@@ -1,0 +1,27 @@
+CREATE TABLE IF NOT EXISTS "user"
+(
+    "id"       INTEGER NOT NULL,
+    "email"    VARCHAR(255) NOT NULL,
+    "password" VARCHAR(255) NOT NULL,
+
+    PRIMARY KEY ("id" AUTOINCREMENT)
+);
+
+CREATE TABLE IF NOT EXISTS "session"
+(
+    "id"      INTEGER NOT NULL,
+    "token"   VARCHAR(255) NOT NULL,
+    "user_id" VARCHAR(255) NOT NULL,
+
+    PRIMARY KEY ("id" AUTOINCREMENT)
+);
+
+CREATE TABLE IF NOT EXISTS "archive"
+(
+    "id"    INTEGER NOT NULL,
+    "type"  VARCHAR(255) NOT NULL,
+    "name"  VARCHAR(255) NOT NULL,
+    "owner" VARCHAR(255) NOT NULL,
+
+    PRIMARY KEY ("id" AUTOINCREMENT)
+);

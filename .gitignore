@@ -1,0 +1,9 @@
+# build & run outputs
+/archivekeep-server
+/coverage.out
+
+# server data
+/data
+
+# IDE stuff
+/.idea

@@ -1,0 +1,89 @@
+syntax = "proto3";
+
+package archivekeep;
+
+option go_package = "github.com/archivekeep/archivekeep/grpc/protobuf";
+
+
+service ArchiveService {
+  rpc ListArchives(ListArchivesRequest) returns (ListArchivesResponse) {}
+  rpc GetArchive(GetArchiveRequest) returns (GetArchiveResponse) {}
+
+  rpc ListArchiveFiles(ListArchiveFilesRequest) returns (ListArchiveFilesResponse) {}
+
+  rpc DownloadArchiveFile(DownloadArchiveFileRequest) returns (stream DownloadArchiveFileResponse) {}
+
+  rpc UploadArchiveFile(stream UploadArchiveFileRequest) returns (ArchiveFile) {}
+  rpc MoveArchiveFile(MoveArchiveFileRequest) returns (ArchiveFile) {}
+}
+
+message Archive {
+  string name = 1;
+}
+
+message ListArchivesRequest {
+
+}
+
+message ListArchivesResponse {
+  repeated Archive archives = 1;
+}
+
+message GetArchiveRequest {
+  string name = 1;
+}
+
+message GetArchiveResponse {
+  Archive archive = 1;
+}
+
+message ArchiveFile {
+  string name = 1;
+
+  int64 length = 2;
+  map<string, string> digests = 3;
+}
+
+
+message ListArchiveFilesRequest {
+  string parent = 1;
+}
+
+message ListArchiveFilesResponse {
+  repeated ArchiveFile files = 1;
+}
+
+
+message DownloadArchiveFileRequest {
+  string name = 1;
+
+  bool skip_head = 2;
+
+  int64 offset = 3;
+  int64 limit = 4;
+}
+
+message DownloadArchiveFileResponse {
+  oneof value {
+    ArchiveFile head = 1;
+    BytesChunk chunk = 2;
+  }
+}
+
+
+message UploadArchiveFileRequest {
+  oneof value {
+    ArchiveFile head = 1;
+    BytesChunk chunk = 2;
+  }
+}
+
+
+message MoveArchiveFileRequest {
+  string name = 1;
+  string destination_name = 2;
+}
+
+message BytesChunk {
+  bytes chunk = 1;
+}
