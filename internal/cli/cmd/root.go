@@ -30,6 +30,9 @@ func New() *cobra.Command {
 	rootCmd.AddCommand(pullCmd())
 	rootCmd.AddCommand(pushCmd())
 
+	// util
+	rootCmd.AddCommand(versionCmd)
+
 	// sharing
 	remoteCmd := &cobra.Command{Use: "remote"}
 	remoteCmd.AddCommand(remoteConnectCmd())

@@ -1,5 +1,8 @@
 #!/usr/bin/env bash
 
+cd "$(dirname "$(realpath "$0")")" || exit;
+cd ..
+
 SCRIPT_DIR="$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && cd ../ && pwd )"
 
 SRC_DIR="${SCRIPT_DIR}"

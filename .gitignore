@@ -1,6 +1,7 @@
 # build & run outputs
 /archivekeep-server
 /coverage.out
+/internal/buildinfo/archivekeep-version.json
 
 # server data
 /data
