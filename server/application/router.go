@@ -13,19 +13,6 @@ import (
 	"github.com/archivekeep/archivekeep/server/web/spa"
 )
 
-// Server is an application server
-type Server struct {
-	UserRepository *UserRepository
-
-	ArchiveService *ArchiveService
-	UserService    *UserService
-
-	ArchiveRestService         *archiveApplicationService
-	SessionBasedAuthentication *SessionBasedAuthentication
-
-	Config Config
-}
-
 func createRouter(s *Server) *chi.Mux {
 	restApi := rest.NewAPI(rest.Options{
 		ArchiveService: s.ArchiveRestService,

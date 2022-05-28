@@ -1,8 +1,35 @@
 package application
 
+import (
+	"log"
+	"net"
+)
+
+// Server is an application server
+type Server struct {
+	UserRepository *UserRepository
+
+	ArchiveService *ArchiveService
+	UserService    *UserService
+
+	ArchiveRestService         *archiveApplicationService
+	SessionBasedAuthentication *SessionBasedAuthentication
+
+	Config Config
+
+	HTTP struct {
+		Listeners []net.Listener
+	}
+}
+
 func CreateServer(config Config) (*Server, error) {
-	dbLocation := "./data/db/db.sqlite"
-	repositoriesDir := "./data/repositories/files"
+	if config.DataPath == "" {
+		config.DataPath = "./data"
+		log.Printf("using default data path: " + config.DataPath)
+	}
+
+	dbLocation := config.DataPath + "/db/db.sqlite"
+	repositoriesDir := config.DataPath + "/repositories/files"
 
 	db, err := openOrCreateDB(dbLocation)
 	if err != nil {

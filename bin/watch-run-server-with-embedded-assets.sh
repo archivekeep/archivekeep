@@ -5,6 +5,6 @@ cd ..
 
 CompileDaemon \
   -build 'go build -tags embed_assets ./cmd/archivekeep-server' \
-  -pattern  "(.+\\.go|.+\\.c|.+\\.sql)$" \
+  -pattern  "(.+\\.go|.+\\.c|.+\\.sql|.+\\.js)$" \
   -command './archivekeep-server run' \
   -graceful-kill

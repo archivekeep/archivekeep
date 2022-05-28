@@ -1,17 +1,24 @@
 package application
 
 import (
+	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"log"
 	"net/http"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/gorilla/securecookie"
+	"golang.org/x/crypto/bcrypt"
 )
 
 const sessionCookieName = "session"
 const sessionTokenName = "sessionToken"
+
+var (
+	sessionContextKey = contextKey("session")
+)
 
 // TODO: add some cookie encrypter
 var sessionSecureCookie = securecookie.New(
@@ -38,7 +45,8 @@ func (a *SessionBasedAuthentication) Middleware() func(http.Handler) http.Handle
 }
 
 func (a *SessionBasedAuthentication) RegisterRoutes(r chi.Router) {
-	r.Post("/auth/login", a.handleLogin)
+	r.Post("/auth/session/login", a.handleLogin)
+	r.Post("/auth/session/logout", a.handleLogout)
 }
 
 func (a *SessionBasedAuthentication) loadSession(w http.ResponseWriter, r *http.Request) bool {
@@ -88,7 +96,11 @@ func (a *SessionBasedAuthentication) loadSession(w http.ResponseWriter, r *http.
 		}
 
 		if session != nil {
-			req := r.WithContext(userIDContext(r.Context(), session.UserID))
+			ctx := r.Context()
+			ctx = userIDContext(ctx, session.UserID)
+			ctx = context.WithValue(ctx, sessionContextKey, session)
+
+			req := r.WithContext(ctx)
 			*r = *req
 		}
 	}
@@ -117,7 +129,13 @@ func (a *SessionBasedAuthentication) handleLogin(w http.ResponseWriter, r *http.
 	user, err := a.UserService.VerifyLogin(r.Context(), input.Username, input.Password)
 	if err != nil {
 		log.Printf("error login: %v", err)
-		handleAppError(w, err)
+		if errors.Is(err, bcrypt.ErrMismatchedHashAndPassword) {
+			w.WriteHeader(http.StatusForbidden)
+		} else if errors.Is(err, errDbNotExist) {
+			w.WriteHeader(http.StatusForbidden)
+		} else {
+			handleAppError(w, err)
+		}
 		return
 	}
 
@@ -128,6 +146,31 @@ func (a *SessionBasedAuthentication) handleLogin(w http.ResponseWriter, r *http.
 		return
 	}
 
+	w.WriteHeader(http.StatusOK)
+}
+
+func (a *SessionBasedAuthentication) handleLogout(w http.ResponseWriter, r *http.Request) {
+	_, currentlyLoggedIN := getLoggedInUserID(r.Context())
+	if !currentlyLoggedIN {
+		log.Printf("not logged in")
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	session, ok := r.Context().Value(sessionContextKey).(*Session)
+	if !ok {
+		log.Printf("not logged in via session")
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	err := a.SessionRepository.Delete(session.ID)
+	if err != nil {
+		handleAppError(w, err)
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
 }
 
 func (a *SessionBasedAuthentication) startAuthSession(w http.ResponseWriter, r *http.Request, user *User) error {

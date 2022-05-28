@@ -66,7 +66,7 @@ func (r *UserRepository) GetUserByUserName(username string) (*User, error) {
 		return &user, nil
 	}
 
-	return nil, nil
+	return nil, errDbNotExist
 }
 
 func (r *UserRepository) CreateUser(user User) error {

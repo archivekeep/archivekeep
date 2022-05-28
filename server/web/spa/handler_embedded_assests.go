@@ -56,10 +56,10 @@ func init() {
 					return nil, modTime, err
 				}
 
-				if strings.HasSuffix(path, ".js") {
+				if strings.HasSuffix(path, ".js") || strings.HasSuffix(path, ".css") {
 					patchedContents, err := patchConstants(rs, config)
 					if err != nil {
-						return nil, modTime, fmt.Errorf("patch JS file: %w", err)
+						return nil, modTime, fmt.Errorf("patch resource file: %w", err)
 					}
 					return bytes.NewReader(patchedContents), modTime, nil
 				}

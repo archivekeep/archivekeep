@@ -2,6 +2,7 @@ package application
 
 import (
 	"context"
+	"errors"
 	"fmt"
 
 	"golang.org/x/crypto/bcrypt"
@@ -16,9 +17,6 @@ func (s *UserService) VerifyLogin(context context.Context, username string, pass
 	if err != nil {
 		return nil, fmt.Errorf("get user: %w", err)
 	}
-	if user == nil {
-		return nil, fmt.Errorf("user not found")
-	}
 
 	err = bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(password))
 	if err != nil {
@@ -29,12 +27,11 @@ func (s *UserService) VerifyLogin(context context.Context, username string, pass
 }
 
 func (s *UserService) CreateUser(emailAddress string, password string) error {
-	existingUser, err := s.repository.GetUserByUserName(emailAddress)
-	if err != nil {
-		return fmt.Errorf("check for existing user: %w", err)
-	}
-	if existingUser != nil {
+	_, err := s.repository.GetUserByUserName(emailAddress)
+	if err == nil {
 		return fmt.Errorf("user already exists")
+	} else if !errors.Is(err, errDbNotExist) {
+		return fmt.Errorf("check for existing user: %w", err)
 	}
 
 	passwordHash, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost+1)

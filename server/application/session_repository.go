@@ -54,3 +54,9 @@ func (r *SessionRepository) GetSessionByToken(token string) (*Session, error) {
 
 	return nil, nil
 }
+
+func (r *SessionRepository) Delete(id int64) error {
+	_, err := r.db.Exec("DELETE FROM session WHERE id = ?", id)
+
+	return err
+}
