@@ -7,6 +7,7 @@ import (
 	"io"
 	"log"
 	"net/http"
+	paths "path"
 
 	"github.com/archivekeep/archivekeep/internal/thumbnails"
 	"github.com/archivekeep/archivekeep/server/api"
@@ -141,6 +142,11 @@ func (s *API) getFile(w http.ResponseWriter, r *http.Request) {
 	io.Copy(w, reader)
 }
 
+var (
+	// TODO: caching, but mind security!
+	generator = thumbnails.NewGenerator(thumbnails.GeneratorOptions{})
+)
+
 func (s *API) getThumbnail(w http.ResponseWriter, r *http.Request) {
 	archiveID := chi.URLParam(r, ArchiveIdResourceParam)
 	filePath := chi.URLParam(r, "*")
@@ -157,12 +163,14 @@ func (s *API) getThumbnail(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// TODO: caching, but mind security!
-	generator := thumbnails.Generator{
-		ArchiveReader: archiveReader,
+	_, readCloser, err := archiveReader.OpenFile(filePath)
+	if err != nil {
+		s.options.ErrorHandler(w, fmt.Errorf("open file from archive: %w", err))
+		return
 	}
+	defer readCloser.Close()
 
-	thumbImg, err := generator.GenerateThumbnail(filePath)
+	thumbImg, err := generator.GenerateThumbnail(r.Context(), readCloser, paths.Ext(filePath))
 	if err != nil {
 		s.options.ErrorHandler(w, fmt.Errorf("geenrate thumbnail: %w", err))
 		return

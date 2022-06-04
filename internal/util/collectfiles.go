@@ -45,10 +45,9 @@ func statFiles(a FileCollectibleArchive, allFiles []string) ([]*archive.FileInfo
 	for i := 0; i < WorkerCount; i++ {
 		go func() {
 			for filename := range fileToStatChan {
-				// TODO: err
 				info, err := a.FileInfo(filename)
 				if err != nil {
-					anyError = fmt.Errorf("get checksum of %s: %w", filename, err)
+					anyError = fmt.Errorf("get file info %s: %w", filename, err)
 				}
 
 				filesToCollect.Add(1)

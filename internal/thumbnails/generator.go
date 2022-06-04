@@ -1,34 +1,56 @@
 package thumbnails
 
 import (
+	"context"
 	"fmt"
 	"image"
-	paths "path"
+	"io"
+	"runtime"
 	"strings"
 
 	"golang.org/x/image/draw"
-
-	"github.com/archivekeep/archivekeep/archive"
+	"golang.org/x/sync/semaphore"
 )
 
 type Generator struct {
-	ArchiveReader archive.Reader
+	semaphore *semaphore.Weighted
+	options   GeneratorOptions
 }
 
-func (g *Generator) GenerateThumbnail(filePath string) (image.Image, error) {
-	extension := strings.ToLower(paths.Ext(filePath))
+type GeneratorOptions struct {
+	MaxParallel  int64
+	Interpolator draw.Interpolator
+}
+
+func NewGenerator(options GeneratorOptions) *Generator {
+	if options.MaxParallel == 0 {
+		options.MaxParallel = int64(runtime.NumCPU())
+	}
+	if options.Interpolator == nil {
+		options.Interpolator = draw.ApproxBiLinear
+	}
+
+	return &Generator{
+		semaphore: semaphore.NewWeighted(options.MaxParallel),
+		options:   options,
+	}
+}
+
+func (g *Generator) GenerateThumbnail(ctx context.Context, readCloser io.ReadCloser, extension string) (image.Image, error) {
+	err := g.semaphore.Acquire(ctx, 1)
+	if err != nil {
+		return nil, fmt.Errorf("acquire semaphore: %w", err)
+	}
+	defer g.semaphore.Release(1)
+
+	extension = strings.ToLower(extension)
+
 	switch extension {
 	case ".jpg", ".jpeg", ".png":
 		break
 	default:
 		return nil, fmt.Errorf("extension %s is not supported", extension)
 	}
-
-	_, readCloser, err := g.ArchiveReader.OpenFile(filePath)
-	if err != nil {
-		return nil, fmt.Errorf("open file from archive: %w", err)
-	}
-	defer readCloser.Close()
 
 	img, _, err := image.Decode(readCloser)
 	if err != nil {
@@ -61,7 +83,8 @@ func (g *Generator) GenerateThumbnail(filePath string) (image.Image, error) {
 
 	offsetX := (origWidth - baseWidth) / 2
 	offsetY := (origHeight - baseHeight) / 2
-	draw.CatmullRom.Scale(
+
+	g.options.Interpolator.Scale(
 		resultImg, resultImg.Rect,
 		img, image.Rect(offsetX, offsetY, offsetX+baseWidth, offsetY+baseHeight),
 		draw.Src, nil,
