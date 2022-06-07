@@ -1,9 +1,11 @@
 package thumbnails
 
 import (
+	"bytes"
 	"context"
 	"fmt"
 	"image"
+	"image/jpeg"
 	"io"
 	"runtime"
 	"strings"
@@ -20,6 +22,8 @@ type Generator struct {
 type GeneratorOptions struct {
 	MaxParallel  int64
 	Interpolator draw.Interpolator
+
+	JPEGQuality int
 }
 
 func NewGenerator(options GeneratorOptions) *Generator {
@@ -28,6 +32,9 @@ func NewGenerator(options GeneratorOptions) *Generator {
 	}
 	if options.Interpolator == nil {
 		options.Interpolator = draw.ApproxBiLinear
+	}
+	if options.JPEGQuality == 0 {
+		options.JPEGQuality = jpeg.DefaultQuality
 	}
 
 	return &Generator{
@@ -91,4 +98,21 @@ func (g *Generator) GenerateThumbnail(ctx context.Context, readCloser io.ReadClo
 	)
 
 	return resultImg, nil
+}
+
+func (g *Generator) GenerateThumbnailJPEG(ctx context.Context, readCloser io.ReadCloser, extension string) ([]byte, error) {
+	thumbImg, err := g.GenerateThumbnail(ctx, readCloser, extension)
+	if err != nil {
+		return nil, fmt.Errorf("generate image: %w", err)
+	}
+
+	var buf bytes.Buffer
+	err = jpeg.Encode(&buf, thumbImg, &jpeg.Options{
+		Quality: g.options.JPEGQuality,
+	})
+	if err != nil {
+		return nil, fmt.Errorf("encode to JPEG: %w", err)
+	}
+
+	return buf.Bytes(), nil
 }

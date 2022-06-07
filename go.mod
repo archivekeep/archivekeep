@@ -3,6 +3,7 @@ module github.com/archivekeep/archivekeep
 go 1.18
 
 require (
+	github.com/allegro/bigcache/v3 v3.0.2
 	github.com/go-chi/chi/v5 v5.0.7
 	github.com/google/go-cmp v0.5.6
 	github.com/google/uuid v1.1.2

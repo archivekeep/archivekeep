@@ -1,9 +1,11 @@
 package rest
 
 import (
+	"bytes"
+	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
-	"image/jpeg"
 	"io"
 	"log"
 	"net/http"
@@ -143,8 +145,7 @@ func (s *API) getFile(w http.ResponseWriter, r *http.Request) {
 }
 
 var (
-	// TODO: caching, but mind security!
-	generator = thumbnails.NewGenerator(thumbnails.GeneratorOptions{})
+	fallbackThumbnailGenerator = thumbnails.NewGenerator(thumbnails.GeneratorOptions{})
 )
 
 func (s *API) getThumbnail(w http.ResponseWriter, r *http.Request) {
@@ -157,29 +158,44 @@ func (s *API) getThumbnail(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	thumbImgReader, err := a.GetThumbnail(r.Context(), filePath)
+	if errors.Is(err, api.ErrNotImplemented) {
+		log.Printf("WARN: application service doesn't implement thumbnail generation, using fallback generator")
+
+		thumbImgReader, err = s.generateFallbackThumbnail(r.Context(), a, filePath)
+		if err != nil {
+			s.options.ErrorHandler(w, fmt.Errorf("generate fallback thumbnail: %w", err))
+			return
+		}
+	} else if err != nil {
+		s.options.ErrorHandler(w, fmt.Errorf("get thumbnail: %w", err))
+		return
+	}
+
+	defer thumbImgReader.Close()
+
+	w.WriteHeader(http.StatusOK)
+	io.Copy(w, thumbImgReader)
+}
+
+func (s *API) generateFallbackThumbnail(ctx context.Context, a api.ArchiveAccessor, filePath string) (io.ReadCloser, error) {
 	archiveReader, err := a.OpenReader()
 	if err != nil {
-		s.options.ErrorHandler(w, fmt.Errorf("open archive for reading: %w", err))
-		return
+		return nil, fmt.Errorf("open archive for reading: %w", err)
 	}
 
 	_, readCloser, err := archiveReader.OpenFile(filePath)
 	if err != nil {
-		s.options.ErrorHandler(w, fmt.Errorf("open file from archive: %w", err))
-		return
+		return nil, fmt.Errorf("open file from archive: %w", err)
 	}
 	defer readCloser.Close()
 
-	thumbImg, err := generator.GenerateThumbnail(r.Context(), readCloser, paths.Ext(filePath))
+	thumbImgBytes, err := fallbackThumbnailGenerator.GenerateThumbnailJPEG(ctx, readCloser, paths.Ext(filePath))
 	if err != nil {
-		s.options.ErrorHandler(w, fmt.Errorf("geenrate thumbnail: %w", err))
-		return
+		return nil, fmt.Errorf("generate thumbnail: %w", err)
 	}
 
-	w.WriteHeader(http.StatusOK)
-	jpeg.Encode(w, thumbImg, &jpeg.Options{
-		Quality: 65,
-	})
+	return io.NopCloser(bytes.NewReader(thumbImgBytes)), nil
 }
 
 func archiveToDTO(a api.ArchiveDetails) ArchiveDTO {
