@@ -97,7 +97,7 @@ func (a *SessionBasedAuthentication) loadSession(w http.ResponseWriter, r *http.
 
 		if session != nil {
 			ctx := r.Context()
-			ctx = userIDContext(ctx, session.UserID)
+			ctx = UserIDContext(ctx, session.UserID)
 			ctx = context.WithValue(ctx, sessionContextKey, session)
 
 			req := r.WithContext(ctx)

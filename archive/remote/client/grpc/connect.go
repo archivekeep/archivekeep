@@ -2,7 +2,6 @@ package grpcarchive
 
 import (
 	"context"
-	"encoding/base64"
 	"fmt"
 
 	"google.golang.org/grpc"
@@ -25,11 +24,11 @@ func Connect(connection *remote.Connection, archiveResourceName string) (*Remote
 	}
 
 	if connection.BasicAuthCredentials != nil {
-		options = append(options, grpc.WithPerRPCCredentials(basicAuth{
-			username: connection.BasicAuthCredentials.Username,
-			password: connection.BasicAuthCredentials.Password,
+		options = append(options, grpc.WithPerRPCCredentials(BasicAuth{
+			Username: connection.BasicAuthCredentials.Username,
+			Password: connection.BasicAuthCredentials.Password,
 
-			allowInsecureTransport: connection.Insecure,
+			AllowInsecureTransport: connection.Insecure,
 		}))
 	}
 
@@ -48,23 +47,4 @@ func Connect(connection *remote.Connection, archiveResourceName string) (*Remote
 	archiveName, _ := grpc_ak.ArchiveResourceName(archiveResourceName).DeconstructParts()
 
 	return NewRemoteArchive(grpcConnection, archiveName), nil
-}
-
-type basicAuth struct {
-	username string
-	password string
-
-	allowInsecureTransport bool
-}
-
-func (b basicAuth) GetRequestMetadata(ctx context.Context, in ...string) (map[string]string, error) {
-	auth := b.username + ":" + b.password
-	enc := base64.StdEncoding.EncodeToString([]byte(auth))
-	return map[string]string{
-		"authorization": "Basic " + enc,
-	}, nil
-}
-
-func (b basicAuth) RequireTransportSecurity() bool {
-	return !b.allowInsecureTransport
 }

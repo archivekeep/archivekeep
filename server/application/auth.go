@@ -21,7 +21,7 @@ func getLoggedInUserID(ctx context.Context) (int64, bool) {
 	return userId, ok
 }
 
-func userIDContext(ctx context.Context, userID int64) context.Context {
+func UserIDContext(ctx context.Context, userID int64) context.Context {
 	return context.WithValue(ctx, authenticatedUserIDContextKey, userID)
 }
 

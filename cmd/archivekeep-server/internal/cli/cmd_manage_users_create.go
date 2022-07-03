@@ -25,7 +25,7 @@ func manageUsersCreateCmd() *cobra.Command {
 			return fmt.Errorf("get password: %w", err)
 		}
 
-		err = app.UserService.CreateUser(username, password)
+		_, err = app.UserService.CreateUser(username, password)
 		if err != nil {
 			return fmt.Errorf("create user failed: %w", err)
 		}

@@ -53,7 +53,7 @@ func Test_archiveApplicationService_ListArchives(t *testing.T) {
 	}
 
 	tryToListArchives := func(userID int64) (api.ListArchivesResult, error) {
-		return service.ListArchives(userIDContext(context.Background(), userID), api.ListArchivesRequest{})
+		return service.ListArchives(UserIDContext(context.Background(), userID), api.ListArchivesRequest{})
 	}
 
 	t.Run("can list own archives", func(t *testing.T) {
@@ -101,7 +101,7 @@ func Test_archiveApplicationService_GetArchive(t *testing.T) {
 	}
 
 	tryGetArchive := func(userID int64, a dbArchive) (api.ArchiveDetails, error) {
-		return service.GetArchive(userIDContext(context.Background(), userID), a.StringID())
+		return service.GetArchive(UserIDContext(context.Background(), userID), a.StringID())
 	}
 
 	tryGetArchiveWithoutLogin := func(a dbArchive) (api.ArchiveDetails, error) {
@@ -202,7 +202,7 @@ func Test_archiveApplicationService_GetArchiveAccessor(t *testing.T) {
 	}
 
 	tryGetArchiveAccessor := func(userID int64, a dbArchive) (api.ArchiveAccessor, error) {
-		return service.GetArchiveAccessor(userIDContext(context.Background(), userID), a.StringID())
+		return service.GetArchiveAccessor(UserIDContext(context.Background(), userID), a.StringID())
 	}
 
 	t.Run("can access own archive", func(t *testing.T) {

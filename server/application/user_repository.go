@@ -69,11 +69,16 @@ func (r *UserRepository) GetUserByUserName(username string) (*User, error) {
 	return nil, errDbNotExist
 }
 
-func (r *UserRepository) CreateUser(user User) error {
-	_, err := r.db.Exec("INSERT INTO user (email, password) VALUES (?,?)", user.Email, user.Password)
+func (r *UserRepository) CreateUser(user User) (User, error) {
+	result, err := r.db.Exec("INSERT INTO user (email, password) VALUES (?,?)", user.Email, user.Password)
 	if err != nil {
-		return fmt.Errorf("exec insert: %w", err)
+		return User{}, fmt.Errorf("exec insert: %w", err)
 	}
 
-	return nil
+	user.ID, err = result.LastInsertId()
+	if err != nil {
+		return User{}, fmt.Errorf("get last insert ID: %w", err)
+	}
+
+	return user, nil
 }

@@ -173,6 +173,7 @@ func (m *SingleArchive) Serve(
 
 		grpcServer := grpc_ak.NewServer(
 			singleArchiveService,
+			nil,
 			grpc.Creds(credentials.NewTLS(m.certificates.ServerTLSConfig())),
 		)
 

@@ -4,6 +4,27 @@ package archivekeep;
 
 option go_package = "github.com/archivekeep/archivekeep/grpc/protobuf";
 
+import "google/protobuf/empty.proto";
+
+service PersonalAccessTokenService {
+  rpc CreatePersonalAccessToken(CreatePersonalAccessTokenRequest) returns (PersonalAccessToken);
+  rpc DeletePersonalAccessToken(DeletePersonalAccessTokenRequest) returns (google.protobuf.Empty);
+}
+
+message CreatePersonalAccessTokenRequest {
+  string name = 2;
+}
+
+message DeletePersonalAccessTokenRequest {
+  string id = 1;
+}
+
+message PersonalAccessToken {
+  string id = 1;
+  string name = 2;
+  string token = 3;
+  string token_last_eight = 4;
+}
 
 service ArchiveService {
   rpc ListArchives(ListArchivesRequest) returns (ListArchivesResponse) {}

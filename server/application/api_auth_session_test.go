@@ -21,7 +21,7 @@ func Test_SessionBasedAuthentication(t *testing.T) {
 	testUserName := "test.user@localhost"
 	testUserPassword := "test-password"
 
-	err := server.UserService.CreateUser(
+	_, err := server.UserService.CreateUser(
 		testUserName,
 		testUserPassword,
 	)
@@ -84,6 +84,10 @@ func createTestServer(t *testing.T) (*application.Server, application.ServerList
 		DataPath: tmpDir,
 
 		HTTP: application.HTTPConfig{
+			Enable: true,
+		},
+
+		GRPC: application.GRPCConfig{
 			Enable: true,
 		},
 	}

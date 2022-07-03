@@ -3,6 +3,7 @@ package application
 import (
 	"context"
 	"encoding/base64"
+	"errors"
 	"fmt"
 	"strings"
 
@@ -47,7 +48,7 @@ func createAuthenticatedContext(server *Server, ctx context.Context) (context.Co
 		return ctx, nil
 	}
 
-	user, err := getUser(server, authHeaders[0])
+	user, err := getUser(ctx, server, authHeaders[0])
 	if err != nil {
 		return ctx, err
 	}
@@ -55,13 +56,13 @@ func createAuthenticatedContext(server *Server, ctx context.Context) (context.Co
 	mdPurged := md.Copy()
 	mdPurged["authorization"] = nil
 
-	ctx = userIDContext(ctx, user.ID)
+	ctx = UserIDContext(ctx, user.ID)
 	ctx = metadata.NewIncomingContext(ctx, mdPurged)
 
 	return ctx, nil
 }
 
-func getUser(server *Server, authHeader string) (*User, error) {
+func getUser(ctx context.Context, server *Server, authHeader string) (*User, error) {
 	authParts := strings.SplitN(authHeader, " ", 2)
 	if len(authParts) != 2 {
 		return nil, fmt.Errorf("invalid format: extract type from: %s", authHeader)
@@ -76,12 +77,28 @@ func getUser(server *Server, authHeader string) (*User, error) {
 		}
 
 		cs := strings.SplitN(string(c), ":", 2)
+		if len(cs) == 1 {
+			user, err := server.PersonalAccessTokenApplicationService.TryTokenAuth(ctx, cs[0])
+			if err != nil && !errors.Is(err, errDbNotExist) {
+				return nil, fmt.Errorf("try token auth: %w", err)
+			} else if err == nil {
+				return user, nil
+			}
+		}
+
 		if len(cs) != 2 {
 			return nil, fmt.Errorf("invalid format: extract username and password from: %s", cs)
 		}
-		userName, userPassword := cs[0], cs[1]
+		userName, passwordOrToken := cs[0], cs[1]
 
-		return server.UserService.VerifyLogin(context.TODO(), userName, userPassword)
+		user, err := server.PersonalAccessTokenApplicationService.TryTokenAuth(ctx, passwordOrToken)
+		if err != nil && !errors.Is(err, errDbNotExist) {
+			return nil, fmt.Errorf("try token auth: %w", err)
+		} else if err == nil {
+			return user, nil
+		}
+
+		return server.UserService.VerifyLogin(context.TODO(), userName, passwordOrToken)
 	default:
 		return nil, fmt.Errorf("unsupported auth type: %s", authType)
 	}

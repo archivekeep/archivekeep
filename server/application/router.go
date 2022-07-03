@@ -15,7 +15,7 @@ import (
 
 func createRouter(s *Server) *chi.Mux {
 	restApi := rest.NewAPI(rest.Options{
-		ArchiveService: s.ArchiveRestService,
+		ArchiveService: s.ArchiveApplicationService,
 
 		ErrorHandler: handleAppError,
 	})
@@ -39,7 +39,7 @@ func createRouter(s *Server) *chi.Mux {
 			restApi.Register(r)
 
 			r.Post("/archives", func(w http.ResponseWriter, r *http.Request) {
-				err := s.ArchiveRestService.CreateArchive(r.Context())
+				err := s.ArchiveApplicationService.CreateArchive(r.Context())
 				if err != nil {
 					handleAppError(w, err)
 					return

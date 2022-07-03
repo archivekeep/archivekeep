@@ -26,17 +26,17 @@ func (s *UserService) VerifyLogin(context context.Context, username string, pass
 	return user, nil
 }
 
-func (s *UserService) CreateUser(emailAddress string, password string) error {
+func (s *UserService) CreateUser(emailAddress string, password string) (User, error) {
 	_, err := s.repository.GetUserByUserName(emailAddress)
 	if err == nil {
-		return fmt.Errorf("user already exists")
+		return User{}, fmt.Errorf("user already exists")
 	} else if !errors.Is(err, errDbNotExist) {
-		return fmt.Errorf("check for existing user: %w", err)
+		return User{}, fmt.Errorf("check for existing user: %w", err)
 	}
 
 	passwordHash, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost+1)
 	if err != nil {
-		return fmt.Errorf("generate bcrypt hash: %w", err)
+		return User{}, fmt.Errorf("generate bcrypt hash: %w", err)
 	}
 
 	return s.repository.CreateUser(User{

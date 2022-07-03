@@ -39,6 +39,7 @@ func createImplementationTester() *archivetest.ImplementationTester {
 						A:           a,
 					},
 				},
+				nil,
 				grpc.Creds(credentials.NewTLS(serverCertificates.ServerTLSConfig())),
 			)
 

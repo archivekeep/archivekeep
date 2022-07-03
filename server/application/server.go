@@ -9,10 +9,13 @@ import (
 type Server struct {
 	UserRepository *UserRepository
 
-	ArchiveService *ArchiveService
-	UserService    *UserService
+	ArchiveService                *ArchiveService
+	PersonalAccessTokenRepository *PersonalAccessTokenRepository
+	UserService                   *UserService
 
-	ArchiveRestService         *archiveApplicationService
+	ArchiveApplicationService             *archiveApplicationService
+	PersonalAccessTokenApplicationService *personalAccessTokenApplicationService
+
 	SessionBasedAuthentication *SessionBasedAuthentication
 
 	Config Config
@@ -41,15 +44,21 @@ func CreateServer(config Config) (*Server, error) {
 			rootDir: repositoriesDir,
 		}
 
-		archiveRepository = &sqlArchiveRepository{db: db}
-		userRepository    = &UserRepository{db: db}
-		sessionRepository = &SessionRepository{db: db}
+		archiveRepository             = &sqlArchiveRepository{db: db}
+		personalAccessTokenRepository = &PersonalAccessTokenRepository{db: db}
+		sessionRepository             = &SessionRepository{db: db}
+		userRepository                = &UserRepository{db: db}
 
 		userService = &UserService{repository: userRepository}
 
 		archiveService = &ArchiveService{
 			archiveRepository: archiveRepository,
 			contentStorage:    contentStorage,
+		}
+
+		personalAccessTokenApplicationService = &personalAccessTokenApplicationService{
+			personalAccessTokenRepository: personalAccessTokenRepository,
+			userRepository:                userRepository,
 		}
 
 		sessionAuth = &SessionBasedAuthentication{
@@ -66,10 +75,13 @@ func CreateServer(config Config) (*Server, error) {
 	return &Server{
 		UserRepository: userRepository,
 
-		ArchiveService: archiveService,
-		UserService:    userService,
+		ArchiveService:                archiveService,
+		PersonalAccessTokenRepository: personalAccessTokenRepository,
+		UserService:                   userService,
 
-		ArchiveRestService:         service,
+		ArchiveApplicationService:             service,
+		PersonalAccessTokenApplicationService: personalAccessTokenApplicationService,
+
 		SessionBasedAuthentication: sessionAuth,
 
 		Config: config,

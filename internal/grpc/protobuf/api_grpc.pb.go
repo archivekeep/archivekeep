@@ -8,6 +8,7 @@ package protobuf
 
 import (
 	context "context"
+	empty "github.com/golang/protobuf/ptypes/empty"
 	grpc "google.golang.org/grpc"
 	codes "google.golang.org/grpc/codes"
 	status "google.golang.org/grpc/status"
@@ -17,6 +18,129 @@ import (
 // is compatible with the grpc package it is being compiled against.
 // Requires gRPC-Go v1.32.0 or later.
 const _ = grpc.SupportPackageIsVersion7
+
+// PersonalAccessTokenServiceClient is the client API for PersonalAccessTokenService service.
+//
+// For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
+type PersonalAccessTokenServiceClient interface {
+	CreatePersonalAccessToken(ctx context.Context, in *CreatePersonalAccessTokenRequest, opts ...grpc.CallOption) (*PersonalAccessToken, error)
+	DeletePersonalAccessToken(ctx context.Context, in *DeletePersonalAccessTokenRequest, opts ...grpc.CallOption) (*empty.Empty, error)
+}
+
+type personalAccessTokenServiceClient struct {
+	cc grpc.ClientConnInterface
+}
+
+func NewPersonalAccessTokenServiceClient(cc grpc.ClientConnInterface) PersonalAccessTokenServiceClient {
+	return &personalAccessTokenServiceClient{cc}
+}
+
+func (c *personalAccessTokenServiceClient) CreatePersonalAccessToken(ctx context.Context, in *CreatePersonalAccessTokenRequest, opts ...grpc.CallOption) (*PersonalAccessToken, error) {
+	out := new(PersonalAccessToken)
+	err := c.cc.Invoke(ctx, "/archivekeep.PersonalAccessTokenService/CreatePersonalAccessToken", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *personalAccessTokenServiceClient) DeletePersonalAccessToken(ctx context.Context, in *DeletePersonalAccessTokenRequest, opts ...grpc.CallOption) (*empty.Empty, error) {
+	out := new(empty.Empty)
+	err := c.cc.Invoke(ctx, "/archivekeep.PersonalAccessTokenService/DeletePersonalAccessToken", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+// PersonalAccessTokenServiceServer is the server API for PersonalAccessTokenService service.
+// All implementations must embed UnimplementedPersonalAccessTokenServiceServer
+// for forward compatibility
+type PersonalAccessTokenServiceServer interface {
+	CreatePersonalAccessToken(context.Context, *CreatePersonalAccessTokenRequest) (*PersonalAccessToken, error)
+	DeletePersonalAccessToken(context.Context, *DeletePersonalAccessTokenRequest) (*empty.Empty, error)
+	mustEmbedUnimplementedPersonalAccessTokenServiceServer()
+}
+
+// UnimplementedPersonalAccessTokenServiceServer must be embedded to have forward compatible implementations.
+type UnimplementedPersonalAccessTokenServiceServer struct {
+}
+
+func (UnimplementedPersonalAccessTokenServiceServer) CreatePersonalAccessToken(context.Context, *CreatePersonalAccessTokenRequest) (*PersonalAccessToken, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method CreatePersonalAccessToken not implemented")
+}
+func (UnimplementedPersonalAccessTokenServiceServer) DeletePersonalAccessToken(context.Context, *DeletePersonalAccessTokenRequest) (*empty.Empty, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method DeletePersonalAccessToken not implemented")
+}
+func (UnimplementedPersonalAccessTokenServiceServer) mustEmbedUnimplementedPersonalAccessTokenServiceServer() {
+}
+
+// UnsafePersonalAccessTokenServiceServer may be embedded to opt out of forward compatibility for this service.
+// Use of this interface is not recommended, as added methods to PersonalAccessTokenServiceServer will
+// result in compilation errors.
+type UnsafePersonalAccessTokenServiceServer interface {
+	mustEmbedUnimplementedPersonalAccessTokenServiceServer()
+}
+
+func RegisterPersonalAccessTokenServiceServer(s grpc.ServiceRegistrar, srv PersonalAccessTokenServiceServer) {
+	s.RegisterService(&PersonalAccessTokenService_ServiceDesc, srv)
+}
+
+func _PersonalAccessTokenService_CreatePersonalAccessToken_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(CreatePersonalAccessTokenRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(PersonalAccessTokenServiceServer).CreatePersonalAccessToken(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/archivekeep.PersonalAccessTokenService/CreatePersonalAccessToken",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(PersonalAccessTokenServiceServer).CreatePersonalAccessToken(ctx, req.(*CreatePersonalAccessTokenRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _PersonalAccessTokenService_DeletePersonalAccessToken_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(DeletePersonalAccessTokenRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(PersonalAccessTokenServiceServer).DeletePersonalAccessToken(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/archivekeep.PersonalAccessTokenService/DeletePersonalAccessToken",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(PersonalAccessTokenServiceServer).DeletePersonalAccessToken(ctx, req.(*DeletePersonalAccessTokenRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+// PersonalAccessTokenService_ServiceDesc is the grpc.ServiceDesc for PersonalAccessTokenService service.
+// It's only intended for direct use with grpc.RegisterService,
+// and not to be introspected or modified (even as a copy)
+var PersonalAccessTokenService_ServiceDesc = grpc.ServiceDesc{
+	ServiceName: "archivekeep.PersonalAccessTokenService",
+	HandlerType: (*PersonalAccessTokenServiceServer)(nil),
+	Methods: []grpc.MethodDesc{
+		{
+			MethodName: "CreatePersonalAccessToken",
+			Handler:    _PersonalAccessTokenService_CreatePersonalAccessToken_Handler,
+		},
+		{
+			MethodName: "DeletePersonalAccessToken",
+			Handler:    _PersonalAccessTokenService_DeletePersonalAccessToken_Handler,
+		},
+	},
+	Streams:  []grpc.StreamDesc{},
+	Metadata: "api.proto",
+}
 
 // ArchiveServiceClient is the client API for ArchiveService service.
 //

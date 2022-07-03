@@ -27,6 +27,25 @@ func NewArchiveServiceServer(archiveProvider api.ArchiveService) pb.ArchiveServi
 	}
 }
 
+func (s *archiveServiceServer) ListArchives(ctx context.Context, r *pb.ListArchivesRequest) (*pb.ListArchivesResponse, error) {
+	appArchives, err := s.archiveService.ListArchives(ctx, api.ListArchivesRequest{})
+	if err != nil {
+		return nil, err
+	}
+
+	apiArchives := make([]*pb.Archive, 0, len(appArchives.Archives))
+	for _, appArchive := range appArchives.Archives {
+		apiArchives = append(apiArchives, &pb.Archive{
+			// TODO: sort out model
+			Name: appArchive.ArchiveName,
+		})
+	}
+
+	return &pb.ListArchivesResponse{
+		Archives: apiArchives,
+	}, nil
+}
+
 func (s *archiveServiceServer) GetArchive(ctx context.Context, request *pb.GetArchiveRequest) (*pb.GetArchiveResponse, error) {
 	archiveName, err := ArchiveResourceName(request.Name).DeconstructParts()
 	if err != nil {
