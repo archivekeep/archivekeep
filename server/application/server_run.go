@@ -34,7 +34,9 @@ func (s *Server) Serve(ctx context.Context, listeners ServerListeners) error {
 func (s *Server) launchRestAPI(listeners []net.Listener, g *errgroup.Group, gCtx context.Context) {
 	r := createRouter(s)
 
-	for _, listener := range listeners {
+	for _, _listener := range listeners {
+		listener := _listener
+
 		httpServer := &http.Server{
 			Addr:    listener.Addr().String(),
 			Handler: r,

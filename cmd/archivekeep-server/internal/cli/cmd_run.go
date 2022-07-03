@@ -40,10 +40,12 @@ func runCmd() *cobra.Command {
 	}
 
 	cmd.Flags().BoolVar(&options.GRPC.Enable, "grpc-enable", true, "enable GRPC API")
+	cmd.Flags().BoolVar(&options.GRPC.ListenOnAllInterfaces, "grpc-listen-on-all-interfaces", false, "listen on all interfaces")
 	cmd.Flags().Uint16Var(&options.GRPC.Port, "grpc-port", 24202, "port to listen GRPC on")
 
 	cmd.Flags().BoolVar(&options.HTTP.Enable, "http-enable", true, "enable HTTP API")
 	cmd.Flags().Uint16Var(&options.HTTP.Port, "http-port", 4202, "port to listen HTTP on")
+	cmd.Flags().BoolVar(&options.HTTP.ListenOnAllInterfaces, "http-listen-on-all-interfaces", false, "listen on all interfaces")
 	cmd.Flags().StringVar(&options.HTTP.PublicPath, "http-public-path", "", "relative path to root of web app ")
 
 	return cmd
