@@ -9,7 +9,7 @@ import (
 
 	"github.com/spf13/afero"
 
-	"github.com/archivekeep/archivekeep/archive/local/driver/plain"
+	filesarchive "github.com/archivekeep/archivekeep/archive/local/driver/plain"
 	"github.com/archivekeep/archivekeep/internal/josesecrets"
 	"github.com/archivekeep/archivekeep/internal/util"
 )

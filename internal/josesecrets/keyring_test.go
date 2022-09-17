@@ -4,8 +4,9 @@ import (
 	paths "path"
 	"testing"
 
-	"github.com/archivekeep/archivekeep/internal/josesecrets"
 	"gotest.tools/v3/assert"
+
+	"github.com/archivekeep/archivekeep/internal/josesecrets"
 )
 
 func Test(t *testing.T) {

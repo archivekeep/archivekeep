@@ -7,8 +7,9 @@ import (
 	"math/rand"
 	"testing"
 
-	akcf "github.com/archivekeep/archivekeep/crypto/file"
 	"gotest.tools/v3/assert"
+
+	akcf "github.com/archivekeep/archivekeep/crypto/file"
 )
 
 func TestHeader(t *testing.T) {

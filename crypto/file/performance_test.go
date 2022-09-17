@@ -6,9 +6,10 @@ import (
 	"runtime"
 	"testing"
 
+	"gotest.tools/v3/assert"
+
 	akcf "github.com/archivekeep/archivekeep/crypto/file"
 	"github.com/archivekeep/archivekeep/internal/tests/benchmark/datasizes"
-	"gotest.tools/v3/assert"
 )
 
 func BenchmarkEncryption(b *testing.B) {

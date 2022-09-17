@@ -6,8 +6,9 @@ import (
 	paths "path"
 	"testing"
 
-	"github.com/archivekeep/archivekeep/server/api"
 	"gotest.tools/v3/assert"
+
+	"github.com/archivekeep/archivekeep/server/api"
 )
 
 func openTestDB(t testing.TB) *sql.DB {

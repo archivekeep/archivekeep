@@ -10,7 +10,7 @@ import (
 	_ "github.com/mattn/go-sqlite3"
 	"golang.org/x/sync/errgroup"
 
-	"github.com/archivekeep/archivekeep/server/api/grpc"
+	grpc_ak "github.com/archivekeep/archivekeep/server/api/grpc"
 )
 
 func (s *Server) ListenAndServe(ctx context.Context) error {

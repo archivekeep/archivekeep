@@ -3,9 +3,10 @@ package cli
 import (
 	"fmt"
 
+	"github.com/spf13/cobra"
+
 	"github.com/archivekeep/archivekeep/internal/util"
 	"github.com/archivekeep/archivekeep/server/application"
-	"github.com/spf13/cobra"
 )
 
 func manageUsersCreateCmd() *cobra.Command {

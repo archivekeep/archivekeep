@@ -11,7 +11,7 @@ import (
 
 	"github.com/archivekeep/archivekeep/archive"
 	pb "github.com/archivekeep/archivekeep/internal/grpc/protobuf"
-	"github.com/archivekeep/archivekeep/server/api/grpc"
+	grpc_ak "github.com/archivekeep/archivekeep/server/api/grpc"
 )
 
 const chunkSize = 64 * 1024 // 64 KiB

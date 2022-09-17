@@ -10,8 +10,9 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/archivekeep/archivekeep/server/application"
 	"gotest.tools/v3/assert"
+
+	"github.com/archivekeep/archivekeep/server/application"
 )
 
 func Test_SessionBasedAuthentication(t *testing.T) {

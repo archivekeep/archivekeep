@@ -4,9 +4,10 @@ import (
 	"context"
 	"testing"
 
+	"gotest.tools/v3/assert"
+
 	"github.com/archivekeep/archivekeep/server/api"
 	"github.com/archivekeep/archivekeep/server/application"
-	"gotest.tools/v3/assert"
 )
 
 func Test_personalAccessTokenApplicationService_CreatePersonalAccessToken(t *testing.T) {

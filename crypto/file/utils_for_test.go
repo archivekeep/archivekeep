@@ -3,9 +3,10 @@ package akcf_test
 import (
 	"testing"
 
-	akcf "github.com/archivekeep/archivekeep/crypto/file"
 	"github.com/keybase/saltpack/basic"
 	"gotest.tools/v3/assert"
+
+	akcf "github.com/archivekeep/archivekeep/crypto/file"
 )
 
 func createTestOptionsFromRandomKeys(tb testing.TB) (*akcf.EncryptOptions, *akcf.DecryptOptions) {

@@ -5,8 +5,9 @@ import (
 	"path/filepath"
 	"sort"
 
-	"github.com/archivekeep/archivekeep/internal/cli/currentarchive"
 	"github.com/spf13/cobra"
+
+	"github.com/archivekeep/archivekeep/internal/cli/currentarchive"
 )
 
 var statusCmd = &cobra.Command{

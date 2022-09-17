@@ -3,9 +3,10 @@ package cmd
 import (
 	"fmt"
 
-	"github.com/archivekeep/archivekeep/archive/local/driver/crypto"
-	"github.com/archivekeep/archivekeep/internal/util"
 	"github.com/spf13/cobra"
+
+	cryptoarchive "github.com/archivekeep/archivekeep/archive/local/driver/crypto"
+	"github.com/archivekeep/archivekeep/internal/util"
 )
 
 func keyringChangePassword() *cobra.Command {

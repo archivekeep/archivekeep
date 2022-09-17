@@ -1,8 +1,9 @@
 package cmd
 
 import (
-	"github.com/archivekeep/archivekeep/internal/buildinfo"
 	"github.com/spf13/cobra"
+
+	"github.com/archivekeep/archivekeep/internal/buildinfo"
 )
 
 var versionCmd = &cobra.Command{

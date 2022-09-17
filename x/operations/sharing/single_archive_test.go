@@ -9,7 +9,7 @@ import (
 
 	"github.com/archivekeep/archivekeep/archive"
 	"github.com/archivekeep/archivekeep/archive/remote"
-	"github.com/archivekeep/archivekeep/archive/remote/client/grpc"
+	grpcarchive "github.com/archivekeep/archivekeep/archive/remote/client/grpc"
 	"github.com/archivekeep/archivekeep/internal/cli/currentarchive"
 	"github.com/archivekeep/archivekeep/internal/tests/testarchive"
 	"github.com/archivekeep/archivekeep/x/operations/sharing"

@@ -7,7 +7,7 @@ import (
 	"github.com/spf13/afero"
 	"gotest.tools/v3/assert"
 
-	"github.com/archivekeep/archivekeep/archive/local/driver/plain"
+	filesarchive "github.com/archivekeep/archivekeep/archive/local/driver/plain"
 )
 
 func IndexContains(t testing.TB, archiveDir string, expectedFiles []string) {

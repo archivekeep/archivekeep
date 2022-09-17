@@ -11,10 +11,11 @@ import (
 	"net/http"
 	paths "path"
 
-	"github.com/archivekeep/archivekeep/internal/thumbnails"
-	"github.com/archivekeep/archivekeep/server/api"
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
+
+	"github.com/archivekeep/archivekeep/internal/thumbnails"
+	"github.com/archivekeep/archivekeep/server/api"
 )
 
 const ArchiveIdResourceParam = "archiveID"

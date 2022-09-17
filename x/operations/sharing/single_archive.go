@@ -16,7 +16,7 @@ import (
 
 	"github.com/archivekeep/archivekeep/archive"
 	"github.com/archivekeep/archivekeep/internal/josesecrets"
-	"github.com/archivekeep/archivekeep/server/api/grpc"
+	grpc_ak "github.com/archivekeep/archivekeep/server/api/grpc"
 	"github.com/archivekeep/archivekeep/server/api/rest"
 	"github.com/archivekeep/archivekeep/x/operations/sharing/servertls"
 )

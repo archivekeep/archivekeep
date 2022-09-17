@@ -7,9 +7,10 @@ import (
 	"encoding/base64"
 	"fmt"
 
-	"github.com/archivekeep/archivekeep/server/api"
 	"github.com/google/uuid"
 	"golang.org/x/crypto/pbkdf2"
+
+	"github.com/archivekeep/archivekeep/server/api"
 )
 
 type personalAccessTokenApplicationService struct {

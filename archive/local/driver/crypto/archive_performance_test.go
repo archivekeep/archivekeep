@@ -5,8 +5,9 @@ import (
 	"runtime"
 	"testing"
 
-	"github.com/archivekeep/archivekeep/internal/tests/benchmark/datasizes"
 	"gotest.tools/v3/assert"
+
+	"github.com/archivekeep/archivekeep/internal/tests/benchmark/datasizes"
 )
 
 func BenchmarkArchive_FileChecksum(b *testing.B) {
