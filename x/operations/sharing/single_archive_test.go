@@ -11,8 +11,8 @@ import (
 	"github.com/archivekeep/archivekeep/archive/remote"
 	"github.com/archivekeep/archivekeep/archive/remote/client/grpc"
 	"github.com/archivekeep/archivekeep/internal/cli/currentarchive"
-	"github.com/archivekeep/archivekeep/internal/operations/sharing"
 	"github.com/archivekeep/archivekeep/internal/tests/testarchive"
+	"github.com/archivekeep/archivekeep/x/operations/sharing"
 )
 
 func TestArchiveManager_Init(t *testing.T) {

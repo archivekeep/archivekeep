@@ -20,8 +20,8 @@ import (
 	grpcarchive "github.com/archivekeep/archivekeep/archive/remote/client/grpc"
 	"github.com/archivekeep/archivekeep/internal/cli/cmd"
 	"github.com/archivekeep/archivekeep/internal/cli/currentarchive"
-	"github.com/archivekeep/archivekeep/internal/operations/sharing"
 	"github.com/archivekeep/archivekeep/internal/tests/testarchive"
+	"github.com/archivekeep/archivekeep/x/operations/sharing"
 )
 
 const password = "123-456"

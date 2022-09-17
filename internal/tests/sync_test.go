@@ -27,11 +27,11 @@ func TestBasicSync(t *testing.T) {
 
 	out = runCmd(t, archiveDirA, nil, "compare", archiveDirB)
 	assert.Equal(t, out, `
-Extra local files not matched to remote files:
+Extra files in local archive:
 	file_a
 	file_b
 
-Extra local files not matched to remote files:
+Extra files in remote archive:
 	file_c
 	file_d
 
@@ -43,25 +43,28 @@ Total files present in both archives: 0
 
 	out = runCmd(t, archiveDirA, strings.NewReader("y\n"), "push", archiveDirB)
 	assert.Equal(t, out, `
-Files to be pushed from current to remote archive:
+Extra files in current archive:
 	file_a
 	file_b
+
+Extra files in remote archive:
+	file_c
+	file_d
 
 Extra files in current archive: 2
 Extra files in remote archive: 2
 Total files present in both archives: 0
 
 Do you want to perform push? [y/n]: 
-proceeding ...
-file copied: file_a
-file copied: file_b
+file stored: file_a
+file stored: file_b
 `)
 	assertArchiveFile(t, archiveDirB, "file_a", "A")
 	assertArchiveFile(t, archiveDirB, "file_b", "A")
 
 	out = runCmd(t, archiveDirA, strings.NewReader("y\n"), "pull", archiveDirB)
 	assert.Equal(t, out, `
-Files to be pulled from remote to current archive:
+Extra files in remote archive:
 	file_c
 	file_d
 
@@ -70,9 +73,8 @@ Extra files in current archive: 0
 Total files present in both archives: 2
 
 Do you want to perform pull? [y/n]: 
-proceeding ...
-file copied: file_c
-file copied: file_d
+file stored: file_c
+file stored: file_d
 `)
 	assertArchiveFile(t, archiveDirA, "file_c", "B")
 	assertArchiveFile(t, archiveDirA, "file_d", "B")
@@ -102,7 +104,7 @@ func TestPushWontOverwriteNonIndexedContents(t *testing.T) {
 	out, err := runCmdError(t, currentArchiveDir, strings.NewReader("y\n"), "push", remoteArchiveDir)
 	assert.Equal(t, out, strings.Join([]string{
 		"",
-		"Files to be pushed from current to remote archive:",
+		"Extra files in current archive:",
 		"\tb",
 		"",
 		"Extra files in current archive: 1",
@@ -110,10 +112,10 @@ func TestPushWontOverwriteNonIndexedContents(t *testing.T) {
 		"Total files present in both archives: 1",
 		"",
 		"Do you want to perform push? [y/n]: ",
-		"proceeding ...",
+		"error storing file 'b': open " + remoteArchiveDir + "/b: file exists",
 		"",
 	}, "\n"))
-	assert.Error(t, err, fmt.Sprintf("push new files: transfer file b: open %s/b: file exists", remoteArchiveDir))
+	assert.Error(t, err, fmt.Sprintf("execute push: copy new files: transfer file b: open %s/b: file exists", remoteArchiveDir))
 
 	assertArchiveFileContains(t, remoteArchiveDir, "b", "non indexed target b")
 }
@@ -134,7 +136,7 @@ func TestPullWontOverwriteNonIndexedContents(t *testing.T) {
 	out, err := runCmdError(t, currentArchiveDir, strings.NewReader("y\n"), "pull", remoteArchiveDir)
 	assert.Equal(t, out, strings.Join([]string{
 		"",
-		"Files to be pulled from remote to current archive:",
+		"Extra files in remote archive:",
 		"\tb",
 		"",
 		"Extra files in remote archive: 1",
@@ -142,10 +144,10 @@ func TestPullWontOverwriteNonIndexedContents(t *testing.T) {
 		"Total files present in both archives: 1",
 		"",
 		"Do you want to perform pull? [y/n]: ",
-		"proceeding ...",
+		"error storing file 'b': open " + currentArchiveDir + "/b: file exists",
 		"",
 	}, "\n"))
-	assert.Error(t, err, fmt.Sprintf("pull new files: transfer file b: open %s/b: file exists", currentArchiveDir))
+	assert.Error(t, err, fmt.Sprintf("execute pull: copy new files: transfer file b: open %s/b: file exists", currentArchiveDir))
 
 	assertArchiveFileContains(t, currentArchiveDir, "b", "non indexed original b")
 }

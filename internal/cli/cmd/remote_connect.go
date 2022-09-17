@@ -7,8 +7,8 @@ import (
 	"github.com/spf13/cobra"
 
 	"github.com/archivekeep/archivekeep/internal/cli/currentarchive"
-	"github.com/archivekeep/archivekeep/internal/operations/remotes"
 	"github.com/archivekeep/archivekeep/internal/util"
+	"github.com/archivekeep/archivekeep/x/operations/remotes"
 )
 
 func remoteConnectCmd() *cobra.Command {

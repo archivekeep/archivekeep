@@ -11,8 +11,8 @@ import (
 	"github.com/archivekeep/archivekeep/archive/local/driver/crypto"
 	"github.com/archivekeep/archivekeep/archive/local/driver/plain"
 	"github.com/archivekeep/archivekeep/internal/cli/currentarchive"
-	"github.com/archivekeep/archivekeep/internal/operations/verification"
 	"github.com/archivekeep/archivekeep/internal/util"
+	"github.com/archivekeep/archivekeep/x/operations/verification"
 )
 
 type ArchiveConnection interface {

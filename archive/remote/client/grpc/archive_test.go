@@ -12,10 +12,10 @@ import (
 	"github.com/archivekeep/archivekeep/archive"
 	"github.com/archivekeep/archivekeep/archive/remote"
 	"github.com/archivekeep/archivekeep/archive/remote/client/grpc"
-	"github.com/archivekeep/archivekeep/internal/operations/sharing/servertls"
 	"github.com/archivekeep/archivekeep/internal/tests/testarchive"
 	"github.com/archivekeep/archivekeep/server/api"
 	"github.com/archivekeep/archivekeep/server/api/grpc"
+	"github.com/archivekeep/archivekeep/x/operations/sharing/servertls"
 	"github.com/archivekeep/archivekeep/x/testing/archivetest"
 )
 

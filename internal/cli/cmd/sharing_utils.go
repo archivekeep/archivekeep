@@ -7,10 +7,10 @@ import (
 	"github.com/spf13/cobra"
 
 	"github.com/archivekeep/archivekeep/archive"
-	"github.com/archivekeep/archivekeep/archive/wrapper/readonly"
 	"github.com/archivekeep/archivekeep/internal/cli/currentarchive"
-	"github.com/archivekeep/archivekeep/internal/operations/sharing"
 	"github.com/archivekeep/archivekeep/internal/util"
+	"github.com/archivekeep/archivekeep/x/archive/wrapper/readonly"
+	"github.com/archivekeep/archivekeep/x/operations/sharing"
 )
 
 func openForSharing(cmd *cobra.Command, allowWrite bool) (string, *sharing.SingleArchive, error) {

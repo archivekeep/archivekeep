@@ -27,7 +27,7 @@ type Writer interface {
 	SaveFile(reader io.Reader, fileInfo *FileInfo) error
 	MoveFile(from string, to string) error
 
-	DeleteFile(filename string) error
+	DeleteFile(path string) error
 }
 
 type ReadWriter interface {

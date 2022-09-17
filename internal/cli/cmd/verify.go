@@ -6,7 +6,7 @@ import (
 	"github.com/spf13/cobra"
 
 	"github.com/archivekeep/archivekeep/internal/cli/currentarchive"
-	"github.com/archivekeep/archivekeep/internal/operations/verification"
+	"github.com/archivekeep/archivekeep/x/operations/verification"
 )
 
 var verifyCmd = &cobra.Command{

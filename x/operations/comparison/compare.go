@@ -1,4 +1,4 @@
-package compare
+package comparison
 
 import (
 	"fmt"
@@ -56,27 +56,10 @@ func newRelocation(from, to []string) Relocation {
 	}
 }
 
-type ExtraGroup struct {
-	Checksum  string
-	Filenames []string
-}
-
-type Result struct {
-	AllBaseFiles  []string
-	AllOtherFiles []string
-
-	Relocations []Relocation
-
-	// Paths to be having new content, after original file in base archive is moved to a new path
-	NewContentAfterMove []string
-
-	NewContentToOverwrite []string
-
-	UnmatchedBaseExtras  []ExtraGroup
-	UnmatchedOtherExtras []ExtraGroup
-}
-
-func CompareArchives(
+// Execute compares base archive against other archive.
+//
+// Comparison result should provide set of changes needed to update other archive to match base archive.
+func Execute(
 	base archive.Reader,
 	other archive.Reader,
 ) (Result, error) {

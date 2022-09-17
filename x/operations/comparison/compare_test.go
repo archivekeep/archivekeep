@@ -1,16 +1,16 @@
-package compare_test
+package comparison_test
 
 import (
 	"testing"
 
 	"gotest.tools/v3/assert"
 
-	"github.com/archivekeep/archivekeep/internal/operations/compare"
 	"github.com/archivekeep/archivekeep/internal/tests/testarchive"
+	"github.com/archivekeep/archivekeep/x/operations/comparison"
 )
 
-func TestPrepare(t *testing.T) {
-	archiveA, _ := testarchive.CreateWithContents(t, map[string]string{
+func TestExecute(t *testing.T) {
+	latestVersion, _ := testarchive.CreateWithContents(t, map[string]string{
 		"file to be extra in source":    "file to be extra in source",
 		"file to duplicate":             "file to duplicate: old",
 		"file to duplicate 02":          "file to duplicate: old",
@@ -22,7 +22,7 @@ func TestPrepare(t *testing.T) {
 		"moved/file to move":            "file to move: old",
 		"old/file to modify backup":     "file to modify with backup: old",
 	})
-	archiveB, _ := testarchive.CreateWithContents(t, map[string]string{
+	outdatedArchive, _ := testarchive.CreateWithContents(t, map[string]string{
 		"file to be extra in target": "file to be extra in target",
 		"file to duplicate":          "file to duplicate: old",
 		"file to move":               "file to move: old",
@@ -32,9 +32,9 @@ func TestPrepare(t *testing.T) {
 		"file to be left untouched":  "file to be left untouched: untouched",
 	})
 
-	result, err := compare.CompareArchives(archiveA, archiveB)
+	result, err := comparison.Execute(latestVersion, outdatedArchive)
 	assert.NilError(t, err)
-	assert.DeepEqual(t, result.Relocations, []compare.Relocation{
+	assert.DeepEqual(t, result.Relocations, []comparison.Relocation{
 		{
 			OriginalFileNames:      []string{"file to duplicate"},
 			NewFileNames:           []string{"file to duplicate", "file to duplicate 02"},
@@ -66,7 +66,7 @@ func TestPrepare(t *testing.T) {
 	assert.DeepEqual(t, result.NewContentToOverwrite, []string{
 		"file to overwrite",
 	})
-	assert.DeepEqual(t, result.UnmatchedBaseExtras, []compare.ExtraGroup{
+	assert.DeepEqual(t, result.UnmatchedBaseExtras, []comparison.ExtraGroup{
 		{
 			Checksum: "1edc8804c33fd71860f80dd0f5974f09c2cf9be162ae1dc8db0bfcb820e48cef",
 			Filenames: []string{
@@ -86,7 +86,7 @@ func TestPrepare(t *testing.T) {
 			},
 		},
 	})
-	assert.DeepEqual(t, result.UnmatchedOtherExtras, []compare.ExtraGroup{
+	assert.DeepEqual(t, result.UnmatchedOtherExtras, []comparison.ExtraGroup{
 		{
 			Checksum: "c9dd58abb6a3bd6bfaf0b42d8e47b215002fbed488b53b165edfac151ff46d27",
 			Filenames: []string{

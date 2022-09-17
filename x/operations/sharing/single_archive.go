@@ -16,9 +16,9 @@ import (
 
 	"github.com/archivekeep/archivekeep/archive"
 	"github.com/archivekeep/archivekeep/internal/josesecrets"
-	"github.com/archivekeep/archivekeep/internal/operations/sharing/servertls"
 	"github.com/archivekeep/archivekeep/server/api/grpc"
 	"github.com/archivekeep/archivekeep/server/api/rest"
+	"github.com/archivekeep/archivekeep/x/operations/sharing/servertls"
 )
 
 const sharingSecretsKey = "sharing"

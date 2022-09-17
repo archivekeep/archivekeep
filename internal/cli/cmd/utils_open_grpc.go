@@ -11,8 +11,8 @@ import (
 	"github.com/archivekeep/archivekeep/archive/remote"
 	grpcarchive "github.com/archivekeep/archivekeep/archive/remote/client/grpc"
 	"github.com/archivekeep/archivekeep/internal/cli/currentarchive"
-	"github.com/archivekeep/archivekeep/internal/operations/remotes"
 	"github.com/archivekeep/archivekeep/internal/util"
+	"github.com/archivekeep/archivekeep/x/operations/remotes"
 )
 
 const (

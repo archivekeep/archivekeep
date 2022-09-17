@@ -6,9 +6,10 @@ import (
 	"github.com/spf13/cobra"
 
 	"github.com/archivekeep/archivekeep/archive"
-	"github.com/archivekeep/archivekeep/internal/operations/compare"
-	"github.com/archivekeep/archivekeep/internal/operations/sync"
 	"github.com/archivekeep/archivekeep/internal/util"
+	"github.com/archivekeep/archivekeep/x/archive/wrapper/logged"
+	"github.com/archivekeep/archivekeep/x/operations/comparison"
+	"github.com/archivekeep/archivekeep/x/operations/sync"
 )
 
 func performSync(
@@ -18,68 +19,16 @@ func performSync(
 	fromArchive archive.Reader,
 	toArchive archive.ReadWriter,
 ) error {
-	compareResult, err := compare.CompareArchives(fromArchive, toArchive)
+	compareResult, err := comparison.Execute(fromArchive, toArchive)
 	if err != nil {
 		return fmt.Errorf("prepare sync: %w", err)
 	}
 
-	if len(compareResult.Relocations) > 0 {
-		printUnmatchedBaseExtras(cmd, compareResult, fromName, toName)
-		printUnmatchedOtherExtras(cmd, compareResult, toName, fromName)
-		printRelocations(cmd, compareResult)
+	// TODO: execute sync.Plan(compareResult, options) and show the generated plan instead
 
-		if options.ResolveMoves && options.AdditiveDuplicating {
-			return fmt.Errorf("use only one --resolve-moves or --additive-duplicating")
-		}
+	compareResult.PrintAll(cmd, fromName, toName)
 
-		if options.AdditiveDuplicating {
-			if util.AskForConfirmation(cmd, "\nDo want to %s additive duplicates?", operationName) {
-				cmd.Printf("\nproceeding ...\n")
-
-				err := sync.PerformAdditiveDuplicating(
-					cmd.Context(),
-					cmd,
-					compareResult,
-					fromArchive,
-					toArchive,
-				)
-
-				if err != nil {
-					return fmt.Errorf("%s changes: %w", operationName, err)
-				}
-			}
-		} else if options.ResolveMoves {
-			if util.AskForConfirmation(cmd, "\nDo want to %s file moves?", operationName) {
-				cmd.Printf("\nproceeding ...\n")
-
-				err := sync.PerformRelocationsSync(
-					cmd.Context(),
-					cmd,
-					compareResult,
-					options,
-					fromArchive,
-					toArchive,
-				)
-
-				if err != nil {
-					return err
-				}
-			}
-		} else {
-			return fmt.Errorf("relocations detected, execute with --resolve-moves or --additive-duplicating")
-		}
-	}
-
-	if len(compareResult.UnmatchedBaseExtras) > 0 {
-		cmd.Printf("\nFiles to be %sed from %s to %s archive:\n", operationName, fromName, toName)
-		for _, sourceExtra := range compareResult.UnmatchedBaseExtras {
-			cmd.Printf("\t%s\n", filenamesPrint(sourceExtra.Filenames))
-		}
-	}
-
-	printStats(cmd, compareResult, fromName, toName)
-
-	if len(compareResult.UnmatchedBaseExtras) == 0 {
+	if len(compareResult.UnmatchedBaseExtras) == 0 && len(compareResult.Relocations) == 0 {
 		cmd.Printf("no files to %s ...\n", operationName)
 		return nil
 	}
@@ -88,16 +37,21 @@ func performSync(
 		return nil
 	}
 
-	cmd.Printf("\nproceeding ...\n")
-	err = sync.PerformNewFilesSync(
+	cmd.Printf("\n")
+
+	err = sync.PerformSync(
 		cmd.Context(),
-		cmd,
+		options,
 		compareResult,
 		fromArchive,
-		toArchive,
+		&logged.Archive{
+			Base:     toArchive,
+			Printfer: cmd,
+		},
 	)
+
 	if err != nil {
-		return fmt.Errorf("%s new files: %w", operationName, err)
+		return fmt.Errorf("execute %s: %w", operationName, err)
 	}
 
 	return nil
