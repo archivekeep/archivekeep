@@ -10,8 +10,8 @@ import (
 
 	"github.com/archivekeep/archivekeep/archive"
 	akcf "github.com/archivekeep/archivekeep/crypto/file"
-	"github.com/archivekeep/archivekeep/internal/testing/archivetest"
 	"github.com/archivekeep/archivekeep/internal/util"
+	"github.com/archivekeep/archivekeep/x/testing/archivetest"
 )
 
 func TestCreate(t *testing.T) {

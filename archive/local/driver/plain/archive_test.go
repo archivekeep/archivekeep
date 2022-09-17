@@ -9,7 +9,7 @@ import (
 	"gotest.tools/v3/assert"
 
 	"github.com/archivekeep/archivekeep/archive"
-	"github.com/archivekeep/archivekeep/internal/testing/archivetest"
+	"github.com/archivekeep/archivekeep/x/testing/archivetest"
 )
 
 func TestInitialize(t *testing.T) {

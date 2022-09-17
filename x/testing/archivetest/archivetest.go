@@ -58,13 +58,7 @@ func Run(t *testing.T, implementation *ImplementationTester) {
 		assert.NilError(t, err)
 		defer contentsReader.Close()
 
-		assert.DeepEqual(t, info, archive.FileInfo{
-			Path:   "existing-file-01",
-			Length: 22,
-			Digest: map[string]string{
-				"SHA256": "2a5c7f36d8af12221b84b588566aa964668fb7fc0f5d717f906a25bbab8798d4",
-			},
-		})
+		assert.DeepEqual(t, info, *existingFile01Info)
 
 		expectedData := []byte("existing file contents")
 
@@ -88,13 +82,7 @@ func Run(t *testing.T, implementation *ImplementationTester) {
 		assert.NilError(t, err)
 		defer contentsReader.Close()
 
-		assert.DeepEqual(t, info, archive.FileInfo{
-			Path:   "existing-file-01",
-			Length: 22,
-			Digest: map[string]string{
-				"SHA256": "2a5c7f36d8af12221b84b588566aa964668fb7fc0f5d717f906a25bbab8798d4",
-			},
-		})
+		assert.DeepEqual(t, info, *existingFile01Info)
 
 		expectedData := []byte("existing file contents")
 		b := make([]byte, len(expectedData)+100)
@@ -126,12 +114,12 @@ func Run(t *testing.T, implementation *ImplementationTester) {
 			archiveRW := testedArchive.OpenReadWriter()
 
 			err := archiveRW.SaveFile(
-				bytes.NewReader([]byte("new file contents")),
+				bytes.NewReader(newFileContent),
 				&archive.FileInfo{
 					Path:   "new-file",
 					Length: 17,
 					Digest: map[string]string{
-						"SHA256": "428189279ce0f27c1e26d0555538043bae351115e3795b1d3ffcb2948de131dd",
+						"SHA256": newFileSha256,
 					},
 				},
 			)
@@ -139,13 +127,18 @@ func Run(t *testing.T, implementation *ImplementationTester) {
 
 			assertArchiveFileContains(t, testedArchive, "existing-file-01", "existing file contents")
 			assertArchiveFileContains(t, testedArchive, "new-file", "new file contents")
+			assertArchiveIndex(t, testedArchive, []*archive.FileInfo{
+				existingFile01Info,
+				existingFile02Info,
+				newFileInfo,
+			})
 		})
 		t.Run("Won't modify existing file", func(t *testing.T) {
 			testedArchive := createTestArchive01(t, implementation)
 			archiveRW := testedArchive.OpenReadWriter()
 
 			err := archiveRW.SaveFile(
-				bytes.NewReader([]byte("new file contents")),
+				bytes.NewReader(newFileContent),
 				&archive.FileInfo{
 					Path:   "existing-file-01",
 					Length: 17,
@@ -158,6 +151,52 @@ func Run(t *testing.T, implementation *ImplementationTester) {
 			assert.ErrorContains(t, err, "file exists")
 
 			assertArchiveFileContains(t, testedArchive, "existing-file-01", "existing file contents")
+			assertArchiveIndex(t, testedArchive, []*archive.FileInfo{
+				existingFile01Info,
+				existingFile02Info,
+			})
+		})
+		t.Run("Won't store corrupted file and won't break correct save afterwards", func(t *testing.T) {
+			testedArchive := createTestArchive01(t, implementation)
+			archiveRW := testedArchive.OpenReadWriter()
+
+			err := archiveRW.SaveFile(
+				bytes.NewReader(newFileContent[0:8]),
+				&archive.FileInfo{
+					Path:   "new-file",
+					Length: 8,
+					Digest: map[string]string{
+						"SHA256": newFileSha256,
+					},
+				},
+			)
+			assert.ErrorContains(t, err, "wrong checksum:")
+			assert.ErrorContains(t, err, "got=b37d2cbfd875891e9ed073fcbe61f35a990bee8eecbdd07f9efc51339d5ffd66")
+			assert.ErrorContains(t, err, "expected="+newFileSha256)
+			assertArchiveIndex(t, testedArchive, []*archive.FileInfo{
+				existingFile01Info,
+				existingFile02Info,
+			})
+
+			err = archiveRW.SaveFile(
+				bytes.NewReader(newFileContent),
+				&archive.FileInfo{
+					Path:   "new-file",
+					Length: 17,
+					Digest: map[string]string{
+						"SHA256": newFileSha256,
+					},
+				},
+			)
+			assert.NilError(t, err)
+
+			assertArchiveFileContains(t, testedArchive, "existing-file-01", "existing file contents")
+			assertArchiveFileContains(t, testedArchive, "new-file", "new file contents")
+			assertArchiveIndex(t, testedArchive, []*archive.FileInfo{
+				existingFile01Info,
+				existingFile02Info,
+				newFileInfo,
+			})
 		})
 		// TODO: test store large file (> 10MB)
 	})
@@ -237,3 +276,40 @@ func assertArchiveFileContains(t *testing.T, testedArchive *TestedArchive, path,
 
 	assert.DeepEqual(t, data, []byte(expectedContents))
 }
+
+func assertArchiveIndex(t *testing.T, testedArchive *TestedArchive, expectedFiles []*archive.FileInfo) {
+	t.Helper()
+
+	archiveRW := testedArchive.OpenReadWriter()
+
+	storedFiles, err := archiveRW.ListFiles()
+	assert.NilError(t, err)
+	assert.DeepEqual(t, storedFiles, expectedFiles)
+}
+
+var (
+	newFileContent = []byte("new file contents")
+	newFileSha256  = "428189279ce0f27c1e26d0555538043bae351115e3795b1d3ffcb2948de131dd"
+
+	existingFile01Info = &archive.FileInfo{
+		Path:   "existing-file-01",
+		Length: 22,
+		Digest: map[string]string{
+			"SHA256": "2a5c7f36d8af12221b84b588566aa964668fb7fc0f5d717f906a25bbab8798d4",
+		},
+	}
+	existingFile02Info = &archive.FileInfo{
+		Path:   "existing-file-02",
+		Length: 30,
+		Digest: map[string]string{
+			"SHA256": "e1bd0afc0d2276fab4d1458b12e01d760e0d0e2a7cf6f72fde281f297f8bff65",
+		},
+	}
+	newFileInfo = &archive.FileInfo{
+		Path:   "new-file",
+		Length: 17,
+		Digest: map[string]string{
+			"SHA256": "428189279ce0f27c1e26d0555538043bae351115e3795b1d3ffcb2948de131dd",
+		},
+	}
+)

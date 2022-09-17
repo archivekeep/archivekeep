@@ -172,7 +172,7 @@ func (archive *Archive) FileChecksum(filename string) (string, error) {
 	return fileInfo.PrivateMetadata.Data.Digest["SHA256"], nil
 }
 
-func (archive *Archive) openEncrypted(filename string) (*akcf.FileInfo, []byte, error) {
+func (archive *Archive) readEncrypted(filename string) (*akcf.FileInfo, []byte, error) {
 	file, err := os.Open(archive.encryptedFilePath(filename))
 	if err != nil {
 		return nil, nil, fmt.Errorf("open: %w", err)
@@ -222,6 +222,8 @@ func (archive *Archive) SaveFileFromBytes(content []byte, filename string) error
 }
 
 func (archive *Archive) SaveFile(reader io.Reader, fileInfo *archive2.FileInfo) error {
+	checksum := fileInfo.Digest["SHA256"]
+
 	destinationPath := archive.encryptedFilePath(fileInfo.Path)
 	err := os.MkdirAll(paths.Dir(destinationPath), directoryCreationPerm)
 	if err != nil {
@@ -242,11 +244,11 @@ func (archive *Archive) SaveFile(reader io.Reader, fileInfo *archive2.FileInfo) 
 			return fmt.Errorf("%s, remove of corrupted file failed: %w", s, removeErr)
 		}
 
-		return fmt.Errorf("copy file: %w", err)
+		return fmt.Errorf("save file: %s: %w", s, err)
 	}
 
 	err = akcf.Encrypt(targetFile, reader, fileInfo.Length, map[string]string{
-		"SHA256": fileInfo.Digest["SHA256"],
+		"SHA256": checksum,
 	}, &akcf.EncryptOptions{
 		BoxKey:     archive.keyring.BoxKey,
 		SigningKey: archive.keyring.SigningKey,
@@ -255,7 +257,16 @@ func (archive *Archive) SaveFile(reader io.Reader, fileInfo *archive2.FileInfo) 
 		return processFailureError("store file", err)
 	}
 
-	// TODO: validate checksum of stored file
+	_, contents, err := archive.readEncrypted(fileInfo.Path)
+	if err != nil {
+		return processFailureError("reopen stored file", err)
+	}
+
+	storedChecksum := util.ComputeChecksumFromBytes(contents)
+	if storedChecksum != fileInfo.Digest["SHA256"] {
+		err = fmt.Errorf("copied file has wrong checksum: got=%s, expected=%s", storedChecksum, checksum)
+		return processFailureError("copy result", err)
+	}
 
 	return nil
 }
@@ -281,7 +292,7 @@ func (archive *Archive) DeleteFile(filename string) error {
 }
 
 func (archive *Archive) VerifyFileIntegrity(path string) error {
-	metadata, contents, err := archive.openEncrypted(path)
+	metadata, contents, err := archive.readEncrypted(path)
 	if err != nil {
 		return fmt.Errorf("open encrypted file: %w", err)
 	}

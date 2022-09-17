@@ -244,7 +244,7 @@ func (archive *Archive) SaveFile(reader io.Reader, fileInfo *archiveapi.FileInfo
 			return fmt.Errorf("%s, remove of corrupted file failed: %w", s, removeErr)
 		}
 
-		return fmt.Errorf("copy file: %w", err)
+		return fmt.Errorf("save file: %s: %w", s, err)
 	}
 
 	err = archive.storeFile(targetFile, reader)
