@@ -9,15 +9,39 @@ import (
 	"github.com/archivekeep/archivekeep/x/operations/verification"
 )
 
-var verifyCmd = &cobra.Command{
-	Use:   "verify",
-	Short: "Verifies integrity archive",
-	RunE: func(cmd *cobra.Command, args []string) error {
+func verifyCmd() *cobra.Command {
+	var flags struct {
+		again bool
+	}
+
+	cmdFunc := func(cmd *cobra.Command, args []string) error {
 		currentArchive, err := currentarchive.Open()
 		if err != nil {
 			return fmt.Errorf("open current archive: %w", err)
 		}
 
-		return verification.Verify(cmd.Context(), cmd, currentArchive)
-	},
+		_, err = verification.Execute(
+			cmd.Context(),
+			currentArchive,
+			verification.ActionOptions{
+				Logger: cmd,
+
+				StartFromScratch: flags.again,
+			},
+		)
+
+		// TODO: fmt.Printf("Verification result: %v", result)
+
+		return err
+	}
+
+	cmd := &cobra.Command{
+		Use:   "verify",
+		Short: "Verifies integrity archive",
+		RunE:  cmdFunc,
+	}
+
+	cmd.Flags().BoolVar(&flags.again, "again", false, "verify it again")
+
+	return cmd
 }

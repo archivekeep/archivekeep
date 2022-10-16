@@ -23,7 +23,7 @@ func New() *cobra.Command {
 	rootCmd.AddCommand(addCmd())
 	rootCmd.AddCommand(rmCmd)
 	rootCmd.AddCommand(statusCmd)
-	rootCmd.AddCommand(verifyCmd)
+	rootCmd.AddCommand(verifyCmd())
 
 	// synchronization of archives
 	rootCmd.AddCommand(compareCmd())

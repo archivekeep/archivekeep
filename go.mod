@@ -1,10 +1,11 @@
 module github.com/archivekeep/archivekeep
 
-go 1.18
+go 1.19
 
 require (
 	github.com/allegro/bigcache/v3 v3.0.2
 	github.com/go-chi/chi/v5 v5.0.7
+	github.com/golang/protobuf v1.5.0
 	github.com/google/go-cmp v0.5.6
 	github.com/google/uuid v1.1.2
 	github.com/gorilla/securecookie v1.1.1
@@ -25,7 +26,6 @@ require (
 )
 
 require (
-	github.com/golang/protobuf v1.5.0 // indirect
 	github.com/inconshreveable/mousetrap v1.0.0 // indirect
 	github.com/keybase/go-codec v0.0.0-20180928230036-164397562123 // indirect
 	github.com/kr/fs v0.1.0 // indirect

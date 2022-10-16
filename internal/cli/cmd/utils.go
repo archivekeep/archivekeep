@@ -12,14 +12,7 @@ import (
 	filesarchive "github.com/archivekeep/archivekeep/archive/local/driver/plain"
 	"github.com/archivekeep/archivekeep/internal/cli/currentarchive"
 	"github.com/archivekeep/archivekeep/internal/util"
-	"github.com/archivekeep/archivekeep/x/operations/verification"
 )
-
-type ArchiveConnection interface {
-	archive.ReadWriter
-
-	verification.VerifiableArchive
-}
 
 type ConnectionFlags struct {
 	insecure bool
@@ -39,7 +32,7 @@ func openOtherArchive(
 }
 
 func openFileSystemArchive(cmd *cobra.Command, location string) (archive.ReadWriter, error) {
-	var arw ArchiveConnection
+	var arw archive.ReadWriter
 	var err error
 
 	fs, sublocation, err := resolve(location)
