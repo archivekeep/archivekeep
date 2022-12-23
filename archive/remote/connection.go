@@ -46,6 +46,8 @@ type connectionJSON struct {
 
 	ClientCertificate string
 	ClientPrivateKey  string
+
+	BasicAuthCredentials *BasicAuthCredentials
 }
 
 func (c *Connection) UnmarshalJSON(bytes []byte) error {
@@ -72,6 +74,7 @@ func (c *Connection) UnmarshalJSON(bytes []byte) error {
 			ServerRootCertificate: rootCertificate,
 			ClientCertificate:     clientCertificate,
 		},
+		BasicAuthCredentials: jsonRepresentation.BasicAuthCredentials,
 	}
 
 	return nil
@@ -81,15 +84,19 @@ func (c *Connection) MarshalJSON() ([]byte, error) {
 	var err error
 
 	jsonRepresentation := connectionJSON{
-		Address: c.Address,
-
-		RootCertificate:   tlsutil.EncodeCertificatePEM(c.Secrets.ServerRootCertificate.Raw),
-		ClientCertificate: tlsutil.EncodeCertificatePEM(c.Secrets.ClientCertificate.Leaf.Raw),
+		Address:              c.Address,
+		BasicAuthCredentials: c.BasicAuthCredentials,
 	}
 
-	jsonRepresentation.ClientPrivateKey, err = tlsutil.EncodeKeyPEM(c.Secrets.ClientCertificate.PrivateKey)
-	if err != nil {
-		return nil, err
+	if c.Secrets.ServerRootCertificate != nil {
+		jsonRepresentation.RootCertificate = tlsutil.EncodeCertificatePEM(c.Secrets.ServerRootCertificate.Raw)
+	}
+	if c.Secrets.ClientCertificate != nil {
+		jsonRepresentation.ClientCertificate = tlsutil.EncodeCertificatePEM(c.Secrets.ClientCertificate.Leaf.Raw)
+		jsonRepresentation.ClientPrivateKey, err = tlsutil.EncodeKeyPEM(c.Secrets.ClientCertificate.PrivateKey)
+		if err != nil {
+			return nil, err
+		}
 	}
 
 	return json.Marshal(jsonRepresentation)

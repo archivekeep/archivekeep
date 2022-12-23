@@ -99,6 +99,10 @@ func (a *CurrentArchive) OpenKeyring(
 	return nil
 }
 
+func (a *CurrentArchive) RemotesStore() *keyringRemotesStore {
+	return &keyringRemotesStore{Keyring: a.keyring}
+}
+
 func (a *CurrentArchive) FindFilesFromWD(searchGlobs []string) []string {
 	var absGlobs []string
 	for _, searchGlob := range searchGlobs {

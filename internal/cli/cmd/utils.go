@@ -18,6 +18,10 @@ type ConnectionFlags struct {
 	insecure bool
 }
 
+func (f *ConnectionFlags) register(cmd *cobra.Command) {
+	cmd.Flags().BoolVar(&f.insecure, "insecure", false, "use insecure connection")
+}
+
 func openOtherArchive(
 	cmd *cobra.Command,
 	location string,

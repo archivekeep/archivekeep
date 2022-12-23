@@ -9,3 +9,6 @@
 
 # IDE stuff
 /.idea
+
+# local development playground
+/tmp

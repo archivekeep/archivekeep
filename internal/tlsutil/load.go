@@ -8,6 +8,10 @@ import (
 )
 
 func LoadTLSCertificate(certificatePEM string, keyPEM string) (*tls.Certificate, error) {
+	if certificatePEM == "" && keyPEM == "" {
+		return nil, nil
+	}
+
 	cert, err := tls.X509KeyPair([]byte(certificatePEM), []byte(keyPEM))
 	if err != nil {
 		return nil, fmt.Errorf("parse key pair: %w", err)
@@ -22,6 +26,10 @@ func LoadTLSCertificate(certificatePEM string, keyPEM string) (*tls.Certificate,
 }
 
 func LoadX509Certificate(certificatePEM string) (*x509.Certificate, error) {
+	if certificatePEM == "" {
+		return nil, nil
+	}
+
 	pemBlock, _ := pem.Decode([]byte(certificatePEM))
 	if pemBlock == nil {
 		return nil, fmt.Errorf("PEM block is empty")

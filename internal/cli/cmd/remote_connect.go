@@ -35,7 +35,7 @@ func remoteConnectCmd() *cobra.Command {
 		return remotes.AddConnection(
 			remoteHostName,
 			tokenBytes,
-			currentArchive.Keyring(),
+			currentArchive.RemotesStore(),
 		)
 	}
 

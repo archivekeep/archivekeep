@@ -51,7 +51,7 @@ func pushCmd() *cobra.Command {
 		RunE:  cmdFunc,
 	}
 
-	cmd.Flags().BoolVar(&connectionFlags.insecure, "insecure", false, "use insecure connection")
+	connectionFlags.register(cmd)
 
 	cmd.Flags().BoolVar(&flags.resolveMoves, "resolve-moves", false, "resolves added files against checksums of existing remote files")
 	cmd.Flags().BoolVar(&flags.enableDuplicateIncrease, "allow-duplicate-increase", false, "allow to increase duplication of existing files")
