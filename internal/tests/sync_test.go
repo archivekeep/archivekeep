@@ -19,10 +19,10 @@ func TestBasicSync(t *testing.T) {
 	createArchiveFile(t, archiveDirB, "file_c", "B")
 	createArchiveFile(t, archiveDirB, "file_d", "B")
 
-	out := runCmd(t, archiveDirA, nil, "add", "file_a", "file_b")
+	out := runCmd(t, archiveDirA, nil, "add", "--do-not-print-preparation-summary", "file_a", "file_b")
 	assert.Equal(t, out, "added: file_a\nadded: file_b\n")
 
-	out = runCmd(t, archiveDirB, nil, "add", "file_c", "file_d")
+	out = runCmd(t, archiveDirB, nil, "add", "--do-not-print-preparation-summary", "file_c", "file_d")
 	assert.Equal(t, out, "added: file_c\nadded: file_d\n")
 
 	out = runCmd(t, archiveDirA, nil, "compare", archiveDirB)

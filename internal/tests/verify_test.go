@@ -19,7 +19,7 @@ func TestVerify(t *testing.T) {
 	createArchiveFile(t, archiveDir, "file_c", "A")
 	createArchiveFile(t, archiveDir, "file_d", "A")
 
-	out := runCmd(t, archiveDir, nil, "add", "file_*")
+	out := runCmd(t, archiveDir, nil, "add", "--do-not-print-preparation-summary", "file_*")
 	assert.Equal(t, lines(
 		"added: file_a",
 		"added: file_b",

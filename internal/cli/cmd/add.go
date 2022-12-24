@@ -11,7 +11,9 @@ import (
 
 func addCmd() *cobra.Command {
 	var flags struct {
-		resolveMoves bool
+		disableMovesCheck bool
+
+		doNotPrintPreparationSummary bool
 	}
 
 	cmdFunc := func(cmd *cobra.Command, args []string) error {
@@ -23,10 +25,27 @@ func addCmd() *cobra.Command {
 		operation := operations.Add{
 			FileNames: args,
 
-			ResolveMoves: flags.resolveMoves,
+			DisableMovesCheck: flags.disableMovesCheck,
 		}
 
-		return operation.Execute(cmd, currentArchive)
+		preparedOperation, err := operation.Prepare(currentArchive)
+		if err != nil {
+			return fmt.Errorf("prepare adding files: %w", err)
+		}
+
+		if !flags.doNotPrintPreparationSummary {
+			err := preparedOperation.PrintSummary(cmd, currentArchive)
+			if err != nil {
+				return fmt.Errorf("print summary of prepared operation before execution")
+			}
+		}
+
+		err = preparedOperation.Execute(cmd, currentArchive)
+		if err != nil {
+			return fmt.Errorf("execute operation: %w", err)
+		}
+
+		return nil
 	}
 
 	cmd := &cobra.Command{
@@ -35,7 +54,8 @@ func addCmd() *cobra.Command {
 		RunE:  cmdFunc,
 	}
 
-	cmd.Flags().BoolVar(&flags.resolveMoves, "resolve-moves", false, "resolves added files against checksums of missing files")
+	cmd.Flags().BoolVar(&flags.disableMovesCheck, "disable-moves-check", false, "do not check for moves or missing files")
+	cmd.Flags().BoolVar(&flags.doNotPrintPreparationSummary, "do-not-print-preparation-summary", false, "do not print pre-execution summary")
 
 	return cmd
 }

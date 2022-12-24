@@ -13,7 +13,7 @@ func TestBasicFlow(t *testing.T) {
 
 	createArchiveFile(t, archiveDir, "file_a", "A")
 
-	out := runCmd(t, archiveDir, nil, "add", "file_a")
+	out := runCmd(t, archiveDir, nil, "add", "--do-not-print-preparation-summary", "file_a")
 	assert.Equal(t, out, "added: file_a\n")
 
 	out = runCmd(t, archiveDir, nil, "status")
@@ -24,7 +24,7 @@ func TestBasicFlow(t *testing.T) {
 	out = runCmd(t, archiveDir, nil, "status")
 	assert.Equal(t, out, "\nFiles not added to the archive:\n\tfile_b\n\nTotal files in archive: 1\n")
 
-	out = runCmd(t, archiveDir, nil, "add", ".")
+	out = runCmd(t, archiveDir, nil, "add", "--do-not-print-preparation-summary", ".")
 	assert.Equal(t, out, "added: file_b\n")
 
 	out = runCmd(t, archiveDir, nil, "status")

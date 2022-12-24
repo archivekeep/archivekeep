@@ -10,6 +10,7 @@ import (
 
 	"gotest.tools/v3/assert"
 
+	filesarchive "github.com/archivekeep/archivekeep/archive/local/driver/plain"
 	"github.com/archivekeep/archivekeep/internal/cli/cmd"
 )
 
@@ -29,6 +30,26 @@ func createArchiveFiles(t *testing.T, archiveDir string, contents map[string]str
 		assert.NilError(t, err)
 
 		err = os.WriteFile(paths.Join(archiveDir, filename), []byte(fileContent), 0755)
+		assert.NilError(t, err)
+	}
+}
+
+func createMissingFiles(t *testing.T, archiveDir string, a *filesarchive.Archive, contents map[string]string) {
+	t.Helper()
+
+	if contents == nil {
+		return
+	}
+
+	createArchiveFiles(t, archiveDir, contents)
+
+	for filename := range contents {
+		err := a.Add(filename)
+		assert.NilError(t, err)
+	}
+
+	for filename := range contents {
+		err := os.Remove(paths.Join(archiveDir, filename))
 		assert.NilError(t, err)
 	}
 }
