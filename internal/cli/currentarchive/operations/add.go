@@ -82,9 +82,9 @@ func (add Add) Prepare(
 				return AddPrepareResult{}, fmt.Errorf("compute checksum of %s: %w", cwdRelativePath, err)
 			}
 
-			if missing, found := missingFilesByChecksum[checksum]; found {
+			if missingFilePath, found := missingFilesByChecksum[checksum]; found {
 				result.Moves = append(result.Moves, Move{
-					From: missing,
+					From: missingFilePath,
 					To:   inArchiveFullPath,
 				})
 				delete(missingFilesByChecksum, checksum)
@@ -100,6 +100,14 @@ func (add Add) Prepare(
 		sort.Slice(result.Moves, func(i, j int) bool {
 			return strings.Compare(result.Moves[i].From, result.Moves[j].From) < 0
 		})
+	} else {
+		for _, inArchiveFullPath := range filesMatchingPattern {
+			if currentArchive.Contains(inArchiveFullPath) {
+				continue
+			}
+
+			result.NewFiles = append(result.NewFiles, inArchiveFullPath)
+		}
 	}
 
 	sort.Strings(result.MissingFiles)

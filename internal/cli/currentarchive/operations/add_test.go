@@ -10,25 +10,7 @@ import (
 )
 
 func TestAdd_Prepare(t *testing.T) {
-	a := testarchive.CreateTestingArchive01(t)
-
-	a.CreateUnindexedArchiveFiles(map[string]string{
-		"new_c":         "file_c",
-		"new-dir/d":     "file_d",
-		"new-dir/new-e": "file_e",
-		"dir/c":         "dir file c",
-		"dir/f":         "dir file f",
-		"other/d":       "other file d",
-		"other/g":       "other file g",
-	})
-
-	a.CreateMissingFiles(map[string]string{
-		"old-dir/c":     "file_c",
-		"old-dir/d":     "file_d",
-		"old-dir/e":     "file_e",
-		"deleted-dir/x": "deleted file X",
-		"deleted-dir/y": "deleted file Y",
-	})
+	a := createTestArchiveForAdd(t)
 
 	preparedAdd, err := operations.Add{
 		SearchGlobs:       []string{"."},
@@ -55,4 +37,49 @@ func TestAdd_Prepare(t *testing.T) {
 			"deleted-dir/y",
 		},
 	}, preparedAdd)
+}
+
+func TestAdd_Prepare_WithDisabledMovesCheck(t *testing.T) {
+	a := createTestArchiveForAdd(t)
+
+	preparedAdd, err := operations.Add{
+		SearchGlobs:       []string{"."},
+		DisableMovesCheck: true,
+	}.Prepare(a, "")
+
+	assert.NilError(t, err)
+	assert.DeepEqual(t, operations.AddPrepareResult{
+		NewFiles: []string{
+			"dir/c",
+			"dir/f",
+			"new-dir/d",
+			"new-dir/new-e",
+			"new_c",
+			"other/d",
+			"other/g",
+		},
+	}, preparedAdd)
+}
+
+func createTestArchiveForAdd(t *testing.T) *testarchive.TestArchive {
+	a := testarchive.CreateTestingArchive01(t)
+
+	a.CreateUnindexedArchiveFiles(map[string]string{
+		"new_c":         "file_c",
+		"new-dir/d":     "file_d",
+		"new-dir/new-e": "file_e",
+		"dir/c":         "dir file c",
+		"dir/f":         "dir file f",
+		"other/d":       "other file d",
+		"other/g":       "other file g",
+	})
+
+	a.CreateMissingFiles(map[string]string{
+		"old-dir/c":     "file_c",
+		"old-dir/d":     "file_d",
+		"old-dir/e":     "file_e",
+		"deleted-dir/x": "deleted file X",
+		"deleted-dir/y": "deleted file Y",
+	})
+	return a
 }
