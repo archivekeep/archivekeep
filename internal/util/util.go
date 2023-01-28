@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"io/fs"
 	"os"
-	"path/filepath"
 	"sort"
 	"strings"
 )
@@ -32,22 +31,22 @@ func IsPathIgnored(path string) bool {
 	return false
 }
 
-func FindFilesByGlobs(globs ...string) []string {
-	return FindFilesByGlobsIgnore(IsPathIgnored, globs...)
+func FindFilesByGlobs(fs fs.FS, globs ...string) []string {
+	return FindFilesByGlobsIgnore(fs, IsPathIgnored, globs...)
 }
 
-func FindFilesByGlobsIgnore(ignoreFunc func(path string) bool, globs ...string) []string {
+func FindFilesByGlobsIgnore(baseFS fs.FS, ignoreFunc func(path string) bool, globs ...string) []string {
 	matchedFiles := map[string]struct{}{}
 
 	for _, pattern := range globs {
-		foundFiles, err := filepath.Glob(pattern)
+		foundFiles, err := fs.Glob(baseFS, pattern)
 		if err != nil {
 			fmt.Printf("ERROR: file: %v", err)
 			continue
 		}
 
 		for _, foundFile := range foundFiles {
-			err := filepath.WalkDir(foundFile, func(path string, d fs.DirEntry, err error) error {
+			err := fs.WalkDir(baseFS, foundFile, func(path string, d fs.DirEntry, err error) error {
 				if err != nil {
 					fmt.Printf("ERROR: file: %v", err)
 					return nil

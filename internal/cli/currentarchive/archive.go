@@ -103,30 +103,9 @@ func (a *CurrentArchive) RemotesStore() *keyringRemotesStore {
 	return &keyringRemotesStore{Keyring: a.keyring}
 }
 
-func (a *CurrentArchive) FindFilesFromWD(searchGlobs []string) []string {
-	var absGlobs []string
-	for _, searchGlob := range searchGlobs {
-		absGlobs = append(absGlobs, filepath.Join(a.location, a.WorkingSubdirectory, searchGlob))
-	}
-
-	matchedFilesAbs := util.FindFilesByGlobsIgnore(
-		func(path string) bool {
-			relativePathFromArchive := strings.TrimPrefix(path, a.location+"/")
-			return util.IsPathIgnored(relativePathFromArchive)
-		},
-		absGlobs...,
-	)
-
-	var matchedFiles []string
-	for _, absFile := range matchedFilesAbs {
-		matchedFiles = append(matchedFiles, strings.TrimPrefix(absFile, a.location+"/"))
-	}
-
-	return matchedFiles
-}
-
 func (a *CurrentArchive) FindFiles() []string {
 	matchedFilesAbs := util.FindFilesByGlobsIgnore(
+		afero.NewIOFS(afero.NewOsFs()),
 		func(path string) bool {
 			relativePathFromArchive := strings.TrimPrefix(path, a.location+"/")
 			return util.IsPathIgnored(relativePathFromArchive)
@@ -148,4 +127,14 @@ func (a *CurrentArchive) Keyring() *josesecrets.Keyring {
 
 func (a *CurrentArchive) Location() string {
 	return a.location
+}
+
+func (a *CurrentArchive) PrependWorkingDirectoryToPaths(relativePaths []string) []string {
+	var inArchivePaths []string
+
+	for _, relativePath := range relativePaths {
+		inArchivePaths = append(inArchivePaths, filepath.Join(a.WorkingSubdirectory, relativePath))
+	}
+
+	return inArchivePaths
 }

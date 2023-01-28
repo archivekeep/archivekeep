@@ -1,6 +1,7 @@
 package operations
 
 import (
+	"github.com/spf13/afero"
 	"github.com/spf13/cobra"
 
 	"github.com/archivekeep/archivekeep/internal/cli/currentarchive"
@@ -15,7 +16,10 @@ func (remove Remove) Execute(
 	cmd *cobra.Command, // TODO: get rid of cmd to allow GUI clients
 	currentArchive currentarchive.CurrentArchive,
 ) error {
-	filesToRemove := util.FindFilesByGlobs(remove.FileNames...)
+	filesToRemove := util.FindFilesByGlobs(
+		afero.NewIOFS(afero.NewOsFs()),
+		currentArchive.PrependWorkingDirectoryToPaths(remove.FileNames)...,
+	)
 
 	for _, file := range filesToRemove {
 		if !currentArchive.Contains(file) {

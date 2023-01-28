@@ -10,7 +10,8 @@ import (
 )
 
 func TestStatusFromSubDirectory(t *testing.T) {
-	_, archiveDir := testarchive.CreateTestingArchive01(t)
+	a := testarchive.CreateTestingArchive01(t)
+	archiveDir := a.Dir
 
 	// test initial archive
 	{
@@ -26,7 +27,7 @@ func TestStatusFromSubDirectory(t *testing.T) {
 		assert.Equal(t, out, "Total files in archive: 6\n")
 	}
 
-	createArchiveFiles(t, archiveDir, map[string]string{
+	a.CreateUnindexedArchiveFiles(map[string]string{
 		"c":       "file_c",
 		"d":       "file_d",
 		"e":       "file_e",

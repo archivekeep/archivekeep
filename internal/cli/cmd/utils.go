@@ -58,9 +58,5 @@ func openFileSystemArchive(cmd *cobra.Command, location string) (archive.ReadWri
 }
 
 func resolve(location string) (afero.Fs, string, error) {
-	if strings.HasPrefix(location, "ssh://") {
-		return resolveSSH(location)
-	}
-
 	return afero.NewOsFs(), location, nil
 }

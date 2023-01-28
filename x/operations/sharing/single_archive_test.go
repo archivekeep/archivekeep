@@ -16,7 +16,7 @@ import (
 )
 
 func TestArchiveManager_Init(t *testing.T) {
-	_, archiveLocation := testarchive.CreateTestingArchive01(t)
+	archiveLocation := testarchive.CreateTestingArchive01(t).Dir
 
 	ca, err := currentarchive.OpenLocation(archiveLocation)
 	assert.NilError(t, err)
@@ -42,7 +42,7 @@ func TestArchiveManager_Init(t *testing.T) {
 }
 
 func Test(t *testing.T) {
-	_, archiveLocation := testarchive.CreateTestingArchive01(t)
+	archiveLocation := testarchive.CreateTestingArchive01(t).Dir
 
 	archiveInstance, err := currentarchive.OpenLocation(archiveLocation)
 	assert.NilError(t, err)

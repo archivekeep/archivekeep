@@ -62,7 +62,6 @@ func getConnectionConfiguration(
 	}
 	if storedConnection != nil {
 		connection = *storedConnection
-		log.Printf("connection: %v\n", storedConnection)
 	} else {
 		log.Printf("WARNING: remote connection %s not registered, use remote login or remote connect", remoteName)
 

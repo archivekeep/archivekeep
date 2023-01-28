@@ -81,6 +81,15 @@ func (archive *Archive) Contains(path string) bool {
 	return false
 }
 
+func (archive *Archive) VerifyFileExists(path string) (bool, error) {
+	exists, err := archive.rootFs.Exists(path)
+	if err != nil {
+		return false, fmt.Errorf("check if file exists: %w", err)
+	}
+
+	return exists, nil
+}
+
 func (archive *Archive) VerifyFileIntegrity(path string) error {
 	exists, err := archive.rootFs.Exists(path)
 	if err != nil {
@@ -90,7 +99,7 @@ func (archive *Archive) VerifyFileIntegrity(path string) error {
 		return fmt.Errorf("file was deleted")
 	}
 
-	sum, err := util.ComputeChecksum(archive.rootFs, path)
+	sum, err := archive.ComputeFileChecksum(path)
 	if err != nil {
 		return fmt.Errorf("compute checksum: %w", err)
 	}
@@ -105,6 +114,10 @@ func (archive *Archive) VerifyFileIntegrity(path string) error {
 	}
 
 	return nil
+}
+
+func (archive *Archive) ComputeFileChecksum(path string) (string, error) {
+	return util.ComputeChecksum(archive.rootFs, path)
 }
 
 func (archive *Archive) StoredFiles() ([]string, error) {
@@ -318,6 +331,23 @@ func (archive *Archive) DeleteFile(filename string) error {
 	}
 
 	return nil
+}
+
+func (archive *Archive) FindAllFiles(searchGlobs ...string) []string {
+	matchedFilesAbs := util.FindFilesByGlobsIgnore(
+		afero.NewIOFS(archive.rootFs),
+		func(path string) bool {
+			return util.IsPathIgnored(path)
+		},
+		searchGlobs...,
+	)
+
+	var matchedFiles []string
+	for _, absFile := range matchedFilesAbs {
+		matchedFiles = append(matchedFiles, absFile)
+	}
+
+	return matchedFiles
 }
 
 func (archive *Archive) checksumPath(path string) string {

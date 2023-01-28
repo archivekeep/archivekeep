@@ -23,12 +23,12 @@ func addCmd() *cobra.Command {
 		}
 
 		operation := operations.Add{
-			FileNames: args,
+			SearchGlobs: currentArchive.PrependWorkingDirectoryToPaths(args),
 
 			DisableMovesCheck: flags.disableMovesCheck,
 		}
 
-		preparedOperation, err := operation.Prepare(currentArchive)
+		preparedOperation, err := operation.Prepare(currentArchive, currentArchive.WorkingSubdirectory)
 		if err != nil {
 			return fmt.Errorf("prepare adding files: %w", err)
 		}

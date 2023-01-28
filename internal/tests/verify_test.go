@@ -12,7 +12,7 @@ import (
 )
 
 func TestVerify(t *testing.T) {
-	_, archiveDir := testarchive.Create(t)
+	archiveDir := testarchive.Create(t).Dir
 
 	createArchiveFile(t, archiveDir, "file_a", "A")
 	createArchiveFile(t, archiveDir, "file_b", "A")

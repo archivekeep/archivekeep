@@ -2,12 +2,10 @@ package operations
 
 import (
 	"fmt"
-	"os"
 	"path/filepath"
 	"sort"
 	"strings"
 
-	"github.com/spf13/afero"
 	"github.com/spf13/cobra"
 
 	"github.com/archivekeep/archivekeep/internal/cli/currentarchive"
@@ -15,7 +13,7 @@ import (
 )
 
 type Add struct {
-	FileNames []string
+	SearchGlobs []string
 
 	DisableMovesCheck bool
 }
@@ -33,16 +31,14 @@ type AddPrepareResult struct {
 }
 
 func (add Add) Prepare(
-	currentArchive currentarchive.CurrentArchive,
+	currentArchive WorkingArchive,
+	workingSubdirectory string,
 ) (AddPrepareResult, error) {
 	var result AddPrepareResult
 
-	filesMatchingPattern := currentArchive.FindFilesFromWD(add.FileNames)
+	filesMatchingPattern := currentArchive.FindAllFiles(add.SearchGlobs...)
 
 	if !add.DisableMovesCheck {
-		existingFiles := util.FindFilesByGlobs(".")
-		sort.Strings(existingFiles)
-
 		storedFiles, err := currentArchive.StoredFiles()
 		if err != nil {
 			return AddPrepareResult{}, fmt.Errorf("retrieve current archive stored files: %w", err)
@@ -51,15 +47,20 @@ func (add Add) Prepare(
 
 		missingFilesByChecksum := map[string]string{}
 		for _, inArchiveFullPath := range storedFiles {
-			cwdRelativePath, err := filepath.Rel(currentArchive.WorkingSubdirectory, inArchiveFullPath)
+			cwdRelativePath, err := filepath.Rel(workingSubdirectory, inArchiveFullPath)
 			if err != nil {
 				return AddPrepareResult{}, fmt.Errorf("reconstruct archive relative path to working directory for %s: %w", cwdRelativePath, err)
 			}
 
-			if !util.FileExists(cwdRelativePath) {
+			exists, err := currentArchive.VerifyFileExists(inArchiveFullPath)
+			if err != nil {
+				return AddPrepareResult{}, fmt.Errorf("check if expected file exists: %w", err)
+			}
+
+			if !exists {
 				checksum, err := currentArchive.FileChecksum(inArchiveFullPath)
 				if err != nil {
-					return AddPrepareResult{}, fmt.Errorf("get checksum of missing file %s: %w", cwdRelativePath, err)
+					return AddPrepareResult{}, fmt.Errorf("get expected checksum of missing file %s: %w", cwdRelativePath, err)
 				}
 
 				missingFilesByChecksum[checksum] = inArchiveFullPath
@@ -67,15 +68,16 @@ func (add Add) Prepare(
 		}
 
 		for _, inArchiveFullPath := range filesMatchingPattern {
-			cwdRelativePath, err := filepath.Rel(currentArchive.WorkingSubdirectory, inArchiveFullPath)
+			cwdRelativePath, err := filepath.Rel(workingSubdirectory, inArchiveFullPath)
 			if err != nil {
 				return AddPrepareResult{}, fmt.Errorf("reconstruct archive relative path to working directory for %s: %w", inArchiveFullPath, err)
 			}
 
-			currentDir, _ := os.Getwd()
-			fmt.Printf("cwd: %s\n", currentDir)
+			if currentArchive.Contains(inArchiveFullPath) {
+				continue
+			}
 
-			checksum, err := util.ComputeChecksum(afero.NewOsFs(), cwdRelativePath)
+			checksum, err := currentArchive.ComputeFileChecksum(inArchiveFullPath)
 			if err != nil {
 				return AddPrepareResult{}, fmt.Errorf("compute checksum of %s: %w", cwdRelativePath, err)
 			}
@@ -87,9 +89,7 @@ func (add Add) Prepare(
 				})
 				delete(missingFilesByChecksum, checksum)
 			} else {
-				if !currentArchive.Contains(inArchiveFullPath) {
-					result.NewFiles = append(result.NewFiles, inArchiveFullPath)
-				}
+				result.NewFiles = append(result.NewFiles, inArchiveFullPath)
 			}
 		}
 
@@ -102,6 +102,9 @@ func (add Add) Prepare(
 		})
 	}
 
+	sort.Strings(result.MissingFiles)
+	sort.Strings(result.NewFiles)
+
 	return result, nil
 }
 
@@ -111,7 +114,6 @@ func (result AddPrepareResult) PrintSummary(
 ) error {
 	if len(result.MissingFiles) > 0 {
 		cmd.Printf("Missing indexed files not matched by add:\n")
-		sort.Strings(result.MissingFiles)
 
 		for _, file := range result.MissingFiles {
 			relToWD, err := filepath.Rel(currentArchive.WorkingSubdirectory, file)
@@ -125,7 +127,6 @@ func (result AddPrepareResult) PrintSummary(
 
 	if len(result.NewFiles) > 0 {
 		cmd.Printf("New files to be indexed:\n")
-		sort.Strings(result.NewFiles)
 		for _, file := range result.NewFiles {
 			relToWD, err := filepath.Rel(currentArchive.WorkingSubdirectory, file)
 			if err != nil {

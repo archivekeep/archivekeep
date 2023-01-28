@@ -21,7 +21,7 @@ var statusCmd = &cobra.Command{
 
 		var matchedFiles []string
 		if len(args) > 0 {
-			matchedFiles = currentArchive.FindFilesFromWD(args)
+			matchedFiles = currentArchive.FindAllFiles(currentArchive.PrependWorkingDirectoryToPaths(args)...)
 		} else {
 			matchedFiles = currentArchive.FindFiles()
 		}

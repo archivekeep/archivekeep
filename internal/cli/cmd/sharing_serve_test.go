@@ -123,7 +123,7 @@ func TestWriteableServe(t *testing.T) {
 }
 
 func createTestArchive(t *testing.T) (*sharing.SingleArchive, string) {
-	_, loc := testarchive.CreateTestingArchive01(t)
+	loc := testarchive.CreateTestingArchive01(t).Dir
 
 	ca, err := currentarchive.OpenLocation(loc)
 	assert.NilError(t, err)

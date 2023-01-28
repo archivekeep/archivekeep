@@ -9,7 +9,7 @@ import (
 )
 
 func TestBasicFlow(t *testing.T) {
-	_, archiveDir := testarchive.Create(t)
+	archiveDir := testarchive.Create(t).Dir
 
 	createArchiveFile(t, archiveDir, "file_a", "A")
 

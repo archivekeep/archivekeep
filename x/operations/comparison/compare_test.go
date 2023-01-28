@@ -10,7 +10,7 @@ import (
 )
 
 func TestExecute(t *testing.T) {
-	latestVersion, _ := testarchive.CreateWithContents(t, map[string]string{
+	latestVersion := testarchive.CreateWithContents(t, map[string]string{
 		"file to be extra in source":    "file to be extra in source",
 		"file to duplicate":             "file to duplicate: old",
 		"file to duplicate 02":          "file to duplicate: old",
@@ -22,7 +22,7 @@ func TestExecute(t *testing.T) {
 		"moved/file to move":            "file to move: old",
 		"old/file to modify backup":     "file to modify with backup: old",
 	})
-	outdatedArchive, _ := testarchive.CreateWithContents(t, map[string]string{
+	outdatedArchive := testarchive.CreateWithContents(t, map[string]string{
 		"file to be extra in target": "file to be extra in target",
 		"file to duplicate":          "file to duplicate: old",
 		"file to move":               "file to move: old",

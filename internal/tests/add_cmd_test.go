@@ -162,14 +162,14 @@ func Test(t *testing.T) {
 
 	for idx, test := range tests {
 		t.Run(fmt.Sprintf("%d", idx), func(t *testing.T) {
-			a, archiveDir := testarchive.CreateWithContents(t, addedContents)
-			createArchiveFiles(t, archiveDir, notAddedContents)
-			createMissingFiles(t, archiveDir, a, test.missingFiles)
+			a := testarchive.CreateWithContents(t, addedContents)
+			a.CreateUnindexedArchiveFiles(notAddedContents)
+			a.CreateMissingFiles(test.missingFiles)
 
-			out := runCmd(t, paths.Join(archiveDir, test.subdir), strings.NewReader(test.stdin), test.args...)
+			out := runCmd(t, paths.Join(a.Dir, test.subdir), strings.NewReader(test.stdin), test.args...)
 			assert.Equal(t, out, test.expectedOut)
 
-			assertarchive.IndexContains(t, archiveDir, test.expectedIndex)
+			assertarchive.IndexContains(t, a.Dir, test.expectedIndex)
 		})
 	}
 }

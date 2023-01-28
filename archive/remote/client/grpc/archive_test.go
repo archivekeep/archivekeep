@@ -26,7 +26,7 @@ func TestArchiveContract(t *testing.T) {
 func createImplementationTester() *archivetest.ImplementationTester {
 	return &archivetest.ImplementationTester{
 		New: func(t *testing.T) *archivetest.TestedArchive {
-			a, _ := testarchive.Create(t)
+			a := testarchive.Create(t)
 
 			serverCertificates, err := servertls.GenerateCertificates()
 			assert.NilError(t, err)
