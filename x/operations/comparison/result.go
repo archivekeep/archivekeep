@@ -3,7 +3,10 @@ package comparison
 import (
 	"strings"
 
+	"github.com/fatih/color"
 	"github.com/kr/pretty"
+
+	"github.com/archivekeep/archivekeep/internal/printutil"
 )
 
 type ExtraGroup struct {
@@ -55,10 +58,26 @@ func (compareResult Result) PrintUnmatchedOtherExtras(out pretty.Printfer, _ str
 }
 
 func (compareResult Result) PrintRelocations(out pretty.Printfer) {
+	red := color.New(color.FgRed).SprintFunc()
+
+	colorFunc := func(s string) string {
+		return red(s)
+	}
+
 	if len(compareResult.Relocations) > 0 {
 		out.Printf("\nFiles to be moved:\n")
 		for _, move := range compareResult.Relocations {
-			out.Printf("\t%s -> %s\n", filenamesPrint(move.OriginalFileNames), filenamesPrint(move.NewFileNames))
+			if len(move.OriginalFileNames) == 1 && len(move.NewFileNames) == 1 {
+				out.Printf(
+					"\t%s\n",
+					printutil.PathDiff(
+						move.OriginalFileNames[0],
+						move.NewFileNames[0],
+						colorFunc,
+					))
+			} else {
+				out.Printf("\t%s -> %s\n", filenamesPrint(move.OriginalFileNames), filenamesPrint(move.NewFileNames))
+			}
 		}
 	}
 }

@@ -4,6 +4,7 @@ go 1.19
 
 require (
 	github.com/allegro/bigcache/v3 v3.0.2
+	github.com/fatih/color v1.14.1
 	github.com/go-chi/chi/v5 v5.0.7
 	github.com/golang/protobuf v1.5.0
 	github.com/google/go-cmp v0.5.6
@@ -30,10 +31,12 @@ require (
 	github.com/keybase/go-codec v0.0.0-20180928230036-164397562123 // indirect
 	github.com/kr/fs v0.1.0 // indirect
 	github.com/kr/text v0.1.0 // indirect
+	github.com/mattn/go-colorable v0.1.13 // indirect
+	github.com/mattn/go-isatty v0.0.17 // indirect
 	github.com/pkg/errors v0.8.1 // indirect
 	github.com/spf13/pflag v1.0.5 // indirect
 	golang.org/x/net v0.0.0-20210226172049-e18ecbb05110 // indirect
-	golang.org/x/sys v0.0.0-20210615035016-665e8c7367d1 // indirect
+	golang.org/x/sys v0.3.0 // indirect
 	golang.org/x/text v0.3.6 // indirect
 	google.golang.org/genproto v0.0.0-20200526211855-cb27e3aa2013 // indirect
 )
