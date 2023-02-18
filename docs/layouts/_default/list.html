@@ -1,0 +1,6 @@
+{{ define "main" }}
+<article class="markdown">
+    {{- if not .Params.NoHeading }}{{ with .Title }}<h1>{{.}}</h1>{{ end }}{{ end }}
+    {{- .Content -}}
+</article>
+{{ end }}

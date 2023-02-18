@@ -1,0 +1,7 @@
+.hugo_build.lock
+
+# generated
+/resources/_gen
+
+# build outputs
+/public

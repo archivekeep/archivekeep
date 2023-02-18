@@ -63,7 +63,7 @@ As a package:
 
 ## Usage
 
-See [docs/features.md](docs/features.md) for overview. To be documented later.
+See [docs/features.md](docs/content/about/features/index.md) for overview. To be documented later.
 
 ## Warranty
 

@@ -1,0 +1,26 @@
+baseURL = "http://localhost"
+title = "archivekeep"
+theme = "hugo-book"
+
+disableKinds = ['taxonomy', 'taxonomyTerm']
+
+[markup.goldmark.renderer]
+unsafe = true
+
+[markup.highlight]
+guessSyntax = true
+style = 'tango'
+
+[params]
+BookTheme = 'auto'
+BookSearch = false
+BookSection = '*'
+BookRepo = 'https://github.com/archivekeep/archivekeep'
+
+
+[menu]
+
+[[menu.after]]
+name = "GitHub"
+url = "https://github.com/archivekeep/archivekeep"
+weight = 10
