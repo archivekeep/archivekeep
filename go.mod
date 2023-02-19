@@ -26,15 +26,18 @@ require (
 )
 
 require (
+	github.com/cpuguy83/go-md2man/v2 v2.0.1 // indirect
 	github.com/inconshreveable/mousetrap v1.0.0 // indirect
 	github.com/keybase/go-codec v0.0.0-20180928230036-164397562123 // indirect
 	github.com/kr/text v0.1.0 // indirect
 	github.com/mattn/go-colorable v0.1.13 // indirect
 	github.com/mattn/go-isatty v0.0.17 // indirect
 	github.com/pkg/errors v0.9.1 // indirect
+	github.com/russross/blackfriday/v2 v2.1.0 // indirect
 	github.com/spf13/pflag v1.0.5 // indirect
 	golang.org/x/net v0.0.0-20210226172049-e18ecbb05110 // indirect
 	golang.org/x/sys v0.3.0 // indirect
 	golang.org/x/text v0.3.6 // indirect
 	google.golang.org/genproto v0.0.0-20210226172003-ab064af71705 // indirect
+	gopkg.in/yaml.v2 v2.4.0 // indirect
 )

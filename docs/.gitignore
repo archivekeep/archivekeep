@@ -1,6 +1,7 @@
 .hugo_build.lock
 
 # generated
+/content/reference/cli
 /resources/_gen
 
 # build outputs

@@ -35,6 +35,15 @@ jobs:
         id: pages
         uses: actions/configure-pages@v2
 
+      - name: Set up Go
+        uses: actions/setup-go@v3
+        with:
+          go-version: 1.19
+
+      - name: Build reference pages
+        run: |
+          ./bin/generate_cli_markdown_pages.sh ]
+
       - name: Build with Hugo
         env:
           # For maximum backward compatibility with Hugo modules
@@ -43,6 +52,7 @@ jobs:
         run: |
           cd docs
           hugo --baseURL "${{ steps.pages.outputs.base_url }}/"
+
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v1
         with:

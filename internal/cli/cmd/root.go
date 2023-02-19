@@ -16,6 +16,8 @@ func New() *cobra.Command {
 
 		SilenceErrors: true,
 		SilenceUsage:  true,
+
+		DisableAutoGenTag: true,
 	}
 
 	// local archive manipulation
@@ -31,6 +33,7 @@ func New() *cobra.Command {
 	rootCmd.AddCommand(pushCmd())
 
 	// util
+	rootCmd.AddCommand(genMarkdownCmd())
 	rootCmd.AddCommand(versionCmd)
 
 	// remotes management
