@@ -1,23 +1,39 @@
 # Archive Keep
 
-_Keep your files archived on multiple places, in a reliable and simple way._
+> Keep your files archived on multiple places, in a reliable and simple way.
 
-## About
 
-The primary requirements and priorities of ArchiveKeep are to make process of **reliable archivation** to be simple and easy:
+<div class="features-section">
+<div>
+    <h3>Plain files</h3>
+    <div>Access your files directly without any external tool. The archivekeep only facilitates archivation process.</div>
+</div>
+<div>
+    <h3>Offline storages</h3>
+    <div>Replicate your archive contents asynchronously to offline storages such as external HDDs.</div>
+</div>
+<div>
+    <h3>Safe replication</h3>
+    <div>The replication process prevents propagation of redactions, deletions, corrupted or destructive changes.</div>
+</div>
+</div>
 
-1. **safe replication** to other storages:
-    - prevent propagation of redactions and deletion of files
-    - prevent propagation of corruption and destructive changes of original information,
-2. **offline storages** - external HDDs - have first class support,
-3. **plain files** for direct access, maximum compatibility and convenience,
-4. **optional server** with asynchronous online synchronisation.
+Other features:
 
-See [about](about) for more.
+- **verifiable integrity** of stored files using digital checksums,
+- **optional server** with asynchronous online communication.
+
+See [about](about) for more information and details.
 
 ## Install
 
 See [install](install) docs.
+
+## Pricing
+
+This is an open-source software, and it is free and will be free, to use the tool and self-host a server.
+
+The source code is available on [github](https://github.com/archivekeep/archivekeep).
 
 ## License
 

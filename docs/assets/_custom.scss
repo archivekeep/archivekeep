@@ -21,3 +21,48 @@ h3,
   font-size: 1.125rem;
   font-weight: bold;
 }
+
+.home-page-container {
+  max-width: 62rem;
+}
+
+.home-page {
+  .markdown {
+    h1 {
+      margin: 5rem 0 2rem;
+      font-size: 2.5rem;
+      text-align: center;
+    }
+
+    h1 + blockquote {
+      margin-bottom: 3rem;
+      text-align: center;
+      border: none;
+      font-style: italic;
+      font-size: 1.25rem;
+    }
+
+    .features-section {
+      display: flex;
+      flex-direction: row;
+      flex-wrap: wrap;
+      justify-content: center;
+
+      margin: 0 -1rem 0;
+      padding: 0;
+
+      > div {
+        flex: 33.33% 0 0;
+        padding: 0.75rem 1rem;
+
+        > :first-child {
+          margin-top: 0;
+        }
+
+        @media screen and (max-width: $mobile-breakpoint) {
+          flex: 100% 0 0;
+        }
+      }
+    }
+  }
+}
