@@ -19,12 +19,15 @@ func PathDiff(
 			dirDiffPart = oldDir
 		} else {
 			dirLCP := lcp(oldDir, newDir)
-			dirLCS := lcf(oldDir, newDir)
+			remainingOldDir := strings.TrimPrefix(oldDir, dirLCP)
+			remainingNewDir := strings.TrimPrefix(newDir, dirLCP)
+
+			dirLCS := lcf(remainingOldDir, remainingNewDir)
 
 			dirDiffMiddlePart := fmt.Sprintf(
 				"{%s -> %s}",
-				strings.TrimPrefix(strings.TrimSuffix(oldDir, dirLCS), dirLCP),
-				strings.TrimPrefix(strings.TrimSuffix(newDir, dirLCS), dirLCP),
+				strings.TrimSuffix(remainingOldDir, dirLCS),
+				strings.TrimSuffix(remainingNewDir, dirLCS),
 			)
 
 			dirDiffPart = fmt.Sprintf(
@@ -37,14 +40,14 @@ func PathDiff(
 	}
 
 	if oldName == newName {
-		return fmt.Sprintf("%s/%s", dirDiffPart, oldName)
+		return fmt.Sprintf("%s%s", dirDiffPart, oldName)
 	} else {
 		if dirDiffPart == "" {
 			return colorFunc(fmt.Sprintf("%s -> %s", oldName, newName))
 		} else {
 			nameDiffPart := fmt.Sprintf("{%s -> %s}", oldName, newName)
 
-			return fmt.Sprintf("%s/%s", dirDiffPart, colorFunc(nameDiffPart))
+			return fmt.Sprintf("%s%s", dirDiffPart, colorFunc(nameDiffPart))
 		}
 	}
 
@@ -56,7 +59,7 @@ func splitDirName(path string) (string, string) {
 	if idx == -1 {
 		return "", path
 	} else {
-		return path[:idx], path[idx+1:]
+		return path[:idx+1], path[idx+1:]
 	}
 }
 

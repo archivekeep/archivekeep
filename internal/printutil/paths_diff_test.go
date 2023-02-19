@@ -22,6 +22,8 @@ func TestPathDiff(t *testing.T) {
 		{"same-base/old-dir/a", "same-base/new-dir/b", "same-base/{old -> new}-dir/{a -> b}"},
 		{"same-base/old-dir/same-sub/a", "same-base/new-dir/same-sub/a", "same-base/{old -> new}-dir/same-sub/a"},
 		{"same-base/old-dir/same-sub/a", "same-base/new-dir/same-sub/b", "same-base/{old -> new}-dir/same-sub/{a -> b}"},
+		{"same-base/sub-dir/a", "same-base/moved-deeper/sub-dir/a", "same-base/{ -> moved-deeper/}sub-dir/a"},
+		{"a/b/c/d/file", "a/b/c/d/c/d/file", "a/b/c/d/{ -> c/d/}file"},
 	}
 	for ti, tt := range tests {
 		t.Run(fmt.Sprintf("%d", ti), func(t *testing.T) {
