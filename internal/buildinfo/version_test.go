@@ -1,6 +1,9 @@
 package buildinfo
 
-import "testing"
+import (
+	"testing"
+	"time"
+)
 
 func TestVersionJson_String(t *testing.T) {
 	tests := []struct {
@@ -11,57 +14,42 @@ func TestVersionJson_String(t *testing.T) {
 		{
 			"without-tag",
 			Version{
-				Tag:        "",
-				TagCommit:  "e79d5ef",
+				Version:    "(devel)",
+				VCS:        "git",
 				Commit:     "e79d5ef",
-				CommitDate: "20220522",
-				Changes:    "",
+				CommitDate: time.Date(2022, 5, 22, 0, 0, 0, 1, time.UTC),
+				Modified:   false,
 			},
-			"notag-e79d5ef-20220522",
+			"(devel)-git-e79d5ef-20220522",
 		},
 		{
 			"clean-1.0",
 			Version{
-				Tag:        "v1.0",
-				TagCommit:  "e79d5ef",
+				Version:    "v1.0",
+				VCS:        "git",
 				Commit:     "e79d5ef",
-				CommitDate: "20220522",
-				Changes:    "",
+				CommitDate: time.Date(2022, 5, 23, 0, 0, 0, 1, time.UTC),
+				Modified:   false,
 			},
-			"1.0-e79d5ef-20220522",
+			"1.0-git-e79d5ef-20220523",
 		},
 		{
-			"1.0-next",
+			"clean-1.0-without-info",
 			Version{
-				Tag:        "v1.0",
-				TagCommit:  "e79d5ef",
-				Commit:     "1a2b3c4",
-				CommitDate: "20220523",
-				Changes:    "",
+				Version: "v1.0",
 			},
-			"1.0-next-1a2b3c4-20220523",
+			"1.0",
 		},
 		{
 			"1.0-dirty",
 			Version{
-				Tag:        "v1.0",
-				TagCommit:  "e79d5ef",
+				Version:    "v1.0",
+				VCS:        "git",
 				Commit:     "e79d5ef",
-				CommitDate: "20220522",
-				Changes:    "A  bin/generate-version.sh",
+				CommitDate: time.Date(2022, 5, 24, 0, 0, 0, 1, time.UTC),
+				Modified:   true,
 			},
-			"1.0-e79d5ef-20220522-dirty",
-		},
-		{
-			"1.0-next-dirty",
-			Version{
-				Tag:        "v1.0",
-				TagCommit:  "e79d5ef",
-				Commit:     "1a2b3c4",
-				CommitDate: "20220523",
-				Changes:    "A  bin/generate-version.sh",
-			},
-			"1.0-next-1a2b3c4-20220523-dirty",
+			"1.0-git-e79d5ef-20220524-modified",
 		},
 	}
 	for _, tt := range tests {
