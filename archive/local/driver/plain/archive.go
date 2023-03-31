@@ -5,8 +5,10 @@ import (
 	"fmt"
 	"io"
 	"io/fs"
+	"log"
 	"os"
 	paths "path"
+	"regexp"
 	"sort"
 	"strings"
 	"sync"
@@ -16,6 +18,10 @@ import (
 	archiveapi "github.com/archivekeep/archivekeep/archive"
 	"github.com/archivekeep/archivekeep/internal/util"
 	"github.com/archivekeep/archivekeep/internal/util/cwalk"
+)
+
+const (
+	ignoreFileName = ".archivekeepignore"
 )
 
 type Archive struct {
@@ -333,11 +339,30 @@ func (archive *Archive) DeleteFile(filename string) error {
 	return nil
 }
 
-func (archive *Archive) FindAllFiles(searchGlobs ...string) []string {
+func (archive *Archive) FindAllFiles(searchGlobs ...string) ([]string, error) {
+	ignorePatterns, err := archive.loadIgnorePatterns()
+	if err != nil {
+		return nil, fmt.Errorf("load ignore patterns (if present): %w", err)
+	}
+
 	matchedFilesAbs := util.FindFilesByGlobsIgnore(
 		afero.NewIOFS(archive.rootFs),
 		func(path string) bool {
-			return util.IsPathIgnored(path)
+			if util.IsPathIgnored(path) {
+				return true
+			}
+
+			for _, pattern := range ignorePatterns {
+				match, err := paths.Match(pattern, paths.Base(path))
+				if err != nil {
+					log.Printf("error checking ignore: %v", err)
+				}
+				if match {
+					return true
+				}
+			}
+
+			return false
 		},
 		searchGlobs...,
 	)
@@ -347,7 +372,7 @@ func (archive *Archive) FindAllFiles(searchGlobs ...string) []string {
 		matchedFiles = append(matchedFiles, absFile)
 	}
 
-	return matchedFiles
+	return matchedFiles, nil
 }
 
 func (archive *Archive) checksumPath(path string) string {
@@ -401,4 +426,35 @@ func (archive *Archive) storeFileChecksum(filename string, checksum string) erro
 		return fmt.Errorf("write checksum file: %w", err)
 	}
 	return nil
+}
+
+func (archive *Archive) loadIgnorePatterns() ([]string, error) {
+	ignoreFileExists, err := archive.rootFs.Exists(ignoreFileName)
+	if err != nil {
+		return nil, fmt.Errorf("check ignore file existence: %w", err)
+	}
+
+	if !ignoreFileExists {
+		return nil, nil
+	}
+
+	ignoreFileBytes, err := archive.rootFs.ReadFile(ignoreFileName)
+	if err != nil {
+		return nil, fmt.Errorf("read ignore file contents: %w", err)
+	}
+
+	lines := regexp.MustCompile("\r?\n").Split(string(ignoreFileBytes), -1)
+
+	var patterns []string
+	for _, line := range lines {
+		pattern := strings.TrimSpace(line)
+
+		if pattern == "" || pattern[0] == '#' {
+			continue
+		}
+
+		patterns = append(patterns, pattern)
+	}
+
+	return patterns, nil
 }

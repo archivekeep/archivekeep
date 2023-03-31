@@ -5,13 +5,11 @@ import (
 	"os"
 	paths "path"
 	"path/filepath"
-	"strings"
 
 	"github.com/spf13/afero"
 
 	filesarchive "github.com/archivekeep/archivekeep/archive/local/driver/plain"
 	"github.com/archivekeep/archivekeep/internal/josesecrets"
-	"github.com/archivekeep/archivekeep/internal/util"
 )
 
 type CurrentArchive struct {
@@ -101,24 +99,6 @@ func (a *CurrentArchive) OpenKeyring(
 
 func (a *CurrentArchive) RemotesStore() *keyringRemotesStore {
 	return &keyringRemotesStore{Keyring: a.keyring}
-}
-
-func (a *CurrentArchive) FindFiles() []string {
-	matchedFilesAbs := util.FindFilesByGlobsIgnore(
-		afero.NewIOFS(afero.NewOsFs()),
-		func(path string) bool {
-			relativePathFromArchive := strings.TrimPrefix(path, a.location+"/")
-			return util.IsPathIgnored(relativePathFromArchive)
-		},
-		a.location,
-	)
-
-	var matchedFiles []string
-	for _, absFile := range matchedFilesAbs {
-		matchedFiles = append(matchedFiles, strings.TrimPrefix(absFile, a.location+"/"))
-	}
-
-	return matchedFiles
 }
 
 func (a *CurrentArchive) Keyring() *josesecrets.Keyring {

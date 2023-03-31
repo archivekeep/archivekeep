@@ -20,7 +20,7 @@ func FileExists(path string) bool {
 }
 
 func IsPathIgnored(path string) bool {
-	ignoredDirectories := []string{".archive", ".git", ".idea"}
+	ignoredDirectories := []string{".archive", ".git", ".idea", ".archivekeepignore"}
 
 	for _, ignoredDirectory := range ignoredDirectories {
 		if path == ignoredDirectory || strings.HasPrefix(path, ignoredDirectory+"/") {

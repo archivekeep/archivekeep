@@ -36,7 +36,10 @@ func (add Add) Prepare(
 ) (AddPrepareResult, error) {
 	var result AddPrepareResult
 
-	filesMatchingPattern := currentArchive.FindAllFiles(add.SearchGlobs...)
+	filesMatchingPattern, err := currentArchive.FindAllFiles(add.SearchGlobs...)
+	if err != nil {
+		return AddPrepareResult{}, fmt.Errorf("find files in archive: %w", err)
+	}
 
 	if !add.DisableMovesCheck {
 		storedFiles, err := currentArchive.StoredFiles()

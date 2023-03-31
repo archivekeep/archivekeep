@@ -3,6 +3,7 @@ package filesarchive
 import (
 	"os"
 	paths "path"
+	"strings"
 	"testing"
 
 	"github.com/spf13/afero"
@@ -140,4 +141,31 @@ func assertArchiveFileContains(t *testing.T, archiveDir, path, expectedContents 
 	contents, err := os.ReadFile(paths.Join(archiveDir, path))
 	assert.NilError(t, err)
 	assert.DeepEqual(t, contents, []byte(expectedContents))
+}
+
+func TestArchive_FindAllFiles(t *testing.T) {
+	t.Run("Ignores files by patterns from .archivekeepignore", func(t *testing.T) {
+		aDir, a := createTestArchive01(t)
+
+		createArchiveFiles(t, aDir, map[string]string{
+			".archivekeepignore": strings.Join([]string{
+				"# the XMP is part of exported JPEGs anyway",
+				"*.xmp",
+				"*.XMP",
+			}, "\n"),
+
+			"photos/20010203.RW2":          "RAW file",
+			"photos/20010203_edit_01.JPEG": "JPEG of edit 01 with XMP profile attached",
+			"photos/20010203_edit_01.XMP":  "XMP of edit 01",
+		})
+
+		foundFiles, err := a.FindAllFiles(".")
+		assert.NilError(t, err)
+		assert.DeepEqual(t, []string{
+			"indexed-file",
+			"non-indexed-file",
+			"photos/20010203.RW2",
+			"photos/20010203_edit_01.JPEG",
+		}, foundFiles)
+	})
 }

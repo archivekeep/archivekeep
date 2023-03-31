@@ -8,7 +8,7 @@ type WorkingArchive interface {
 	archive.Reader
 	archive.Writer
 
-	FindAllFiles(searchGlobs ...string) []string
+	FindAllFiles(searchGlobs ...string) ([]string, error)
 
 	Contains(path string) bool
 	FileChecksum(path string) (string, error)

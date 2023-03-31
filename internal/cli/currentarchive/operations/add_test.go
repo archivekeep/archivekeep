@@ -1,6 +1,7 @@
 package operations_test
 
 import (
+	"strings"
 	"testing"
 
 	"gotest.tools/v3/assert"
@@ -65,6 +66,10 @@ func createTestArchiveForAdd(t *testing.T) *testarchive.TestArchive {
 	a := testarchive.CreateTestingArchive01(t)
 
 	a.CreateUnindexedArchiveFiles(map[string]string{
+		".archivekeepignore": strings.Join([]string{
+			"# the XMP is part of exported JPEGs anyway",
+			"*.xmp",
+		}, "\n"),
 		"new_c":         "file_c",
 		"new-dir/d":     "file_d",
 		"new-dir/new-e": "file_e",
@@ -72,6 +77,7 @@ func createTestArchiveForAdd(t *testing.T) *testarchive.TestArchive {
 		"dir/f":         "dir file f",
 		"other/d":       "other file d",
 		"other/g":       "other file g",
+		"tralala.xmp":   "an XMP file",
 	})
 
 	a.CreateMissingFiles(map[string]string{

@@ -19,11 +19,16 @@ var statusCmd = &cobra.Command{
 			return fmt.Errorf("open current archive: %w", err)
 		}
 
-		var matchedFiles []string
+		var paths []string
 		if len(args) > 0 {
-			matchedFiles = currentArchive.FindAllFiles(currentArchive.PrependWorkingDirectoryToPaths(args)...)
+			paths = currentArchive.PrependWorkingDirectoryToPaths(args)
 		} else {
-			matchedFiles = currentArchive.FindFiles()
+			paths = []string{"."}
+		}
+
+		matchedFiles, err := currentArchive.FindAllFiles(paths...)
+		if err != nil {
+			return fmt.Errorf("find files: %w", err)
 		}
 
 		var newFiles, storedFiles []string
