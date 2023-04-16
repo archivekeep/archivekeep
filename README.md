@@ -1,6 +1,9 @@
 Archivekeep
 ===========
 
+[![Go Reference](https://pkg.go.dev/badge/github.com/archivekeep/archivekeep.svg)](https://pkg.go.dev/github.com/archivekeep/archivekeep)
+[![Go Report Card](https://goreportcard.com/badge/github.com/archivekeep/archivekeep)](https://goreportcard.com/report/github.com/archivekeep/archivekeep)
+
 _Keep your files archived on multiple places, in a reliable and simple way._
 
 The primary requirements and priorities of ArchiveKeep are to make process of **reliable archivation** to be simple and easy:

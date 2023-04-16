@@ -152,11 +152,20 @@ func TestArchive_FindAllFiles(t *testing.T) {
 				"# the XMP is part of exported JPEGs anyway",
 				"*.xmp",
 				"*.XMP",
+				"# default darktable_exported files attempts",
+				"darktable_exported",
 			}, "\n"),
 
 			"photos/20010203.RW2":          "RAW file",
 			"photos/20010203_edit_01.JPEG": "JPEG of edit 01 with XMP profile attached",
 			"photos/20010203_edit_01.XMP":  "XMP of edit 01",
+
+			"photos/darktable_exported/20010203_01.JPG": "20010203_01.JPG",
+			"photos/darktable_exported/20010203_02.JPG": "20010203_02.JPG",
+			"photos/darktable_exported/20010203_99.JPG": "20010203_99.JPG",
+
+			"photos/saved_darktable_exported/20010203_22.JPG": "Saved one - 20010203_2.JPG",
+			"photos/darktable_exported_final/20010203_98.JPG": "Final one - 20010203_98.JPG",
 		})
 
 		foundFiles, err := a.FindAllFiles(".")
@@ -166,6 +175,8 @@ func TestArchive_FindAllFiles(t *testing.T) {
 			"non-indexed-file",
 			"photos/20010203.RW2",
 			"photos/20010203_edit_01.JPEG",
+			"photos/darktable_exported_final/20010203_98.JPG",
+			"photos/saved_darktable_exported/20010203_22.JPG",
 		}, foundFiles)
 	})
 }

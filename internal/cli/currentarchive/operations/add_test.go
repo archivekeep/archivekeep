@@ -25,6 +25,8 @@ func TestAdd_Prepare(t *testing.T) {
 			"dir/f",
 			"other/d",
 			"other/g",
+			"photos/darktable_exported_final/final_03.jpg",
+			"photos/saved_darktable_exported/good_one_32.jpg",
 		},
 
 		Moves: []operations.Move{
@@ -58,6 +60,8 @@ func TestAdd_Prepare_WithDisabledMovesCheck(t *testing.T) {
 			"new_c",
 			"other/d",
 			"other/g",
+			"photos/darktable_exported_final/final_03.jpg",
+			"photos/saved_darktable_exported/good_one_32.jpg",
 		},
 	}, preparedAdd)
 }
@@ -69,7 +73,11 @@ func createTestArchiveForAdd(t *testing.T) *testarchive.TestArchive {
 		".archivekeepignore": strings.Join([]string{
 			"# the XMP is part of exported JPEGs anyway",
 			"*.xmp",
+			"*.XMP",
+			"# default darktable_exported files attempts",
+			"darktable_exported",
 		}, "\n"),
+
 		"new_c":         "file_c",
 		"new-dir/d":     "file_d",
 		"new-dir/new-e": "file_e",
@@ -78,6 +86,12 @@ func createTestArchiveForAdd(t *testing.T) *testarchive.TestArchive {
 		"other/d":       "other file d",
 		"other/g":       "other file g",
 		"tralala.xmp":   "an XMP file",
+
+		"photos/darktable_exported/attempt_01.jpg": "attempt 01.jpg",
+		"photos/darktable_exported/attempt_02.jpg": "attempt 02.jpg",
+
+		"photos/saved_darktable_exported/good_one_32.jpg": "A good one",
+		"photos/darktable_exported_final/final_03.jpg":    "A final one",
 	})
 
 	a.CreateMissingFiles(map[string]string{

@@ -352,13 +352,17 @@ func (archive *Archive) FindAllFiles(searchGlobs ...string) ([]string, error) {
 				return true
 			}
 
+			pathParts := strings.Split(path, "/")
+
 			for _, pattern := range ignorePatterns {
-				match, err := paths.Match(pattern, paths.Base(path))
-				if err != nil {
-					log.Printf("error checking ignore: %v", err)
-				}
-				if match {
-					return true
+				for _, pathPart := range pathParts {
+					match, err := paths.Match(pattern, pathPart)
+					if err != nil {
+						log.Printf("error checking ignore: %v", err)
+					}
+					if match {
+						return true
+					}
 				}
 			}
 
