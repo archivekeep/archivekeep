@@ -51,8 +51,8 @@ func Test_archiveApplicationService_ListArchives(t *testing.T) {
 			assert.DeepEqual(t, result.Archives, toDetailsList(a))
 		}
 
-		expectAccessList(tis.user01, tis.a01, tis.a02, tis.a03, tis.a06)
-		expectAccessList(tis.user02, tis.a04, tis.a06)
+		expectAccessList(tis.user01, tis.a01, tis.a02, tis.a03, tis.a06, tis.a07)
+		expectAccessList(tis.user02, tis.a04, tis.a06, tis.a07)
 		expectAccessList(tis.user03, tis.a05, tis.a06)
 	})
 }

@@ -131,6 +131,8 @@ func (r *RemoteArchive) SaveFile(reader io.Reader, fileInfo *archive.FileInfo) e
 		return fmt.Errorf("send head: %w", err)
 	}
 
+	var chunkSendError error
+
 	message := &pb.UploadArchiveFileRequest{}
 	buf := make([]byte, chunkSize)
 	for currentByte := 0; int64(currentByte) < fileInfo.Length; {
@@ -146,7 +148,8 @@ func (r *RemoteArchive) SaveFile(reader io.Reader, fileInfo *archive.FileInfo) e
 		}
 
 		if err := streamClient.Send(message); err != nil {
-			return status.Errorf(codes.Internal, "couldn't send chunk: %v", err)
+			chunkSendError = err
+			break
 		}
 
 		currentByte += currentChunkSize
@@ -155,6 +158,10 @@ func (r *RemoteArchive) SaveFile(reader io.Reader, fileInfo *archive.FileInfo) e
 	_, err = streamClient.CloseAndRecv()
 	if err != nil {
 		return fmt.Errorf("close and receive result: %w", err)
+	}
+
+	if chunkSendError != nil {
+		return status.Errorf(codes.Internal, "couldn't send chunk: %v", chunkSendError)
 	}
 
 	return nil

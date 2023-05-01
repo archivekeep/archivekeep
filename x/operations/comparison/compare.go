@@ -39,6 +39,7 @@ func diff(a, b []string) []string {
 			result = append(result, s)
 		}
 	}
+	sort.Strings(result)
 	return result
 }
 
