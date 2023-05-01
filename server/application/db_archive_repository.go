@@ -6,6 +6,8 @@ import (
 	"strconv"
 
 	filesarchive "github.com/archivekeep/archivekeep/archive/local/driver/plain"
+
+	"github.com/jmoiron/sqlx"
 )
 
 type dbArchive struct {
@@ -22,7 +24,16 @@ type sqlArchiveRepository struct {
 	db *sql.DB
 }
 
-func (repository *sqlArchiveRepository) get(id int64) (dbArchive, error) {
+func (repository *sqlArchiveRepository) get(idStr string) (dbArchive, error) {
+	id, err := strconv.ParseInt(idStr, 10, 64)
+	if err != nil {
+		return dbArchive{}, fmt.Errorf("ID parsing failed: %w", err)
+	}
+
+	return repository.getByIntId(id)
+}
+
+func (repository *sqlArchiveRepository) getByIntId(id int64) (dbArchive, error) {
 	rows, err := repository.db.Query("SELECT id, owner, name FROM archive WHERE id = ?", id)
 	if err != nil {
 		return dbArchive{}, fmt.Errorf("query archives: %w", err)
@@ -47,8 +58,29 @@ func (repository *sqlArchiveRepository) get(id int64) (dbArchive, error) {
 	return dbArchive{}, errDbNotExist
 }
 
-func (repository *sqlArchiveRepository) findOwnedBy(owner string) ([]dbArchive, error) {
-	rows, err := repository.db.Query("SELECT id, owner, name FROM archive WHERE owner = ?", owner)
+func (repository *sqlArchiveRepository) findAccessibleBy(
+	ownerResourceName string,
+	ownerByEmailResourceNames []string,
+) ([]dbArchive, error) {
+	var q string
+	var args []interface{}
+	var err error
+
+	if len(ownerByEmailResourceNames) > 0 {
+		q, args, err = sqlx.In(
+			"SELECT id, owner, name FROM archive a WHERE owner = ? OR EXISTS (SELECT 1 FROM archive_permission ap WHERE a.id = ap.archive_id AND ap.subject_name IN (?))",
+			ownerResourceName,
+			ownerByEmailResourceNames,
+		)
+		if err != nil {
+			return nil, fmt.Errorf("prepare in query: %w", err)
+		}
+	} else {
+		q = "SELECT id, owner, name FROM archive WHERE owner = ?"
+		args = []interface{}{ownerResourceName}
+	}
+
+	rows, err := repository.db.Query(q, args...)
 	if err != nil {
 		return nil, fmt.Errorf("query archives: %w", err)
 	}
@@ -87,5 +119,5 @@ func (repository *sqlArchiveRepository) create(archive dbArchive) (dbArchive, er
 		return dbArchive{}, fmt.Errorf("get new instance id: %w", err)
 	}
 
-	return repository.get(newInstanceID)
+	return repository.getByIntId(newInstanceID)
 }

@@ -61,7 +61,9 @@ func (s *Server) launchRestAPI(listeners []net.Listener, g *errgroup.Group, gCtx
 }
 
 func (s *Server) launchGrpcAPI(listeners []net.Listener, g *errgroup.Group, gCtx context.Context) {
-	for _, listener := range listeners {
+	for _, _listener := range listeners {
+		listener := _listener
+
 		grpcServer := grpc_ak.NewServer(
 			s.ArchiveApplicationService,
 			s.PersonalAccessTokenApplicationService,

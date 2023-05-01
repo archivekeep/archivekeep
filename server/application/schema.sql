@@ -26,6 +26,16 @@ CREATE TABLE IF NOT EXISTS "archive"
     PRIMARY KEY ("id" AUTOINCREMENT)
 );
 
+CREATE TABLE IF NOT EXISTS "archive_permission"
+(
+    "id"            INTEGER NOT NULL,
+    "archive_id"    INTEGER NOT NULL,
+
+    "subject_name"    VARCHAR(255) NOT NULL,
+
+    PRIMARY KEY ("id" AUTOINCREMENT)
+);
+
 CREATE TABLE IF NOT EXISTS "personal_access_token"
 (
     "id"                INTEGER NOT NULL,

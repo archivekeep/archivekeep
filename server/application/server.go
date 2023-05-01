@@ -14,6 +14,7 @@ type Server struct {
 	UserService                   *UserService
 
 	ArchiveApplicationService             *archiveApplicationService
+	ArchivePermissionApplicationService   *archivePermissionApplicationService
 	PersonalAccessTokenApplicationService *personalAccessTokenApplicationService
 
 	SessionBasedAuthentication *SessionBasedAuthentication
@@ -45,6 +46,7 @@ func CreateServer(config Config) (*Server, error) {
 		}
 
 		archiveRepository             = &sqlArchiveRepository{db: db}
+		archivePermissionRepository   = &sqlArchivePermissionRepository{db: db}
 		personalAccessTokenRepository = &PersonalAccessTokenRepository{db: db}
 		sessionRepository             = &SessionRepository{db: db}
 		userRepository                = &UserRepository{db: db}
@@ -63,13 +65,20 @@ func CreateServer(config Config) (*Server, error) {
 
 		sessionAuth = &SessionBasedAuthentication{
 			UserService:       userService,
+			UserRepository:    userRepository,
 			SessionRepository: sessionRepository,
 		}
 	)
 
 	service := &archiveApplicationService{
-		archiveRepository: archiveRepository,
-		contentStorage:    contentStorage,
+		archiveRepository:           archiveRepository,
+		archivePermissionRepository: archivePermissionRepository,
+		contentStorage:              contentStorage,
+	}
+
+	archivePermissionService := &archivePermissionApplicationService{
+		archiveRepository:           archiveRepository,
+		archivePermissionRepository: archivePermissionRepository,
 	}
 
 	return &Server{
@@ -80,6 +89,7 @@ func CreateServer(config Config) (*Server, error) {
 		UserService:                   userService,
 
 		ArchiveApplicationService:             service,
+		ArchivePermissionApplicationService:   archivePermissionService,
 		PersonalAccessTokenApplicationService: personalAccessTokenApplicationService,
 
 		SessionBasedAuthentication: sessionAuth,

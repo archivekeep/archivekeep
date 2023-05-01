@@ -1,12 +1,16 @@
 package application
 
 import (
+	"bytes"
 	"context"
 	"database/sql"
+	"fmt"
 	paths "path"
 	"testing"
 
 	"gotest.tools/v3/assert"
+
+	"github.com/archivekeep/archivekeep/archive"
 
 	"github.com/archivekeep/archivekeep/server/api"
 )
@@ -23,129 +27,97 @@ func openTestDB(t testing.TB) *sql.DB {
 }
 
 func Test_archiveApplicationService_ListArchives(t *testing.T) {
-	db := openTestDB(t)
-
-	// TODO: use server creator
-	archiveRepository := &sqlArchiveRepository{db: db}
-	contentStorage := &archiveContentStorage{
-		rootDir: paths.Join(t.TempDir(), "content-root"),
-	}
-	archiveService := &ArchiveService{
-		archiveRepository: archiveRepository,
-		contentStorage:    contentStorage,
-	}
-
-	mustCreateArchive := func(owner, name string) dbArchive {
-		archiveEntity, err := archiveService.CreateArchive(context.Background(), owner, name)
-		assert.NilError(t, err)
-
-		return archiveEntity
-	}
-
-	a01 := mustCreateArchive("users/1", "Archive 01.")
-	a02 := mustCreateArchive("users/1", "Archive 02.")
-	a03 := mustCreateArchive("users/1", "Archive 03.")
-	a04 := mustCreateArchive("users/2", "Archive 04.")
-	a05 := mustCreateArchive("users/3", "Archive 05.")
+	tapp := createTestApplication(t)
+	tis := createTestAppInitialState(tapp)
 
 	service := &archiveApplicationService{
-		archiveRepository: archiveRepository,
-		contentStorage:    contentStorage,
+		archiveRepository:           tapp.archiveRepository,
+		archivePermissionRepository: tapp.archivePermissionRepository,
+		contentStorage:              tapp.contentStorage,
 	}
 
-	tryToListArchives := func(userID int64) (api.ListArchivesResult, error) {
-		return service.ListArchives(UserIDContext(context.Background(), userID), api.ListArchivesRequest{})
+	tryToListArchives := func(user *User) (api.ListArchivesResult, error) {
+		return service.ListArchives(
+			NewContextWithAuthenticatedUser(context.Background(), user),
+			api.ListArchivesRequest{},
+		)
 	}
 
-	t.Run("can list own archives", func(t *testing.T) {
-		expectAccessList := func(userID int64, a ...dbArchive) {
+	t.Run("can list own and shared archives", func(t *testing.T) {
+		expectAccessList := func(user *User, a ...dbArchive) {
 			t.Helper()
-			result, err := tryToListArchives(userID)
+			result, err := tryToListArchives(user)
 			assert.NilError(t, err)
 			assert.DeepEqual(t, result.Archives, toDetailsList(a))
 		}
 
-		expectAccessList(1, a01, a02, a03)
-		expectAccessList(2, a04)
-		expectAccessList(3, a05)
+		expectAccessList(tis.user01, tis.a01, tis.a02, tis.a03, tis.a06)
+		expectAccessList(tis.user02, tis.a04, tis.a06)
+		expectAccessList(tis.user03, tis.a05, tis.a06)
 	})
 }
 
 func Test_archiveApplicationService_GetArchive(t *testing.T) {
-	db := openTestDB(t)
-
-	archiveRepository := &sqlArchiveRepository{db: db}
-	contentStorage := &archiveContentStorage{
-		rootDir: paths.Join(t.TempDir(), "content-root"),
-	}
-	archiveService := &ArchiveService{
-		archiveRepository: archiveRepository,
-		contentStorage:    contentStorage,
-	}
-
-	mustCreateArchive := func(owner, name string) dbArchive {
-		archiveEntity, err := archiveService.CreateArchive(context.Background(), owner, name)
-		assert.NilError(t, err)
-
-		return archiveEntity
-	}
-
-	a01 := mustCreateArchive("users/1", "Archive 01.")
-	a02 := mustCreateArchive("users/1", "Archive 02.")
-	a03 := mustCreateArchive("users/1", "Archive 03.")
-	a04 := mustCreateArchive("users/2", "Archive 04.")
-	a05 := mustCreateArchive("users/3", "Archive 05.")
+	tapp := createTestApplication(t)
+	tis := createTestAppInitialState(tapp)
 
 	service := &archiveApplicationService{
-		archiveRepository: archiveRepository,
-		contentStorage:    contentStorage,
+		archiveRepository:           tapp.archiveRepository,
+		archivePermissionRepository: tapp.archivePermissionRepository,
+		contentStorage:              tapp.contentStorage,
 	}
 
-	tryGetArchive := func(userID int64, a dbArchive) (api.ArchiveDetails, error) {
-		return service.GetArchive(UserIDContext(context.Background(), userID), a.StringID())
+	tryGetArchive := func(user *User, a dbArchive) (api.ArchiveDetails, error) {
+		return service.GetArchive(NewContextWithAuthenticatedUser(context.Background(), user), a.StringID())
 	}
 
 	tryGetArchiveWithoutLogin := func(a dbArchive) (api.ArchiveDetails, error) {
 		return service.GetArchive(context.Background(), a.StringID())
 	}
 
+	expectAccessOK := func(t *testing.T, user *User, a dbArchive) {
+		t.Helper()
+		result, err := tryGetArchive(user, a)
+		assert.NilError(t, err)
+		assert.DeepEqual(t, toApiArchiveDetails(a), result)
+	}
+
 	t.Run("can access own archive", func(t *testing.T) {
-		expectAccessOK := func(userID int64, a dbArchive) {
-			t.Helper()
-			result, err := tryGetArchive(userID, a)
-			assert.NilError(t, err)
-			assert.DeepEqual(t, toApiArchiveDetails(a), result)
-		}
+		expectAccessOK(t, tis.user01, tis.a01)
+		expectAccessOK(t, tis.user01, tis.a02)
+		expectAccessOK(t, tis.user01, tis.a03)
 
-		expectAccessOK(1, a01)
-		expectAccessOK(1, a02)
-		expectAccessOK(1, a03)
+		expectAccessOK(t, tis.user02, tis.a04)
 
-		expectAccessOK(2, a04)
+		expectAccessOK(t, tis.user03, tis.a05)
+	})
 
-		expectAccessOK(3, a05)
+	t.Run("can access shared archive", func(t *testing.T) {
+		expectAccessOK(t, tis.user01, tis.a06)
+		expectAccessOK(t, tis.user02, tis.a06)
+		expectAccessOK(t, tis.user03, tis.a06)
 	})
 
 	t.Run("can't access other archive", func(t *testing.T) {
-		expectAccessError := func(userID int64, a dbArchive) {
+		expectAccessError := func(user *User, a dbArchive) {
 			t.Helper()
-			result, err := tryGetArchive(userID, a)
+			result, err := tryGetArchive(user, a)
 			assert.ErrorContains(t, err, api.ErrNotAuthorized.Error())
 			assert.DeepEqual(t, result, api.ArchiveDetails{})
 		}
 
-		expectAccessError(1, a04)
-		expectAccessError(1, a05)
+		expectAccessError(tis.user01, tis.a04)
+		expectAccessError(tis.user01, tis.a05)
 
-		expectAccessError(2, a01)
-		expectAccessError(2, a02)
-		expectAccessError(2, a03)
-		expectAccessError(2, a05)
+		expectAccessError(tis.user02, tis.a01)
+		expectAccessError(tis.user02, tis.a02)
+		expectAccessError(tis.user02, tis.a03)
+		expectAccessError(tis.user02, tis.a05)
 
-		expectAccessError(3, a01)
-		expectAccessError(3, a02)
-		expectAccessError(3, a03)
-		expectAccessError(3, a04)
+		expectAccessError(tis.user03, tis.a01)
+		expectAccessError(tis.user03, tis.a02)
+		expectAccessError(tis.user03, tis.a03)
+		expectAccessError(tis.user03, tis.a04)
 	})
 
 	t.Run("can't access without login archive", func(t *testing.T) {
@@ -156,11 +128,11 @@ func Test_archiveApplicationService_GetArchive(t *testing.T) {
 			assert.DeepEqual(t, result, api.ArchiveDetails{})
 		}
 
-		expectAccessError(a01)
-		expectAccessError(a02)
-		expectAccessError(a03)
-		expectAccessError(a04)
-		expectAccessError(a05)
+		expectAccessError(tis.a01)
+		expectAccessError(tis.a02)
+		expectAccessError(tis.a03)
+		expectAccessError(tis.a04)
+		expectAccessError(tis.a05)
 	})
 }
 
@@ -173,9 +145,107 @@ func toDetailsList(a []dbArchive) []api.ArchiveDetails {
 }
 
 func Test_archiveApplicationService_GetArchiveAccessor(t *testing.T) {
+	tapp := createTestApplication(t)
+	tis := createTestAppInitialState(tapp)
+
+	service := &archiveApplicationService{
+		archiveRepository:           tapp.archiveRepository,
+		archivePermissionRepository: tapp.archivePermissionRepository,
+		contentStorage:              tapp.contentStorage,
+	}
+
+	tryGetArchiveAccessor := func(user *User, a dbArchive) (api.ArchiveAccessor, error) {
+		return service.GetArchiveAccessor(NewContextWithAuthenticatedUser(context.Background(), user), a.StringID())
+	}
+
+	t.Run("can access own archive", func(t *testing.T) {
+		expectAccessOK := func(user *User, a dbArchive) {
+			t.Helper()
+			result, err := tryGetArchiveAccessor(user, a)
+			assert.NilError(t, err)
+			assert.DeepEqual(t, result.(ownedArchiveAccessor).id, a.StringID())
+		}
+
+		expectAccessOK(tis.user01, tis.a01)
+		expectAccessOK(tis.user01, tis.a02)
+		expectAccessOK(tis.user01, tis.a03)
+		expectAccessOK(tis.user01, tis.a06)
+		expectAccessOK(tis.user01, tis.a07)
+
+		expectAccessOK(tis.user02, tis.a04)
+
+		expectAccessOK(tis.user03, tis.a05)
+	})
+
+	t.Run("can access shared archive", func(t *testing.T) {
+		expectReadOnlyAccessOK := func(user *User, a dbArchive) {
+			t.Helper()
+			result, err := tryGetArchiveAccessor(user, a)
+			assert.NilError(t, err)
+			assert.DeepEqual(t, result.(readonlyArchiveAccessor).id, a.StringID())
+
+			reader, err := result.OpenReader()
+			assert.NilError(t, err)
+
+			_, castableToWriter := reader.(archive.Writer)
+			assert.Equal(t, false, castableToWriter)
+
+			_, err = result.OpenWriter()
+			assert.Error(t, err, "not authorized")
+
+			_, err = result.OpenReadWriter()
+			assert.Error(t, err, "not authorized")
+		}
+
+		expectReadOnlyAccessOK(tis.user02, tis.a06)
+		expectReadOnlyAccessOK(tis.user02, tis.a07)
+
+		expectReadOnlyAccessOK(tis.user03, tis.a06)
+	})
+
+	t.Run("can't access other archive", func(t *testing.T) {
+		expectAccessError := func(user *User, a dbArchive) {
+			t.Helper()
+			result, err := tryGetArchiveAccessor(user, a)
+			assert.ErrorContains(t, err, api.ErrNotAuthorized.Error())
+			assert.DeepEqual(t, result, nil)
+		}
+
+		expectAccessError(tis.user01, tis.a04)
+		expectAccessError(tis.user01, tis.a05)
+
+		expectAccessError(tis.user02, tis.a01)
+		expectAccessError(tis.user02, tis.a02)
+		expectAccessError(tis.user02, tis.a03)
+		expectAccessError(tis.user02, tis.a05)
+
+		expectAccessError(tis.user03, tis.a01)
+		expectAccessError(tis.user03, tis.a02)
+		expectAccessError(tis.user03, tis.a03)
+		expectAccessError(tis.user03, tis.a04)
+		expectAccessError(tis.user03, tis.a07)
+	})
+}
+
+type testingApplication struct {
+	archiveRepository           *sqlArchiveRepository
+	archivePermissionRepository *sqlArchivePermissionRepository
+	contentStorage              *archiveContentStorage
+	archiveService              *ArchiveService
+	userRepository              *UserRepository
+	userService                 *UserService
+
+	mustCreateArchive           func(ownerUser *User, name string) dbArchive
+	mustCreateArchivePermission func(archiveID int64, user *User) dbArchivePermission
+	mustCreateUser              func(userEmail string) *User
+	mustStoreFile               func(archiveID int64, filename string, contents []byte)
+}
+
+func createTestApplication(t *testing.T) *testingApplication {
 	db := openTestDB(t)
 
 	archiveRepository := &sqlArchiveRepository{db: db}
+	archivePermissionRepository := &sqlArchivePermissionRepository{db: db}
 	contentStorage := &archiveContentStorage{
 		rootDir: paths.Join(t.TempDir(), "content-root"),
 	}
@@ -183,65 +253,118 @@ func Test_archiveApplicationService_GetArchiveAccessor(t *testing.T) {
 		archiveRepository: archiveRepository,
 		contentStorage:    contentStorage,
 	}
+	userRepository := &UserRepository{
+		db: db,
+	}
+	userService := &UserService{
+		repository: userRepository,
+	}
 
-	mustCreateArchive := func(owner, name string) dbArchive {
-		archiveEntity, err := archiveService.CreateArchive(context.Background(), owner, name)
+	mustCreateArchive := func(ownerUser *User, name string) dbArchive {
+		archiveEntity, err := archiveService.CreateArchive(context.Background(), ownerUser.ResourceName(), name)
 		assert.NilError(t, err)
 
 		return archiveEntity
 	}
 
-	a01 := mustCreateArchive("users/1", "Archive 01.")
-	a02 := mustCreateArchive("users/1", "Archive 02.")
-	a03 := mustCreateArchive("users/1", "Archive 03.")
-	a04 := mustCreateArchive("users/2", "Archive 04.")
-	a05 := mustCreateArchive("users/3", "Archive 05.")
+	mustCreateArchivePermission := func(archiveID int64, user *User) dbArchivePermission {
+		p, err := archivePermissionRepository.create(dbArchivePermission{
+			ArchiveID:   archiveID,
+			SubjectName: user.ByEmailResourceName(),
+		})
+		assert.NilError(t, err)
 
-	service := &archiveApplicationService{
-		archiveRepository: archiveRepository,
-		contentStorage:    contentStorage,
+		return p
 	}
 
-	tryGetArchiveAccessor := func(userID int64, a dbArchive) (api.ArchiveAccessor, error) {
-		return service.GetArchiveAccessor(UserIDContext(context.Background(), userID), a.StringID())
+	mustCreateUser := func(userEmail string) *User {
+		user, err := userService.CreateUser(userEmail, "no-password")
+		assert.NilError(t, err)
+
+		return &user
 	}
 
-	t.Run("can access own archive", func(t *testing.T) {
-		expectAccessOK := func(userID int64, a dbArchive) {
-			t.Helper()
-			result, err := tryGetArchiveAccessor(userID, a)
-			assert.NilError(t, err)
-			assert.DeepEqual(t, result.(ownedArchiveAccessor).id, a.StringID())
-		}
+	mustStoreFile := func(archiveID int64, path string, content []byte) {
+		arw, err := archiveService.contentStorage.get(fmt.Sprintf("%d", archiveID))
+		assert.NilError(t, err)
 
-		expectAccessOK(1, a01)
-		expectAccessOK(1, a02)
-		expectAccessOK(1, a03)
+		err = arw.SaveFile(bytes.NewReader(content), &archive.FileInfo{
+			Path:   path,
+			Length: int64(len(content)),
+			Digest: map[string]string{
+				"SHA256": "01534f5786529e78a0018a7d48ed385e6f20736523ab014ba505e91dd0fa0001",
+			},
+		})
+		assert.NilError(t, err)
+	}
 
-		expectAccessOK(2, a04)
+	return &testingApplication{
+		archiveRepository:           archiveRepository,
+		archivePermissionRepository: archivePermissionRepository,
+		contentStorage:              contentStorage,
+		archiveService:              archiveService,
+		userRepository:              userRepository,
+		userService:                 userService,
 
-		expectAccessOK(3, a05)
-	})
+		mustCreateArchive:           mustCreateArchive,
+		mustCreateArchivePermission: mustCreateArchivePermission,
+		mustCreateUser:              mustCreateUser,
+		mustStoreFile:               mustStoreFile,
+	}
+}
 
-	t.Run("can't access other archive", func(t *testing.T) {
-		expectAccessError := func(userID int64, a dbArchive) {
-			t.Helper()
-			result, err := tryGetArchiveAccessor(userID, a)
-			assert.ErrorContains(t, err, api.ErrNotAuthorized.Error())
-			assert.DeepEqual(t, result, nil)
-		}
+type testAppInitialState struct {
+	user01 *User
+	user02 *User
+	user03 *User
 
-		expectAccessError(1, a04)
-		expectAccessError(1, a05)
+	a01 dbArchive
+	a02 dbArchive
+	a03 dbArchive
+	a04 dbArchive
+	a05 dbArchive
+	a06 dbArchive
+	a07 dbArchive
 
-		expectAccessError(2, a01)
-		expectAccessError(2, a02)
-		expectAccessError(2, a03)
-		expectAccessError(2, a05)
+	a06Permission01User02 dbArchivePermission
+	a06Permission01User03 dbArchivePermission
+	a07Permission01User02 dbArchivePermission
+}
 
-		expectAccessError(3, a01)
-		expectAccessError(3, a02)
-		expectAccessError(3, a03)
-		expectAccessError(3, a04)
-	})
+func createTestAppInitialState(tapp *testingApplication) *testAppInitialState {
+	user01 := tapp.mustCreateUser("test-user-01@somewhere.there")
+	user02 := tapp.mustCreateUser("test-user-02@somewhere.there")
+	user03 := tapp.mustCreateUser("test-user-03@somewhere.there")
+
+	a01 := tapp.mustCreateArchive(user01, "Archive 01.")
+	a02 := tapp.mustCreateArchive(user01, "Archive 02.")
+	a03 := tapp.mustCreateArchive(user01, "Archive 03.")
+	a04 := tapp.mustCreateArchive(user02, "Archive 04.")
+	a05 := tapp.mustCreateArchive(user03, "Archive 05.")
+	a06 := tapp.mustCreateArchive(user01, "Archive 06.")
+	a07 := tapp.mustCreateArchive(user01, "Archive 07.")
+
+	a06Permission01User02 := tapp.mustCreateArchivePermission(a06.ID, user02)
+	a06Permission01User03 := tapp.mustCreateArchivePermission(a06.ID, user03)
+	a07Permission01User02 := tapp.mustCreateArchivePermission(a07.ID, user02)
+
+	tapp.mustStoreFile(a06.ID, "test-file.txt", []byte("Test File Contents"))
+
+	return &testAppInitialState{
+		user01: user01,
+		user02: user02,
+		user03: user03,
+
+		a01: a01,
+		a02: a02,
+		a03: a03,
+		a04: a04,
+		a05: a05,
+		a06: a06,
+		a07: a07,
+
+		a06Permission01User02: a06Permission01User02,
+		a06Permission01User03: a06Permission01User03,
+		a07Permission01User02: a07Permission01User02,
+	}
 }

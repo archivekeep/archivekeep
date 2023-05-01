@@ -27,7 +27,9 @@ var sessionSecureCookie = securecookie.New(
 )
 
 type SessionBasedAuthentication struct {
-	UserService       *UserService
+	UserService *UserService
+
+	UserRepository    *UserRepository
 	SessionRepository *SessionRepository
 }
 
@@ -94,10 +96,27 @@ func (a *SessionBasedAuthentication) loadSession(w http.ResponseWriter, r *http.
 			w.WriteHeader(http.StatusInternalServerError)
 			return true
 		}
+		if session == nil {
+			return false
+		}
 
-		if session != nil {
+		user, err := a.UserRepository.GetUserByUserID(session.UserID)
+		if err != nil {
+			log.Printf("error getting user from session: %v", err)
+
+			err := setSessionCookie(w, map[string]string{})
+			if err != nil {
+				log.Printf("error setting session cookie: %v", err)
+				w.WriteHeader(http.StatusInternalServerError)
+				return true
+			}
+
+			user = nil
+		}
+
+		if user != nil {
 			ctx := r.Context()
-			ctx = UserIDContext(ctx, session.UserID)
+			ctx = NewContextWithAuthenticatedUser(ctx, user)
 			ctx = context.WithValue(ctx, sessionContextKey, session)
 
 			req := r.WithContext(ctx)
@@ -109,7 +128,7 @@ func (a *SessionBasedAuthentication) loadSession(w http.ResponseWriter, r *http.
 }
 
 func (a *SessionBasedAuthentication) handleLogin(w http.ResponseWriter, r *http.Request) {
-	if _, currentlyLoggedIN := getLoggedInUserID(r.Context()); currentlyLoggedIN {
+	if _, _, currentlyLoggedIN := getLoggedInSubject(r.Context()); currentlyLoggedIN {
 		log.Printf("already logged in")
 		w.WriteHeader(http.StatusBadRequest)
 		return
@@ -150,7 +169,7 @@ func (a *SessionBasedAuthentication) handleLogin(w http.ResponseWriter, r *http.
 }
 
 func (a *SessionBasedAuthentication) handleLogout(w http.ResponseWriter, r *http.Request) {
-	_, currentlyLoggedIN := getLoggedInUserID(r.Context())
+	_, _, currentlyLoggedIN := getLoggedInSubject(r.Context())
 	if !currentlyLoggedIN {
 		log.Printf("not logged in")
 		w.WriteHeader(http.StatusBadRequest)

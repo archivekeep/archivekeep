@@ -30,21 +30,3 @@ type ListArchivesRequest struct{}
 type ListArchivesResult struct {
 	Archives []ArchiveDetails
 }
-
-type UnimplementedArchiveService struct {
-}
-
-func (_ UnimplementedArchiveService) ListArchives(_ context.Context, _ ListArchivesRequest) (ListArchivesResult, error) {
-	return ListArchivesResult{}, ErrNotImplemented
-}
-
-func (_ UnimplementedArchiveService) GetArchive(_ context.Context, _ string) (ArchiveDetails, error) {
-	return ArchiveDetails{}, ErrNotImplemented
-}
-
-func (_ UnimplementedArchiveService) GetArchiveAccessor(_ context.Context, _ string) (ArchiveAccessor, error) {
-	return nil, ErrNotImplemented
-}
-
-func (_ UnimplementedArchiveService) mustEmbedUnimplementedArchiveService() {
-}

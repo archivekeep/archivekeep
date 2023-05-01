@@ -11,6 +11,14 @@ As an owner of data I can verify the integrity of stored files, so that I am ass
 As an owner of data I can resume interrupted-previous verification process, so I can continue verification of unverified files instead of re-verifying already verified files.
 
 
+Hosting
+-------
+
+### Sharing
+
+As an owner of a repository I can grant read-only access to other users, so that I can share archive contents directly without copying to some intermediate medium.
+
+
 Other
 -----
 

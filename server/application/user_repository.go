@@ -15,6 +15,10 @@ func (u User) ResourceName() string {
 	return fmt.Sprintf("users/%d", u.ID)
 }
 
+func (u User) ByEmailResourceName() string {
+	return fmt.Sprintf("users-by-email/%s", u.Email)
+}
+
 type UserRepository struct {
 	db *sql.DB
 }

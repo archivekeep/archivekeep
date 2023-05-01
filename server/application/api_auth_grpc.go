@@ -56,7 +56,7 @@ func createAuthenticatedContext(server *Server, ctx context.Context) (context.Co
 	mdPurged := md.Copy()
 	mdPurged["authorization"] = nil
 
-	ctx = UserIDContext(ctx, user.ID)
+	ctx = NewContextWithAuthenticatedUser(ctx, user)
 	ctx = metadata.NewIncomingContext(ctx, mdPurged)
 
 	return ctx, nil
@@ -92,7 +92,7 @@ func getUser(ctx context.Context, server *Server, authHeader string) (*User, err
 		userName, passwordOrToken := cs[0], cs[1]
 
 		user, err := server.PersonalAccessTokenApplicationService.TryTokenAuth(ctx, passwordOrToken)
-		if err != nil && !errors.Is(err, errDbNotExist) {
+		if err != nil && !(errors.Is(err, errDbNotExist) || strings.Contains(err.Error(), "too short token")) {
 			return nil, fmt.Errorf("try token auth: %w", err)
 		} else if err == nil {
 			return user, nil

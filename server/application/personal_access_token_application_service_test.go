@@ -15,35 +15,35 @@ func Test_personalAccessTokenApplicationService_CreatePersonalAccessToken(t *tes
 	defer closeServer()
 
 	var (
-		testUser01Name     = "test.user@localhost"
+		testUser01Email    = "test.user@localhost"
 		testUser01Password = "password-01"
 
-		testUser02Name     = "another.test.user@localhost"
+		testUser02Email    = "another.test.user@localhost"
 		testUser02Password = "password-02"
 	)
 
-	testUser01, err := server.UserService.CreateUser(testUser01Name, testUser01Password)
+	testUser01, err := server.UserService.CreateUser(testUser01Email, testUser01Password)
 	assert.NilError(t, err)
 
-	testUser02, err := server.UserService.CreateUser(testUser02Name, testUser02Password)
+	testUser02, err := server.UserService.CreateUser(testUser02Email, testUser02Password)
 	assert.NilError(t, err)
 
 	testUser01Token01, err := server.PersonalAccessTokenApplicationService.CreatePersonalAccessToken(
-		application.UserIDContext(context.TODO(), testUser01.ID),
+		application.NewContextWithAuthenticatedUser(context.TODO(), &testUser01),
 		&api.CreatePersonalAccessTokenRequest{Name: "the first token"},
 	)
 	assert.NilError(t, err)
 	assert.Assert(t, testUser01Token01 != nil)
 
 	testUser01Token02, err := server.PersonalAccessTokenApplicationService.CreatePersonalAccessToken(
-		application.UserIDContext(context.TODO(), testUser01.ID),
+		application.NewContextWithAuthenticatedUser(context.TODO(), &testUser01),
 		&api.CreatePersonalAccessTokenRequest{Name: "the second token"},
 	)
 	assert.NilError(t, err)
 	assert.Assert(t, testUser01Token02 != nil)
 
 	testUser02Token01, err := server.PersonalAccessTokenApplicationService.CreatePersonalAccessToken(
-		application.UserIDContext(context.TODO(), testUser02.ID),
+		application.NewContextWithAuthenticatedUser(context.TODO(), &testUser02),
 		&api.CreatePersonalAccessTokenRequest{Name: "the first token"},
 	)
 	assert.NilError(t, err)
@@ -51,7 +51,7 @@ func Test_personalAccessTokenApplicationService_CreatePersonalAccessToken(t *tes
 
 	{
 		_, err = server.PersonalAccessTokenApplicationService.CreatePersonalAccessToken(
-			application.UserIDContext(context.TODO(), testUser01.ID),
+			application.NewContextWithAuthenticatedUser(context.TODO(), &testUser01),
 			&api.CreatePersonalAccessTokenRequest{Name: "the second token"},
 		)
 		assert.ErrorContains(t, err, "UNIQUE constraint failed")

@@ -15,7 +15,8 @@ import (
 
 func createRouter(s *Server) *chi.Mux {
 	restApi := rest.NewAPI(rest.Options{
-		ArchiveService: s.ArchiveApplicationService,
+		ArchiveService:           s.ArchiveApplicationService,
+		ArchivePermissionService: s.ArchivePermissionApplicationService,
 
 		ErrorHandler: handleAppError,
 	})
@@ -61,7 +62,7 @@ func createRouter(s *Server) *chi.Mux {
 
 func requireLogin(handler http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		if _, loggedIN := getLoggedInUserID(r.Context()); !loggedIN {
+		if _, _, loggedIN := getLoggedInSubject(r.Context()); !loggedIN {
 			w.WriteHeader(http.StatusForbidden)
 			return
 		}

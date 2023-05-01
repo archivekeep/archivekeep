@@ -22,7 +22,7 @@ func (p *personalAccessTokenApplicationService) CreatePersonalAccessToken(
 	ctx context.Context,
 	request *api.CreatePersonalAccessTokenRequest,
 ) (*api.PersonalAccessToken, error) {
-	userID, loggedIn := getLoggedInUserID(ctx)
+	userID, _, loggedIn := getLoggedInSubject(ctx)
 	if !loggedIn {
 		return nil, api.ErrNotAuthorized
 	}

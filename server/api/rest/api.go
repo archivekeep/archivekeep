@@ -19,9 +19,11 @@ import (
 )
 
 const ArchiveIdResourceParam = "archiveID"
+const ArchivePermissionIdResourceParam = "permissionID"
 
 type Options struct {
-	ArchiveService api.ArchiveService
+	ArchiveService           api.ArchiveService
+	ArchivePermissionService api.ArchivePermissionService
 
 	ErrorHandler func(w http.ResponseWriter, err error)
 }
@@ -58,6 +60,18 @@ func (s *API) Register(r chi.Router) {
 
 				r.Get("/files/*", s.getFile)
 				r.Get("/thumbnails/*", s.getThumbnail)
+
+				r.Route("/permissions", func(r chi.Router) {
+					r.Get("/", s.listArchivePermissions)
+					r.Post("/", s.createArchivePermission)
+
+					r.Route(
+						fmt.Sprintf("/{%s}", ArchivePermissionIdResourceParam),
+						func(r chi.Router) {
+							r.Delete("/", s.deleteArchivePermission)
+						},
+					)
+				})
 			},
 		)
 	})
@@ -66,7 +80,7 @@ func (s *API) Register(r chi.Router) {
 func (s *API) listArchives(w http.ResponseWriter, r *http.Request) {
 	aa, err := s.options.ArchiveService.ListArchives(r.Context(), api.ListArchivesRequest{})
 	if err != nil {
-		s.options.ErrorHandler(w, fmt.Errorf("list archives: %w", err))
+		s.respondForError(w, fmt.Errorf("list archives: %w", err))
 		return
 	}
 
@@ -83,7 +97,7 @@ func (s *API) getArchive(w http.ResponseWriter, r *http.Request) {
 
 	a, err := s.options.ArchiveService.GetArchive(r.Context(), archiveID)
 	if err != nil {
-		s.options.ErrorHandler(w, fmt.Errorf("get archive with id %s: %w", archiveID, err))
+		s.respondForError(w, fmt.Errorf("get archive with id %s: %w", archiveID, err))
 		return
 	}
 
@@ -95,19 +109,19 @@ func (s *API) listArchiveFiles(w http.ResponseWriter, r *http.Request) {
 
 	a, err := s.options.ArchiveService.GetArchiveAccessor(r.Context(), archiveID)
 	if err != nil {
-		s.options.ErrorHandler(w, fmt.Errorf("get archive with id %s: %w", archiveID, err))
+		s.respondForError(w, fmt.Errorf("get archive with id %s: %w", archiveID, err))
 		return
 	}
 
 	archiveReader, err := a.OpenReader()
 	if err != nil {
-		s.options.ErrorHandler(w, fmt.Errorf("open archive for reading: %w", err))
+		s.respondForError(w, fmt.Errorf("open archive for reading: %w", err))
 		return
 	}
 
 	files, err := archiveReader.ListFiles()
 	if err != nil {
-		s.options.ErrorHandler(w, fmt.Errorf("list archive contents id %s: %w", archiveID, err))
+		s.respondForError(w, fmt.Errorf("list archive contents id %s: %w", archiveID, err))
 		return
 	}
 
@@ -120,23 +134,23 @@ func (s *API) getFile(w http.ResponseWriter, r *http.Request) {
 
 	a, err := s.options.ArchiveService.GetArchiveAccessor(r.Context(), archiveID)
 	if err != nil {
-		s.options.ErrorHandler(w, fmt.Errorf("get archive with id %s: %w ", archiveID, err))
+		s.respondForError(w, fmt.Errorf("get archive with id %s: %w ", archiveID, err))
 		return
 	}
 
 	archiveReader, err := a.OpenReader()
 	if err != nil {
-		s.options.ErrorHandler(w, fmt.Errorf("open archive for reading: %w", err))
+		s.respondForError(w, fmt.Errorf("open archive for reading: %w", err))
 		return
 	}
 
 	_, reader, err := archiveReader.OpenFile(filePath)
 	if err != nil {
-		s.options.ErrorHandler(w, fmt.Errorf("get archive file %s: %w", filePath, err))
+		s.respondForError(w, fmt.Errorf("get archive file %s: %w", filePath, err))
 		return
 	}
 	if reader == nil {
-		s.options.ErrorHandler(w, fmt.Errorf("read %s: %w", filePath, api.ErrNotFound))
+		s.respondForError(w, fmt.Errorf("read %s: %w", filePath, api.ErrNotFound))
 		return
 	}
 	defer reader.Close()
@@ -155,7 +169,7 @@ func (s *API) getThumbnail(w http.ResponseWriter, r *http.Request) {
 
 	a, err := s.options.ArchiveService.GetArchiveAccessor(r.Context(), archiveID)
 	if err != nil {
-		s.options.ErrorHandler(w, fmt.Errorf("get archive with id %s: %w ", archiveID, err))
+		s.respondForError(w, fmt.Errorf("get archive with id %s: %w ", archiveID, err))
 		return
 	}
 
@@ -165,11 +179,11 @@ func (s *API) getThumbnail(w http.ResponseWriter, r *http.Request) {
 
 		thumbImgReader, err = s.generateFallbackThumbnail(r.Context(), a, filePath)
 		if err != nil {
-			s.options.ErrorHandler(w, fmt.Errorf("generate fallback thumbnail: %w", err))
+			s.respondForError(w, fmt.Errorf("generate fallback thumbnail: %w", err))
 			return
 		}
 	} else if err != nil {
-		s.options.ErrorHandler(w, fmt.Errorf("get thumbnail: %w", err))
+		s.respondForError(w, fmt.Errorf("get thumbnail: %w", err))
 		return
 	}
 
@@ -209,7 +223,7 @@ func archiveToDTO(a api.ArchiveDetails) ArchiveDTO {
 func (s *API) writeJSONResponse(w http.ResponseWriter, dto interface{}) {
 	result, err := json.Marshal(dto)
 	if err != nil {
-		s.options.ErrorHandler(w, fmt.Errorf("marshal json: %w", err))
+		s.respondForError(w, fmt.Errorf("marshal json: %w", err))
 		return
 	}
 
@@ -218,4 +232,70 @@ func (s *API) writeJSONResponse(w http.ResponseWriter, dto interface{}) {
 	if err != nil {
 		log.Printf("ERROR - writer result: %v", err)
 	}
+}
+
+func (s *API) listArchivePermissions(w http.ResponseWriter, r *http.Request) {
+	archiveID := chi.URLParam(r, ArchiveIdResourceParam)
+
+	result, err := s.options.ArchivePermissionService.ListArchivePermissions(r.Context(), api.ListArchivePermissionsRequest{
+		ArchiveID: archiveID,
+	})
+	if err != nil {
+		s.respondForError(w, fmt.Errorf("get archive permissions %s: %w", archiveID, err))
+		return
+	}
+
+	s.writeJSONResponse(w, result)
+}
+
+func (s *API) createArchivePermission(w http.ResponseWriter, r *http.Request) {
+	archiveID := chi.URLParam(r, ArchiveIdResourceParam)
+
+	var body struct {
+		SubjectName string
+	}
+
+	err := json.NewDecoder(r.Body).Decode(&body)
+	if err != nil {
+		s.respondForError(w, fmt.Errorf("bad body: %w", err))
+		return
+	}
+
+	result, err := s.options.ArchivePermissionService.CreateArchivePermission(r.Context(), api.CreateArchivePermissionRequest{
+		ArchiveID: archiveID,
+
+		SubjectName: body.SubjectName,
+	})
+	if err != nil {
+		s.respondForError(w, fmt.Errorf("create archive permission %s: %w", archiveID, err))
+		return
+	}
+
+	s.writeJSONResponse(w, result)
+}
+
+func (s *API) deleteArchivePermission(w http.ResponseWriter, r *http.Request) {
+	archiveID := chi.URLParam(r, ArchiveIdResourceParam)
+	permissionID := chi.URLParam(r, ArchivePermissionIdResourceParam)
+
+	err := s.options.ArchivePermissionService.DeletePermission(r.Context(), api.DeleteArchivePermissionRequest{
+		ArchiveID:    archiveID,
+		PermissionID: permissionID,
+	})
+	if err != nil {
+		s.respondForError(w, fmt.Errorf("delete archive permission %s - %s: %w", archiveID, permissionID, err))
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
+}
+
+func (s *API) respondForError(w http.ResponseWriter, err error) {
+	if s.options.ErrorHandler == nil {
+		log.Printf("ERROR: no error handler specified, default: %v", err)
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+	s.options.ErrorHandler(w, err)
 }

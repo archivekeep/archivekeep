@@ -58,6 +58,10 @@ func (a ownedArchiveAccessor) GetThumbnail(ctx context.Context, filePath string)
 		return nil, err
 	}
 
+	return getThumbnail(ctx, filePath, archiveReader)
+}
+
+func getThumbnail(ctx context.Context, filePath string, archiveReader archive.Reader) (io.ReadCloser, error) {
 	info, readCloser, err := archiveReader.OpenFile(filePath)
 	if err != nil {
 		return nil, err

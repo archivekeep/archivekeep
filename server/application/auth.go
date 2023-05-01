@@ -15,14 +15,22 @@ var (
 	authenticatedUserIDContextKey = contextKey("authenticatedUserID")
 )
 
-func getLoggedInUserID(ctx context.Context) (int64, bool) {
-	userId, ok := ctx.Value(authenticatedUserIDContextKey).(int64)
-
-	return userId, ok
+type userContextDetails struct {
+	userId          int64
+	otherIdentities []string
 }
 
-func UserIDContext(ctx context.Context, userID int64) context.Context {
-	return context.WithValue(ctx, authenticatedUserIDContextKey, userID)
+func getLoggedInSubject(ctx context.Context) (int64, []string, bool) {
+	userContextDetails, ok := ctx.Value(authenticatedUserIDContextKey).(userContextDetails)
+
+	return userContextDetails.userId, userContextDetails.otherIdentities, ok
+}
+
+func NewContextWithAuthenticatedUser(ctx context.Context, user *User) context.Context {
+	return context.WithValue(ctx, authenticatedUserIDContextKey, userContextDetails{
+		userId:          user.ID,
+		otherIdentities: []string{user.ByEmailResourceName()},
+	})
 }
 
 type AuthenticationController struct {
@@ -34,7 +42,7 @@ func (c *AuthenticationController) RegisterRoutes(r chi.Router) {
 }
 
 func (c *AuthenticationController) getCurrentUser(w http.ResponseWriter, r *http.Request) {
-	userID, loggedIn := getLoggedInUserID(r.Context())
+	userID, _, loggedIn := getLoggedInSubject(r.Context())
 
 	if !loggedIn {
 		w.WriteHeader(http.StatusNotFound)
