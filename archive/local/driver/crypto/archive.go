@@ -86,7 +86,7 @@ func (archive *Archive) StoredFiles() ([]string, error) {
 		}
 	}()
 
-	err := cwalk.Walk(afero.Afero{afero.NewOsFs()}, basepath, func(path string, d fs.FileInfo, err error) error {
+	err := cwalk.Walk(afero.Afero{Fs: afero.NewOsFs()}, basepath, func(path string, d fs.FileInfo, err error) error {
 		if err != nil {
 			fmt.Printf("ERROR: file: %v", err)
 			return err
