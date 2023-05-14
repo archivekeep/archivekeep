@@ -6,6 +6,7 @@ import (
 	"io"
 	"os"
 	paths "path"
+	"strings"
 	"testing"
 
 	"gotest.tools/v3/assert"
@@ -79,4 +80,8 @@ func runCmdBase(dir string, stdin io.Reader, args []string) (string, error) {
 	err = c.Execute()
 
 	return out.String(), err
+}
+
+func terminalLines(lines ...string) string {
+	return strings.Join(lines, "\n") + "\n"
 }

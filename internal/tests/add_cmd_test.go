@@ -47,15 +47,14 @@ func Test(t *testing.T) {
 			subdir: "dir",
 			args:   []string{"add", "."},
 
-			expectedOut: strings.Join([]string{
+			expectedOut: terminalLines(
 				"New files to be indexed:",
 				"\tc",
 				"\tf",
 				"",
 				"added: c",
 				"added: f",
-				"",
-			}, "\n"),
+			),
 			expectedIndex: []string{
 				"a",
 				"b",
@@ -78,7 +77,7 @@ func Test(t *testing.T) {
 
 			stdin: "y\n",
 
-			expectedOut: strings.Join([]string{
+			expectedOut: terminalLines(
 				"Missing indexed files not matched by add:",
 				"\t../missing/unexisting_x",
 				"",
@@ -93,8 +92,7 @@ func Test(t *testing.T) {
 				"proceeding ...",
 				"moved: missing/old_c -> dir/c",
 				"added: f",
-				"",
-			}, "\n"),
+			),
 			expectedIndex: []string{
 				"a",
 				"b",
@@ -111,15 +109,14 @@ func Test(t *testing.T) {
 			subdir: "dir",
 			args:   []string{"add", "../other"},
 
-			expectedOut: strings.Join([]string{
+			expectedOut: terminalLines(
 				"New files to be indexed:",
 				"\t../other/d",
 				"\t../other/g",
 				"",
 				"added: ../other/d",
 				"added: ../other/g",
-				"",
-			}, "\n"),
+			),
 			expectedIndex: []string{
 				"a",
 				"b",
@@ -135,7 +132,7 @@ func Test(t *testing.T) {
 			subdir: "dir",
 			args:   []string{"add", "../dir/f", "../e", "../other/g"},
 
-			expectedOut: strings.Join([]string{
+			expectedOut: terminalLines(
 				"New files to be indexed:",
 				"\tf",
 				"\t../e",
@@ -144,8 +141,7 @@ func Test(t *testing.T) {
 				"added: f",
 				"added: ../e",
 				"added: ../other/g",
-				"",
-			}, "\n"),
+			),
 			expectedIndex: []string{
 				"a",
 				"b",

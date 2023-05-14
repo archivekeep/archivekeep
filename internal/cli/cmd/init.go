@@ -31,7 +31,8 @@ func initCmd() *cobra.Command {
 			}
 		}
 
-		cmd.Printf("Archive successfully initialized")
+		cmd.Printf("Archive successfully initialized\n")
+
 		return nil
 	}
 

@@ -14,7 +14,9 @@ func TestInitArchive(t *testing.T) {
 	assert.NilError(t, err)
 
 	out := runCmd(t, archiveDir, nil, "init")
-	assert.Equal(t, out, "Archive successfully initialized")
+	assert.Equal(t, out, terminalLines(
+		"Archive successfully initialized",
+	))
 }
 
 func TestInitArchiveAgainFails(t *testing.T) {

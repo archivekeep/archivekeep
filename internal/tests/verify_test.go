@@ -3,7 +3,6 @@ package tests_test
 import (
 	"os"
 	paths "path"
-	"strings"
 	"testing"
 
 	"gotest.tools/v3/assert"
@@ -20,7 +19,7 @@ func TestVerify(t *testing.T) {
 	createArchiveFile(t, archiveDir, "file_d", "A")
 
 	out := runCmd(t, archiveDir, nil, "add", "--do-not-print-preparation-summary", "file_*")
-	assert.Equal(t, lines(
+	assert.Equal(t, terminalLines(
 		"added: file_a",
 		"added: file_b",
 		"added: file_c",
@@ -28,7 +27,7 @@ func TestVerify(t *testing.T) {
 	), out)
 
 	out = runCmd(t, archiveDir, nil, "verify")
-	assert.Equal(t, lines(
+	assert.Equal(t, terminalLines(
 		"Found 4 files to verify",
 		"Verified 4 of 4 files",
 		"Verification completed",
@@ -40,7 +39,7 @@ func TestVerify(t *testing.T) {
 	os.Remove(paths.Join(archiveDir, "file_d"))
 
 	out, _ = runCmdError(t, archiveDir, nil, "verify", "--again")
-	assert.Equal(t, lines(
+	assert.Equal(t, terminalLines(
 		"Found 4 files to verify",
 		"ERROR: corrupted file_b: file was modified",
 		"ERROR: corrupted file_d: file was deleted",
@@ -49,8 +48,4 @@ func TestVerify(t *testing.T) {
 		"OK files:        2",
 		"Corrupted files: 2",
 	), out)
-}
-
-func lines(lines ...string) string {
-	return strings.Join(lines, "\n") + "\n"
 }
