@@ -42,6 +42,45 @@ func TestAdd_Prepare(t *testing.T) {
 	}, preparedAdd)
 }
 
+func TestAdd_Of_Invalid_characters(t *testing.T) {
+	type testCase struct {
+		filename string
+		err      string
+	}
+
+	testCases := []testCase{
+		{
+			":colon-not-allowed:",
+			"file :colon-not-allowed: has invalid filename: character ':' is not supported in FAT-like filesystems",
+		},
+		{
+			"no * here",
+			"file no * here has invalid filename: character '*' is not supported in FAT-like filesystems",
+		},
+		{
+			"what ? is this",
+			"file what ? is this has invalid filename: character '?' is not supported in FAT-like filesystems",
+		},
+	}
+
+	for _, tc := range testCases {
+		t.Run(tc.filename, func(t *testing.T) {
+			a := createTestArchiveForAdd(t)
+
+			a.CreateUnindexedArchiveFiles(map[string]string{
+				tc.filename: "",
+			})
+
+			_, err := operations.Add{
+				SearchGlobs:       []string{"."},
+				DisableMovesCheck: false,
+			}.Prepare(a, "")
+
+			assert.Error(t, err, tc.err)
+		})
+	}
+}
+
 func TestAdd_Prepare_WithDisabledMovesCheck(t *testing.T) {
 	a := createTestArchiveForAdd(t)
 

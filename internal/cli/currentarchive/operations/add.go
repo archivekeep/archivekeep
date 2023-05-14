@@ -6,6 +6,7 @@ import (
 	"sort"
 	"strings"
 
+	"github.com/samber/lo"
 	"github.com/spf13/cobra"
 
 	"github.com/archivekeep/archivekeep/internal/cli/currentarchive"
@@ -15,7 +16,8 @@ import (
 type Add struct {
 	SearchGlobs []string
 
-	DisableMovesCheck bool
+	DisableFilenameCheck bool
+	DisableMovesCheck    bool
 }
 
 type Move struct {
@@ -39,6 +41,19 @@ func (add Add) Prepare(
 	filesMatchingPattern, err := currentArchive.FindAllFiles(add.SearchGlobs...)
 	if err != nil {
 		return AddPrepareResult{}, fmt.Errorf("find files in archive: %w", err)
+	}
+
+	unindexedFilesMatchingPattern := lo.Filter(filesMatchingPattern, func(inArchiveFullPath string, _ int) bool {
+		return !currentArchive.Contains(inArchiveFullPath)
+	})
+
+	if !add.DisableFilenameCheck {
+		for _, inArchiveFileName := range unindexedFilesMatchingPattern {
+			err := add.checkFilename(inArchiveFileName)
+			if err != nil {
+				return AddPrepareResult{}, fmt.Errorf("file %s has invalid filename: %w", inArchiveFileName, err)
+			}
+		}
 	}
 
 	if !add.DisableMovesCheck {
@@ -70,14 +85,10 @@ func (add Add) Prepare(
 			}
 		}
 
-		for _, inArchiveFullPath := range filesMatchingPattern {
+		for _, inArchiveFullPath := range unindexedFilesMatchingPattern {
 			cwdRelativePath, err := filepath.Rel(workingSubdirectory, inArchiveFullPath)
 			if err != nil {
 				return AddPrepareResult{}, fmt.Errorf("reconstruct archive relative path to working directory for %s: %w", inArchiveFullPath, err)
-			}
-
-			if currentArchive.Contains(inArchiveFullPath) {
-				continue
 			}
 
 			checksum, err := currentArchive.ComputeFileChecksum(inArchiveFullPath)
@@ -104,19 +115,23 @@ func (add Add) Prepare(
 			return strings.Compare(result.Moves[i].From, result.Moves[j].From) < 0
 		})
 	} else {
-		for _, inArchiveFullPath := range filesMatchingPattern {
-			if currentArchive.Contains(inArchiveFullPath) {
-				continue
-			}
-
-			result.NewFiles = append(result.NewFiles, inArchiveFullPath)
-		}
+		result.NewFiles = unindexedFilesMatchingPattern
 	}
 
 	sort.Strings(result.MissingFiles)
 	sort.Strings(result.NewFiles)
 
 	return result, nil
+}
+
+func (add Add) checkFilename(inArchiveFileName string) error {
+	for _, illegalCharacter := range illegalCharacters {
+		if strings.Contains(inArchiveFileName, illegalCharacter) {
+			return fmt.Errorf("character '%s' is not supported in FAT-like filesystems", illegalCharacter)
+		}
+	}
+
+	return nil
 }
 
 func (result AddPrepareResult) PrintSummary(
@@ -208,4 +223,13 @@ func (result AddPrepareResult) Execute(
 	}
 
 	return nil
+}
+
+var illegalCharacters = []string{
+	":",
+	"?",
+	"<",
+	">",
+	"*",
+	"|",
 }

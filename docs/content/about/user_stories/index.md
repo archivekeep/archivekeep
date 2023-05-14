@@ -22,6 +22,8 @@ As an owner of a repository I can grant read-only access to other users, so that
 Other
 -----
 
-As a desktop/laptop user I can perform operations on remote repository without re-entering my credentials on each command execution, so that I can work more efficiently without distractions.
+As a computer user I can perform operations on remote repository without re-entering my credentials on each command execution, so that I can work more efficiently without distractions.
 
-As a desktop/laptop user I am prevented re-adding a moved file as a new file unless I explicitly disable the check, so that I am aware of errors immediately rather than at sync time.
+As a computer user I am prevented re-adding a moved file as a new file unless I explicitly disable the check, so that I am aware of errors immediately rather than at sync time.
+
+As a computer user I am prevented adding files with filenames incompatible with FAT-like filesystems, so that I am aware of the issue early rather than when doing sync with FAT-like storage. 
