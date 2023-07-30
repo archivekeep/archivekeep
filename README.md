@@ -66,7 +66,21 @@ As a package:
 
 ## Usage
 
+### CLI
+
 See [docs/features.md](docs/content/about/features/index.md) for overview. To be documented later.
+
+### GUI
+
+GUI is not implemented. Design preview can be run via:
+
+```shell
+# install native libraries & dependencies
+apt install gcc pkg-config libwayland-dev libx11-dev libx11-xcb-dev libxkbcommon-x11-dev libgles2-mesa-dev libegl1-mesa-dev libffi-dev libxcursor-dev libvulkan-dev
+
+# run
+go run github.com/archivekeep/archivekeep/cmd/archivekeep-gioui
+```
 
 ## Warranty
 
