@@ -2,7 +2,7 @@ baseURL = "http://localhost"
 title = "archivekeep"
 theme = "hugo-book"
 
-disableKinds = ['taxonomy', 'taxonomyTerm']
+disableKinds = ['taxonomy', 'term']
 
 [markup.goldmark.renderer]
 unsafe = true
@@ -24,3 +24,9 @@ BookRepo = 'https://github.com/archivekeep/archivekeep'
 name = "GitHub"
 url = "https://github.com/archivekeep/archivekeep"
 weight = 10
+
+
+
+[security.exec]
+allow = ["^dart-sass-embedded$", "^go$", "^npx$", "^postcss$", "^asciidoctor$"]
+osEnv = ["(?i)^(PATH|PATHEXT|APPDATA|TMP|TEMP|TERM|RUBYLIB)$"]

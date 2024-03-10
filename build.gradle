@@ -1,0 +1,74 @@
+plugins {
+    id 'org.jetbrains.kotlin.jvm' version '1.9.0'
+    id 'org.jetbrains.kotlin.kapt' version '1.9.0'
+
+    id 'application'
+
+    id 'org.graalvm.buildtools.native' version '0.10.0'
+
+    id 'org.asciidoctor.jvm.convert' version '4.0.2'
+}
+
+group = 'org.archivekeep'
+version = '1.0-SNAPSHOT'
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    implementation 'info.picocli:picocli:4.7.5'
+    kapt 'info.picocli:picocli-codegen:4.7.5'
+
+    testImplementation 'org.jetbrains.kotlin:kotlin-test'
+}
+
+test {
+    useJUnitPlatform()
+}
+
+kotlin {
+    jvmToolchain(17)
+}
+
+kapt {
+    arguments {
+        arg("project", "${project.group}/${project.name}")
+    }
+}
+
+application {
+    mainClass = 'org.archivekeep.cli.MainKt'
+}
+
+tasks.withType(Jar).configureEach {
+    manifest {
+        attributes["Main-Class"] = 'org.archivekeep.cli.MainKt'
+    }
+}
+
+graalvmNative {
+    toolchainDetection = true
+}
+
+tasks.register('generateManpageAsciiDoc', JavaExec) {
+    dependsOn(classes)
+
+    group = "Documentation"
+    description = "Generate AsciiDoc manpage"
+
+    classpath(configurations.compileClasspath, configurations.kapt, sourceSets.main.runtimeClasspath)
+    main 'picocli.codegen.docgen.manpage.ManPageGenerator'
+
+    args 'org.archivekeep.cli.MainCommand', "--outdir=${project.buildDir}/generated-picocli-docs", "-v"
+}
+
+asciidoctor {
+    dependsOn(generateManpageAsciiDoc)
+    sourceDir = file("${project.buildDir}/generated-picocli-docs")
+    outputDir = file("${project.buildDir}/docs")
+    logDocuments = true
+    outputOptions {
+        backends = ['manpage', 'html5']
+    }
+}

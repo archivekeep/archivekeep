@@ -42,7 +42,7 @@ jobs:
 
       - name: Build reference pages
         run: |
-          ./bin/generate_cli_markdown_pages.sh ]
+          ./bin/generate_cli_adoc_pages.sh ]
 
       - name: Build with Hugo
         env:
