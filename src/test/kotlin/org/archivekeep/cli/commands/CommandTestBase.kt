@@ -1,16 +1,16 @@
 package org.archivekeep.cli.commands
 
 import org.archivekeep.cli.MainCommand
+import org.archivekeep.core.repo.files.FilesRepo
 import org.junit.jupiter.api.io.TempDir
 import picocli.CommandLine
 import java.io.File
 import java.io.PrintWriter
+import java.io.StringReader
 import java.io.StringWriter
 import java.nio.file.Path
 import java.security.MessageDigest
-import kotlin.io.path.Path
-import kotlin.io.path.createParentDirectories
-import kotlin.io.path.writeText
+import kotlin.io.path.*
 import kotlin.test.assertEquals
 
 abstract class CommandTestBase {
@@ -21,8 +21,14 @@ abstract class CommandTestBase {
     val archivePath: Path
         get() = Path(archiveTempDir.absolutePath)
 
-    internal fun executeCmd(cwd: Path, vararg args: String): String {
-        val app = MainCommand(cwd)
+    internal fun fileRepo() = FilesRepo(archivePath)
+
+    internal fun executeCmd(
+        cwd: Path,
+        vararg args: String,
+        `in`: String = ""
+    ): String {
+        val app = MainCommand(cwd, inStream = `in`.byteInputStream())
         val cmd = CommandLine(app)
 
         val sw = StringWriter()
@@ -47,7 +53,7 @@ abstract class CommandTestBase {
         )
     }
 
-    private fun createArchiveWithContents(files: Map<String, String>) {
+    fun createArchiveWithContents(files: Map<String, String>) {
         createUnindexedFiles(files)
 
 
@@ -66,6 +72,29 @@ abstract class CommandTestBase {
 
             filePath.writeText(it.value)
         }
+    }
+
+    internal fun createMissingFiles(files: Map<String, String>) {
+        files.forEach {
+            val checksumPath = archiveTempDir.resolve(".archive/checksums").resolve(it.key + ".sha256").toPath()
+            checksumPath.createParentDirectories()
+
+            checksumPath.writeText(it.value.sha256())
+        }
+    }
+
+    @OptIn(ExperimentalPathApi::class)
+    internal fun cleanup() {
+        // TODO: change to parametrized test, and don't do manual cleanup
+
+        archiveTempDir.toPath().forEachDirectoryEntry {
+            println("to delete: $it")
+            it.deleteRecursively()
+        }
+    }
+
+    internal fun terminalLines(vararg lines: String): String {
+        return lines.joinToString("\n") + "\n"
     }
 }
 

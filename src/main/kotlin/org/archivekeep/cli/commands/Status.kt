@@ -1,8 +1,7 @@
 package org.archivekeep.cli.commands
 
 import org.archivekeep.cli.MainCommand
-import org.archivekeep.cli.workingarchive.openWorkingArchive
-import org.archivekeep.core.operations.Status
+import org.archivekeep.core.operations.StatusOperation
 import picocli.CommandLine.Command
 import picocli.CommandLine.Model.CommandSpec
 import picocli.CommandLine.Parameters
@@ -46,7 +45,7 @@ class Status : Callable<Int> {
             singletonList(".")
         }
 
-        val result = Status(subsetGlobs = rootRelativeGlobs).execute(currentArchive.repo)
+        val result = StatusOperation(subsetGlobs = rootRelativeGlobs).execute(currentArchive.repo)
 
         if (result.newFiles.isNotEmpty()) {
             out.println("")

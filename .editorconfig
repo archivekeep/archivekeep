@@ -8,14 +8,5 @@ charset = utf-8
 end_of_line = lf
 insert_final_newline = true
 
-[*.go]
-indent_style = tab # gofmt standard
-
-ij_go_group_stdlib_imports = true
-ij_go_group_current_project_imports = true
-ij_go_move_all_imports_in_one_declaration = true
-ij_go_move_all_stdlib_imports_in_one_group = true
-ij_go_remove_redundant_import_aliases = true
-
 [*.md]
 max_line_length = 160

@@ -4,7 +4,7 @@ import org.archivekeep.core.repo.LocalRepo
 import org.archivekeep.core.repo.Repo
 import kotlin.io.path.invariantSeparatorsPathString
 
-class Status(
+class StatusOperation(
     val subsetGlobs: List<String>
 ) {
     fun execute(repo: Repo): Result {
