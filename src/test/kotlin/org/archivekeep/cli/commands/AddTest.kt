@@ -126,7 +126,7 @@ class AddTest : CommandTestBase() {
             )
 
             val out = executeCmd(
-                tc.subpath.fold(archivePath) { acc, o -> acc.resolve(o) },
+                tc.subpath.fold(currentArchivePath) { acc, o -> acc.resolve(o) },
                 *tc.args.toTypedArray()
             )
             assertEquals(tc.out, out)
@@ -203,7 +203,7 @@ class AddTest : CommandTestBase() {
             )
 
             val out = executeCmd(
-                tc.subpath.fold(archivePath) { acc, o -> acc.resolve(o) },
+                tc.subpath.fold(currentArchivePath) { acc, o -> acc.resolve(o) },
                 *tc.args.toTypedArray(),
                 `in` = tc.`in`
             )

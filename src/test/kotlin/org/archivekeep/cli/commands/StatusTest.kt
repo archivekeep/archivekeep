@@ -10,10 +10,10 @@ class StatusTest : CommandTestBase() {
     fun `test fully indexed archive`() {
         createTestingArchive()
 
-        val out1 = executeCmd(archivePath, "status")
+        val out1 = executeCmd(currentArchivePath, "status")
         assertEquals("Total indexed files in archive: 6\n", out1)
 
-        val out2 = executeCmd(archivePath.resolve("dir"), "status")
+        val out2 = executeCmd(currentArchivePath.resolve("dir"), "status")
         assertEquals("Total indexed files in archive: 6\n", out2)
     }
 
@@ -77,7 +77,7 @@ class StatusTest : CommandTestBase() {
             )
         ).forEach {tc ->
             val out = executeCmd(
-                tc.subpath.fold(archivePath) { acc, o -> acc.resolve(o)},
+                tc.subpath.fold(currentArchivePath) { acc, o -> acc.resolve(o)},
                 *tc.args.toTypedArray()
             )
             assertEquals(tc.out, out)

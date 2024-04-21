@@ -79,7 +79,7 @@ class Add : Callable<Int> {
         }
 
         if (result.moves.isNotEmpty()) {
-            if (mainCommand.askForConfirmation(spec.commandLine(), "\nDo want to perform move?")) {
+            if (mainCommand.askForConfirmation("\nDo want to perform move?")) {
                 out.println("proceeding ...")
 
                 result.executeMoves(

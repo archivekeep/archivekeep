@@ -6,7 +6,6 @@ import org.junit.jupiter.api.io.TempDir
 import picocli.CommandLine
 import java.io.File
 import java.io.PrintWriter
-import java.io.StringReader
 import java.io.StringWriter
 import java.nio.file.Path
 import java.security.MessageDigest
@@ -16,17 +15,19 @@ import kotlin.test.assertEquals
 abstract class CommandTestBase {
 
     @field:TempDir
-    lateinit var archiveTempDir: File
+    lateinit var currentArchiveTempDir: File
 
-    val archivePath: Path
-        get() = Path(archiveTempDir.absolutePath)
+    val currentArchivePath: Path
+        get() = Path(currentArchiveTempDir.absolutePath)
 
-    internal fun fileRepo() = FilesRepo(archivePath)
+    internal fun fileRepo() = FilesRepo(currentArchivePath)
 
     internal fun executeCmd(
         cwd: Path,
         vararg args: String,
-        `in`: String = ""
+        // TODO: interactive mode - listOf(ExpectOut("..."), ProvideIn("..."),...)
+        `in`: String = "",
+        expectedOut: String? = null
     ): String {
         val app = MainCommand(cwd, inStream = `in`.byteInputStream())
         val cmd = CommandLine(app)
@@ -35,13 +36,34 @@ abstract class CommandTestBase {
         cmd.setOut(PrintWriter(sw))
 
         val exitCode: Int = cmd.execute(*args)
-        assertEquals(0, exitCode)
+        val out = sw.toString()
 
-        return sw.toString()
+        assertEquals(0, exitCode)
+        expectedOut?.let {
+            assertEquals(expectedOut, out)
+        }
+
+        return out
+    }
+
+    internal fun executeFailingCmd(
+        cwd: Path,
+        vararg args: String,
+        `in`: String = ""
+    ): Pair<Int, String> {
+        val app = MainCommand(cwd, inStream = `in`.byteInputStream())
+        val cmd = CommandLine(app)
+
+        val sw = StringWriter()
+        cmd.setOut(PrintWriter(sw))
+
+        val exitCode: Int = cmd.execute(*args)
+
+        return Pair(exitCode, sw.toString())
     }
 
     fun createTestingArchive() {
-        createArchiveWithContents(
+        createCurrentArchiveWithContents(
             mapOf(
                 "a" to "file_a",
                 "b" to "file_b",
@@ -53,12 +75,11 @@ abstract class CommandTestBase {
         )
     }
 
-    fun createArchiveWithContents(files: Map<String, String>) {
+    fun createCurrentArchiveWithContents(files: Map<String, String>) {
         createUnindexedFiles(files)
 
-
         files.forEach {
-            val checksumPath = archiveTempDir.resolve(".archive/checksums").resolve(it.key + ".sha256").toPath()
+            val checksumPath = currentArchiveTempDir.resolve(".archive/checksums").resolve(it.key + ".sha256").toPath()
             checksumPath.createParentDirectories()
 
             checksumPath.writeText(it.value.sha256())
@@ -67,7 +88,7 @@ abstract class CommandTestBase {
 
     internal fun createUnindexedFiles(files: Map<String, String>) {
         files.forEach {
-            val filePath = archiveTempDir.resolve(it.key).toPath()
+            val filePath = currentArchiveTempDir.resolve(it.key).toPath()
             filePath.createParentDirectories()
 
             filePath.writeText(it.value)
@@ -76,7 +97,7 @@ abstract class CommandTestBase {
 
     internal fun createMissingFiles(files: Map<String, String>) {
         files.forEach {
-            val checksumPath = archiveTempDir.resolve(".archive/checksums").resolve(it.key + ".sha256").toPath()
+            val checksumPath = currentArchiveTempDir.resolve(".archive/checksums").resolve(it.key + ".sha256").toPath()
             checksumPath.createParentDirectories()
 
             checksumPath.writeText(it.value.sha256())
@@ -87,7 +108,7 @@ abstract class CommandTestBase {
     internal fun cleanup() {
         // TODO: change to parametrized test, and don't do manual cleanup
 
-        archiveTempDir.toPath().forEachDirectoryEntry {
+        currentArchiveTempDir.toPath().forEachDirectoryEntry {
             println("to delete: $it")
             it.deleteRecursively()
         }

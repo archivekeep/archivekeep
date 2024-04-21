@@ -2,6 +2,7 @@ package org.archivekeep.cli
 
 import org.archivekeep.cli.commands.Add
 import org.archivekeep.cli.commands.Compare
+import org.archivekeep.cli.commands.Push
 import org.archivekeep.cli.commands.Status
 import org.archivekeep.cli.workingarchive.WorkingArchive
 import org.archivekeep.cli.workingarchive.openWorkingArchive
@@ -9,6 +10,7 @@ import org.archivekeep.core.repo.Repo
 import org.archivekeep.core.repo.files.openFilesRepoOrNull
 import picocli.CommandLine
 import picocli.CommandLine.Command
+import picocli.CommandLine.Spec
 import java.io.InputStream
 import java.io.PrintWriter
 import java.io.Reader
@@ -22,15 +24,17 @@ import kotlin.system.exitProcess
     mixinStandardHelpOptions = true,
     subcommands = [
         Add::class,
-        Compare::class,
         Status::class,
+
+        Compare::class,
+        Push::class,
     ],
 )
 class MainCommand(
     private val workingDirectory: Path,
     private val inStream: InputStream= System.`in`
 ) {
-    @CommandLine.Spec
+    @Spec
     lateinit var spec: CommandLine.Model.CommandSpec
 
     // used for ascii doctor
@@ -49,9 +53,9 @@ class MainCommand(
 
     val `in` = inStream.bufferedReader()
 
-    fun askForConfirmation(cmd: CommandLine, prompt: String): Boolean {
+    fun askForConfirmation(prompt: String): Boolean {
         while (true) {
-            cmd.out.println("$prompt [y/n]: ")
+            spec.commandLine().out.println("$prompt [y/n]: ")
 
             val answer = `in`.readLine() ?: throw RuntimeException("end of input")
 

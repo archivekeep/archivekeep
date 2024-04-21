@@ -1,16 +1,17 @@
 package org.archivekeep.cli.commands
 
+import org.archivekeep.createArchiveWithContents
 import org.junit.jupiter.api.io.TempDir
 import java.io.File
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
 
-class CompareTestTest : CommandTestBase() {
+class CompareTest : CommandTestBase() {
 
     @Test
     fun execute(@TempDir otherDir: File) {
-        this.createArchiveWithContents(
+        createCurrentArchiveWithContents(
             mapOf(
                 "file to be extra in source" to "file to be extra in source",
                 "file to duplicate" to "file to duplicate: old",
@@ -25,7 +26,7 @@ class CompareTestTest : CommandTestBase() {
             )
         )
 
-        org.archivekeep.createArchiveWithContents(
+        createArchiveWithContents(
             otherDir, mapOf(
                 "file to be extra in target" to "file to be extra in target",
                 "file to duplicate" to "file to duplicate: old",
@@ -37,7 +38,7 @@ class CompareTestTest : CommandTestBase() {
             )
         )
 
-        val out1 = executeCmd(archivePath, "compare", otherDir.path)
+        val out1 = executeCmd(currentArchivePath, "compare", otherDir.path)
         assertEquals("""
             
             Extra files in local archive:

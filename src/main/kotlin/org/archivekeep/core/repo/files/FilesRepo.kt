@@ -1,13 +1,16 @@
 package org.archivekeep.core.repo.files
 
 import computeChecksum
+import org.archivekeep.core.exceptions.DestinationExists
 import org.archivekeep.core.exceptions.NotRegularFilePath
+import org.archivekeep.core.repo.ArchiveFileInfo
 import org.archivekeep.core.repo.LocalRepo
 import org.archivekeep.core.repo.RepoIndex
 import safeSubPath
+import java.io.InputStream
 import java.nio.file.FileSystems
 import java.nio.file.Files
-import java.nio.file.OpenOption
+import java.nio.file.Files.copy
 import java.nio.file.Path
 import java.nio.file.PathMatcher
 import java.nio.file.StandardOpenOption
@@ -92,7 +95,7 @@ class FilesRepo(
     }
 
     override fun remove(path: String) {
-        val checksumPath = Path("${checksumsRoot.resolve(safeSubPath(path))}.sha256")
+        val checksumPath = getChecksumPath(path)
 
         if (!checksumPath.isRegularFile()) {
             throw NotRegularFilePath(checksumPath.toString())
@@ -101,8 +104,56 @@ class FilesRepo(
         checksumPath.deleteIfExists()
     }
 
+    override fun move(from: String, to: String) {
+        val dstPath = root.resolve(safeSubPath(to))
+        if(dstPath.exists()) {
+            throw DestinationExists(to)
+        }
+
+        val checksum = this.fileChecksum(from)
+        this.storeFileChecksum(to, checksum)
+
+        dstPath.createParentDirectories()
+
+        root.resolve(from).moveTo(dstPath)
+
+        getChecksumPath(from).deleteExisting()
+    }
+
+    override fun open(filename: String): Pair<ArchiveFileInfo, InputStream> {
+        val checksum = fileChecksum(filename)
+
+        return Pair(
+            ArchiveFileInfo(
+                checksumSha256 = checksum
+            ),
+            root.resolve(safeSubPath(filename)).inputStream()
+        )
+    }
+
+    override fun save(filename: String, info: ArchiveFileInfo, stream: InputStream) {
+        val dstPath = root.resolve(safeSubPath(filename))
+
+        dstPath.createParentDirectories()
+
+        try {
+            copy(stream, dstPath)
+
+            val realChecksum = computeChecksum(dstPath)
+
+            if(realChecksum != info.checksumSha256) {
+                throw RuntimeException("copied file has wrong checksum: got=${realChecksum}, expected=${info.checksumSha256}")
+            }
+
+            storeFileChecksum(filename, info.checksumSha256)
+        } catch (e: Exception) {
+            getChecksumPath(filename).deleteIfExists()
+            dstPath.deleteIfExists()
+        }
+    }
+
     private fun storeFileChecksum(path: String, checksum: String) {
-        val checksumPath = Path("${checksumsRoot.resolve(safeSubPath(path))}.sha256")
+        val checksumPath = getChecksumPath(path)
 
         checksumPath.createParentDirectories()
 
@@ -116,11 +167,13 @@ class FilesRepo(
     }
 
     override fun contains(path: String): Boolean {
-        val checksumPath = Path("${checksumsRoot.resolve(safeSubPath(path))}.sha256")
+        val checksumPath = getChecksumPath(path)
         val fullPath = root.resolve(safeSubPath(path))
 
         return checksumPath.isRegularFile() && fullPath.isRegularFile()
     }
+
+    private fun getChecksumPath(path: String) = Path("${checksumsRoot.resolve(safeSubPath(path))}.sha256")
 
     override fun index(): RepoIndex {
         val files = Files.walk(checksumsRoot)

@@ -94,6 +94,9 @@ class CompareOperation {
         val unmatchedBaseExtras: List<ExtraGroup>,
         val unmatchedOtherExtras: List<ExtraGroup>,
     ) {
+        val hasRelocations: Boolean
+            get() = relocations.isNotEmpty()
+
         data class Relocation(
             val checksum: String,
             val baseFilenames: List<String>,

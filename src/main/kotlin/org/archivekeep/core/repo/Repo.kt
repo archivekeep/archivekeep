@@ -1,5 +1,6 @@
 package org.archivekeep.core.repo
 
+import java.io.InputStream
 import java.nio.file.Path
 
 data class RepoIndex (
@@ -15,10 +16,18 @@ data class RepoIndex (
     )
 }
 
+data class ArchiveFileInfo (
+    val checksumSha256: String
+)
+
 interface Repo {
     fun contains(path: String): Boolean
 
     fun index(): RepoIndex
+
+    fun move(from: String, to: String)
+    fun open(filename: String): Pair<ArchiveFileInfo, InputStream>
+    fun save(filename: String, info: ArchiveFileInfo, stream: InputStream)
 }
 
 interface LocalRepo: Repo {
