@@ -7,14 +7,14 @@ Unfortunately, Gradle GraalVM plugin doesn't work well with non-FHS NixOS.
 
 **Warning:** there's a bug in GraalVM ([#8792](https://github.com/oracle/graal/issues/8792)), that makes native image not work well with non-ASCII filenames and paths.
 
-```shell
-./gradlew clean nativeCompileClasspathJar
+Build native-image binary:
 
-native-image \
-  --libc=musl \
-  --static \
-  --no-fallback \
-  -cp ./build/libs/nativecompile-classpath-1.0-SNAPSHOT.jar \
-  -o archivekeep \
-  org.archivekeep.cli.MainKt
+```shell
+./gradlew --console=plain --no-daemon clean nativeCompile
+```
+
+Run native-image binary:
+
+```shell
+time ./build/native/nativeCompile/archivekeep-picocli --help
 ```

@@ -16,12 +16,10 @@ pkgs.mkShell {
   ];
 
   packages = with pkgs; [
-    # use older JDK - Gradle/Groovy is not compatible with version 22 provided by GraalVM
-    openjdk17
-
-    # still install GraalVM, but additionally - not a primary JDK
-    musl
+    # add GraalVM - must be default JDK to work properly
+    # gradle will detect other JDK(s) to compile classes
     graalvmCEPackages.graalvm-ce-musl
+    musl
 
     # docs stuff
     asciidoctor
