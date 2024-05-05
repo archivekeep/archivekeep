@@ -8,5 +8,6 @@ pluginManagement {
 rootProject.name = "archivekeep"
 
 include(
-    "cli"
+    "cli",
+    "gui"
 )

@@ -1,6 +1,16 @@
 { pkgs ? import <nixpkgs> {}}:
 
-pkgs.mkShell {
+let
+  libs  = with pkgs; [
+    # Kotlin Compose Desktop
+    fontconfig
+    libGL
+    xorg.libX11
+  ];
+
+  lib-path = with pkgs; lib.makeLibraryPath libs;
+
+in pkgs.mkShell {
   OPENJDK_17_HOME = "${pkgs.openjdk17}/lib/openjdk";
   OPENJDK_21_HOME = "${pkgs.openjdk21}/lib/openjdk";
   TEMURIN_17_HOME = "${pkgs.temurin-bin-17}";
@@ -13,7 +23,7 @@ pkgs.mkShell {
     temurin-bin-17
     temurin-bin-21
     graalvm-ce
-  ];
+  ] ++ libs;
 
   packages = with pkgs; [
     # add GraalVM - must be default JDK to work properly
@@ -25,4 +35,8 @@ pkgs.mkShell {
     asciidoctor
     hugo
   ];
+
+  shellHook = ''
+    export "LD_LIBRARY_PATH=$LD_LIBRARY_PATH:${lib-path}"
+  '';
 }

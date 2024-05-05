@@ -1,8 +1,8 @@
 import org.asciidoctor.gradle.jvm.AsciidoctorTask
 
 plugins {
-    id("org.jetbrains.kotlin.jvm") version "1.9.0"
-    id("org.jetbrains.kotlin.kapt") version "1.9.0"
+    kotlin("jvm")
+    kotlin("kapt")
 
     application
 
