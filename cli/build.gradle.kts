@@ -51,6 +51,12 @@ tasks.withType(Jar::class).configureEach {
 
 graalvmNative {
     toolchainDetection = true
+
+    binaries {
+        named("main") {
+            imageName = "archivekeep"
+        }
+    }
 }
 
 val generateManpageAsciiDoc = tasks.register<JavaExec>("generateManpageAsciiDoc") {

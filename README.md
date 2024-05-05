@@ -10,11 +10,11 @@ Unfortunately, Gradle GraalVM plugin doesn't work well with non-FHS NixOS.
 Build native-image binary:
 
 ```shell
-./gradlew --console=plain --no-daemon clean nativeCompile
+./gradlew --console=plain --no-daemon clean cli:nativeCompile
 ```
 
 Run native-image binary:
 
 ```shell
-time ./build/native/nativeCompile/archivekeep-picocli --help
+time ./cli/build/native/nativeCompile/archivekeep --help
 ```
