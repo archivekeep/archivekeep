@@ -1,0 +1,6 @@
+[Desktop Entry]
+Name=ArchiveKeep
+Exec=archivekeep-gui
+Type=Application
+Icon=org.archivekeep.ArchiveKeep
+Categories=Utility;Archiving;

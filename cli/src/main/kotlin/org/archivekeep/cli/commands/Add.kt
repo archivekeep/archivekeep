@@ -1,7 +1,9 @@
 package org.archivekeep.cli.commands
 
+import kotlinx.coroutines.runBlocking
 import org.archivekeep.cli.MainCommand
 import org.archivekeep.core.operations.AddOperation
+import org.archivekeep.core.operations.AddOperationTextWriter
 import picocli.CommandLine.Command
 import picocli.CommandLine.Model.CommandSpec
 import picocli.CommandLine.Option
@@ -45,75 +47,58 @@ class Add : Callable<Int> {
     val out: PrintWriter
         get() = spec.commandLine().out
 
-    override fun call(): Int {
-        val currentArchive = mainCommand.openCurrentArchive()
+    override fun call(): Int =
+        runBlocking(mainCommand.coroutineContext) {
+            val currentArchive = mainCommand.openCurrentArchive()
 
-        val rootRelativeGlobs =
-            if (globs.isNotEmpty()) {
-                globs
-                    .map {
-                        currentArchive.workingSubDirectory
-                            .resolve(it)
-                            .normalize()
-                            .pathString
-                    }.map { if (it == "") "." else it }
-            } else {
-                Collections.singletonList(".")
-            }
+            val rootRelativeGlobs =
+                if (globs.isNotEmpty()) {
+                    globs
+                        .map { currentArchive.workingSubDirectory.resolve(it).normalize().pathString }
+                        .map { if (it == "") "." else it }
+                } else {
+                    Collections.singletonList(".")
+                }
 
-        val result =
-            AddOperation(
-                subsetGlobs = rootRelativeGlobs,
-                disableFilenameCheck = false,
-                disableMovesCheck = disableMovesCheck,
-            ).prepare(currentArchive.repo)
+            val result =
+                AddOperation(
+                    subsetGlobs = rootRelativeGlobs,
+                    disableFilenameCheck = false,
+                    disableMovesCheck = disableMovesCheck,
+                ).prepare(currentArchive.repo)
 
-        if (!doNotPrintPreparationSummary) {
-            if (result.missingFiles.isNotEmpty()) {
-                out.println("Missing indexed files not matched by add:")
-                result.missingFiles.forEach { out.println("\t${currentArchive.fromArchiveToRelativePath(it)}") }
+            if (!doNotPrintPreparationSummary) {
+                result.printSummary(
+                    this@Add.out,
+                    transformPath = { currentArchive.fromArchiveToRelativePath(it).toString() },
+                )
                 out.println()
             }
 
-            out.println("New files to be indexed:")
-            result.newFiles.forEach { out.println("\t${currentArchive.fromArchiveToRelativePath(it)}") }
-            out.println()
+            val writter =
+                AddOperationTextWriter(
+                    out,
+                    fromArchiveToRelativePath = currentArchive::fromArchiveToRelativePath,
+                )
 
             if (result.moves.isNotEmpty()) {
-                out.println("Files to be moved:")
-                result.moves.forEach {
-                    out.println(
-                        "\t${currentArchive.fromArchiveToRelativePath(it.from)} -> ${currentArchive.fromArchiveToRelativePath(it.to)}",
+                if (mainCommand.askForConfirmation("\nDo want to perform move?")) {
+                    out.println("proceeding ...")
+
+                    result.executeMovesReindex(
+                        currentArchive.repo,
+                        onMoveCompleted = writter::onMoveCompleted,
                     )
                 }
-                out.println()
             }
-        }
 
-        if (result.moves.isNotEmpty()) {
-            if (mainCommand.askForConfirmation("\nDo want to perform move?")) {
-                out.println("proceeding ...")
-
-                result.executeMoves(
+            if (result.newFiles.isNotEmpty()) {
+                result.executeAddNewFiles(
                     currentArchive.repo,
-                    onMoveCompleted = {
-                        out.println(
-                            "moved: ${currentArchive.fromArchiveToRelativePath(
-                                it.from,
-                            )} to ${currentArchive.fromArchiveToRelativePath(it.to)}",
-                        )
-                    },
+                    onAddCompleted = writter::onAddCompleted,
                 )
             }
-        }
 
-        if (result.newFiles.isNotEmpty()) {
-            result.executeAddNewFiles(
-                currentArchive.repo,
-                onAddCompleted = { out.println("added: ${currentArchive.fromArchiveToRelativePath(it)}") },
-            )
+            return@runBlocking 0
         }
-
-        return 0
-    }
 }

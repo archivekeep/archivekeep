@@ -1,5 +1,6 @@
 package org.archivekeep.cli.commands
 
+import kotlinx.coroutines.runBlocking
 import org.archivekeep.cli.MainCommand
 import org.archivekeep.core.operations.CompareOperation
 import picocli.CommandLine.Command
@@ -30,18 +31,19 @@ class Compare : Callable<Int> {
     val out: PrintWriter
         get() = spec.commandLine().out
 
-    override fun call(): Int {
-        val currentArchive = mainCommand.openCurrentArchive()
-        val otherArchive = mainCommand.openOtherArchive(otherArchiveLocation)
+    override fun call(): Int =
+        runBlocking(mainCommand.coroutineContext) {
+            val currentArchive = mainCommand.openCurrentArchive()
+            val otherArchive = mainCommand.openOtherArchive(otherArchiveLocation)
 
-        val result =
-            CompareOperation().execute(
-                currentArchive.repo,
-                otherArchive,
-            )
+            val result =
+                CompareOperation().execute(
+                    currentArchive.repo,
+                    otherArchive,
+                )
 
-        result.printAll(out, "local", "remote")
+            result.printAll(out, "local", "remote")
 
-        return 0
-    }
+            return@runBlocking 0
+        }
 }

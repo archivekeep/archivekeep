@@ -9,20 +9,23 @@ plugins {
     id("org.graalvm.buildtools.native") version "0.10.0"
 
     id("org.asciidoctor.jvm.convert") version "4.0.2"
+
+    id("org.jlleitschuh.gradle.ktlint")
 }
 
 group = "org.archivekeep"
 version = "1.0-SNAPSHOT"
 
-repositories {
-    mavenCentral()
-}
-
 dependencies {
+    implementation(project(":common"))
+
     implementation("info.picocli:picocli:4.7.5")
     kapt("info.picocli:picocli-codegen:4.7.5")
 
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.9.0")
+
     testImplementation("org.jetbrains.kotlin:kotlin-test")
+    testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.9.0")
 }
 
 tasks.named<Test>("test") {

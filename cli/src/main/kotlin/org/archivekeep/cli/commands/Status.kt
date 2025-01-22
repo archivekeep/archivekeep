@@ -1,5 +1,6 @@
 package org.archivekeep.cli.commands
 
+import kotlinx.coroutines.runBlocking
 import org.archivekeep.cli.MainCommand
 import org.archivekeep.core.operations.StatusOperation
 import picocli.CommandLine.Command
@@ -34,39 +35,40 @@ class Status : Callable<Int> {
     val out: PrintWriter
         get() = spec.commandLine().out
 
-    override fun call(): Int {
-        val currentArchive = mainCommand.openCurrentArchive()
+    override fun call(): Int =
+        runBlocking(mainCommand.coroutineContext) {
+            val currentArchive = mainCommand.openCurrentArchive()
 
-        val rootRelativeGlobs =
+            val rootRelativeGlobs =
+                if (globs.isNotEmpty()) {
+                    globs
+                        .map { currentArchive.workingSubDirectory.resolve(it).normalize().pathString }
+                        .map { if (it == "") "." else it }
+                } else {
+                    singletonList(".")
+                }
+
+            val result = StatusOperation(subsetGlobs = rootRelativeGlobs).execute(currentArchive.repo)
+
+            if (result.newFiles.isNotEmpty()) {
+                out.println("")
+                out.println("Files not added to the archive:")
+
+                result.newFiles.sorted().forEach {
+                    val relToWD = Path(it).relativeTo(currentArchive.workingSubDirectory)
+
+                    out.println("\t${relToWD.pathString}")
+                }
+
+                out.println()
+            }
+
             if (globs.isNotEmpty()) {
-                globs
-                    .map { currentArchive.workingSubDirectory.resolve(it).normalize().pathString }
-                    .map { if (it == "") "." else it }
+                out.println("Files indexed in archive matching globs: ${result.storedFiles.size}")
             } else {
-                singletonList(".")
+                out.println("Total indexed files in archive: ${result.storedFiles.size}")
             }
 
-        val result = StatusOperation(subsetGlobs = rootRelativeGlobs).execute(currentArchive.repo)
-
-        if (result.newFiles.isNotEmpty()) {
-            out.println("")
-            out.println("Files not added to the archive:")
-
-            result.newFiles.sorted().forEach {
-                val relToWD = Path(it).relativeTo(currentArchive.workingSubDirectory)
-
-                out.println("\t${relToWD.pathString}")
-            }
-
-            out.println()
+            return@runBlocking 0
         }
-
-        if (globs.isNotEmpty()) {
-            out.println("Files indexed in archive matching globs: ${result.storedFiles.size}")
-        } else {
-            out.println("Total indexed files in archive: ${result.storedFiles.size}")
-        }
-
-        return 0
-    }
 }

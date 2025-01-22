@@ -37,6 +37,16 @@ class PushTest : CommandTestBase() {
             `in` = "yes\n",
             expectedOut =
                 """
+                
+                Extra files in current archive:
+                	b
+                	c
+                	d
+                
+                Extra files in current archive: 3
+                Extra files in other archive: 0
+                Total files present in both archives: 1
+
                 Do you want to push new files? [y/n]: 
                 file stored: b
                 file stored: c
@@ -76,6 +86,14 @@ class PushTest : CommandTestBase() {
             assertEquals(1, exitCode)
             assertEquals(
                 """
+                
+                Files to be moved in other to match current:
+                	[31m{old/ -> }[0ma
+                
+                Extra files in current archive: 0
+                Extra files in other archive: 0
+                Total files present in both archives: 1
+
                 relocations disabled but present
                 Enable relocations with --resolve-moves, or switch to --additive-duplicating mode
                 """.trimIndent() + "\n",
@@ -94,7 +112,15 @@ class PushTest : CommandTestBase() {
             `in` = "yes\n",
             expectedOut =
                 """
-                Do you want to perform moves? [y/n]: 
+                
+                Files to be moved in other to match current:
+                	[31m{old/ -> }[0ma
+
+                Extra files in current archive: 0
+                Extra files in other archive: 0
+                Total files present in both archives: 1
+                
+                Do you want to push moves? [y/n]: 
                 file moved: old/a -> a
                 """.trimIndent() + "\n",
         )
@@ -120,6 +146,14 @@ class PushTest : CommandTestBase() {
             assertEquals(1, exitCode)
             assertEquals(
                 """
+                
+                Files to be moved in other to match current:
+                	{} -> duplication/a
+
+                Extra files in current archive: 0
+                Extra files in other archive: 0
+                Total files present in both archives: 2
+                
                 relocations disabled but present
                 Enable relocations with --resolve-moves, or switch to --additive-duplicating mode
                 """.trimIndent() + "\n",
@@ -144,6 +178,14 @@ class PushTest : CommandTestBase() {
             assertEquals(1, exitCode)
             assertEquals(
                 """
+                
+                Files to be moved in other to match current:
+                	{} -> duplication/a
+
+                Extra files in current archive: 0
+                Extra files in other archive: 0
+                Total files present in both archives: 2
+
                 duplicate increase is not allowed
                 Enable duplication increase with --allow-duplicate-increase, or switch to --additive-duplicating mode
                 """.trimIndent() + "\n",
@@ -172,7 +214,15 @@ class PushTest : CommandTestBase() {
             `in` = "yes\n",
             expectedOut =
                 """
-                Do you want to perform moves? [y/n]: 
+                
+                Files to be moved in other to match current:
+                	{} -> duplication/a
+
+                Extra files in current archive: 0
+                Extra files in other archive: 0
+                Total files present in both archives: 2
+
+                Do you want to push moves? [y/n]: 
                 file stored: duplication/a
                 """.trimIndent() + "\n",
         )
@@ -198,7 +248,15 @@ class PushTest : CommandTestBase() {
             `in` = "yes\n",
             expectedOut =
                 """
-                Do you want to perform additive duplicating? [y/n]: 
+                
+                Files to be moved in other to match current:
+                	{} -> duplication/a
+
+                Extra files in current archive: 0
+                Extra files in other archive: 0
+                Total files present in both archives: 2
+
+                Do you want to push in additive duplicating mode? [y/n]: 
                 file stored: duplication/a
                 """.trimIndent() + "\n",
         )
@@ -224,7 +282,20 @@ class PushTest : CommandTestBase() {
             `in` = "yes\nyes\n",
             expectedOut =
                 """
-                Do you want to perform moves? [y/n]: 
+                
+                Extra files in current archive:
+                	new/f
+
+                Files to be moved in other to match current:
+                	{} -> duplicated/e
+                	old/b -> {relocated and duplicated/b, relocated and duplicated/c}
+                	[31m{ol -> relocate}[0md/a
+
+                Extra files in current archive: 1
+                Extra files in other archive: 0
+                Total files present in both archives: 5
+
+                Do you want to push moves? [y/n]: 
                 file stored: duplicated/e
                 file stored: relocated and duplicated/c
                 file moved: old/b -> relocated and duplicated/b
@@ -255,7 +326,20 @@ class PushTest : CommandTestBase() {
             `in` = "yes\nyes\n",
             expectedOut =
                 """
-                Do you want to perform additive duplicating? [y/n]: 
+                
+                Extra files in current archive:
+                	new/f
+                
+                Files to be moved in other to match current:
+                	{} -> duplicated/e
+                	old/b -> {relocated and duplicated/b, relocated and duplicated/c}
+                	[31m{ol -> relocate}[0md/a
+                
+                Extra files in current archive: 1
+                Extra files in other archive: 0
+                Total files present in both archives: 5
+                
+                Do you want to push in additive duplicating mode? [y/n]: 
                 file stored: duplicated/e
                 file stored: relocated and duplicated/b
                 file stored: relocated and duplicated/c

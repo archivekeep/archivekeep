@@ -1,6 +1,6 @@
 package org.archivekeep
 
-import org.archivekeep.cli.commands.sha256
+import org.archivekeep.cli.utils.sha256
 import java.io.File
 import kotlin.io.path.createParentDirectories
 import kotlin.io.path.writeText

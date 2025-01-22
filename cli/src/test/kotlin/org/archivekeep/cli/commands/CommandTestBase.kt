@@ -1,6 +1,7 @@
 package org.archivekeep.cli.commands
 
 import org.archivekeep.cli.MainCommand
+import org.archivekeep.cli.utils.sha256
 import org.archivekeep.core.repo.files.FilesRepo
 import org.junit.jupiter.api.io.TempDir
 import picocli.CommandLine
@@ -8,7 +9,7 @@ import java.io.File
 import java.io.PrintWriter
 import java.io.StringWriter
 import java.nio.file.Path
-import java.security.MessageDigest
+import kotlin.coroutines.EmptyCoroutineContext
 import kotlin.io.path.ExperimentalPathApi
 import kotlin.io.path.Path
 import kotlin.io.path.createParentDirectories
@@ -33,7 +34,7 @@ abstract class CommandTestBase {
         `in`: String = "",
         expectedOut: String? = null,
     ): String {
-        val app = MainCommand(cwd, inStream = `in`.byteInputStream())
+        val app = MainCommand(cwd, EmptyCoroutineContext, inStream = `in`.byteInputStream())
         val cmd = CommandLine(app)
 
         val sw = StringWriter()
@@ -55,7 +56,7 @@ abstract class CommandTestBase {
         vararg args: String,
         `in`: String = "",
     ): Pair<Int, String> {
-        val app = MainCommand(cwd, inStream = `in`.byteInputStream())
+        val app = MainCommand(cwd, EmptyCoroutineContext, inStream = `in`.byteInputStream())
         val cmd = CommandLine(app)
 
         val sw = StringWriter()
@@ -120,14 +121,3 @@ abstract class CommandTestBase {
 
     internal fun terminalLines(vararg lines: String): String = lines.joinToString("\n") + "\n"
 }
-
-fun String.sha256(): String = hashString(this, "SHA-256")
-
-private fun hashString(
-    input: String,
-    algorithm: String,
-): String =
-    MessageDigest
-        .getInstance(algorithm)
-        .digest(input.toByteArray())
-        .fold("") { str, it -> str + "%02x".format(it) }

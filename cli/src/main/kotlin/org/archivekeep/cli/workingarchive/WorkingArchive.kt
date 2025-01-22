@@ -12,9 +12,7 @@ class WorkingArchive(
     val relativePathToRoot: Path,
     val repo: Repo,
 ) {
-    fun fromArchiveToRelativePath(path: String): Path {
-        return Path.of(path).relativeTo(workingSubDirectory)
-    }
+    fun fromArchiveToRelativePath(path: String): Path = Path.of(path).relativeTo(workingSubDirectory)
 }
 
 fun openWorkingArchive(cwd: Path): WorkingArchive {

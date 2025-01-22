@@ -1,0 +1,212 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   width="32"
+   height="32"
+   viewBox="0 0 32 32"
+   version="1.1"
+   id="svg1"
+   inkscape:version="1.4 (e7c3feb100, 2024-10-09)"
+   sodipodi:docname="org.archivekeep.ArchiveKeep.svg"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns:xlink="http://www.w3.org/1999/xlink"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <sodipodi:namedview
+     id="namedview1"
+     pagecolor="#ffffff"
+     bordercolor="#000000"
+     borderopacity="0.25"
+     inkscape:showpageshadow="2"
+     inkscape:pageopacity="0.0"
+     inkscape:pagecheckerboard="0"
+     inkscape:deskcolor="#d1d1d1"
+     inkscape:document-units="px"
+     inkscape:zoom="6.363961"
+     inkscape:cx="11.785113"
+     inkscape:cy="19.327585"
+     inkscape:window-width="2560"
+     inkscape:window-height="1368"
+     inkscape:window-x="0"
+     inkscape:window-y="0"
+     inkscape:window-maximized="1"
+     inkscape:current-layer="layer1"
+     showguides="false" />
+  <defs
+     id="defs1">
+    <linearGradient
+       id="linearGradient10"
+       inkscape:collect="always">
+      <stop
+         style="stop-color:#59a6ff;stop-opacity:1;"
+         offset="0"
+         id="stop10" />
+      <stop
+         style="stop-color:#acd6ff;stop-opacity:1;"
+         offset="1"
+         id="stop11" />
+    </linearGradient>
+    <linearGradient
+       id="linearGradient8"
+       inkscape:collect="always">
+      <stop
+         style="stop-color:#cdddca;stop-opacity:1;"
+         offset="0"
+         id="stop8" />
+      <stop
+         style="stop-color:#dafcd1;stop-opacity:1;"
+         offset="1"
+         id="stop9" />
+    </linearGradient>
+    <linearGradient
+       inkscape:collect="always"
+       xlink:href="#linearGradient8"
+       id="linearGradient9"
+       x1="3"
+       y1="27"
+       x2="29"
+       y2="27"
+       gradientUnits="userSpaceOnUse" />
+    <linearGradient
+       inkscape:collect="always"
+       xlink:href="#linearGradient10"
+       id="linearGradient11"
+       x1="3"
+       y1="13.5"
+       x2="29"
+       y2="13.5"
+       gradientUnits="userSpaceOnUse" />
+  </defs>
+  <g
+     inkscape:label="Layer 1"
+     inkscape:groupmode="layer"
+     id="layer1">
+    <path
+       id="rect3-2"
+       style="fill:url(#linearGradient11);stroke-linecap:round;stroke-linejoin:round"
+       d="M 5 3 C 3.892 3 3 3.892 3 5 L 3 17 L 3 22 L 3 24 L 5 24 L 27 24 L 29 24 L 29 22 L 29 17 L 29 5 C 29 3.892 28.108 3 27 3 L 5 3 z " />
+    <path
+       id="rect2-6"
+       style="fill:url(#linearGradient9);stroke-width:2.36001;stroke-linecap:round;stroke-linejoin:round"
+       d="M 3 24 L 3 27 C 3 28.108 3.892 29 5 29 L 27 29 C 28.108 29 29 28.108 29 27 L 29 24 L 3 24 z " />
+    <rect
+       style="fill:#3fc03f;fill-opacity:1;stroke:none;stroke-width:0.801654;stroke-linecap:round;stroke-linejoin:round;stroke-opacity:1"
+       id="rect2"
+       width="6"
+       height="3"
+       x="4"
+       y="25"
+       rx="1"
+       ry="1" />
+    <rect
+       style="fill:#3fc03f;fill-opacity:0.796637;stroke:none;stroke-width:0.731807;stroke-linecap:round;stroke-linejoin:round;stroke-opacity:1"
+       id="rect2-5"
+       width="5"
+       height="3"
+       x="11"
+       y="25"
+       rx="1"
+       ry="1" />
+    <rect
+       style="fill:#3fc03f;fill-opacity:0.713929;stroke:none;stroke-width:0.654548;stroke-linecap:round;stroke-linejoin:round;stroke-opacity:1"
+       id="rect2-5-2"
+       width="4"
+       height="3"
+       x="17"
+       y="25"
+       rx="1"
+       ry="1" />
+    <rect
+       style="fill:#3fc03f;fill-opacity:0.497816;stroke:none;stroke-width:0.566855;stroke-linecap:round;stroke-linejoin:round;stroke-opacity:1"
+       id="rect2-5-2-7"
+       width="3"
+       height="3"
+       x="22"
+       y="25"
+       rx="1"
+       ry="1" />
+    <rect
+       style="fill:#3fc03f;fill-opacity:0.311047;stroke:none;stroke-width:0.462835;stroke-linecap:round;stroke-linejoin:round;stroke-opacity:1"
+       id="rect2-5-2-7-6"
+       width="2"
+       height="3"
+       x="26"
+       y="25"
+       rx="1"
+       ry="1" />
+    <rect
+       style="fill:#3f75c0;fill-opacity:1;stroke:none;stroke-width:0.999999;stroke-linecap:round;stroke-linejoin:round;stroke-opacity:1"
+       id="rect3"
+       width="16"
+       height="7"
+       x="4"
+       y="4"
+       rx="1"
+       ry="1" />
+    <rect
+       style="fill:#3f75c0;fill-opacity:0.772607;stroke:none;stroke-width:0.999996;stroke-linecap:round;stroke-linejoin:round;stroke-opacity:1"
+       id="rect4"
+       width="12"
+       height="6"
+       x="4"
+       y="12"
+       rx="1"
+       ry="1" />
+    <rect
+       style="fill:#3f75c0;fill-opacity:0.681894;stroke:none;stroke-width:1;stroke-linecap:round;stroke-linejoin:round;stroke-opacity:1"
+       id="rect5"
+       width="7"
+       height="4"
+       x="4"
+       y="19"
+       rx="1"
+       ry="1" />
+    <rect
+       style="fill:#3f75c0;fill-opacity:0.481791;stroke:none;stroke-width:1;stroke-linecap:round;stroke-linejoin:round;stroke-opacity:1"
+       id="rect5-9"
+       width="4"
+       height="4"
+       x="12"
+       y="19"
+       rx="1"
+       ry="1" />
+    <rect
+       style="fill:#3f75c0;fill-opacity:0.623193;stroke:none;stroke-width:1;stroke-linecap:round;stroke-linejoin:round;stroke-opacity:1"
+       id="rect5-9-7"
+       width="3"
+       height="3"
+       x="17"
+       y="12"
+       rx="1"
+       ry="1" />
+    <rect
+       style="fill:#3f75c0;fill-opacity:0.751253;stroke:none;stroke-width:1;stroke-linecap:round;stroke-linejoin:round;stroke-opacity:1"
+       id="rect7"
+       width="4"
+       height="11"
+       x="21"
+       y="4"
+       rx="1"
+       ry="1" />
+    <rect
+       style="fill:#3f75c0;fill-opacity:0.436424;stroke:none;stroke-width:0.999996;stroke-linecap:round;stroke-linejoin:round;stroke-opacity:1"
+       id="rect7-3"
+       width="2"
+       height="11"
+       x="26"
+       y="4"
+       rx="1"
+       ry="1" />
+    <rect
+       style="fill:#3f75c0;fill-opacity:0.193621;stroke:none;stroke-width:0.999996;stroke-linecap:round;stroke-linejoin:round;stroke-opacity:1"
+       id="rect8"
+       width="11"
+       height="7"
+       x="17"
+       y="16"
+       rx="1"
+       ry="1" />
+  </g>
+</svg>
