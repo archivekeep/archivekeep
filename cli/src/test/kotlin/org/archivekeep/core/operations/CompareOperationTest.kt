@@ -2,18 +2,20 @@ package org.archivekeep.core.operations
 
 import org.archivekeep.core.repo.files.FilesRepo
 import org.archivekeep.createArchiveWithContents
+import org.junit.jupiter.api.Assertions.assertIterableEquals
 import org.junit.jupiter.api.Test
-
-import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.io.TempDir
 import java.io.File
 
 class CompareOperationTest {
-
     @Test
-    fun execute(@TempDir baseDir: File, @TempDir otherDir: File) {
+    fun execute(
+        @TempDir baseDir: File,
+        @TempDir otherDir: File,
+    ) {
         createArchiveWithContents(
-            baseDir, mapOf(
+            baseDir,
+            mapOf(
                 "file to be extra in source" to "file to be extra in source",
                 "file to duplicate" to "file to duplicate: old",
                 "file to duplicate 02" to "file to duplicate: old",
@@ -24,10 +26,11 @@ class CompareOperationTest {
                 "file to be left untouched" to "file to be left untouched: untouched",
                 "moved/file to move" to "file to move: old",
                 "old/file to modify backup" to "file to modify with backup: old",
-            )
+            ),
         )
         createArchiveWithContents(
-            otherDir, mapOf(
+            otherDir,
+            mapOf(
                 "file to be extra in target" to "file to be extra in target",
                 "file to duplicate" to "file to duplicate: old",
                 "file to move" to "file to move: old",
@@ -35,13 +38,14 @@ class CompareOperationTest {
                 "file to modify with backup" to "file to modify with backup: old",
                 "file to overwrite" to "file to overwrite: old",
                 "file to be left untouched" to "file to be left untouched: untouched",
-            )
+            ),
         )
 
-        val result = CompareOperation().execute(
-            FilesRepo(baseDir.toPath()),
-            FilesRepo(otherDir.toPath()),
-        )
+        val result =
+            CompareOperation().execute(
+                FilesRepo(baseDir.toPath()),
+                FilesRepo(otherDir.toPath()),
+            )
 
         assertIterableEquals(
             listOf(
@@ -66,62 +70,67 @@ class CompareOperationTest {
                     otherFilenames = listOf("file to modify with backup"),
                 ),
             ),
-            result.relocations
+            result.relocations,
         )
 
         assertIterableEquals(
             listOf(
                 "file to modify with backup",
             ),
-            result.newContentAfterMove
+            result.newContentAfterMove,
         )
 
         assertIterableEquals(
             listOf(
                 "file to overwrite",
             ),
-            result.newContentToOverwrite
+            result.newContentToOverwrite,
         )
 
         assertIterableEquals(
             listOf(
                 CompareOperation.Result.ExtraGroup(
                     checksum = "1edc8804c33fd71860f80dd0f5974f09c2cf9be162ae1dc8db0bfcb820e48cef",
-                    filenames = listOf(
-                        "file to be extra in source",
-                    ),
+                    filenames =
+                        listOf(
+                            "file to be extra in source",
+                        ),
                 ),
                 CompareOperation.Result.ExtraGroup(
                     checksum = "64ec974de61170bc2ba1041cde9a3a9fbe23ffbc4e5bdd8db8d149c2700c0b87",
-                    filenames = listOf(
-                        "file to modify with backup",
-                    ),
+                    filenames =
+                        listOf(
+                            "file to modify with backup",
+                        ),
                 ),
                 CompareOperation.Result.ExtraGroup(
                     checksum = "43cd4f8a83b9a4c06ffa4c62bf4d58dc3f48633faf4c2a15cb5ee897e54b6fb6",
-                    filenames = listOf(
-                        "file to overwrite",
-                    ),
-                )
+                    filenames =
+                        listOf(
+                            "file to overwrite",
+                        ),
+                ),
             ),
-            result.unmatchedBaseExtras
+            result.unmatchedBaseExtras,
         )
         assertIterableEquals(
             listOf(
                 CompareOperation.Result.ExtraGroup(
                     checksum = "c9dd58abb6a3bd6bfaf0b42d8e47b215002fbed488b53b165edfac151ff46d27",
-                    filenames = listOf(
-                        "file to be extra in target",
-                    ),
+                    filenames =
+                        listOf(
+                            "file to be extra in target",
+                        ),
                 ),
                 CompareOperation.Result.ExtraGroup(
                     checksum = "3e0db7aee818f73f48744520499f2e258351c9d8cef6da077cb722aff1fa8458",
-                    filenames = listOf(
-                        "file to overwrite",
-                    ),
+                    filenames =
+                        listOf(
+                            "file to overwrite",
+                        ),
                 ),
             ),
-            result.unmatchedOtherExtras
+            result.unmatchedOtherExtras,
         )
     }
 }

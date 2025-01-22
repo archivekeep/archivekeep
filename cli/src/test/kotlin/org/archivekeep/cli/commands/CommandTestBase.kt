@@ -9,11 +9,15 @@ import java.io.PrintWriter
 import java.io.StringWriter
 import java.nio.file.Path
 import java.security.MessageDigest
-import kotlin.io.path.*
+import kotlin.io.path.ExperimentalPathApi
+import kotlin.io.path.Path
+import kotlin.io.path.createParentDirectories
+import kotlin.io.path.deleteRecursively
+import kotlin.io.path.forEachDirectoryEntry
+import kotlin.io.path.writeText
 import kotlin.test.assertEquals
 
 abstract class CommandTestBase {
-
     @field:TempDir
     lateinit var currentArchiveTempDir: File
 
@@ -27,7 +31,7 @@ abstract class CommandTestBase {
         vararg args: String,
         // TODO: interactive mode - listOf(ExpectOut("..."), ProvideIn("..."),...)
         `in`: String = "",
-        expectedOut: String? = null
+        expectedOut: String? = null,
     ): String {
         val app = MainCommand(cwd, inStream = `in`.byteInputStream())
         val cmd = CommandLine(app)
@@ -49,7 +53,7 @@ abstract class CommandTestBase {
     internal fun executeFailingCmd(
         cwd: Path,
         vararg args: String,
-        `in`: String = ""
+        `in`: String = "",
     ): Pair<Int, String> {
         val app = MainCommand(cwd, inStream = `in`.byteInputStream())
         val cmd = CommandLine(app)
@@ -71,7 +75,7 @@ abstract class CommandTestBase {
                 "dir/b" to "dir file b",
                 "other/a" to "other file a",
                 "other/c" to "other file c",
-            )
+            ),
         )
     }
 
@@ -114,18 +118,16 @@ abstract class CommandTestBase {
         }
     }
 
-    internal fun terminalLines(vararg lines: String): String {
-        return lines.joinToString("\n") + "\n"
-    }
+    internal fun terminalLines(vararg lines: String): String = lines.joinToString("\n") + "\n"
 }
 
-fun String.sha256(): String {
-    return hashString(this, "SHA-256")
-}
+fun String.sha256(): String = hashString(this, "SHA-256")
 
-private fun hashString(input: String, algorithm: String): String {
-    return MessageDigest
+private fun hashString(
+    input: String,
+    algorithm: String,
+): String =
+    MessageDigest
         .getInstance(algorithm)
         .digest(input.toByteArray())
         .fold("") { str, it -> str + "%02x".format(it) }
-}

@@ -32,18 +32,19 @@ class Status : Callable<Int> {
     var globs: List<String> = emptyList()
 
     val out: PrintWriter
-        get () = spec.commandLine().out
+        get() = spec.commandLine().out
 
     override fun call(): Int {
         val currentArchive = mainCommand.openCurrentArchive()
 
-        val rootRelativeGlobs = if (globs.isNotEmpty()) {
-            globs
-                .map { currentArchive.workingSubDirectory.resolve(it).normalize().pathString }
-                .map { if (it == "") "." else it }
-        } else {
-            singletonList(".")
-        }
+        val rootRelativeGlobs =
+            if (globs.isNotEmpty()) {
+                globs
+                    .map { currentArchive.workingSubDirectory.resolve(it).normalize().pathString }
+                    .map { if (it == "") "." else it }
+            } else {
+                singletonList(".")
+            }
 
         val result = StatusOperation(subsetGlobs = rootRelativeGlobs).execute(currentArchive.repo)
 

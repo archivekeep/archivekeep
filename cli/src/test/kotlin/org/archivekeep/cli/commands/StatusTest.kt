@@ -3,9 +3,7 @@ package org.archivekeep.cli.commands
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
-
 class StatusTest : CommandTestBase() {
-
     @Test
     fun `test fully indexed archive`() {
         createTestingArchive()
@@ -30,13 +28,13 @@ class StatusTest : CommandTestBase() {
                 "dir/f" to "dir file f",
                 "other/d" to "other file d",
                 "other/g" to "other file g",
-            )
+            ),
         )
 
         data class TC(
             val subpath: List<String>,
             val args: List<String>,
-            val out: String
+            val out: String,
         )
 
         listOf(
@@ -74,12 +72,13 @@ class StatusTest : CommandTestBase() {
                 listOf("dir"),
                 listOf("status", ".", "../other"),
                 "\nFiles not added to the archive:\n\tc\n\tf\n\t../other/d\n\t../other/g\n\nFiles indexed in archive matching globs: 4\n",
-            )
-        ).forEach {tc ->
-            val out = executeCmd(
-                tc.subpath.fold(currentArchivePath) { acc, o -> acc.resolve(o)},
-                *tc.args.toTypedArray()
-            )
+            ),
+        ).forEach { tc ->
+            val out =
+                executeCmd(
+                    tc.subpath.fold(currentArchivePath) { acc, o -> acc.resolve(o) },
+                    *tc.args.toTypedArray(),
+                )
             assertEquals(tc.out, out)
         }
     }

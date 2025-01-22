@@ -34,10 +34,11 @@ class Compare : Callable<Int> {
         val currentArchive = mainCommand.openCurrentArchive()
         val otherArchive = mainCommand.openOtherArchive(otherArchiveLocation)
 
-        val result = CompareOperation().execute(
-            currentArchive.repo,
-            otherArchive
-        )
+        val result =
+            CompareOperation().execute(
+                currentArchive.repo,
+                otherArchive,
+            )
 
         result.printAll(out, "local", "remote")
 

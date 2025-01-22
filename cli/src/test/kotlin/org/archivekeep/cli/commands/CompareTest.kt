@@ -6,11 +6,11 @@ import java.io.File
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
-
 class CompareTest : CommandTestBase() {
-
     @Test
-    fun execute(@TempDir otherDir: File) {
+    fun execute(
+        @TempDir otherDir: File,
+    ) {
         createCurrentArchiveWithContents(
             mapOf(
                 "file to be extra in source" to "file to be extra in source",
@@ -23,11 +23,12 @@ class CompareTest : CommandTestBase() {
                 "file to be left untouched" to "file to be left untouched: untouched",
                 "moved/file to move" to "file to move: old",
                 "old/file to modify backup" to "file to modify with backup: old",
-            )
+            ),
         )
 
         createArchiveWithContents(
-            otherDir, mapOf(
+            otherDir,
+            mapOf(
                 "file to be extra in target" to "file to be extra in target",
                 "file to duplicate" to "file to duplicate: old",
                 "file to move" to "file to move: old",
@@ -35,11 +36,12 @@ class CompareTest : CommandTestBase() {
                 "file to modify with backup" to "file to modify with backup: old",
                 "file to overwrite" to "file to overwrite: old",
                 "file to be left untouched" to "file to be left untouched: untouched",
-            )
+            ),
         )
 
         val out1 = executeCmd(currentArchivePath, "compare", otherDir.path)
-        assertEquals("""
+        assertEquals(
+            """
             
             Extra files in local archive:
             	file to be extra in source
@@ -60,6 +62,8 @@ class CompareTest : CommandTestBase() {
             Extra files in remote archive: 2
             Total files present in both archives: 7
             
-        """.trimIndent() + "\n", out1)
+            """.trimIndent() + "\n",
+            out1,
+        )
     }
 }

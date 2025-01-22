@@ -14,60 +14,70 @@ class CompareOperation {
 
         val allChecksums = baseIndex.byChecksumSha256.keys union otherIndex.byChecksumSha256.keys
 
-        val zippedInstances = allChecksums.map { checksum ->
-            object {
-                val checksum = checksum
-                val baseInstances = baseIndex.byChecksumSha256[checksum]
-                val otherInstances = otherIndex.byChecksumSha256[checksum]
+        val zippedInstances =
+            allChecksums.map { checksum ->
+                object {
+                    val checksum = checksum
+                    val baseInstances = baseIndex.byChecksumSha256[checksum]
+                    val otherInstances = otherIndex.byChecksumSha256[checksum]
 
-                fun asRelocationOrNull(): Result.Relocation? {
-                    return if (baseInstances != null && otherInstances != null) {
-                        Result.Relocation(
-                            checksum = checksum,
-                            baseFilenames = baseInstances.map { it.path }.sorted(),
-                            otherFilenames = otherInstances.map { it.path }.sorted(),
-                        )
-                    } else null
-                }
+                    fun asRelocationOrNull(): Result.Relocation? {
+                        return if (baseInstances != null && otherInstances != null) {
+                            Result.Relocation(
+                                checksum = checksum,
+                                baseFilenames = baseInstances.map { it.path }.sorted(),
+                                otherFilenames = otherInstances.map { it.path }.sorted(),
+                            )
+                        } else {
+                            null
+                        }
+                    }
 
-                fun asBaseExtraOrNull(): Result.ExtraGroup? {
-                    return if (baseInstances != null && otherInstances == null) {
-                        Result.ExtraGroup(this.checksum, baseInstances.map { it.path }.sorted())
-                    } else null
-                }
+                    fun asBaseExtraOrNull(): Result.ExtraGroup? {
+                        return if (baseInstances != null && otherInstances == null) {
+                            Result.ExtraGroup(this.checksum, baseInstances.map { it.path }.sorted())
+                        } else {
+                            null
+                        }
+                    }
 
-                fun asOtherExtraOrNull(): Result.ExtraGroup? {
-                    return if (otherInstances != null && baseInstances == null) {
-                        Result.ExtraGroup(this.checksum, otherInstances.map { it.path }.sorted())
-                    } else null
+                    fun asOtherExtraOrNull(): Result.ExtraGroup? {
+                        return if (otherInstances != null && baseInstances == null) {
+                            Result.ExtraGroup(this.checksum, otherInstances.map { it.path }.sorted())
+                        } else {
+                            null
+                        }
+                    }
                 }
             }
-        }
 
-        val relocations = zippedInstances.mapNotNull { it.asRelocationOrNull() }
-            .filter { it.extraBaseLocations.isNotEmpty() || it.extraOtherLocations.isNotEmpty() }
-            .sortedBy { it.baseFilenames[0] }
+        val relocations =
+            zippedInstances.mapNotNull { it.asRelocationOrNull() }
+                .filter { it.extraBaseLocations.isNotEmpty() || it.extraOtherLocations.isNotEmpty() }
+                .sortedBy { it.baseFilenames[0] }
 
         val unmatchedBaseExtras = zippedInstances.mapNotNull { it.asBaseExtraOrNull() }.sortedBy { it.filenames[0] }
         val unmatchedOtherExtras = zippedInstances.mapNotNull { it.asOtherExtraOrNull() }.sortedBy { it.filenames[0] }
 
-        val newContentAfterMove = relocations
-            .flatMap { relocation ->
-                relocation.otherFilenames.filter { otherFilename ->
-                    val baseFile = baseIndex.byPath[otherFilename]
+        val newContentAfterMove =
+            relocations
+                .flatMap { relocation ->
+                    relocation.otherFilenames.filter { otherFilename ->
+                        val baseFile = baseIndex.byPath[otherFilename]
 
-                    baseFile != null && baseFile.checksumSha256 != relocation.checksum
+                        baseFile != null && baseFile.checksumSha256 != relocation.checksum
+                    }
                 }
-            }
 
-        val newContentToOverwrite = unmatchedOtherExtras
-            .flatMap { otherExtra ->
-                otherExtra.filenames.filter { otherFilename ->
-                    val baseFile = baseIndex.byPath[otherFilename]
+        val newContentToOverwrite =
+            unmatchedOtherExtras
+                .flatMap { otherExtra ->
+                    otherExtra.filenames.filter { otherFilename ->
+                        val baseFile = baseIndex.byPath[otherFilename]
 
-                    baseFile != null && baseFile.checksumSha256 != otherExtra.checksum
+                        baseFile != null && baseFile.checksumSha256 != otherExtra.checksum
+                    }
                 }
-            }
 
         return Result(
             allBaseFiles = baseIndex.files.map { it.path },
@@ -76,21 +86,17 @@ class CompareOperation {
             newContentAfterMove = newContentAfterMove,
             newContentToOverwrite = newContentToOverwrite,
             unmatchedBaseExtras = unmatchedBaseExtras,
-            unmatchedOtherExtras = unmatchedOtherExtras
+            unmatchedOtherExtras = unmatchedOtherExtras,
         )
     }
 
     class Result(
         val allBaseFiles: List<String>,
         val allOtherFiles: List<String>,
-
         val relocations: List<Relocation>,
-
         // Paths to be having new content, after original file in other archive is moved to a new path
         val newContentAfterMove: List<String>,
-
         val newContentToOverwrite: List<String>,
-
         val unmatchedBaseExtras: List<ExtraGroup>,
         val unmatchedOtherExtras: List<ExtraGroup>,
     ) {
@@ -114,10 +120,14 @@ class CompareOperation {
 
         data class ExtraGroup(
             val checksum: String,
-            val filenames: List<String>
+            val filenames: List<String>,
         )
 
-        fun printAll(out: PrintWriter, baseName: String, otherName: String) {
+        fun printAll(
+            out: PrintWriter,
+            baseName: String,
+            otherName: String,
+        ) {
             printUnmatchedBaseExtras(out, baseName, otherName)
             printUnmatchedOtherExtras(out, baseName, otherName)
             printRelocations(out, baseName, otherName)
@@ -127,8 +137,12 @@ class CompareOperation {
             printStats(out, baseName, otherName)
         }
 
-        private fun printUnmatchedBaseExtras(out: PrintWriter, baseName: String, otherName: String) {
-            if(unmatchedBaseExtras.isNotEmpty()) {
+        private fun printUnmatchedBaseExtras(
+            out: PrintWriter,
+            baseName: String,
+            otherName: String,
+        ) {
+            if (unmatchedBaseExtras.isNotEmpty()) {
                 out.print("\nExtra files in $baseName archive:\n")
 
                 unmatchedBaseExtras.forEach { baseExtra ->
@@ -137,8 +151,12 @@ class CompareOperation {
             }
         }
 
-        private fun printUnmatchedOtherExtras(out: PrintWriter, baseName: String, otherName: String) {
-            if(unmatchedOtherExtras.isNotEmpty()) {
+        private fun printUnmatchedOtherExtras(
+            out: PrintWriter,
+            baseName: String,
+            otherName: String,
+        ) {
+            if (unmatchedOtherExtras.isNotEmpty()) {
                 out.print("\nExtra files in $otherName archive:\n")
 
                 unmatchedOtherExtras.forEach { otherExtra ->
@@ -147,19 +165,23 @@ class CompareOperation {
             }
         }
 
-        private fun printRelocations(out: PrintWriter, baseName: String, otherName: String) {
+        private fun printRelocations(
+            out: PrintWriter,
+            baseName: String,
+            otherName: String,
+        ) {
             fun colorFunc(str: String): String {
                 return "\u001b[31m${str}\u001b[0m"
             }
 
-            if(relocations.isNotEmpty()) {
-                out.println("\nFiles to be moved in $otherName to match ${baseName}:")
+            if (relocations.isNotEmpty()) {
+                out.println("\nFiles to be moved in $otherName to match $baseName:")
 
                 relocations.forEach { r ->
                     if (r.extraBaseLocations.size == 1 && r.extraOtherLocations.size == 1) {
                         val p = pathDiff(r.extraOtherLocations[0], r.extraBaseLocations[0], ::colorFunc)
 
-                        out.println("\t${p}")
+                        out.println("\t$p")
                     } else {
                         out.println("\t${filenamesPrint(r.extraOtherLocations)} -> ${filenamesPrint(r.extraBaseLocations)}")
                     }
@@ -167,7 +189,11 @@ class CompareOperation {
             }
         }
 
-        private fun printStats(out: PrintWriter, baseName: String, otherName: String) {
+        private fun printStats(
+            out: PrintWriter,
+            baseName: String,
+            otherName: String,
+        ) {
             out.println()
 
             out.println("Extra files in $baseName archive: ${unmatchedBaseExtras.size}")

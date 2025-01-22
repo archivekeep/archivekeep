@@ -2,16 +2,20 @@ package org.archivekeep.cli.commands
 
 import org.archivekeep.cli.MainCommand
 import org.archivekeep.core.operations.AddOperation
-import picocli.CommandLine.*
+import picocli.CommandLine.Command
 import picocli.CommandLine.Model.CommandSpec
+import picocli.CommandLine.Option
+import picocli.CommandLine.Parameters
+import picocli.CommandLine.ParentCommand
+import picocli.CommandLine.Spec
 import java.io.PrintWriter
-import java.util.*
+import java.util.Collections
 import java.util.concurrent.Callable
 import kotlin.io.path.pathString
 
 @Command(
     name = "add",
-    description = ["Adds files to archive."]
+    description = ["Adds files to archive."],
 )
 class Add : Callable<Int> {
     @Spec
@@ -22,13 +26,13 @@ class Add : Callable<Int> {
 
     @Option(
         names = ["--disable-moves-check"],
-        description = ["do not check for moves or missing files"]
+        description = ["do not check for moves or missing files"],
     )
     var disableMovesCheck: Boolean = false
 
     @Option(
         names = ["--do-not-print-preparation-summary"],
-        description = ["do not print pre-execution summary"]
+        description = ["do not print pre-execution summary"],
     )
     var doNotPrintPreparationSummary: Boolean = false
 
@@ -44,22 +48,28 @@ class Add : Callable<Int> {
     override fun call(): Int {
         val currentArchive = mainCommand.openCurrentArchive()
 
-        val rootRelativeGlobs = if (globs.isNotEmpty()) {
-            globs
-                .map { currentArchive.workingSubDirectory.resolve(it).normalize().pathString }
-                .map { if (it == "") "." else it }
-        } else {
-            Collections.singletonList(".")
-        }
+        val rootRelativeGlobs =
+            if (globs.isNotEmpty()) {
+                globs
+                    .map {
+                        currentArchive.workingSubDirectory
+                            .resolve(it)
+                            .normalize()
+                            .pathString
+                    }.map { if (it == "") "." else it }
+            } else {
+                Collections.singletonList(".")
+            }
 
-        val result = AddOperation(
-            subsetGlobs = rootRelativeGlobs,
-            disableFilenameCheck = false,
-            disableMovesCheck = disableMovesCheck
-        ).prepare(currentArchive.repo)
+        val result =
+            AddOperation(
+                subsetGlobs = rootRelativeGlobs,
+                disableFilenameCheck = false,
+                disableMovesCheck = disableMovesCheck,
+            ).prepare(currentArchive.repo)
 
         if (!doNotPrintPreparationSummary) {
-            if(result.missingFiles.isNotEmpty()) {
+            if (result.missingFiles.isNotEmpty()) {
                 out.println("Missing indexed files not matched by add:")
                 result.missingFiles.forEach { out.println("\t${currentArchive.fromArchiveToRelativePath(it)}") }
                 out.println()
@@ -69,10 +79,12 @@ class Add : Callable<Int> {
             result.newFiles.forEach { out.println("\t${currentArchive.fromArchiveToRelativePath(it)}") }
             out.println()
 
-            if(result.moves.isNotEmpty()) {
+            if (result.moves.isNotEmpty()) {
                 out.println("Files to be moved:")
-                result.moves.forEach { out.println(
-                    "\t${currentArchive.fromArchiveToRelativePath(it.from)} -> ${currentArchive.fromArchiveToRelativePath(it.to)}")
+                result.moves.forEach {
+                    out.println(
+                        "\t${currentArchive.fromArchiveToRelativePath(it.from)} -> ${currentArchive.fromArchiveToRelativePath(it.to)}",
+                    )
                 }
                 out.println()
             }
@@ -84,7 +96,13 @@ class Add : Callable<Int> {
 
                 result.executeMoves(
                     currentArchive.repo,
-                    onMoveCompleted = { out.println("moved: ${currentArchive.fromArchiveToRelativePath(it.from)} to ${currentArchive.fromArchiveToRelativePath(it.to)}") }
+                    onMoveCompleted = {
+                        out.println(
+                            "moved: ${currentArchive.fromArchiveToRelativePath(
+                                it.from,
+                            )} to ${currentArchive.fromArchiveToRelativePath(it.to)}",
+                        )
+                    },
                 )
             }
         }
@@ -92,7 +110,7 @@ class Add : Callable<Int> {
         if (result.newFiles.isNotEmpty()) {
             result.executeAddNewFiles(
                 currentArchive.repo,
-                onAddCompleted = { out.println("added: ${currentArchive.fromArchiveToRelativePath(it)}") }
+                onAddCompleted = { out.println("added: ${currentArchive.fromArchiveToRelativePath(it)}") },
             )
         }
 

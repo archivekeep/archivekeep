@@ -3,17 +3,13 @@ package org.archivekeep.cli.commands
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
-
 class AddTest : CommandTestBase() {
-
     @Test
     fun `test partially indexed archive`() {
         data class TC(
             val subpath: List<String>,
             val args: List<String>,
-
             val out: String,
-
             val resultingIndex: List<String>,
         )
 
@@ -38,7 +34,7 @@ class AddTest : CommandTestBase() {
                     "dir/f",
                     "other/a",
                     "other/c",
-                )
+                ),
             ),
             TC(
                 listOf("dir"),
@@ -60,7 +56,7 @@ class AddTest : CommandTestBase() {
                     "dir/f",
                     "other/a",
                     "other/c",
-                )
+                ),
             ),
             TC(
                 listOf("dir"),
@@ -82,7 +78,7 @@ class AddTest : CommandTestBase() {
                     "other/c",
                     "other/d",
                     "other/g",
-                )
+                ),
             ),
             TC(
                 listOf("dir"),
@@ -107,7 +103,7 @@ class AddTest : CommandTestBase() {
                     "other/a",
                     "other/c",
                     "other/g",
-                )
+                ),
             ),
         ).forEach { tc ->
             cleanup()
@@ -122,13 +118,14 @@ class AddTest : CommandTestBase() {
                     "dir/f" to "dir file f",
                     "other/d" to "other file d",
                     "other/g" to "other file g",
-                )
+                ),
             )
 
-            val out = executeCmd(
-                tc.subpath.fold(currentArchivePath) { acc, o -> acc.resolve(o) },
-                *tc.args.toTypedArray()
-            )
+            val out =
+                executeCmd(
+                    tc.subpath.fold(currentArchivePath) { acc, o -> acc.resolve(o) },
+                    *tc.args.toTypedArray(),
+                )
             assertEquals(tc.out, out)
             assertEquals(tc.resultingIndex, fileRepo().storedFiles())
         }
@@ -139,10 +136,8 @@ class AddTest : CommandTestBase() {
         data class TC(
             val subpath: List<String>,
             val args: List<String>,
-
             val `in`: String,
             val out: String,
-
             val resultingIndex: List<String>,
         )
 
@@ -177,7 +172,7 @@ class AddTest : CommandTestBase() {
                     "missing/unexisting_x",
                     "other/a",
                     "other/c",
-                )
+                ),
             ),
         ).forEach { tc ->
             cleanup()
@@ -192,21 +187,22 @@ class AddTest : CommandTestBase() {
                     "dir/f" to "dir file f",
                     "other/d" to "other file d",
                     "other/g" to "other file g",
-                )
+                ),
             )
 
             createMissingFiles(
                 mapOf(
                     "missing/old_c" to "dir file c",
                     "missing/unexisting_x" to "file x",
-                )
+                ),
             )
 
-            val out = executeCmd(
-                tc.subpath.fold(currentArchivePath) { acc, o -> acc.resolve(o) },
-                *tc.args.toTypedArray(),
-                `in` = tc.`in`
-            )
+            val out =
+                executeCmd(
+                    tc.subpath.fold(currentArchivePath) { acc, o -> acc.resolve(o) },
+                    *tc.args.toTypedArray(),
+                    `in` = tc.`in`,
+                )
             assertEquals(tc.out, out)
             assertEquals(tc.resultingIndex, fileRepo().storedFiles())
         }

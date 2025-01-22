@@ -59,18 +59,18 @@ graalvmNative {
     }
 }
 
-val generateManpageAsciiDoc = tasks.register<JavaExec>("generateManpageAsciiDoc") {
-    dependsOn(tasks.named("classes"))
+val generateManpageAsciiDoc =
+    tasks.register<JavaExec>("generateManpageAsciiDoc") {
+        dependsOn(tasks.named("classes"))
 
-    group = "Documentation"
-    description = "Generate AsciiDoc manpage"
+        group = "Documentation"
+        description = "Generate AsciiDoc manpage"
 
-    classpath(configurations.named("compileClasspath"), configurations.named("kapt"), sourceSets.main.get().compileClasspath)
-    mainClass = "picocli.codegen.docgen.manpage.ManPageGenerator"
+        classpath(configurations.named("compileClasspath"), configurations.named("kapt"), sourceSets.main.get().compileClasspath)
+        mainClass = "picocli.codegen.docgen.manpage.ManPageGenerator"
 
-    args("org.archivekeep.cli.MainCommand", "--outdir=${project.layout.buildDirectory}/generated-picocli-docs", "-v")
-}
-
+        args("org.archivekeep.cli.MainCommand", "--outdir=${project.layout.buildDirectory}/generated-picocli-docs", "-v")
+    }
 
 tasks {
     "asciidoctor"(AsciidoctorTask::class) {

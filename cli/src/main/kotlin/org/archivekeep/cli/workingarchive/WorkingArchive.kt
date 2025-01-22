@@ -3,17 +3,14 @@ package org.archivekeep.cli.workingarchive
 import org.archivekeep.core.repo.Repo
 import org.archivekeep.core.repo.files.openFilesRepoOrNull
 import java.nio.file.Path
-import java.nio.file.Paths
 import kotlin.io.path.relativeTo
 
-class WorkingArchive (
+class WorkingArchive(
     val cwd: Path,
-
     val location: Path,
     val workingSubDirectory: Path,
     val relativePathToRoot: Path,
-
-    val repo: Repo
+    val repo: Repo,
 ) {
     fun fromArchiveToRelativePath(path: String): Path {
         return Path.of(path).relativeTo(workingSubDirectory)
@@ -26,31 +23,31 @@ fun openWorkingArchive(cwd: Path): WorkingArchive {
     while (tryPath != null) {
         val archive = tryOpen(cwd, tryPath)
 
-        if(archive != null) {
+        if (archive != null) {
             return archive
         }
 
         tryPath = tryPath.parent
     }
 
-    throw RuntimeException("Current working directory `${cwd}` is not an archive")
+    throw RuntimeException("Current working directory `$cwd` is not an archive")
 }
 
-private fun tryOpen(cwd: Path, tryPath: Path): WorkingArchive? {
+private fun tryOpen(
+    cwd: Path,
+    tryPath: Path,
+): WorkingArchive? {
     val filesRepo = openFilesRepoOrNull(tryPath)
 
     if (filesRepo != null) {
         return WorkingArchive(
             cwd = cwd,
-
             location = tryPath,
             workingSubDirectory = cwd.relativeTo(tryPath),
             relativePathToRoot = tryPath.relativeTo(cwd),
-
             repo = filesRepo,
         )
     }
 
     return null
 }
-

@@ -5,8 +5,10 @@ import java.io.File
 import kotlin.io.path.createParentDirectories
 import kotlin.io.path.writeText
 
-
-fun createArchiveWithContents(archiveTempDir: File, files: Map<String, String>) {
+fun createArchiveWithContents(
+    archiveTempDir: File,
+    files: Map<String, String>,
+) {
     createUnindexedFiles(archiveTempDir, files)
 
     files.forEach {
@@ -17,7 +19,10 @@ fun createArchiveWithContents(archiveTempDir: File, files: Map<String, String>) 
     }
 }
 
-fun createUnindexedFiles(archiveTempDir: File, files: Map<String, String>) {
+fun createUnindexedFiles(
+    archiveTempDir: File,
+    files: Map<String, String>,
+) {
     files.forEach {
         val filePath = archiveTempDir.resolve(it.key).toPath()
         filePath.createParentDirectories()

@@ -1,9 +1,20 @@
 package org.archivekeep.cli.commands
 
 import org.archivekeep.cli.MainCommand
-import org.archivekeep.core.operations.*
-import picocli.CommandLine.*
+import org.archivekeep.core.operations.AdditiveRelocationsSyncStep
+import org.archivekeep.core.operations.DuplicationIncreasePresentButDisabledException
+import org.archivekeep.core.operations.NewFilesSyncStep
+import org.archivekeep.core.operations.RelocationSyncMode
+import org.archivekeep.core.operations.RelocationsMoveApplySyncStep
+import org.archivekeep.core.operations.RelocationsPresentButDisabledException
+import org.archivekeep.core.operations.SyncLogger
+import org.archivekeep.core.operations.SyncOperation
+import picocli.CommandLine.Command
 import picocli.CommandLine.Model.CommandSpec
+import picocli.CommandLine.Option
+import picocli.CommandLine.Parameters
+import picocli.CommandLine.ParentCommand
+import picocli.CommandLine.Spec
 import java.io.PrintWriter
 import java.util.concurrent.Callable
 
@@ -26,25 +37,25 @@ class Push : Callable<Int> {
 
     @Option(
         names = ["--resolve-moves"],
-        description = ["resolves added files against checksums of existing remote files"]
+        description = ["resolves added files against checksums of existing remote files"],
     )
     var resolveMoves: Boolean = false
 
     @Option(
         names = ["--allow-duplicate-increase"],
-        description = ["allow to increase duplication of existing files"]
+        description = ["allow to increase duplication of existing files"],
     )
     var allowDuplicateIncrease: Boolean = false
 
     @Option(
         names = ["--allow-duplicate-reduction"],
-        description = ["allow to decrease duplication of existing files"]
+        description = ["allow to decrease duplication of existing files"],
     )
     var allowDuplicateReduction: Boolean = false
 
     @Option(
         names = ["--additive-duplicating"],
-        description = ["push all new local files to remote without resolving moves or checking for duplication increase"]
+        description = ["push all new local files to remote without resolving moves or checking for duplication increase"],
     )
     var additiveDuplicating: Boolean = false
 
@@ -55,28 +66,30 @@ class Push : Callable<Int> {
         val currentArchive = mainCommand.openCurrentArchive()
         val otherArchive = mainCommand.openOtherArchive(otherArchiveLocation)
 
-        val syncMode = when {
-            additiveDuplicating -> RelocationSyncMode.AdditiveDuplicating
-            resolveMoves -> RelocationSyncMode.Move(
-                allowDuplicateIncrease = allowDuplicateIncrease,
-                allowDuplicateReduction = allowDuplicateReduction
-            )
+        val syncMode =
+            when {
+                additiveDuplicating -> RelocationSyncMode.AdditiveDuplicating
+                resolveMoves ->
+                    RelocationSyncMode.Move(
+                        allowDuplicateIncrease = allowDuplicateIncrease,
+                        allowDuplicateReduction = allowDuplicateReduction,
+                    )
 
-            else -> RelocationSyncMode.Disabled
-        }
+                else -> RelocationSyncMode.Disabled
+            }
 
-
-        val preparedSync = try {
-            SyncOperation(syncMode).prepare(currentArchive.repo, otherArchive)
-        } catch (e: RelocationsPresentButDisabledException) {
-            out.println(e.message)
-            out.println("Enable relocations with --resolve-moves, or switch to --additive-duplicating mode")
-            return 1
-        } catch (e: DuplicationIncreasePresentButDisabledException) {
-            out.println(e.message)
-            out.println("Enable duplication increase with --allow-duplicate-increase, or switch to --additive-duplicating mode")
-            return 1
-        }
+        val preparedSync =
+            try {
+                SyncOperation(syncMode).prepare(currentArchive.repo, otherArchive)
+            } catch (e: RelocationsPresentButDisabledException) {
+                out.println(e.message)
+                out.println("Enable relocations with --resolve-moves, or switch to --additive-duplicating mode")
+                return 1
+            } catch (e: DuplicationIncreasePresentButDisabledException) {
+                out.println(e.message)
+                out.println("Enable duplication increase with --allow-duplicate-increase, or switch to --additive-duplicating mode")
+                return 1
+            }
 
         preparedSync.execute(
             currentArchive.repo,
@@ -93,15 +106,19 @@ class Push : Callable<Int> {
                         mainCommand.askForConfirmation("Do you want to push new files?")
                 }
             },
-            logger = object : SyncLogger {
-                override fun onFileStored(filename: String) {
-                    out.println("file stored: $filename")
-                }
+            logger =
+                object : SyncLogger {
+                    override fun onFileStored(filename: String) {
+                        out.println("file stored: $filename")
+                    }
 
-                override fun onFileMoved(from: String, to: String) {
-                    out.println("file moved: $from -> $to")
-                }
-            }
+                    override fun onFileMoved(
+                        from: String,
+                        to: String,
+                    ) {
+                        out.println("file moved: $from -> $to")
+                    }
+                },
         )
 
         return 0

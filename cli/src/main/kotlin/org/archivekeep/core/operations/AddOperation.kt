@@ -4,30 +4,30 @@ import org.archivekeep.core.repo.LocalRepo
 import org.archivekeep.core.repo.Repo
 import kotlin.io.path.invariantSeparatorsPathString
 
-val illegalCharacters = listOf(
-    ":",
-    "?",
-    "<",
-    ">",
-    "*",
-    "|",
-)
+val illegalCharacters =
+    listOf(
+        ":",
+        "?",
+        "<",
+        ">",
+        "*",
+        "|",
+    )
 
 class AddOperation(
     val subsetGlobs: List<String>,
-
     val disableFilenameCheck: Boolean,
-    val disableMovesCheck: Boolean
+    val disableMovesCheck: Boolean,
 ) {
-
     fun prepare(repo: Repo): PreparationResult {
         val localRepo = repo as? LocalRepo ?: throw RuntimeException("not local repo")
 
         val matchedFiles = localRepo.findAllFiles(subsetGlobs)
 
-        val unindexedFilesMatchingPattern = matchedFiles.filter {
-            !localRepo.contains(it.invariantSeparatorsPathString)
-        }
+        val unindexedFilesMatchingPattern =
+            matchedFiles.filter {
+                !localRepo.contains(it.invariantSeparatorsPathString)
+            }
 
         if (!disableFilenameCheck) {
             unindexedFilesMatchingPattern.forEach {
@@ -41,18 +41,17 @@ class AddOperation(
             }
         }
 
-
         if (!disableMovesCheck) {
             val storedFiles = localRepo.storedFiles().sorted()
 
-            val missingIndexedFilesByChecksum = storedFiles
-                .filter { !localRepo.verifyFileExists(it) }
-                .associateBy {
-                    localRepo.fileChecksum(it)
-                }
+            val missingIndexedFilesByChecksum =
+                storedFiles
+                    .filter { !localRepo.verifyFileExists(it) }
+                    .associateBy {
+                        localRepo.fileChecksum(it)
+                    }
 
-
-            val remainingMissingIndexedFilesByChecksum = missingIndexedFilesByChecksum.toMutableMap();
+            val remainingMissingIndexedFilesByChecksum = missingIndexedFilesByChecksum.toMutableMap()
             val moves = mutableListOf<PreparationResult.Move>()
             val unmatchedNewFiles = mutableListOf<String>()
 
@@ -65,8 +64,8 @@ class AddOperation(
                     moves.add(
                         PreparationResult.Move(
                             from = missingFilePath,
-                            to = newUnindexedFile.invariantSeparatorsPathString
-                        )
+                            to = newUnindexedFile.invariantSeparatorsPathString,
+                        ),
                     )
                     remainingMissingIndexedFilesByChecksum.remove(checksum)
                 } else {
@@ -77,13 +76,13 @@ class AddOperation(
             return PreparationResult(
                 newFiles = unmatchedNewFiles.sorted(),
                 moves = moves,
-                missingFiles = remainingMissingIndexedFilesByChecksum.values.toList().sorted()
+                missingFiles = remainingMissingIndexedFilesByChecksum.values.toList().sorted(),
             )
         } else {
             return PreparationResult(
                 unindexedFilesMatchingPattern.map { it.invariantSeparatorsPathString }.sorted(),
                 emptyList(),
-                emptyList()
+                emptyList(),
             )
         }
     }
@@ -91,16 +90,16 @@ class AddOperation(
     data class PreparationResult(
         val newFiles: List<String>,
         val moves: List<Move>,
-        val missingFiles: List<String>
+        val missingFiles: List<String>,
     ) {
         data class Move(
             val from: String,
-            val to: String
+            val to: String,
         )
 
         fun executeMoves(
             repo: Repo,
-            onMoveCompleted: (move: Move) -> Unit
+            onMoveCompleted: (move: Move) -> Unit,
         ) {
             val localRepo = repo as? LocalRepo ?: throw RuntimeException("not local repo")
 
@@ -114,7 +113,7 @@ class AddOperation(
 
         fun executeAddNewFiles(
             repo: Repo,
-            onAddCompleted: (newFile: String) -> Unit
+            onAddCompleted: (newFile: String) -> Unit,
         ) {
             val localRepo = repo as? LocalRepo ?: throw RuntimeException("not local repo")
 

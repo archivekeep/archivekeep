@@ -20,15 +20,16 @@ fun App() {
     MaterialTheme {
         Button(
             onClick = { text = "Hello, Desktop!" },
-            modifier = Modifier.testTag("button")
+            modifier = Modifier.testTag("button"),
         ) {
             Text(text)
         }
     }
 }
 
-fun main() = application {
-    Window(onCloseRequest = ::exitApplication) {
-        App()
+fun main() =
+    application {
+        Window(onCloseRequest = ::exitApplication) {
+            App()
+        }
     }
-}

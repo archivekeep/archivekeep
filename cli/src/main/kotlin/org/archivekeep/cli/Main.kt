@@ -13,14 +13,12 @@ import picocli.CommandLine.Command
 import picocli.CommandLine.Spec
 import java.io.InputStream
 import java.io.PrintWriter
-import java.io.Reader
 import java.nio.file.Path
 import java.nio.file.Paths
 import kotlin.system.exitProcess
 
 @Command(
     name = "archivekeep",
-
     mixinStandardHelpOptions = true,
     subcommands = [
         Add::class,
@@ -32,13 +30,13 @@ import kotlin.system.exitProcess
 )
 class MainCommand(
     private val workingDirectory: Path,
-    private val inStream: InputStream= System.`in`
+    private val inStream: InputStream = System.`in`,
 ) {
     @Spec
     lateinit var spec: CommandLine.Model.CommandSpec
 
     // used for ascii doctor
-    internal constructor(): this(Path.of("."))
+    internal constructor() : this(Path.of("."))
 
     fun openCurrentArchive(): WorkingArchive {
         return openWorkingArchive(workingDirectory)
@@ -49,7 +47,7 @@ class MainCommand(
     }
 
     val out: PrintWriter
-        get () = spec.commandLine().out
+        get() = spec.commandLine().out
 
     val `in` = inStream.bufferedReader()
 

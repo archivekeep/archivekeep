@@ -10,3 +10,11 @@ insert_final_newline = true
 
 [*.md]
 max_line_length = 160
+
+[*.{kt,kts}]
+max_line_length = 160
+
+ktlint_code_style = ktlint_official
+ktlint_function_naming_ignore_when_annotated_with=Composable
+ktlint_standard_filename = disabled
+ktlint_standard_property-naming = disabled

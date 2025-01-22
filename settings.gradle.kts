@@ -9,5 +9,5 @@ rootProject.name = "archivekeep"
 
 include(
     "cli",
-    "gui"
+    "gui",
 )

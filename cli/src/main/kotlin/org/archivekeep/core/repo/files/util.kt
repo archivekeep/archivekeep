@@ -6,7 +6,6 @@ import java.security.MessageDigest
 import kotlin.io.path.invariantSeparatorsPathString
 import kotlin.io.path.readBytes
 
-
 internal fun safeSubPath(path: String): Path {
     return safeSubPath(Paths.get(path))
 }
@@ -15,11 +14,11 @@ internal fun safeSubPath(path: Path): Path {
     val p = path.normalize()
     val s = p.invariantSeparatorsPathString
 
-    if( s == ".." || s.startsWith("../")) {
+    if (s == ".." || s.startsWith("../")) {
         throw MaliciousPath(path.toString())
     }
 
-    if(p.invariantSeparatorsPathString != path.toString()) {
+    if (p.invariantSeparatorsPathString != path.toString()) {
         throw NotNormalizedPath(path.toString())
     }
 
@@ -33,5 +32,4 @@ internal fun computeChecksum(path: Path): String {
     val digest = md.digest(content)
 
     return digest.joinToString("") { "%02x".format(it) }
-
 }
