@@ -13,8 +13,8 @@ import org.archivekeep.app.core.domain.archives.AssociatedArchive
 import org.archivekeep.app.core.domain.repositories.Repository
 import org.archivekeep.app.core.domain.storages.Storage
 import org.archivekeep.app.core.domain.storages.StorageNamedReference
-import org.archivekeep.app.core.operations.addpush.AddPushOperationService
-import org.archivekeep.app.core.operations.addpush.RepoAddPush
+import org.archivekeep.app.core.operations.addpush.AddAndPushOperation
+import org.archivekeep.app.core.operations.addpush.AddAndPushOperationService
 import org.archivekeep.app.core.operations.derived.SyncService
 import org.archivekeep.app.core.utils.generics.mapLoadedData
 import org.archivekeep.app.core.utils.identifiers.NamedRepositoryReference
@@ -25,7 +25,7 @@ import org.archivekeep.utils.safeCombine
 
 class HomeArchiveEntryViewModel(
     scope: CoroutineScope,
-    addPushOperationService: AddPushOperationService,
+    addAndPushOperationService: AddAndPushOperationService,
     syncService: SyncService,
     val repository: Repository,
     val archive: AssociatedArchive,
@@ -41,10 +41,10 @@ class HomeArchiveEntryViewModel(
         val indexStatusText: Loadable<String>,
         val addPushOperationRunning: Boolean,
     ) {
-        val canAddPush = canAdd && anySecondaryAvailable
+        val canAddPush = (canAdd && anySecondaryAvailable) || addPushOperationRunning
     }
 
-    val addPushOperation = addPushOperationService.getAddPushOperation(primaryRepository.reference.uri)
+    val addPushOperation = addAndPushOperationService.getAddPushOperation(primaryRepository.reference.uri)
 
     val secondaryRepositories: StateFlow<List<Pair<Storage, SecondaryArchiveRepository.State>>> =
         safeCombine(
@@ -59,7 +59,7 @@ class HomeArchiveEntryViewModel(
         combine(
             repository.localRepoStatus,
             secondaryRepositories,
-            addPushOperation.stateFlow.map { it is RepoAddPush.LaunchedAddPushProcess }.onStart { emit(false) },
+            addPushOperation.stateFlow.map { it is AddAndPushOperation.LaunchedAddPushProcess }.onStart { emit(false) },
         ) { indexStatus, nonLocalRepositories, addPushOperationRunning ->
             VMState(
                 canAdd = indexStatus is Loadable.Loaded && indexStatus.value.hasChanges,

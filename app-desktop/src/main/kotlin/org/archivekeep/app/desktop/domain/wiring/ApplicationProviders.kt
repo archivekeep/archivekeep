@@ -8,7 +8,8 @@ import org.archivekeep.app.core.domain.archives.DefaultArchiveService
 import org.archivekeep.app.core.domain.repositories.DefaultRepositoryService
 import org.archivekeep.app.core.domain.storages.KnownStorageService
 import org.archivekeep.app.core.domain.storages.StorageService
-import org.archivekeep.app.core.operations.addpush.DefaultAddPushOperationService
+import org.archivekeep.app.core.operations.add.AddOperationSupervisorServiceImpl
+import org.archivekeep.app.core.operations.addpush.AddAndPushOperationServiceImpl
 import org.archivekeep.app.core.operations.derived.DefaultSyncService
 import org.archivekeep.app.core.persistence.drivers.filesystem.FileStores
 import org.archivekeep.app.core.persistence.platform.Environment
@@ -48,7 +49,8 @@ fun ApplicationProviders(
 
                 val archiveService = DefaultArchiveService(scope, storageService)
                 val syncService = DefaultSyncService(repoService)
-                val addPushService = DefaultAddPushOperationService(repoService)
+                val addPushService = AddAndPushOperationServiceImpl(repoService)
+                val addOperationSupervisorService = AddOperationSupervisorServiceImpl(scope, repoService)
 
                 val operationFactory =
                     OperationFactory(
@@ -67,6 +69,7 @@ fun ApplicationProviders(
         LocalRepoService provides derivedServices.repoService,
         LocalSyncService provides derivedServices.syncService,
         LocalAddPushService provides derivedServices.addPushService,
+        LocalAddOperationSupervisorService provides derivedServices.addOperationSupervisorService,
         LocalRegistry provides environment.registry,
         LocalFileStores provides fileStores,
         LocalStorageRegistry provides derivedServices.knownStorageService,

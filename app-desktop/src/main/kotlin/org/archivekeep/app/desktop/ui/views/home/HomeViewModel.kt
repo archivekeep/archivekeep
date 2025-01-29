@@ -7,7 +7,7 @@ import kotlinx.coroutines.flow.map
 import org.archivekeep.app.core.domain.archives.ArchiveService
 import org.archivekeep.app.core.domain.repositories.RepositoryService
 import org.archivekeep.app.core.domain.storages.StorageService
-import org.archivekeep.app.core.operations.addpush.AddPushOperationService
+import org.archivekeep.app.core.operations.addpush.AddAndPushOperationService
 import org.archivekeep.app.core.operations.derived.SyncService
 import org.archivekeep.app.core.persistence.credentials.Credentials
 import org.archivekeep.app.core.persistence.credentials.JoseStorage
@@ -25,7 +25,7 @@ class HomeViewModel(
     val repositoryService: RepositoryService,
     val storageService: StorageService,
     val syncService: SyncService,
-    val addPushOperationService: AddPushOperationService,
+    val addAndPushOperationService: AddAndPushOperationService,
     val credentialsStorage: JoseStorage<Credentials>,
 ) {
     val allLocalArchivesFlow =
@@ -37,7 +37,7 @@ class HomeViewModel(
 
                     HomeArchiveEntryViewModel(
                         scope,
-                        addPushOperationService,
+                        addAndPushOperationService,
                         syncService,
                         repositoryService.getRepository(primaryRepository.uri),
                         archive = a,

@@ -5,59 +5,33 @@ import org.archivekeep.app.core.domain.archives.ArchiveService
 import org.archivekeep.app.core.domain.repositories.RepositoryService
 import org.archivekeep.app.core.domain.storages.StorageRegistry
 import org.archivekeep.app.core.domain.storages.StorageService
-import org.archivekeep.app.core.operations.addpush.AddPushOperationService
+import org.archivekeep.app.core.operations.add.AddOperationSupervisorService
+import org.archivekeep.app.core.operations.addpush.AddAndPushOperationService
 import org.archivekeep.app.core.operations.derived.SyncService
 import org.archivekeep.app.core.persistence.credentials.Credentials
 import org.archivekeep.app.core.persistence.credentials.JoseStorage
 import org.archivekeep.app.core.persistence.drivers.filesystem.FileStores
 import org.archivekeep.app.core.persistence.registry.RegistryDataStore
 
-val LocalStorageService =
-    staticCompositionLocalOf<StorageService> {
-        error("CompositionLocal StorageService not provided")
-    }
+val LocalStorageService = staticCompositionLocalOfNotProvided<StorageService>()
+val LocalRepoService = staticCompositionLocalOfNotProvided<RepositoryService>()
+val LocalArchiveService = staticCompositionLocalOfNotProvided<ArchiveService>()
 
-val LocalRepoService =
-    staticCompositionLocalOf<RepositoryService> {
-        error("CompositionLocal IRepositoryService not provided")
-    }
+val LocalWalletDataStore = staticCompositionLocalOfNotProvided<JoseStorage<Credentials>>()
 
-val LocalArchiveService =
-    staticCompositionLocalOf<ArchiveService> {
-        error("CompositionLocal ArchiveService not provided")
-    }
+val LocalSyncService = staticCompositionLocalOfNotProvided<SyncService>()
+val LocalAddPushService = staticCompositionLocalOfNotProvided<AddAndPushOperationService>()
+val LocalAddOperationSupervisorService = staticCompositionLocalOfNotProvided<AddOperationSupervisorService>()
 
-val LocalWalletDataStore =
-    staticCompositionLocalOf<JoseStorage<Credentials>> {
-        error("CompositionLocal JoseStorage not provided")
-    }
+val LocalRegistry = staticCompositionLocalOfNotProvided<RegistryDataStore>()
 
-val LocalSyncService =
-    staticCompositionLocalOf<SyncService> {
-        error("CompositionLocal SyncService not provided")
-    }
+val LocalFileStores = staticCompositionLocalOfNotProvided<FileStores>()
 
-val LocalAddPushService =
-    staticCompositionLocalOf<AddPushOperationService> {
-        error("CompositionLocal AddPushOperationService not provided")
-    }
+val LocalStorageRegistry = staticCompositionLocalOfNotProvided<StorageRegistry>()
 
-val LocalRegistry =
-    staticCompositionLocalOf<RegistryDataStore> {
-        error("CompositionLocal Registry not provided")
-    }
+val LocalOperationFactory = staticCompositionLocalOfNotProvided<OperationFactory>()
 
-val LocalFileStores =
-    staticCompositionLocalOf<FileStores> {
-        error("CompositionLocal FileStores not provided")
-    }
-
-val LocalStorageRegistry =
-    staticCompositionLocalOf<StorageRegistry> {
-        error("CompositionLocal StorageRegistry not provided")
-    }
-
-val LocalOperationFactory =
-    staticCompositionLocalOf<OperationFactory> {
-        error("CompositionLocal OperationFactory not provided")
+inline fun <reified T> staticCompositionLocalOfNotProvided() =
+    staticCompositionLocalOf<T> {
+        error("CompositionLocal ${T::class.qualifiedName} not provided")
     }

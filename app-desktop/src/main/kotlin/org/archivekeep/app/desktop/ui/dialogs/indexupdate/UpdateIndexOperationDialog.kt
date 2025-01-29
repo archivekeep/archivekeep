@@ -1,56 +1,48 @@
 package org.archivekeep.app.desktop.ui.dialogs.indexupdate
 
 import androidx.compose.desktop.ui.tooling.preview.Preview
-import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Start
-import androidx.compose.material3.FilledTonalButton
-import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.awt.ComposeWindow
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
-import androidx.compose.ui.window.Dialog
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.launch
-import org.archivekeep.app.core.utils.generics.SyncFlowStringWriter
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.flatMapLatest
+import org.archivekeep.app.core.operations.add.AddOperationSupervisor
+import org.archivekeep.app.core.utils.generics.mapToLoadable
 import org.archivekeep.app.core.utils.identifiers.RepositoryURI
+import org.archivekeep.app.desktop.domain.wiring.LocalAddOperationSupervisorService
 import org.archivekeep.app.desktop.domain.wiring.LocalRepoService
-import org.archivekeep.app.desktop.ui.designsystem.dialog.DialogContentContainer
+import org.archivekeep.app.desktop.ui.components.FileManySelect
+import org.archivekeep.app.desktop.ui.components.ItemManySelect
+import org.archivekeep.app.desktop.ui.components.LoadableGuard
+import org.archivekeep.app.desktop.ui.designsystem.dialog.DialogButtonContainer
+import org.archivekeep.app.desktop.ui.designsystem.dialog.DialogCardWithDialogInnerContainer
+import org.archivekeep.app.desktop.ui.designsystem.dialog.DialogDismissButton
+import org.archivekeep.app.desktop.ui.designsystem.dialog.DialogOverlay
+import org.archivekeep.app.desktop.ui.designsystem.dialog.DialogPreviewColumn
+import org.archivekeep.app.desktop.ui.designsystem.dialog.DialogPrimaryButton
 import org.archivekeep.app.desktop.ui.dialogs.Dialog
 import org.archivekeep.app.desktop.utils.collectAsLoadable
+import org.archivekeep.app.desktop.utils.collectLoadableFlow
+import org.archivekeep.app.desktop.utils.derivedMutableStateOf
+import org.archivekeep.app.desktop.utils.stickToFirstNotNull
 import org.archivekeep.core.operations.AddOperation
-import org.archivekeep.core.operations.AddOperationTextWriter
+import org.archivekeep.core.operations.AddOperation.PreparationResult.Move
 import org.archivekeep.utils.Loadable
-import java.io.PrintWriter
-import java.io.StringWriter
 
 class UpdateIndexOperationDialog(
     val repositoryURI: RepositoryURI,
@@ -67,89 +59,39 @@ class UpdateIndexOperationDialog(
                 }
             }.collectAsLoadable()
 
-        val repositoryAccess =
-            with(LocalRepoService.current) {
-                remember(repositoryURI) {
-                    getRepository(repositoryURI).accessorFlow
+        val operation =
+            LocalAddOperationSupervisorService.current.let { service ->
+                remember(service, repositoryURI) {
+                    service.getAddOperation(repositoryURI)
                 }
             }
 
-        val scope = rememberCoroutineScope()
+        val launchOptions = remember { mutableStateOf(AddOperation.LaunchOptions(addFilesSubsetLimit = emptySet(), movesSubsetLimit = emptySet())) }
 
-        if (repositoryAccess == null) {
-            Text("Archive with ID $repositoryURI not found")
-            return
-        }
-
-        when (repository) {
-            is Loadable.Loading -> {
-                Text("Loading")
-                return
-            }
-
-            is Loadable.Failed -> {
-                Text("Failed")
-                return
-            }
-
-            is Loadable.Loaded -> {
-                val preparationResult =
-                    produceState<AddOperation.PreparationResult?>(initialValue = null, repositoryURI) {
-//                    val preparationResult = withContext(Dispatchers.IO) {
-//                        AddOperation(
-//                            subsetGlobs = listOf("."),
-//
-//                            disableFilenameCheck = false,
-//                            disableMovesCheck = false
-//                        ).prepare(repositoryAccess)
-//                    }
-//
-//                    value = preparationResult
-                    }
-
-                var executeJob: Job? by remember { mutableStateOf(null) }
-
-                val executeResult = remember { SyncFlowStringWriter() }
-                val executeResultString = executeResult.string.collectAsState().value
-
-                val onTriggerExecute =
-                    remember {
-                        {
-                            val preparedResult = preparationResult.value
-                            val writter = AddOperationTextWriter(PrintWriter(executeResult.writer, true))
-
-                            if (preparedResult != null) {
-                                executeJob =
-                                    scope.launch {
-//                            try {
-//                                preparedResult.executeMovesReindex(
-//                                    repositoryAccess,
-//                                    writter::onMoveCompleted
-//                                )
-//                                preparedResult.executeAddNewFiles(
-//                                    repositoryAccess,
-//                                    writter::onAddCompleted
-//                                )
-//                            } finally {
-//                                executeResult.writer.flush()
-//                                executeJob = null
-//                            }
-                                    }
-                            }
+        val statusFlow: Loadable<AddOperationSupervisor.State> =
+            remember(operation) {
+                val f: Flow<Loadable<AddOperationSupervisor.State>> =
+                    operation.currentJobFlow
+                        .stickToFirstNotNull()
+                        .distinctUntilChanged()
+                        .flatMapLatest { job ->
+                            job?.executionStateFlow?.mapToLoadable() ?: operation.prepare()
                         }
-                    }
 
-                Dialog(
-                    onDismissRequest = onClose,
-                ) {
-                    contents(
-                        repository.value.displayName,
-                        preparationResult.value,
-                        executeResult = executeResultString,
-                        isExecuting = executeJob != null,
-                        onTriggerExecute = onTriggerExecute,
-                    )
-                }
+                f
+            }.collectLoadableFlow()
+
+        DialogOverlay(onDismissRequest = onClose) {
+            LoadableGuard(
+                repository,
+                statusFlow,
+            ) { repository, state ->
+                contents(
+                    repository.displayName,
+                    state,
+                    launchOptions,
+                    onClose,
+                )
             }
         }
     }
@@ -158,12 +100,19 @@ class UpdateIndexOperationDialog(
 @Composable
 private fun contents(
     archiveName: String,
-    preparationResult: AddOperation.PreparationResult?,
-    isExecuting: Boolean,
-    executeResult: String,
-    onTriggerExecute: () -> Unit,
+    state: AddOperationSupervisor.State,
+    launchOptions: MutableState<AddOperation.LaunchOptions>,
+    onClose: () -> Unit = {},
 ) {
-    DialogContentContainer(
+    val preparedResult = (state as? AddOperationSupervisor.Prepared)?.result
+    val executeResult = (state as? AddOperationSupervisor.ExecutionState.Running)?.log ?: ""
+    val isExecuting = state is AddOperationSupervisor.ExecutionState.Running
+
+    val onTriggerExecute = {
+        (state as AddOperationSupervisor.Prepared).launch(launchOptions.value)
+    }
+
+    DialogCardWithDialogInnerContainer(
         title =
             buildAnnotatedString {
                 append("Update index of ")
@@ -172,49 +121,87 @@ private fun contents(
                     append(archiveName)
                 }
             },
-    ) {
-        if (isExecuting || executeResult.isNotEmpty()) {
-            Box(Modifier.verticalScroll(rememberScrollState())) {
-                Text(executeResult)
-            }
-        } else if (preparationResult != null) {
-            val preparationResultSummary =
-                remember(preparationResult) {
-                    StringWriter()
-                        .apply {
-                            preparationResult.printSummary(
-                                PrintWriter(this),
-                                indent = " - ",
-                            )
-                        }.toString()
+        content = {
+            if (isExecuting || executeResult.isNotEmpty()) {
+                Box(Modifier.verticalScroll(rememberScrollState())) {
+                    Text(executeResult)
+                }
+            } else if (preparedResult != null) {
+                val selectedFilenames =
+                    remember {
+                        derivedMutableStateOf(
+                            onSet = { newValue ->
+                                launchOptions.value =
+                                    launchOptions.value.copy(
+                                        addFilesSubsetLimit = newValue,
+                                    )
+                            },
+                        ) {
+                            launchOptions.value.addFilesSubsetLimit ?: emptySet()
+                        }
+                    }
+
+                val selectedMoves =
+                    remember {
+                        derivedMutableStateOf(
+                            onSet = { newValue ->
+                                launchOptions.value =
+                                    launchOptions.value.copy(
+                                        movesSubsetLimit = newValue,
+                                    )
+                            },
+                        ) {
+                            launchOptions.value.movesSubsetLimit ?: emptySet()
+                        }
+                    }
+
+                if (preparedResult.moves.isNotEmpty()) {
+                    ItemManySelect(
+                        "Moves",
+                        allItemsLabel = { "All moves ($it)" },
+                        itemLabel = { "${it.from} -> ${it.to}" },
+                        allItems = preparedResult.moves,
+                        selectedMoves,
+                    )
+                    Spacer(Modifier.height(12.dp))
                 }
 
-            Box(Modifier.verticalScroll(rememberScrollState())) {
-                Text(preparationResultSummary)
+                if (preparedResult.newFiles.isNotEmpty()) {
+                    FileManySelect("New files", preparedResult.newFiles, selectedFilenames)
+                }
+            } else {
+                Text("Preparing...")
             }
+        },
+        bottomContent = {
+            DialogButtonContainer {
+                var closeShown = false
 
-            val fontSize = 12.sp
-            val lineHeight = fontSize * 1.5
+                when (state) {
+                    AddOperationSupervisor.ExecutionState.NotRunning -> {
+                        DialogPrimaryButton("Execute index update", onClick = {}, enabled = false)
+                    }
+                    is AddOperationSupervisor.ExecutionState.Running -> {
+                        if (state.finished) {
+                            DialogDismissButton("Close", onClose)
+                            closeShown = true
+                        } else {
+                            DialogPrimaryButton("Execute index update", onClick = {}, enabled = false)
+                            Text("Running ...")
+                        }
+                    }
+                    is AddOperationSupervisor.Prepared -> {
+                        DialogPrimaryButton("Execute index update", onClick = onTriggerExecute, enabled = true)
+                    }
+                }
 
-            val sizeDp = with(LocalDensity.current) { lineHeight.toDp() }
-
-            FilledTonalButton(
-                onClick = onTriggerExecute,
-                shape = RoundedCornerShape(8.dp),
-                contentPadding = PaddingValues(12.dp, 4.dp),
-            ) {
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(8.dp),
-                ) {
-                    Icon(Icons.Default.Start, "", modifier = Modifier.size(sizeDp))
-                    Text("Execute index update", fontSize = fontSize, lineHeight = lineHeight)
+                if (!closeShown) {
+                    Spacer(Modifier.weight(1f))
+                    DialogDismissButton("Dismiss", onClose)
                 }
             }
-        } else {
-            Text("Preparing...")
-        }
-    }
+        },
+    )
 }
 
 private val demo_preparation_result =
@@ -224,49 +211,66 @@ private val demo_preparation_result =
                 "Documents/Something/There.pdf",
                 "Photos/2024/04/photo_09.JPG",
             ),
-        moves = emptyList(),
+        moves =
+            listOf(
+                Move("Document/bad-name.pdf", "Document/corrected-name.pdf"),
+            ),
         missingFiles = emptyList(),
     )
 
 @Preview
 @Composable
 private fun UpdateIndexOperationViewPreview() {
-    Box(
-        Modifier.fillMaxSize().background(Color.DarkGray).padding(48.dp),
-        contentAlignment = Alignment.Center,
-    ) {
-        Column(verticalArrangement = Arrangement.spacedBy(20.dp)) {
-            contents(
-                archiveName = "Family Stuff",
-                preparationResult = null,
-                isExecuting = false,
-                executeResult = "",
-                onTriggerExecute = {},
-            )
+    DialogPreviewColumn {
+        contents(
+            archiveName = "Family Stuff",
+            state =
+                AddOperationSupervisor.Prepared(
+                    demo_preparation_result,
+                    {},
+                ),
+            launchOptions = mutableStateOf(AddOperation.LaunchOptions()),
+        )
 
-            contents(
-                archiveName = "Family Stuff",
-                preparationResult = demo_preparation_result,
-                isExecuting = false,
-                executeResult = "",
-                onTriggerExecute = {},
-            )
+        contents(
+            archiveName = "Family Stuff",
+            state =
+                AddOperationSupervisor.Prepared(
+                    demo_preparation_result,
+                    {},
+                ),
+            launchOptions = mutableStateOf(AddOperation.LaunchOptions()),
+        )
 
-            contents(
-                archiveName = "Family Stuff",
-                preparationResult = demo_preparation_result,
-                isExecuting = true,
-                executeResult = "added: Documents/Something/There.pdf",
-                onTriggerExecute = {},
-            )
+        contents(
+            archiveName = "Family Stuff",
+            state =
+                AddOperationSupervisor.ExecutionState.Running(
+                    AddOperationSupervisor.AddProgress(setOf("Documents/Something/There.pdf"), emptyMap(), false),
+                    AddOperationSupervisor.MoveProgress(emptySet(), emptyMap(), false),
+                    "added: Documents/Something/There.pdf",
+                ),
+            launchOptions = mutableStateOf(AddOperation.LaunchOptions()),
+        )
 
-            contents(
-                archiveName = "Family Stuff",
-                preparationResult = demo_preparation_result,
-                isExecuting = true,
-                executeResult = "added: Documents/Something/There.pdf\nadded: Photos/2024/04/photo_09.JPG",
-                onTriggerExecute = {},
-            )
-        }
+        contents(
+            archiveName = "Family Stuff",
+            AddOperationSupervisor.ExecutionState.Running(
+                AddOperationSupervisor.AddProgress(setOf("Documents/Something/There.pdf", "Photos/2024/04/photo_09.JPG"), emptyMap(), false),
+                AddOperationSupervisor.MoveProgress(emptySet(), emptyMap(), false),
+                "added: Documents/Something/There.pdf\nadded: Photos/2024/04/photo_09.JPG",
+            ),
+            launchOptions = mutableStateOf(AddOperation.LaunchOptions()),
+        )
+
+        contents(
+            archiveName = "Family Stuff",
+            AddOperationSupervisor.ExecutionState.Running(
+                AddOperationSupervisor.AddProgress(setOf("Documents/Something/There.pdf", "Photos/2024/04/photo_09.JPG"), emptyMap(), true),
+                AddOperationSupervisor.MoveProgress(emptySet(), emptyMap(), false),
+                "added: Documents/Something/There.pdf\nadded: Photos/2024/04/photo_09.JPG",
+            ),
+            launchOptions = mutableStateOf(AddOperation.LaunchOptions()),
+        )
     }
 }

@@ -42,7 +42,7 @@ class SpeedLimitedLocalRepoWrapper(
     }
 
     override suspend fun getMetadata(): RepositoryMetadata =
-        delayed(150) {
+        delayed(25) {
             base.getMetadata()
         }
 

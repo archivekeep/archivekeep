@@ -17,7 +17,7 @@ import org.archivekeep.app.core.utils.generics.mapToLoadable
 import org.archivekeep.app.core.utils.identifiers.RepositoryURI
 import org.archivekeep.app.desktop.domain.data.getSyncCandidates
 import org.archivekeep.app.desktop.ui.dialogs.sync.describePreparedSyncOperation
-import org.archivekeep.app.desktop.utils.stickToFirstNotNull
+import org.archivekeep.app.desktop.utils.stickToFirstNotNullAsState
 import org.archivekeep.core.operations.RelocationSyncMode
 import org.archivekeep.utils.Loadable
 
@@ -58,7 +58,7 @@ class PushRepoDialogViewModel(
     ) {
         val repoToRepoSync = syncService.getRepoToRepoSync(repositoryURI, otherRepository.uri)
 
-        val rememberedOPFlow = repoToRepoSync.currentlyRunningOperationFlow.stickToFirstNotNull(scope)
+        val rememberedOPFlow = repoToRepoSync.currentlyRunningOperationFlow.stickToFirstNotNullAsState(scope)
 
         val currentSyncFlow: StateFlow<Loadable<PreparedRunningOrCompletedSync>> =
             rememberedOPFlow

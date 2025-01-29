@@ -13,9 +13,9 @@ import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
-import org.archivekeep.app.core.operations.addpush.RepoAddPush.LaunchedAddPushProcess
-import org.archivekeep.app.core.operations.addpush.RepoAddPush.NotReadyAddPushProcess
-import org.archivekeep.app.core.operations.addpush.RepoAddPush.ReadyAddPushProcess
+import org.archivekeep.app.core.operations.addpush.AddAndPushOperation.LaunchedAddPushProcess
+import org.archivekeep.app.core.operations.addpush.AddAndPushOperation.NotReadyAddPushProcess
+import org.archivekeep.app.core.operations.addpush.AddAndPushOperation.ReadyAddPushProcess
 import org.archivekeep.app.core.utils.identifiers.RepositoryURI
 import org.archivekeep.app.desktop.ui.components.DestinationManySelect
 import org.archivekeep.app.desktop.ui.components.FileManySelect
@@ -73,7 +73,7 @@ private fun AddAndPushDialogContents(
                                 )
                             }
                             Spacer(modifier = Modifier.height(6.dp))
-                            FileManySelect(state.allNewFiles, vm.selectedFilenames.asState())
+                            FileManySelect("Files to add and push:", state.allNewFiles, vm.selectedFilenames.asState())
                         }
 
                         is LaunchedAddPushProcess -> {

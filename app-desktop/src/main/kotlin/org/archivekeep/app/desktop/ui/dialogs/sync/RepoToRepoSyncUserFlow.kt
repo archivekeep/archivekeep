@@ -11,7 +11,7 @@ import org.archivekeep.app.core.operations.derived.RepoToRepoSync
 import org.archivekeep.app.core.operations.derived.SyncOperationExecution
 import org.archivekeep.app.core.utils.generics.mapLoadedData
 import org.archivekeep.app.core.utils.generics.mapToLoadable
-import org.archivekeep.app.desktop.utils.stickToFirstNotNull
+import org.archivekeep.app.desktop.utils.stickToFirstNotNullAsState
 import org.archivekeep.core.operations.RelocationSyncMode
 import org.archivekeep.utils.Loadable
 import org.archivekeep.utils.mapIfLoadedOrDefault
@@ -31,7 +31,7 @@ class RepoToRepoSyncUserFlow(
         val canLaunch = operation.mapIfLoadedOrDefault(false) { it is SyncOperationExecution.Prepared }
     }
 
-    val currentOperation = sync.currentlyRunningOperationFlow.stickToFirstNotNull(scope)
+    val currentOperation = sync.currentlyRunningOperationFlow.stickToFirstNotNullAsState(scope)
 
     val relocationSyncModeFlow =
         MutableStateFlow(

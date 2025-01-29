@@ -1,5 +1,6 @@
 package org.archivekeep.core.operations
 
+import org.archivekeep.core.operations.AddOperation.PreparationResult.Move
 import org.archivekeep.core.repo.LocalRepo
 import org.archivekeep.core.repo.Repo
 import java.io.PrintWriter
@@ -20,6 +21,11 @@ class AddOperation(
     val disableFilenameCheck: Boolean,
     val disableMovesCheck: Boolean,
 ) {
+    data class LaunchOptions(
+        val addFilesSubsetLimit: Set<String>? = null,
+        val movesSubsetLimit: Set<Move>? = null,
+    )
+
     suspend fun prepare(repo: Repo): PreparationResult {
         val localRepo = repo as? LocalRepo ?: throw RuntimeException("not local repo")
 
@@ -100,11 +106,16 @@ class AddOperation(
 
         suspend fun executeMovesReindex(
             repo: Repo,
+            movesSubsetLimit: Set<Move>? = null,
             onMoveCompleted: (move: Move) -> Unit,
         ) {
             val localRepo = repo as? LocalRepo ?: throw RuntimeException("not local repo")
 
             moves.forEach { move ->
+                if (movesSubsetLimit != null && !movesSubsetLimit.contains(move)) {
+                    return@forEach
+                }
+
                 localRepo.add(move.to)
                 localRepo.remove(move.from)
 
@@ -114,11 +125,16 @@ class AddOperation(
 
         suspend fun executeAddNewFiles(
             repo: Repo,
+            addFilesSubsetLimit: Set<String>? = null,
             onAddCompleted: (newFile: String) -> Unit,
         ) {
             val localRepo = repo as? LocalRepo ?: throw RuntimeException("not local repo")
 
             newFiles.forEach { newFile ->
+                if (addFilesSubsetLimit != null && !addFilesSubsetLimit.contains(newFile)) {
+                    return@forEach
+                }
+
                 localRepo.add(newFile)
 
                 onAddCompleted(newFile)

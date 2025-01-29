@@ -7,9 +7,11 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.transformWhile
 
-fun <T> (Flow<T>).stickToFirstNotNull(scope: CoroutineScope): StateFlow<T?> =
+fun <T> (Flow<T>).stickToFirstNotNull() =
     this
         .transformWhile {
             emit(it)
             it == null
-        }.stateIn(scope, SharingStarted.Lazily, null)
+        }
+
+fun <T> (Flow<T>).stickToFirstNotNullAsState(scope: CoroutineScope): StateFlow<T?> = this.stickToFirstNotNull().stateIn(scope, SharingStarted.Lazily, null)

@@ -48,7 +48,7 @@ import org.archivekeep.app.desktop.ui.designsystem.dialog.DialogOverlayWithLoada
 import org.archivekeep.app.desktop.ui.dialogs.Dialog
 import org.archivekeep.app.desktop.utils.collectAsLoadable
 import org.archivekeep.app.desktop.utils.collectLoadableFlow
-import org.archivekeep.app.desktop.utils.stickToFirstNotNull
+import org.archivekeep.app.desktop.utils.stickToFirstNotNullAsState
 import org.archivekeep.core.operations.AdditiveRelocationsSyncStep
 import org.archivekeep.core.operations.CompareOperation
 import org.archivekeep.core.operations.NewFilesSyncStep
@@ -92,7 +92,7 @@ class SyncOperationDialog(
                 selectedTarget?.let { targetId ->
                     val repoToRepoSync = syncService.getRepoToRepoSync(repositoryURI, targetId)
 
-                    val rememberedOP = repoToRepoSync.currentlyRunningOperationFlow.stickToFirstNotNull(GlobalScope)
+                    val rememberedOP = repoToRepoSync.currentlyRunningOperationFlow.stickToFirstNotNullAsState(GlobalScope)
 
                     rememberedOP.flatMapLatest {
                         if (it != null) {

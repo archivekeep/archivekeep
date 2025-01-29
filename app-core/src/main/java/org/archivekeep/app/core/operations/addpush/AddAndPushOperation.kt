@@ -5,7 +5,7 @@ import kotlinx.coroutines.flow.StateFlow
 import org.archivekeep.app.core.operations.derived.IndexStatus
 import org.archivekeep.app.core.utils.identifiers.RepositoryURI
 
-interface RepoAddPush {
+interface AddAndPushOperation {
     val currentJobFlow: StateFlow<Job?>
     val stateFlow: Flow<State>
 

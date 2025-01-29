@@ -10,21 +10,22 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.transform
 import org.archivekeep.app.core.domain.repositories.RepositoryService
 import org.archivekeep.app.core.domain.storages.StorageRepository
 import org.archivekeep.app.core.domain.storages.StorageService
-import org.archivekeep.app.core.operations.addpush.RepoAddPush
-import org.archivekeep.app.core.operations.addpush.RepoAddPush.LaunchOptions
-import org.archivekeep.app.core.operations.addpush.RepoAddPush.LaunchedAddPushProcess
-import org.archivekeep.app.core.operations.addpush.RepoAddPush.ReadyAddPushProcess
+import org.archivekeep.app.core.operations.addpush.AddAndPushOperation
+import org.archivekeep.app.core.operations.addpush.AddAndPushOperation.LaunchOptions
+import org.archivekeep.app.core.operations.addpush.AddAndPushOperation.LaunchedAddPushProcess
+import org.archivekeep.app.core.operations.addpush.AddAndPushOperation.ReadyAddPushProcess
 import org.archivekeep.app.core.utils.generics.mapToLoadable
 import org.archivekeep.app.core.utils.identifiers.RepositoryURI
 import org.archivekeep.app.desktop.domain.data.getSyncCandidates
 import org.archivekeep.app.desktop.domain.wiring.LocalAddPushService
 import org.archivekeep.app.desktop.domain.wiring.LocalRepoService
 import org.archivekeep.app.desktop.domain.wiring.LocalStorageService
-import org.archivekeep.app.desktop.utils.stickToFirstNotNull
+import org.archivekeep.app.desktop.utils.stickToFirstNotNullAsState
 import org.archivekeep.utils.Loadable
 import org.archivekeep.utils.mapIfLoadedOrDefault
 
@@ -33,7 +34,7 @@ class AddAndPushDialogViewModel(
     val storageService: StorageService,
     val repositoryService: RepositoryService,
     val repositoryURI: RepositoryURI,
-    val addPushStatus: RepoAddPush,
+    val addPushStatus: AddAndPushOperation,
     val onClose: () -> Unit,
 ) {
     val selectedDestinationRepositories: MutableStateFlow<Set<RepositoryURI>> = MutableStateFlow(emptySet())
@@ -41,16 +42,19 @@ class AddAndPushDialogViewModel(
 
     val repoName = repositoryService.getRepository(repositoryURI).informationFlow.map { it.displayName }
 
-    val currentOperation = addPushStatus.currentJobFlow.stickToFirstNotNull(scope)
+    val currentOperation = addPushStatus.currentJobFlow.stickToFirstNotNullAsState(scope)
 
     val otherRepositoryCandidates = getSyncCandidates(storageService, repositoryURI).mapToLoadable()
 
     val allNewFilesFlow =
-        addPushStatus.stateFlow.transform {
-            if (it is ReadyAddPushProcess) {
-                emit(it.indexStatus.newFiles)
+        addPushStatus.stateFlow
+            .transform {
+                if (it is ReadyAddPushProcess) {
+                    emit(it.indexStatus.newFiles)
+                }
+            }.onStart {
+                emit(emptyList())
             }
-        }
 
     val currentStatusFlow =
         currentOperation.flatMapLatest {
@@ -79,7 +83,7 @@ class AddAndPushDialogViewModel(
         )
 
     data class VMState(
-        val state: RepoAddPush.State,
+        val state: AddAndPushOperation.State,
 //        val repoName: String,
         val allNewFiles: List<String>,
         val selectedDestinationRepositories: Set<RepositoryURI>,

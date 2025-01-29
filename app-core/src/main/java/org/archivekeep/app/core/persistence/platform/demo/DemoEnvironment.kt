@@ -37,7 +37,6 @@ import org.archivekeep.app.core.utils.generics.sharedWhileSubscribed
 import org.archivekeep.app.core.utils.identifiers.RepositoryURI
 import org.archivekeep.app.core.utils.identifiers.StorageURI
 import org.archivekeep.core.RepositoryAssociationGroupId
-import org.archivekeep.core.exceptions.UnsupportedFeatureException
 import org.archivekeep.core.repo.LocalRepo
 import org.archivekeep.core.repo.Repo
 import org.archivekeep.core.repo.RepoIndex
@@ -184,7 +183,9 @@ class DemoEnvironment(
             override suspend fun updateRepositoryMemorizedIndexIfDiffers(
                 uri: RepositoryURI,
                 metadata: RepoIndex?,
-            ): Unit = throw UnsupportedFeatureException()
+            ) {
+                // TODO
+            }
         }
 
     override val repositoryMetadataMemory =

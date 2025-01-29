@@ -23,7 +23,7 @@ open class InMemoryLocalRepo(
     val unindexedFiles = MutableStateFlow(initialUnindexedContents)
 
     override suspend fun findAllFiles(globs: List<String>): List<Path> {
-        if (globs != listOf("*")) {
+        if (globs != listOf("*") && globs != listOf(".")) {
             TODO("Not yet implemented")
         }
 

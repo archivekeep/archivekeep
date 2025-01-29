@@ -50,7 +50,7 @@ fun <T> Flow<T>.mapToLoadable(message: String? = null): Flow<Loadable<T>> =
                 Loadable.Failed(
                     RuntimeException(
                         "${message ?: "Require wait value"}: ${it.message ?: it.toString()}",
-                        it.cause,
+                        it,
                     ),
                 ),
             )
@@ -68,7 +68,7 @@ inline fun <T, R> Flow<T>.mapToLoadable(
                 Loadable.Failed(
                     RuntimeException(
                         "${message ?: "Require wait value"}: ${it.message ?: it.toString()}",
-                        it.cause,
+                        it,
                     ),
                 ),
             )
