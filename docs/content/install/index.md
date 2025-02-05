@@ -10,13 +10,35 @@ weight: 15
 {{< /hint >}}
 
 
-## Using go (from sources)
+## From sources - as a Flatpak application
 
-The tool can be installed as a go module:
+The application can be built by Gradle using `app-desktop:createDistributable` and then installed as an user application using Flatpak.
+
+Install pre-requisites on Fedora (Toolbox):
 
 ```shell
-go install github.com/archivekeep/archivekeep@latest
+# add adoptium repository
+sudo dnf install adoptium-temurin-java-repository
+sudo dnf config-manager --enable adoptium-temurin-java-repository
 
-# ensure PATH is set correctly (in .bashrc)
-export PATH="$PATH:$HOME/go/bin"
+# install Temurin JDK
+sudo dnf install binutils temurin-17-jdk
+```
+
+Setup flatpak:
+
+```shell
+flatpak remote-add --if-not-exists --user flathub https://dl.flathub.org/repo/flathub.flatpakrepo
+```
+
+```shell
+./gradlew app-desktop:createDistributable
+
+flatpak-builder \
+  --force-clean \
+  --user \
+  --install-deps-from=flathub \
+  --state-dir ~/opt/flatpak/flatpak-builder-state \
+  --install ~/opt/flatpak/builddir/org.archivekeep.ArchiveKeep \
+  distribution/flatpak/org.archivekeep.ArchiveKeep.yaml
 ```

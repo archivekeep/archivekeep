@@ -19,6 +19,7 @@ import org.archivekeep.app.core.operations.addpush.AddAndPushOperation.ReadyAddP
 import org.archivekeep.app.core.utils.identifiers.RepositoryURI
 import org.archivekeep.app.desktop.ui.components.DestinationManySelect
 import org.archivekeep.app.desktop.ui.components.FileManySelect
+import org.archivekeep.app.desktop.ui.components.ItemManySelect
 import org.archivekeep.app.desktop.ui.components.LoadableGuard
 import org.archivekeep.app.desktop.ui.designsystem.dialog.DialogButtonContainer
 import org.archivekeep.app.desktop.ui.designsystem.dialog.DialogDismissButton
@@ -27,7 +28,7 @@ import org.archivekeep.app.desktop.ui.designsystem.dialog.DialogOverlayCard
 import org.archivekeep.app.desktop.ui.designsystem.dialog.DialogPrimaryButton
 import org.archivekeep.app.desktop.ui.designsystem.dialog.DialogSecondaryButton
 import org.archivekeep.app.desktop.ui.dialogs.Dialog
-import org.archivekeep.app.desktop.utils.asState
+import org.archivekeep.app.desktop.utils.asMutableState
 import org.archivekeep.app.desktop.utils.collectAsLoadable
 
 class AddAndPushRepoDialog(
@@ -69,20 +70,42 @@ private fun AddAndPushDialogContents(
                             ) {
                                 DestinationManySelect(
                                     it,
-                                    vm.selectedDestinationRepositories.asState(),
+                                    vm.selectedDestinationRepositories.asMutableState(),
                                 )
                             }
                             Spacer(modifier = Modifier.height(6.dp))
-                            FileManySelect("Files to add and push:", state.allNewFiles, vm.selectedFilenames.asState())
+
+                            if (state.allMoves.isNotEmpty()) {
+                                ItemManySelect(
+                                    "Moves",
+                                    allItemsLabel = { "All moves ($it)" },
+                                    itemLabel = { "${it.from} -> ${it.to}" },
+                                    allItems = state.allMoves,
+                                    vm.selectedMoves.asMutableState(),
+                                )
+                                Spacer(Modifier.height(12.dp))
+                            }
+
+                            if (state.allNewFiles.isNotEmpty()) {
+                                FileManySelect("Files to add and push:", state.allNewFiles, vm.selectedFilenames.asMutableState())
+                            }
                         }
 
                         is LaunchedAddPushProcess -> {
                             val addProgress =
                                 buildAnnotatedString {
-                                    appendLine("Added ${status.addProgress.added.size} / ${status.options.selectedFiles.size}")
+                                    if (status.options.movesToExecute.isNotEmpty()) {
+                                        appendLine("Added ${status.moveProgress.moved.size} / ${status.options.movesToExecute.size}")
+                                    }
+                                    if (status.options.filesToAdd.isNotEmpty()) {
+                                        appendLine("Moved ${status.addProgress.added.size} / ${status.options.filesToAdd.size}")
+                                    }
 
                                     status.pushProgress.forEach { (repo, pp) ->
-                                        appendLine("Pushed ${pp.added.size} / ${status.options.selectedFiles.size} to $repo")
+                                        appendLine(
+                                            "Pushed ${pp.moved.size} / ${status.options.movesToExecute.size} moves, " +
+                                                "${pp.added.size} / ${status.options.filesToAdd.size} files to $repo",
+                                        )
                                     }
                                 }
 

@@ -5,13 +5,14 @@ import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.onStart
-import kotlinx.coroutines.flow.transform
+import kotlinx.coroutines.flow.transformWhile
 import org.archivekeep.app.core.domain.repositories.RepositoryService
 import org.archivekeep.app.core.domain.storages.StorageRepository
 import org.archivekeep.app.core.domain.storages.StorageService
@@ -26,6 +27,7 @@ import org.archivekeep.app.desktop.domain.wiring.LocalAddPushService
 import org.archivekeep.app.desktop.domain.wiring.LocalRepoService
 import org.archivekeep.app.desktop.domain.wiring.LocalStorageService
 import org.archivekeep.app.desktop.utils.stickToFirstNotNullAsState
+import org.archivekeep.core.operations.AddOperation
 import org.archivekeep.utils.Loadable
 import org.archivekeep.utils.mapIfLoadedOrDefault
 
@@ -39,6 +41,7 @@ class AddAndPushDialogViewModel(
 ) {
     val selectedDestinationRepositories: MutableStateFlow<Set<RepositoryURI>> = MutableStateFlow(emptySet())
     val selectedFilenames: MutableStateFlow<Set<String>> = MutableStateFlow(emptySet())
+    val selectedMoves: MutableStateFlow<Set<AddOperation.PreparationResult.Move>> = MutableStateFlow(emptySet())
 
     val repoName = repositoryService.getRepository(repositoryURI).informationFlow.map { it.displayName }
 
@@ -46,30 +49,34 @@ class AddAndPushDialogViewModel(
 
     val otherRepositoryCandidates = getSyncCandidates(storageService, repositoryURI).mapToLoadable()
 
-    val allNewFilesFlow =
-        addPushStatus.stateFlow
-            .transform {
-                if (it is ReadyAddPushProcess) {
-                    emit(it.indexStatus.newFiles)
-                }
-            }.onStart {
-                emit(emptyList())
-            }
-
     val currentStatusFlow =
-        currentOperation.flatMapLatest {
-            val operationStatus = it?.state
+        currentOperation
+            .flatMapLatest {
+                val operationStatus = it?.state
 
-            operationStatus ?: addPushStatus.stateFlow
+                operationStatus ?: addPushStatus.stateFlow
+            }.onStart { emit(AddAndPushOperation.NotReadyAddPushProcess) }
+
+    val lastPreparation =
+        currentStatusFlow.transformWhile {
+            when (it) {
+                is LaunchedAddPushProcess -> false
+                AddAndPushOperation.NotReadyAddPushProcess -> true
+                is ReadyAddPushProcess -> {
+                    emit(it.addPreprationResult)
+                    true
+                }
+            }
         }
 
     val currentVMState =
-        combine(
+        combine6(
             currentStatusFlow,
 //            repoName,
-            allNewFilesFlow,
+            lastPreparation,
             selectedDestinationRepositories,
             selectedFilenames,
+            selectedMoves,
             otherRepositoryCandidates.onEach { v ->
                 if (v is Loadable.Loaded) {
                     selectedDestinationRepositories.value =
@@ -79,15 +86,26 @@ class AddAndPushDialogViewModel(
                             .toSet()
                 }
             },
-            transform = AddAndPushDialogViewModel::VMState,
-        )
+        ) { currentStatus, lastPreparation, selectedDestinationRepositories, selectedFilenames, selectedMoves, otherRepositoryCandidates ->
+            VMState(
+                currentStatus,
+                lastPreparation.newFiles,
+                lastPreparation.moves,
+                selectedDestinationRepositories,
+                selectedFilenames,
+                selectedMoves,
+                otherRepositoryCandidates,
+            )
+        }
 
     data class VMState(
         val state: AddAndPushOperation.State,
 //        val repoName: String,
         val allNewFiles: List<String>,
+        val allMoves: List<AddOperation.PreparationResult.Move>,
         val selectedDestinationRepositories: Set<RepositoryURI>,
         val selectedFilenames: Set<String>,
+        val selectedMoves: Set<AddOperation.PreparationResult.Move>,
         val otherRepositoryCandidates: Loadable<List<StorageRepository>>,
     ) {
         val showLaunch =
@@ -99,8 +117,10 @@ class AddAndPushDialogViewModel(
             val candidates = otherRepositoryCandidates.mapIfLoadedOrDefault(emptyList()) { it }
             val selections = selectedDestinationRepositories
 
+            val anyOperationSelected = selectedFilenames.isNotEmpty() || selectedMoves.isNotEmpty()
+
             state is ReadyAddPushProcess &&
-                selectedFilenames.isNotEmpty() &&
+                anyOperationSelected &&
                 selections.isNotEmpty() &&
                 selections.all { selection ->
                     candidates
@@ -121,6 +141,7 @@ class AddAndPushDialogViewModel(
             state.launch(
                 LaunchOptions(
                     selectedFilenames,
+                    selectedMoves,
                     selectedDestinationRepositories,
                 ),
             )
@@ -156,3 +177,24 @@ fun rememberAddAndPushDialogViewModel(
 
     return vm
 }
+
+@Suppress("UNCHECKED_CAST")
+fun <T1, T2, T3, T4, T5, T6, R> combine6(
+    flow: Flow<T1>,
+    flow2: Flow<T2>,
+    flow3: Flow<T3>,
+    flow4: Flow<T4>,
+    flow5: Flow<T5>,
+    flow6: Flow<T6>,
+    transform: suspend (T1, T2, T3, T4, T5, T6) -> R,
+): Flow<R> =
+    combine(flow, flow2, flow3, flow4, flow5, flow6) { args: Array<*> ->
+        transform(
+            args[0] as T1,
+            args[1] as T2,
+            args[2] as T3,
+            args[3] as T4,
+            args[4] as T5,
+            args[5] as T6,
+        )
+    }

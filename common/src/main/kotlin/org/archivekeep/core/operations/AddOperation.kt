@@ -107,7 +107,7 @@ class AddOperation(
         suspend fun executeMovesReindex(
             repo: Repo,
             movesSubsetLimit: Set<Move>? = null,
-            onMoveCompleted: (move: Move) -> Unit,
+            onMoveCompleted: suspend (move: Move) -> Unit,
         ) {
             val localRepo = repo as? LocalRepo ?: throw RuntimeException("not local repo")
 
@@ -126,7 +126,7 @@ class AddOperation(
         suspend fun executeAddNewFiles(
             repo: Repo,
             addFilesSubsetLimit: Set<String>? = null,
-            onAddCompleted: (newFile: String) -> Unit,
+            onAddCompleted: suspend (newFile: String) -> Unit,
         ) {
             val localRepo = repo as? LocalRepo ?: throw RuntimeException("not local repo")
 

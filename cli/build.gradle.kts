@@ -69,10 +69,10 @@ val generateManpageAsciiDoc =
         group = "Documentation"
         description = "Generate AsciiDoc manpage"
 
-        classpath(configurations.named("compileClasspath"), configurations.named("kapt"), sourceSets.main.get().compileClasspath)
+        classpath(configurations.compileClasspath, configurations.named("kapt"), sourceSets.main.get().runtimeClasspath)
         mainClass = "picocli.codegen.docgen.manpage.ManPageGenerator"
 
-        args("org.archivekeep.cli.MainCommand", "--outdir=${project.layout.buildDirectory}/generated-picocli-docs", "-v")
+        args("org.archivekeep.cli.MainCommand", "--outdir=${project.layout.buildDirectory.get()}/generated-picocli-docs", "-v")
     }
 
 tasks {

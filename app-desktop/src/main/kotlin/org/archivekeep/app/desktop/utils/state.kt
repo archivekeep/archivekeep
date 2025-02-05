@@ -17,14 +17,14 @@ fun (Deferred<ExecutionOutcome>).produceState() =
     }
 
 @Composable
-fun <T> MutableStateFlow<T>.asState(): MutableState<T> {
+fun <T> MutableStateFlow<T>.asMutableState(): MutableState<T> {
     val state = this.collectAsState()
 
     return object : MutableState<T> {
         override var value: T
             get() = state.value
             set(value) {
-                this@asState.value = value
+                this@asMutableState.value = value
             }
 
         override fun component1(): T = value

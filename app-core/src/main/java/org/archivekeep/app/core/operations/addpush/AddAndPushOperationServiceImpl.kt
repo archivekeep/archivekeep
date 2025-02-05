@@ -8,6 +8,7 @@ import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.combineTransform
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.transform
 import kotlinx.coroutines.joinAll
@@ -15,12 +16,12 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import org.archivekeep.app.core.domain.repositories.RepositoryService
-import org.archivekeep.app.core.operations.derived.IndexStatus
 import org.archivekeep.app.core.utils.UniqueJobGuard
 import org.archivekeep.app.core.utils.generics.firstLoadedOrFailure
 import org.archivekeep.app.core.utils.generics.sharedGlobalWhileSubscribed
 import org.archivekeep.app.core.utils.generics.singleInstanceWeakValueMap
 import org.archivekeep.app.core.utils.identifiers.RepositoryURI
+import org.archivekeep.core.operations.AddOperation
 import org.archivekeep.core.operations.copyFile
 import org.archivekeep.core.repo.LocalRepo
 import org.archivekeep.utils.Loadable
@@ -34,25 +35,27 @@ class AddAndPushOperationServiceImpl(
 
     inner class RepoAddPushJobImpl(
         private val addPush: AddAndPushOperationImpl,
-        override val originalIndexStatus: IndexStatus,
+        override val addPreparationResult: AddOperation.PreparationResult,
         private val launchOptions: AddAndPushOperation.LaunchOptions,
     ) : AddAndPushOperation.Job,
         UniqueJobGuard.RunnableJob {
         val updateMutex = Mutex()
         var addProgress = AddAndPushOperation.AddProgress(emptySet(), emptyMap(), false)
+        var moveProgress = AddAndPushOperation.MoveProgress(emptySet(), emptyMap(), false)
         var repositoryPushStatus =
             launchOptions.selectedDestinationRepositories
                 .associateWith {
-                    AddAndPushOperation.PushProgress(emptySet(), emptyMap(), false)
+                    AddAndPushOperation.PushProgress(emptySet(), emptySet(), emptyMap(), false)
                 }
         var finished = false
 
         private val _state =
             MutableStateFlow(
                 AddAndPushOperation.LaunchedAddPushProcess(
-                    originalIndexStatus,
+                    addPreparationResult,
                     launchOptions,
                     addProgress,
+                    moveProgress,
                     repositoryPushStatus,
                     finished,
                 ),
@@ -68,9 +71,10 @@ class AddAndPushOperationServiceImpl(
             suspend fun report() {
                 _state.emit(
                     AddAndPushOperation.LaunchedAddPushProcess(
-                        originalIndexStatus,
+                        addPreparationResult,
                         launchOptions,
                         addProgress,
+                        moveProgress,
                         repositoryPushStatus,
                         finished,
                     ),
@@ -97,26 +101,42 @@ class AddAndPushOperationServiceImpl(
                     throw RuntimeException("not local repo: ${addPush.repositoryURI}")
                 }
 
-                println("Add: ${launchOptions.selectedFiles}")
+                addPreparationResult.executeMovesReindex(
+                    repo,
+                    launchOptions.movesToExecute,
+                    onMoveCompleted = {
+                        updateProgress {
+                            moveProgress =
+                                moveProgress.copy(
+                                    moved = moveProgress.moved + listOf(it),
+                                )
+                        }
+                    },
+                )
+                updateProgress {
+                    moveProgress =
+                        moveProgress.copy(
+                            finished = true,
+                        )
+                }
 
-                launchOptions.selectedFiles.forEach { fileToAdd ->
-                    println("add: $fileToAdd")
-                    try {
-                        repo.add(fileToAdd)
+                addPreparationResult.executeAddNewFiles(
+                    repo,
+                    launchOptions.filesToAdd,
+                    onAddCompleted = {
                         updateProgress {
                             addProgress =
                                 addProgress.copy(
-                                    added = addProgress.added + listOf(fileToAdd),
+                                    added = addProgress.added + listOf(it),
                                 )
                         }
-                    } catch (e: Exception) {
-                        updateProgress {
-                            addProgress =
-                                addProgress.copy(
-                                    error = addProgress.error + mapOf(fileToAdd to e.toString()),
-                                )
-                        }
-                    }
+                    },
+                )
+                updateProgress {
+                    addProgress =
+                        addProgress.copy(
+                            finished = true,
+                        )
                 }
 
                 coroutineScope {
@@ -132,7 +152,24 @@ class AddAndPushOperationServiceImpl(
                                         .accessorFlow
                                         .firstLoadedOrFailure()
 
-                                launchOptions.selectedFiles.forEach { fileToPush ->
+                                launchOptions.movesToExecute.forEach { move ->
+                                    destinationRepo.move(move.from, move.to)
+
+                                    updateProgress {
+                                        repositoryPushStatus =
+                                            repositoryPushStatus.mapValues { (k, v) ->
+                                                if (k == destinationRepoID) {
+                                                    v.copy(
+                                                        moved = v.moved + setOf(move),
+                                                    )
+                                                } else {
+                                                    v
+                                                }
+                                            }
+                                    }
+                                }
+
+                                launchOptions.filesToAdd.forEach { fileToPush ->
                                     copyFile(
                                         dst = destinationRepo,
                                         base = repo,
@@ -174,23 +211,34 @@ class AddAndPushOperationServiceImpl(
     inner class AddAndPushOperationImpl(
         val repositoryURI: RepositoryURI,
     ) : AddAndPushOperation {
+        val repository = repositoryService.getRepository(repositoryURI)
+
         val preparationFlow =
-            repositoryService
-                .getRepository(repositoryURI)
-                .localRepoStatus
-                .transform {
-                    if (it is Loadable.Loaded) {
-                        val indexStatus = it.value
-                        emit(
-                            AddAndPushOperation.ReadyAddPushProcess(
-                                indexStatus,
-                                launch = { launchOptions ->
-                                    launch(indexStatus, launchOptions)
-                                },
-                            ),
-                        )
-                    }
+            combineTransform(
+                repository.accessorFlow,
+                repository.localRepoStatus,
+                repository.indexFlow,
+            ) { accessor, _, _ ->
+                // TODO: reuse already computed index and local repo status
+
+                if (accessor is Loadable.Loaded) {
+                    val preparedAddOperation =
+                        AddOperation(
+                            subsetGlobs = listOf("."),
+                            disableFilenameCheck = false,
+                            disableMovesCheck = false,
+                        ).prepare(accessor.value)
+
+                    emit(
+                        AddAndPushOperation.ReadyAddPushProcess(
+                            preparedAddOperation,
+                            launch = { launchOptions ->
+                                launch(preparedAddOperation, launchOptions)
+                            },
+                        ),
+                    )
                 }
+            }
 
         override val currentJobFlow = jobGuards.stateHoldersWeakReference[repositoryURI]
 
@@ -206,13 +254,13 @@ class AddAndPushOperationServiceImpl(
                 }.sharedGlobalWhileSubscribed()
 
         internal fun launch(
-            originalIndexStatus: IndexStatus,
+            addPreparationResult: AddOperation.PreparationResult,
             launchOptions: AddAndPushOperation.LaunchOptions,
         ) {
             val newOperation =
                 RepoAddPushJobImpl(
                     this,
-                    originalIndexStatus,
+                    addPreparationResult,
                     launchOptions,
                 )
 
