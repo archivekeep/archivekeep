@@ -1,5 +1,7 @@
 # Changelog
 
+## [Unreleased]
+
 ## [0.2.0] - 2025-02-05 - Add Desktop GUI & rewrite to Kotlin
 
 The initial Desktop GUI application was implemented using Jetpack Compose. Currently, the state of it is somewhere in between PoC and MVP.
