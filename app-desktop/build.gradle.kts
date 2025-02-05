@@ -9,7 +9,7 @@ plugins {
 }
 
 group = "org.archivekeep"
-version = "1.0-SNAPSHOT"
+version = "0.2.0"
 
 dependencies {
     implementation(project(":common"))
