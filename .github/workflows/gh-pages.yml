@@ -40,6 +40,14 @@ jobs:
           hugo-version: '0.111.3'
           extended: true
 
+      - name: Setup Ruby (for asciidoctor)
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: 3.2
+
+      - name: Install asciidoctor
+        run: gem install asciidoctor
+
       - name: Setup Pages
         id: pages
         uses: actions/configure-pages@v2
