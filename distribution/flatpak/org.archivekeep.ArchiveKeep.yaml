@@ -1,0 +1,48 @@
+id: org.archivekeep.ArchiveKeep
+
+runtime: org.freedesktop.Platform
+runtime-version: '23.08'
+
+sdk: org.freedesktop.Sdk
+sdk-extensions:
+  - org.freedesktop.Sdk.Extension.openjdk17
+
+finish-args:
+  - --socket=x11
+  - --device=dri
+  - --share=network
+  # access to /dev/disk/by-uuid/ and /dev/mapper/ needed for disk UUID resolution
+  - --device=all
+  - --filesystem=home
+  - --filesystem=/media
+  - --filesystem=/run/media
+  - --filesystem=/mnt
+  - --env=PATH=/usr/bin:/app/bin:/app/jre/bin
+  - --env=JAVA_HOME=/app/jre
+
+command: archivekeep-gui
+
+modules:
+  - name: openjdk
+    buildsystem: simple
+    build-commands:
+      - /usr/lib/sdk/openjdk17/install.sh
+
+  - name: archivekeep-gui
+    buildsystem: simple
+    build-commands:
+      - find
+      - mkdir /app/bin/
+      - mkdir /app/lib/
+      - cp -r archivekeep-gui/bin/* /app/bin/
+      - cp -r archivekeep-gui/lib/* /app/lib/
+      - install -Dm644 org.archivekeep.ArchiveKeep.svg /app/share/icons/hicolor/scalable/apps/org.archivekeep.ArchiveKeep.svg
+      - install -Dm644 org.archivekeep.ArchiveKeep.desktop /app/share/applications/org.archivekeep.ArchiveKeep.desktop
+      - find /app
+    sources:
+      - type: dir
+        path: ../../app-desktop/build/compose/binaries/main/app
+      - type: file
+        path: ../resources/org.archivekeep.ArchiveKeep.desktop
+      - type: file
+        path: ../resources/org.archivekeep.ArchiveKeep.svg

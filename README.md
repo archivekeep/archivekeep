@@ -1,9 +1,6 @@
 Archivekeep
 ===========
 
-[![Go Reference](https://pkg.go.dev/badge/github.com/archivekeep/archivekeep.svg)](https://pkg.go.dev/github.com/archivekeep/archivekeep)
-[![Go Report Card](https://goreportcard.com/badge/github.com/archivekeep/archivekeep)](https://goreportcard.com/report/github.com/archivekeep/archivekeep)
-
 _Keep your files archived on multiple places, in a reliable and simple way._
 
 The primary requirements and priorities of ArchiveKeep are to make process of **reliable archivation** to be simple and easy:
@@ -20,6 +17,8 @@ The primary requirements and priorities of ArchiveKeep are to make process of **
 The ArchiveKeep is under active development, although it already serves author's needs. Focus is to not introduce breaking changes, especially for formats of data at rest. However, that is not guaranteed.
 
 However, as data files are being kept as plain files, if there would be a breaking change to support data structures, it would only render indexes and other technical data incompatible across versions, and would require reinitialisation and reindexing, and it should not cause data loss to plain data files.
+
+The state of GUI is somewhere between PoC and MVP, and the code whole after being rewritten in Kotlin is in early development phase, and there could be bugs in edge-cases, and there definitely are missing features, and unsolved UX/UI ugliness (and correct GUI-friendly error handling) and other technical debts.
 
 ## About
 
@@ -38,6 +37,20 @@ Threat model, in which you should still be able to retain your data:
 
 Assuming you don't lose every access to each copy of your data.
 
+### Current and planned features
+
+Supported storages:
+
+- [X] plain simple files on HDD, SSD, USB drives or other filesystem media.
+- [ ] self-hosting server - currently, it is implemented in previous version written in Go, not yet rewritten to Kotlin, but it's compatible with Kotlin client,
+- [ ] Amazon S3 and object storage services providing S3 API.
+
+Encryption:
+
+- [X] no encryption,
+  - note: filesystem or disk encryption transparent to applications can be used (i.e. [LUKS]), 
+- [ ] per file E2E encryption (for storing files in cloud storage).
+
 ## Inspiration and similar software
 
 This tool is inspired mainly by [Perkeep] and standard way of delivery of software archives and images via FTP and HTTP repositories having `.md5` or `.sha1` files containing checksum.
@@ -50,37 +63,34 @@ Notable software in similar software with less or more different goals:
     - no lock-in to specific software to access files,
     - i.e. just pass external HDD to other people, or plug it into a smart TV,... 
 - [Syncthing] - continuous file synchronization program. It synchronizes files between two or more computers in real time, safely protected from prying eyes.
-  - difference is in focus, Syncthing focuses on seamless and continuous file synchronisation, where ArchiveKeeps focuses on archivation and preservation of original data untouched and uncorrupted  
+  - difference is in focus, Syncthing focuses on seamless and continuous file synchronisation, where ArchiveKeeps focuses on archivation and preservation of original data untouched and uncorrupted,
+- [borgbackup], [restic] and other backup software - designed to get back in time, which either includes corruption that was already present at the point when backup was done, or requires to preserve the full history and the figure out which backup contains uncorrupted data.
 
 ## Installation
 
-Using `go`:
+Install from packages:
 
-```bash
-go install github.com/archivekeep/archivekeep
-```
+- not packaged for any distribution, yet.
 
-As a package:
+Build sources with Gradle and install as Flatpak application:
 
-- currently, not packaged for any distribution.
+- see [docs - install](docs/content/install/index.md) for instructions.
 
 ## Usage
+
+### GUI
+
+The ArchiveKeep should appear in system application menu after installation.
+
+Alternatively, it's possible to launch Flatpak application manually from terminal:
+
+```shell
+flatpak run org.archivekeep.ArchiveKeep
+```
 
 ### CLI
 
 See [docs/features.md](docs/content/about/features/index.md) for overview. To be documented later.
-
-### GUI
-
-GUI is not implemented. Design preview can be run via:
-
-```shell
-# install native libraries & dependencies
-apt install gcc pkg-config libwayland-dev libx11-dev libx11-xcb-dev libxkbcommon-x11-dev libgles2-mesa-dev libegl1-mesa-dev libffi-dev libxcursor-dev libvulkan-dev
-
-# run
-go run github.com/archivekeep/archivekeep/cmd/archivekeep-gioui
-```
 
 ## Warranty
 
@@ -88,7 +98,10 @@ Although author desires to make system 100% bulletproof to prevent loss of own d
 
 ## License
 
-The whole project is licensed under Apache License, Version 2.0. See [LICENSE](LICENSE) for details.
+The whole project is licensed under AGPLv3 - GNU Affero General Public License, version 3. See [LICENSE](LICENSE) for details.
 
 [Perkeep]: https://perkeep.org/
 [Syncthing]: https://syncthing.net/
+[BorgBackup]: https://www.borgbackup.org/
+[restic]: https://restic.net/
+[LUKS]: https://en.wikipedia.org/wiki/Linux_Unified_Key_Setup
