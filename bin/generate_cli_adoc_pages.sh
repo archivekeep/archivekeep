@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+set -e
+
 SCRIPT_DIRECTORY="$(dirname "$0")"
 PROJECT_DIRECTORY="$(dirname "${SCRIPT_DIRECTORY}")"
 
