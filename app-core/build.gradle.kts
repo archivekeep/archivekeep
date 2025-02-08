@@ -1,10 +1,10 @@
 plugins {
     id("java-library")
 
-    kotlin("jvm")
-    kotlin("plugin.serialization")
+    alias(libs.plugins.kotlin.jvm)
+    alias(libs.plugins.kotlin.serialization)
 
-    id("org.jlleitschuh.gradle.ktlint")
+    alias(libs.plugins.ktlint)
 }
 
 java {
@@ -15,20 +15,20 @@ java {
 dependencies {
     api(project(":common"))
 
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.9.0")
-    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.3")
+    implementation(libs.kotlinx.coroutines.core)
+    implementation(libs.kotlinx.serialization.json)
 
-    implementation("com.github.oshi:oshi-core:6.6.5")
+    implementation(libs.oshi.core)
 
-    implementation("com.google.guava:guava:33.3.0-jre")
+    implementation(libs.guava)
 
-    implementation("net.jcip:jcip-annotations:1.0")
-    implementation("com.nimbusds:nimbus-jose-jwt:9.46")
+    implementation(libs.jcip.annotations)
+    implementation(libs.jose.jwt)
 
-    api("androidx.datastore:datastore:1.1.1")
-    api("androidx.datastore:datastore-preferences:1.1.1")
+    api(libs.androidx.datastore)
+    api(libs.androidx.datastore.preferences)
 
-    implementation("io.github.irgaly.kfswatch:kfswatch:1.3.0")
+    implementation(libs.kfswatch)
 
     testImplementation("org.jetbrains.kotlin:kotlin-test")
 }

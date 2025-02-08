@@ -1,16 +1,14 @@
 package org.archivekeep.cli.commands
 
 import org.archivekeep.createArchiveWithContents
-import org.junit.jupiter.api.io.TempDir
-import java.io.File
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
 class CompareTest : CommandTestBase() {
     @Test
-    fun execute(
-        @TempDir otherDir: File,
-    ) {
+    fun execute() {
+        val otherDir = baseTempDir.resolve("other-dir")
+
         createCurrentArchiveWithContents(
             mapOf(
                 "file to be extra in source" to "file to be extra in source",
@@ -32,7 +30,7 @@ class CompareTest : CommandTestBase() {
                 "file to be extra in target" to "file to be extra in target",
                 "file to duplicate" to "file to duplicate: old",
                 "file to move" to "file to move: old",
-                "file to move and duplicate" to "file to move and duplicate: old",
+                "file to move and duplicate (old)" to "file to move and duplicate: old",
                 "file to modify with backup" to "file to modify with backup: old",
                 "file to overwrite" to "file to overwrite: old",
                 "file to be left untouched" to "file to be left untouched: untouched",
@@ -54,7 +52,7 @@ class CompareTest : CommandTestBase() {
 
             Files to be moved in remote to match local:
             	{} -> file to duplicate 02
-            	file to move and duplicate -> {file to move and duplicate/01, file to move and duplicate/02}
+            	file to move and duplicate (old) -> {file to move and duplicate/01, file to move and duplicate/02}
             	[31m{ -> moved/}[0mfile to move
             	[31m{ -> old/}[0m[31m{file to modify with backup -> file to modify backup}[0m
 

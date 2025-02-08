@@ -20,7 +20,10 @@ import kotlin.test.assertEquals
 
 abstract class CommandTestBase {
     @field:TempDir
-    lateinit var currentArchiveTempDir: File
+    lateinit var baseTempDir: File
+
+    val currentArchiveTempDir: File
+        get() = baseTempDir.resolve("current-archive")
 
     val currentArchivePath: Path
         get() = Path(currentArchiveTempDir.absolutePath)
@@ -113,9 +116,11 @@ abstract class CommandTestBase {
     internal fun cleanup() {
         // TODO: change to parametrized test, and don't do manual cleanup
 
-        currentArchiveTempDir.toPath().forEachDirectoryEntry {
-            println("to delete: $it")
-            it.deleteRecursively()
+        if (currentArchiveTempDir.exists()) {
+            currentArchiveTempDir.toPath().forEachDirectoryEntry {
+                println("to delete: $it")
+                it.deleteRecursively()
+            }
         }
     }
 

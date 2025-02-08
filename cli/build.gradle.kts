@@ -1,31 +1,29 @@
 import org.asciidoctor.gradle.jvm.AsciidoctorTask
 
 plugins {
-    kotlin("jvm")
-    kotlin("kapt")
-
     application
 
-    id("org.graalvm.buildtools.native") version "0.10.0"
+    alias(libs.plugins.kotlin.jvm)
+    alias(libs.plugins.kotlin.kapt)
 
-    id("org.asciidoctor.jvm.convert") version "4.0.2"
+    alias(libs.plugins.asciidoctor)
 
-    id("org.jlleitschuh.gradle.ktlint")
+    alias(libs.plugins.ktlint)
 }
 
 group = "org.archivekeep"
-version = "0.2.1-SNAPSHOT"
+version = libs.versions.archivekeep
 
 dependencies {
     implementation(project(":common"))
 
-    implementation("info.picocli:picocli:4.7.5")
-    kapt("info.picocli:picocli-codegen:4.7.5")
+    implementation(libs.picocli)
+    kapt(libs.picocli.codegen)
 
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.9.0")
+    implementation(libs.kotlinx.coroutines.core)
 
     testImplementation("org.jetbrains.kotlin:kotlin-test")
-    testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.9.0")
+    testImplementation(libs.kotlinx.coroutines.test)
 }
 
 tasks.named<Test>("test") {
@@ -49,16 +47,6 @@ application {
 tasks.withType(Jar::class).configureEach {
     manifest {
         attributes["Main-Class"] = "org.archivekeep.cli.MainKt"
-    }
-}
-
-graalvmNative {
-    toolchainDetection = true
-
-    binaries {
-        named("main") {
-            imageName = "archivekeep"
-        }
     }
 }
 

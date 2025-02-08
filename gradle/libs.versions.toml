@@ -1,0 +1,60 @@
+[versions]
+kotlin = "1.9.23"
+
+compose = "1.7.3"
+grpc = "1.66.0"
+grpc-kotlin = "1.4.1"
+picocli = "4.7.5"
+protobuf = "0.9.4"
+protobuf-kotlin = "3.25.3"
+
+ktlint = "12.1.2"
+
+archivekeep = "0.2.1-SNAPSHOT"
+
+[libraries]
+kotlinx-coroutines-core = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-core", version = "1.9.0" }
+kotlinx-coroutines-test = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-test", version = "1.9.0" }
+kotlinx-serialization-json = { group = "org.jetbrains.kotlinx", name = "kotlinx-serialization-json", version = "1.6.3" }
+
+compose-grid = { group = "com.cheonjaeung.compose.grid", name = "grid", version = "2.0.0" }
+compose-filekit = { group = "io.github.vinceglb", name = "filekit-compose", version = "0.8.3" }
+compose-resources-tabler-icons = { group = "br.com.devsrsouza.compose.icons", name = "tabler-icons", version = "1.1.1" }
+
+grpc-protobuf = { group = "io.grpc", name = "grpc-protobuf", version.ref = "grpc" }
+grpc-stub = { group = "io.grpc", name = "grpc-stub", version.ref = "grpc" }
+grpc-netty-shadded = { group = "io.grpc", name = "grpc-netty-shaded", version.ref = "grpc" }
+
+grpc-kotlin-stub = { group = "io.grpc", name = "grpc-kotlin-stub", version.ref = "grpc-kotlin" }
+
+protobuf-kotlin = { group = "com.google.protobuf", name = "protobuf-kotlin", version.ref = "protobuf-kotlin" }
+
+picocli = { group = "info.picocli", name = "picocli", version.ref = "picocli" }
+picocli-codegen = { group = "info.picocli", name = "picocli-codegen", version.ref = "picocli" }
+
+oshi-core = { group = "com.github.oshi", name = "oshi-core", version = "6.6.5" }
+
+androidx-datastore = { group = "androidx.datastore", name = "datastore", version = "1.1.1" }
+androidx-datastore-preferences = { group = "androidx.datastore", name = "datastore-preferences", version = "1.1.1" }
+
+guava = { group = "com.google.guava", name = "guava", version = "33.3.0-jre" }
+
+jcip-annotations = { group = "net.jcip", name = "jcip-annotations", version = "1.0" }
+apache-tomcat-annotations = { group = "org.apache.tomcat", name = "annotations-api", version = "6.0.53" }
+
+jose-jwt = { group = "com.nimbusds", name = "nimbus-jose-jwt", version = "9.46" }
+
+kfswatch = { group = "io.github.irgaly.kfswatch", name = "kfswatch", version = "1.3.0" }
+
+[plugins]
+kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
+kotlin-kapt = { id = "org.jetbrains.kotlin.kapt", version.ref = "kotlin" }
+kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
+
+asciidoctor = { id = "org.asciidoctor.jvm.convert", version = "4.0.2" }
+
+compose = { id = "org.jetbrains.compose", version.ref = "compose" }
+
+protobuf = { id = "com.google.protobuf", version.ref = "protobuf" }
+
+ktlint = { id = "org.jlleitschuh.gradle.ktlint", version.ref = "ktlint" }

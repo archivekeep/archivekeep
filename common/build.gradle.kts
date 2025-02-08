@@ -1,30 +1,32 @@
 plugins {
-    kotlin("jvm")
-    kotlin("plugin.serialization")
-
     id("java-library")
-    id("com.google.protobuf")
 
-    id("org.jlleitschuh.gradle.ktlint")
+    alias(libs.plugins.kotlin.jvm)
+    alias(libs.plugins.kotlin.serialization)
+
+    alias(libs.plugins.protobuf)
+
+    alias(libs.plugins.ktlint)
 }
 
 group = "org.archivekeep"
-version = "0.2.1-SNAPSHOT"
+version = libs.versions.archivekeep
 
 dependencies {
-    runtimeOnly("io.grpc:grpc-netty-shaded:1.66.0")
+    implementation(libs.kotlinx.coroutines.core)
+    implementation(libs.kotlinx.serialization.json)
 
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.9.0")
-    implementation("io.grpc:grpc-protobuf:1.66.0")
-    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.3")
-    api("io.grpc:grpc-stub:1.66.0")
-    api("io.grpc:grpc-kotlin-stub:1.4.1")
+    implementation(libs.grpc.protobuf)
+    implementation(libs.grpc.stub)
+    runtimeOnly(libs.grpc.netty.shadded)
 
-    implementation("com.google.protobuf:protobuf-kotlin:3.25.3")
+    api(libs.grpc.kotlin.stub)
 
-    implementation("io.github.irgaly.kfswatch:kfswatch:1.3.0")
+    implementation(libs.protobuf.kotlin)
 
-    compileOnly("org.apache.tomcat:annotations-api:6.0.53")
+    implementation(libs.kfswatch)
+
+    compileOnly(libs.apache.tomcat.annotations)
 
     testImplementation("org.jetbrains.kotlin:kotlin-test")
 }
