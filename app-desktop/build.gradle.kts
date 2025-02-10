@@ -52,8 +52,15 @@ compose.desktop {
                 modules("jdk.unsupported")
             }
 
-            packageName = "archivekeep-gui"
-            packageVersion = "0.2.1-SNAPSHOT" // TODO: libs.versions.archivekeep
+            packageName = "archivekeep-desktop"
+            packageVersion = libs.versions.archivekeep.get()
+
+            copyright = "AGPLv3"
+            licenseFile.set(rootProject.file("LICENSE"))
+        }
+
+        buildTypes.release.proguard {
+            configurationFiles.from(project.file("proguard-rules.pro"))
         }
     }
 }

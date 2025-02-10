@@ -18,7 +18,7 @@ dependencies {
 
     implementation(libs.grpc.protobuf)
     implementation(libs.grpc.stub)
-    runtimeOnly(libs.grpc.netty.shadded)
+    implementation(libs.grpc.netty.shaded)
 
     api(libs.grpc.kotlin.stub)
 

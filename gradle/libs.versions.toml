@@ -23,7 +23,7 @@ compose-resources-tabler-icons = { group = "br.com.devsrsouza.compose.icons", na
 
 grpc-protobuf = { group = "io.grpc", name = "grpc-protobuf", version.ref = "grpc" }
 grpc-stub = { group = "io.grpc", name = "grpc-stub", version.ref = "grpc" }
-grpc-netty-shadded = { group = "io.grpc", name = "grpc-netty-shaded", version.ref = "grpc" }
+grpc-netty-shaded = { group = "io.grpc", name = "grpc-netty-shaded", version.ref = "grpc" }
 
 grpc-kotlin-stub = { group = "io.grpc", name = "grpc-kotlin-stub", version.ref = "grpc-kotlin" }
 

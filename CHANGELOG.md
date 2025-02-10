@@ -8,6 +8,10 @@ Build setup:
 
 - migrate to version catalog
 
+### Fixed
+
+- release build processed by ProGuard - Gradle task proguardReleaseJars / createReleaseDistributable / runReleaseDistributable
+
 ### Removed
 
 Build setup:

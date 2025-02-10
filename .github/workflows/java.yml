@@ -28,6 +28,9 @@ jobs:
       - name: Build with Gradle Wrapper
         run: ./gradlew build
 
+      - name: Create release distributable (ProGuard processed)
+        run: ./gradlew createReleaseDistributable
+
   dependency-submission:
     runs-on: ubuntu-22.04
     permissions:
