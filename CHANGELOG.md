@@ -4,9 +4,8 @@
 
 ### Changed
 
-Build setup:
-
-- migrate to version catalog
+- migrate to Gradle version catalog
+- upgrade to Kotlin 2.0.20 from 1.9.23
 
 ### Fixed
 
@@ -14,9 +13,7 @@ Build setup:
 
 ### Removed
 
-Build setup:
-
-- GraalVM setup
+- GraalVM build & setup
 
 ## [0.2.0] - 2025-02-05 - Add Desktop GUI & rewrite to Kotlin
 

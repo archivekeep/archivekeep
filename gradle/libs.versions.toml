@@ -1,5 +1,7 @@
 [versions]
-kotlin = "1.9.23"
+kotlin = "2.0.20"
+
+kotlinx-coroutines = "1.10.1"
 
 compose = "1.7.3"
 grpc = "1.66.0"
@@ -13,8 +15,8 @@ ktlint = "12.1.2"
 archivekeep = "0.2.1-SNAPSHOT"
 
 [libraries]
-kotlinx-coroutines-core = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-core", version = "1.9.0" }
-kotlinx-coroutines-test = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-test", version = "1.9.0" }
+kotlinx-coroutines-core = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-core", version.ref = "kotlinx-coroutines" }
+kotlinx-coroutines-test = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-test", version.ref = "kotlinx-coroutines" }
 kotlinx-serialization-json = { group = "org.jetbrains.kotlinx", name = "kotlinx-serialization-json", version = "1.6.3" }
 
 compose-grid = { group = "com.cheonjaeung.compose.grid", name = "grid", version = "2.0.0" }
@@ -47,6 +49,7 @@ jose-jwt = { group = "com.nimbusds", name = "nimbus-jose-jwt", version = "9.46" 
 kfswatch = { group = "io.github.irgaly.kfswatch", name = "kfswatch", version = "1.3.0" }
 
 [plugins]
+kotlin-compose = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
 kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
 kotlin-kapt = { id = "org.jetbrains.kotlin.kapt", version.ref = "kotlin" }
 kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
