@@ -1,3 +1,5 @@
+import org.jetbrains.compose.desktop.application.dsl.TargetFormat
+
 plugins {
     alias(libs.plugins.kotlin.jvm)
     alias(libs.plugins.kotlin.compose)
@@ -48,13 +50,19 @@ compose.desktop {
         mainClass = "org.archivekeep.app.desktop.MainKt"
 
         nativeDistributions {
-            linux {
-                modules("jdk.security.auth")
-                modules("jdk.unsupported")
-            }
+            targetFormats(TargetFormat.Deb, TargetFormat.Rpm)
 
             packageName = "archivekeep-desktop"
             packageVersion = libs.versions.archivekeep.get()
+
+            linux.rpmPackageVersion = createRPMPackageVersion()
+
+            linux {
+                modules("jdk.security.auth")
+                modules("jdk.unsupported")
+
+                installationPath = "/usr"
+            }
 
             copyright = "AGPLv3"
             licenseFile.set(rootProject.file("LICENSE"))
@@ -65,3 +73,8 @@ compose.desktop {
         }
     }
 }
+
+fun createRPMPackageVersion() =
+    libs.versions.archivekeep
+        .get()
+        .replace('-', '_')

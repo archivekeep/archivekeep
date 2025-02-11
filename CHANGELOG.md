@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 
+### Added
+
+- DEB and RPM packaging support
+
 ### Changed
 
 - migrate to Gradle version catalog

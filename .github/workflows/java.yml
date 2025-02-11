@@ -25,11 +25,42 @@ jobs:
       - name: Check ktlint
         run: ./gradlew ktlintCheck
 
-      - name: Build with Gradle Wrapper
+      - name: Build code with Gradle Wrapper
         run: ./gradlew build
 
       - name: Create release distributable (ProGuard processed)
         run: ./gradlew createReleaseDistributable
+
+      - name: Build release DEB package
+        run: ./gradlew --console=plain --no-daemon app-desktop:packageReleaseDeb
+
+      - name: Build release RPM package
+        run: ./gradlew --console=plain --no-daemon app-desktop:packageReleaseRpm
+
+      - name: Upload Linux DEB artifact
+        if: github.ref == 'refs/heads/main'
+        uses: actions/upload-artifact@v4
+        with:
+          name: linux-deb-package
+          path: ./app-desktop/build/compose/binaries/main-release/deb/archivekeep-desktop_*.deb
+          if-no-files-found: error
+          compression-level: 0
+          retention-days: 5
+
+#      TODO: package built by GitHub actions doesn't install due to:
+#         Error: Transaction test error:
+#           file /usr/bin from install of archivekeep-desktop-0.2.1_SNAPSHOT-1.x86_64 conflicts with file from package filesystem-3.18-8.fc40.x86_64
+#           file /usr/lib from install of archivekeep-desktop-0.2.1_SNAPSHOT-1.x86_64 conflicts with file from package filesystem-3.18-8.fc40.x86_64
+#
+#      - name: Upload Linux RPM artifact
+#        if: github.ref == 'refs/heads/main'
+#        uses: actions/upload-artifact@v4
+#        with:
+#          name: linux-rpm-package
+#          path: app-desktop/build/compose/binaries/main-release/rpm/archivekeep-desktop-*.rpm
+#          if-no-files-found: error
+#          compression-level: 0
+#          retention-days: 5
 
   dependency-submission:
     runs-on: ubuntu-22.04
