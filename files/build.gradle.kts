@@ -39,11 +39,6 @@ kotlin {
     jvmToolchain(17)
 }
 
-java {
-    sourceCompatibility = JavaVersion.VERSION_17
-    targetCompatibility = JavaVersion.VERSION_17
-}
-
 protobuf {
     protoc { artifact = "com.google.protobuf:protoc:3.25.3" }
 
@@ -75,6 +70,17 @@ ktlint {
             val path = element.file.path
 
             path.contains("/generated/")
+        }
+    }
+}
+
+publishing {
+    publications.named<MavenPublication>("maven") {
+        artifactId = "archivekeep-files"
+
+        pom {
+            name = "ArchiveKeep Files"
+            description = "Library providing files management and core functionality, and base API(s)."
         }
     }
 }

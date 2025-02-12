@@ -7,11 +7,6 @@ plugins {
     alias(libs.plugins.ktlint)
 }
 
-java {
-    sourceCompatibility = JavaVersion.VERSION_17
-    targetCompatibility = JavaVersion.VERSION_17
-}
-
 dependencies {
     api(project(":files"))
 
@@ -39,4 +34,15 @@ kotlin {
 
 tasks.named<Test>("test") {
     useJUnitPlatform()
+}
+
+publishing {
+    publications.named<MavenPublication>("maven") {
+        artifactId = "archivekeep-application-core"
+
+        pom {
+            name = "ArchiveKeep Application Core"
+            description = "Library with Application Core for ArchiveKeep application."
+        }
+    }
 }

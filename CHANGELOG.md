@@ -5,6 +5,7 @@
 ### Added
 
 - DEB and RPM packaging support
+- Maven Central publishing support
 
 ### Changed
 

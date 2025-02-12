@@ -1,3 +1,4 @@
+import org.gradle.jvm.tasks.Jar
 import org.jetbrains.compose.desktop.application.dsl.TargetFormat
 
 plugins {
@@ -8,9 +9,6 @@ plugins {
 
     alias(libs.plugins.ktlint)
 }
-
-group = "org.archivekeep"
-version = libs.versions.archivekeep.get()
 
 dependencies {
     implementation(project(":files"))
@@ -78,3 +76,20 @@ fun createRPMPackageVersion() =
     libs.versions.archivekeep
         .get()
         .replace('-', '_')
+
+publishing {
+    publications.named<MavenPublication>("maven") {
+        artifactId = "archivekeep-desktop-application"
+
+        afterEvaluate {
+            artifact(tasks.named<Jar>("packageReleaseUberJarForCurrentOS")) {
+                classifier = "uber"
+            }
+        }
+
+        pom {
+            name = "ArchiveKeep Desktop Application"
+            description = "Desktop application for archive management."
+        }
+    }
+}

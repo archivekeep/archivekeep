@@ -11,9 +11,6 @@ plugins {
     alias(libs.plugins.ktlint)
 }
 
-group = "org.archivekeep"
-version = libs.versions.archivekeep.get()
-
 dependencies {
     implementation(project(":files"))
 
@@ -74,6 +71,17 @@ tasks {
 
         outputOptions {
             backends("manpage", "html5")
+        }
+    }
+}
+
+publishing {
+    publications.named<MavenPublication>("maven") {
+        artifactId = "archivekeep-cli"
+
+        pom {
+            name = "ArchiveKeep CLI"
+            description = "CLI tool for archive management."
         }
     }
 }
