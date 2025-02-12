@@ -34,7 +34,7 @@ flatpak remote-add --if-not-exists --user flathub https://dl.flathub.org/repo/fl
 ```
 
 ```shell
-./gradlew app-desktop:createDistributable
+./gradlew app-desktop:createReleaseDistributable
 
 flatpak-builder \
   --force-clean \
