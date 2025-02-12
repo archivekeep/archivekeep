@@ -24,6 +24,15 @@
 
 -keep class com.sun.jna.** { *; }
 
+-keep class archivekeep.**{ *; }
+-dontwarn archivekeep.**
+
+-keep class com.google.protobuf.**{ *; }
+-dontwarn com.google.protobuf.**
+
+-keep class com.squareup.okhttp.**{ *; }
+-dontwarn com.squareup.okhttp.**
+
 -keep class io.grpc.netty.shaded.io{ *; }
 -dontwarn io.grpc.netty.shaded.io.**
 

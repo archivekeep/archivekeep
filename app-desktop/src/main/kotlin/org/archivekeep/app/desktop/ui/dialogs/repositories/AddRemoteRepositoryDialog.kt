@@ -24,6 +24,7 @@ import org.archivekeep.app.core.operations.AddRemoteRepositoryOperation
 import org.archivekeep.app.core.operations.AddRemoteRepositoryOperation.AddStatus
 import org.archivekeep.app.desktop.domain.wiring.LocalOperationFactory
 import org.archivekeep.app.desktop.domain.wiring.OperationFactory
+import org.archivekeep.app.desktop.ui.components.errors.AutomaticErrorMessage
 import org.archivekeep.app.desktop.ui.designsystem.dialog.DialogButtonContainer
 import org.archivekeep.app.desktop.ui.designsystem.dialog.DialogCard
 import org.archivekeep.app.desktop.ui.designsystem.dialog.DialogDismissButton
@@ -149,6 +150,9 @@ private fun AddRemoteRepositoryDialogContents(
                         },
                         singleLine = true,
                     )
+                }
+                if (addStatus is AddStatus.AddFailed) {
+                    AutomaticErrorMessage(addStatus.cause, onResolve = { TODO() })
                 }
             },
             bottomContent = {

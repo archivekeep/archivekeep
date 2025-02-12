@@ -23,7 +23,7 @@ interface AddRemoteRepositoryOperation {
 
         data class AddFailed(
             val reason: String,
-            val cause: Throwable?,
+            val cause: Throwable,
         ) : AddStatus
 
         data object RequiresCredentials : AddStatus

@@ -1,6 +1,5 @@
 package org.archivekeep.cli
 
-import io.grpc.StatusException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -22,6 +21,7 @@ import org.archivekeep.files.repo.files.openFilesRepoOrNull
 import org.archivekeep.files.repo.remote.grpc.BasicAuthCredentials
 import org.archivekeep.files.repo.remote.grpc.Options
 import org.archivekeep.files.repo.remote.grpc.grpcPrefix
+import org.archivekeep.files.repo.remote.grpc.isNotAuthorized
 import org.archivekeep.files.repo.remote.grpc.openGrpcArchive
 import picocli.CommandLine
 import picocli.CommandLine.Command
@@ -82,8 +82,8 @@ class MainCommand(
 
             try {
                 return openGrpcArchive(otherArchiveLocation, options)
-            } catch (e: StatusException) {
-                if (e.status.description?.endsWith("not authorized") == true) {
+            } catch (e: Exception) {
+                if (e.isNotAuthorized()) {
                     val username = askForText("Please, enter username")
                     val password = askForText("Please, enter password")
 

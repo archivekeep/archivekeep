@@ -4,11 +4,11 @@ kotlin = "2.0.20"
 kotlinx-coroutines = "1.10.1"
 
 compose = "1.7.3"
-grpc = "1.66.0"
+grpc = "1.70.0"
 grpc-kotlin = "1.4.1"
 picocli = "4.7.5"
 protobuf = "0.9.4"
-protobuf-kotlin = "3.25.3"
+protobuf-kotlin = "3.25.5"
 
 ktlint = "12.1.2"
 
@@ -23,9 +23,10 @@ compose-grid = { group = "com.cheonjaeung.compose.grid", name = "grid", version 
 compose-filekit = { group = "io.github.vinceglb", name = "filekit-compose", version = "0.8.3" }
 compose-resources-tabler-icons = { group = "br.com.devsrsouza.compose.icons", name = "tabler-icons", version = "1.1.1" }
 
-grpc-protobuf = { group = "io.grpc", name = "grpc-protobuf", version.ref = "grpc" }
+grpc-protobuf-lite = { group = "io.grpc", name = "grpc-protobuf-lite", version.ref = "grpc" }
+grpc-core = { group = "io.grpc", name = "grpc-core", version.ref = "grpc" }
 grpc-stub = { group = "io.grpc", name = "grpc-stub", version.ref = "grpc" }
-grpc-netty-shaded = { group = "io.grpc", name = "grpc-netty-shaded", version.ref = "grpc" }
+grpc-okhttp = { group = "io.grpc", name = "grpc-okhttp", version.ref = "grpc" }
 
 grpc-kotlin-stub = { group = "io.grpc", name = "grpc-kotlin-stub", version.ref = "grpc-kotlin" }
 

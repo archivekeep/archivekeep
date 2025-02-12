@@ -35,7 +35,10 @@ class MemorizingRepositoryReader(
                 println("Accessor stuff for $st: $uri -> $optionalAccessorLoadable")
 
                 when (optionalAccessorLoadable) {
-                    is OptionalLoadable.Failed -> flowOf(OptionalLoadable.Failed(optionalAccessorLoadable.cause))
+                    is OptionalLoadable.Failed -> {
+                        optionalAccessorLoadable.cause.printStackTrace()
+                        flowOf(OptionalLoadable.Failed(optionalAccessorLoadable.cause))
+                    }
                     OptionalLoadable.Loading -> flowOf(OptionalLoadable.Loading)
                     is OptionalLoadable.NotAvailable -> a
                     is OptionalLoadable.LoadedAvailable -> b(optionalAccessorLoadable.value)

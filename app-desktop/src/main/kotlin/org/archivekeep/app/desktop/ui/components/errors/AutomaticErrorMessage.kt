@@ -16,7 +16,7 @@ fun AutomaticErrorMessage(
     error: ExecutionOutcome.Failed,
     onResolve: () -> Unit,
 ) {
-    AutomaticErrorMessage(error, onResolve)
+    AutomaticErrorMessage(error.cause, onResolve)
 }
 
 @Composable

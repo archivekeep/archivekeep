@@ -8,8 +8,11 @@ import io.grpc.CallCredentials
 import io.grpc.CompositeChannelCredentials
 import io.grpc.Grpc.newChannelBuilderForAddress
 import io.grpc.InsecureChannelCredentials
+import io.grpc.LoadBalancerRegistry
 import io.grpc.Metadata
+import io.grpc.StatusException
 import io.grpc.TlsChannelCredentials
+import io.grpc.internal.PickFirstLoadBalancerProvider
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.archivekeep.files.repo.Repo
@@ -114,6 +117,8 @@ suspend fun connect(
     archiveName: String,
     options: Options,
 ): RemoteGrpcRepository {
+    LoadBalancerRegistry.getDefaultRegistry().register(PickFirstLoadBalancerProvider())
+
     val channelCredentials =
         if (options.insecure) InsecureChannelCredentials.create() else TlsChannelCredentials.create()
     val userCredentials =
@@ -165,8 +170,11 @@ suspend fun connect(
         )
     } catch (e: Exception) {
         channel.shutdown()
-        throw e
+        throw RuntimeException(e)
     }
 
     return RemoteGrpcRepository(channel, archiveName)
 }
+
+fun Exception.isNotAuthorized(): Boolean =
+    (this is StatusException && status.description?.endsWith("not authorized") == true) || ((this.cause as? Exception)?.isNotAuthorized() ?: false)

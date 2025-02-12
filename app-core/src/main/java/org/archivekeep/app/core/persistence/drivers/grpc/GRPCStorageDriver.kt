@@ -1,6 +1,5 @@
 package org.archivekeep.app.core.persistence.drivers.grpc
 
-import io.grpc.StatusException
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.SupervisorJob
@@ -25,6 +24,7 @@ import org.archivekeep.files.repo.Repo
 import org.archivekeep.files.repo.remote.grpc.BasicAuthCredentials
 import org.archivekeep.files.repo.remote.grpc.Options
 import org.archivekeep.files.repo.remote.grpc.createPAT
+import org.archivekeep.files.repo.remote.grpc.isNotAuthorized
 import org.archivekeep.files.repo.remote.grpc.openGrpcArchive
 
 class GRPCStorageDriver(
@@ -140,5 +140,3 @@ class GRPCStorageDriver(
         }
     }
 }
-
-private fun Exception.isNotAuthorized(): Boolean = this is StatusException && status.description?.endsWith("not authorized") == true

@@ -10,6 +10,7 @@
 ### Changed
 
 - migrate to Gradle version catalog
+- migrate GRPC to lite variant with okhttp
 - upgrade to Kotlin 2.0.20 from 1.9.23
 - renamed package common to files
 

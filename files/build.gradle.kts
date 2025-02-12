@@ -16,9 +16,10 @@ dependencies {
     implementation(libs.kotlinx.coroutines.core)
     implementation(libs.kotlinx.serialization.json)
 
-    implementation(libs.grpc.protobuf)
+    implementation(libs.grpc.protobuf.lite)
+    implementation(libs.grpc.core)
     implementation(libs.grpc.stub)
-    implementation(libs.grpc.netty.shaded)
+    implementation(libs.grpc.okhttp)
 
     api(libs.grpc.kotlin.stub)
 
@@ -44,7 +45,7 @@ protobuf {
 
     plugins {
         create("grpc") {
-            artifact = "io.grpc:protoc-gen-grpc-java:1.62.2"
+            artifact = "io.grpc:protoc-gen-grpc-java:${libs.versions.grpc.asProvider().get()}"
         }
         create("grpckt") {
             artifact = "io.grpc:protoc-gen-grpc-kotlin:1.4.1:jdk8@jar"
@@ -53,12 +54,21 @@ protobuf {
 
     generateProtoTasks {
         all().forEach {
-            it.plugins {
-                create("grpc")
-                create("grpckt")
-            }
             it.builtins {
-                create("kotlin")
+                named("java") {
+                    option("lite")
+                }
+                create("kotlin") {
+                    option("lite")
+                }
+            }
+            it.plugins {
+                create("grpc") {
+                    option("lite")
+                }
+                create("grpckt") {
+                    option("lite")
+                }
             }
         }
     }
