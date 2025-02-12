@@ -2,7 +2,7 @@ syntax = "proto3";
 
 package archivekeep;
 
-option go_package = "github.com/archivekeep/archivekeep/grpc/protobuf";
+option java_package = "org.archivekeep.files.internal.grpc";
 
 import "google/protobuf/empty.proto";
 

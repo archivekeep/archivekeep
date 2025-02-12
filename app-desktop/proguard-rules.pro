@@ -24,8 +24,8 @@
 
 -keep class com.sun.jna.** { *; }
 
--keep class archivekeep.**{ *; }
--dontwarn archivekeep.**
+-keep class org.archivekeep.files.internal.grpc.**{ *; }
+-dontwarn org.archivekeep.files.internal.grpc.**
 
 -keep class com.google.protobuf.**{ *; }
 -dontwarn com.google.protobuf.**

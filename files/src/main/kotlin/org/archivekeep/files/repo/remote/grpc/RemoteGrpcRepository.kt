@@ -1,13 +1,5 @@
 package org.archivekeep.files.repo.remote.grpc
 
-import archivekeep.Api
-import archivekeep.ArchiveServiceGrpcKt
-import archivekeep.archiveFile
-import archivekeep.bytesChunk
-import archivekeep.chunkOrNull
-import archivekeep.headOrNull
-import archivekeep.listArchiveFilesRequest
-import archivekeep.uploadArchiveFileRequest
 import com.google.protobuf.ByteString
 import io.grpc.ManagedChannel
 import kotlinx.coroutines.CoroutineScope
@@ -28,6 +20,14 @@ import kotlinx.coroutines.flow.shareIn
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.archivekeep.files.exceptions.UnsupportedFeatureException
+import org.archivekeep.files.internal.grpc.Api
+import org.archivekeep.files.internal.grpc.ArchiveServiceGrpcKt
+import org.archivekeep.files.internal.grpc.archiveFile
+import org.archivekeep.files.internal.grpc.bytesChunk
+import org.archivekeep.files.internal.grpc.chunkOrNull
+import org.archivekeep.files.internal.grpc.headOrNull
+import org.archivekeep.files.internal.grpc.listArchiveFilesRequest
+import org.archivekeep.files.internal.grpc.uploadArchiveFileRequest
 import org.archivekeep.files.repo.ArchiveFileInfo
 import org.archivekeep.files.repo.ObservableRepo
 import org.archivekeep.files.repo.Repo

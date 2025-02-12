@@ -1,9 +1,5 @@
 package org.archivekeep.files.repo.remote.grpc
 
-import archivekeep.ArchiveServiceGrpcKt
-import archivekeep.PersonalAccessTokenServiceGrpcKt.PersonalAccessTokenServiceCoroutineStub
-import archivekeep.createPersonalAccessTokenRequest
-import archivekeep.getArchiveRequest
 import io.grpc.CallCredentials
 import io.grpc.CompositeChannelCredentials
 import io.grpc.Grpc.newChannelBuilderForAddress
@@ -15,6 +11,10 @@ import io.grpc.TlsChannelCredentials
 import io.grpc.internal.PickFirstLoadBalancerProvider
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import org.archivekeep.files.internal.grpc.ArchiveServiceGrpcKt
+import org.archivekeep.files.internal.grpc.PersonalAccessTokenServiceGrpcKt.PersonalAccessTokenServiceCoroutineStub
+import org.archivekeep.files.internal.grpc.createPersonalAccessTokenRequest
+import org.archivekeep.files.internal.grpc.getArchiveRequest
 import org.archivekeep.files.repo.Repo
 import java.util.Date
 import java.util.concurrent.Executor
