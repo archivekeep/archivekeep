@@ -1,6 +1,6 @@
 package org.archivekeep.app.core.domain.repositories
 
-import org.archivekeep.core.RepositoryAssociationGroupId
+import org.archivekeep.files.RepositoryAssociationGroupId
 
 data class RepositoryInformation(
     val associationId: RepositoryAssociationGroupId?,

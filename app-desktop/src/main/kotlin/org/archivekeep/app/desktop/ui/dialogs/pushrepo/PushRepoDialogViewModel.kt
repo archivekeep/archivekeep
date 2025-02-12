@@ -18,7 +18,7 @@ import org.archivekeep.app.core.utils.identifiers.RepositoryURI
 import org.archivekeep.app.desktop.domain.data.getSyncCandidates
 import org.archivekeep.app.desktop.ui.dialogs.sync.describePreparedSyncOperation
 import org.archivekeep.app.desktop.utils.stickToFirstNotNullAsState
-import org.archivekeep.core.operations.RelocationSyncMode
+import org.archivekeep.files.operations.RelocationSyncMode
 import org.archivekeep.utils.Loadable
 
 class PushRepoDialogViewModel(

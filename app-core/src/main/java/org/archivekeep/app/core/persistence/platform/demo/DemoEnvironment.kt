@@ -36,11 +36,11 @@ import org.archivekeep.app.core.utils.generics.mapToLoadable
 import org.archivekeep.app.core.utils.generics.sharedWhileSubscribed
 import org.archivekeep.app.core.utils.identifiers.RepositoryURI
 import org.archivekeep.app.core.utils.identifiers.StorageURI
-import org.archivekeep.core.RepositoryAssociationGroupId
-import org.archivekeep.core.repo.LocalRepo
-import org.archivekeep.core.repo.Repo
-import org.archivekeep.core.repo.RepoIndex
-import org.archivekeep.core.repo.RepositoryMetadata
+import org.archivekeep.files.RepositoryAssociationGroupId
+import org.archivekeep.files.repo.LocalRepo
+import org.archivekeep.files.repo.Repo
+import org.archivekeep.files.repo.RepoIndex
+import org.archivekeep.files.repo.RepositoryMetadata
 import org.archivekeep.testing.fixtures.FixtureRepo
 import org.archivekeep.testing.fixtures.FixtureRepoBuilder
 import org.archivekeep.testing.storage.InMemoryLocalRepo

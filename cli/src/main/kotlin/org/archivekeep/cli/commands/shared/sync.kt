@@ -2,15 +2,15 @@ package org.archivekeep.cli.commands.shared
 
 import org.archivekeep.cli.MainCommand
 import org.archivekeep.cli.commands.mixins.SyncOptions
-import org.archivekeep.core.operations.AdditiveRelocationsSyncStep
-import org.archivekeep.core.operations.CompareOperation
-import org.archivekeep.core.operations.DuplicationIncreasePresentButDisabledException
-import org.archivekeep.core.operations.NewFilesSyncStep
-import org.archivekeep.core.operations.RelocationsMoveApplySyncStep
-import org.archivekeep.core.operations.RelocationsPresentButDisabledException
-import org.archivekeep.core.operations.SyncLogger
-import org.archivekeep.core.operations.SyncOperation
-import org.archivekeep.core.repo.Repo
+import org.archivekeep.files.operations.AdditiveRelocationsSyncStep
+import org.archivekeep.files.operations.CompareOperation
+import org.archivekeep.files.operations.DuplicationIncreasePresentButDisabledException
+import org.archivekeep.files.operations.NewFilesSyncStep
+import org.archivekeep.files.operations.RelocationsMoveApplySyncStep
+import org.archivekeep.files.operations.RelocationsPresentButDisabledException
+import org.archivekeep.files.operations.SyncLogger
+import org.archivekeep.files.operations.SyncOperation
+import org.archivekeep.files.repo.Repo
 import java.io.PrintWriter
 
 suspend fun executeSync(

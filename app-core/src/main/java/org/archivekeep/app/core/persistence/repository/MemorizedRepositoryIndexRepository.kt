@@ -3,7 +3,7 @@ package org.archivekeep.app.core.persistence.repository
 import kotlinx.coroutines.flow.Flow
 import org.archivekeep.app.core.utils.generics.OptionalLoadable
 import org.archivekeep.app.core.utils.identifiers.RepositoryURI
-import org.archivekeep.core.repo.RepoIndex
+import org.archivekeep.files.repo.RepoIndex
 
 /**
  * This is a bit more than merely a cache.

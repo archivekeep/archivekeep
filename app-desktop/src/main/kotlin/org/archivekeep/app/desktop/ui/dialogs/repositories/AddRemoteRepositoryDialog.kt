@@ -32,7 +32,7 @@ import org.archivekeep.app.desktop.ui.designsystem.dialog.DialogOverlay
 import org.archivekeep.app.desktop.ui.designsystem.dialog.DialogPreviewColumn
 import org.archivekeep.app.desktop.ui.designsystem.dialog.DialogPrimaryButton
 import org.archivekeep.app.desktop.ui.dialogs.Dialog
-import org.archivekeep.core.repo.remote.grpc.BasicAuthCredentials
+import org.archivekeep.files.repo.remote.grpc.BasicAuthCredentials
 
 class AddRemoteRepositoryDialog : Dialog {
     class VM(

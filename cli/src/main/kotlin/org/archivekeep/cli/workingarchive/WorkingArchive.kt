@@ -1,7 +1,7 @@
 package org.archivekeep.cli.workingarchive
 
-import org.archivekeep.core.repo.Repo
-import org.archivekeep.core.repo.files.openFilesRepoOrNull
+import org.archivekeep.files.repo.Repo
+import org.archivekeep.files.repo.files.openFilesRepoOrNull
 import java.nio.file.Path
 import kotlin.io.path.relativeTo
 

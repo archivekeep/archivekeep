@@ -16,7 +16,7 @@ import org.archivekeep.app.core.utils.generics.OptionalLoadable
 import org.archivekeep.app.core.utils.generics.mapToOptionalLoadable
 import org.archivekeep.app.core.utils.generics.sharedGlobalWhileSubscribed
 import org.archivekeep.app.core.utils.identifiers.RepositoryURI
-import org.archivekeep.core.repo.RepoIndex
+import org.archivekeep.files.repo.RepoIndex
 
 private val defaultDatastore by lazy {
     PreferenceDataStoreFactory.create(

@@ -25,10 +25,10 @@ import org.archivekeep.app.core.utils.generics.flatMapLoadableFlow
 import org.archivekeep.app.core.utils.generics.mapToLoadable
 import org.archivekeep.app.core.utils.generics.singleInstanceWeakValueMap
 import org.archivekeep.app.core.utils.identifiers.RepositoryURI
-import org.archivekeep.core.operations.AddOperation
-import org.archivekeep.core.operations.AddOperationTextWriter
-import org.archivekeep.core.repo.Repo
-import org.archivekeep.core.repo.RepoIndex
+import org.archivekeep.files.operations.AddOperation
+import org.archivekeep.files.operations.AddOperationTextWriter
+import org.archivekeep.files.repo.Repo
+import org.archivekeep.files.repo.RepoIndex
 import org.archivekeep.utils.Loadable
 import java.io.PrintWriter
 

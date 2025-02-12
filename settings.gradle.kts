@@ -8,7 +8,7 @@ pluginManagement {
 rootProject.name = "archivekeep"
 
 include(
-    ":common",
+    ":files",
     ":cli",
     ":app-core",
     ":app-desktop",

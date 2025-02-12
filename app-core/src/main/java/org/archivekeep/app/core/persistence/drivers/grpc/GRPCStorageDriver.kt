@@ -21,11 +21,11 @@ import org.archivekeep.app.core.utils.filterLoaded
 import org.archivekeep.app.core.utils.firstLoadedOrNullOnErrorOrLocked
 import org.archivekeep.app.core.utils.identifiers.RepositoryURI
 import org.archivekeep.app.core.utils.identifiers.StorageURI
-import org.archivekeep.core.repo.Repo
-import org.archivekeep.core.repo.remote.grpc.BasicAuthCredentials
-import org.archivekeep.core.repo.remote.grpc.Options
-import org.archivekeep.core.repo.remote.grpc.createPAT
-import org.archivekeep.core.repo.remote.grpc.openGrpcArchive
+import org.archivekeep.files.repo.Repo
+import org.archivekeep.files.repo.remote.grpc.BasicAuthCredentials
+import org.archivekeep.files.repo.remote.grpc.Options
+import org.archivekeep.files.repo.remote.grpc.createPAT
+import org.archivekeep.files.repo.remote.grpc.openGrpcArchive
 
 class GRPCStorageDriver(
     val credentialsStore: CredentialsStore,

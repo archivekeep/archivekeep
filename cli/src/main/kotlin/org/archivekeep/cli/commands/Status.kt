@@ -2,7 +2,7 @@ package org.archivekeep.cli.commands
 
 import kotlinx.coroutines.runBlocking
 import org.archivekeep.cli.MainCommand
-import org.archivekeep.core.operations.StatusOperation
+import org.archivekeep.files.operations.StatusOperation
 import picocli.CommandLine.Command
 import picocli.CommandLine.Model.CommandSpec
 import picocli.CommandLine.Parameters
@@ -42,8 +42,12 @@ class Status : Callable<Int> {
             val rootRelativeGlobs =
                 if (globs.isNotEmpty()) {
                     globs
-                        .map { currentArchive.workingSubDirectory.resolve(it).normalize().pathString }
-                        .map { if (it == "") "." else it }
+                        .map {
+                            currentArchive.workingSubDirectory
+                                .resolve(it)
+                                .normalize()
+                                .pathString
+                        }.map { if (it == "") "." else it }
                 } else {
                     singletonList(".")
                 }

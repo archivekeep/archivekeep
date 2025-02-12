@@ -2,8 +2,8 @@ package org.archivekeep.cli.commands
 
 import kotlinx.coroutines.runBlocking
 import org.archivekeep.cli.MainCommand
-import org.archivekeep.core.operations.AddOperation
-import org.archivekeep.core.operations.AddOperationTextWriter
+import org.archivekeep.files.operations.AddOperation
+import org.archivekeep.files.operations.AddOperationTextWriter
 import picocli.CommandLine.Command
 import picocli.CommandLine.Model.CommandSpec
 import picocli.CommandLine.Option
@@ -54,8 +54,12 @@ class Add : Callable<Int> {
             val rootRelativeGlobs =
                 if (globs.isNotEmpty()) {
                     globs
-                        .map { currentArchive.workingSubDirectory.resolve(it).normalize().pathString }
-                        .map { if (it == "") "." else it }
+                        .map {
+                            currentArchive.workingSubDirectory
+                                .resolve(it)
+                                .normalize()
+                                .pathString
+                        }.map { if (it == "") "." else it }
                 } else {
                     Collections.singletonList(".")
                 }

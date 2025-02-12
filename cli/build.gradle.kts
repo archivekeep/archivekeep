@@ -12,10 +12,10 @@ plugins {
 }
 
 group = "org.archivekeep"
-version = libs.versions.archivekeep
+version = libs.versions.archivekeep.get()
 
 dependencies {
-    implementation(project(":common"))
+    implementation(project(":files"))
 
     implementation(libs.picocli)
     kapt(libs.picocli.codegen)

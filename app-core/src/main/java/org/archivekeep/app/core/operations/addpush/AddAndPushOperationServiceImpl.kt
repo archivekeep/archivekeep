@@ -21,9 +21,9 @@ import org.archivekeep.app.core.utils.generics.firstLoadedOrFailure
 import org.archivekeep.app.core.utils.generics.sharedGlobalWhileSubscribed
 import org.archivekeep.app.core.utils.generics.singleInstanceWeakValueMap
 import org.archivekeep.app.core.utils.identifiers.RepositoryURI
-import org.archivekeep.core.operations.AddOperation
-import org.archivekeep.core.operations.copyFile
-import org.archivekeep.core.repo.LocalRepo
+import org.archivekeep.files.operations.AddOperation
+import org.archivekeep.files.operations.copyFile
+import org.archivekeep.files.repo.LocalRepo
 import org.archivekeep.utils.Loadable
 
 class AddAndPushOperationServiceImpl(

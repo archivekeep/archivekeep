@@ -20,8 +20,8 @@ import org.archivekeep.app.core.utils.generics.sharedGlobalWhileSubscribed
 import org.archivekeep.app.core.utils.generics.waitLoadedValue
 import org.archivekeep.app.core.utils.identifiers.RepositoryURI
 import org.archivekeep.app.core.utils.identifiers.StorageURI
-import org.archivekeep.core.repo.Repo
-import org.archivekeep.core.repo.files.openFilesRepoOrNull
+import org.archivekeep.files.repo.Repo
+import org.archivekeep.files.repo.files.openFilesRepoOrNull
 import org.archivekeep.utils.Loadable
 import kotlin.io.path.Path
 

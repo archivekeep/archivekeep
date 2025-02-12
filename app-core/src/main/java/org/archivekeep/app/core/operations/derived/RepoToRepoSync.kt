@@ -5,8 +5,8 @@ import kotlinx.coroutines.flow.StateFlow
 import org.archivekeep.app.core.operations.derived.DefaultSyncService.Operation
 import org.archivekeep.app.core.utils.generics.OptionalLoadable
 import org.archivekeep.app.core.utils.identifiers.RepositoryURI
-import org.archivekeep.core.operations.CompareOperation
-import org.archivekeep.core.operations.RelocationSyncMode
+import org.archivekeep.files.operations.CompareOperation
+import org.archivekeep.files.operations.RelocationSyncMode
 import org.archivekeep.utils.Loadable
 
 interface RepoToRepoSync {

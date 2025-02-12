@@ -10,10 +10,10 @@ plugins {
 }
 
 group = "org.archivekeep"
-version = libs.versions.archivekeep
+version = libs.versions.archivekeep.get()
 
 dependencies {
-    implementation(project(":common"))
+    implementation(project(":files"))
     implementation(project(":app-core"))
 
     implementation(compose.desktop.currentOs)

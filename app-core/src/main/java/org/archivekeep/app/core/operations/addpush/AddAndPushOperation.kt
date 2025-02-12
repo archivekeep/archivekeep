@@ -3,8 +3,8 @@ package org.archivekeep.app.core.operations.addpush
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.StateFlow
 import org.archivekeep.app.core.utils.identifiers.RepositoryURI
-import org.archivekeep.core.operations.AddOperation
-import org.archivekeep.core.operations.AddOperation.PreparationResult.Move
+import org.archivekeep.files.operations.AddOperation
+import org.archivekeep.files.operations.AddOperation.PreparationResult.Move
 
 interface AddAndPushOperation {
     val currentJobFlow: StateFlow<Job?>

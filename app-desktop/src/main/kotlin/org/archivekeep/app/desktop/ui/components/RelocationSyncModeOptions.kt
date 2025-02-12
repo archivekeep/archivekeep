@@ -18,7 +18,7 @@ import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.dp
 import org.archivekeep.app.desktop.ui.designsystem.dialog.LabelText
 import org.archivekeep.app.desktop.ui.designsystem.input.CheckboxWithText
-import org.archivekeep.core.operations.RelocationSyncMode
+import org.archivekeep.files.operations.RelocationSyncMode
 
 @Preview
 @Composable

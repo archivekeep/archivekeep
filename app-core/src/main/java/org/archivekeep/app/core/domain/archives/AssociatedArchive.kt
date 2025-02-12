@@ -2,7 +2,7 @@ package org.archivekeep.app.core.domain.archives
 
 import org.archivekeep.app.core.domain.repositories.ResolvedRepositoryState
 import org.archivekeep.app.core.domain.storages.Storage
-import org.archivekeep.core.RepositoryAssociationGroupId
+import org.archivekeep.files.RepositoryAssociationGroupId
 
 data class AssociatedArchive(
     // TODO: tear apart unassociated archives (repositories without association id)

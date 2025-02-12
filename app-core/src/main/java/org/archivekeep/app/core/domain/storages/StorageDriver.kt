@@ -7,7 +7,7 @@ import org.archivekeep.app.core.utils.ProtectedLoadableResource
 import org.archivekeep.app.core.utils.generics.OptionalLoadable
 import org.archivekeep.app.core.utils.identifiers.RepositoryURI
 import org.archivekeep.app.core.utils.identifiers.StorageURI
-import org.archivekeep.core.repo.Repo
+import org.archivekeep.files.repo.Repo
 
 interface StorageDriver {
     fun getStorageAccessor(storageURI: StorageURI): StorageConnection

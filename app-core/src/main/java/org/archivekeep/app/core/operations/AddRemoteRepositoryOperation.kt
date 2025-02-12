@@ -2,7 +2,7 @@ package org.archivekeep.app.core.operations
 
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.StateFlow
-import org.archivekeep.core.repo.remote.grpc.BasicAuthCredentials
+import org.archivekeep.files.repo.remote.grpc.BasicAuthCredentials
 
 interface AddRemoteRepositoryOperation {
     val addStatus: StateFlow<AddStatus?>

@@ -15,7 +15,7 @@ import org.archivekeep.app.core.persistence.drivers.filesystem.operations.AddFil
 import org.archivekeep.app.core.persistence.drivers.filesystem.operations.AddFileSystemRepositoryOperationImpl
 import org.archivekeep.app.core.persistence.registry.RegistryDataStore
 import org.archivekeep.app.core.utils.identifiers.RepositoryURI
-import org.archivekeep.core.repo.remote.grpc.BasicAuthCredentials
+import org.archivekeep.files.repo.remote.grpc.BasicAuthCredentials
 
 class OperationFactory(
     val repositoryService: RepositoryService,

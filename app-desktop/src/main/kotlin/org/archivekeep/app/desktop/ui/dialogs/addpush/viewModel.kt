@@ -27,7 +27,7 @@ import org.archivekeep.app.desktop.domain.wiring.LocalAddPushService
 import org.archivekeep.app.desktop.domain.wiring.LocalRepoService
 import org.archivekeep.app.desktop.domain.wiring.LocalStorageService
 import org.archivekeep.app.desktop.utils.stickToFirstNotNullAsState
-import org.archivekeep.core.operations.AddOperation
+import org.archivekeep.files.operations.AddOperation
 import org.archivekeep.utils.Loadable
 import org.archivekeep.utils.mapIfLoadedOrDefault
 

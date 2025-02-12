@@ -2,7 +2,7 @@ package org.archivekeep.app.core.domain.storages
 
 import org.archivekeep.app.core.domain.repositories.ResolvedRepositoryState
 import org.archivekeep.app.core.utils.identifiers.RepositoryURI
-import org.archivekeep.core.RepositoryAssociationGroupId
+import org.archivekeep.files.RepositoryAssociationGroupId
 
 data class StorageRepository(
     val storage: StorageNamedReference,

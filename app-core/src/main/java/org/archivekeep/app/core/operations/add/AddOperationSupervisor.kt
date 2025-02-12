@@ -2,9 +2,9 @@ package org.archivekeep.app.core.operations.add
 
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.StateFlow
-import org.archivekeep.core.operations.AddOperation
-import org.archivekeep.core.operations.AddOperation.PreparationResult
-import org.archivekeep.core.operations.AddOperation.PreparationResult.Move
+import org.archivekeep.files.operations.AddOperation
+import org.archivekeep.files.operations.AddOperation.PreparationResult
+import org.archivekeep.files.operations.AddOperation.PreparationResult.Move
 import org.archivekeep.utils.Loadable
 
 interface AddOperationSupervisor {

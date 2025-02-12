@@ -37,7 +37,7 @@ import org.archivekeep.app.desktop.ui.designsystem.dialog.DialogPrimaryButton
 import org.archivekeep.app.desktop.ui.designsystem.input.CheckboxWithText
 import org.archivekeep.app.desktop.ui.dialogs.Dialog
 import org.archivekeep.app.desktop.utils.rememberLaunchableAction
-import org.archivekeep.core.repo.remote.grpc.BasicAuthCredentials
+import org.archivekeep.files.repo.remote.grpc.BasicAuthCredentials
 
 class RepositoryUnlockDialog(
     val uri: RepositoryURI,

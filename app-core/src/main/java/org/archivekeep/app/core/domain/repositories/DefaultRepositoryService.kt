@@ -13,7 +13,7 @@ import org.archivekeep.app.core.utils.ProtectedLoadableResource
 import org.archivekeep.app.core.utils.generics.UniqueInstanceManager
 import org.archivekeep.app.core.utils.generics.UniqueSharedFlowInstanceManager
 import org.archivekeep.app.core.utils.identifiers.RepositoryURI
-import org.archivekeep.core.repo.Repo
+import org.archivekeep.files.repo.Repo
 
 class DefaultRepositoryService(
     private val scope: CoroutineScope,

@@ -18,8 +18,8 @@ import org.archivekeep.app.core.persistence.registry.RegisteredRepository
 import org.archivekeep.app.core.persistence.registry.RegistryDataStore
 import org.archivekeep.app.core.utils.identifiers.RepositoryURI
 import org.archivekeep.app.core.utils.identifiers.StorageURI
-import org.archivekeep.core.repo.files.createFilesRepo
-import org.archivekeep.core.repo.files.openFilesRepoOrNull
+import org.archivekeep.files.repo.files.createFilesRepo
+import org.archivekeep.files.repo.files.openFilesRepoOrNull
 import java.nio.file.Path
 import kotlin.io.path.Path
 import kotlin.io.path.exists

@@ -2,7 +2,7 @@ package org.archivekeep.cli.commands
 
 import org.archivekeep.cli.MainCommand
 import org.archivekeep.cli.utils.sha256
-import org.archivekeep.core.repo.files.FilesRepo
+import org.archivekeep.files.repo.files.FilesRepo
 import org.junit.jupiter.api.io.TempDir
 import picocli.CommandLine
 import java.io.File

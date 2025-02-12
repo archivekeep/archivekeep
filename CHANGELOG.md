@@ -10,6 +10,7 @@
 
 - migrate to Gradle version catalog
 - upgrade to Kotlin 2.0.20 from 1.9.23
+- renamed package common to files
 
 ### Fixed
 

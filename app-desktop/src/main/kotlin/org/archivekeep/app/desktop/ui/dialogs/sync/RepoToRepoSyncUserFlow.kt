@@ -12,7 +12,7 @@ import org.archivekeep.app.core.operations.derived.SyncOperationExecution
 import org.archivekeep.app.core.utils.generics.mapLoadedData
 import org.archivekeep.app.core.utils.generics.mapToLoadable
 import org.archivekeep.app.desktop.utils.stickToFirstNotNullAsState
-import org.archivekeep.core.operations.RelocationSyncMode
+import org.archivekeep.files.operations.RelocationSyncMode
 import org.archivekeep.utils.Loadable
 import org.archivekeep.utils.mapIfLoadedOrDefault
 

@@ -7,7 +7,7 @@ import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import org.archivekeep.app.core.utils.ProtectedLoadableResource
 import org.archivekeep.app.core.utils.identifiers.RepositoryURI
-import org.archivekeep.core.repo.remote.grpc.BasicAuthCredentials
+import org.archivekeep.files.repo.remote.grpc.BasicAuthCredentials
 
 class CredentialsInProtectedDataStore(
     val datastore: ProtectedDataStore<Credentials>,

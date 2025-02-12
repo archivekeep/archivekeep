@@ -40,8 +40,8 @@ import org.archivekeep.app.desktop.utils.collectAsLoadable
 import org.archivekeep.app.desktop.utils.collectLoadableFlow
 import org.archivekeep.app.desktop.utils.derivedMutableStateOf
 import org.archivekeep.app.desktop.utils.stickToFirstNotNull
-import org.archivekeep.core.operations.AddOperation
-import org.archivekeep.core.operations.AddOperation.PreparationResult.Move
+import org.archivekeep.files.operations.AddOperation
+import org.archivekeep.files.operations.AddOperation.PreparationResult.Move
 import org.archivekeep.utils.Loadable
 
 class UpdateIndexOperationDialog(

@@ -13,7 +13,7 @@ java {
 }
 
 dependencies {
-    api(project(":common"))
+    api(project(":files"))
 
     implementation(libs.kotlinx.coroutines.core)
     implementation(libs.kotlinx.serialization.json)

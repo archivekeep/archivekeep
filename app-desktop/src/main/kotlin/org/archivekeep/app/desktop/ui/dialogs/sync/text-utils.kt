@@ -1,9 +1,9 @@
 package org.archivekeep.app.desktop.ui.dialogs.sync
 
-import org.archivekeep.core.operations.AdditiveRelocationsSyncStep
-import org.archivekeep.core.operations.NewFilesSyncStep
-import org.archivekeep.core.operations.PreparedSyncOperation
-import org.archivekeep.core.operations.RelocationsMoveApplySyncStep
+import org.archivekeep.files.operations.AdditiveRelocationsSyncStep
+import org.archivekeep.files.operations.NewFilesSyncStep
+import org.archivekeep.files.operations.PreparedSyncOperation
+import org.archivekeep.files.operations.RelocationsMoveApplySyncStep
 
 fun describePreparedSyncOperationWithDetails(
     a: PreparedSyncOperation,

@@ -24,11 +24,11 @@ import org.archivekeep.app.core.utils.generics.mapIfLoadedOrNull
 import org.archivekeep.app.core.utils.generics.sharedWhileSubscribed
 import org.archivekeep.app.core.utils.identifiers.RepositoryURI
 import org.archivekeep.app.core.utils.mapAsLoadable
-import org.archivekeep.core.exceptions.UnsupportedFeatureException
-import org.archivekeep.core.repo.LocalRepo
-import org.archivekeep.core.repo.Repo
-import org.archivekeep.core.repo.RepositoryMetadata
-import org.archivekeep.core.repo.remote.grpc.BasicAuthCredentials
+import org.archivekeep.files.exceptions.UnsupportedFeatureException
+import org.archivekeep.files.repo.LocalRepo
+import org.archivekeep.files.repo.Repo
+import org.archivekeep.files.repo.RepositoryMetadata
+import org.archivekeep.files.repo.remote.grpc.BasicAuthCredentials
 
 /**
  * Object to access repository state:

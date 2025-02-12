@@ -13,9 +13,9 @@ import org.archivekeep.app.core.utils.generics.OptionalLoadable
 import org.archivekeep.app.core.utils.generics.mapToOptionalLoadable
 import org.archivekeep.app.core.utils.generics.sharedWhileSubscribed
 import org.archivekeep.app.core.utils.identifiers.RepositoryURI
-import org.archivekeep.core.exceptions.UnsupportedFeatureException
-import org.archivekeep.core.repo.Repo
-import org.archivekeep.core.repo.RepositoryMetadata
+import org.archivekeep.files.exceptions.UnsupportedFeatureException
+import org.archivekeep.files.repo.Repo
+import org.archivekeep.files.repo.RepositoryMetadata
 import org.archivekeep.utils.Loadable
 
 class MemorizingRepositoryReader(

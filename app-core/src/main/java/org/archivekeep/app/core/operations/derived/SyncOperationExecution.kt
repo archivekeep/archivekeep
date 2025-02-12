@@ -2,9 +2,9 @@ package org.archivekeep.app.core.operations.derived
 
 import kotlinx.coroutines.flow.StateFlow
 import org.archivekeep.app.core.utils.generics.OptionalLoadable
-import org.archivekeep.core.operations.CompareOperation
-import org.archivekeep.core.operations.PreparedSyncOperation
-import org.archivekeep.core.operations.SyncPlanStep
+import org.archivekeep.files.operations.CompareOperation
+import org.archivekeep.files.operations.PreparedSyncOperation
+import org.archivekeep.files.operations.SyncPlanStep
 
 sealed interface PreparedOrRunningSync : SyncOperationExecution
 
