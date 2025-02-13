@@ -8,16 +8,16 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
+import org.archivekeep.app.desktop.ui.designsystem.styles.CColors.Companion.navigationRailColor
 
 @Composable
 fun NavigationRail(content: @Composable ColumnScope.() -> Unit) {
     Column(
         Modifier
             .zIndex(10f)
-            .background(Color(44, 77, 123))
+            .background(navigationRailColor)
             .padding(6.dp)
             .width(IntrinsicSize.Max),
         content = content,

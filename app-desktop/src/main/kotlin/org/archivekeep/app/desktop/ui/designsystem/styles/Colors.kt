@@ -9,5 +9,8 @@ class CColors {
         val cardOtherRposBG = Color(244, 247, 252)
 
         val topBannerBackground = Color(241, 249, 255)
+
+        val appBarBackground = Color(40, 70, 112)
+        val navigationRailColor = Color(50, 81, 143)
     }
 }

@@ -4,6 +4,7 @@
 
 ### Added
 
+- Material Design TopAppBar (with client side decorations)
 - DEB and RPM packaging support
 - Maven Central publishing support
 
