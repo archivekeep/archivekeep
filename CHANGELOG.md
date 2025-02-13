@@ -4,24 +4,25 @@
 
 ### Added
 
-- Material Design TopAppBar (with client side decorations)
-- DEB and RPM packaging support
-- Maven Central publishing support
+- UI: Material Design TopAppBar (with client side decorations)
+- build: DEB and RPM packaging support
+- build: Maven Central publishing support
 
 ### Changed
 
-- migrate to Gradle version catalog
-- migrate GRPC to lite variant with okhttp
-- upgrade to Kotlin 2.0.20 from 1.9.23
-- renamed package common to files
+- UI: move unlock button to TopAppBar
+- build: migrate to Gradle version catalog
+- build: migrate GRPC to lite variant with okhttp
+- build: upgrade to Kotlin 2.0.20 from 1.9.23
+- refactor: renamed package common to files
 
 ### Fixed
 
-- release build processed by ProGuard - Gradle task proguardReleaseJars / createReleaseDistributable / runReleaseDistributable
+- build: release build processed by ProGuard - Gradle task proguardReleaseJars / createReleaseDistributable / runReleaseDistributable
 
 ### Removed
 
-- GraalVM build & setup
+- build: GraalVM build & setup
 
 ## [0.2.0] - 2025-02-05 - Add Desktop GUI & rewrite to Kotlin
 

@@ -12,13 +12,11 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.CoroutineScope
-import org.archivekeep.app.core.persistence.credentials.JoseStorage
 import org.archivekeep.app.core.persistence.drivers.filesystem.FileSystemStorageType
 import org.archivekeep.app.desktop.domain.wiring.LocalAddPushService
 import org.archivekeep.app.desktop.domain.wiring.LocalArchiveOperationLaunchers
@@ -26,7 +24,6 @@ import org.archivekeep.app.desktop.domain.wiring.LocalArchiveService
 import org.archivekeep.app.desktop.domain.wiring.LocalRepoService
 import org.archivekeep.app.desktop.domain.wiring.LocalStorageService
 import org.archivekeep.app.desktop.domain.wiring.LocalSyncService
-import org.archivekeep.app.desktop.domain.wiring.LocalWalletDataStore
 import org.archivekeep.app.desktop.ui.designsystem.sections.SectionTitle
 import org.archivekeep.app.desktop.ui.designsystem.styles.CColors
 import org.archivekeep.app.desktop.ui.views.View
@@ -34,7 +31,6 @@ import org.archivekeep.app.desktop.ui.views.home.components.HomeActionsList
 import org.archivekeep.app.desktop.ui.views.home.components.HomeArchiveKeepFunctionDescription
 import org.archivekeep.app.desktop.ui.views.home.components.HomeArchivesIntro
 import org.archivekeep.app.desktop.ui.views.home.components.HomeArchivesList
-import org.archivekeep.app.desktop.ui.views.home.components.HomeImportantActions
 import org.archivekeep.app.desktop.ui.views.home.components.HomeNonLocalArchivesList
 import org.archivekeep.app.desktop.ui.views.home.components.HomeStoragesIntro
 import org.archivekeep.app.desktop.ui.views.home.components.HomeStoragesList
@@ -50,7 +46,6 @@ class HomeView : View<HomeViewModel> {
         val storageService = LocalStorageService.current
         val syncService = LocalSyncService.current
         val addPushOperationService = LocalAddPushService.current
-        val credentialStorage = LocalWalletDataStore.current
 
         return remember(
             scope,
@@ -58,7 +53,6 @@ class HomeView : View<HomeViewModel> {
             storageService,
             syncService,
             addPushOperationService,
-            credentialStorage,
         ) {
             HomeViewModel(
                 scope,
@@ -67,7 +61,6 @@ class HomeView : View<HomeViewModel> {
                 storageService,
                 syncService,
                 addPushOperationService,
-                credentialStorage,
             )
         }
     }
@@ -130,13 +123,6 @@ private fun homeViewContent(vm: HomeViewModel) {
             modifier = Modifier.padding(top = 6.dp, start = 32.dp, end = 32.dp, bottom = 32.dp),
             verticalArrangement = Arrangement.spacedBy(10.dp),
         ) {
-            if (vm.credentialsStorage.autoloadFlow
-                    .collectAsState()
-                    .value is JoseStorage.State.Locked
-            ) {
-                HomeImportantActions()
-            }
-
             if (showLocalAddIntro) {
                 SectionTitle("Introduction")
                 HomeArchivesIntro()

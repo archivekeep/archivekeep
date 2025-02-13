@@ -9,8 +9,6 @@ import org.archivekeep.app.core.domain.repositories.RepositoryService
 import org.archivekeep.app.core.domain.storages.StorageService
 import org.archivekeep.app.core.operations.addpush.AddAndPushOperationService
 import org.archivekeep.app.core.operations.derived.SyncService
-import org.archivekeep.app.core.persistence.credentials.Credentials
-import org.archivekeep.app.core.persistence.credentials.JoseStorage
 import org.archivekeep.app.core.utils.generics.flatMapLatestLoadedData
 import org.archivekeep.app.core.utils.generics.flatMapLoadableFlow
 import org.archivekeep.app.core.utils.generics.mapLoadedData
@@ -26,7 +24,6 @@ class HomeViewModel(
     val storageService: StorageService,
     val syncService: SyncService,
     val addAndPushOperationService: AddAndPushOperationService,
-    val credentialsStorage: JoseStorage<Credentials>,
 ) {
     val allLocalArchivesFlow =
         archiveService.allArchives.mapLoadedData {

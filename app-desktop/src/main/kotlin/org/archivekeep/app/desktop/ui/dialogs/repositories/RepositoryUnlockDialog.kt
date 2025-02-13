@@ -24,8 +24,8 @@ import androidx.compose.ui.unit.dp
 import compose.icons.TablerIcons
 import compose.icons.tablericons.Lock
 import org.archivekeep.app.core.domain.repositories.UnlockOptions
-import org.archivekeep.app.core.persistence.credentials.JoseStorage
 import org.archivekeep.app.core.utils.identifiers.RepositoryURI
+import org.archivekeep.app.desktop.domain.data.canUnlock
 import org.archivekeep.app.desktop.domain.wiring.LocalRepoService
 import org.archivekeep.app.desktop.domain.wiring.LocalWalletDataStore
 import org.archivekeep.app.desktop.domain.wiring.LocalWalletOperationLaunchers
@@ -99,10 +99,7 @@ class RepositoryUnlockDialog(
                     Text("Authentication is needed to access repository")
                     Spacer(Modifier.height(12.dp))
 
-                    if (credentialStorage.autoloadFlow
-                            .collectAsState()
-                            .value is JoseStorage.State.Locked
-                    ) {
+                    if (credentialStorage.canUnlock()) {
                         HorizontalDivider(Modifier.padding(bottom = 12.dp), thickness = 1.dp)
                         Text(
                             "Wallet with stored credentials is locked.",

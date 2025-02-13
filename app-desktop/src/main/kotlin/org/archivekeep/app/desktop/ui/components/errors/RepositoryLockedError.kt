@@ -10,13 +10,12 @@ import androidx.compose.material.Icon
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import compose.icons.TablerIcons
 import compose.icons.tablericons.Lock
-import org.archivekeep.app.core.persistence.credentials.JoseStorage
 import org.archivekeep.app.core.utils.exceptions.RepositoryLockedException
+import org.archivekeep.app.desktop.domain.data.canUnlock
 import org.archivekeep.app.desktop.domain.wiring.LocalArchiveOperationLaunchers
 import org.archivekeep.app.desktop.domain.wiring.LocalWalletDataStore
 import org.archivekeep.app.desktop.domain.wiring.LocalWalletOperationLaunchers
@@ -35,10 +34,7 @@ fun RepositoryLockedError(
     Spacer(Modifier.height(8.dp))
 
     Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-        if (credentialStorage.autoloadFlow
-                .collectAsState()
-                .value is JoseStorage.State.Locked
-        ) {
+        if (credentialStorage.canUnlock()) {
             OutlinedButton(
                 onClick = { walletOperationLaunchers.openUnlockWallet(onResolve) },
             ) {
