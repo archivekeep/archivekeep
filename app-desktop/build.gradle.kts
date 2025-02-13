@@ -82,8 +82,10 @@ publishing {
         artifactId = "archivekeep-desktop-application"
 
         afterEvaluate {
-            artifact(tasks.named<Jar>("packageReleaseUberJarForCurrentOS")) {
-                classifier = "uber"
+            tasks.named<Jar>("packageReleaseUberJarForCurrentOS").get().let { releaseUberJar ->
+                artifact(releaseUberJar) {
+                    classifier = "${releaseUberJar.archiveAppendix.get()}-uber"
+                }
             }
         }
 
