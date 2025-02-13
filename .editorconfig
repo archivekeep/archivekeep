@@ -18,3 +18,8 @@ ktlint_code_style = ktlint_official
 ktlint_function_naming_ignore_when_annotated_with=Composable
 ktlint_standard_filename = disabled
 ktlint_standard_property-naming = disabled
+
+[**/generated/**]
+generated_code = true
+ij_formatter_enabled = false
+ktlint = disabled

@@ -9,6 +9,7 @@ grpc-kotlin = "1.4.1"
 picocli = "4.7.5"
 protobuf = "0.9.4"
 protobuf-kotlin = "3.25.5"
+svg2ico = "2.6"
 
 ktlint = "12.1.2"
 
@@ -60,5 +61,7 @@ asciidoctor = { id = "org.asciidoctor.jvm.convert", version = "4.0.2" }
 compose = { id = "org.jetbrains.compose", version.ref = "compose" }
 
 protobuf = { id = "com.google.protobuf", version.ref = "protobuf" }
+
+svg2ico = { id = "com.gitlab.svg2ico", version.ref = "svg2ico" }
 
 ktlint = { id = "org.jlleitschuh.gradle.ktlint", version.ref = "ktlint" }

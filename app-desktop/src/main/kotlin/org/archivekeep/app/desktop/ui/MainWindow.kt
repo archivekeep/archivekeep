@@ -15,6 +15,9 @@ import org.archivekeep.app.desktop.domain.wiring.archiveOperationLaunchersAsDial
 import org.archivekeep.app.desktop.domain.wiring.rememberWalletOperationLaunchersAsDialogs
 import org.archivekeep.app.desktop.domain.wiring.storageOperationsLaunchersAsDialogs
 import org.archivekeep.app.desktop.ui.designsystem.styles.DesktopAppTheme
+import org.archivekeep.app_desktop.generated.resources.Res
+import org.archivekeep.app_desktop.generated.resources.ic_app
+import org.jetbrains.compose.resources.painterResource
 
 @Composable
 fun (ApplicationScope).MainWindow() {
@@ -26,6 +29,11 @@ fun (ApplicationScope).MainWindow() {
 
     Window(
         onCloseRequest = ::exitApplication,
+        title = "ArchiveKeep",
+        // note: this seems to not be respected by GNOME and generic icon is shown for the app,
+        //       but _NET_WM_ICON is set and icon can be retrieved using xprop, see:
+        //       https://unix.stackexchange.com/questions/48860/how-to-dump-the-icon-of-a-running-x-program
+        icon = painterResource(Res.drawable.ic_app),
         state =
             rememberWindowState(
                 width = 1000.dp,

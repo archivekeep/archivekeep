@@ -36,7 +36,7 @@ modules:
       - mkdir /app/lib/
       - cp -r archivekeep-desktop/bin/* /app/bin/
       - cp -r archivekeep-desktop/lib/* /app/lib/
-      - install -Dm644 org.archivekeep.ArchiveKeep.svg /app/share/icons/hicolor/scalable/apps/org.archivekeep.ArchiveKeep.svg
+      - install -Dm644 ic_app.svg /app/share/icons/hicolor/scalable/apps/org.archivekeep.ArchiveKeep.svg
       - install -Dm644 org.archivekeep.ArchiveKeep.desktop /app/share/applications/org.archivekeep.ArchiveKeep.desktop
       - find /app
     sources:
@@ -45,4 +45,4 @@ modules:
       - type: file
         path: ../resources/org.archivekeep.ArchiveKeep.desktop
       - type: file
-        path: ../resources/org.archivekeep.ArchiveKeep.svg
+        path: ../../app-desktop/src/main/composeResources/drawable/ic_app.svg

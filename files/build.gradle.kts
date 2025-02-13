@@ -74,16 +74,6 @@ protobuf {
     }
 }
 
-ktlint {
-    filter {
-        exclude { element ->
-            val path = element.file.path
-
-            path.contains("/generated/")
-        }
-    }
-}
-
 publishing {
     publications.named<MavenPublication>("maven") {
         artifactId = "archivekeep-files"
