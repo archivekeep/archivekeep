@@ -27,6 +27,7 @@ import org.archivekeep.app.desktop.ui.designsystem.sections.SectionCardButton
 import org.archivekeep.app.desktop.ui.designsystem.sections.SectionCardTitle
 import org.archivekeep.app.desktop.ui.designsystem.sections.SectionCardTitleIconButton
 import org.archivekeep.app.desktop.ui.designsystem.sections.sectionCardHorizontalPadding
+import org.archivekeep.app.desktop.ui.designsystem.styles.CIcons
 import org.archivekeep.app.desktop.ui.views.home.HomeArchiveEntryViewModel
 import org.archivekeep.utils.Loadable
 
@@ -141,6 +142,7 @@ private fun HomeArchiveEntry(
         ) { (storage, it) ->
             SecondaryArchiveRepositoryRow(
                 it,
+                icon = CIcons.Storage,
                 name =
                     storage.namedReference.displayName + (
                         if (it.repo.reference.displayName != localArchive.displayName) {

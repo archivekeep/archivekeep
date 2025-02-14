@@ -25,6 +25,9 @@ sealed interface OptionalLoadable<out T> {
     data object Loading : OptionalLoadable<Nothing>
 }
 
+val <T> OptionalLoadable<T>.isLoading: Boolean
+    get() = this is OptionalLoadable.Loading
+
 fun <T, R> OptionalLoadable<T>.mapLoadedData(function: (data: T) -> R): OptionalLoadable<R> =
     when (this) {
         is OptionalLoadable.LoadedAvailable ->

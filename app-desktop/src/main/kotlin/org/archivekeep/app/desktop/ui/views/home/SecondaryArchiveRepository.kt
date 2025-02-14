@@ -13,6 +13,7 @@ import org.archivekeep.app.core.domain.repositories.ResolvedRepositoryState
 import org.archivekeep.app.core.operations.derived.RepoToRepoSync
 import org.archivekeep.app.core.operations.derived.SyncService
 import org.archivekeep.app.core.utils.generics.OptionalLoadable
+import org.archivekeep.app.core.utils.generics.isLoading
 import org.archivekeep.app.core.utils.generics.mapIfLoadedOrNull
 import org.archivekeep.app.core.utils.generics.mapLoadedData
 import org.archivekeep.app.core.utils.identifiers.NamedRepositoryReference
@@ -23,8 +24,9 @@ class SecondaryArchiveRepository(
     // TODO: reference only
     val otherRepositoryState: ResolvedRepositoryState,
     val repository: Repository,
-    val reference: NamedRepositoryReference = otherRepositoryState.namedReference,
 ) {
+    val reference: NamedRepositoryReference = otherRepositoryState.namedReference
+
     data class State(
         val repo: SecondaryArchiveRepository,
         val connectionStatus: Repository.ConnectionState,
@@ -34,6 +36,8 @@ class SecondaryArchiveRepository(
         val texts: OptionalLoadable<String>,
     ) {
         val needsUnlock = connectionStatus is Repository.ConnectionState.ConnectedLocked
+
+        val isLoading = texts.isLoading || syncRunning
     }
 
     fun stateFlow(
@@ -44,7 +48,7 @@ class SecondaryArchiveRepository(
             primaryRepositoryURI?.let {
                 syncService.getRepoToRepoSync(
                     primaryRepositoryURI,
-                    reference.uri,
+                    repository.uri,
                 )
             }
 
@@ -54,7 +58,7 @@ class SecondaryArchiveRepository(
         val initialValue =
             State(
                 repo = this,
-                connectionStatus = repository.connectionStatusFlow.value,
+                connectionStatus = otherRepositoryState.connectionState,
                 syncRunning = false,
                 canPush = false,
                 canPull = false,
@@ -62,10 +66,11 @@ class SecondaryArchiveRepository(
             )
 
         return combine(
-            repository.connectionStatusFlow,
             syncStatusFlow,
             syncRunningFlow,
-        ) { connectionStatus, syncStatus, syncRunning ->
+        ) { syncStatus, syncRunning ->
+            val connectionStatus = otherRepositoryState.connectionState
+
             val canPush =
                 syncStatus?.mapIfLoadedOrNull {
                     it.missingBaseInOther != 0

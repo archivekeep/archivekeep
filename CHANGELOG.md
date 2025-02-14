@@ -11,6 +11,7 @@
 ### Changed
 
 - UI: move unlock button to TopAppBar
+- UI: add loading indication of secondary repository state
 - build: migrate to Gradle version catalog
 - build: migrate GRPC to lite variant with okhttp
 - build: upgrade to Kotlin 2.0.20 from 1.9.23

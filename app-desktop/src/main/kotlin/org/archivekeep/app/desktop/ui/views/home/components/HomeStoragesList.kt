@@ -25,6 +25,7 @@ import org.archivekeep.app.desktop.ui.designsystem.sections.SectionCardBottomLis
 import org.archivekeep.app.desktop.ui.designsystem.sections.SectionCardButton
 import org.archivekeep.app.desktop.ui.designsystem.sections.SectionCardTitle
 import org.archivekeep.app.desktop.ui.designsystem.sections.sectionCardHorizontalPadding
+import org.archivekeep.app.desktop.ui.designsystem.styles.CIcons
 import org.archivekeep.app.desktop.ui.views.home.HomeViewStorage
 import org.archivekeep.utils.Loadable
 
@@ -114,7 +115,7 @@ fun HomeStoragesList(allStoragesFlow: Loadable<List<HomeViewStorage>>) {
                     Spacer(Modifier.height(4.dp))
 
                     SectionCardBottomList(storage.secondaryRepositories.collectAsState().value) { secondaryRepositoryState ->
-                        SecondaryArchiveRepositoryRow(secondaryRepositoryState)
+                        SecondaryArchiveRepositoryRow(secondaryRepositoryState, icon = CIcons.Repository)
                     }
                 }
             }

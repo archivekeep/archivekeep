@@ -36,13 +36,7 @@ flatpak remote-add --if-not-exists --user flathub https://dl.flathub.org/repo/fl
 ```shell
 ./gradlew app-desktop:createReleaseDistributable
 
-flatpak-builder \
-  --force-clean \
-  --user \
-  --install-deps-from=flathub \
-  --state-dir ~/opt/flatpak/flatpak-builder-state \
-  --install ~/opt/flatpak/builddir/org.archivekeep.ArchiveKeep \
-  distribution/flatpak/org.archivekeep.ArchiveKeep.yaml
+./bin/build-install-flatpak.sh
 ```
 
 ### Building & installing DEB package
