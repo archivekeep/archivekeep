@@ -1,5 +1,4 @@
 import com.gitlab.svg2ico.Svg2PngTask
-import org.gradle.jvm.tasks.Jar
 import org.jetbrains.compose.desktop.application.dsl.TargetFormat
 
 plugins {
@@ -106,14 +105,6 @@ fun createRPMPackageVersion() =
 publishing {
     publications.named<MavenPublication>("maven") {
         artifactId = "archivekeep-desktop-application"
-
-        afterEvaluate {
-            tasks.named<Jar>("packageReleaseUberJarForCurrentOS").get().let { releaseUberJar ->
-                artifact(releaseUberJar) {
-                    classifier = "${releaseUberJar.archiveAppendix.get()}-uber"
-                }
-            }
-        }
 
         pom {
             name = "ArchiveKeep Desktop Application"
