@@ -13,6 +13,12 @@ plugins {
     alias(libs.plugins.ktlint)
 }
 
+val gradleOfflineBuildExtra by
+    configurations.creating {
+        isCanBeConsumed = true
+        isCanBeResolved = true
+    }
+
 dependencies {
     implementation(project(":files"))
     implementation(project(":app-core"))
@@ -37,6 +43,9 @@ dependencies {
     implementation(libs.guava)
 
     testImplementation("org.jetbrains.kotlin:kotlin-test")
+
+    gradleOfflineBuildExtra("com.guardsquare:proguard-gradle:7.2.2")
+    gradleOfflineBuildExtra("org.jetbrains.compose:gradle-plugin-internal-jdk-version-probe:1.7.3")
 }
 
 kotlin {

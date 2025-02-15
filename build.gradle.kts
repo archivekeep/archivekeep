@@ -1,3 +1,5 @@
+import io.github.jwharm.flatpakgradlegenerator.FlatpakGradleGeneratorTask
+
 plugins {
     alias(libs.plugins.kotlin.jvm) apply false
     alias(libs.plugins.kotlin.compose) apply false
@@ -5,9 +7,9 @@ plugins {
     alias(libs.plugins.kotlin.serialization) apply false
 
     alias(libs.plugins.compose) apply false
-
+    alias(libs.plugins.flatpak.gradle.generator)
+    alias(libs.plugins.svg2ico) apply false
     alias(libs.plugins.protobuf) apply false
-
     alias(libs.plugins.ktlint) apply false
 
     id("java")
@@ -41,6 +43,9 @@ subprojects {
         mavenCentral()
         maven("https://maven.pkg.jetbrains.space/public/p/compose/dev")
         google()
+
+        // for Flatpak offline no-network-access build
+        maven(uri(rootDir.resolve("offline-repository")))
     }
 
     publishing {
@@ -91,6 +96,17 @@ subprojects {
         useGpgCmd()
 
         sign(publishing.publications["maven"])
+    }
+}
+
+allprojects {
+    apply {
+        plugin("io.github.jwharm.flatpak-gradle-generator")
+    }
+
+    tasks.named<FlatpakGradleGeneratorTask>("flatpakGradleGenerator") {
+        outputFile = project.layout.buildDirectory.file("flatpak/dependencies-sources.json")
+        downloadDirectory = "./offline-repository"
     }
 }
 

@@ -2,6 +2,8 @@ pluginManagement {
     repositories {
         mavenCentral()
         gradlePluginPortal()
+
+        maven(uri(rootDir.resolve("./offline-repository")))
     }
 }
 

@@ -1,0 +1,30 @@
+name: Flatpak CI
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    container:
+      image: bilelmoussaoui/flatpak-github-actions:freedesktop-24.08
+      options: --privileged
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build
+        uses: flatpak/flatpak-github-actions/flatpak-builder@b8be6bc0ede43cb3a2cc55895654312b14f84a0d
+        with:
+          bundle: archivekeep-desktop.flatpak
+          manifest-path: distribution/flatpak/org.archivekeep.ArchiveKeep.yaml
+          cache-key: flatpak-builder-${{ github.sha }}
+          upload-artifact: false
+      - name: Upload artifact
+        if: github.ref == 'refs/heads/main'
+        uses: actions/upload-artifact@v4
+        with:
+          name: archivekeep-desktop.x86-64.flatpak
+          path: archivekeep-desktop.flatpak
+          if-no-files-found: error
+          compression-level: 0
+          retention-days: 45

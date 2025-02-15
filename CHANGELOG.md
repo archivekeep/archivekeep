@@ -7,6 +7,7 @@
 - UI: Material Design TopAppBar (with client side decorations)
 - build: DEB and RPM packaging support
 - build: Maven Central publishing support
+- build: Flatpak offline Gradle build support
 
 ### Changed
 
