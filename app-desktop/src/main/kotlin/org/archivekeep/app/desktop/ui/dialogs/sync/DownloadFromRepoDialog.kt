@@ -13,11 +13,11 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
 import org.archivekeep.app.core.domain.storages.StorageRepository
 import org.archivekeep.app.core.domain.storages.StorageService
-import org.archivekeep.app.core.operations.derived.SyncService
+import org.archivekeep.app.core.operations.sync.RepoToRepoSyncService
 import org.archivekeep.app.core.utils.generics.mapToLoadable
 import org.archivekeep.app.core.utils.identifiers.RepositoryURI
+import org.archivekeep.app.desktop.domain.wiring.LocalRepoToRepoSyncService
 import org.archivekeep.app.desktop.domain.wiring.LocalStorageService
-import org.archivekeep.app.desktop.domain.wiring.LocalSyncService
 import org.archivekeep.app.desktop.ui.designsystem.dialog.DialogCardWithDialogInnerContainer
 import org.archivekeep.app.desktop.ui.designsystem.dialog.DialogOverlayWithLoadableGuard
 import org.archivekeep.app.desktop.ui.dialogs.Dialog
@@ -37,10 +37,10 @@ data class DownloadFromRepoDialog(
 
     inner class VM(
         val storageService: StorageService,
-        syncService: SyncService,
+        repoToRepoSyncService: RepoToRepoSyncService,
         val scope: CoroutineScope,
     ) {
-        val sync = syncService.getRepoToRepoSync(from, to)
+        val sync = repoToRepoSyncService.getRepoToRepoSync(from, to)
         val userFlow = RepoToRepoSyncUserFlow(scope, sync)
 
         val state =
@@ -63,7 +63,7 @@ data class DownloadFromRepoDialog(
         onClose: () -> Unit,
     ) {
         val storageService = LocalStorageService.current
-        val syncService = LocalSyncService.current
+        val syncService = LocalRepoToRepoSyncService.current
         val scope = rememberCoroutineScope()
 
         val vm =

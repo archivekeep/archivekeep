@@ -1,8 +1,8 @@
-package org.archivekeep.app.core.operations.derived
+package org.archivekeep.app.core.operations.sync
 
 import org.archivekeep.app.core.utils.identifiers.RepositoryURI
 
-interface SyncService {
+interface RepoToRepoSyncService {
     fun getRepoToRepoSync(
         baseURI: RepositoryURI,
         otherURI: RepositoryURI,

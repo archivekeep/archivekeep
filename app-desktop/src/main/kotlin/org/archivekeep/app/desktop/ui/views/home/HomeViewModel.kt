@@ -8,7 +8,7 @@ import org.archivekeep.app.core.domain.archives.ArchiveService
 import org.archivekeep.app.core.domain.repositories.RepositoryService
 import org.archivekeep.app.core.domain.storages.StorageService
 import org.archivekeep.app.core.operations.addpush.AddAndPushOperationService
-import org.archivekeep.app.core.operations.derived.SyncService
+import org.archivekeep.app.core.operations.sync.RepoToRepoSyncService
 import org.archivekeep.app.core.utils.generics.flatMapLatestLoadedData
 import org.archivekeep.app.core.utils.generics.flatMapLoadableFlow
 import org.archivekeep.app.core.utils.generics.mapLoadedData
@@ -22,7 +22,7 @@ class HomeViewModel(
     val archiveService: ArchiveService,
     val repositoryService: RepositoryService,
     val storageService: StorageService,
-    val syncService: SyncService,
+    val repoToRepoSyncService: RepoToRepoSyncService,
     val addAndPushOperationService: AddAndPushOperationService,
 ) {
     val allLocalArchivesFlow =
@@ -35,7 +35,7 @@ class HomeViewModel(
                     HomeArchiveEntryViewModel(
                         scope,
                         addAndPushOperationService,
-                        syncService,
+                        repoToRepoSyncService,
                         repositoryService.getRepository(primaryRepository.uri),
                         archive = a,
                         primaryRepository.displayName,
@@ -77,7 +77,7 @@ class HomeViewModel(
 
                                 HomeViewStorage(
                                     scope,
-                                    syncService = syncService,
+                                    repoToRepoSyncService = repoToRepoSyncService,
                                     storage = storage,
                                     otherRepositoriesInThisStorage =
                                         allArchives

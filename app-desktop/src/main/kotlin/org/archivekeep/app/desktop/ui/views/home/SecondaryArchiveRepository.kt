@@ -10,8 +10,8 @@ import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.stateIn
 import org.archivekeep.app.core.domain.repositories.Repository
 import org.archivekeep.app.core.domain.repositories.ResolvedRepositoryState
-import org.archivekeep.app.core.operations.derived.RepoToRepoSync
-import org.archivekeep.app.core.operations.derived.SyncService
+import org.archivekeep.app.core.operations.sync.RepoToRepoSync
+import org.archivekeep.app.core.operations.sync.RepoToRepoSyncService
 import org.archivekeep.app.core.utils.generics.OptionalLoadable
 import org.archivekeep.app.core.utils.generics.isLoading
 import org.archivekeep.app.core.utils.generics.mapIfLoadedOrNull
@@ -42,18 +42,18 @@ class SecondaryArchiveRepository(
 
     fun stateFlow(
         scope: CoroutineScope,
-        syncService: SyncService,
+        repoToRepoSyncService: RepoToRepoSyncService,
     ): StateFlow<State> {
         val repoToRepoSync =
             primaryRepositoryURI?.let {
-                syncService.getRepoToRepoSync(
+                repoToRepoSyncService.getRepoToRepoSync(
                     primaryRepositoryURI,
                     repository.uri,
                 )
             }
 
-        val syncStatusFlow = repoToRepoSync?.stateFlow?.onStart { emit(OptionalLoadable.Loading) } ?: MutableStateFlow(null)
-        val syncRunningFlow = repoToRepoSync?.currentlyRunningOperationFlow?.map { it != null } ?: MutableStateFlow(false)
+        val syncStatusFlow = repoToRepoSync?.compareStateFlow?.onStart { emit(OptionalLoadable.Loading) } ?: MutableStateFlow(null)
+        val syncRunningFlow = repoToRepoSync?.currentJobFlow?.map { it != null } ?: MutableStateFlow(false)
 
         val initialValue =
             State(
@@ -95,11 +95,11 @@ class SecondaryArchiveRepository(
     }
 }
 
-fun textTags(syncStatuss: RepoToRepoSync.State): String {
+fun textTags(status: RepoToRepoSync.CompareState): String {
     val outOfSyncParts =
         listOfNotNull(
-            if (syncStatuss.missingBaseInOther > 0) "${syncStatuss.missingBaseInOther} missing" else null,
-            if (syncStatuss.missingOtherInBase > 0) "${syncStatuss.missingOtherInBase} extra" else null,
+            if (status.missingBaseInOther > 0) "${status.missingBaseInOther} missing" else null,
+            if (status.missingOtherInBase > 0) "${status.missingOtherInBase} extra" else null,
         )
 
     return if (outOfSyncParts.isNotEmpty()) {

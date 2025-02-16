@@ -15,7 +15,7 @@ import org.archivekeep.app.core.domain.storages.Storage
 import org.archivekeep.app.core.domain.storages.StorageNamedReference
 import org.archivekeep.app.core.operations.addpush.AddAndPushOperation
 import org.archivekeep.app.core.operations.addpush.AddAndPushOperationService
-import org.archivekeep.app.core.operations.derived.SyncService
+import org.archivekeep.app.core.operations.sync.RepoToRepoSyncService
 import org.archivekeep.app.core.utils.generics.mapLoadedData
 import org.archivekeep.app.core.utils.identifiers.NamedRepositoryReference
 import org.archivekeep.utils.Loadable
@@ -26,7 +26,7 @@ import org.archivekeep.utils.safeCombine
 class HomeArchiveEntryViewModel(
     scope: CoroutineScope,
     addAndPushOperationService: AddAndPushOperationService,
-    syncService: SyncService,
+    repoToRepoSyncService: RepoToRepoSyncService,
     val repository: Repository,
     val archive: AssociatedArchive,
     val displayName: String,
@@ -49,7 +49,7 @@ class HomeArchiveEntryViewModel(
     val secondaryRepositories: StateFlow<List<Pair<Storage, SecondaryArchiveRepository.State>>> =
         safeCombine(
             otherRepositories.map { (storage, secondaryArchiveRepository) ->
-                secondaryArchiveRepository.stateFlow(scope, syncService).map { Pair(storage, it) }
+                secondaryArchiveRepository.stateFlow(scope, repoToRepoSyncService).map { Pair(storage, it) }
             },
         ) {
             it.toList()
@@ -112,7 +112,7 @@ class HomeArchiveNonLocalArchive(
 
 class HomeViewStorage(
     scope: CoroutineScope,
-    val syncService: SyncService,
+    val repoToRepoSyncService: RepoToRepoSyncService,
     val storage: Storage,
     val reference: StorageNamedReference = storage.namedReference,
     val name: String? = storage.knownStorage.registeredStorage?.label,
@@ -127,7 +127,7 @@ class HomeViewStorage(
     }
 
     val secondaryRepositories: StateFlow<List<SecondaryArchiveRepository.State>> =
-        safeCombine(otherRepositoriesInThisStorage.map { it.stateFlow(scope, syncService) }) {
+        safeCombine(otherRepositoriesInThisStorage.map { it.stateFlow(scope, repoToRepoSyncService) }) {
             it.toList()
         }.stateIn(scope, SharingStarted.Lazily, emptyList())
 

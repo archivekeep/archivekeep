@@ -11,7 +11,6 @@ import org.archivekeep.app.desktop.ui.dialogs.repositories.ForgetRepositoryDialo
 import org.archivekeep.app.desktop.ui.dialogs.repositories.RepositoryUnlockDialog
 import org.archivekeep.app.desktop.ui.dialogs.repositories.UnassociateRepositoryDialog
 import org.archivekeep.app.desktop.ui.dialogs.sync.DownloadFromRepoDialog
-import org.archivekeep.app.desktop.ui.dialogs.sync.SyncOperationDialog
 import org.archivekeep.app.desktop.ui.dialogs.sync.UploadToRepoDialog
 import org.archivekeep.app.desktop.ui.dialogs.verify.VerifyOperationDialog
 
@@ -19,7 +18,6 @@ fun archiveOperationLaunchersAsDialogs(dialogRenderer: OverlayDialogRenderer) =
     ArchiveOperationLaunchers(
         openAddAndPushOperation = dialogRenderer.openFn(::AddAndPushRepoDialog),
         openIndexUpdateOperation = dialogRenderer.openFn(::UpdateIndexOperationDialog),
-        openSyncOperation = dialogRenderer.openFn(::SyncOperationDialog),
         openVerifyOperation = dialogRenderer.openFn(::VerifyOperationDialog),
         openAssociateRepository = dialogRenderer.openFn(::AssociateRepositoryDialog),
         openUnassociateRepository = dialogRenderer.openFn(::UnassociateRepositoryDialog),

@@ -9,9 +9,9 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import org.archivekeep.app.core.domain.storages.StorageRepository
 import org.archivekeep.app.core.domain.storages.StorageService
-import org.archivekeep.app.core.operations.derived.PreparedRunningOrCompletedSync
-import org.archivekeep.app.core.operations.derived.SyncOperationExecution
-import org.archivekeep.app.core.operations.derived.SyncService
+import org.archivekeep.app.core.operations.sync.RepoToRepoSync.JobState
+import org.archivekeep.app.core.operations.sync.RepoToRepoSync.State
+import org.archivekeep.app.core.operations.sync.RepoToRepoSyncService
 import org.archivekeep.app.core.utils.generics.mapLoadedData
 import org.archivekeep.app.core.utils.generics.mapToLoadable
 import org.archivekeep.app.core.utils.identifiers.RepositoryURI
@@ -25,7 +25,7 @@ class PushRepoDialogViewModel(
     val scope: CoroutineScope,
     val repositoryURI: RepositoryURI,
     val storageService: StorageService,
-    val syncService: SyncService,
+    val repoToRepoSyncService: RepoToRepoSyncService,
 ) {
     val relocationSyncModeFlow =
         MutableStateFlow<RelocationSyncMode>(
@@ -56,16 +56,16 @@ class PushRepoDialogViewModel(
     inner class RepoStatus(
         val otherRepository: StorageRepository,
     ) {
-        val repoToRepoSync = syncService.getRepoToRepoSync(repositoryURI, otherRepository.uri)
+        val repoToRepoSync = repoToRepoSyncService.getRepoToRepoSync(repositoryURI, otherRepository.uri)
 
-        val rememberedOPFlow = repoToRepoSync.currentlyRunningOperationFlow.stickToFirstNotNullAsState(scope)
+        val rememberedOPFlow = repoToRepoSync.currentJobFlow.stickToFirstNotNullAsState(scope)
 
-        val currentSyncFlow: StateFlow<Loadable<PreparedRunningOrCompletedSync>> =
+        val currentSyncFlow: StateFlow<Loadable<State>> =
             rememberedOPFlow
                 .flatMapLatest { rememberedOP ->
                     if (rememberedOP != null) {
                         return@flatMapLatest rememberedOP.currentState.mapToLoadable().mapLoadedData {
-                            it as PreparedRunningOrCompletedSync
+                            it as State
                         }
                     }
 
@@ -79,13 +79,13 @@ class PushRepoDialogViewModel(
             currentSyncFlow
                 .mapLoadedData {
                     when (it) {
-                        is SyncOperationExecution.Prepared ->
+                        is State.Prepared ->
                             describePreparedSyncOperation(it.preparedSyncOperation)
 
-                        is SyncOperationExecution.Running ->
+                        is JobState.Running ->
                             "Running"
 
-                        is SyncOperationExecution.Finished ->
+                        is JobState.Finished ->
                             "Completed"
                     }
                 }
@@ -99,7 +99,7 @@ class PushRepoDialogViewModel(
 
             val status = currentSync.value
 
-            if (status !is SyncOperationExecution.Prepared) {
+            if (status !is State.Prepared) {
                 throw RuntimeException("illegal state")
             }
 

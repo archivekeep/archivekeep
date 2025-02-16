@@ -15,8 +15,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import org.archivekeep.app.core.utils.identifiers.RepositoryURI
+import org.archivekeep.app.desktop.domain.wiring.LocalRepoToRepoSyncService
 import org.archivekeep.app.desktop.domain.wiring.LocalStorageService
-import org.archivekeep.app.desktop.domain.wiring.LocalSyncService
 import org.archivekeep.app.desktop.ui.components.LoadableGuard
 import org.archivekeep.app.desktop.ui.components.RelocationSyncModeOptions
 import org.archivekeep.app.desktop.ui.components.SplitRow
@@ -42,7 +42,7 @@ class PushRepoDialog(
         val scope = rememberCoroutineScope()
 
         val storageService = LocalStorageService.current
-        val syncService = LocalSyncService.current
+        val syncService = LocalRepoToRepoSyncService.current
 
         val vm =
             remember {

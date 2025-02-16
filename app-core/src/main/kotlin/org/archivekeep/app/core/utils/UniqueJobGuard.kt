@@ -13,7 +13,7 @@ import kotlin.coroutines.CoroutineContext
 class UniqueJobGuard<K : Any, V : UniqueJobGuard.RunnableJob> {
     val stateHoldersWeakReference = singleInstanceWeakValueMap { it: K -> MutableStateFlow<V?>(null) }
 
-    val ongoingJobsStrongReferences = mutableSetOf<Pair<V, MutableStateFlow<V?>>>()
+    private val ongoingJobsStrongReferences = mutableSetOf<Pair<V, MutableStateFlow<V?>>>()
 
     fun launch(
         scope: CoroutineScope,

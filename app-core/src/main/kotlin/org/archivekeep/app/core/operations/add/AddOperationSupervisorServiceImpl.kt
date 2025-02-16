@@ -6,15 +6,11 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.conflate
-import kotlinx.coroutines.flow.flatMapLatest
-import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.flowOn
-import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import org.archivekeep.app.core.domain.repositories.RepositoryService
 import org.archivekeep.app.core.operations.add.AddOperationSupervisor.AddProgress
@@ -46,12 +42,6 @@ class AddOperationSupervisorServiceImpl(
         val repositoryURI: RepositoryURI,
     ) : AddOperationSupervisor {
         override val currentJobFlow: StateFlow<JobImpl?> = jobGuards.stateHoldersWeakReference[repositoryURI].asStateFlow()
-
-        override val executionStateFlow: StateFlow<AddOperationSupervisor.ExecutionState> =
-            currentJobFlow
-                .flatMapLatest { currentJob ->
-                    currentJob?.executionStateFlow ?: flowOf(AddOperationSupervisor.ExecutionState.NotRunning)
-                }.stateIn(scope, SharingStarted.WhileSubscribed(), AddOperationSupervisor.ExecutionState.NotRunning)
 
         override fun prepare(): Flow<Loadable<AddOperationSupervisor.Prepared>> =
             repositoryService

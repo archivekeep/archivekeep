@@ -6,10 +6,8 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
-import org.archivekeep.app.core.operations.derived.PreparedRunningOrCompletedSync
-import org.archivekeep.app.core.operations.derived.RepoToRepoSync
-import org.archivekeep.app.core.operations.derived.SyncOperationExecution
-import org.archivekeep.app.core.utils.generics.mapLoadedData
+import org.archivekeep.app.core.operations.sync.RepoToRepoSync
+import org.archivekeep.app.core.operations.sync.RepoToRepoSync.JobState
 import org.archivekeep.app.core.utils.generics.mapToLoadable
 import org.archivekeep.app.desktop.utils.stickToFirstNotNullAsState
 import org.archivekeep.files.operations.RelocationSyncMode
@@ -21,17 +19,17 @@ class RepoToRepoSyncUserFlow(
     val sync: RepoToRepoSync,
 ) {
     data class State(
-        val operation: Loadable<PreparedRunningOrCompletedSync>,
+        val operation: Loadable<RepoToRepoSync.State>,
     ) {
-        val isRunning = operation.mapIfLoadedOrDefault(false) { it is SyncOperationExecution.Running }
-        val isCancelled = operation.mapIfLoadedOrDefault(false) { it is SyncOperationExecution.Finished && it.cancelled }
-        val isCompleted = operation.mapIfLoadedOrDefault(false) { it is SyncOperationExecution.Finished }
+        val isRunning = operation.mapIfLoadedOrDefault(false) { it is JobState.Running }
+        val isCancelled = operation.mapIfLoadedOrDefault(false) { it is JobState.Finished && it.cancelled }
+        val isCompleted = operation.mapIfLoadedOrDefault(false) { it is JobState.Finished }
 
         val canCancel = isRunning
-        val canLaunch = operation.mapIfLoadedOrDefault(false) { it is SyncOperationExecution.Prepared }
+        val canLaunch = operation.mapIfLoadedOrDefault(false) { it is RepoToRepoSync.State.Prepared }
     }
 
-    val currentOperation = sync.currentlyRunningOperationFlow.stickToFirstNotNullAsState(scope)
+    val currentOperation = sync.currentJobFlow.stickToFirstNotNullAsState(scope)
 
     val relocationSyncModeFlow =
         MutableStateFlow(
@@ -49,23 +47,18 @@ class RepoToRepoSyncUserFlow(
                         sync.prepare(relocationSyncMode)
                     }
                 } else {
-                    it.currentState.map { it as PreparedRunningOrCompletedSync }.mapToLoadable()
+                    it.currentState.map { it as RepoToRepoSync.State }.mapToLoadable()
                 }
             }.stateIn(scope, SharingStarted.WhileSubscribed(), Loadable.Loading)
 
-    val stateFlow =
-        operationStateFlow.map {
-            State(
-                operation = it.mapLoadedData { it as PreparedRunningOrCompletedSync },
-            )
-        }
+    val stateFlow = operationStateFlow.map { State(operation = it) }
 
     fun launch() {
         val stateLoadable =
             operationStateFlow.value as? Loadable.Loaded
                 ?: throw IllegalStateException("Must be in prepared state")
 
-        val state = stateLoadable.value as? SyncOperationExecution.Prepared ?: throw IllegalStateException("Must be in prepared state")
+        val state = stateLoadable.value as? RepoToRepoSync.State.Prepared ?: throw IllegalStateException("Must be in prepared state")
 
         state.startExecution()
     }

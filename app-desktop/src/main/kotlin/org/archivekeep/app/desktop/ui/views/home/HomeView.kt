@@ -22,8 +22,8 @@ import org.archivekeep.app.desktop.domain.wiring.LocalAddPushService
 import org.archivekeep.app.desktop.domain.wiring.LocalArchiveOperationLaunchers
 import org.archivekeep.app.desktop.domain.wiring.LocalArchiveService
 import org.archivekeep.app.desktop.domain.wiring.LocalRepoService
+import org.archivekeep.app.desktop.domain.wiring.LocalRepoToRepoSyncService
 import org.archivekeep.app.desktop.domain.wiring.LocalStorageService
-import org.archivekeep.app.desktop.domain.wiring.LocalSyncService
 import org.archivekeep.app.desktop.ui.designsystem.sections.SectionTitle
 import org.archivekeep.app.desktop.ui.designsystem.styles.CColors
 import org.archivekeep.app.desktop.ui.views.View
@@ -44,7 +44,7 @@ class HomeView : View<HomeViewModel> {
         val archiveService = LocalArchiveService.current
         val repositoryService = LocalRepoService.current
         val storageService = LocalStorageService.current
-        val syncService = LocalSyncService.current
+        val syncService = LocalRepoToRepoSyncService.current
         val addPushOperationService = LocalAddPushService.current
 
         return remember(

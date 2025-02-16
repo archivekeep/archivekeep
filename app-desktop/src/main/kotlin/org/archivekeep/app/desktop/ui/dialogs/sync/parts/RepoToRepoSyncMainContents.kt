@@ -12,7 +12,8 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.sp
-import org.archivekeep.app.core.operations.derived.SyncOperationExecution
+import org.archivekeep.app.core.operations.sync.RepoToRepoSync.JobState
+import org.archivekeep.app.core.operations.sync.RepoToRepoSync.State
 import org.archivekeep.app.desktop.ui.components.LoadableGuard
 import org.archivekeep.app.desktop.ui.dialogs.sync.RepoToRepoSyncUserFlow
 import org.archivekeep.app.desktop.ui.dialogs.sync.describePreparedSyncOperationWithDetails
@@ -21,7 +22,7 @@ import org.archivekeep.app.desktop.ui.dialogs.sync.describePreparedSyncOperation
 fun (ColumnScope).RepoToRepoSyncMainContents(userFlowState: RepoToRepoSyncUserFlow.State) {
     LoadableGuard(userFlowState.operation) { operation ->
         when (operation) {
-            is SyncOperationExecution.Prepared -> {
+            is State.Prepared -> {
                 val t =
                     remember(operation.preparedSyncOperation) {
                         describePreparedSyncOperationWithDetails(operation.preparedSyncOperation, "Upload")
@@ -42,7 +43,7 @@ fun (ColumnScope).RepoToRepoSyncMainContents(userFlowState: RepoToRepoSyncUserFl
                     )
                 }
             }
-            is SyncOperationExecution.Running -> {
+            is JobState.Running -> {
                 val t by operation.progressLog.collectAsState("")
 
                 Column {
@@ -58,7 +59,7 @@ fun (ColumnScope).RepoToRepoSyncMainContents(userFlowState: RepoToRepoSyncUserFl
                 }
             }
 
-            is SyncOperationExecution.Finished ->
+            is JobState.Finished ->
                 Column {
                     Text("Finished")
                     Box(

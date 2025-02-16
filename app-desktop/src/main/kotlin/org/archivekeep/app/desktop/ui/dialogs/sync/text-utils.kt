@@ -5,6 +5,21 @@ import org.archivekeep.files.operations.NewFilesSyncStep
 import org.archivekeep.files.operations.PreparedSyncOperation
 import org.archivekeep.files.operations.RelocationsMoveApplySyncStep
 
+fun describePreparedSyncOperation(a: PreparedSyncOperation) =
+    if (a.isNoOp()) {
+        "NoOP"
+    } else {
+        a.steps.joinToString("\n") {
+            when (it) {
+                is AdditiveRelocationsSyncStep -> "Duplicate ${it.relocations.size} files."
+
+                is RelocationsMoveApplySyncStep -> "Move ${it.relocations.size} files."
+
+                is NewFilesSyncStep -> "Upload ${it.unmatchedBaseExtras.size} files."
+            }
+        }
+    }
+
 fun describePreparedSyncOperationWithDetails(
     a: PreparedSyncOperation,
     action: String = "Add",
