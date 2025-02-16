@@ -2,6 +2,8 @@ package org.archivekeep.app.desktop.ui.components
 
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import org.archivekeep.app.desktop.ui.components.errors.AutomaticErrorMessage
 import org.archivekeep.utils.Loadable
 
 @Composable
@@ -11,8 +13,14 @@ fun <T> LoadableGuard(
     content: @Composable (value: T) -> Unit,
 ) {
     when (loadable) {
-        is Loadable.Failed ->
-            Text("Failed: ${loadable.throwable.message}")
+        is Loadable.Failed -> {
+            LaunchedEffect(loadable.throwable) {
+                println("Loadable guard catched error: ${loadable.throwable}")
+                loadable.throwable.printStackTrace()
+            }
+
+            AutomaticErrorMessage(loadable.throwable, onResolve = {})
+        }
 
         is Loadable.Loading ->
             loadingContent()
