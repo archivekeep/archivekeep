@@ -8,11 +8,11 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import org.archivekeep.app.core.operations.sync.RepoToRepoSync
 import org.archivekeep.app.core.operations.sync.RepoToRepoSync.JobState
-import org.archivekeep.app.core.utils.generics.mapToLoadable
 import org.archivekeep.app.desktop.utils.stickToFirstNotNullAsState
 import org.archivekeep.files.operations.RelocationSyncMode
-import org.archivekeep.utils.Loadable
-import org.archivekeep.utils.mapIfLoadedOrDefault
+import org.archivekeep.utils.loading.Loadable
+import org.archivekeep.utils.loading.mapIfLoadedOrDefault
+import org.archivekeep.utils.loading.mapToLoadable
 
 class RepoToRepoSyncUserFlow(
     val scope: CoroutineScope,

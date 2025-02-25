@@ -35,8 +35,8 @@ import org.archivekeep.app.desktop.ui.views.home.components.HomeNonLocalArchives
 import org.archivekeep.app.desktop.ui.views.home.components.HomeStoragesIntro
 import org.archivekeep.app.desktop.ui.views.home.components.HomeStoragesList
 import org.archivekeep.app.desktop.utils.collectLoadableFlow
-import org.archivekeep.utils.Loadable
-import org.archivekeep.utils.isLoading
+import org.archivekeep.utils.loading.Loadable
+import org.archivekeep.utils.loading.isLoading
 
 class HomeView : View<HomeViewModel> {
     @Composable

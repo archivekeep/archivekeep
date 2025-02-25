@@ -4,7 +4,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import org.archivekeep.app.desktop.ui.components.errors.AutomaticErrorMessage
-import org.archivekeep.utils.Loadable
+import org.archivekeep.utils.loading.Loadable
 
 @Composable
 fun <T> LoadableGuard(

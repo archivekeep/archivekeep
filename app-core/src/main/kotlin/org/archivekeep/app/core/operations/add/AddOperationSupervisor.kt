@@ -5,7 +5,7 @@ import kotlinx.coroutines.flow.StateFlow
 import org.archivekeep.files.operations.AddOperation
 import org.archivekeep.files.operations.AddOperation.PreparationResult
 import org.archivekeep.files.operations.AddOperation.PreparationResult.Move
-import org.archivekeep.utils.Loadable
+import org.archivekeep.utils.loading.Loadable
 
 interface AddOperationSupervisor {
     val currentJobFlow: StateFlow<Job?>

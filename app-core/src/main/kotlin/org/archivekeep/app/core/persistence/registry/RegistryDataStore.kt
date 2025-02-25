@@ -2,7 +2,7 @@ package org.archivekeep.app.core.persistence.registry
 
 import kotlinx.coroutines.flow.SharedFlow
 import org.archivekeep.app.core.utils.identifiers.StorageURI
-import org.archivekeep.utils.Loadable
+import org.archivekeep.utils.loading.Loadable
 
 interface RegistryDataStore {
     val registeredRepositories: SharedFlow<Set<RegisteredRepository>>

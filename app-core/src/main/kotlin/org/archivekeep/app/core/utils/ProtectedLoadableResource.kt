@@ -4,7 +4,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.transform
-import org.archivekeep.utils.Loadable
+import org.archivekeep.utils.loading.Loadable
 
 sealed interface ProtectedLoadableResource<out T, out A> {
     fun asLoadable(): Loadable<T>

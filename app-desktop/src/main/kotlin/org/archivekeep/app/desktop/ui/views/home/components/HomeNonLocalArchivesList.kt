@@ -31,7 +31,7 @@ import org.archivekeep.app.desktop.ui.designsystem.sections.SectionCardBottomLis
 import org.archivekeep.app.desktop.ui.designsystem.sections.SectionCardTitle
 import org.archivekeep.app.desktop.ui.designsystem.sections.sectionCardHorizontalPadding
 import org.archivekeep.app.desktop.ui.views.home.HomeArchiveNonLocalArchive
-import org.archivekeep.utils.Loadable
+import org.archivekeep.utils.loading.Loadable
 
 @Composable
 fun HomeNonLocalArchivesList(otherArchivesLoadable: Loadable<List<HomeArchiveNonLocalArchive>>) {

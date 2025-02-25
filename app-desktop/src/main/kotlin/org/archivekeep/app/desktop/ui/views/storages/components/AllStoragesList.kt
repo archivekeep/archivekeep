@@ -29,7 +29,7 @@ import org.archivekeep.app.desktop.ui.designsystem.sections.SectionCardBottomLis
 import org.archivekeep.app.desktop.ui.designsystem.sections.SectionCardTitle
 import org.archivekeep.app.desktop.ui.designsystem.sections.sectionCardHorizontalPadding
 import org.archivekeep.app.desktop.ui.views.storages.StoragesVM
-import org.archivekeep.utils.Loadable
+import org.archivekeep.utils.loading.Loadable
 
 @OptIn(ExperimentalLayoutApi::class)
 @Composable

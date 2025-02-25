@@ -14,15 +14,15 @@ import org.archivekeep.app.core.domain.storages.StorageInformation
 import org.archivekeep.app.core.utils.ProtectedLoadableResource
 import org.archivekeep.app.core.utils.exceptions.DisconnectedStorageException
 import org.archivekeep.app.core.utils.generics.UniqueSharedFlowInstanceManager
-import org.archivekeep.app.core.utils.generics.mapLoadedData
 import org.archivekeep.app.core.utils.generics.mapLoadedDataToOptional
 import org.archivekeep.app.core.utils.generics.sharedGlobalWhileSubscribed
-import org.archivekeep.app.core.utils.generics.waitLoadedValue
 import org.archivekeep.app.core.utils.identifiers.RepositoryURI
 import org.archivekeep.app.core.utils.identifiers.StorageURI
 import org.archivekeep.files.repo.Repo
 import org.archivekeep.files.repo.files.openFilesRepoOrNull
-import org.archivekeep.utils.Loadable
+import org.archivekeep.utils.loading.Loadable
+import org.archivekeep.utils.loading.mapLoadedData
+import org.archivekeep.utils.loading.waitLoadedValue
 import kotlin.io.path.Path
 
 class FileSystemStorageDriver(

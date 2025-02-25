@@ -9,13 +9,13 @@ import org.archivekeep.app.core.domain.repositories.RepositoryService
 import org.archivekeep.app.core.domain.storages.StorageService
 import org.archivekeep.app.core.operations.addpush.AddAndPushOperationService
 import org.archivekeep.app.core.operations.sync.RepoToRepoSyncService
-import org.archivekeep.app.core.utils.generics.flatMapLatestLoadedData
-import org.archivekeep.app.core.utils.generics.flatMapLoadableFlow
-import org.archivekeep.app.core.utils.generics.mapLoadedData
 import org.archivekeep.app.core.utils.generics.sharedWhileSubscribed
-import org.archivekeep.utils.Loadable
 import org.archivekeep.utils.combineToList
-import org.archivekeep.utils.mapIfLoadedOrDefault
+import org.archivekeep.utils.loading.Loadable
+import org.archivekeep.utils.loading.flatMapLatestLoadedData
+import org.archivekeep.utils.loading.flatMapLoadableFlow
+import org.archivekeep.utils.loading.mapIfLoadedOrDefault
+import org.archivekeep.utils.loading.mapLoadedData
 
 class HomeViewModel(
     val scope: CoroutineScope,

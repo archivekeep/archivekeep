@@ -10,13 +10,13 @@ import kotlinx.coroutines.flow.onEach
 import org.archivekeep.app.core.persistence.repository.MemorizedRepositoryIndexRepository
 import org.archivekeep.app.core.persistence.repository.MemorizedRepositoryMetadataRepository
 import org.archivekeep.app.core.utils.generics.OptionalLoadable
-import org.archivekeep.app.core.utils.generics.mapToOptionalLoadable
+import org.archivekeep.app.core.utils.generics.mapLoadedDataToOptional
 import org.archivekeep.app.core.utils.generics.sharedWhileSubscribed
 import org.archivekeep.app.core.utils.identifiers.RepositoryURI
 import org.archivekeep.files.exceptions.UnsupportedFeatureException
 import org.archivekeep.files.repo.Repo
 import org.archivekeep.files.repo.RepositoryMetadata
-import org.archivekeep.utils.Loadable
+import org.archivekeep.utils.loading.Loadable
 
 class MemorizingRepositoryReader(
     val scope: CoroutineScope,
@@ -52,7 +52,9 @@ class MemorizingRepositoryReader(
             memorizedFallback("index flow", memorizedIndexFlow) {
                 it.observable.indexFlow
                     .conflate()
-                    .onEach { accessedIndex ->
+                    .onEach { accessedIndexLoadable ->
+                        val accessedIndex = (accessedIndexLoadable as? Loadable.Loaded)?.value ?: return@onEach
+
                         try {
                             memorizedRepositoryIndexRepository.updateRepositoryMemorizedIndexIfDiffers(
                                 uri,
@@ -62,7 +64,7 @@ class MemorizingRepositoryReader(
                             println("ERROR: memorized index update failed: $e")
                             e.printStackTrace()
                         }
-                    }.mapToOptionalLoadable { it }
+                    }.mapLoadedDataToOptional()
             }.onEach {
                 println("Loaded repository index for $uri")
             }.sharedWhileSubscribed(scope)

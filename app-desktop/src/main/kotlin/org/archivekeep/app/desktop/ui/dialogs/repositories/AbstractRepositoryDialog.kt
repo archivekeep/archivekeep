@@ -17,7 +17,7 @@ import org.archivekeep.app.desktop.ui.designsystem.dialog.DialogOverlayWithLoada
 import org.archivekeep.app.desktop.ui.dialogs.Dialog
 import org.archivekeep.app.desktop.ui.dialogs.repositories.AbstractRepositoryDialog.BaseState
 import org.archivekeep.app.desktop.utils.collectLoadableFlow
-import org.archivekeep.utils.Loadable
+import org.archivekeep.utils.loading.Loadable
 
 abstract class AbstractRepositoryDialog<T_State : BaseState, T_VM : AbstractRepositoryDialog.IVM<T_State>>(
     val uri: RepositoryURI,

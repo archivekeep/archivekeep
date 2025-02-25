@@ -27,7 +27,7 @@ import org.archivekeep.app.desktop.ui.designsystem.sections.SectionCardTitle
 import org.archivekeep.app.desktop.ui.designsystem.sections.sectionCardHorizontalPadding
 import org.archivekeep.app.desktop.ui.designsystem.styles.CIcons
 import org.archivekeep.app.desktop.ui.views.home.HomeViewStorage
-import org.archivekeep.utils.Loadable
+import org.archivekeep.utils.loading.Loadable
 
 @OptIn(ExperimentalLayoutApi::class)
 @Composable

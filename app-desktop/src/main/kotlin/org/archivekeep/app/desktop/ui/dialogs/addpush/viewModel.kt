@@ -20,7 +20,6 @@ import org.archivekeep.app.core.operations.addpush.AddAndPushOperation
 import org.archivekeep.app.core.operations.addpush.AddAndPushOperation.LaunchOptions
 import org.archivekeep.app.core.operations.addpush.AddAndPushOperation.LaunchedAddPushProcess
 import org.archivekeep.app.core.operations.addpush.AddAndPushOperation.ReadyAddPushProcess
-import org.archivekeep.app.core.utils.generics.mapToLoadable
 import org.archivekeep.app.core.utils.identifiers.RepositoryURI
 import org.archivekeep.app.desktop.domain.data.getSyncCandidates
 import org.archivekeep.app.desktop.domain.wiring.LocalAddPushService
@@ -28,8 +27,9 @@ import org.archivekeep.app.desktop.domain.wiring.LocalRepoService
 import org.archivekeep.app.desktop.domain.wiring.LocalStorageService
 import org.archivekeep.app.desktop.utils.stickToFirstNotNullAsState
 import org.archivekeep.files.operations.AddOperation
-import org.archivekeep.utils.Loadable
-import org.archivekeep.utils.mapIfLoadedOrDefault
+import org.archivekeep.utils.loading.Loadable
+import org.archivekeep.utils.loading.mapIfLoadedOrDefault
+import org.archivekeep.utils.loading.mapToLoadable
 
 class AddAndPushDialogViewModel(
     val scope: CoroutineScope,

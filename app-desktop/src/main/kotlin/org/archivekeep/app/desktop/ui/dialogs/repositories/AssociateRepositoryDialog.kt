@@ -41,7 +41,6 @@ import org.archivekeep.app.core.domain.storages.Storage
 import org.archivekeep.app.core.operations.AssociateRepositoryOperation
 import org.archivekeep.app.core.operations.AssociateRepositoryOperation.Target
 import org.archivekeep.app.core.utils.generics.ExecutionOutcome
-import org.archivekeep.app.core.utils.generics.mapLoadedData
 import org.archivekeep.app.core.utils.identifiers.RepositoryURI
 import org.archivekeep.app.desktop.domain.wiring.LocalArchiveService
 import org.archivekeep.app.desktop.domain.wiring.LocalOperationFactory
@@ -53,7 +52,8 @@ import org.archivekeep.app.desktop.ui.designsystem.dialog.DialogDismissButton
 import org.archivekeep.app.desktop.ui.designsystem.dialog.DialogPrimaryButton
 import org.archivekeep.app.desktop.ui.dialogs.repositories.AssociateRepositoryDialog.VM
 import org.archivekeep.app.desktop.utils.produceState
-import org.archivekeep.utils.Loadable
+import org.archivekeep.utils.loading.Loadable
+import org.archivekeep.utils.loading.mapLoadedData
 
 class AssociateRepositoryDialog(
     uri: RepositoryURI,

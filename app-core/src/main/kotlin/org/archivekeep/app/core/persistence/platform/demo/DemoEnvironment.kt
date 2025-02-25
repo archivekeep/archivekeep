@@ -32,7 +32,6 @@ import org.archivekeep.app.core.persistence.repository.MemorizedRepositoryMetada
 import org.archivekeep.app.core.utils.ProtectedLoadableResource
 import org.archivekeep.app.core.utils.generics.OptionalLoadable
 import org.archivekeep.app.core.utils.generics.UniqueSharedFlowInstanceManager
-import org.archivekeep.app.core.utils.generics.mapToLoadable
 import org.archivekeep.app.core.utils.generics.sharedWhileSubscribed
 import org.archivekeep.app.core.utils.identifiers.RepositoryURI
 import org.archivekeep.app.core.utils.identifiers.StorageURI
@@ -47,7 +46,8 @@ import org.archivekeep.testing.storage.InMemoryLocalRepo
 import org.archivekeep.testing.storage.InMemoryRepo
 import org.archivekeep.testing.storage.SpeedLimitedLocalRepoWrapper
 import org.archivekeep.testing.storage.SpeedLimitedRepoWrapper
-import org.archivekeep.utils.Loadable
+import org.archivekeep.utils.loading.Loadable
+import org.archivekeep.utils.loading.mapToLoadable
 
 class DemoEnvironment(
     scope: CoroutineScope,

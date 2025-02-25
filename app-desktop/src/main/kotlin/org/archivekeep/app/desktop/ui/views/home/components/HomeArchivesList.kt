@@ -29,7 +29,7 @@ import org.archivekeep.app.desktop.ui.designsystem.sections.SectionCardTitleIcon
 import org.archivekeep.app.desktop.ui.designsystem.sections.sectionCardHorizontalPadding
 import org.archivekeep.app.desktop.ui.designsystem.styles.CIcons
 import org.archivekeep.app.desktop.ui.views.home.HomeArchiveEntryViewModel
-import org.archivekeep.utils.Loadable
+import org.archivekeep.utils.loading.Loadable
 
 val TinyRoundShape = RoundedCornerShape(4.dp)
 

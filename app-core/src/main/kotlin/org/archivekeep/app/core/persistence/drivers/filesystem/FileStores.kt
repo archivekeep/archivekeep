@@ -16,10 +16,10 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.transformLatest
-import org.archivekeep.app.core.utils.generics.firstLoadedOrFailure
-import org.archivekeep.app.core.utils.generics.mapLoadedData
 import org.archivekeep.app.core.utils.generics.sharedGlobalLoadableWhileSubscribed
 import org.archivekeep.utils.io.watch
+import org.archivekeep.utils.loading.firstLoadedOrFailure
+import org.archivekeep.utils.loading.mapLoadedData
 import oshi.SystemInfo
 import oshi.software.os.OSFileStore
 import oshi.software.os.linux.LinuxFileSystem

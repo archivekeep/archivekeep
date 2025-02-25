@@ -6,9 +6,9 @@ import kotlinx.coroutines.flow.onEach
 import org.archivekeep.app.core.persistence.drivers.filesystem.FileStores
 import org.archivekeep.app.core.persistence.registry.RegisteredStorage
 import org.archivekeep.app.core.persistence.registry.RegistryDataStore
-import org.archivekeep.app.core.utils.generics.firstLoadedOrFailure
-import org.archivekeep.app.core.utils.generics.mapLoadedData
-import org.archivekeep.utils.Loadable
+import org.archivekeep.utils.loading.Loadable
+import org.archivekeep.utils.loading.firstLoadedOrFailure
+import org.archivekeep.utils.loading.mapLoadedData
 
 class KnownStorageService(
     val dataStore: RegistryDataStore,

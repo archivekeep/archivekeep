@@ -12,14 +12,14 @@ import org.archivekeep.app.core.domain.storages.StorageService
 import org.archivekeep.app.core.operations.sync.RepoToRepoSync.JobState
 import org.archivekeep.app.core.operations.sync.RepoToRepoSync.State
 import org.archivekeep.app.core.operations.sync.RepoToRepoSyncService
-import org.archivekeep.app.core.utils.generics.mapLoadedData
-import org.archivekeep.app.core.utils.generics.mapToLoadable
 import org.archivekeep.app.core.utils.identifiers.RepositoryURI
 import org.archivekeep.app.desktop.domain.data.getSyncCandidates
 import org.archivekeep.app.desktop.ui.dialogs.sync.describePreparedSyncOperation
 import org.archivekeep.app.desktop.utils.stickToFirstNotNullAsState
 import org.archivekeep.files.operations.RelocationSyncMode
-import org.archivekeep.utils.Loadable
+import org.archivekeep.utils.loading.Loadable
+import org.archivekeep.utils.loading.mapLoadedData
+import org.archivekeep.utils.loading.mapToLoadable
 
 class PushRepoDialogViewModel(
     val scope: CoroutineScope,

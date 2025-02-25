@@ -14,7 +14,6 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.flowOn
-import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.produceIn
 import kotlinx.coroutines.flow.shareIn
 import kotlinx.coroutines.launch
@@ -33,7 +32,8 @@ import org.archivekeep.files.repo.ObservableRepo
 import org.archivekeep.files.repo.Repo
 import org.archivekeep.files.repo.RepoIndex
 import org.archivekeep.files.repo.RepositoryMetadata
-import org.archivekeep.utils.Loadable
+import org.archivekeep.utils.loading.Loadable
+import org.archivekeep.utils.loading.mapToLoadable
 import java.io.Closeable
 import java.io.InputStream
 import java.io.PipedInputStream
@@ -216,9 +216,9 @@ class RemoteGrpcRepository(
 
     override val observable: ObservableRepo = this
 
-    override val indexFlow: Flow<RepoIndex> =
+    override val indexFlow: Flow<Loadable<RepoIndex>> =
         modifChannel
-            .map { index() }
+            .mapToLoadable { index() }
             .shareIn(GlobalScope, SharingStarted.WhileSubscribed())
 
     override val metadataFlow: Flow<Loadable<RepositoryMetadata>> =

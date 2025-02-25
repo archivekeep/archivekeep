@@ -25,7 +25,6 @@ import org.archivekeep.app.core.utils.UniqueJobGuard
 import org.archivekeep.app.core.utils.generics.OptionalLoadable
 import org.archivekeep.app.core.utils.generics.SyncFlowStringWriter
 import org.archivekeep.app.core.utils.generics.mapLoadedData
-import org.archivekeep.app.core.utils.generics.mapToLoadable
 import org.archivekeep.app.core.utils.generics.sharedGlobalWhileSubscribed
 import org.archivekeep.app.core.utils.generics.singleInstanceWeakValueMap
 import org.archivekeep.app.core.utils.identifiers.RepositoryURI
@@ -36,7 +35,8 @@ import org.archivekeep.files.operations.SyncLogger
 import org.archivekeep.files.operations.SyncOperation
 import org.archivekeep.files.operations.SyncPlanStep
 import org.archivekeep.files.repo.Repo
-import org.archivekeep.utils.Loadable
+import org.archivekeep.utils.loading.Loadable
+import org.archivekeep.utils.loading.mapToLoadable
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.milliseconds
 

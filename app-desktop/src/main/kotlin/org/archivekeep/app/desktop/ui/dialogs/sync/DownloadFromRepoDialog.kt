@@ -14,7 +14,6 @@ import kotlinx.coroutines.flow.stateIn
 import org.archivekeep.app.core.domain.storages.StorageRepository
 import org.archivekeep.app.core.domain.storages.StorageService
 import org.archivekeep.app.core.operations.sync.RepoToRepoSyncService
-import org.archivekeep.app.core.utils.generics.mapToLoadable
 import org.archivekeep.app.core.utils.identifiers.RepositoryURI
 import org.archivekeep.app.desktop.domain.wiring.LocalRepoToRepoSyncService
 import org.archivekeep.app.desktop.domain.wiring.LocalStorageService
@@ -23,7 +22,8 @@ import org.archivekeep.app.desktop.ui.designsystem.dialog.DialogOverlayWithLoada
 import org.archivekeep.app.desktop.ui.dialogs.Dialog
 import org.archivekeep.app.desktop.ui.dialogs.sync.parts.RepoToRepoSyncFlowButtons
 import org.archivekeep.app.desktop.ui.dialogs.sync.parts.RepoToRepoSyncMainContents
-import org.archivekeep.utils.Loadable
+import org.archivekeep.utils.loading.Loadable
+import org.archivekeep.utils.loading.mapToLoadable
 
 data class DownloadFromRepoDialog(
     val from: RepositoryURI,

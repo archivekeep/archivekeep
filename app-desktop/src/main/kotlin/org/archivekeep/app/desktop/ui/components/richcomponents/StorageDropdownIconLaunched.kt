@@ -12,13 +12,13 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import compose.icons.TablerIcons
 import compose.icons.tablericons.DotsVertical
-import org.archivekeep.app.core.utils.generics.mapLoadedData
 import org.archivekeep.app.core.utils.identifiers.StorageURI
 import org.archivekeep.app.desktop.domain.wiring.LocalStorageOperationsLaunchers
 import org.archivekeep.app.desktop.domain.wiring.LocalStorageService
 import org.archivekeep.app.desktop.ui.components.LoadableGuard
 import org.archivekeep.app.desktop.ui.designsystem.sections.SectionCardTitleIconButton
 import org.archivekeep.app.desktop.utils.collectLoadableFlow
+import org.archivekeep.utils.loading.mapLoadedData
 
 @Composable
 fun StorageDropdownIconLaunched(uri: StorageURI) {

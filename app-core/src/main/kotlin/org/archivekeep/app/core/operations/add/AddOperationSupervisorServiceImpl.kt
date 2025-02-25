@@ -17,15 +17,14 @@ import org.archivekeep.app.core.operations.add.AddOperationSupervisor.AddProgres
 import org.archivekeep.app.core.operations.add.AddOperationSupervisor.MoveProgress
 import org.archivekeep.app.core.utils.UniqueJobGuard
 import org.archivekeep.app.core.utils.generics.SyncFlowStringWriter
-import org.archivekeep.app.core.utils.generics.flatMapLoadableFlow
-import org.archivekeep.app.core.utils.generics.mapToLoadable
 import org.archivekeep.app.core.utils.generics.singleInstanceWeakValueMap
 import org.archivekeep.app.core.utils.identifiers.RepositoryURI
 import org.archivekeep.files.operations.AddOperation
 import org.archivekeep.files.operations.AddOperationTextWriter
 import org.archivekeep.files.repo.Repo
-import org.archivekeep.files.repo.RepoIndex
-import org.archivekeep.utils.Loadable
+import org.archivekeep.utils.loading.Loadable
+import org.archivekeep.utils.loading.flatMapLoadableFlow
+import org.archivekeep.utils.loading.mapLoadedData
 import java.io.PrintWriter
 
 class AddOperationSupervisorServiceImpl(
@@ -50,7 +49,7 @@ class AddOperationSupervisorServiceImpl(
                 .flatMapLoadableFlow { repositoryAccess ->
                     repositoryAccess.observable.indexFlow
                         .conflate()
-                        .mapToLoadable<RepoIndex, AddOperationSupervisor.Prepared> {
+                        .mapLoadedData {
                             val preparedResult =
                                 AddOperation(
                                     subsetGlobs = listOf("."),

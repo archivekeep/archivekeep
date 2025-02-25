@@ -15,7 +15,9 @@ import org.archivekeep.files.repo.ObservableRepo
 import org.archivekeep.files.repo.Repo
 import org.archivekeep.files.repo.RepoIndex
 import org.archivekeep.files.repo.RepositoryMetadata
-import org.archivekeep.utils.Loadable
+import org.archivekeep.utils.loading.Loadable
+import org.archivekeep.utils.loading.firstLoadedOrFailure
+import org.archivekeep.utils.loading.mapToLoadable
 import org.archivekeep.utils.sha256
 import java.io.InputStream
 
@@ -31,9 +33,9 @@ open class InMemoryRepo(
 
     suspend fun contains(path: String): Boolean = contents.containsKey(path)
 
-    override val indexFlow: Flow<RepoIndex> =
+    override val indexFlow: Flow<Loadable<RepoIndex>> =
         contentsFlow
-            .map { contents ->
+            .mapToLoadable { contents ->
                 RepoIndex(
                     contents.entries.map {
                         RepoIndex.File(
@@ -49,7 +51,7 @@ open class InMemoryRepo(
     override val metadataFlow: Flow<Loadable<RepositoryMetadata>> =
         _metadataFlow.map { Loadable.Loaded(it) }
 
-    override suspend fun index(): RepoIndex = indexFlow.first()
+    override suspend fun index(): RepoIndex = indexFlow.firstLoadedOrFailure()
 
     override suspend fun move(
         from: String,

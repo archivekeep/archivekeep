@@ -7,15 +7,15 @@ import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 import org.archivekeep.app.core.domain.repositories.RepositoryService
 import org.archivekeep.app.core.utils.generics.OptionalLoadable
-import org.archivekeep.app.core.utils.generics.flatMapLatestLoadedData
-import org.archivekeep.app.core.utils.generics.mapLoadedData
 import org.archivekeep.app.core.utils.generics.sharedGlobalWhileSubscribed
 import org.archivekeep.app.core.utils.generics.sharedWhileSubscribed
-import org.archivekeep.app.core.utils.generics.waitLoadedValue
 import org.archivekeep.app.core.utils.identifiers.RepositoryURI
 import org.archivekeep.app.core.utils.identifiers.StorageURI
 import org.archivekeep.utils.combineToFlatMapList
 import org.archivekeep.utils.combineToList
+import org.archivekeep.utils.loading.flatMapLatestLoadedData
+import org.archivekeep.utils.loading.mapLoadedData
+import org.archivekeep.utils.loading.waitLoadedValue
 
 class StorageService(
     val scope: CoroutineScope,

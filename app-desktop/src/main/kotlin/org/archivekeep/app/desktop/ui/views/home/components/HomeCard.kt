@@ -10,7 +10,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import org.archivekeep.app.desktop.ui.designsystem.sections.sectionCardHorizontalPadding
-import org.archivekeep.utils.Loadable
+import org.archivekeep.utils.loading.Loadable
 
 @Composable
 fun HomeCardStateText(loadable: Loadable<String>) {

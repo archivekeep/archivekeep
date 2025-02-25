@@ -22,8 +22,9 @@ import org.archivekeep.files.operations.StatusOperation
 import org.archivekeep.files.repo.ObservableWorkingRepo
 import org.archivekeep.files.repo.RepoIndex
 import org.archivekeep.files.repo.RepositoryMetadata
-import org.archivekeep.utils.Loadable
 import org.archivekeep.utils.io.watchRecursively
+import org.archivekeep.utils.loading.Loadable
+import org.archivekeep.utils.loading.mapToLoadable
 import kotlin.io.path.exists
 import kotlin.io.path.inputStream
 import kotlin.time.Duration
@@ -60,7 +61,7 @@ class ObservableFilesRepo internal constructor(
             }.flowOn(Dispatchers.IO)
             .shareIn(GlobalScope, SharingStarted.WhileSubscribed(), replay = 1)
 
-    override val indexFlow: Flow<RepoIndex> =
+    override val indexFlow: Flow<Loadable<RepoIndex>> =
         calculationCause
             .conflate()
             .transform {
@@ -71,6 +72,7 @@ class ObservableFilesRepo internal constructor(
                 // throttle
                 delay(throttlePauseDuration)
             }.flowOn(Dispatchers.IO)
+            .mapToLoadable()
             .shareIn(GlobalScope, SharingStarted.WhileSubscribed(), replay = 1)
 
     override val metadataFlow: Flow<Loadable<RepositoryMetadata>> =

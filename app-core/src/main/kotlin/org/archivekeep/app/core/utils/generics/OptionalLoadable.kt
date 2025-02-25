@@ -5,7 +5,7 @@ import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.transform
-import org.archivekeep.utils.Loadable
+import org.archivekeep.utils.loading.Loadable
 
 sealed interface OptionalLoadable<out T> {
     sealed interface LoadingFinished<out T> : OptionalLoadable<T>
@@ -50,6 +50,8 @@ fun <T, R> Flow<OptionalLoadable<T>>.mapLoadedData(function: suspend (data: T) -
                 is OptionalLoadable.NotAvailable -> OptionalLoadable.NotAvailable(it.cause)
             }
         }.autoCatch()
+
+fun <T> Flow<Loadable<T>>.mapLoadedDataToOptional(): Flow<OptionalLoadable<T>> = this.mapLoadedDataToOptional { it }
 
 fun <T, R> Flow<Loadable<T>>.mapLoadedDataToOptional(function: suspend (data: T) -> R?): Flow<OptionalLoadable<R>> =
     this

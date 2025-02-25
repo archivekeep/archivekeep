@@ -5,7 +5,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.sp
 import org.archivekeep.app.core.utils.generics.OptionalLoadable
-import org.archivekeep.utils.Loadable
+import org.archivekeep.utils.loading.Loadable
 
 @Composable
 fun SectionCardItemStateText(loadable: Loadable<String>) {

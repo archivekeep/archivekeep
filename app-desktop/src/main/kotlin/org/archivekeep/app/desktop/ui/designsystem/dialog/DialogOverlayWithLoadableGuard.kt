@@ -5,7 +5,7 @@ import androidx.compose.runtime.Composable
 import compose.icons.TablerIcons
 import compose.icons.tablericons.Circle
 import org.archivekeep.app.desktop.ui.components.LoadableGuard
-import org.archivekeep.utils.Loadable
+import org.archivekeep.utils.loading.Loadable
 
 @Composable
 fun <T> DialogOverlayWithLoadableGuard(

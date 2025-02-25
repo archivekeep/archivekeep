@@ -16,7 +16,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.withStyle
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
-import org.archivekeep.app.core.utils.generics.mapLoadedData
 import org.archivekeep.app.core.utils.identifiers.RepositoryURI
 import org.archivekeep.app.desktop.domain.wiring.LocalArchiveService
 import org.archivekeep.app.desktop.domain.wiring.LocalRegistry
@@ -28,6 +27,7 @@ import org.archivekeep.app.desktop.ui.designsystem.dialog.DialogOverlayCard
 import org.archivekeep.app.desktop.ui.designsystem.dialog.DialogPrimaryButton
 import org.archivekeep.app.desktop.ui.dialogs.Dialog
 import org.archivekeep.app.desktop.utils.collectLoadableFlow
+import org.archivekeep.utils.loading.mapLoadedData
 
 class ForgetRepositoryDialog(
     val uri: RepositoryURI,

@@ -22,7 +22,6 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flatMapLatest
 import org.archivekeep.app.core.operations.add.AddOperationSupervisor
-import org.archivekeep.app.core.utils.generics.mapToLoadable
 import org.archivekeep.app.core.utils.identifiers.RepositoryURI
 import org.archivekeep.app.desktop.domain.wiring.LocalAddOperationSupervisorService
 import org.archivekeep.app.desktop.domain.wiring.LocalRepoService
@@ -42,7 +41,8 @@ import org.archivekeep.app.desktop.utils.derivedMutableStateOf
 import org.archivekeep.app.desktop.utils.stickToFirstNotNull
 import org.archivekeep.files.operations.AddOperation
 import org.archivekeep.files.operations.AddOperation.PreparationResult.Move
-import org.archivekeep.utils.Loadable
+import org.archivekeep.utils.loading.Loadable
+import org.archivekeep.utils.loading.mapToLoadable
 
 class UpdateIndexOperationDialog(
     val repositoryURI: RepositoryURI,

@@ -8,13 +8,13 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import org.archivekeep.app.core.domain.storages.StorageRepository
 import org.archivekeep.app.core.domain.storages.StorageService
-import org.archivekeep.app.core.utils.generics.flatMapLatestLoadedData
-import org.archivekeep.app.core.utils.generics.waitLoadedValue
 import org.archivekeep.app.core.utils.identifiers.RepositoryURI
 import org.archivekeep.app.desktop.domain.wiring.LocalStorageService
 import org.archivekeep.app.desktop.utils.collectAsLoadableState
-import org.archivekeep.utils.Loadable
 import org.archivekeep.utils.combineToFlatMapList
+import org.archivekeep.utils.loading.Loadable
+import org.archivekeep.utils.loading.flatMapLatestLoadedData
+import org.archivekeep.utils.loading.waitLoadedValue
 
 @OptIn(ExperimentalCoroutinesApi::class)
 fun getSyncCandidates(

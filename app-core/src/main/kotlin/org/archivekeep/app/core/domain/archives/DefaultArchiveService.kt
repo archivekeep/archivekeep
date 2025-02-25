@@ -6,9 +6,9 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.flowOn
 import org.archivekeep.app.core.domain.storages.StorageService
-import org.archivekeep.app.core.utils.generics.flatMapLatestLoadedData
 import org.archivekeep.app.core.utils.generics.sharedWhileSubscribed
 import org.archivekeep.utils.combineToList
+import org.archivekeep.utils.loading.flatMapLatestLoadedData
 
 class DefaultArchiveService(
     scope: CoroutineScope,

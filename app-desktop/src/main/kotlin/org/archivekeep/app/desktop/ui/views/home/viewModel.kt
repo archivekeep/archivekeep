@@ -16,11 +16,11 @@ import org.archivekeep.app.core.domain.storages.StorageNamedReference
 import org.archivekeep.app.core.operations.addpush.AddAndPushOperation
 import org.archivekeep.app.core.operations.addpush.AddAndPushOperationService
 import org.archivekeep.app.core.operations.sync.RepoToRepoSyncService
-import org.archivekeep.app.core.utils.generics.mapLoadedData
 import org.archivekeep.app.core.utils.identifiers.NamedRepositoryReference
-import org.archivekeep.utils.Loadable
-import org.archivekeep.utils.isLoading
-import org.archivekeep.utils.mapIfLoadedOrDefault
+import org.archivekeep.utils.loading.Loadable
+import org.archivekeep.utils.loading.isLoading
+import org.archivekeep.utils.loading.mapIfLoadedOrDefault
+import org.archivekeep.utils.loading.mapLoadedData
 import org.archivekeep.utils.safeCombine
 
 class HomeArchiveEntryViewModel(

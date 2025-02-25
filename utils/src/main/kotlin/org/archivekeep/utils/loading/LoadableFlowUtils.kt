@@ -1,17 +1,34 @@
-package org.archivekeep.app.core.utils.generics
+package org.archivekeep.utils.loading
 
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.SharingStarted
-import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.transform
-import org.archivekeep.utils.Loadable
+
+fun <T> Flow<T>.mapToLoadable(message: String? = null): Flow<Loadable<T>> = this.mapToLoadable(message = message) { it }
+
+inline fun <T, R> Flow<T>.mapToLoadable(
+    message: String? = null,
+    crossinline transform: suspend (value: T) -> R,
+): Flow<Loadable<R>> =
+    this
+        .map {
+            Loadable.Loaded(transform(it)) as Loadable<R>
+        }.catch {
+            emit(
+                Loadable.Failed(
+                    RuntimeException(
+                        "${message ?: "Require wait value"}: ${it.message ?: it.toString()}",
+                        it,
+                    ),
+                ),
+            )
+        }.onStart { emit(Loadable.Loading) }
 
 fun <T, R> Loadable<T>.mapLoadedData(function: (data: T) -> R): Loadable<R> =
     when (this) {
@@ -84,11 +101,4 @@ suspend fun <T> Flow<Loadable<T>>.firstLoadedOrFailure(): T =
         }
     }.first()
 
-fun <T> Flow<Loadable<T>>.waitLoaded(): Flow<Loadable.Loaded<T>> = this.transform { if (it is Loadable.Loaded) emit(it) }
-
 fun <T> Flow<Loadable<T>>.waitLoadedValue(): Flow<T> = this.transform { if (it is Loadable.Loaded) emit(it.value) }
-
-fun <T> Flow<Loadable<T>>.loadableStateIn(
-    scope: CoroutineScope,
-    started: SharingStarted,
-): StateFlow<Loadable<T>> = this.stateIn(scope, SharingStarted.Lazily, Loadable.Loading)

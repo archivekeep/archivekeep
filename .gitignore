@@ -1,6 +1,7 @@
 # build & run outputs
 .gradle
 .direnv
+.kotlin
 build/
 !gradle/wrapper/gradle-wrapper.jar
 !**/src/main/**/build/

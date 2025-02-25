@@ -6,7 +6,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.awt.ComposeWindow
 import androidx.compose.ui.text.buildAnnotatedString
 import org.archivekeep.app.core.domain.storages.Storage
-import org.archivekeep.app.core.utils.generics.mapLoadedData
 import org.archivekeep.app.core.utils.identifiers.StorageURI
 import org.archivekeep.app.desktop.domain.wiring.LocalStorageService
 import org.archivekeep.app.desktop.ui.components.LoadableGuard
@@ -16,6 +15,7 @@ import org.archivekeep.app.desktop.ui.designsystem.dialog.DialogInnerContainer
 import org.archivekeep.app.desktop.ui.designsystem.dialog.DialogOverlayCard
 import org.archivekeep.app.desktop.ui.dialogs.Dialog
 import org.archivekeep.app.desktop.utils.collectLoadableFlow
+import org.archivekeep.utils.loading.mapLoadedData
 
 abstract class AbstractStorageDialog<VM : AbstractStorageDialog.IVM>(
     val uri: StorageURI,

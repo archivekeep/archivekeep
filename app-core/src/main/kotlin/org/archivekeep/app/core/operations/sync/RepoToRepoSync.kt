@@ -7,7 +7,7 @@ import org.archivekeep.files.operations.CompareOperation
 import org.archivekeep.files.operations.PreparedSyncOperation
 import org.archivekeep.files.operations.RelocationSyncMode
 import org.archivekeep.files.operations.SyncPlanStep
-import org.archivekeep.utils.Loadable
+import org.archivekeep.utils.loading.Loadable
 
 interface RepoToRepoSync {
     val currentJobFlow: StateFlow<Job?>

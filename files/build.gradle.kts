@@ -13,6 +13,8 @@ group = "org.archivekeep"
 version = libs.versions.archivekeep.get()
 
 dependencies {
+    api(project(":utils"))
+
     implementation(libs.kotlinx.coroutines.core)
     implementation(libs.kotlinx.serialization.json)
 

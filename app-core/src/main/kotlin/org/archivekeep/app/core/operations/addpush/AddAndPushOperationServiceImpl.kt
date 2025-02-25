@@ -17,14 +17,14 @@ import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import org.archivekeep.app.core.domain.repositories.RepositoryService
 import org.archivekeep.app.core.utils.UniqueJobGuard
-import org.archivekeep.app.core.utils.generics.firstLoadedOrFailure
 import org.archivekeep.app.core.utils.generics.sharedGlobalWhileSubscribed
 import org.archivekeep.app.core.utils.generics.singleInstanceWeakValueMap
 import org.archivekeep.app.core.utils.identifiers.RepositoryURI
 import org.archivekeep.files.operations.AddOperation
 import org.archivekeep.files.operations.copyFile
 import org.archivekeep.files.repo.LocalRepo
-import org.archivekeep.utils.Loadable
+import org.archivekeep.utils.loading.Loadable
+import org.archivekeep.utils.loading.firstLoadedOrFailure
 
 class AddAndPushOperationServiceImpl(
     private val repositoryService: RepositoryService,
