@@ -50,6 +50,10 @@ class FixtureRepo(
         TODO("Not yet implemented")
     }
 
+    override suspend fun delete(filename: String) {
+        TODO("Not yet implemented")
+    }
+
     override suspend fun getMetadata(): RepositoryMetadata {
         TODO("Not yet implemented")
     }

@@ -41,6 +41,11 @@ class SpeedLimitedLocalRepoWrapper(
         base.save(filename, info, stream)
     }
 
+    override suspend fun delete(filename: String) =
+        delayed(25) {
+            base.delete(filename)
+        }
+
     override suspend fun getMetadata(): RepositoryMetadata =
         delayed(25) {
             base.getMetadata()

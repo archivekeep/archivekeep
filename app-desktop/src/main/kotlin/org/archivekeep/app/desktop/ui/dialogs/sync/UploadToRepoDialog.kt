@@ -22,6 +22,7 @@ import org.archivekeep.app.desktop.ui.designsystem.dialog.DialogOverlayWithLoada
 import org.archivekeep.app.desktop.ui.dialogs.Dialog
 import org.archivekeep.app.desktop.ui.dialogs.sync.parts.RepoToRepoSyncFlowButtons
 import org.archivekeep.app.desktop.ui.dialogs.sync.parts.RepoToRepoSyncMainContents
+import org.archivekeep.app.desktop.utils.asMutableState
 import org.archivekeep.utils.loading.Loadable
 import org.archivekeep.utils.loading.mapToLoadable
 
@@ -90,7 +91,10 @@ data class UploadToRepoDialog(
                         },
                     )
 
-                    RepoToRepoSyncMainContents(state.userFlow)
+                    RepoToRepoSyncMainContents(
+                        vm.userFlow.relocationSyncModeFlow.asMutableState(),
+                        state.userFlow,
+                    )
                 },
                 bottomContent = {
                     RepoToRepoSyncFlowButtons(

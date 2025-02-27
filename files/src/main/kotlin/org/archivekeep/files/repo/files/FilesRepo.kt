@@ -125,6 +125,21 @@ class FilesRepo(
         storeFileChecksum(path, checksum)
     }
 
+    override suspend fun delete(filename: String) {
+        val fullPath = root.resolve(safeSubPath(filename))
+        val checksumPath = getChecksumPath(filename)
+
+        if (!fullPath.isRegularFile()) {
+            throw NotRegularFilePath(fullPath.toString())
+        }
+        if (!checksumPath.isRegularFile()) {
+            throw NotRegularFilePath(checksumPath.toString())
+        }
+
+        fullPath.deleteExisting()
+        checksumPath.deleteExisting()
+    }
+
     override suspend fun remove(path: String) {
         val checksumPath = getChecksumPath(path)
 

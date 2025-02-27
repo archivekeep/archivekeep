@@ -207,6 +207,12 @@ class RemoteGrpcRepository(
         }
     }
 
+    override suspend fun delete(filename: String) {
+        reportOnCompletion {
+            TODO("Not yet implemented")
+        }
+    }
+
     override suspend fun getMetadata(): RepositoryMetadata = throw UnsupportedFeatureException("GRPC repository Metadata")
 
     override suspend fun updateMetadata(transform: (old: RepositoryMetadata) -> RepositoryMetadata): Unit =

@@ -168,24 +168,6 @@ class RepoToRepoSyncServiceImpl(
             val baseFlow = repositoryService.getRepository(fromURI).accessorFlow
             val otherFlow = repositoryService.getRepository(otherURI).accessorFlow
 
-            val startFlow = {
-                    comparisonLoadable: OptionalLoadable.LoadedAvailable<CompareOperation.Result>,
-                    preparedSync: PreparedSyncOperation,
-                    base: Repo,
-                    other: Repo,
-                ->
-                val newJob =
-                    JobImpl(
-                        comparisonLoadable = comparisonLoadable,
-                        preparedSyncOperation = preparedSync,
-                        base = base,
-                        other = other,
-                    )
-
-                jobGuards.launch(scope, Dispatchers.IO, key, newJob)
-                newJob
-            }
-
             val preparationFlow =
                 combine(
                     compareStatusFlow,
@@ -249,12 +231,15 @@ class RepoToRepoSyncServiceImpl(
                             State.Prepared(
                                 comparisonLoadable,
                                 startExecution = {
-                                    startFlow(
-                                        comparisonLoadable,
-                                        prepared,
-                                        base,
-                                        other,
-                                    )
+                                    val newJob =
+                                        JobImpl(
+                                            comparisonLoadable = comparisonLoadable,
+                                            preparedSyncOperation = prepared,
+                                            base = base,
+                                            other = other,
+                                        )
+                                    jobGuards.launch(scope, Dispatchers.IO, this@RepoToRepoSyncImpl.key, newJob)
+                                    newJob
                                 },
                                 preparedSyncOperation = prepared,
                             ),
@@ -325,6 +310,11 @@ class RepoToRepoSyncServiceImpl(
                                 to: String,
                             ) {
                                 executeResult.writer.println("file moved: $from -> $to")
+                                executeResult.writer.flush()
+                            }
+
+                            override fun onFileDeleted(filename: String) {
+                                executeResult.writer.println("file deleted: $filename")
                                 executeResult.writer.flush()
                             }
                         },

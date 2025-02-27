@@ -73,12 +73,12 @@ class SecondaryArchiveRepository(
 
             val canPush =
                 syncStatus?.mapIfLoadedOrNull {
-                    it.missingBaseInOther != 0
+                    it.missingBaseInOther != 0 || it.relocations > 0
                 } ?: false
 
             val canPull =
                 syncStatus?.mapIfLoadedOrNull {
-                    it.missingOtherInBase != 0
+                    it.missingOtherInBase != 0 || it.relocations > 0
                 } ?: false
 
             val texts = syncStatus?.mapLoadedData(::textTags) ?: OptionalLoadable.NotAvailable()
@@ -100,6 +100,8 @@ fun textTags(status: RepoToRepoSync.CompareState): String {
         listOfNotNull(
             if (status.missingBaseInOther > 0) "${status.missingBaseInOther} missing" else null,
             if (status.missingOtherInBase > 0) "${status.missingOtherInBase} extra" else null,
+            if (status.relocations == 1) "${status.relocations} relocation" else null,
+            if (status.relocations > 1) "${status.relocations} relocations" else null,
         )
 
     return if (outOfSyncParts.isNotEmpty()) {

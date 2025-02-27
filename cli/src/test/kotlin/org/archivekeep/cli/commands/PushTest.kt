@@ -94,7 +94,7 @@ class PushTest : CommandTestBase() {
                 Extra files in other archive: 0
                 Total files present in both archives: 1
 
-                relocations disabled but present
+                Relocations disabled but present.
                 Enable relocations with --resolve-moves, or switch to --additive-duplicating mode
                 """.trimIndent() + "\n",
                 out,
@@ -154,7 +154,7 @@ class PushTest : CommandTestBase() {
                 Extra files in other archive: 0
                 Total files present in both archives: 2
                 
-                relocations disabled but present
+                Relocations disabled but present.
                 Enable relocations with --resolve-moves, or switch to --additive-duplicating mode
                 """.trimIndent() + "\n",
                 out,
@@ -186,8 +186,78 @@ class PushTest : CommandTestBase() {
                 Extra files in other archive: 0
                 Total files present in both archives: 2
 
-                duplicate increase is not allowed
+                Duplicate increase is not enabled.
                 Enable duplication increase with --allow-duplicate-increase, or switch to --additive-duplicating mode
+                """.trimIndent() + "\n",
+                out,
+            )
+
+            // TODO: assert resulting archive repository contents
+        }
+    }
+
+    @Test
+    fun `push of duplication reduction requires flag(s)`(
+        @TempDir dstArchiveDir: File,
+    ) {
+        createDuplicationReductionRepoPair(dstArchiveDir)
+
+        run {
+            val (exitCode, out) =
+                executeFailingCmd(
+                    currentArchivePath,
+                    args =
+                        arrayOf(
+                            "push",
+                            dstArchiveDir.path,
+                        ),
+                )
+
+            assertEquals(1, exitCode)
+            assertEquals(
+                """
+                
+                Files to be moved in other to match current:
+                	duplication/a -> {}
+
+                Extra files in current archive: 0
+                Extra files in other archive: 0
+                Total files present in both archives: 1
+                
+                Relocations disabled but present.
+                Enable relocations with --resolve-moves, or switch to --additive-duplicating mode
+                """.trimIndent() + "\n",
+                out,
+            )
+
+            // TODO: assert resulting archive repository contents
+        }
+
+        run {
+            val (exitCode, out) =
+                executeFailingCmd(
+                    currentArchivePath,
+                    args =
+                        arrayOf(
+                            "push",
+                            "--resolve-moves",
+                            dstArchiveDir.path,
+                        ),
+                )
+
+            assertEquals(1, exitCode)
+            assertEquals(
+                """
+                
+                Files to be moved in other to match current:
+                	duplication/a -> {}
+
+                Extra files in current archive: 0
+                Extra files in other archive: 0
+                Total files present in both archives: 1
+
+                Duplicate decrease is not enabled.
+                Enable duplication decrease with --allow-duplicate-reduction, or switch to --additive-duplicating mode
                 """.trimIndent() + "\n",
                 out,
             )
@@ -364,6 +434,22 @@ class PushTest : CommandTestBase() {
             dstArchiveDir,
             mapOf(
                 "a" to "A",
+            ),
+        )
+    }
+
+    private fun createDuplicationReductionRepoPair(dstArchiveDir: File) {
+        createCurrentArchiveWithContents(
+            mapOf(
+                "a" to "A",
+            ),
+        )
+
+        createArchiveWithContents(
+            dstArchiveDir,
+            mapOf(
+                "a" to "A",
+                "duplication/a" to "A",
             ),
         )
     }

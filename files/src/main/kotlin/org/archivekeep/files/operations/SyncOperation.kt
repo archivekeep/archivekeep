@@ -34,19 +34,23 @@ class SyncOperation(
             run {
                 if (comparisonResult.hasRelocations) {
                     when (relocationSyncMode) {
-                        RelocationSyncMode.Disabled -> throw RelocationsPresentButDisabledException
+                        RelocationSyncMode.Disabled -> RelocationsMoveApplySyncStep(emptyList(), comparisonResult.relocations)
                         RelocationSyncMode.AdditiveDuplicating -> AdditiveRelocationsSyncStep(comparisonResult.relocations)
 
                         is RelocationSyncMode.Move -> {
-                            if (comparisonResult.relocations.any { it.isIncreasingDuplicates } && !relocationSyncMode.allowDuplicateIncrease) {
-                                throw DuplicationIncreasePresentButDisabledException
-                            }
+                            fun canBeApplied(relocation: CompareOperation.Result.Relocation): Boolean =
+                                if (relocation.isIncreasingDuplicates) {
+                                    relocationSyncMode.allowDuplicateIncrease
+                                } else if (relocation.isDecreasingDuplicates) {
+                                    relocationSyncMode.allowDuplicateReduction
+                                } else {
+                                    true
+                                }
 
-                            if (comparisonResult.relocations.any { it.isDecreasingDuplicates } && !relocationSyncMode.allowDuplicateReduction) {
-                                throw RuntimeException("duplicate reduction is not allowed")
-                            }
-
-                            RelocationsMoveApplySyncStep(comparisonResult.relocations)
+                            RelocationsMoveApplySyncStep(
+                                toApply = comparisonResult.relocations.filter { canBeApplied(it) },
+                                toIgnore = comparisonResult.relocations.filter { !canBeApplied(it) },
+                            )
                         }
                     }
                 } else {
@@ -83,6 +87,8 @@ sealed interface SyncPlanStep {
         progressReport: (progress: Progress) -> Unit,
     ): SyncPlanStep.Progress
 
+    fun isNoOp(): Boolean
+
     sealed interface Progress {
         // TODO: localization
         fun summaryText(): String
@@ -116,6 +122,8 @@ class AdditiveRelocationsSyncStep internal constructor(
         return Progress(relocations, completedRelocations)
     }
 
+    override fun isNoOp() = relocations.isEmpty()
+
     class Progress(
         val allRelocations: List<CompareOperation.Result.Relocation>,
         val completedRelocations: List<CompareOperation.Result.Relocation>,
@@ -125,7 +133,8 @@ class AdditiveRelocationsSyncStep internal constructor(
 }
 
 class RelocationsMoveApplySyncStep internal constructor(
-    val relocations: List<CompareOperation.Result.Relocation>,
+    val toApply: List<CompareOperation.Result.Relocation>,
+    val toIgnore: List<CompareOperation.Result.Relocation>,
 ) : SyncPlanStep {
     override suspend fun execute(
         base: Repo,
@@ -135,7 +144,7 @@ class RelocationsMoveApplySyncStep internal constructor(
     ): SyncPlanStep.Progress {
         var completedRelocations = emptyList<CompareOperation.Result.Relocation>()
 
-        relocations.forEach { relocation ->
+        toApply.forEach { relocation ->
             if (relocation.isIncreasingDuplicates) {
                 relocation.extraBaseLocations
                     .subList(
@@ -151,7 +160,7 @@ class RelocationsMoveApplySyncStep internal constructor(
                         relocation.extraBaseLocations.size,
                         relocation.extraOtherLocations.size,
                     ).forEach { extraOtherLocation ->
-                        deleteFile(dst, extraOtherLocation)
+                        deleteFile(dst, extraOtherLocation, logger)
                     }
             }
 
@@ -165,12 +174,14 @@ class RelocationsMoveApplySyncStep internal constructor(
 
             completedRelocations = completedRelocations + listOf(relocation)
             progressReport(
-                Progress(relocations, completedRelocations),
+                Progress(toApply, completedRelocations),
             )
         }
 
-        return Progress(relocations, completedRelocations)
+        return Progress(toApply, completedRelocations)
     }
+
+    override fun isNoOp() = toApply.isEmpty()
 
     class Progress(
         val allRelocations: List<CompareOperation.Result.Relocation>,
@@ -207,6 +218,8 @@ class NewFilesSyncStep internal constructor(
         return Progress(unmatchedBaseExtras, completed)
     }
 
+    override fun isNoOp() = unmatchedBaseExtras.isEmpty()
+
     class Progress(
         val all: List<CompareOperation.Result.ExtraGroup>,
         val completed: List<CompareOperation.Result.ExtraGroup>,
@@ -222,6 +235,8 @@ interface SyncLogger {
         from: String,
         to: String,
     )
+
+    fun onFileDeleted(filename: String)
 }
 
 class PreparedSyncOperation internal constructor(
@@ -254,7 +269,7 @@ class PreparedSyncOperation internal constructor(
         progressReport(finishedStepProgress)
     }
 
-    fun isNoOp(): Boolean = steps.isEmpty()
+    fun isNoOp(): Boolean = steps.isEmpty() || steps.all { it.isNoOp() }
 }
 
 suspend fun copyFile(
@@ -282,14 +297,12 @@ private suspend fun copyFileAndLog(
     logger.onFileStored(filename)
 }
 
-private fun deleteFile(
+private suspend fun deleteFile(
     dst: Repo,
-    extraOtherLocation: String,
+    filename: String,
+    logger: SyncLogger,
 ) {
-    TODO("Not yet implemented")
+    dst.delete(filename)
+
+    logger.onFileDeleted(filename)
 }
-
-object RelocationsPresentButDisabledException : RuntimeException("relocations disabled but present")
-
-object DuplicationIncreasePresentButDisabledException :
-    RuntimeException("duplicate increase is not allowed")

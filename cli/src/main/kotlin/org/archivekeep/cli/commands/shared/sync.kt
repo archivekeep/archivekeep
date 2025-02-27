@@ -4,10 +4,9 @@ import org.archivekeep.cli.MainCommand
 import org.archivekeep.cli.commands.mixins.SyncOptions
 import org.archivekeep.files.operations.AdditiveRelocationsSyncStep
 import org.archivekeep.files.operations.CompareOperation
-import org.archivekeep.files.operations.DuplicationIncreasePresentButDisabledException
 import org.archivekeep.files.operations.NewFilesSyncStep
+import org.archivekeep.files.operations.RelocationSyncMode
 import org.archivekeep.files.operations.RelocationsMoveApplySyncStep
-import org.archivekeep.files.operations.RelocationsPresentButDisabledException
 import org.archivekeep.files.operations.SyncLogger
 import org.archivekeep.files.operations.SyncOperation
 import org.archivekeep.files.repo.Repo
@@ -27,18 +26,26 @@ suspend fun executeSync(
 
     comparisonResult.printAll(out, baseName, otherName)
 
-    val preparedSync =
-        try {
-            SyncOperation(syncOptions.syncMode).prepareFromComparison(comparisonResult)
-        } catch (e: RelocationsPresentButDisabledException) {
-            out.println(e.message)
-            out.println("Enable relocations with --resolve-moves, or switch to --additive-duplicating mode")
-            return 1
-        } catch (e: DuplicationIncreasePresentButDisabledException) {
-            out.println(e.message)
-            out.println("Enable duplication increase with --allow-duplicate-increase, or switch to --additive-duplicating mode")
+    val preparedSync = SyncOperation(syncOptions.syncMode).prepareFromComparison(comparisonResult)
+
+    preparedSync.steps.filterIsInstance<RelocationsMoveApplySyncStep>().forEach { relocationStep ->
+        if (relocationStep.toIgnore.isNotEmpty()) {
+            if (syncOptions.syncMode == RelocationSyncMode.Disabled) {
+                out.println("Relocations disabled but present.")
+                out.println("Enable relocations with --resolve-moves, or switch to --additive-duplicating mode")
+            } else if (relocationStep.toIgnore.any { it.isIncreasingDuplicates }) {
+                out.println("Duplicate increase is not enabled.")
+                out.println("Enable duplication increase with --allow-duplicate-increase, or switch to --additive-duplicating mode")
+            } else if (relocationStep.toIgnore.any { it.isDecreasingDuplicates }) {
+                out.println("Duplicate decrease is not enabled.")
+                out.println("Enable duplication decrease with --allow-duplicate-reduction, or switch to --additive-duplicating mode")
+            } else {
+                out.println("Ignored relocations detected.")
+            }
+
             return 1
         }
+    }
 
     if (preparedSync.isNoOp()) {
         out.println("No changes to $operationName")
@@ -70,6 +77,10 @@ suspend fun executeSync(
                     to: String,
                 ) {
                     out.println("file moved: $from -> $to")
+                }
+
+                override fun onFileDeleted(filename: String) {
+                    out.println("file deleted: $filename")
                 }
             },
     )

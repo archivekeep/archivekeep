@@ -55,6 +55,8 @@ interface Repo {
         stream: InputStream,
     )
 
+    suspend fun delete(filename: String)
+
     suspend fun getMetadata(): RepositoryMetadata
 
     suspend fun updateMetadata(transform: (old: RepositoryMetadata) -> RepositoryMetadata)

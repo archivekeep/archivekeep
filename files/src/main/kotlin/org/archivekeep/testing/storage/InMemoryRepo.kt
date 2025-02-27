@@ -71,6 +71,14 @@ open class InMemoryRepo(
         }
     }
 
+    override suspend fun delete(filename: String) {
+        if (contains(filename)) {
+            throw FileDoesntExist(filename)
+        }
+
+        contentsFlow.update { it - filename }
+    }
+
     override suspend fun open(filename: String): Pair<ArchiveFileInfo, InputStream> {
         val c = contents[filename] ?: throw FileDoesntExist(filename)
 

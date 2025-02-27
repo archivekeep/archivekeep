@@ -7,6 +7,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
@@ -15,11 +16,16 @@ import androidx.compose.ui.unit.sp
 import org.archivekeep.app.core.operations.sync.RepoToRepoSync.JobState
 import org.archivekeep.app.core.operations.sync.RepoToRepoSync.State
 import org.archivekeep.app.desktop.ui.components.LoadableGuard
+import org.archivekeep.app.desktop.ui.components.RelocationSyncModeOptions
 import org.archivekeep.app.desktop.ui.dialogs.sync.RepoToRepoSyncUserFlow
 import org.archivekeep.app.desktop.ui.dialogs.sync.describePreparedSyncOperationWithDetails
+import org.archivekeep.files.operations.RelocationSyncMode
 
 @Composable
-fun (ColumnScope).RepoToRepoSyncMainContents(userFlowState: RepoToRepoSyncUserFlow.State) {
+fun (ColumnScope).RepoToRepoSyncMainContents(
+    relocationsSyncModeState: MutableState<RelocationSyncMode>,
+    userFlowState: RepoToRepoSyncUserFlow.State,
+) {
     LoadableGuard(userFlowState.operation) { operation ->
         when (operation) {
             is State.Prepared -> {
@@ -27,6 +33,15 @@ fun (ColumnScope).RepoToRepoSyncMainContents(userFlowState: RepoToRepoSyncUserFl
                     remember(operation.preparedSyncOperation) {
                         describePreparedSyncOperationWithDetails(operation.preparedSyncOperation, "Upload")
                     }
+
+                if (operation.comparisonResult.value.relocations
+                        .isNotEmpty()
+                ) {
+                    RelocationSyncModeOptions(
+                        relocationsSyncModeState.value,
+                        onRelocationSyncModeChange = { relocationsSyncModeState.value = it },
+                    )
+                }
 
                 Text("Prepared")
                 Box(

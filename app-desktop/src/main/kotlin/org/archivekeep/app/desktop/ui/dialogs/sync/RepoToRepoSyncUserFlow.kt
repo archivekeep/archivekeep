@@ -18,6 +18,14 @@ class RepoToRepoSyncUserFlow(
     val scope: CoroutineScope,
     val sync: RepoToRepoSync,
 ) {
+    companion object {
+        val defaultRelocationSyncMode =
+            RelocationSyncMode.Move(
+                allowDuplicateIncrease = false,
+                allowDuplicateReduction = false,
+            )
+    }
+
     data class State(
         val operation: Loadable<RepoToRepoSync.State>,
     ) {
@@ -26,18 +34,12 @@ class RepoToRepoSyncUserFlow(
         val isCompleted = operation.mapIfLoadedOrDefault(false) { it is JobState.Finished }
 
         val canCancel = isRunning
-        val canLaunch = operation.mapIfLoadedOrDefault(false) { it is RepoToRepoSync.State.Prepared }
+        val canLaunch = operation.mapIfLoadedOrDefault(false) { it is RepoToRepoSync.State.Prepared && !it.preparedSyncOperation.isNoOp() }
     }
 
     val currentOperation = sync.currentJobFlow.stickToFirstNotNullAsState(scope)
 
-    val relocationSyncModeFlow =
-        MutableStateFlow(
-            RelocationSyncMode.Move(
-                false,
-                false,
-            ),
-        )
+    val relocationSyncModeFlow = MutableStateFlow<RelocationSyncMode>(defaultRelocationSyncMode)
 
     val operationStateFlow =
         currentOperation
