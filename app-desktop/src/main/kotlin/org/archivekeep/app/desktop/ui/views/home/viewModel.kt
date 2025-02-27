@@ -7,13 +7,11 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
-import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.stateIn
 import org.archivekeep.app.core.domain.archives.AssociatedArchive
 import org.archivekeep.app.core.domain.repositories.Repository
 import org.archivekeep.app.core.domain.storages.Storage
 import org.archivekeep.app.core.domain.storages.StorageNamedReference
-import org.archivekeep.app.core.operations.addpush.AddAndPushOperation
 import org.archivekeep.app.core.operations.addpush.AddAndPushOperationService
 import org.archivekeep.app.core.operations.sync.RepoToRepoSyncService
 import org.archivekeep.app.core.utils.identifiers.NamedRepositoryReference
@@ -59,7 +57,7 @@ class HomeArchiveEntryViewModel(
         combine(
             repository.localRepoStatus,
             secondaryRepositories,
-            addPushOperation.stateFlow.map { it is AddAndPushOperation.LaunchedAddPushProcess }.onStart { emit(false) },
+            addPushOperation.currentJobFlow.map { it != null },
         ) { indexStatus, nonLocalRepositories, addPushOperationRunning ->
             VMState(
                 canAdd = indexStatus is Loadable.Loaded && indexStatus.value.hasChanges,

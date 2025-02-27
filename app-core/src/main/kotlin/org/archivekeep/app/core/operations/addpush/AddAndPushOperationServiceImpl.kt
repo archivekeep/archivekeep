@@ -1,5 +1,6 @@
 package org.archivekeep.app.core.operations.addpush
 
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.Job
@@ -9,15 +10,13 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combineTransform
-import kotlinx.coroutines.flow.flatMapLatest
-import kotlinx.coroutines.flow.transform
+import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.joinAll
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import org.archivekeep.app.core.domain.repositories.RepositoryService
 import org.archivekeep.app.core.utils.UniqueJobGuard
-import org.archivekeep.app.core.utils.generics.sharedGlobalWhileSubscribed
 import org.archivekeep.app.core.utils.generics.singleInstanceWeakValueMap
 import org.archivekeep.app.core.utils.identifiers.RepositoryURI
 import org.archivekeep.files.operations.AddOperation
@@ -28,6 +27,7 @@ import org.archivekeep.utils.loading.firstLoadedOrFailure
 
 class AddAndPushOperationServiceImpl(
     private val repositoryService: RepositoryService,
+    private val ioDispatcher: CoroutineDispatcher = Dispatchers.IO,
 ) : AddAndPushOperationService {
     private val addPushOperations = singleInstanceWeakValueMap(::AddAndPushOperationImpl)
 
@@ -213,7 +213,9 @@ class AddAndPushOperationServiceImpl(
     ) : AddAndPushOperation {
         val repository = repositoryService.getRepository(repositoryURI)
 
-        val preparationFlow =
+        override val currentJobFlow = jobGuards.stateHoldersWeakReference[repositoryURI]
+
+        override fun prepare(): Flow<AddAndPushOperation.State> =
             combineTransform(
                 repository.accessorFlow,
                 repository.localRepoStatus,
@@ -238,20 +240,7 @@ class AddAndPushOperationServiceImpl(
                         ),
                     )
                 }
-            }
-
-        override val currentJobFlow = jobGuards.stateHoldersWeakReference[repositoryURI]
-
-        override val stateFlow: Flow<AddAndPushOperation.State> =
-            currentJobFlow
-                .flatMapLatest { currentlyRunningOperation ->
-                    val currentJobStateFlow =
-                        currentlyRunningOperation?.state?.transform {
-                            emit(it as AddAndPushOperation.State)
-                        }
-
-                    currentJobStateFlow ?: preparationFlow
-                }.sharedGlobalWhileSubscribed()
+            }.flowOn(ioDispatcher)
 
         internal fun launch(
             addPreparationResult: AddOperation.PreparationResult,
@@ -266,7 +255,7 @@ class AddAndPushOperationServiceImpl(
 
             jobGuards.launch(
                 GlobalScope,
-                Dispatchers.IO,
+                ioDispatcher,
                 repositoryURI,
                 newOperation,
             )

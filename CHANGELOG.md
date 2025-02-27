@@ -22,6 +22,7 @@
 
 ### Fixed
 
+- UI: reopen of Add & Push Dialog when operation is running
 - build: release build processed by ProGuard - Gradle task proguardReleaseJars / createReleaseDistributable / runReleaseDistributable
 
 ### Removed

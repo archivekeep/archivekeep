@@ -14,4 +14,5 @@ fun <T> (Flow<T>).stickToFirstNotNull() =
             it == null
         }
 
-fun <T> (Flow<T>).stickToFirstNotNullAsState(scope: CoroutineScope): StateFlow<T?> = this.stickToFirstNotNull().stateIn(scope, SharingStarted.Lazily, null)
+fun <T> (StateFlow<T>).stickToFirstNotNullAsState(scope: CoroutineScope): StateFlow<T?> =
+    this.stickToFirstNotNull().stateIn(scope, SharingStarted.Lazily, this.value)

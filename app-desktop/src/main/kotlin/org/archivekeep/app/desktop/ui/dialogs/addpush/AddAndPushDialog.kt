@@ -30,6 +30,7 @@ import org.archivekeep.app.desktop.ui.designsystem.dialog.DialogSecondaryButton
 import org.archivekeep.app.desktop.ui.dialogs.Dialog
 import org.archivekeep.app.desktop.utils.asMutableState
 import org.archivekeep.app.desktop.utils.collectAsLoadable
+import org.archivekeep.utils.collections.ifNotEmpty
 
 class AddAndPushRepoDialog(
     val repositoryURI: RepositoryURI,
@@ -75,19 +76,19 @@ private fun AddAndPushDialogContents(
                             }
                             Spacer(modifier = Modifier.height(6.dp))
 
-                            if (state.allMoves.isNotEmpty()) {
+                            status.addPreprationResult.moves.ifNotEmpty { moves ->
                                 ItemManySelect(
                                     "Moves",
                                     allItemsLabel = { "All moves ($it)" },
                                     itemLabel = { "${it.from} -> ${it.to}" },
-                                    allItems = state.allMoves,
+                                    allItems = moves,
                                     vm.selectedMoves.asMutableState(),
                                 )
                                 Spacer(Modifier.height(12.dp))
                             }
 
-                            if (state.allNewFiles.isNotEmpty()) {
-                                FileManySelect("Files to add and push:", state.allNewFiles, vm.selectedFilenames.asMutableState())
+                            status.addPreprationResult.newFiles.ifNotEmpty { newFiles ->
+                                FileManySelect("Files to add and push:", newFiles, vm.selectedFilenames.asMutableState())
                             }
                         }
 
@@ -95,10 +96,10 @@ private fun AddAndPushDialogContents(
                             val addProgress =
                                 buildAnnotatedString {
                                     if (status.options.movesToExecute.isNotEmpty()) {
-                                        appendLine("Added ${status.moveProgress.moved.size} / ${status.options.movesToExecute.size}")
+                                        appendLine("Moved ${status.moveProgress.moved.size} / ${status.options.movesToExecute.size}")
                                     }
                                     if (status.options.filesToAdd.isNotEmpty()) {
-                                        appendLine("Moved ${status.addProgress.added.size} / ${status.options.filesToAdd.size}")
+                                        appendLine("Added ${status.addProgress.added.size} / ${status.options.filesToAdd.size}")
                                     }
 
                                     status.pushProgress.forEach { (repo, pp) ->

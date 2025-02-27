@@ -8,11 +8,12 @@ import org.archivekeep.files.operations.AddOperation.PreparationResult.Move
 
 interface AddAndPushOperation {
     val currentJobFlow: StateFlow<Job?>
-    val stateFlow: Flow<State>
+
+    fun prepare(): Flow<State>
 
     interface Job {
         val addPreparationResult: AddOperation.PreparationResult
-        val state: Flow<State>
+        val state: StateFlow<State>
 
         fun cancel()
     }

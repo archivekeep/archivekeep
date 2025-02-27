@@ -12,7 +12,6 @@ import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.onStart
-import kotlinx.coroutines.flow.transformWhile
 import org.archivekeep.app.core.domain.repositories.RepositoryService
 import org.archivekeep.app.core.domain.storages.StorageRepository
 import org.archivekeep.app.core.domain.storages.StorageService
@@ -36,7 +35,7 @@ class AddAndPushDialogViewModel(
     val storageService: StorageService,
     val repositoryService: RepositoryService,
     val repositoryURI: RepositoryURI,
-    val addPushStatus: AddAndPushOperation,
+    val addAndPushOperation: AddAndPushOperation,
     val onClose: () -> Unit,
 ) {
     val selectedDestinationRepositories: MutableStateFlow<Set<RepositoryURI>> = MutableStateFlow(emptySet())
@@ -45,35 +44,20 @@ class AddAndPushDialogViewModel(
 
     val repoName = repositoryService.getRepository(repositoryURI).informationFlow.map { it.displayName }
 
-    val currentOperation = addPushStatus.currentJobFlow.stickToFirstNotNullAsState(scope)
+    val currentOperation = addAndPushOperation.currentJobFlow.stickToFirstNotNullAsState(scope)
 
     val otherRepositoryCandidates = getSyncCandidates(storageService, repositoryURI).mapToLoadable()
 
     val currentStatusFlow =
-        currentOperation
-            .flatMapLatest {
-                val operationStatus = it?.state
-
-                operationStatus ?: addPushStatus.stateFlow
-            }.onStart { emit(AddAndPushOperation.NotReadyAddPushProcess) }
-
-    val lastPreparation =
-        currentStatusFlow.transformWhile {
-            when (it) {
-                is LaunchedAddPushProcess -> false
-                AddAndPushOperation.NotReadyAddPushProcess -> true
-                is ReadyAddPushProcess -> {
-                    emit(it.addPreprationResult)
-                    true
-                }
-            }
+        currentOperation.flatMapLatest {
+            it?.state
+                ?: addAndPushOperation.prepare().onStart { emit(AddAndPushOperation.NotReadyAddPushProcess) }
         }
 
     val currentVMState =
-        combine6(
+        combine(
             currentStatusFlow,
 //            repoName,
-            lastPreparation,
             selectedDestinationRepositories,
             selectedFilenames,
             selectedMoves,
@@ -86,11 +70,9 @@ class AddAndPushDialogViewModel(
                             .toSet()
                 }
             },
-        ) { currentStatus, lastPreparation, selectedDestinationRepositories, selectedFilenames, selectedMoves, otherRepositoryCandidates ->
+        ) { currentStatus, selectedDestinationRepositories, selectedFilenames, selectedMoves, otherRepositoryCandidates ->
             VMState(
                 currentStatus,
-                lastPreparation.newFiles,
-                lastPreparation.moves,
                 selectedDestinationRepositories,
                 selectedFilenames,
                 selectedMoves,
@@ -101,8 +83,6 @@ class AddAndPushDialogViewModel(
     data class VMState(
         val state: AddAndPushOperation.State,
 //        val repoName: String,
-        val allNewFiles: List<String>,
-        val allMoves: List<AddOperation.PreparationResult.Move>,
         val selectedDestinationRepositories: Set<RepositoryURI>,
         val selectedFilenames: Set<String>,
         val selectedMoves: Set<AddOperation.PreparationResult.Move>,
