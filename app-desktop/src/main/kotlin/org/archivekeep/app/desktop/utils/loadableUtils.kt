@@ -6,6 +6,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.remember
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.onEach
+import org.archivekeep.app.core.utils.generics.OptionalLoadable
 import org.archivekeep.utils.loading.Loadable
 import org.archivekeep.utils.loading.mapToLoadable
 
@@ -34,5 +35,18 @@ fun <T> log(loadable: Loadable<T>) {
     if (loadable is Loadable.Failed) {
         println("ERROR: Loadable collection failed: ${loadable.throwable}")
         loadable.throwable.printStackTrace()
+    }
+}
+
+@Composable
+fun <T> Flow<OptionalLoadable<T>>.collectAsState() =
+    remember(this) {
+        this.onEach(::log)
+    }.collectAsState(OptionalLoadable.Loading)
+
+private fun <T> log(loadable: OptionalLoadable<T>) {
+    if (loadable is OptionalLoadable.Failed) {
+        println("ERROR: Loadable collection failed: ${loadable.cause}")
+        loadable.cause.printStackTrace()
     }
 }

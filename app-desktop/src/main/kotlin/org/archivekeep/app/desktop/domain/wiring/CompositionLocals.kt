@@ -12,6 +12,7 @@ import org.archivekeep.app.core.persistence.credentials.Credentials
 import org.archivekeep.app.core.persistence.credentials.JoseStorage
 import org.archivekeep.app.core.persistence.drivers.filesystem.FileStores
 import org.archivekeep.app.core.persistence.registry.RegistryDataStore
+import org.archivekeep.app.desktop.domain.services.RepositoryOpenService
 
 val LocalStorageService = staticCompositionLocalOfNotProvided<StorageService>()
 val LocalRepoService = staticCompositionLocalOfNotProvided<RepositoryService>()
@@ -30,6 +31,8 @@ val LocalFileStores = staticCompositionLocalOfNotProvided<FileStores>()
 val LocalStorageRegistry = staticCompositionLocalOfNotProvided<StorageRegistry>()
 
 val LocalOperationFactory = staticCompositionLocalOfNotProvided<OperationFactory>()
+
+val LocalRepositoryOpenService = staticCompositionLocalOfNotProvided<RepositoryOpenService>()
 
 inline fun <reified T> staticCompositionLocalOfNotProvided() =
     staticCompositionLocalOf<T> {

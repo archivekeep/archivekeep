@@ -51,9 +51,20 @@ fun <T, R> Flow<OptionalLoadable<T>>.mapLoadedData(function: suspend (data: T) -
             }
         }.autoCatch()
 
-fun <T> Flow<Loadable<T>>.mapLoadedDataToOptional(): Flow<OptionalLoadable<T>> = this.mapLoadedDataToOptional { it }
+fun <T, R> Flow<OptionalLoadable<T>>.mapLoadedDataToOptional(transform: suspend (data: T) -> OptionalLoadable<R>): Flow<OptionalLoadable<R>> =
+    this
+        .map {
+            when (it) {
+                is OptionalLoadable.LoadedAvailable -> transform(it.value)
+                is OptionalLoadable.Failed -> OptionalLoadable.Failed(it.cause)
+                OptionalLoadable.Loading -> OptionalLoadable.Loading
+                is OptionalLoadable.NotAvailable -> OptionalLoadable.NotAvailable(it.cause)
+            }
+        }.autoCatch()
 
-fun <T, R> Flow<Loadable<T>>.mapLoadedDataToOptional(function: suspend (data: T) -> R?): Flow<OptionalLoadable<R>> =
+fun <T> Flow<Loadable<T>>.mapToOptionalLoadable(): Flow<OptionalLoadable<T>> = this.mapLoadedDataAsOptional { it }
+
+fun <T, R> Flow<Loadable<T>>.mapLoadedDataAsOptional(function: suspend (data: T) -> R?): Flow<OptionalLoadable<R>> =
     this
         .map {
             when (it) {

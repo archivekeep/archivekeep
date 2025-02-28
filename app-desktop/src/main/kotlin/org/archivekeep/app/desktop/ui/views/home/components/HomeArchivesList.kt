@@ -20,6 +20,7 @@ import compose.icons.tablericons.Folder
 import org.archivekeep.app.desktop.domain.wiring.ArchiveOperationLaunchers
 import org.archivekeep.app.desktop.domain.wiring.LocalArchiveOperationLaunchers
 import org.archivekeep.app.desktop.ui.components.LoadableGuard
+import org.archivekeep.app.desktop.ui.components.repository.WithRepositoryOpener
 import org.archivekeep.app.desktop.ui.components.richcomponents.ArchiveDropdownIconLaunched
 import org.archivekeep.app.desktop.ui.designsystem.sections.SectionCard
 import org.archivekeep.app.desktop.ui.designsystem.sections.SectionCardBottomList
@@ -70,7 +71,12 @@ private fun HomeArchiveEntry(
             state.loading,
             localArchive.displayName,
             icons = {
-                SectionCardTitleIconButton(icon = TablerIcons.Folder, onClick = {})
+                WithRepositoryOpener(localArchive.primaryRepository.reference.uri) {
+                    SectionCardTitleIconButton(
+                        icon = TablerIcons.Folder,
+                        onClick = openRepository,
+                    )
+                }
                 ArchiveDropdownIconLaunched(
                     repositoryURI = localArchive.primaryRepository.reference.uri,
                     isAssociated = localArchive.archive.associationId != null,

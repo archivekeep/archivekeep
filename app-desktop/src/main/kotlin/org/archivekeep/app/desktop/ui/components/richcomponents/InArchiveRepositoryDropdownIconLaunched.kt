@@ -15,6 +15,7 @@ import compose.icons.TablerIcons
 import compose.icons.tablericons.DotsVertical
 import org.archivekeep.app.core.domain.repositories.Repository
 import org.archivekeep.app.desktop.domain.wiring.LocalArchiveOperationLaunchers
+import org.archivekeep.app.desktop.ui.components.repository.WithRepositoryOpener
 import org.archivekeep.app.desktop.ui.designsystem.sections.SectionCardBottomListItemIconButton
 
 @Composable
@@ -33,6 +34,10 @@ fun InArchiveRepositoryDropdownIconLaunched(
                 mutableStateOf(false)
             }
 
+        fun closeDropdown() {
+            isDropdownExpanded = false
+        }
+
         SectionCardBottomListItemIconButton(
             icon = TablerIcons.DotsVertical,
             contentDescription = "More",
@@ -42,12 +47,21 @@ fun InArchiveRepositoryDropdownIconLaunched(
         )
         DropdownMenu(
             expanded = isDropdownExpanded,
-            onDismissRequest = { isDropdownExpanded = false },
+            onDismissRequest = ::closeDropdown,
         ) {
+            WithRepositoryOpener(repositoryURI) {
+                DropdownMenuItem(onClick = {
+                    openRepository()
+                    closeDropdown()
+                }, text = {
+                    Text("Open")
+                })
+            }
+
             if (repository.needsUnlock.collectAsState(false).value) {
                 DropdownMenuItem(onClick = {
                     operationsLaunchers.unlockRepository(repositoryURI, null)
-                    isDropdownExpanded = false
+                    closeDropdown()
                 }, text = {
                     Text("Unlock")
                 })
@@ -56,14 +70,14 @@ fun InArchiveRepositoryDropdownIconLaunched(
             if (isAssociated) {
                 DropdownMenuItem(onClick = {
                     operationsLaunchers.openUnassociateRepository(repositoryURI)
-                    isDropdownExpanded = false
+                    closeDropdown()
                 }, text = {
                     Text("Unassociate")
                 })
             } else {
                 DropdownMenuItem(onClick = {
                     operationsLaunchers.openAssociateRepository(repositoryURI)
-                    isDropdownExpanded = false
+                    closeDropdown()
                 }, text = {
                     Text("Associate")
                 })
@@ -71,7 +85,7 @@ fun InArchiveRepositoryDropdownIconLaunched(
 
             DropdownMenuItem(onClick = {
                 operationsLaunchers.openForgetRepository(repositoryURI)
-                isDropdownExpanded = false
+                closeDropdown()
             }, text = {
                 Text("Forget")
             })

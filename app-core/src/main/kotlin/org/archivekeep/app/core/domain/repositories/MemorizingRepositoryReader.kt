@@ -10,7 +10,7 @@ import kotlinx.coroutines.flow.onEach
 import org.archivekeep.app.core.persistence.repository.MemorizedRepositoryIndexRepository
 import org.archivekeep.app.core.persistence.repository.MemorizedRepositoryMetadataRepository
 import org.archivekeep.app.core.utils.generics.OptionalLoadable
-import org.archivekeep.app.core.utils.generics.mapLoadedDataToOptional
+import org.archivekeep.app.core.utils.generics.mapToOptionalLoadable
 import org.archivekeep.app.core.utils.generics.sharedWhileSubscribed
 import org.archivekeep.app.core.utils.identifiers.RepositoryURI
 import org.archivekeep.files.exceptions.UnsupportedFeatureException
@@ -64,7 +64,7 @@ class MemorizingRepositoryReader(
                             println("ERROR: memorized index update failed: $e")
                             e.printStackTrace()
                         }
-                    }.mapLoadedDataToOptional()
+                    }.mapToOptionalLoadable()
             }.onEach {
                 println("Loaded repository index for $uri")
             }.sharedWhileSubscribed(scope)

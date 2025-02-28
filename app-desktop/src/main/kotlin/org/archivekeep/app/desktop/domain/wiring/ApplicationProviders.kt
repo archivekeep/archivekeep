@@ -12,7 +12,9 @@ import org.archivekeep.app.core.operations.add.AddOperationSupervisorServiceImpl
 import org.archivekeep.app.core.operations.addpush.AddAndPushOperationServiceImpl
 import org.archivekeep.app.core.operations.sync.RepoToRepoSyncServiceImpl
 import org.archivekeep.app.core.persistence.drivers.filesystem.FileStores
+import org.archivekeep.app.core.persistence.drivers.filesystem.FileSystemStorageDriver
 import org.archivekeep.app.core.persistence.platform.Environment
+import org.archivekeep.app.desktop.domain.services.RepositoryOpenService
 
 @Composable
 fun ApplicationProviders(
@@ -59,6 +61,13 @@ fun ApplicationProviders(
                         fileStores,
                         knownStorageService,
                     )
+
+                val repositoryOpenService =
+                    RepositoryOpenService(
+                        environment.storageDrivers.values
+                            .filterIsInstance<FileSystemStorageDriver>()
+                            .firstOrNull(),
+                    )
             }
         }
 
@@ -74,6 +83,7 @@ fun ApplicationProviders(
         LocalFileStores provides fileStores,
         LocalStorageRegistry provides derivedServices.knownStorageService,
         LocalOperationFactory provides derivedServices.operationFactory,
+        LocalRepositoryOpenService provides derivedServices.repositoryOpenService,
     ) {
         content()
     }
