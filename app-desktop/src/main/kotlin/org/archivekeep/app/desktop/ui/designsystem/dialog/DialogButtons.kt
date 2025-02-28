@@ -48,7 +48,7 @@ fun DialogSecondaryButton(
         onClick = onClick,
         enabled = enabled,
         shape = MaterialTheme.shapes.small,
-        border = ButtonDefaults.outlinedButtonBorder,
+        border = ButtonDefaults.outlinedButtonBorder(enabled),
         colors = ButtonDefaults.outlinedButtonColors(),
     ) {
         Text(text)
@@ -64,7 +64,7 @@ fun DialogDismissButton(
     OutlinedButton(
         onClick = onClick,
         shape = MaterialTheme.shapes.small,
-        border = ButtonDefaults.outlinedButtonBorder,
+        border = ButtonDefaults.outlinedButtonBorder(enabled),
         colors = ButtonDefaults.outlinedButtonColors(),
         enabled = enabled,
     ) {

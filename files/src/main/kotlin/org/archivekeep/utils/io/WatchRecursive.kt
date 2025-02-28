@@ -98,16 +98,26 @@ fun (Path).watchRecursively(
                                 return@map emptyList()
                             }
 
-                        events.map { event ->
+                        events.mapNotNull { event ->
                             val kind = event.kind()
 
-                            if (kind == StandardWatchEventKinds.OVERFLOW) {
-                                RecursiveWatchEvent.Overflow(basePath)
-                            } else {
-                                RecursiveWatchEvent.Change(
-                                    kind as WatchEvent.Kind<out Path>,
-                                    event.context() as Path,
-                                )
+                            when (kind) {
+                                StandardWatchEventKinds.OVERFLOW -> RecursiveWatchEvent.Overflow(basePath)
+
+                                StandardWatchEventKinds.ENTRY_CREATE,
+                                StandardWatchEventKinds.ENTRY_DELETE,
+                                StandardWatchEventKinds.ENTRY_MODIFY,
+                                -> {
+                                    @Suppress("UNCHECKED_CAST")
+                                    val kindTyped = kind as WatchEvent.Kind<out Path>
+
+                                    RecursiveWatchEvent.Change(kindTyped, event.context() as Path)
+                                }
+
+                                else -> {
+                                    println("WARNING: event $kind not supported")
+                                    null
+                                }
                             }
                         }
                     }

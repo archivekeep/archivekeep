@@ -1,7 +1,7 @@
 package org.archivekeep.app.core.domain.repositories
 
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.combine
@@ -97,7 +97,7 @@ class Repository(
                     ProtectedLoadableResource.Loading -> ConnectionState.Disconnected
                     is ProtectedLoadableResource.PendingAuthentication -> ConnectionState.ConnectedLocked
                 }
-            }.stateIn(GlobalScope, SharingStarted.WhileSubscribed(), ConnectionState.Disconnected)
+            }.stateIn(scope, SharingStarted.WhileSubscribed(), ConnectionState.Disconnected)
 
     val memorizingRepositoryReader =
         MemorizingRepositoryReader(
@@ -133,6 +133,7 @@ class Repository(
 
     val indexFlow = memorizingRepositoryReader.indexFlow
 
+    @OptIn(ExperimentalCoroutinesApi::class)
     val localRepoStatus =
         accessorFlow
             .flatMapLatestLoadedData { repo ->

@@ -1,6 +1,8 @@
 package org.archivekeep.app.core.domain.storages
 
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.DelicateCoroutinesApi
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOf
@@ -56,6 +58,7 @@ class StorageService(
                 }
             }.sharedWhileSubscribed(scope)
 
+    @OptIn(ExperimentalCoroutinesApi::class)
     val allRepos =
         allStorages
             .flatMapLatestLoadedData {
@@ -69,6 +72,7 @@ class StorageService(
             }.waitLoadedValue()
 }
 
+@OptIn(DelicateCoroutinesApi::class)
 fun notSupportedStorage(storageURI: StorageURI) =
     StorageConnection(
         storageURI,

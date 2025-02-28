@@ -1,5 +1,6 @@
 package org.archivekeep.app.core.domain.storages
 
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.onEach
@@ -14,6 +15,7 @@ class KnownStorageService(
     val dataStore: RegistryDataStore,
     val fileStores: FileStores,
 ) : StorageRegistry {
+    @OptIn(ExperimentalCoroutinesApi::class)
     val knownStorages: Flow<Loadable<List<KnownStorage>>> =
         dataStore.registeredRepositories
             .flatMapLatest { repositories ->

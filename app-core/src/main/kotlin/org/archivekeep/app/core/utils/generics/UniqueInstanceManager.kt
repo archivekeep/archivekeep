@@ -4,7 +4,7 @@ import com.google.common.cache.CacheBuilder
 import com.google.common.cache.CacheLoader
 import com.google.common.cache.LoadingCache
 
-class UniqueInstanceManager<T, V>(
+class UniqueInstanceManager<T : Any, V : Any>(
     val factory: (key: T) -> V,
 ) {
     private val values: LoadingCache<T, V> =

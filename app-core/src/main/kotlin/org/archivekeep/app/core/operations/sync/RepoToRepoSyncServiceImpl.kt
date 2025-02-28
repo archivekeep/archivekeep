@@ -4,6 +4,7 @@ import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.delay
@@ -25,7 +26,7 @@ import org.archivekeep.app.core.utils.UniqueJobGuard
 import org.archivekeep.app.core.utils.generics.OptionalLoadable
 import org.archivekeep.app.core.utils.generics.SyncFlowStringWriter
 import org.archivekeep.app.core.utils.generics.mapLoadedData
-import org.archivekeep.app.core.utils.generics.sharedGlobalWhileSubscribed
+import org.archivekeep.app.core.utils.generics.sharedWhileSubscribed
 import org.archivekeep.app.core.utils.generics.singleInstanceWeakValueMap
 import org.archivekeep.app.core.utils.identifiers.RepositoryURI
 import org.archivekeep.files.operations.CompareOperation
@@ -157,13 +158,14 @@ class RepoToRepoSyncServiceImpl(
                         OptionalLoadable.Loading -> {}
                     }
                 }.flowOn(computeDispatcher)
-                .sharedGlobalWhileSubscribed()
+                .sharedWhileSubscribed(scope)
 
         override val compareStateFlow =
             compareStatusFlow.mapLoadedData {
                 RepoToRepoSync.CompareState(it)
             }
 
+        @OptIn(ExperimentalCoroutinesApi::class)
         override fun prepare(relocationSyncMode: RelocationSyncMode): Flow<Loadable<State.Prepared>> {
             val baseFlow = repositoryService.getRepository(fromURI).accessorFlow
             val otherFlow = repositoryService.getRepository(otherURI).accessorFlow
@@ -254,7 +256,7 @@ class RepoToRepoSyncServiceImpl(
                     flowOf()
                 } else {
                     preparationFlow
-                }.sharedGlobalWhileSubscribed()
+                }.sharedWhileSubscribed(scope)
             }
         }
     }

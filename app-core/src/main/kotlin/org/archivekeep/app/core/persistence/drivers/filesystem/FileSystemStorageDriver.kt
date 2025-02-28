@@ -1,6 +1,6 @@
 package org.archivekeep.app.core.persistence.drivers.filesystem
 
-import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
@@ -19,7 +19,7 @@ import org.archivekeep.app.core.utils.generics.mapLoadedData
 import org.archivekeep.app.core.utils.generics.mapLoadedDataAsOptional
 import org.archivekeep.app.core.utils.generics.mapLoadedDataToOptional
 import org.archivekeep.app.core.utils.generics.mapToOptionalLoadable
-import org.archivekeep.app.core.utils.generics.sharedGlobalWhileSubscribed
+import org.archivekeep.app.core.utils.generics.sharedWhileSubscribed
 import org.archivekeep.app.core.utils.identifiers.RepositoryURI
 import org.archivekeep.app.core.utils.identifiers.StorageURI
 import org.archivekeep.files.repo.Repo
@@ -30,11 +30,12 @@ import java.nio.file.Path
 import kotlin.io.path.Path
 
 class FileSystemStorageDriver(
+    val scope: CoroutineScope,
     val fileStores: FileStores,
 ) : StorageDriver {
     val liveStatusFlowManager =
         UniqueSharedFlowInstanceManager(
-            GlobalScope,
+            scope,
             factory = { key: StorageURI ->
                 fileStores.mountedFileSystems
                     .mapLoadedData { connectedFSList ->
@@ -68,7 +69,7 @@ class FileSystemStorageDriver(
                                 driveType = StorageInformation.Partition.DriveType.Other,
                             )
                         }
-                }.sharedGlobalWhileSubscribed(),
+                }.sharedWhileSubscribed(scope),
             liveStatusFlowManager[storageURI],
         )
 

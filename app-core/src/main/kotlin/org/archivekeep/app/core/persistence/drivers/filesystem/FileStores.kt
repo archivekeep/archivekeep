@@ -16,10 +16,11 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.transformLatest
-import org.archivekeep.app.core.utils.generics.sharedGlobalLoadableWhileSubscribed
+import org.archivekeep.app.core.utils.generics.sharedWhileSubscribed
 import org.archivekeep.utils.io.watch
 import org.archivekeep.utils.loading.firstLoadedOrFailure
 import org.archivekeep.utils.loading.mapLoadedData
+import org.archivekeep.utils.loading.mapToLoadable
 import oshi.SystemInfo
 import oshi.software.os.OSFileStore
 import oshi.software.os.linux.LinuxFileSystem
@@ -33,6 +34,7 @@ import kotlin.time.Duration.Companion.milliseconds
 
 @OptIn(FlowPreview::class, ExperimentalCoroutinesApi::class)
 class FileStores(
+    scope: CoroutineScope,
     ioDispatcher: CoroutineDispatcher = Dispatchers.IO,
 ) {
     val updateFrequencyOrRateLimit = 100.milliseconds
@@ -67,8 +69,8 @@ class FileStores(
             .transformLatest { mediaDirectories ->
                 println("New media directories: $mediaDirectories")
 
-                val scope = CoroutineScope(coroutineContext)
-                val watcher = KfsDirectoryWatcher(scope)
+                val watcherScope = CoroutineScope(coroutineContext)
+                val watcher = KfsDirectoryWatcher(watcherScope)
 
                 try {
                     watcher.add(DevPath.MAPPER)
@@ -158,7 +160,8 @@ class FileStores(
                     send()
                 }
         }.flowOn(Dispatchers.IO)
-            .sharedGlobalLoadableWhileSubscribed()
+            .mapToLoadable()
+            .sharedWhileSubscribed(scope)
 
     val mountedFileSystems =
         mountPoints.mapLoadedData { mountPoints ->

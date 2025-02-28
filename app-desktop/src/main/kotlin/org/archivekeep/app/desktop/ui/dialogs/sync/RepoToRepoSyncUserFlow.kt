@@ -1,6 +1,7 @@
 package org.archivekeep.app.desktop.ui.dialogs.sync
 
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.flatMapLatest
@@ -41,6 +42,7 @@ class RepoToRepoSyncUserFlow(
 
     val relocationSyncModeFlow = MutableStateFlow<RelocationSyncMode>(defaultRelocationSyncMode)
 
+    @OptIn(ExperimentalCoroutinesApi::class)
     val operationStateFlow =
         currentOperation
             .flatMapLatest {

@@ -2,6 +2,7 @@ package org.archivekeep.app.core.operations.add
 
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.Flow
@@ -42,6 +43,7 @@ class AddOperationSupervisorServiceImpl(
     ) : AddOperationSupervisor {
         override val currentJobFlow: StateFlow<JobImpl?> = jobGuards.stateHoldersWeakReference[repositoryURI].asStateFlow()
 
+        @OptIn(ExperimentalCoroutinesApi::class)
         override fun prepare(): Flow<Loadable<AddOperationSupervisor.Prepared>> =
             repositoryService
                 .getRepository(repositoryURI)

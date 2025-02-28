@@ -1,5 +1,6 @@
 package org.archivekeep.app.core.domain.storages
 
+import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -38,6 +39,7 @@ class Storage(
         DISCONNECTED,
     }
 
+    @OptIn(DelicateCoroutinesApi::class)
     val state =
         connection.connectionStatus
             .mapToLoadable { connectionStatus ->

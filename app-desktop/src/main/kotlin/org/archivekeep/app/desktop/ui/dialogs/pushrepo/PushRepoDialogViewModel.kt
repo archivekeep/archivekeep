@@ -1,6 +1,7 @@
 package org.archivekeep.app.desktop.ui.dialogs.pushrepo
 
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -60,6 +61,7 @@ class PushRepoDialogViewModel(
 
         val rememberedOPFlow = repoToRepoSync.currentJobFlow.stickToFirstNotNullAsState(scope)
 
+        @OptIn(ExperimentalCoroutinesApi::class)
         val currentSyncFlow: StateFlow<Loadable<State>> =
             rememberedOPFlow
                 .flatMapLatest { rememberedOP ->

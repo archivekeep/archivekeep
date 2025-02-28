@@ -5,6 +5,7 @@ import androidx.datastore.preferences.core.PreferenceDataStoreFactory
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringSetPreferencesKey
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
@@ -14,7 +15,7 @@ import kotlinx.serialization.json.Json
 import org.archivekeep.app.core.utils.environment.getRepositoryMetadataMemoryDatastorePath
 import org.archivekeep.app.core.utils.generics.OptionalLoadable
 import org.archivekeep.app.core.utils.generics.mapToOptionalLoadable
-import org.archivekeep.app.core.utils.generics.sharedGlobalWhileSubscribed
+import org.archivekeep.app.core.utils.generics.sharedWhileSubscribed
 import org.archivekeep.app.core.utils.identifiers.RepositoryURI
 import org.archivekeep.files.repo.RepositoryMetadata
 
@@ -29,6 +30,7 @@ private val defaultDatastore by lazy {
 private val REMEMBERED_REPOSITORY_METADATA_KEY = stringSetPreferencesKey("remembered_repository_metadata")
 
 class MemorizedRepositoryMetadataRepositoryInDataStore(
+    val scope: CoroutineScope,
     val datastore: DataStore<Preferences> = defaultDatastore,
 ) : MemorizedRepositoryMetadataRepository {
     val rememberedRepositoriesMetadata =
@@ -36,7 +38,7 @@ class MemorizedRepositoryMetadataRepositoryInDataStore(
             .map(::getRememberedRepositoriesMetadataFromPreferences)
             .onEach {
                 println("Loaded repository metadata: $it")
-            }.sharedGlobalWhileSubscribed()
+            }.sharedWhileSubscribed(scope)
 
     override fun repositoryCachedMetadataFlow(uri: RepositoryURI): Flow<OptionalLoadable<RepositoryMetadata>> =
         rememberedRepositoriesMetadata

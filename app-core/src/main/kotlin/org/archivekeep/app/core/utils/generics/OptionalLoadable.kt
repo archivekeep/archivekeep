@@ -1,8 +1,11 @@
 package org.archivekeep.app.core.utils.generics
 
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.transform
 import org.archivekeep.utils.loading.Loadable
@@ -61,6 +64,26 @@ fun <T, R> Flow<OptionalLoadable<T>>.mapLoadedDataToOptional(transform: suspend 
                 is OptionalLoadable.NotAvailable -> OptionalLoadable.NotAvailable(it.cause)
             }
         }.autoCatch()
+
+@ExperimentalCoroutinesApi
+fun <T, R> Flow<OptionalLoadable<T>>.flatMapLatestLoadedData(
+    onNotAvailable: suspend (l: OptionalLoadable.NotAvailable) -> Flow<OptionalLoadable<R>>,
+    onLoading: suspend () -> Flow<OptionalLoadable<R>> = { flowOf(OptionalLoadable.Loading) },
+    onFailed: suspend (l: OptionalLoadable.Failed) -> Flow<OptionalLoadable<R>> = {
+        it.cause.printStackTrace()
+        flowOf(OptionalLoadable.Failed(it.cause))
+    },
+    transform: suspend (data: T) -> Flow<OptionalLoadable<R>>,
+): Flow<OptionalLoadable<R>> =
+    this
+        .flatMapLatest {
+            when (it) {
+                is OptionalLoadable.Failed -> onFailed(it)
+                is OptionalLoadable.NotAvailable -> onNotAvailable(it)
+                is OptionalLoadable.LoadedAvailable -> transform(it.value)
+                OptionalLoadable.Loading -> onLoading()
+            }
+        }
 
 fun <T> Flow<Loadable<T>>.mapToOptionalLoadable(): Flow<OptionalLoadable<T>> = this.mapLoadedDataAsOptional { it }
 

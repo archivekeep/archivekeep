@@ -5,14 +5,15 @@ import androidx.datastore.preferences.core.PreferenceDataStoreFactory
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringSetPreferencesKey
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import org.archivekeep.app.core.utils.environment.getRegistryDatastorePath
-import org.archivekeep.app.core.utils.generics.sharedGlobalLoadableWhileSubscribed
-import org.archivekeep.app.core.utils.generics.sharedGlobalWhileSubscribed
+import org.archivekeep.app.core.utils.generics.sharedWhileSubscribed
 import org.archivekeep.app.core.utils.identifiers.StorageURI
+import org.archivekeep.utils.loading.mapToLoadable
 
 private val defaultDatastore by lazy {
     PreferenceDataStoreFactory.create(
@@ -26,6 +27,7 @@ private val REGISTERED_REPO_KEY = stringSetPreferencesKey("registered_repositori
 private val REGISTERED_FS_STORAGE_KEY = stringSetPreferencesKey("registered_filesystem_storages")
 
 class PreferenceDataStoreRegistryData(
+    val scope: CoroutineScope,
     val datastore: DataStore<Preferences> = defaultDatastore,
 ) : RegistryDataStore {
     override val registeredRepositories =
@@ -33,14 +35,14 @@ class PreferenceDataStoreRegistryData(
             .map(::getRepositoriesFromPreferences)
             .onEach {
                 println("Loaded repositories: $it")
-            }.sharedGlobalWhileSubscribed()
+            }.sharedWhileSubscribed(scope)
 
     override val registeredStorages =
         datastore.data
-            .map(::getStoragesFromPreferences)
+            .mapToLoadable(transform = ::getStoragesFromPreferences)
             .onEach {
                 println("Loaded file system storages: $it")
-            }.sharedGlobalLoadableWhileSubscribed()
+            }.sharedWhileSubscribed(scope)
 
     override suspend fun updateStorage(
         uri: StorageURI,

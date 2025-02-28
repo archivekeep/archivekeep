@@ -5,6 +5,7 @@ import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.combine
@@ -48,6 +49,7 @@ class AddAndPushDialogViewModel(
 
     val otherRepositoryCandidates = getSyncCandidates(storageService, repositoryURI).mapToLoadable()
 
+    @OptIn(ExperimentalCoroutinesApi::class)
     val currentStatusFlow =
         currentOperation.flatMapLatest {
             it?.state

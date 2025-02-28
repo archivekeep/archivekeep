@@ -13,7 +13,7 @@ fun main(args: Array<String>) {
     application {
         val scope = rememberCoroutineScope()
 
-        val fileStores = remember { FileStores() }
+        val fileStores = remember { FileStores(scope) }
 
         val environment =
             remember {

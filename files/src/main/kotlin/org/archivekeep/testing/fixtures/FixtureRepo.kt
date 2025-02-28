@@ -9,7 +9,6 @@ import org.archivekeep.files.repo.Repo
 import org.archivekeep.files.repo.RepoIndex
 import org.archivekeep.files.repo.RepositoryMetadata
 import org.archivekeep.utils.loading.Loadable
-import org.archivekeep.utils.loading.mapToLoadable
 import org.archivekeep.utils.sha256
 import java.io.InputStream
 
@@ -70,7 +69,7 @@ class FixtureRepo(
 
     override val observable: ObservableRepo = this
 
-    override val indexFlow: Flow<Loadable<RepoIndex>> = MutableStateFlow(_index).mapToLoadable()
+    override val indexFlow = MutableStateFlow(Loadable.Loaded(_index))
 
     override val metadataFlow: Flow<Loadable<RepositoryMetadata>> = flow { TODO() }
 }

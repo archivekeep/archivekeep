@@ -5,6 +5,7 @@ import org.archivekeep.files.operations.CompareOperation
 import org.archivekeep.files.operations.NewFilesSyncStep
 import org.archivekeep.files.operations.PreparedSyncOperation
 import org.archivekeep.files.operations.RelocationsMoveApplySyncStep
+import java.util.Locale
 
 fun describePreparedSyncOperation(a: PreparedSyncOperation) =
     if (a.steps.isEmpty()) {
@@ -75,6 +76,8 @@ fun describePreparedSyncOperationWithDetails(
             }
         }.joinToString("\n")
 }
+
+private fun String.capitalize(): String = this.replaceFirstChar { if (it.isLowerCase()) it.titlecase(Locale.getDefault()) else it.toString() }
 
 fun CompareOperation.Result.Relocation.describe() =
     (

@@ -18,6 +18,7 @@ import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flatMapLatest
@@ -47,6 +48,7 @@ import org.archivekeep.utils.loading.mapToLoadable
 class UpdateIndexOperationDialog(
     val repositoryURI: RepositoryURI,
 ) : Dialog {
+    @OptIn(ExperimentalCoroutinesApi::class)
     @Composable
     override fun render(
         window: ComposeWindow,

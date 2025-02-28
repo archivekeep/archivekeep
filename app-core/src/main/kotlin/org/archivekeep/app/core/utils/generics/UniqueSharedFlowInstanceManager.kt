@@ -9,7 +9,7 @@ import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.shareIn
 
-class UniqueSharedFlowInstanceManager<T, V>(
+class UniqueSharedFlowInstanceManager<T : Any, V>(
     val scope: CoroutineScope,
     val factory: (key: T) -> Flow<V>,
     val started: SharingStarted = SharingStarted.WhileSubscribed(100),

@@ -1,5 +1,6 @@
 package org.archivekeep.testing.storage
 
+import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -33,7 +34,8 @@ open class InMemoryRepo(
 
     suspend fun contains(path: String): Boolean = contents.containsKey(path)
 
-    override val indexFlow: Flow<Loadable<RepoIndex>> =
+    @OptIn(DelicateCoroutinesApi::class)
+    override val indexFlow =
         contentsFlow
             .mapToLoadable { contents ->
                 RepoIndex(

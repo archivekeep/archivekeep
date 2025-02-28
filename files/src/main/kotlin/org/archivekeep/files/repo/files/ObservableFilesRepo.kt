@@ -16,11 +16,11 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.shareIn
 import kotlinx.coroutines.flow.transform
+import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.decodeFromStream
 import org.archivekeep.files.operations.StatusOperation
 import org.archivekeep.files.repo.ObservableWorkingRepo
-import org.archivekeep.files.repo.RepoIndex
 import org.archivekeep.files.repo.RepositoryMetadata
 import org.archivekeep.utils.io.watchRecursively
 import org.archivekeep.utils.loading.Loadable
@@ -30,7 +30,7 @@ import kotlin.io.path.inputStream
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.milliseconds
 
-@OptIn(DelicateCoroutinesApi::class)
+@OptIn(DelicateCoroutinesApi::class, ExperimentalSerializationApi::class)
 class ObservableFilesRepo internal constructor(
     val filesRepo: FilesRepo,
     private val ioDispatcher: CoroutineDispatcher = Dispatchers.IO,
@@ -61,7 +61,7 @@ class ObservableFilesRepo internal constructor(
             }.flowOn(Dispatchers.IO)
             .shareIn(GlobalScope, SharingStarted.WhileSubscribed(), replay = 1)
 
-    override val indexFlow: Flow<Loadable<RepoIndex>> =
+    override val indexFlow =
         calculationCause
             .conflate()
             .transform {

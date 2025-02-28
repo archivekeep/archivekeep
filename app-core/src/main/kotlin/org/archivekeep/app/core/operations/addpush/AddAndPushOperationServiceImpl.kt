@@ -1,8 +1,8 @@
 package org.archivekeep.app.core.operations.addpush
 
 import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.coroutineScope
@@ -26,6 +26,7 @@ import org.archivekeep.utils.loading.Loadable
 import org.archivekeep.utils.loading.firstLoadedOrFailure
 
 class AddAndPushOperationServiceImpl(
+    private val scope: CoroutineScope,
     private val repositoryService: RepositoryService,
     private val ioDispatcher: CoroutineDispatcher = Dispatchers.IO,
 ) : AddAndPushOperationService {
@@ -254,7 +255,7 @@ class AddAndPushOperationServiceImpl(
                 )
 
             jobGuards.launch(
-                GlobalScope,
+                scope,
                 ioDispatcher,
                 repositoryURI,
                 newOperation,

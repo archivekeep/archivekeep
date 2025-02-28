@@ -4,7 +4,6 @@ import com.google.protobuf.ByteString
 import io.grpc.ManagedChannel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.channels.consumeEach
 import kotlinx.coroutines.flow.Flow
@@ -47,6 +46,7 @@ val chunkSize = 64 * 1024
 class RemoteGrpcRepository(
     private val channel: ManagedChannel,
     private val archiveName: String,
+    private val scope: CoroutineScope = CoroutineScope(Dispatchers.IO),
     // TODO: subscription to remote
     private val modifChannel: MutableSharedFlow<Date> = MutableStateFlow(Date()),
 ) : Repo,
@@ -222,10 +222,10 @@ class RemoteGrpcRepository(
 
     override val observable: ObservableRepo = this
 
-    override val indexFlow: Flow<Loadable<RepoIndex>> =
+    override val indexFlow =
         modifChannel
             .mapToLoadable { index() }
-            .shareIn(GlobalScope, SharingStarted.WhileSubscribed())
+            .shareIn(scope, SharingStarted.WhileSubscribed())
 
     override val metadataFlow: Flow<Loadable<RepositoryMetadata>> =
         flowOf(
@@ -236,7 +236,7 @@ class RemoteGrpcRepository(
         try {
             return call()
         } finally {
-            GlobalScope.launch {
+            scope.launch {
                 modifChannel.emit(Date())
             }
         }

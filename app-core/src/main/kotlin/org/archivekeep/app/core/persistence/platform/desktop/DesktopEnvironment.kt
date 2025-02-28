@@ -20,7 +20,7 @@ class DesktopEnvironment(
     val scope: CoroutineScope,
     val fileStores: FileStores,
 ) : Environment {
-    override val registry: PreferenceDataStoreRegistryData = PreferenceDataStoreRegistryData()
+    override val registry: PreferenceDataStoreRegistryData = PreferenceDataStoreRegistryData(scope)
 
     override val walletDataStore =
         JoseStorage(
@@ -31,12 +31,12 @@ class DesktopEnvironment(
 
     val credentialsStore: CredentialsStore = CredentialsInProtectedDataStore(walletDataStore)
 
-    override val repositoryIndexMemory = MemorizedRepositoryIndexRepositoryInDataStore()
-    override val repositoryMetadataMemory = MemorizedRepositoryMetadataRepositoryInDataStore()
+    override val repositoryIndexMemory = MemorizedRepositoryIndexRepositoryInDataStore(scope)
+    override val repositoryMetadataMemory = MemorizedRepositoryMetadataRepositoryInDataStore(scope)
 
     override val storageDrivers =
         mapOf(
-            "filesystem" to FileSystemStorageDriver(fileStores),
+            "filesystem" to FileSystemStorageDriver(scope, fileStores),
             "grpc" to GRPCStorageDriver(credentialsStore),
         )
 }

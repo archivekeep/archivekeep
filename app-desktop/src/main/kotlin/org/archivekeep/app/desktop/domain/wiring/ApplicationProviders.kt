@@ -51,7 +51,7 @@ fun ApplicationProviders(
 
                 val archiveService = DefaultArchiveService(scope, storageService)
                 val syncService = RepoToRepoSyncServiceImpl(scope, repoService)
-                val addPushService = AddAndPushOperationServiceImpl(repoService)
+                val addPushService = AddAndPushOperationServiceImpl(scope, repoService)
                 val addOperationSupervisorService = AddOperationSupervisorServiceImpl(scope, repoService)
 
                 val operationFactory =
