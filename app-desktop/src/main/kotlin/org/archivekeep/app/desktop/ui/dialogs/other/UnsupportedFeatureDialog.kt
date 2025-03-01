@@ -1,4 +1,4 @@
-package org.archivekeep.app.desktop.ui.dialogs
+package org.archivekeep.app.desktop.ui.dialogs.other
 
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -8,6 +8,7 @@ import org.archivekeep.app.desktop.ui.designsystem.dialog.DialogButtonContainer
 import org.archivekeep.app.desktop.ui.designsystem.dialog.DialogCardWithDialogInnerContainer
 import org.archivekeep.app.desktop.ui.designsystem.dialog.DialogOverlay
 import org.archivekeep.app.desktop.ui.designsystem.dialog.DialogPrimaryButton
+import org.archivekeep.app.desktop.ui.dialogs.Dialog
 
 class UnsupportedFeatureDialog : Dialog {
     @Composable

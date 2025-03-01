@@ -1,4 +1,4 @@
-package org.archivekeep.app.desktop.ui.dialogs.repositories
+package org.archivekeep.app.desktop.ui.dialogs.repository.registry
 
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.material3.Text

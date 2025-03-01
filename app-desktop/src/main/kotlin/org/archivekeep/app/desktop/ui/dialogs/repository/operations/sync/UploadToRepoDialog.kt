@@ -1,4 +1,4 @@
-package org.archivekeep.app.desktop.ui.dialogs.sync
+package org.archivekeep.app.desktop.ui.dialogs.repository.operations.sync
 
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -20,8 +20,8 @@ import org.archivekeep.app.desktop.domain.wiring.LocalStorageService
 import org.archivekeep.app.desktop.ui.designsystem.dialog.DialogCardWithDialogInnerContainer
 import org.archivekeep.app.desktop.ui.designsystem.dialog.DialogOverlayWithLoadableGuard
 import org.archivekeep.app.desktop.ui.dialogs.Dialog
-import org.archivekeep.app.desktop.ui.dialogs.sync.parts.RepoToRepoSyncFlowButtons
-import org.archivekeep.app.desktop.ui.dialogs.sync.parts.RepoToRepoSyncMainContents
+import org.archivekeep.app.desktop.ui.dialogs.repository.operations.sync.parts.RepoToRepoSyncFlowButtons
+import org.archivekeep.app.desktop.ui.dialogs.repository.operations.sync.parts.RepoToRepoSyncMainContents
 import org.archivekeep.app.desktop.utils.asMutableState
 import org.archivekeep.utils.loading.Loadable
 import org.archivekeep.utils.loading.mapToLoadable

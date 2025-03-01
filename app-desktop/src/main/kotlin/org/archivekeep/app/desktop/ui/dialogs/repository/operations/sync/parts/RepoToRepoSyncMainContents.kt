@@ -1,4 +1,4 @@
-package org.archivekeep.app.desktop.ui.dialogs.sync.parts
+package org.archivekeep.app.desktop.ui.dialogs.repository.operations.sync.parts
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -17,8 +17,8 @@ import org.archivekeep.app.core.operations.sync.RepoToRepoSync.JobState
 import org.archivekeep.app.core.operations.sync.RepoToRepoSync.State
 import org.archivekeep.app.desktop.ui.components.LoadableGuard
 import org.archivekeep.app.desktop.ui.components.RelocationSyncModeOptions
-import org.archivekeep.app.desktop.ui.dialogs.sync.RepoToRepoSyncUserFlow
-import org.archivekeep.app.desktop.ui.dialogs.sync.describePreparedSyncOperationWithDetails
+import org.archivekeep.app.desktop.ui.dialogs.repository.operations.sync.RepoToRepoSyncUserFlow
+import org.archivekeep.app.desktop.ui.dialogs.repository.operations.sync.describePreparedSyncOperationWithDetails
 import org.archivekeep.files.operations.RelocationSyncMode
 
 @Composable

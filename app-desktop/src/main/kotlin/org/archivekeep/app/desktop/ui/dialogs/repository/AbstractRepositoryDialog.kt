@@ -1,4 +1,4 @@
-package org.archivekeep.app.desktop.ui.dialogs.repositories
+package org.archivekeep.app.desktop.ui.dialogs.repository
 
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.runtime.Composable
@@ -15,7 +15,7 @@ import org.archivekeep.app.desktop.ui.designsystem.dialog.DialogButtonContainer
 import org.archivekeep.app.desktop.ui.designsystem.dialog.DialogCardWithDialogInnerContainer
 import org.archivekeep.app.desktop.ui.designsystem.dialog.DialogOverlayWithLoadableGuard
 import org.archivekeep.app.desktop.ui.dialogs.Dialog
-import org.archivekeep.app.desktop.ui.dialogs.repositories.AbstractRepositoryDialog.BaseState
+import org.archivekeep.app.desktop.ui.dialogs.repository.AbstractRepositoryDialog.BaseState
 import org.archivekeep.app.desktop.utils.collectLoadableFlow
 import org.archivekeep.utils.loading.Loadable
 

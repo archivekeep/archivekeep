@@ -1,4 +1,4 @@
-package org.archivekeep.app.desktop.ui.dialogs.indexupdate
+package org.archivekeep.app.desktop.ui.dialogs.repository.operations.indexupdate
 
 import androidx.compose.desktop.ui.tooling.preview.Preview
 import androidx.compose.foundation.layout.Box

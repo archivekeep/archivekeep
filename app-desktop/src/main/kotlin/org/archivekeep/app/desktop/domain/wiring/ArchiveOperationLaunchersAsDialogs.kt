@@ -1,24 +1,22 @@
 package org.archivekeep.app.desktop.domain.wiring
 
-import org.archivekeep.app.desktop.ui.dialogs.UnsupportedFeatureDialog
-import org.archivekeep.app.desktop.ui.dialogs.addpush.AddAndPushRepoDialog
-import org.archivekeep.app.desktop.ui.dialogs.indexupdate.UpdateIndexOperationDialog
-import org.archivekeep.app.desktop.ui.dialogs.pushrepo.PushRepoDialog
-import org.archivekeep.app.desktop.ui.dialogs.repositories.AddFileSystemRepositoryDialog
-import org.archivekeep.app.desktop.ui.dialogs.repositories.AddRemoteRepositoryDialog
-import org.archivekeep.app.desktop.ui.dialogs.repositories.AssociateRepositoryDialog
-import org.archivekeep.app.desktop.ui.dialogs.repositories.ForgetRepositoryDialog
-import org.archivekeep.app.desktop.ui.dialogs.repositories.RepositoryUnlockDialog
-import org.archivekeep.app.desktop.ui.dialogs.repositories.UnassociateRepositoryDialog
-import org.archivekeep.app.desktop.ui.dialogs.sync.DownloadFromRepoDialog
-import org.archivekeep.app.desktop.ui.dialogs.sync.UploadToRepoDialog
-import org.archivekeep.app.desktop.ui.dialogs.verify.VerifyOperationDialog
+import org.archivekeep.app.desktop.ui.dialogs.other.UnsupportedFeatureDialog
+import org.archivekeep.app.desktop.ui.dialogs.repository.access.RepositoryUnlockDialog
+import org.archivekeep.app.desktop.ui.dialogs.repository.management.AssociateRepositoryDialog
+import org.archivekeep.app.desktop.ui.dialogs.repository.management.UnassociateRepositoryDialog
+import org.archivekeep.app.desktop.ui.dialogs.repository.operations.addpush.AddAndPushRepoDialog
+import org.archivekeep.app.desktop.ui.dialogs.repository.operations.indexupdate.UpdateIndexOperationDialog
+import org.archivekeep.app.desktop.ui.dialogs.repository.operations.pushrepo.PushRepoDialog
+import org.archivekeep.app.desktop.ui.dialogs.repository.operations.sync.DownloadFromRepoDialog
+import org.archivekeep.app.desktop.ui.dialogs.repository.operations.sync.UploadToRepoDialog
+import org.archivekeep.app.desktop.ui.dialogs.repository.registry.AddFileSystemRepositoryDialog
+import org.archivekeep.app.desktop.ui.dialogs.repository.registry.AddRemoteRepositoryDialog
+import org.archivekeep.app.desktop.ui.dialogs.repository.registry.ForgetRepositoryDialog
 
 fun archiveOperationLaunchersAsDialogs(dialogRenderer: OverlayDialogRenderer) =
     ArchiveOperationLaunchers(
         openAddAndPushOperation = dialogRenderer.openFn(::AddAndPushRepoDialog),
         openIndexUpdateOperation = dialogRenderer.openFn(::UpdateIndexOperationDialog),
-        openVerifyOperation = dialogRenderer.openFn(::VerifyOperationDialog),
         openAssociateRepository = dialogRenderer.openFn(::AssociateRepositoryDialog),
         openUnassociateRepository = dialogRenderer.openFn(::UnassociateRepositoryDialog),
         openForgetRepository = dialogRenderer.openFn(::ForgetRepositoryDialog),

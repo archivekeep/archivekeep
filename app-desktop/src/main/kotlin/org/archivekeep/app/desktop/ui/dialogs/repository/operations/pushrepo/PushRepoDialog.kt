@@ -1,4 +1,4 @@
-package org.archivekeep.app.desktop.ui.dialogs.pushrepo
+package org.archivekeep.app.desktop.ui.dialogs.repository.operations.pushrepo
 
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height

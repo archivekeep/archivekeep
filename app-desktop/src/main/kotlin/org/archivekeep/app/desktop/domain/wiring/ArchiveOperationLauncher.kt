@@ -8,7 +8,6 @@ import org.archivekeep.app.core.utils.identifiers.StorageURI
 data class ArchiveOperationLaunchers(
     val openAddAndPushOperation: (repositoryURI: RepositoryURI) -> Unit,
     val openIndexUpdateOperation: (repositoryURI: RepositoryURI) -> Unit,
-    val openVerifyOperation: (repositoryURI: RepositoryURI) -> Unit,
     val openAssociateRepository: (repositoryURI: RepositoryURI) -> Unit,
     val openUnassociateRepository: (repositoryURI: RepositoryURI) -> Unit,
     val openForgetRepository: (repositoryURI: RepositoryURI) -> Unit,
@@ -27,7 +26,6 @@ val LocalArchiveOperationLaunchers =
         ArchiveOperationLaunchers(
             openAddAndPushOperation = { invalidUseOfContext("openAddAndPushOperation") },
             openIndexUpdateOperation = { invalidUseOfContext("openIndexUpdateOperation") },
-            openVerifyOperation = { invalidUseOfContext("openVerifyOperation") },
             openAssociateRepository = { invalidUseOfContext("openAssociateRepository") },
             openUnassociateRepository = { invalidUseOfContext("openUnassociateRepository") },
             openForgetRepository = { invalidUseOfContext("openForgetRepository") },

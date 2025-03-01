@@ -1,4 +1,4 @@
-package org.archivekeep.app.desktop.ui.dialogs.pushrepo
+package org.archivekeep.app.desktop.ui.dialogs.repository.operations.pushrepo
 
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -15,7 +15,7 @@ import org.archivekeep.app.core.operations.sync.RepoToRepoSync.State
 import org.archivekeep.app.core.operations.sync.RepoToRepoSyncService
 import org.archivekeep.app.core.utils.identifiers.RepositoryURI
 import org.archivekeep.app.desktop.domain.data.getSyncCandidates
-import org.archivekeep.app.desktop.ui.dialogs.sync.describePreparedSyncOperation
+import org.archivekeep.app.desktop.ui.dialogs.repository.operations.sync.describePreparedSyncOperation
 import org.archivekeep.app.desktop.utils.stickToFirstNotNullAsState
 import org.archivekeep.files.operations.RelocationSyncMode
 import org.archivekeep.utils.loading.Loadable

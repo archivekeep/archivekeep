@@ -1,4 +1,4 @@
-package org.archivekeep.app.desktop.ui.dialogs.repositories
+package org.archivekeep.app.desktop.ui.dialogs.repository.management
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Arrangement
@@ -50,7 +50,8 @@ import org.archivekeep.app.desktop.ui.components.errors.AutomaticErrorMessage
 import org.archivekeep.app.desktop.ui.designsystem.dialog.DialogButtonContainer
 import org.archivekeep.app.desktop.ui.designsystem.dialog.DialogDismissButton
 import org.archivekeep.app.desktop.ui.designsystem.dialog.DialogPrimaryButton
-import org.archivekeep.app.desktop.ui.dialogs.repositories.AssociateRepositoryDialog.VM
+import org.archivekeep.app.desktop.ui.dialogs.repository.AbstractRepositoryDialog
+import org.archivekeep.app.desktop.ui.dialogs.repository.management.AssociateRepositoryDialog.VM
 import org.archivekeep.app.desktop.utils.produceState
 import org.archivekeep.utils.loading.Loadable
 import org.archivekeep.utils.loading.mapLoadedData

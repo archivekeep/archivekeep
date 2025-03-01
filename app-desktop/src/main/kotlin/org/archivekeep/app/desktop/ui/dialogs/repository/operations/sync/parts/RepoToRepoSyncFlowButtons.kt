@@ -1,4 +1,4 @@
-package org.archivekeep.app.desktop.ui.dialogs.sync.parts
+package org.archivekeep.app.desktop.ui.dialogs.repository.operations.sync.parts
 
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.material3.Text
@@ -7,7 +7,7 @@ import androidx.compose.ui.Modifier
 import org.archivekeep.app.desktop.ui.designsystem.dialog.DialogButtonContainer
 import org.archivekeep.app.desktop.ui.designsystem.dialog.DialogDismissButton
 import org.archivekeep.app.desktop.ui.designsystem.dialog.DialogPrimaryButton
-import org.archivekeep.app.desktop.ui.dialogs.sync.RepoToRepoSyncUserFlow
+import org.archivekeep.app.desktop.ui.dialogs.repository.operations.sync.RepoToRepoSyncUserFlow
 
 @Composable
 fun RepoToRepoSyncFlowButtons(

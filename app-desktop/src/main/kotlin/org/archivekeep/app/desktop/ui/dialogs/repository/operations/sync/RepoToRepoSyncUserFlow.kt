@@ -1,4 +1,4 @@
-package org.archivekeep.app.desktop.ui.dialogs.sync
+package org.archivekeep.app.desktop.ui.dialogs.repository.operations.sync
 
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi

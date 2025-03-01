@@ -1,4 +1,4 @@
-package org.archivekeep.app.desktop.ui.dialogs.addpush
+package org.archivekeep.app.desktop.ui.dialogs.repository.operations.addpush
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.derivedStateOf
