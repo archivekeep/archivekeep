@@ -7,6 +7,7 @@ import kotlinx.serialization.descriptors.PrimitiveSerialDescriptor
 import kotlinx.serialization.descriptors.SerialDescriptor
 import kotlinx.serialization.encoding.Decoder
 import kotlinx.serialization.encoding.Encoder
+import org.archivekeep.app.core.utils.identifiers.StorageURI.Companion.uriPrefix
 
 @Serializable(
     with = StorageURI.Serializer::class,
@@ -17,6 +18,12 @@ data class StorageURI(
 ) {
     companion object {
         val uriPrefix = "archivekeep:storage:"
+
+        fun fromFull(uriText: String): StorageURI {
+            val (driver, data) = uriText.split(":", limit = 2)
+
+            return StorageURI(driver, data)
+        }
     }
 
     override fun toString(): String = "$uriPrefix$driver:$data"

@@ -3,7 +3,6 @@ package org.archivekeep.app.desktop.ui.dialogs.storages
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
-import androidx.compose.ui.awt.ComposeWindow
 import androidx.compose.ui.text.buildAnnotatedString
 import org.archivekeep.app.core.domain.storages.Storage
 import org.archivekeep.app.core.utils.identifiers.StorageURI
@@ -37,10 +36,7 @@ abstract class AbstractStorageDialog<VM : AbstractStorageDialog.IVM>(
     )
 
     @Composable
-    override fun render(
-        window: ComposeWindow,
-        onClose: () -> Unit,
-    ) {
+    override fun render(onClose: () -> Unit) {
         val storageService = LocalStorageService.current
         val storageLoadable =
             remember(storageService, uri) {

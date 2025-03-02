@@ -4,7 +4,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.awt.ComposeWindow
 import org.archivekeep.app.desktop.ui.dialogs.Dialog
 
 class OverlayDialogRenderer {
@@ -15,10 +14,9 @@ class OverlayDialogRenderer {
     }
 
     @Composable
-    fun render(window: ComposeWindow) {
+    fun render() {
         openedDialogs.forEach { dialog ->
             dialog.render(
-                window,
                 onClose = { openedDialogs = openedDialogs.filter { it != dialog } },
             )
         }

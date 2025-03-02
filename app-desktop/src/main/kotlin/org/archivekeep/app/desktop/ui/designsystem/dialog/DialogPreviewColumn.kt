@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
@@ -19,6 +20,7 @@ fun DialogPreviewColumn(content: @Composable ColumnScope.() -> Unit) {
         modifier =
             Modifier
                 .fillMaxWidth()
+                .fillMaxHeight()
                 .background(Color.Black.copy(alpha = 0.6f)),
     ) {
         Column(

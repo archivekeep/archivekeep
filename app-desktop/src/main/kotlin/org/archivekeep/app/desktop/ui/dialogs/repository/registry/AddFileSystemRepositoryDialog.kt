@@ -15,7 +15,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.awt.ComposeWindow
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.unit.dp
 import io.github.vinceglb.filekit.compose.rememberDirectoryPickerLauncher
@@ -27,6 +26,7 @@ import org.archivekeep.app.core.persistence.drivers.filesystem.operations.AddFil
 import org.archivekeep.app.core.persistence.drivers.filesystem.operations.AddFileSystemRepositoryOperation.InitStatus
 import org.archivekeep.app.core.persistence.drivers.filesystem.operations.AddFileSystemRepositoryOperation.PreparationStatus
 import org.archivekeep.app.core.persistence.drivers.filesystem.operations.AddFileSystemRepositoryOperation.StorageMarking
+import org.archivekeep.app.desktop.domain.wiring.LocalComposeWindow
 import org.archivekeep.app.desktop.domain.wiring.LocalOperationFactory
 import org.archivekeep.app.desktop.domain.wiring.OperationFactory
 import org.archivekeep.app.desktop.ui.designsystem.dialog.DialogButtonContainer
@@ -86,10 +86,7 @@ class AddFileSystemRepositoryDialog(
     }
 
     @Composable
-    override fun render(
-        window: ComposeWindow,
-        onClose: () -> Unit,
-    ) {
+    override fun render(onClose: () -> Unit) {
         val operationFactory = LocalOperationFactory.current
 
         val coroutineScope = rememberCoroutineScope()
@@ -113,7 +110,7 @@ class AddFileSystemRepositoryDialog(
                 title = "Pick a directory",
                 platformSettings =
                     FileKitPlatformSettings(
-                        parentWindow = window,
+                        parentWindow = LocalComposeWindow.current,
                     ),
             ) { directory ->
                 if (directory != null) {

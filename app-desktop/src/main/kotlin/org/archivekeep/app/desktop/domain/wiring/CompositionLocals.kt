@@ -1,6 +1,7 @@
 package org.archivekeep.app.desktop.domain.wiring
 
 import androidx.compose.runtime.staticCompositionLocalOf
+import androidx.compose.ui.awt.ComposeWindow
 import org.archivekeep.app.core.domain.archives.ArchiveService
 import org.archivekeep.app.core.domain.repositories.RepositoryService
 import org.archivekeep.app.core.domain.storages.StorageRegistry
@@ -33,6 +34,8 @@ val LocalStorageRegistry = staticCompositionLocalOfNotProvided<StorageRegistry>(
 val LocalOperationFactory = staticCompositionLocalOfNotProvided<OperationFactory>()
 
 val LocalRepositoryOpenService = staticCompositionLocalOfNotProvided<RepositoryOpenService>()
+
+val LocalComposeWindow = staticCompositionLocalOfNotProvided<ComposeWindow>()
 
 inline fun <reified T> staticCompositionLocalOfNotProvided() =
     staticCompositionLocalOf<T> {

@@ -1,132 +1,181 @@
 package org.archivekeep.app.desktop.ui.dialogs.wallet
 
+import androidx.compose.desktop.ui.tooling.preview.Preview
+import androidx.compose.foundation.layout.ColumnScope
+import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.awt.ComposeWindow
+import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import org.archivekeep.app.core.persistence.credentials.Credentials
 import org.archivekeep.app.core.persistence.credentials.JoseStorage
 import org.archivekeep.app.desktop.domain.wiring.LocalWalletDataStore
 import org.archivekeep.app.desktop.ui.components.errors.AutomaticErrorMessage
 import org.archivekeep.app.desktop.ui.designsystem.dialog.DialogButtonContainer
 import org.archivekeep.app.desktop.ui.designsystem.dialog.DialogDismissButton
-import org.archivekeep.app.desktop.ui.designsystem.dialog.DialogInnerContainer
-import org.archivekeep.app.desktop.ui.designsystem.dialog.DialogOverlayCard
+import org.archivekeep.app.desktop.ui.designsystem.dialog.DialogPreviewColumn
 import org.archivekeep.app.desktop.ui.designsystem.dialog.DialogPrimaryButton
-import org.archivekeep.app.desktop.ui.dialogs.Dialog
+import org.archivekeep.app.desktop.ui.dialogs.AbstractDialog
 import org.archivekeep.app.desktop.utils.LaunchableAction
+import org.archivekeep.utils.loading.Loadable
 
 class UnlockWalletDialog(
     val onUnlock: (() -> Unit)?,
-) : Dialog {
+) : AbstractDialog<UnlockWalletDialog.State, UnlockWalletDialog.VM>() {
     inner class VM(
         scope: CoroutineScope,
         val joseStorage: JoseStorage<Credentials>,
-        val onClose: () -> Unit,
-    ) {
+        val _onClose: () -> Unit,
+    ) : IVM {
         val openAction =
             LaunchableAction(
                 scope = scope,
             )
 
+        var unlockError = mutableStateOf<Throwable?>(null)
+
+        fun launch(password: String) {
+            openAction.launch {
+                try {
+                    joseStorage.unlock(password)
+                } catch (e: Throwable) {
+                    unlockError.value = e
+                    return@launch
+                }
+
+                try {
+                    onClose()
+                    onUnlock?.let { it() }
+                } catch (e: Throwable) {
+                    println("ERROR: close or onUnlock failed: $e")
+                    e.printStackTrace()
+                }
+            }
+        }
+
+        override fun onClose() {
+            _onClose()
+        }
+    }
+
+    class State(
+        val openAction: LaunchableAction,
+        val unlockError: MutableState<Throwable?>,
+        val onLaunch: (password: String) -> Unit,
+        val onClose: () -> Unit,
+    ) : IState {
         var password by mutableStateOf<String?>(null)
 
-        var unlockError by mutableStateOf<Throwable?>(null)
+        override val title: AnnotatedString =
+            buildAnnotatedString {
+                append("Open wallet")
+            }
 
         val launchOpen by derivedStateOf {
             password?.let { password ->
                 {
-                    openAction.launch {
-                        try {
-                            joseStorage.unlock(password)
-                        } catch (e: Throwable) {
-                            unlockError = e
-                            return@launch
-                        }
-
-                        try {
-                            onClose()
-                            onUnlock?.let { it() }
-                        } catch (e: Throwable) {
-                            println("ERROR: close or onUnlock failed: $e")
-                            e.printStackTrace()
-                        }
-                    }
+                    onLaunch(password)
                 }
             }
         }
     }
 
     @Composable
-    override fun render(
-        window: ComposeWindow,
+    override fun rememberVM(
+        scope: CoroutineScope,
         onClose: () -> Unit,
-    ) {
+    ): VM {
         val joseStorage = LocalWalletDataStore.current
 
-        val scope = rememberCoroutineScope()
-        val vm = remember(scope, joseStorage, onClose) { VM(scope, joseStorage, onClose) }
+        return remember(scope, joseStorage, onClose) { VM(scope, joseStorage, onClose) }
+    }
 
-        DialogOverlayCard(onDismissRequest = onClose) {
-            DialogInnerContainer(
-                buildAnnotatedString {
-                    append("Open wallet")
-                },
-                content = {
+    @Composable
+    override fun rememberState(vm: VM): Loadable<State> =
+        remember(vm) {
+            Loadable.Loaded(
+                State(
+                    vm.openAction,
+                    vm.unlockError,
+                    vm::launch,
+                    vm::onClose,
+                ),
+            )
+        }
+
+    @Composable
+    override fun ColumnScope.renderContent(state: State) {
 //                    if (joseStorage.currentState !is JoseStorage.State.Locked) {
 //                        Text("Wallet already opened")
 //                        return@DialogInnerContainer
 //                    }
 
-                    Spacer(Modifier.height(12.dp))
-                    OutlinedTextField(
-                        vm.password ?: "",
-                        onValueChange = {
-                            vm.password = it
-                        },
-                        visualTransformation = PasswordVisualTransformation(),
-                        placeholder = {
-                            Text("Enter password  ...")
-                        },
-                        singleLine = true,
-                    )
+        Spacer(Modifier.height(12.dp))
+        OutlinedTextField(
+            state.password ?: "",
+            onValueChange = {
+                state.password = it
+            },
+            visualTransformation = PasswordVisualTransformation(),
+            placeholder = {
+                Text("Enter password  ...")
+            },
+            singleLine = true,
+        )
 
-                    vm.unlockError?.let {
-                        AutomaticErrorMessage(it, onResolve = { vm.unlockError = null })
-                    }
-                },
-                bottomContent = {
-                    DialogButtonContainer {
-                        DialogPrimaryButton(
-                            "Authenticate",
-                            onClick = vm.launchOpen ?: {},
-                            enabled =
-                                !vm.openAction.isRunning &&
-                                    vm.launchOpen != null,
-                        )
+        state.unlockError.value?.let {
+            AutomaticErrorMessage(it, onResolve = { state.unlockError.value = null })
+        }
+    }
 
-                        Spacer(modifier = Modifier.weight(1f))
+    @Composable
+    override fun RowScope.renderButtons(state: State) {
+        DialogButtonContainer {
+            DialogPrimaryButton(
+                "Authenticate",
+                onClick = state.launchOpen ?: {},
+                enabled =
+                    !state.openAction.isRunning &&
+                        state.launchOpen != null,
+            )
 
-                        DialogDismissButton(
-                            "Cancel",
-                            onClick = onClose,
-                        )
-                    }
-                },
+            Spacer(modifier = Modifier.weight(1f))
+
+            DialogDismissButton(
+                "Cancel",
+                onClick = state.onClose,
             )
         }
+    }
+}
+
+@Preview
+@Composable
+private fun preview1() {
+    DialogPreviewColumn {
+        val dialog = UnlockWalletDialog(onUnlock = {})
+
+        dialog.renderDialogCard(
+            UnlockWalletDialog.State(
+                LaunchableAction(CoroutineScope(Dispatchers.Main)),
+                mutableStateOf(null),
+                onLaunch = {},
+                onClose = {},
+            ),
+        )
     }
 }

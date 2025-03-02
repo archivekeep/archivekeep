@@ -1,9 +1,14 @@
 package org.archivekeep.app.desktop.ui.dialogs.repository.operations.addpush
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.withStyle
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
@@ -11,7 +16,6 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.onStart
 import org.archivekeep.app.core.domain.repositories.RepositoryService
 import org.archivekeep.app.core.domain.storages.StorageRepository
@@ -25,20 +29,21 @@ import org.archivekeep.app.desktop.domain.data.getSyncCandidates
 import org.archivekeep.app.desktop.domain.wiring.LocalAddPushService
 import org.archivekeep.app.desktop.domain.wiring.LocalRepoService
 import org.archivekeep.app.desktop.domain.wiring.LocalStorageService
+import org.archivekeep.app.desktop.ui.dialogs.AbstractDialog
 import org.archivekeep.app.desktop.utils.stickToFirstNotNullAsState
 import org.archivekeep.files.operations.AddOperation
 import org.archivekeep.utils.loading.Loadable
 import org.archivekeep.utils.loading.mapIfLoadedOrDefault
 import org.archivekeep.utils.loading.mapToLoadable
 
-class AddAndPushDialogViewModel(
+class AddAndPushRepoDialogViewModel(
     val scope: CoroutineScope,
     val storageService: StorageService,
     val repositoryService: RepositoryService,
     val repositoryURI: RepositoryURI,
     val addAndPushOperation: AddAndPushOperation,
-    val onClose: () -> Unit,
-) {
+    val _onClose: () -> Unit,
+) : AbstractDialog.IVM {
     val selectedDestinationRepositories: MutableStateFlow<Set<RepositoryURI>> = MutableStateFlow(emptySet())
     val selectedFilenames: MutableStateFlow<Set<String>> = MutableStateFlow(emptySet())
     val selectedMoves: MutableStateFlow<Set<AddOperation.PreparationResult.Move>> = MutableStateFlow(emptySet())
@@ -56,40 +61,25 @@ class AddAndPushDialogViewModel(
                 ?: addAndPushOperation.prepare().onStart { emit(AddAndPushOperation.NotReadyAddPushProcess) }
         }
 
-    val currentVMState =
-        combine(
-            currentStatusFlow,
-//            repoName,
-            selectedDestinationRepositories,
-            selectedFilenames,
-            selectedMoves,
-            otherRepositoryCandidates.onEach { v ->
-                if (v is Loadable.Loaded) {
-                    selectedDestinationRepositories.value =
-                        v.value
-                            .filter { it.repositoryState.connectionState.isConnected }
-                            .map { it.uri }
-                            .toSet()
-                }
-            },
-        ) { currentStatus, selectedDestinationRepositories, selectedFilenames, selectedMoves, otherRepositoryCandidates ->
-            VMState(
-                currentStatus,
-                selectedDestinationRepositories,
-                selectedFilenames,
-                selectedMoves,
-                otherRepositoryCandidates,
-            )
-        }
-
     data class VMState(
+        val repoName: String,
         val state: AddAndPushOperation.State,
-//        val repoName: String,
-        val selectedDestinationRepositories: Set<RepositoryURI>,
-        val selectedFilenames: Set<String>,
-        val selectedMoves: Set<AddOperation.PreparationResult.Move>,
+        val selectedDestinationRepositories: MutableState<Set<RepositoryURI>>,
+        val selectedFilenames: MutableState<Set<String>>,
+        val selectedMoves: MutableState<Set<AddOperation.PreparationResult.Move>>,
         val otherRepositoryCandidates: Loadable<List<StorageRepository>>,
-    ) {
+        val onCancel: () -> Unit,
+        val onClose: () -> Unit,
+    ) : AbstractDialog.IState {
+        override val title =
+            buildAnnotatedString {
+                withStyle(SpanStyle(fontWeight = FontWeight.Bold)) {
+                    append(repoName)
+                    append(": ")
+                }
+                append("add and push")
+            }
+
         val showLaunch =
             run {
                 state !is LaunchedAddPushProcess || !state.finished
@@ -99,12 +89,12 @@ class AddAndPushDialogViewModel(
             val candidates = otherRepositoryCandidates.mapIfLoadedOrDefault(emptyList()) { it }
             val selections = selectedDestinationRepositories
 
-            val anyOperationSelected = selectedFilenames.isNotEmpty() || selectedMoves.isNotEmpty()
+            val anyOperationSelected = selectedFilenames.value.isNotEmpty() || selectedMoves.value.isNotEmpty()
 
             state is ReadyAddPushProcess &&
                 anyOperationSelected &&
-                selections.isNotEmpty() &&
-                selections.all { selection ->
+                selections.value.isNotEmpty() &&
+                selections.value.all { selection ->
                     candidates
                         .first { it.uri == selection }
                         .repositoryState.connectionState.isConnected
@@ -122,12 +112,16 @@ class AddAndPushDialogViewModel(
 
             state.launch(
                 LaunchOptions(
-                    selectedFilenames,
-                    selectedMoves,
-                    selectedDestinationRepositories,
+                    selectedFilenames.value,
+                    selectedMoves.value,
+                    selectedDestinationRepositories.value,
                 ),
             )
         }
+    }
+
+    override fun onClose() {
+        _onClose()
     }
 
     fun cancel() {
@@ -140,14 +134,14 @@ fun rememberAddAndPushDialogViewModel(
     scope: CoroutineScope,
     repositoryURI: RepositoryURI,
     onClose: () -> Unit,
-): AddAndPushDialogViewModel {
+): AddAndPushRepoDialogViewModel {
     val storageService = LocalStorageService.current
     val repositoryService = LocalRepoService.current
     val addPushOperationService = LocalAddPushService.current
 
     val vm =
         remember(scope, repositoryURI) {
-            AddAndPushDialogViewModel(
+            AddAndPushRepoDialogViewModel(
                 scope,
                 storageService,
                 repositoryService,

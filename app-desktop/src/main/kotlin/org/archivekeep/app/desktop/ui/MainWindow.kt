@@ -15,6 +15,7 @@ import androidx.compose.ui.window.Window
 import androidx.compose.ui.window.WindowPlacement
 import androidx.compose.ui.window.rememberWindowState
 import org.archivekeep.app.desktop.domain.wiring.LocalArchiveOperationLaunchers
+import org.archivekeep.app.desktop.domain.wiring.LocalComposeWindow
 import org.archivekeep.app.desktop.domain.wiring.LocalStorageOperationsLaunchers
 import org.archivekeep.app.desktop.domain.wiring.LocalWalletOperationLaunchers
 import org.archivekeep.app.desktop.domain.wiring.OverlayDialogRenderer
@@ -56,6 +57,7 @@ fun (ApplicationScope).MainWindow() {
                 LocalArchiveOperationLaunchers provides archiveOperationLaunchers,
                 LocalStorageOperationsLaunchers provides storageOperationsLaunchers,
                 LocalWalletOperationLaunchers provides walletOperationLaunchers,
+                LocalComposeWindow provides window,
             ) {
                 Surface(
                     shape =
@@ -76,7 +78,7 @@ fun (ApplicationScope).MainWindow() {
                 ) {
                     MainWindowLayout(onCloseRequest = ::exitApplication)
 
-                    dialogRenderer.render(window)
+                    dialogRenderer.render()
                 }
             }
         }

@@ -15,7 +15,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.awt.ComposeWindow
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
@@ -56,10 +55,7 @@ class AddRemoteRepositoryDialog : Dialog {
     }
 
     @Composable
-    override fun render(
-        window: ComposeWindow,
-        onClose: () -> Unit,
-    ) {
+    override fun render(onClose: () -> Unit) {
         val operationFactory = LocalOperationFactory.current
 
         val coroutineScope = rememberCoroutineScope()

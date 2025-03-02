@@ -1,8 +1,10 @@
 package org.archivekeep.app.desktop.ui.dialogs.repository.management
 
+import androidx.compose.desktop.ui.tooling.preview.Preview
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.Spacer
@@ -14,10 +16,9 @@ import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -30,16 +31,16 @@ import androidx.compose.ui.unit.sp
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.async
-import kotlinx.coroutines.flow.SharingStarted
-import kotlinx.coroutines.flow.stateIn
 import org.archivekeep.app.core.domain.archives.ArchiveService
 import org.archivekeep.app.core.domain.archives.AssociatedArchive
 import org.archivekeep.app.core.domain.repositories.Repository
+import org.archivekeep.app.core.domain.repositories.RepositoryInformation
 import org.archivekeep.app.core.domain.repositories.RepositoryService
-import org.archivekeep.app.core.domain.repositories.ResolvedRepositoryState
-import org.archivekeep.app.core.domain.storages.Storage
+import org.archivekeep.app.core.domain.storages.KnownStorage
 import org.archivekeep.app.core.operations.AssociateRepositoryOperation
 import org.archivekeep.app.core.operations.AssociateRepositoryOperation.Target
+import org.archivekeep.app.core.persistence.platform.demo.Documents
+import org.archivekeep.app.core.persistence.platform.demo.LaptopSSD
 import org.archivekeep.app.core.utils.generics.ExecutionOutcome
 import org.archivekeep.app.core.utils.identifiers.RepositoryURI
 import org.archivekeep.app.desktop.domain.wiring.LocalArchiveService
@@ -49,10 +50,14 @@ import org.archivekeep.app.desktop.domain.wiring.OperationFactory
 import org.archivekeep.app.desktop.ui.components.errors.AutomaticErrorMessage
 import org.archivekeep.app.desktop.ui.designsystem.dialog.DialogButtonContainer
 import org.archivekeep.app.desktop.ui.designsystem.dialog.DialogDismissButton
+import org.archivekeep.app.desktop.ui.designsystem.dialog.DialogPreviewColumn
 import org.archivekeep.app.desktop.ui.designsystem.dialog.DialogPrimaryButton
 import org.archivekeep.app.desktop.ui.dialogs.repository.AbstractRepositoryDialog
 import org.archivekeep.app.desktop.ui.dialogs.repository.management.AssociateRepositoryDialog.VM
+import org.archivekeep.app.desktop.ui.dialogs.repository.management.AssociateRepositoryDialog.VM.State
+import org.archivekeep.app.desktop.utils.collectLoadableFlow
 import org.archivekeep.app.desktop.utils.produceState
+import org.archivekeep.files.RepositoryAssociationGroupId
 import org.archivekeep.utils.loading.Loadable
 import org.archivekeep.utils.loading.mapLoadedData
 
@@ -66,26 +71,34 @@ class AssociateRepositoryDialog(
         val repository: Repository,
         val operationFactory: OperationFactory,
         val _onClose: () -> Unit,
-    ) : IVM<VM.State> {
+    ) : IVM {
         data class State(
             val syncCandidates: List<AssociatedArchive>,
-            val currentArchive: AssociatedArchive,
-            val currentRepo: Pair<Storage, ResolvedRepositoryState>,
-        ) : BaseState {
+            val currentAssociationId: RepositoryAssociationGroupId?,
+            val currentRepoStorage: KnownStorage,
+            val currentRepoInformation: RepositoryInformation,
+            val selectedItem: MutableState<Target?>,
+            val lastLaunch: MutableState<Deferred<ExecutionOutcome>?>,
+            val onLaunch: () -> Unit,
+            val onClose: () -> Unit,
+        ) : IState {
             override val title =
                 buildAnnotatedString {
-                    if (currentArchive.associationId != null) {
+                    if (currentAssociationId != null) {
                         append("Re-associate repository")
                     } else {
                         append("Associate repository")
                     }
                 }
+
+            val canLaunch: Boolean
+                get() = selectedItem.value != null
         }
 
         val uri = repository.uri
 
-        var selectedItem by mutableStateOf<Target?>(null)
-        var lastLaunch by mutableStateOf<Deferred<ExecutionOutcome>?>(null)
+        val selectedItem = mutableStateOf<Target?>(null)
+        val lastLaunch = mutableStateOf<Deferred<ExecutionOutcome>?>(null)
 
         val operation =
             operationFactory.get(AssociateRepositoryOperation.Factory::class.java).create(
@@ -93,39 +106,24 @@ class AssociateRepositoryDialog(
                 uri,
             )
 
-        override val stateFlow =
-            archiveService
-                .allArchives
-                .mapLoadedData { allArchives ->
-                    val syncCandidates =
-                        allArchives
-                            .filter {
-                                it.repositories.none { it.second.uri == uri }
-                            }
-
-                    val currentArchive =
-                        allArchives
-                            .first { it.repositories.any { it.second.uri == uri } }
-
-                    val currentRepo = currentArchive.repositories.first { it.second.uri == uri }
-
-                    State(syncCandidates, currentArchive, currentRepo)
-                }.stateIn(scope, SharingStarted.WhileSubscribed(), Loadable.Loading)
-
         override fun onClose() {
             _onClose()
         }
 
         fun launch() {
-            lastLaunch =
+            lastLaunch.value =
                 scope.async {
-                    val result = operation.execute(selectedItem ?: throw IllegalStateException("Must select first"))
+                    val result =
+                        operation.execute(
+                            selectedItem.value ?: throw IllegalStateException("Must select first"),
+                        )
 
                     when (result) {
                         is ExecutionOutcome.Failed -> {
                             println("Error: ${result.cause}")
                             result.cause.printStackTrace()
                         }
+
                         is ExecutionOutcome.Success -> onClose()
                     }
 
@@ -135,7 +133,7 @@ class AssociateRepositoryDialog(
     }
 
     @Composable
-    override fun createVM(
+    override fun rememberVM(
         scope: CoroutineScope,
         repository: Repository,
         onClose: () -> Unit,
@@ -157,26 +155,54 @@ class AssociateRepositoryDialog(
     }
 
     @Composable
-    override fun renderContent(
-        vm: VM,
-        state: VM.State,
-    ) {
-        val (syncCandidates, currentArchive, currentRepo) = state
+    override fun rememberState(vm: VM): Loadable<State> =
+        remember(vm) {
+            vm.archiveService
+                .allArchives
+                .mapLoadedData { allArchives ->
+                    val syncCandidates =
+                        allArchives
+                            .filter {
+                                it.repositories.none { it.second.uri == uri }
+                            }
+
+                    val currentArchive =
+                        allArchives
+                            .first { it.repositories.any { it.second.uri == uri } }
+
+                    val currentRepo = currentArchive.repositories.first { it.second.uri == uri }
+
+                    State(
+                        syncCandidates,
+                        currentArchive.associationId,
+                        currentRepo.first.knownStorage,
+                        currentRepo.second.information,
+                        vm.selectedItem,
+                        vm.lastLaunch,
+                        onLaunch = vm::launch,
+                        onClose = vm::onClose,
+                    )
+                }
+        }.collectLoadableFlow()
+
+    @Composable
+    override fun ColumnScope.renderContent(state: VM.State) {
+        val (syncCandidates, currentAssociationId, currentRepoStorage, currentRepoInformation) = state
 
         Text(
-            remember(currentArchive, currentRepo) {
+            remember(currentAssociationId, currentRepoStorage, currentRepoInformation) {
                 buildAnnotatedString {
-                    if (currentArchive.associationId != null) {
+                    if (currentAssociationId != null) {
                         append("Re-associate repository ")
                     } else {
                         append("Associate repository ")
                     }
                     withStyle(style = SpanStyle(fontWeight = FontWeight.Bold)) {
-                        append(currentRepo.second.displayName)
+                        append(currentRepoInformation.displayName)
                     }
                     append(" in storage ")
                     withStyle(style = SpanStyle(fontWeight = FontWeight.Bold)) {
-                        append(currentRepo.first.label)
+                        append(currentRepoStorage.label)
                     }
                     append(" to:")
                 }
@@ -191,11 +217,11 @@ class AssociateRepositoryDialog(
                     val associationId = aa.associationId ?: return@forEach
 
                     val selected =
-                        vm.selectedItem.let { it is Target.Archive && it.associatedArchiveId == aa.associationId }
+                        state.selectedItem.value.let { it is Target.Archive && it.associatedArchiveId == aa.associationId }
 
                     Surface(
                         onClick = {
-                            vm.selectedItem = Target.Archive(associationId)
+                            state.selectedItem.value = Target.Archive(associationId)
                         },
                         selected = selected,
                         shape = MaterialTheme.shapes.small,
@@ -254,11 +280,11 @@ class AssociateRepositoryDialog(
                 .forEach { aa ->
                     aa.repositories.forEach { (_, repo) ->
                         val selected =
-                            vm.selectedItem.let { it is Target.UnassociatedRepository && it.repositoryURI == repo.uri }
+                            state.selectedItem.value.let { it is Target.UnassociatedRepository && it.repositoryURI == repo.uri }
 
                         Surface(
                             onClick = {
-                                vm.selectedItem = Target.UnassociatedRepository(repo.uri)
+                                state.selectedItem.value = Target.UnassociatedRepository(repo.uri)
                             },
                             selected = selected,
                             shape = MaterialTheme.shapes.small,
@@ -299,10 +325,10 @@ class AssociateRepositoryDialog(
                     }
                 }
 
-            vm.lastLaunch?.let { lastLaunch ->
+            state.lastLaunch.value?.let { lastLaunch ->
                 lastLaunch.produceState().value.let { result ->
                     if (result is ExecutionOutcome.Failed) {
-                        AutomaticErrorMessage(result, onResolve = { vm.lastLaunch = null })
+                        AutomaticErrorMessage(result, onResolve = { state.lastLaunch.value = null })
                     }
                 }
             }
@@ -310,21 +336,44 @@ class AssociateRepositoryDialog(
     }
 
     @Composable
-    override fun RowScope.renderButtons(vm: VM) {
+    override fun RowScope.renderButtons(state: VM.State) {
         DialogButtonContainer {
             DialogPrimaryButton(
                 "Associate",
-                onClick = vm::launch,
-                enabled = vm.selectedItem != null,
+                onClick = state.onLaunch,
+                enabled = state.canLaunch,
             )
 
             Spacer(modifier = Modifier.weight(1f))
 
             DialogDismissButton(
                 "Cancel",
-                onClick = vm::onClose,
+                onClick = state.onClose,
                 enabled = true,
             )
         }
+    }
+}
+
+@Composable
+@Preview
+private fun Preview() {
+    DialogPreviewColumn {
+        val DocumentsInLaptop = Documents.inStorage(LaptopSSD.reference).storageRepository
+
+        val dialog = AssociateRepositoryDialog(DocumentsInLaptop.uri)
+
+        dialog.renderDialogCard(
+            VM.State(
+                emptyList(),
+                null,
+                KnownStorage(DocumentsInLaptop.storage.uri, null, emptyList()),
+                RepositoryInformation(null, "A Repo"),
+                mutableStateOf(null),
+                mutableStateOf(null),
+                onLaunch = {},
+                onClose = {},
+            ),
+        )
     }
 }

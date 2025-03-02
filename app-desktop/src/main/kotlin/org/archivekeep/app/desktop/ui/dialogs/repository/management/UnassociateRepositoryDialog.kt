@@ -1,122 +1,182 @@
 package org.archivekeep.app.desktop.ui.dialogs.repository.management
 
+import androidx.compose.desktop.ui.tooling.preview.Preview
+import androidx.compose.foundation.layout.ColumnScope
+import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.awt.ComposeWindow
+import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.withStyle
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
+import org.archivekeep.app.core.domain.archives.ArchiveService
+import org.archivekeep.app.core.domain.repositories.Repository
+import org.archivekeep.app.core.domain.repositories.RepositoryInformation
+import org.archivekeep.app.core.domain.repositories.RepositoryService
+import org.archivekeep.app.core.domain.storages.KnownStorage
+import org.archivekeep.app.core.persistence.platform.demo.Documents
+import org.archivekeep.app.core.persistence.platform.demo.LaptopSSD
 import org.archivekeep.app.core.utils.identifiers.RepositoryURI
 import org.archivekeep.app.desktop.domain.wiring.LocalArchiveService
 import org.archivekeep.app.desktop.domain.wiring.LocalRepoService
-import org.archivekeep.app.desktop.ui.components.LoadableGuard
 import org.archivekeep.app.desktop.ui.designsystem.dialog.DialogButtonContainer
 import org.archivekeep.app.desktop.ui.designsystem.dialog.DialogDismissButton
-import org.archivekeep.app.desktop.ui.designsystem.dialog.DialogInnerContainer
-import org.archivekeep.app.desktop.ui.designsystem.dialog.DialogOverlayCard
+import org.archivekeep.app.desktop.ui.designsystem.dialog.DialogPreviewColumn
 import org.archivekeep.app.desktop.ui.designsystem.dialog.DialogPrimaryButton
-import org.archivekeep.app.desktop.ui.dialogs.Dialog
+import org.archivekeep.app.desktop.ui.dialogs.repository.AbstractRepositoryDialog
 import org.archivekeep.app.desktop.utils.collectLoadableFlow
+import org.archivekeep.utils.loading.Loadable
 import org.archivekeep.utils.loading.mapLoadedData
 
 class UnassociateRepositoryDialog(
-    val uri: RepositoryURI,
-) : Dialog {
+    uri: RepositoryURI,
+) : AbstractRepositoryDialog<UnassociateRepositoryDialog.State, UnassociateRepositoryDialog.VM>(uri) {
+    data class State(
+        val currentRepoStorage: KnownStorage,
+        val currentRepoInformation: RepositoryInformation,
+        val onLaunch: () -> Unit,
+        val onClose: () -> Unit,
+    ) : IState {
+        override val title: AnnotatedString =
+            buildAnnotatedString {
+                append("Unassociate repository")
+            }
+    }
+
+    inner class VM(
+        val coroutineScope: CoroutineScope,
+        val archiveService: ArchiveService,
+        repositoryService: RepositoryService,
+        val _onClose: () -> Unit,
+    ) : IVM {
+        val repository = repositoryService.getRepository(uri)
+
+        var runningJob by mutableStateOf<Job?>(null)
+
+        fun launch() {
+            runningJob =
+                coroutineScope.launch {
+                    repository.updateMetadata {
+                        it.copy(
+                            associationGroupId = null,
+                        )
+                    }
+                    onClose()
+                }
+        }
+
+        override fun onClose() {
+            _onClose()
+        }
+    }
+
     @Composable
-    override fun render(
-        window: ComposeWindow,
+    override fun rememberVM(
+        scope: CoroutineScope,
+        repository: Repository,
         onClose: () -> Unit,
-    ) {
+    ): VM {
         val archiveService = LocalArchiveService.current
         val repositoryService = LocalRepoService.current
 
-        val stateLoadable =
-            remember(archiveService, uri) {
-                archiveService
-                    .allArchives
-                    .mapLoadedData { allArchives ->
-                        val currentArchive =
-                            allArchives
-                                .first { it.repositories.any { it.second.uri == uri } }
+        return remember {
+            VM(
+                scope,
+                archiveService,
+                repositoryService,
+                _onClose = onClose,
+            )
+        }
+    }
 
-                        val currentRepo = currentArchive.repositories.first { it.second.uri == uri }
+    @Composable
+    override fun rememberState(vm: VM): Loadable<State> =
+        remember(vm) {
+            vm.archiveService
+                .allArchives
+                .mapLoadedData { allArchives ->
+                    val currentArchive =
+                        allArchives
+                            .first { it.repositories.any { it.second.uri == uri } }
 
-                        Pair(currentArchive, currentRepo)
+                    val currentRepo = currentArchive.repositories.first { it.second.uri == uri }
+
+                    // TODO: check if already not-associated -> not possible to unassociate
+
+                    State(
+                        currentRepo.first.knownStorage,
+                        currentRepo.second.information,
+                        onLaunch = vm::launch,
+                        onClose = vm::onClose,
+                    )
+                }
+        }.collectLoadableFlow()
+
+    @Composable
+    override fun ColumnScope.renderContent(state: State) {
+        Text(
+            remember(state.currentRepoStorage, state.currentRepoInformation) {
+                buildAnnotatedString {
+                    append("Unassociate repository ")
+
+                    withStyle(style = SpanStyle(fontWeight = FontWeight.Bold)) {
+                        append(state.currentRepoInformation.displayName)
                     }
-            }.collectLoadableFlow()
+                    append(" in storage ")
+                    withStyle(style = SpanStyle(fontWeight = FontWeight.Bold)) {
+                        append(state.currentRepoStorage.label)
+                    }
+                    append(".")
+                }
+            },
+        )
+    }
 
-        val repository = repositoryService.getRepository(uri)
+    @Composable
+    override fun RowScope.renderButtons(state: State) {
+        DialogButtonContainer {
+            DialogPrimaryButton(
+                "Unassociate",
+                onClick = state.onLaunch,
+                enabled = true,
+            )
 
-        val coroutineScope = rememberCoroutineScope()
-        var runningJob by remember {
-            mutableStateOf<Job?>(null)
+            Spacer(modifier = Modifier.weight(1f))
+
+            DialogDismissButton(
+                "Cancel",
+                onClick = state.onClose,
+                enabled = true,
+            )
         }
+    }
+}
 
-        DialogOverlayCard(onDismissRequest = onClose) {
-            LoadableGuard(
-                stateLoadable,
-            ) { (currentArchive, currentRepo) ->
-                DialogInnerContainer(
-                    buildAnnotatedString {
-                        append("Unassociate repository")
-                    },
-                    content = {
-                        Text(
-                            remember(currentArchive, currentRepo) {
-                                buildAnnotatedString {
-                                    append("Unassociate repository ")
+@Composable
+@Preview
+private fun Preview() {
+    DialogPreviewColumn {
+        val DocumentsInLaptop = Documents.inStorage(LaptopSSD.reference).storageRepository
 
-                                    withStyle(style = SpanStyle(fontWeight = FontWeight.Bold)) {
-                                        append(currentRepo.second.displayName)
-                                    }
-                                    append(" in storage ")
-                                    withStyle(style = SpanStyle(fontWeight = FontWeight.Bold)) {
-                                        append(currentRepo.first.label)
-                                    }
-                                    append(".")
-                                }
-                            },
-                        )
-                    },
-                    bottomContent = {
-                        DialogButtonContainer {
-                            DialogPrimaryButton(
-                                "Unassociate",
-                                onClick = {
-                                    runningJob =
-                                        coroutineScope.launch {
-                                            repository.updateMetadata {
-                                                it.copy(
-                                                    associationGroupId = null,
-                                                )
-                                            }
-                                            onClose()
-                                        }
-                                },
-                                enabled = true,
-                            )
+        val dialog = UnassociateRepositoryDialog(DocumentsInLaptop.uri)
 
-                            Spacer(modifier = Modifier.weight(1f))
-
-                            DialogDismissButton(
-                                "Cancel",
-                                onClick = onClose,
-                                enabled = true,
-                            )
-                        }
-                    },
-                )
-            }
-        }
+        dialog.renderDialogCard(
+            UnassociateRepositoryDialog.State(
+                KnownStorage(DocumentsInLaptop.storage.uri, null, emptyList()),
+                RepositoryInformation(null, "A Repo"),
+                onLaunch = {},
+                onClose = {},
+            ),
+        )
     }
 }
