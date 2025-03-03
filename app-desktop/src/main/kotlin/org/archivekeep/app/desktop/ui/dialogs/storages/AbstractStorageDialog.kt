@@ -3,37 +3,74 @@ package org.archivekeep.app.desktop.ui.dialogs.storages
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.buildAnnotatedString
+import kotlinx.coroutines.CoroutineScope
 import org.archivekeep.app.core.domain.storages.Storage
 import org.archivekeep.app.core.utils.identifiers.StorageURI
 import org.archivekeep.app.desktop.domain.wiring.LocalStorageService
 import org.archivekeep.app.desktop.ui.components.LoadableGuard
 import org.archivekeep.app.desktop.ui.designsystem.dialog.DialogButtonContainer
+import org.archivekeep.app.desktop.ui.designsystem.dialog.DialogCard
 import org.archivekeep.app.desktop.ui.designsystem.dialog.DialogDismissButton
 import org.archivekeep.app.desktop.ui.designsystem.dialog.DialogInnerContainer
 import org.archivekeep.app.desktop.ui.designsystem.dialog.DialogOverlayCard
 import org.archivekeep.app.desktop.ui.dialogs.Dialog
 import org.archivekeep.app.desktop.utils.collectLoadableFlow
+import org.archivekeep.utils.loading.Loadable
 import org.archivekeep.utils.loading.mapLoadedData
 
-abstract class AbstractStorageDialog<VM : AbstractStorageDialog.IVM>(
+abstract class AbstractStorageDialog<T_State : AbstractStorageDialog.IState, T_VM : Any>(
     val uri: StorageURI,
 ) : Dialog {
-    interface IVM {
-        val title: String
+    interface IState {
+        val title: AnnotatedString
     }
 
     @Composable
-    abstract fun createVM(storage: Storage): VM
+    abstract fun rememberVM(
+        scope: CoroutineScope,
+        storage: Storage,
+        onClose: () -> Unit,
+    ): T_VM
 
     @Composable
-    abstract fun renderContent(vm: VM)
+    protected abstract fun rememberState(vm: T_VM): Loadable<T_State>
+
+    @Composable
+    abstract fun renderContent(state: T_State)
 
     @Composable
     abstract fun RowScope.renderButtons(
         onClose: () -> Unit,
-        vm: VM,
+        state: T_State,
     )
+
+    @Composable
+    fun renderDialogContents(
+        state: T_State,
+        onClose: () -> Unit,
+    ) {
+        DialogInnerContainer(
+            remember {
+                buildAnnotatedString {
+                    append(state.title)
+                }
+            },
+            content = { renderContent(state) },
+            bottomContent = {
+                DialogButtonContainer {
+                    renderButtons(onClose, state)
+                }
+            },
+        )
+    }
+
+    @Composable
+    internal fun renderDialogCardForPreview(state: T_State) {
+        DialogCard { renderDialogContents(state, onClose = {}) }
+    }
 
     @Composable
     override fun render(onClose: () -> Unit) {
@@ -48,31 +85,18 @@ abstract class AbstractStorageDialog<VM : AbstractStorageDialog.IVM>(
             LoadableGuard(
                 storageLoadable,
             ) { storage ->
-
                 if (storage != null) {
-                    val vm = createVM(storage)
-                    DialogInnerContainer(
-                        remember {
-                            buildAnnotatedString {
-                                append(vm.title)
-                            }
-                        },
-                        content = {
-                            renderContent(vm)
-                        },
-                        bottomContent = {
-                            DialogButtonContainer {
-                                renderButtons(onClose, vm)
-                            }
-                        },
-                    )
+                    val vm = rememberVM(rememberCoroutineScope(), storage, onClose)
+
+                    LoadableGuard(rememberState(vm)) { state ->
+                        renderDialogContents(state, onClose)
+                    }
                 } else {
                     DialogInnerContainer(
                         buildAnnotatedString {
                             append("Storage `$uri` not found")
                         },
-                        content = {
-                        },
+                        content = {},
                         bottomContent = {
                             DialogDismissButton("Dismiss", onClick = onClose)
                         },

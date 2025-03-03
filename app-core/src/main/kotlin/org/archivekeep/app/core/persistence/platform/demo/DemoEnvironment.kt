@@ -15,6 +15,7 @@ import org.archivekeep.app.core.domain.repositories.Repository
 import org.archivekeep.app.core.domain.repositories.RepositoryEncryptionType
 import org.archivekeep.app.core.domain.repositories.RepositoryInformation
 import org.archivekeep.app.core.domain.repositories.ResolvedRepositoryState
+import org.archivekeep.app.core.domain.storages.KnownStorage
 import org.archivekeep.app.core.domain.storages.Storage
 import org.archivekeep.app.core.domain.storages.StorageConnection
 import org.archivekeep.app.core.domain.storages.StorageDriver
@@ -378,3 +379,26 @@ fun String.toSlug() =
         .replace("[^a-z\\d\\s]".toRegex(), "-")
         .replace("-+".toRegex(), "-")
         .trim('-')
+
+fun DemoEnvironment.DemoPhysicalMedium.asKnownStorage(): KnownStorage =
+    KnownStorage(
+        this.uri,
+        null,
+        this.repositories.map {
+            it.inStorage(this.reference).asRegisteredRepository()
+        },
+    )
+
+fun DemoEnvironment.DemoPhysicalMedium.asKnownRegisteredStorage(): KnownStorage =
+    KnownStorage(
+        this.uri,
+        RegisteredStorage(
+            this.uri,
+            this.displayName,
+        ),
+        this.repositories.map {
+            it.inStorage(this.reference).asRegisteredRepository()
+        },
+    )
+
+fun DemoEnvironment.MockedRepository.asRegisteredRepository(): RegisteredRepository = RegisteredRepository(this.uri, this.displayName)

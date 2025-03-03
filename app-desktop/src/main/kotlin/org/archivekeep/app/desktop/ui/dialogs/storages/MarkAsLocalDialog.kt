@@ -1,5 +1,6 @@
 package org.archivekeep.app.desktop.ui.dialogs.storages
 
+import androidx.compose.desktop.ui.tooling.preview.Preview
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.padding
@@ -11,42 +12,91 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
+import org.archivekeep.app.core.domain.storages.KnownStorage
 import org.archivekeep.app.core.domain.storages.Storage
+import org.archivekeep.app.core.persistence.platform.demo.asKnownStorage
+import org.archivekeep.app.core.persistence.platform.demo.hddA
+import org.archivekeep.app.core.persistence.registry.RegistryDataStore
 import org.archivekeep.app.core.utils.identifiers.StorageURI
 import org.archivekeep.app.desktop.domain.wiring.LocalRegistry
 import org.archivekeep.app.desktop.ui.designsystem.dialog.DialogDismissButton
+import org.archivekeep.app.desktop.ui.designsystem.dialog.DialogPreviewColumn
 import org.archivekeep.app.desktop.ui.designsystem.dialog.DialogPrimaryButton
+import org.archivekeep.app.desktop.ui.utils.appendBoldSpan
+import org.archivekeep.utils.loading.Loadable
 
 class MarkAsLocalDialog(
     uri: StorageURI,
-) : AbstractStorageDialog<MarkAsLocalDialog.VM>(uri) {
+) : AbstractStorageDialog<MarkAsLocalDialog.State, MarkAsLocalDialog.VM>(uri) {
     class VM(
-        val storage: Storage,
-    ) : IVM {
-        override val title = "Mark as local"
+        val coroutineScope: CoroutineScope,
+        val registry: RegistryDataStore,
+        val storage: KnownStorage,
+        val onClose: () -> Unit,
+    ) {
+        var runningJob by mutableStateOf<Job?>(null)
+
+        fun launch() {
+            runningJob =
+                coroutineScope.launch {
+                    registry.updateStorage(
+                        storage.storageURI,
+                    ) {
+                        it.copy(
+                            isLocal = true,
+                        )
+                    }
+                    onClose()
+                }
+        }
+    }
+
+    class State(
+        val storage: KnownStorage,
+        val onLaunch: () -> Unit,
+    ) : IState {
+        override val title = buildAnnotatedString { append("Mark storage as local") }
     }
 
     @Composable
-    override fun createVM(storage: Storage): VM = remember { VM(storage) }
+    override fun rememberVM(
+        scope: CoroutineScope,
+        storage: Storage,
+        onClose: () -> Unit,
+    ): VM {
+        val registry = LocalRegistry.current
+        val coroutineScope = rememberCoroutineScope()
+
+        return remember {
+            VM(coroutineScope, registry, storage.knownStorage, onClose)
+        }
+    }
 
     @Composable
-    override fun renderContent(vm: VM) {
+    override fun rememberState(vm: VM): Loadable<State> =
+        remember {
+            Loadable.Loaded(
+                State(
+                    vm.storage,
+                    vm::launch,
+                ),
+            )
+        }
+
+    @Composable
+    override fun renderContent(state: State) {
         Text(
             modifier = Modifier.padding(bottom = 4.dp),
             text =
                 buildAnnotatedString {
                     append("Mark storage ")
-                    withStyle(SpanStyle(fontWeight = FontWeight.Bold)) {
-                        append(vm.storage.label)
-                    }
-                    append(" as local")
+                    appendBoldSpan(state.storage.label)
+                    append(" as local.")
                 },
         )
     }
@@ -54,31 +104,28 @@ class MarkAsLocalDialog(
     @Composable
     override fun RowScope.renderButtons(
         onClose: () -> Unit,
-        vm: VM,
+        state: State,
     ) {
-        val registry = LocalRegistry.current
-        val coroutineScope = rememberCoroutineScope()
-        var runningJob by remember {
-            mutableStateOf<Job?>(null)
-        }
-
         DialogPrimaryButton(
             "Mark as local",
-            onClick = {
-                runningJob =
-                    coroutineScope.launch {
-                        registry.updateStorage(
-                            uri,
-                        ) {
-                            it.copy(
-                                isLocal = true,
-                            )
-                        }
-                        onClose()
-                    }
-            },
+            onClick = state.onLaunch,
         )
         Spacer(Modifier.weight(1f))
         DialogDismissButton("Cancel", onClick = onClose)
+    }
+}
+
+@Preview
+@Composable
+private fun preview1() {
+    DialogPreviewColumn {
+        val dialog = MarkAsLocalDialog(hddA.uri)
+
+        dialog.renderDialogCardForPreview(
+            MarkAsLocalDialog.State(
+                hddA.asKnownStorage(),
+                onLaunch = {},
+            ),
+        )
     }
 }
