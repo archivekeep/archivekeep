@@ -14,10 +14,7 @@ import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -35,11 +32,11 @@ import org.archivekeep.app.core.utils.identifiers.RepositoryURI
 import org.archivekeep.app.desktop.domain.wiring.LocalAddOperationSupervisorService
 import org.archivekeep.app.desktop.ui.components.FileManySelect
 import org.archivekeep.app.desktop.ui.components.ItemManySelect
-import org.archivekeep.app.desktop.ui.designsystem.dialog.DialogButtonContainer
 import org.archivekeep.app.desktop.ui.designsystem.dialog.DialogDismissButton
 import org.archivekeep.app.desktop.ui.designsystem.dialog.DialogPreviewColumn
 import org.archivekeep.app.desktop.ui.designsystem.dialog.DialogPrimaryButton
 import org.archivekeep.app.desktop.ui.dialogs.repository.AbstractRepositoryDialog
+import org.archivekeep.app.desktop.ui.utils.appendBoldSpan
 import org.archivekeep.app.desktop.utils.collectAsLoadable
 import org.archivekeep.app.desktop.utils.derivedMutableStateOf
 import org.archivekeep.app.desktop.utils.stickToFirstNotNull
@@ -61,11 +58,8 @@ class UpdateIndexOperationDialog(
     ) : IState {
         override val title =
             buildAnnotatedString {
-                append("Update index of ")
-
-                withStyle(style = SpanStyle(fontWeight = FontWeight.Bold)) {
-                    append(archiveName)
-                }
+                appendBoldSpan(archiveName)
+                append(" - index update")
             }
 
         val preparedResult = (operationState as? AddOperationSupervisor.Prepared)?.result
@@ -191,33 +185,31 @@ class UpdateIndexOperationDialog(
             (state.operationState as AddOperationSupervisor.Prepared).launch(state.launchOptions.value)
         }
 
-        DialogButtonContainer {
-            var closeShown = false
+        var closeShown = false
 
-            when (val opState = state.operationState) {
-                AddOperationSupervisor.ExecutionState.NotRunning -> {
+        when (val opState = state.operationState) {
+            AddOperationSupervisor.ExecutionState.NotRunning -> {
+                DialogPrimaryButton("Execute index update", onClick = {}, enabled = false)
+            }
+
+            is AddOperationSupervisor.ExecutionState.Running -> {
+                if (opState.finished) {
+                    DialogDismissButton("Close", state.onClose)
+                    closeShown = true
+                } else {
                     DialogPrimaryButton("Execute index update", onClick = {}, enabled = false)
-                }
-
-                is AddOperationSupervisor.ExecutionState.Running -> {
-                    if (opState.finished) {
-                        DialogDismissButton("Close", state.onClose)
-                        closeShown = true
-                    } else {
-                        DialogPrimaryButton("Execute index update", onClick = {}, enabled = false)
-                        Text("Running ...")
-                    }
-                }
-
-                is AddOperationSupervisor.Prepared -> {
-                    DialogPrimaryButton("Execute index update", onClick = onTriggerExecute, enabled = true)
+                    Text("Running ...")
                 }
             }
 
-            if (!closeShown) {
-                Spacer(Modifier.weight(1f))
-                DialogDismissButton("Dismiss", state.onClose)
+            is AddOperationSupervisor.Prepared -> {
+                DialogPrimaryButton("Execute index update", onClick = onTriggerExecute, enabled = true)
             }
+        }
+
+        if (!closeShown) {
+            Spacer(Modifier.weight(1f))
+            DialogDismissButton("Dismiss", state.onClose)
         }
     }
 }

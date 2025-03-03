@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ProvideTextStyle
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -21,19 +22,26 @@ fun DialogInnerContainer(
     bottomContent: @Composable () -> Unit,
 ) {
     Column(
-        modifier = Modifier.padding(18.dp).width(IntrinsicSize.Max).defaultMinSize(minWidth = 400.dp, minHeight = 300.dp),
+        modifier =
+            Modifier
+                .padding(DialogContentPadding)
+                .width(IntrinsicSize.Min)
+                .defaultMinSize(minWidth = 400.dp, minHeight = 5.dp),
         verticalArrangement = Arrangement.SpaceBetween,
     ) {
         Column(
             modifier = Modifier.weight(1f, fill = false),
+            verticalArrangement = Arrangement.Bottom,
         ) {
             Text(
                 title,
-                modifier = Modifier.padding(bottom = 16.dp),
-                style = MaterialTheme.typography.titleLarge,
+                modifier = Modifier.padding(top = DialogTitleTopPadding, bottom = DialogTitleContentSpacing),
+                style = DialogTitleStyle,
             )
 
-            content()
+            ProvideTextStyle(MaterialTheme.typography.bodyMedium) {
+                content()
+            }
         }
 
         bottomContent()

@@ -19,16 +19,14 @@ import org.archivekeep.app.core.domain.repositories.Repository
 import org.archivekeep.app.core.operations.addpush.AddAndPushOperation.LaunchedAddPushProcess
 import org.archivekeep.app.core.operations.addpush.AddAndPushOperation.NotReadyAddPushProcess
 import org.archivekeep.app.core.operations.addpush.AddAndPushOperation.ReadyAddPushProcess
-import org.archivekeep.app.core.persistence.platform.demo.Documents
-import org.archivekeep.app.core.persistence.platform.demo.LaptopSSD
-import org.archivekeep.app.core.persistence.platform.demo.hddA
-import org.archivekeep.app.core.persistence.platform.demo.hddB
+import org.archivekeep.app.core.persistence.platform.demo.DocumentsInHDDA
+import org.archivekeep.app.core.persistence.platform.demo.DocumentsInHDDB
+import org.archivekeep.app.core.persistence.platform.demo.DocumentsInLaptopSSD
 import org.archivekeep.app.core.utils.identifiers.RepositoryURI
 import org.archivekeep.app.desktop.ui.components.DestinationManySelect
 import org.archivekeep.app.desktop.ui.components.FileManySelect
 import org.archivekeep.app.desktop.ui.components.ItemManySelect
 import org.archivekeep.app.desktop.ui.components.LoadableGuard
-import org.archivekeep.app.desktop.ui.designsystem.dialog.DialogButtonContainer
 import org.archivekeep.app.desktop.ui.designsystem.dialog.DialogDismissButton
 import org.archivekeep.app.desktop.ui.designsystem.dialog.DialogPreviewColumn
 import org.archivekeep.app.desktop.ui.designsystem.dialog.DialogPrimaryButton
@@ -147,48 +145,42 @@ class AddAndPushRepoDialog(
 
     @Composable
     override fun RowScope.renderButtons(state: VMState) {
-        DialogButtonContainer {
-            if (state.showLaunch) {
-                DialogPrimaryButton(
-                    "Launch",
-                    onClick = state::launch,
-                    enabled = state.canLaunch,
-                )
-            }
-
-            if (state.canStop) {
-                DialogSecondaryButton(
-                    (if (false) "Stopping ..." else "Stop"),
-                    onClick = state.onCancel,
-                )
-            }
-
-            Spacer(modifier = Modifier.weight(1f))
-
-            DialogDismissButton(
-                if (state.canHide) {
-                    "Hide"
-                } else {
-                    "Dismiss"
-                },
-                onClick = state.onClose,
+        if (state.showLaunch) {
+            DialogPrimaryButton(
+                "Launch",
+                onClick = state::launch,
+                enabled = state.canLaunch,
             )
         }
+
+        if (state.canStop) {
+            DialogSecondaryButton(
+                (if (false) "Stopping ..." else "Stop"),
+                onClick = state.onCancel,
+            )
+        }
+
+        Spacer(modifier = Modifier.weight(1f))
+
+        DialogDismissButton(
+            if (state.canHide) {
+                "Hide"
+            } else {
+                "Dismiss"
+            },
+            onClick = state.onClose,
+        )
     }
 }
 
 @Preview
 @Composable
 private fun AddAndPushDialogContentsCompletedPreview() {
-    val DocumentsInLaptop = Documents.inStorage(LaptopSSD.reference).storageRepository
-    val DocumentsInHDDA = Documents.inStorage(hddA.reference).storageRepository
-    val DocumentsInHDDB = Documents.inStorage(hddB.reference).storageRepository
-
     val selectedFilenames = listOf("2024/08/01.JPG", "2024/08/02.JPG")
     val selectedDestinations = setOf(DocumentsInHDDA.uri, DocumentsInHDDB.uri)
 
     DialogPreviewColumn {
-        val dialog = AddAndPushRepoDialog(DocumentsInLaptop.uri)
+        val dialog = AddAndPushRepoDialog(DocumentsInLaptopSSD.uri)
 
         dialog.renderDialogCard(
             VMState(
@@ -207,8 +199,8 @@ private fun AddAndPushDialogContentsCompletedPreview() {
                 otherRepositoryCandidates =
                     Loadable.Loaded(
                         listOf(
-                            DocumentsInHDDA,
-                            DocumentsInHDDB,
+                            DocumentsInHDDA.storageRepository,
+                            DocumentsInHDDB.storageRepository,
                         ),
                     ),
                 onCancel = {},

@@ -4,33 +4,31 @@ import androidx.compose.desktop.ui.tooling.preview.Preview
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.AnnotatedString
-import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.withStyle
+import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import org.archivekeep.app.core.domain.repositories.Repository
 import org.archivekeep.app.core.domain.storages.StorageRepository
 import org.archivekeep.app.core.domain.storages.StorageService
-import org.archivekeep.app.core.persistence.platform.demo.Documents
-import org.archivekeep.app.core.persistence.platform.demo.hddA
+import org.archivekeep.app.core.persistence.platform.demo.DocumentsInHDDA
 import org.archivekeep.app.core.persistence.registry.RegistryDataStore
 import org.archivekeep.app.core.utils.identifiers.RepositoryURI
 import org.archivekeep.app.desktop.domain.wiring.LocalRegistry
 import org.archivekeep.app.desktop.domain.wiring.LocalStorageService
-import org.archivekeep.app.desktop.ui.designsystem.dialog.DialogButtonContainer
 import org.archivekeep.app.desktop.ui.designsystem.dialog.DialogDismissButton
 import org.archivekeep.app.desktop.ui.designsystem.dialog.DialogPreviewColumn
 import org.archivekeep.app.desktop.ui.designsystem.dialog.DialogPrimaryButton
 import org.archivekeep.app.desktop.ui.dialogs.repository.AbstractRepositoryDialog
+import org.archivekeep.app.desktop.ui.utils.appendBoldSpan
 import org.archivekeep.app.desktop.utils.collectLoadableFlow
 import org.archivekeep.utils.loading.Loadable
 import org.archivekeep.utils.loading.mapToLoadable
@@ -103,58 +101,50 @@ class ForgetRepositoryDialog(
             remember(state.currentRepo) {
                 buildAnnotatedString {
                     append("Remove repository ")
-
-                    withStyle(style = SpanStyle(fontWeight = FontWeight.Bold)) {
-                        append(state.currentRepo.storage.displayName)
-                    }
-                    append(" in storage ")
-                    withStyle(style = SpanStyle(fontWeight = FontWeight.Bold)) {
-                        append(state.currentRepo.repositoryState.displayName)
-                    }
+                    appendBoldSpan(state.currentRepo.repositoryState.displayName)
+                    append(" stored in ")
+                    appendBoldSpan(state.currentRepo.storage.displayName)
                     append(" from local registry of known repositories.")
-
-                    appendLine()
-                    appendLine()
+                }
+            },
+        )
+        Text(
+            remember(state.currentRepo) {
+                buildAnnotatedString {
                     append("Data will not be deleted.")
                 }
             },
+            modifier = Modifier.padding(top = 10.dp),
         )
     }
 
     @Composable
     override fun RowScope.renderButtons(state: State) {
-        DialogButtonContainer {
-            DialogPrimaryButton(
-                "Forget",
-                onClick = state.onLaunch,
-                enabled = true,
-            )
+        DialogPrimaryButton(
+            "Forget",
+            onClick = state.onLaunch,
+            enabled = true,
+        )
 
-            Spacer(modifier = Modifier.weight(1f))
+        Spacer(modifier = Modifier.weight(1f))
 
-            DialogDismissButton(
-                "Cancel",
-                onClick = state.onClose,
-                enabled = true,
-            )
-        }
+        DialogDismissButton(
+            "Cancel",
+            onClick = state.onClose,
+            enabled = true,
+        )
     }
 }
 
 @Preview
 @Composable
 private fun preview1() {
-    val DocumentsInHDDA = Documents.inStorage(hddA.reference).storageRepository
-
     DialogPreviewColumn {
-        val dialog =
-            ForgetRepositoryDialog(
-                DocumentsInHDDA.uri,
-            )
+        val dialog = ForgetRepositoryDialog(DocumentsInHDDA.uri)
 
         dialog.renderDialogCard(
             ForgetRepositoryDialog.State(
-                DocumentsInHDDA,
+                DocumentsInHDDA.storageRepository,
                 onLaunch = {},
                 onClose = {},
             ),

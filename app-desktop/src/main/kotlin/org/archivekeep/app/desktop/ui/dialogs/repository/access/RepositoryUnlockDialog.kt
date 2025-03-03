@@ -11,7 +11,6 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.material.Icon
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.OutlinedButton
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
@@ -22,7 +21,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.buildAnnotatedString
-import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import compose.icons.TablerIcons
 import compose.icons.tablericons.Lock
@@ -30,6 +28,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.combine
 import org.archivekeep.app.core.domain.repositories.Repository
+import org.archivekeep.app.core.domain.repositories.RepositoryInformation
 import org.archivekeep.app.core.domain.repositories.UnlockOptions
 import org.archivekeep.app.core.persistence.credentials.Credentials
 import org.archivekeep.app.core.persistence.credentials.JoseStorage
@@ -38,12 +37,14 @@ import org.archivekeep.app.desktop.domain.data.canUnlockFlow
 import org.archivekeep.app.desktop.domain.wiring.LocalWalletDataStore
 import org.archivekeep.app.desktop.domain.wiring.LocalWalletOperationLaunchers
 import org.archivekeep.app.desktop.domain.wiring.WalletOperationLaunchers
-import org.archivekeep.app.desktop.ui.designsystem.dialog.DialogButtonContainer
 import org.archivekeep.app.desktop.ui.designsystem.dialog.DialogDismissButton
 import org.archivekeep.app.desktop.ui.designsystem.dialog.DialogPreviewColumn
 import org.archivekeep.app.desktop.ui.designsystem.dialog.DialogPrimaryButton
 import org.archivekeep.app.desktop.ui.designsystem.input.CheckboxWithText
+import org.archivekeep.app.desktop.ui.designsystem.input.PasswordField
+import org.archivekeep.app.desktop.ui.designsystem.input.TextField
 import org.archivekeep.app.desktop.ui.dialogs.repository.AbstractRepositoryDialog
+import org.archivekeep.app.desktop.ui.utils.appendBoldSpan
 import org.archivekeep.app.desktop.utils.LaunchableAction
 import org.archivekeep.app.desktop.utils.collectAsLoadable
 import org.archivekeep.files.repo.remote.grpc.BasicAuthCredentials
@@ -54,6 +55,7 @@ class RepositoryUnlockDialog(
     val onUnlock: (() -> Unit)? = null,
 ) : AbstractRepositoryDialog<RepositoryUnlockDialog.State, RepositoryUnlockDialog.VM>(uri) {
     data class State(
+        val repositoryInfo: RepositoryInformation,
         val needsUnlock: Boolean,
         val canUnlockCredentials: Boolean,
         val unlockAction: LaunchableAction,
@@ -78,7 +80,7 @@ class RepositoryUnlockDialog(
 
     inner class VM(
         val coroutineScope: CoroutineScope,
-        val repositoryState: Repository,
+        val repository: Repository,
         val walletOperationLaunchers: WalletOperationLaunchers,
         val credentialStorage: JoseStorage<Credentials>,
         val _onClose: () -> Unit,
@@ -101,7 +103,7 @@ class RepositoryUnlockDialog(
                             }
                         }
 
-                        repositoryState.unlock(
+                        repository.unlock(
                             presentBasicCredentials,
                             unlockOptions,
                         )
@@ -139,10 +141,12 @@ class RepositoryUnlockDialog(
     override fun rememberState(vm: VM): Loadable<State> =
         remember(vm) {
             combine(
-                vm.repositoryState.needsUnlock,
+                vm.repository.resolvedState,
+                vm.repository.needsUnlock,
                 vm.credentialStorage.canUnlockFlow(),
-            ) { needsUnlock, canUnlockCredentials ->
+            ) { resolvedState, needsUnlock, canUnlockCredentials ->
                 State(
+                    repositoryInfo = resolvedState.information,
                     needsUnlock = needsUnlock,
                     canUnlockCredentials = canUnlockCredentials,
                     unlockAction = vm.unlockAction,
@@ -162,7 +166,13 @@ class RepositoryUnlockDialog(
         }
         val walletOperationLaunchers = LocalWalletOperationLaunchers.current
 
-        Text("Authentication is needed to access repository")
+        Text(
+            buildAnnotatedString {
+                append("Authentication is needed to access ")
+                appendBoldSpan(state.repositoryInfo.displayName)
+                append(" repository.")
+            },
+        )
         Spacer(Modifier.height(12.dp))
 
         if (state.canUnlockCredentials) {
@@ -195,7 +205,7 @@ class RepositoryUnlockDialog(
             "Enter credentials to authenticate with:",
             modifier = Modifier.padding(bottom = 8.dp),
         )
-        OutlinedTextField(
+        TextField(
             state.basicAuthCredentials?.username ?: "",
             onValueChange = {
                 state.basicAuthCredentials =
@@ -210,7 +220,7 @@ class RepositoryUnlockDialog(
             singleLine = true,
         )
         Spacer(Modifier.height(12.dp))
-        OutlinedTextField(
+        PasswordField(
             state.basicAuthCredentials?.password ?: "",
             onValueChange = {
                 state.basicAuthCredentials =
@@ -219,11 +229,9 @@ class RepositoryUnlockDialog(
                         username = state.basicAuthCredentials?.username ?: "",
                     )
             },
-            visualTransformation = PasswordVisualTransformation(),
             placeholder = {
                 Text("Enter password ...")
             },
-            singleLine = true,
         )
         Spacer(Modifier.height(12.dp))
         CheckboxWithText(
@@ -240,20 +248,18 @@ class RepositoryUnlockDialog(
 
     @Composable
     override fun RowScope.renderButtons(state: State) {
-        DialogButtonContainer {
-            DialogPrimaryButton(
-                "Authenticate",
-                onClick = state.onLaunch,
-                enabled = state.canLaunch,
-            )
+        DialogPrimaryButton(
+            "Authenticate",
+            onClick = state.onLaunch,
+            enabled = state.canLaunch,
+        )
 
-            Spacer(modifier = Modifier.weight(1f))
+        Spacer(modifier = Modifier.weight(1f))
 
-            DialogDismissButton(
-                "Cancel",
-                onClick = state.onClose,
-            )
-        }
+        DialogDismissButton(
+            "Cancel",
+            onClick = state.onClose,
+        )
     }
 }
 
@@ -266,6 +272,7 @@ private fun Preview() {
 
         dialog.renderDialogCard(
             RepositoryUnlockDialog.State(
+                repositoryInfo = RepositoryInformation(null, "Documents"),
                 needsUnlock = true,
                 canUnlockCredentials = false,
                 unlockAction = LaunchableAction(CoroutineScope(Dispatchers.Default)),

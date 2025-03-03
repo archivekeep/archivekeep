@@ -13,27 +13,23 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.AnnotatedString
-import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.CoroutineScope
 import org.archivekeep.app.core.domain.repositories.Repository
-import org.archivekeep.app.core.persistence.platform.demo.Documents
-import org.archivekeep.app.core.persistence.platform.demo.hddA
+import org.archivekeep.app.core.persistence.platform.demo.DocumentsInHDDA
 import org.archivekeep.app.core.utils.identifiers.RepositoryURI
 import org.archivekeep.app.desktop.domain.wiring.LocalRepoToRepoSyncService
 import org.archivekeep.app.desktop.domain.wiring.LocalStorageService
 import org.archivekeep.app.desktop.ui.components.RelocationSyncModeOptions
 import org.archivekeep.app.desktop.ui.components.SplitRow
-import org.archivekeep.app.desktop.ui.designsystem.dialog.DialogButtonContainer
 import org.archivekeep.app.desktop.ui.designsystem.dialog.DialogDismissButton
 import org.archivekeep.app.desktop.ui.designsystem.dialog.DialogPreviewColumn
 import org.archivekeep.app.desktop.ui.designsystem.dialog.DialogPrimaryButton
 import org.archivekeep.app.desktop.ui.designsystem.dialog.LabelText
 import org.archivekeep.app.desktop.ui.designsystem.sections.SectionCardItemStateText
 import org.archivekeep.app.desktop.ui.dialogs.repository.AbstractRepositoryDialog
+import org.archivekeep.app.desktop.ui.utils.appendBoldSpan
 import org.archivekeep.app.desktop.utils.asMutableState
 import org.archivekeep.app.desktop.utils.collectLoadableFlow
 import org.archivekeep.files.operations.RelocationSyncMode
@@ -52,11 +48,8 @@ class PushRepoDialog(
     ) : IState {
         override val title: AnnotatedString =
             buildAnnotatedString {
-                withStyle(SpanStyle(fontWeight = FontWeight.Bold)) {
-                    append(repoName)
-                    append(": ")
-                }
-                append("push")
+                appendBoldSpan(repoName)
+                append(" - push")
             }
     }
 
@@ -126,28 +119,24 @@ class PushRepoDialog(
 
     @Composable
     override fun RowScope.renderButtons(state: State) {
-        DialogButtonContainer {
-            DialogPrimaryButton(
-                "Start all",
-                onClick = state.startAllSync,
-                enabled = true,
-            )
-            Spacer(modifier = Modifier.weight(1f))
+        DialogPrimaryButton(
+            "Start all",
+            onClick = state.startAllSync,
+            enabled = true,
+        )
+        Spacer(modifier = Modifier.weight(1f))
 
-            DialogDismissButton(
-                "Dismiss",
-                onClick = state.onClose,
-                enabled = true,
-            )
-        }
+        DialogDismissButton(
+            "Dismiss",
+            onClick = state.onClose,
+            enabled = true,
+        )
     }
 }
 
 @Preview
 @Composable
 private fun preview1() {
-    val DocumentsInHDDA = Documents.inStorage(hddA.reference).storageRepository
-
     DialogPreviewColumn {
         val dialog =
             PushRepoDialog(

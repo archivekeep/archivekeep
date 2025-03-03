@@ -15,9 +15,8 @@ import kotlinx.coroutines.flow.combine
 import org.archivekeep.app.core.domain.storages.StorageRepository
 import org.archivekeep.app.core.domain.storages.StorageService
 import org.archivekeep.app.core.operations.sync.RepoToRepoSyncService
-import org.archivekeep.app.core.persistence.platform.demo.Documents
-import org.archivekeep.app.core.persistence.platform.demo.hddA
-import org.archivekeep.app.core.persistence.platform.demo.hddB
+import org.archivekeep.app.core.persistence.platform.demo.DocumentsInHDDA
+import org.archivekeep.app.core.persistence.platform.demo.DocumentsInHDDB
 import org.archivekeep.app.core.utils.identifiers.RepositoryURI
 import org.archivekeep.app.desktop.domain.wiring.LocalRepoToRepoSyncService
 import org.archivekeep.app.desktop.domain.wiring.LocalStorageService
@@ -25,6 +24,7 @@ import org.archivekeep.app.desktop.ui.designsystem.dialog.DialogPreviewColumn
 import org.archivekeep.app.desktop.ui.dialogs.AbstractDialog
 import org.archivekeep.app.desktop.ui.dialogs.repository.operations.sync.parts.RepoToRepoSyncFlowButtons
 import org.archivekeep.app.desktop.ui.dialogs.repository.operations.sync.parts.RepoToRepoSyncMainContents
+import org.archivekeep.app.desktop.ui.utils.appendBoldSpan
 import org.archivekeep.app.desktop.utils.asMutableState
 import org.archivekeep.app.desktop.utils.collectAsLoadable
 import org.archivekeep.files.operations.RelocationSyncMode
@@ -45,9 +45,10 @@ data class DownloadFromRepoDialog(
     ) : IState {
         override val title: AnnotatedString =
             buildAnnotatedString {
-                append(
-                    "Download from ${fromRepository.displayName} in ${fromRepository.storage.displayName}",
-                )
+                appendBoldSpan(toRepository.displayName)
+                append(" in ")
+                appendBoldSpan(toRepository.storage.displayName)
+                append(" - download from other")
             }
     }
 
@@ -104,11 +105,13 @@ data class DownloadFromRepoDialog(
     @Composable
     override fun ColumnScope.renderContent(state: State) {
         Text(
-            remember(state.toRepository) {
+            remember(state.fromRepository) {
                 buildAnnotatedString {
-                    append(
-                        "To ${state.toRepository.displayName} in ${state.toRepository.storage.displayName}.",
-                    )
+                    append("Download from repository ")
+                    appendBoldSpan(state.fromRepository.displayName)
+                    append(" in storage ")
+                    appendBoldSpan(state.fromRepository.storage.displayName)
+                    append(".")
                 }
             },
         )
@@ -133,9 +136,6 @@ data class DownloadFromRepoDialog(
 @Preview
 @Composable
 private fun preview1() {
-    val DocumentsInHDDA = Documents.inStorage(hddA.reference).storageRepository
-    val DocumentsInHDDB = Documents.inStorage(hddB.reference).storageRepository
-
     DialogPreviewColumn {
         val dialog =
             DownloadFromRepoDialog(
@@ -145,8 +145,8 @@ private fun preview1() {
 
         dialog.renderDialogCard(
             DownloadFromRepoDialog.State(
-                DocumentsInHDDA,
-                DocumentsInHDDB,
+                DocumentsInHDDA.storageRepository,
+                DocumentsInHDDB.storageRepository,
                 mutableStateOf(RepoToRepoSyncUserFlow.defaultRelocationSyncMode),
                 RepoToRepoSyncUserFlow.State(
                     Loadable.Loading,

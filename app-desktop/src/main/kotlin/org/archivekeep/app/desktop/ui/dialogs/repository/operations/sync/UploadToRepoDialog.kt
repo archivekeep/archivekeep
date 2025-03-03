@@ -15,9 +15,8 @@ import kotlinx.coroutines.flow.combine
 import org.archivekeep.app.core.domain.storages.StorageRepository
 import org.archivekeep.app.core.domain.storages.StorageService
 import org.archivekeep.app.core.operations.sync.RepoToRepoSyncService
-import org.archivekeep.app.core.persistence.platform.demo.Documents
-import org.archivekeep.app.core.persistence.platform.demo.hddA
-import org.archivekeep.app.core.persistence.platform.demo.hddB
+import org.archivekeep.app.core.persistence.platform.demo.DocumentsInHDDA
+import org.archivekeep.app.core.persistence.platform.demo.DocumentsInHDDB
 import org.archivekeep.app.core.utils.identifiers.RepositoryURI
 import org.archivekeep.app.desktop.domain.wiring.LocalRepoToRepoSyncService
 import org.archivekeep.app.desktop.domain.wiring.LocalStorageService
@@ -25,6 +24,7 @@ import org.archivekeep.app.desktop.ui.designsystem.dialog.DialogPreviewColumn
 import org.archivekeep.app.desktop.ui.dialogs.AbstractDialog
 import org.archivekeep.app.desktop.ui.dialogs.repository.operations.sync.parts.RepoToRepoSyncFlowButtons
 import org.archivekeep.app.desktop.ui.dialogs.repository.operations.sync.parts.RepoToRepoSyncMainContents
+import org.archivekeep.app.desktop.ui.utils.appendBoldSpan
 import org.archivekeep.app.desktop.utils.asMutableState
 import org.archivekeep.app.desktop.utils.collectAsLoadable
 import org.archivekeep.files.operations.RelocationSyncMode
@@ -45,7 +45,10 @@ data class UploadToRepoDialog(
     ) : IState {
         override val title: AnnotatedString =
             buildAnnotatedString {
-                append("Push to ${targetRepository.displayName} in ${targetRepository.storage.displayName}")
+                appendBoldSpan(sourceRepository.displayName)
+                append(" in ")
+                appendBoldSpan(sourceRepository.storage.displayName)
+                append(" - upload to other")
             }
     }
 
@@ -102,11 +105,13 @@ data class UploadToRepoDialog(
     @Composable
     override fun ColumnScope.renderContent(state: State) {
         Text(
-            remember(state.sourceRepository) {
+            remember(state.targetRepository) {
                 buildAnnotatedString {
-                    append(
-                        "From to ${state.sourceRepository.displayName} in ${state.sourceRepository.storage.displayName}.",
-                    )
+                    append("Upload to repository ")
+                    appendBoldSpan(state.targetRepository.displayName)
+                    append(" in storage ")
+                    appendBoldSpan(state.targetRepository.storage.displayName)
+                    append(".")
                 }
             },
         )
@@ -131,9 +136,6 @@ data class UploadToRepoDialog(
 @Preview
 @Composable
 private fun preview1() {
-    val DocumentsInHDDA = Documents.inStorage(hddA.reference).storageRepository
-    val DocumentsInHDDB = Documents.inStorage(hddB.reference).storageRepository
-
     DialogPreviewColumn {
         val dialog =
             UploadToRepoDialog(
@@ -143,8 +145,8 @@ private fun preview1() {
 
         dialog.renderDialogCard(
             UploadToRepoDialog.State(
-                DocumentsInHDDA,
-                DocumentsInHDDB,
+                DocumentsInHDDA.storageRepository,
+                DocumentsInHDDB.storageRepository,
                 mutableStateOf(RepoToRepoSyncUserFlow.defaultRelocationSyncMode),
                 RepoToRepoSyncUserFlow.State(
                     Loadable.Loading,

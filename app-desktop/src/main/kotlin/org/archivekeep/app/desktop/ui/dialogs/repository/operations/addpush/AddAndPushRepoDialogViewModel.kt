@@ -5,10 +5,7 @@ import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
-import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.withStyle
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
@@ -30,6 +27,7 @@ import org.archivekeep.app.desktop.domain.wiring.LocalAddPushService
 import org.archivekeep.app.desktop.domain.wiring.LocalRepoService
 import org.archivekeep.app.desktop.domain.wiring.LocalStorageService
 import org.archivekeep.app.desktop.ui.dialogs.AbstractDialog
+import org.archivekeep.app.desktop.ui.utils.appendBoldSpan
 import org.archivekeep.app.desktop.utils.stickToFirstNotNullAsState
 import org.archivekeep.files.operations.AddOperation
 import org.archivekeep.utils.loading.Loadable
@@ -73,10 +71,8 @@ class AddAndPushRepoDialogViewModel(
     ) : AbstractDialog.IState {
         override val title =
             buildAnnotatedString {
-                withStyle(SpanStyle(fontWeight = FontWeight.Bold)) {
-                    append(repoName)
-                    append(": ")
-                }
+                appendBoldSpan(repoName)
+                append(" - ")
                 append("add and push")
             }
 

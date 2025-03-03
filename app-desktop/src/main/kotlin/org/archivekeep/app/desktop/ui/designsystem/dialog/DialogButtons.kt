@@ -10,6 +10,7 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
@@ -17,7 +18,7 @@ import androidx.compose.ui.unit.dp
 @Composable
 fun DialogButtonContainer(content: @Composable RowScope.() -> Unit) {
     Row(
-        modifier = Modifier.padding(top = 16.dp).fillMaxWidth(),
+        modifier = Modifier.padding(top = DialogContentButtonsSpacing).fillMaxWidth(),
         horizontalArrangement = Arrangement.spacedBy(8.dp),
         content = content,
     )
@@ -61,11 +62,9 @@ fun DialogDismissButton(
     onClick: () -> Unit,
     enabled: Boolean = true,
 ) {
-    OutlinedButton(
+    TextButton(
         onClick = onClick,
         shape = MaterialTheme.shapes.small,
-        border = ButtonDefaults.outlinedButtonBorder(enabled),
-        colors = ButtonDefaults.outlinedButtonColors(),
         enabled = enabled,
     ) {
         Text(text)

@@ -3,7 +3,6 @@ package org.archivekeep.app.desktop.ui.dialogs.repository.registry
 import androidx.compose.desktop.ui.tooling.preview.Preview
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -31,6 +30,7 @@ import org.archivekeep.app.desktop.ui.designsystem.dialog.DialogInnerContainer
 import org.archivekeep.app.desktop.ui.designsystem.dialog.DialogOverlay
 import org.archivekeep.app.desktop.ui.designsystem.dialog.DialogPreviewColumn
 import org.archivekeep.app.desktop.ui.designsystem.dialog.DialogPrimaryButton
+import org.archivekeep.app.desktop.ui.designsystem.input.TextField
 import org.archivekeep.app.desktop.ui.dialogs.Dialog
 import org.archivekeep.files.repo.remote.grpc.BasicAuthCredentials
 
@@ -103,14 +103,12 @@ private fun AddRemoteRepositoryDialogContents(
             content = {
                 Text(
                     "Self-hostable server is work in progress (there's old implementation in Go)...",
-                    modifier = Modifier.padding(bottom = 12.dp),
                 )
-                OutlinedTextField(
+                TextField(
                     uriText,
                     onValueChange = { uriText = it },
-                    placeholder = {
-                        Text("Enter URI of repository to add ...")
-                    },
+                    label = { Text("Remote repository URL") },
+                    placeholder = { Text("Enter URI of repository to add ...") },
                     singleLine = true,
                     enabled = addStatus !is AddStatus.Adding,
                 )

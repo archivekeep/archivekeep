@@ -39,8 +39,7 @@ import org.archivekeep.app.core.domain.repositories.RepositoryService
 import org.archivekeep.app.core.domain.storages.KnownStorage
 import org.archivekeep.app.core.operations.AssociateRepositoryOperation
 import org.archivekeep.app.core.operations.AssociateRepositoryOperation.Target
-import org.archivekeep.app.core.persistence.platform.demo.Documents
-import org.archivekeep.app.core.persistence.platform.demo.LaptopSSD
+import org.archivekeep.app.core.persistence.platform.demo.DocumentsInLaptopSSD
 import org.archivekeep.app.core.utils.generics.ExecutionOutcome
 import org.archivekeep.app.core.utils.identifiers.RepositoryURI
 import org.archivekeep.app.desktop.domain.wiring.LocalArchiveService
@@ -48,7 +47,6 @@ import org.archivekeep.app.desktop.domain.wiring.LocalOperationFactory
 import org.archivekeep.app.desktop.domain.wiring.LocalRepoService
 import org.archivekeep.app.desktop.domain.wiring.OperationFactory
 import org.archivekeep.app.desktop.ui.components.errors.AutomaticErrorMessage
-import org.archivekeep.app.desktop.ui.designsystem.dialog.DialogButtonContainer
 import org.archivekeep.app.desktop.ui.designsystem.dialog.DialogDismissButton
 import org.archivekeep.app.desktop.ui.designsystem.dialog.DialogPreviewColumn
 import org.archivekeep.app.desktop.ui.designsystem.dialog.DialogPrimaryButton
@@ -253,7 +251,6 @@ class AssociateRepositoryDialog(
                             Column {
                                 Text(
                                     text = aa.label,
-                                    style = MaterialTheme.typography.bodyMedium,
                                     modifier = Modifier.padding(bottom = 4.dp),
                                 )
                                 aa.repositories.forEach {
@@ -316,7 +313,6 @@ class AssociateRepositoryDialog(
                                 Column {
                                     Text(
                                         text = aa.label,
-                                        style = MaterialTheme.typography.bodyMedium,
                                         modifier = Modifier.padding(bottom = 4.dp),
                                     )
                                 }
@@ -337,21 +333,19 @@ class AssociateRepositoryDialog(
 
     @Composable
     override fun RowScope.renderButtons(state: VM.State) {
-        DialogButtonContainer {
-            DialogPrimaryButton(
-                "Associate",
-                onClick = state.onLaunch,
-                enabled = state.canLaunch,
-            )
+        DialogPrimaryButton(
+            "Associate",
+            onClick = state.onLaunch,
+            enabled = state.canLaunch,
+        )
 
-            Spacer(modifier = Modifier.weight(1f))
+        Spacer(modifier = Modifier.weight(1f))
 
-            DialogDismissButton(
-                "Cancel",
-                onClick = state.onClose,
-                enabled = true,
-            )
-        }
+        DialogDismissButton(
+            "Cancel",
+            onClick = state.onClose,
+            enabled = true,
+        )
     }
 }
 
@@ -359,15 +353,13 @@ class AssociateRepositoryDialog(
 @Preview
 private fun Preview() {
     DialogPreviewColumn {
-        val DocumentsInLaptop = Documents.inStorage(LaptopSSD.reference).storageRepository
-
-        val dialog = AssociateRepositoryDialog(DocumentsInLaptop.uri)
+        val dialog = AssociateRepositoryDialog(DocumentsInLaptopSSD.uri)
 
         dialog.renderDialogCard(
             VM.State(
                 emptyList(),
                 null,
-                KnownStorage(DocumentsInLaptop.storage.uri, null, emptyList()),
+                KnownStorage(DocumentsInLaptopSSD.storage.uri, null, emptyList()),
                 RepositoryInformation(null, "A Repo"),
                 mutableStateOf(null),
                 mutableStateOf(null),

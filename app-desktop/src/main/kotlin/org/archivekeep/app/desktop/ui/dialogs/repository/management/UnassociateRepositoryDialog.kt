@@ -12,10 +12,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.AnnotatedString
-import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.withStyle
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
@@ -29,11 +26,11 @@ import org.archivekeep.app.core.persistence.platform.demo.LaptopSSD
 import org.archivekeep.app.core.utils.identifiers.RepositoryURI
 import org.archivekeep.app.desktop.domain.wiring.LocalArchiveService
 import org.archivekeep.app.desktop.domain.wiring.LocalRepoService
-import org.archivekeep.app.desktop.ui.designsystem.dialog.DialogButtonContainer
 import org.archivekeep.app.desktop.ui.designsystem.dialog.DialogDismissButton
 import org.archivekeep.app.desktop.ui.designsystem.dialog.DialogPreviewColumn
 import org.archivekeep.app.desktop.ui.designsystem.dialog.DialogPrimaryButton
 import org.archivekeep.app.desktop.ui.dialogs.repository.AbstractRepositoryDialog
+import org.archivekeep.app.desktop.ui.utils.appendBoldSpan
 import org.archivekeep.app.desktop.utils.collectLoadableFlow
 import org.archivekeep.utils.loading.Loadable
 import org.archivekeep.utils.loading.mapLoadedData
@@ -127,38 +124,33 @@ class UnassociateRepositoryDialog(
         Text(
             remember(state.currentRepoStorage, state.currentRepoInformation) {
                 buildAnnotatedString {
-                    append("Unassociate repository ")
-
-                    withStyle(style = SpanStyle(fontWeight = FontWeight.Bold)) {
-                        append(state.currentRepoInformation.displayName)
-                    }
-                    append(" in storage ")
-                    withStyle(style = SpanStyle(fontWeight = FontWeight.Bold)) {
-                        append(state.currentRepoStorage.label)
-                    }
-                    append(".")
+                    append("Repository ")
+                    appendBoldSpan(state.currentRepoInformation.displayName)
+                    append(" stored in ")
+                    appendBoldSpan(state.currentRepoStorage.label)
+                    append(" will be unassociated from its archive.")
                 }
             },
         )
+
+        // TODO: add associated repositories with the archive - list them for information
     }
 
     @Composable
     override fun RowScope.renderButtons(state: State) {
-        DialogButtonContainer {
-            DialogPrimaryButton(
-                "Unassociate",
-                onClick = state.onLaunch,
-                enabled = true,
-            )
+        DialogPrimaryButton(
+            "Unassociate",
+            onClick = state.onLaunch,
+            enabled = true,
+        )
 
-            Spacer(modifier = Modifier.weight(1f))
+        Spacer(modifier = Modifier.weight(1f))
 
-            DialogDismissButton(
-                "Cancel",
-                onClick = state.onClose,
-                enabled = true,
-            )
-        }
+        DialogDismissButton(
+            "Cancel",
+            onClick = state.onClose,
+            enabled = true,
+        )
     }
 }
 
