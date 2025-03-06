@@ -31,13 +31,15 @@ class SecondaryArchiveRepository(
         val repo: SecondaryArchiveRepository,
         val connectionStatus: Repository.ConnectionState,
         val syncRunning: Boolean,
-        val canPush: Boolean,
+        val canPushLoadable: OptionalLoadable<Boolean>,
         val canPull: Boolean,
         val texts: OptionalLoadable<String>,
     ) {
         val needsUnlock = connectionStatus is Repository.ConnectionState.ConnectedLocked
 
         val isLoading = texts.isLoading || syncRunning
+
+        val canPush: Boolean = canPushLoadable.mapIfLoadedOrNull { it } ?: false
     }
 
     fun stateFlow(
@@ -60,7 +62,7 @@ class SecondaryArchiveRepository(
                 repo = this,
                 connectionStatus = otherRepositoryState.connectionState,
                 syncRunning = false,
-                canPush = false,
+                canPushLoadable = OptionalLoadable.Loading,
                 canPull = false,
                 texts = OptionalLoadable.Loading,
             )
@@ -71,10 +73,10 @@ class SecondaryArchiveRepository(
         ) { syncStatus, syncRunning ->
             val connectionStatus = otherRepositoryState.connectionState
 
-            val canPush =
-                syncStatus?.mapIfLoadedOrNull {
-                    it.missingBaseInOther != 0 || it.relocations > 0
-                } ?: false
+            val canPushLoadable =
+                syncStatus?.mapLoadedData {
+                    (it.missingBaseInOther != 0 || it.relocations > 0) && connectionStatus.isAvailable
+                } ?: OptionalLoadable.NotAvailable()
 
             val canPull =
                 syncStatus?.mapIfLoadedOrNull {
@@ -87,7 +89,7 @@ class SecondaryArchiveRepository(
                 repo = this,
                 connectionStatus = connectionStatus,
                 syncRunning = syncRunning,
-                canPush = canPush && connectionStatus.isAvailable,
+                canPushLoadable = canPushLoadable,
                 canPull = canPull && connectionStatus.isAvailable,
                 texts = texts,
             )

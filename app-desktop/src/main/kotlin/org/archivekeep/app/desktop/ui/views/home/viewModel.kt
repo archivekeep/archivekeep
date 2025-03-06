@@ -1,5 +1,6 @@
 package org.archivekeep.app.desktop.ui.views.home
 
+import androidx.compose.runtime.Composable
 import androidx.compose.runtime.State
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.SharingStarted
@@ -14,7 +15,11 @@ import org.archivekeep.app.core.domain.storages.Storage
 import org.archivekeep.app.core.domain.storages.StorageNamedReference
 import org.archivekeep.app.core.operations.addpush.AddAndPushOperationService
 import org.archivekeep.app.core.operations.sync.RepoToRepoSyncService
+import org.archivekeep.app.core.utils.generics.isLoading
+import org.archivekeep.app.core.utils.generics.mapIfLoadedOrNull
 import org.archivekeep.app.core.utils.identifiers.NamedRepositoryReference
+import org.archivekeep.app.desktop.domain.wiring.ArchiveOperationLaunchers
+import org.archivekeep.app.desktop.utils.Action
 import org.archivekeep.utils.loading.Loadable
 import org.archivekeep.utils.loading.isLoading
 import org.archivekeep.utils.loading.mapIfLoadedOrDefault
@@ -32,14 +37,14 @@ class HomeArchiveEntryViewModel(
     val otherRepositories: List<Pair<Storage, SecondaryArchiveRepository>>,
 ) {
     data class VMState(
-        val canAdd: Boolean,
-        val canPush: Boolean,
+        val canAdd: Loadable<Boolean>,
+        val canPush: Loadable<Boolean>,
         val anySecondaryAvailable: Boolean,
         val loading: Boolean,
         val indexStatusText: Loadable<String>,
         val addPushOperationRunning: Boolean,
     ) {
-        val canAddPush = (canAdd && anySecondaryAvailable) || addPushOperationRunning
+        val canAddPush = if (addPushOperationRunning) Loadable.Loaded(true) else (canAdd.mapLoadedData { anySecondaryAvailable })
     }
 
     val addPushOperation = addAndPushOperationService.getAddPushOperation(primaryRepository.reference.uri)
@@ -60,8 +65,17 @@ class HomeArchiveEntryViewModel(
             addPushOperation.currentJobFlow.map { it != null },
         ) { indexStatus, nonLocalRepositories, addPushOperationRunning ->
             VMState(
-                canAdd = indexStatus is Loadable.Loaded && indexStatus.value.hasChanges,
-                canPush = nonLocalRepositories.any { it.second.canPush },
+                canAdd = indexStatus.mapLoadedData { it.hasChanges },
+                canPush =
+                    if (nonLocalRepositories.any { it.second.canPushLoadable.mapIfLoadedOrNull { it } ?: false }) {
+                        Loadable.Loaded(true)
+                    } else {
+                        if (nonLocalRepositories.none { it.second.canPushLoadable.isLoading }) {
+                            Loadable.Loaded(false)
+                        } else {
+                            Loadable.Loading
+                        }
+                    },
                 anySecondaryAvailable = nonLocalRepositories.any { it.second.connectionStatus.isAvailable },
                 loading = indexStatus.isLoading,
                 indexStatusText =
@@ -76,8 +90,8 @@ class HomeArchiveEntryViewModel(
             scope,
             SharingStarted.WhileSubscribed(),
             VMState(
-                canAdd = false,
-                canPush = false,
+                canAdd = Loadable.Loading,
+                canPush = Loadable.Loading,
                 anySecondaryAvailable = false,
                 loading = true,
                 indexStatusText = Loadable.Loading,
@@ -145,3 +159,45 @@ data class HomeViewAction(
     val title: String,
     val onTrigger: () -> Unit,
 )
+
+@Composable
+fun HomeArchiveEntryViewModel.VMState.actions(
+    archiveOperationLaunchers: ArchiveOperationLaunchers,
+    localArchive: HomeArchiveEntryViewModel,
+): List<Loadable<Action>> =
+    listOf(
+        this.canAddPush.mapLoadedData {
+            Action(
+                onLaunch = {
+                    archiveOperationLaunchers.openAddAndPushOperation(
+                        localArchive.primaryRepository.reference.uri,
+                    )
+                },
+                text = "Add and push",
+                isAvailable = it,
+                running = this.addPushOperationRunning,
+            )
+        },
+        this.canAdd.mapLoadedData {
+            Action(
+                onLaunch = {
+                    archiveOperationLaunchers.openIndexUpdateOperation(
+                        localArchive.primaryRepository.reference.uri,
+                    )
+                },
+                isAvailable = it,
+                text = "Add",
+            )
+        },
+        this.canPush.mapLoadedData {
+            Action(
+                onLaunch = {
+                    archiveOperationLaunchers.pushRepoToAll(
+                        localArchive.primaryRepository.reference.uri,
+                    )
+                },
+                isAvailable = it,
+                text = "Push to all",
+            )
+        },
+    )

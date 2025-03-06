@@ -1,17 +1,10 @@
 package org.archivekeep.app.desktop.ui.views.home.components
 
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.ExperimentalLayoutApi
-import androidx.compose.foundation.layout.FlowRow
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
-import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.cheonjaeung.compose.grid.SimpleGridCells
 import com.cheonjaeung.compose.grid.VerticalGrid
@@ -23,13 +16,13 @@ import org.archivekeep.app.desktop.ui.components.LoadableGuard
 import org.archivekeep.app.desktop.ui.components.repository.WithRepositoryOpener
 import org.archivekeep.app.desktop.ui.components.richcomponents.ArchiveDropdownIconLaunched
 import org.archivekeep.app.desktop.ui.designsystem.sections.SectionCard
+import org.archivekeep.app.desktop.ui.designsystem.sections.SectionCardActionsRow
 import org.archivekeep.app.desktop.ui.designsystem.sections.SectionCardBottomList
-import org.archivekeep.app.desktop.ui.designsystem.sections.SectionCardButton
 import org.archivekeep.app.desktop.ui.designsystem.sections.SectionCardTitle
 import org.archivekeep.app.desktop.ui.designsystem.sections.SectionCardTitleIconButton
-import org.archivekeep.app.desktop.ui.designsystem.sections.sectionCardHorizontalPadding
 import org.archivekeep.app.desktop.ui.designsystem.styles.CIcons
 import org.archivekeep.app.desktop.ui.views.home.HomeArchiveEntryViewModel
+import org.archivekeep.app.desktop.ui.views.home.actions
 import org.archivekeep.utils.loading.Loadable
 
 val TinyRoundShape = RoundedCornerShape(4.dp)
@@ -59,7 +52,6 @@ fun HomeArchivesList(allLocalArchivesLoadable: Loadable<List<HomeArchiveEntryVie
 }
 
 @Composable
-@OptIn(ExperimentalLayoutApi::class)
 private fun HomeArchiveEntry(
     localArchive: HomeArchiveEntryViewModel,
     archiveOperationLaunchers: ArchiveOperationLaunchers,
@@ -86,61 +78,7 @@ private fun HomeArchiveEntry(
 
         HomeCardStateText(state.indexStatusText)
 
-        val showAddPushAction = state.canAddPush
-        val showAddAction = state.canAdd
-        val showPushAction = state.canPush
-
-        if (showAddPushAction || showAddAction || showPushAction) {
-            FlowRow(
-                horizontalArrangement = Arrangement.spacedBy(8.dp),
-                verticalArrangement = Arrangement.spacedBy(6.dp),
-                modifier =
-                    Modifier
-                        .fillMaxWidth()
-                        .padding(
-                            top = 4.dp,
-                            start = sectionCardHorizontalPadding,
-                            bottom = 8.dp,
-                            end = sectionCardHorizontalPadding,
-                        ),
-            ) {
-                if (showAddPushAction) {
-                    SectionCardButton(
-                        onClick = {
-                            archiveOperationLaunchers.openAddAndPushOperation(
-                                localArchive.primaryRepository.reference.uri,
-                            )
-                        },
-                        text = "Add and push",
-                        running = state.addPushOperationRunning,
-                    )
-                }
-
-                if (showAddAction) {
-                    SectionCardButton(
-                        onClick = {
-                            archiveOperationLaunchers.openIndexUpdateOperation(
-                                localArchive.primaryRepository.reference.uri,
-                            )
-                        },
-                        text = "Add",
-                    )
-                }
-
-                if (showPushAction) {
-                    SectionCardButton(
-                        onClick = {
-                            archiveOperationLaunchers.pushRepoToAll(
-                                localArchive.primaryRepository.reference.uri,
-                            )
-                        },
-                        text = "Push to all",
-                    )
-                }
-            }
-        }
-
-        Spacer(Modifier.height(4.dp))
+        SectionCardActionsRow(state.actions(archiveOperationLaunchers, localArchive))
 
         SectionCardBottomList(
             localArchive.secondaryRepositories.collectAsState().value,
