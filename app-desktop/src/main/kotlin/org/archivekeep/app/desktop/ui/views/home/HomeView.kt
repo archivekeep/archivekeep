@@ -28,7 +28,6 @@ import org.archivekeep.app.desktop.ui.designsystem.sections.SectionTitle
 import org.archivekeep.app.desktop.ui.designsystem.styles.CColors
 import org.archivekeep.app.desktop.ui.views.View
 import org.archivekeep.app.desktop.ui.views.home.components.HomeActionsList
-import org.archivekeep.app.desktop.ui.views.home.components.HomeArchiveKeepFunctionDescription
 import org.archivekeep.app.desktop.ui.views.home.components.HomeArchivesIntro
 import org.archivekeep.app.desktop.ui.views.home.components.HomeArchivesList
 import org.archivekeep.app.desktop.ui.views.home.components.HomeNonLocalArchivesList
@@ -197,10 +196,6 @@ private fun homeViewContent(vm: HomeViewModel) {
                         ),
                 )
             }
-
-            Spacer(Modifier.height(12.dp))
-            SectionTitle("Description")
-            HomeArchiveKeepFunctionDescription()
         }
     }
 }

@@ -20,12 +20,14 @@ import androidx.compose.ui.window.WindowScope
 import compose.icons.TablerIcons
 import compose.icons.tablericons.Database
 import compose.icons.tablericons.Folders
+import compose.icons.tablericons.InfoSquare
 import org.archivekeep.app.desktop.ui.components.AppBar
 import org.archivekeep.app.desktop.ui.designsystem.navigation.NavigationRail
 import org.archivekeep.app.desktop.ui.designsystem.navigation.NavigationRailItem
 import org.archivekeep.app.desktop.ui.views.View
 import org.archivekeep.app.desktop.ui.views.archives.ArchivesView
 import org.archivekeep.app.desktop.ui.views.home.HomeView
+import org.archivekeep.app.desktop.ui.views.home.InfoView
 import org.archivekeep.app.desktop.ui.views.settings.SettingsView
 import org.archivekeep.app.desktop.ui.views.storages.StoragesView
 
@@ -114,6 +116,12 @@ private val navigables =
 
 private val navigablesEnd =
     listOf(
+        NavigableView(
+            key = "info",
+            title = "Info",
+            icon = TablerIcons.InfoSquare,
+            view = InfoView(),
+        ),
         NavigableView(
             key = "settings",
             title = "Settings",
