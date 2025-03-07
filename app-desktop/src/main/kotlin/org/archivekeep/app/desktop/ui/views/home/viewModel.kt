@@ -44,7 +44,7 @@ class HomeArchiveEntryViewModel(
         val indexStatusText: Loadable<String>,
         val addPushOperationRunning: Boolean,
     ) {
-        val canAddPush = if (addPushOperationRunning) Loadable.Loaded(true) else (canAdd.mapLoadedData { anySecondaryAvailable })
+        val canAddPush = if (addPushOperationRunning) Loadable.Loaded(true) else (canAdd.mapLoadedData { it && anySecondaryAvailable })
     }
 
     val addPushOperation = addAndPushOperationService.getAddPushOperation(primaryRepository.reference.uri)
