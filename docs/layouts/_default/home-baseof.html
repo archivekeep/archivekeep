@@ -4,15 +4,11 @@
     {{ partial "docs/html-head" . }}
     {{ partial "docs/inject/head" . }}
 </head>
-<body dir="{{ default "ltr" .Site.Language.LanguageDirection }}">
+<body dir="{{ default "ltr" .Site.Language.LanguageDirection }}" class="home-page">
 <input type="checkbox" class="hidden toggle" id="menu-control" />
 <input type="checkbox" class="hidden toggle" id="toc-control" />
-<main class="container flex home-page-container">
+<main class="home-page-container">
     <div class="book-page home-page">
-        <header class="book-header">
-            {{ template "header" . }} <!-- Mobile layout header -->
-        </header>
-
         {{ partial "docs/inject/content-before" . }}
         {{ template "main" . }} <!-- Page Content -->
         {{ partial "docs/inject/content-after" . }}

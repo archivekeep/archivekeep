@@ -1,68 +1,101 @@
-# Archive Keep
+---
+---
 
-> Keep your files archived on multiple places, in a reliable and simple way.
+<div class="header">
 
-<hr />
+<h1>Archive Keep</h1>
 
-<div class="features-section main-features">
-<div><div>
-    <h2>Files</h2>
-    <div>Access your archived files directly without any external tool.<p>The archivekeep only facilitates archivation process.</p></div>
-</div></div>
-<div><div>
-    <h2>Preservation</h2>
-    <div>
-        <p>Protect against single point of failure and other causes of data loss.</p>
-        <p>Preserve archived files in original unchanged form.</p>
-        <p><a href="{{< ref "/about/preservation" >}}">Read more</a></p>
-    </div>
-</div></div>
-<div><div>
-    <h2>Liberty</h2>
-    <div>
-        <p>Enable own choice of storage, a hosting provider, by open technologies.</p>
-        <p>Store copies on offline HDDs, phone, servers, NAS, or even multiple cloud providers.</p>
-    </div>
-</div></div>
+<a href="{{< ref "/about" >}}">Docs</a>
+[GitHub](https://github.com/archivekeep/archivekeep)
+
 </div>
 
-<hr />
+<div class="main-display-container">
+    <div class="main-display-inner-container">
+        <div class="text">
+            <h2>Personal files archivation<span class="sub">Under your uncompromised control</span></h2>
+            <p>No vendor lock-in. Use your own storages, rent hosted or cloud storages from vendors of your choice, or self-host. And, combine them as you want.</p>
+            <p><a href="{{< ref "/install" >}}">Install</a></p>
+        </div>
+        <div class="other">
+        </div>
+    </div>
 
-<div class="features-section">
-<div><div>
-    <h3>Offline storages</h3>
-    <div>Replicate your archive contents asynchronously to offline storages such as external HDDs.</div>
-</div></div>
-<div><div>
-    <h3>Safe replication</h3>
-    <div>The replication process prevents propagation of redactions, deletions, corrupted or destructive changes.</div>
-</div></div>
-<div><div>
-    <h3>Verifyable</h3>
-    <div>Verify integrity of stored files using digital checksums.</div>
-</div></div>
-<div><div>
-    <h3>Optional server</h3>
-    <div>Store files on immediately accessible server, i.e. NAS.</div>
-</div></div>
-</div>
-
-<hr />
-
-See [about](about) for more information and details.
-
-<hr />
-
-## Install
-
+<div>
 {{< hint warning >}}
 This software is still under development.
-
-However, the custom data is stored separately from files in a hidden directory for metadata in the root of archive directory.
-Therefore, getting rid of this program should be easy - just delete the metadata in a hidden directory.
 {{< /hint >}}
+</div>
+</div>
 
-See [install](install) docs.
+
+<div class="sub-display-container">
+<div class="sub-display-inner-container">
+<div class="other">
+
+</div>
+<div class="text">
+
+## Plain files
+
+Access your archived files directly without any external tool.
+
+The archivekeep only facilitates archivation process to help you replicate your data for preservation.
+</div>
+</div>
+<div class="sub-display-inner-container">
+<div class="other">
+</div>
+<div class="text">
+
+## Offline first
+
+<p>Offline storages are not always online, because they are offline. And, drives aren't a computer.</p>
+<p>The archivekeep is designed for such asynchronous approach of synchronization in repositories with archive replicas.</p>
+</div>
+</div>
+<div class="sub-display-inner-container">
+<div class="other">
+</div>
+<div class="text">
+
+## Nondestructive replication
+
+The replication process prevents propagation of redactions, deletions, corruption or other destructive changes in files.
+
+The contents of files stored in repositories are verifiable using digistal checksums.
+</div>
+</div>
+</div>
+
+
+<div class="sub-display-container" style="background: white">
+<div class="sub-display-inner-container">
+<div class="text" style="flex: 3 0 0">
+
+## Features
+
+Supported storages:
+
+- Internal or external SSD, HDD, USB flash or other file-systems,
+- _(planned)_ Phone,
+- _(planned)_ Amazon S3-compatible API, 
+- _(planned)_ self-hosting.
+
+Encryption options:
+
+- No encryption,
+- Transparent filesystem level encryption (i.e. [LUKS]),
+- _(planned)_ E2E.
+</div>
+<div class="other">
+</div>
+</div>
+</div>
+
+
+<div class="three-col-section">
+<div><div>
 
 ## Pricing
 
@@ -70,13 +103,24 @@ This is an open-source software, and it is free and will be free, to use the too
 
 The source code is available on [github](https://github.com/archivekeep/archivekeep).
 
+
+</div></div>
+<div><div>
+
 ## Warranty
 
 Although **author desires** to make the system 100% bulletproof **to prevent loss of own data**.
+
 This is open-source software, and it is made **available for free, and comes with no warranty**.
+
+</div></div>
+<div><div>
 
 ## License
 
-The project is licensed under Apache License, which allows proprietary use. See `LICENSE` file for more details.
+The project is licensed under **AGPL v3**.
 
+</div></div>
+</div>
 
+[LUKS]: https://en.wikipedia.org/wiki/Linux_Unified_Key_Setup

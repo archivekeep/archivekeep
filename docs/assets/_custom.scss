@@ -1,35 +1,84 @@
+$home-page-container-max-width: 60rem;
+$horizontal-inner-padding: 1rem;
+
 body {
   overflow-y: scroll;
+}
+
+body.home-page {
+  background: #F9F9F9;
 }
 
 h1,
 .markdown h1 {
   font-size: 2.125rem;
-  font-weight: bold;
+  font-weight: 550;
 }
 
 h2,
 .markdown h2  {
-  font-weight: bold;
+  font-weight: 500;
   font-size: 1.5625rem;
 }
 
 h3,
 .markdown h3 {
   font-size: 1.25rem;
-  font-weight: bold;
+  font-weight: 600;
 }
 
-.home-page-container {
-  max-width: 62rem;
-}
+div.home-page {
+  padding: 0;
 
-.home-page {
   .markdown {
-    h1 {
-      margin: 5rem 0 2rem;
-      font-size: 2.5rem;
-      text-align: center;
+    > * {
+      max-width: $home-page-container-max-width;
+      margin-left: auto;
+      margin-right: auto;
+      padding-left: $horizontal-inner-padding;
+      padding-right: $horizontal-inner-padding;
+    }
+
+    .header {
+      display: flex;
+      flex-direction: row;
+      align-items: baseline;
+      padding-top: 1rem;
+      padding-bottom: 1rem;
+
+      h1 {
+        margin-top: 1rem;
+        margin-bottom: 1rem;
+        font-size: 1.5rem;
+        font-weight: 650;
+        letter-spacing: 0.112rem;
+        margin-inline-end: auto;
+      }
+
+      a, a:visited {
+        text-decoration: none;
+        color: rgba(0,0,0,0.45);
+        font-size: 1.2rem;
+        font-weight: 550;
+      }
+
+      a + a {
+        margin-left: 1rem;
+      }
+
+      @media screen and (max-width: $mobile-breakpoint) {
+        flex-direction: column;
+        align-items: center;
+
+        h1 {
+          margin-inline-end: 0;
+        }
+
+        p {
+          padding: 0;
+          margin: 0;
+        }
+      }
     }
 
     h1 + blockquote {
@@ -40,19 +89,147 @@ h3,
       font-size: 1.25rem;
     }
 
-    .features-section {
+    .main-display-container,
+    .sub-display-container {
+      margin:0;
+      max-width: 100%;
+      box-sizing: border-box;
+
+      color: rgba(0,0,0,0.87);
+
+      > * {
+        max-width: $home-page-container-max-width;
+        margin: 0 auto;
+        padding-left: $horizontal-inner-padding;
+        padding-right: $horizontal-inner-padding;
+      }
+
+      .main-display-inner-container,
+      .sub-display-inner-container {
+        display: flex;
+        flex-direction: row;
+        gap: 3rem;
+
+        @media screen and (max-width: $mobile-breakpoint) {
+          gap: 0;
+          flex-direction: column;
+        }
+      }
+
+      .other {
+        align-self: stretch;
+        background: #F0F5FF;
+        background: radial-gradient(rgba(240, 245, 255, 0.07) 20%, #dbe8ff 100%);
+        border-radius: 2rem;
+      }
+
+      h2 {
+        line-height: 1.15;
+        font-size: 2.5rem;
+        letter-spacing: 0.071rem;
+        margin-top: 0;
+        margin-bottom: 2rem;
+
+        > .sub {
+          margin-top: 0.5rem;
+          display: block;
+          font-size: 1.25rem;
+          font-weight: 600;
+          color: rgba(0,0,0,0.5);
+        }
+      }
+
+      p {
+        margin-block-start: 1rem;
+        margin-block-end: 0.25rem;
+      }
+
+      .text {
+        flex: 4 0 0;
+      }
+
+      .other {
+        flex: 2 0 0;
+      }
+    }
+
+    .main-display-container {
+      background: white;
+      padding: 2rem 0 2.5rem;
+
+      p {
+        margin-block-end: 1.25rem;
+      }
+
+      a, a:visited {
+        display: inline-block;
+        border-radius: 1rem;
+        padding: 1rem 3rem;
+        margin-top: 1rem;
+        margin-bottom: 0.5rem;
+        border: #0055bb solid 1px;
+        color: #0055bb;
+        font-weight: 500;
+        letter-spacing: 0.2rem;
+      }
+
+      .main-display-inner-container {
+        padding: 3rem $horizontal-inner-padding 0.75rem;
+      }
+
+      @media screen and (max-width: $mobile-breakpoint) {
+        padding: 2rem 0 1.5rem;
+
+        .main-display-inner-container {
+          padding: 1rem $horizontal-inner-padding 0;
+        }
+      }
+    }
+
+    .sub-display-container {
+      padding: 2rem 0 1rem;
+
+      h2 {
+        line-height: 1.15;
+        font-size: 2rem;
+        margin-top: 0;
+        margin-bottom: 1rem;
+        letter-spacing: 0.051rem;
+      }
+
+      .sub-display-inner-container {
+        padding: 1.5rem $horizontal-inner-padding;
+      }
+
+      .text {
+        flex: 2 0 0;
+      }
+
+      @media screen and (max-width: $mobile-breakpoint) {
+        padding: 0.125rem 0 1.5rem;
+
+        .sub-display-inner-container {
+          padding: 2rem $horizontal-inner-padding 0;
+        }
+      }
+    }
+
+    .three-col-section {
       display: flex;
       flex-direction: row;
       flex-wrap: wrap;
       justify-content: center;
 
-      margin: 0 -1rem 0;
-      padding: 1rem 0;
+      padding: 2.5rem 0 1rem;
+
+      @media screen and (max-width: $mobile-breakpoint) {
+        padding: 1.25rem 0 0.5rem;
+      }
 
       > div {
-        flex: 25% 0 0;
+        flex: 33.33% 0 0;
         padding: 0.75rem 1rem;
-        font-size: 0.875rem;
+        font-size: 1rem;
 
         > div > :first-child {
           margin-top: 0;
@@ -64,16 +241,7 @@ h3,
         }
 
         @media screen and (max-width: $mobile-breakpoint) {
-          flex: 100% 0 0;
-        }
-      }
-
-      &.main-features > div {
-        flex: 33.33% 0 0;
-        padding: 0.75rem 1rem;
-        font-size: 1rem;
-
-        @media screen and (max-width: $mobile-breakpoint) {
+          padding: 1rem 1rem;
           flex: 100% 0 0;
         }
       }
