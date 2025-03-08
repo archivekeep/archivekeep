@@ -21,8 +21,7 @@ import org.archivekeep.app.core.domain.repositories.Repository
 import org.archivekeep.app.core.domain.repositories.RepositoryInformation
 import org.archivekeep.app.core.domain.repositories.RepositoryService
 import org.archivekeep.app.core.domain.storages.KnownStorage
-import org.archivekeep.app.core.persistence.platform.demo.Documents
-import org.archivekeep.app.core.persistence.platform.demo.LaptopSSD
+import org.archivekeep.app.core.persistence.platform.demo.DocumentsInLaptopSSD
 import org.archivekeep.app.core.utils.identifiers.RepositoryURI
 import org.archivekeep.app.desktop.domain.wiring.LocalArchiveService
 import org.archivekeep.app.desktop.domain.wiring.LocalRepoService
@@ -158,13 +157,11 @@ class UnassociateRepositoryDialog(
 @Preview
 private fun Preview() {
     DialogPreviewColumn {
-        val DocumentsInLaptop = Documents.inStorage(LaptopSSD.reference).storageRepository
-
-        val dialog = UnassociateRepositoryDialog(DocumentsInLaptop.uri)
+        val dialog = UnassociateRepositoryDialog(DocumentsInLaptopSSD.uri)
 
         dialog.renderDialogCard(
             UnassociateRepositoryDialog.State(
-                KnownStorage(DocumentsInLaptop.storage.uri, null, emptyList()),
+                KnownStorage(DocumentsInLaptopSSD.storage.uri, null, emptyList()),
                 RepositoryInformation(null, "A Repo"),
                 onLaunch = {},
                 onClose = {},

@@ -26,7 +26,7 @@ fun DialogInnerContainer(
             Modifier
                 .padding(DialogContentPadding)
                 .width(IntrinsicSize.Min)
-                .defaultMinSize(minWidth = 400.dp, minHeight = 5.dp),
+                .defaultMinSize(minWidth = 500.dp, minHeight = 5.dp),
         verticalArrangement = Arrangement.SpaceBetween,
     ) {
         Column(

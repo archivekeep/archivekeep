@@ -45,6 +45,7 @@ The archivekeep only facilitates archivation process to help you replicate your 
 </div>
 <div class="sub-display-inner-container">
 <div class="other">
+<img src="/generated_screenshots/dialogs/add-and-push/example.png" />
 </div>
 <div class="text">
 
@@ -52,12 +53,7 @@ The archivekeep only facilitates archivation process to help you replicate your 
 
 <p>Offline storages are not always online, because they are offline. And, drives aren't a computer.</p>
 <p>The archivekeep is designed for such asynchronous approach of synchronization in repositories with archive replicas.</p>
-</div>
-</div>
-<div class="sub-display-inner-container">
-<div class="other">
-</div>
-<div class="text">
+
 
 ## Nondestructive replication
 

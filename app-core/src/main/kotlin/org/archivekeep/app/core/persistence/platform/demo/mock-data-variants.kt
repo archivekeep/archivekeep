@@ -8,3 +8,9 @@ val DocumentsInHDDA: DemoEnvironment.MockedRepository
 
 val DocumentsInHDDB: DemoEnvironment.MockedRepository
     get() = Documents.inStorage(hddB.reference)
+
+val DocumentsInSSDKeyChain: DemoEnvironment.MockedRepository
+    get() = Documents.inStorage(ssdKeyChain.reference)
+
+val DocumentsInBackBlaze: DemoEnvironment.MockedRepository
+    get() = Documents.inStorage(BackBlaze.reference)

@@ -19,9 +19,10 @@ import org.archivekeep.app.core.domain.repositories.Repository
 import org.archivekeep.app.core.operations.addpush.AddAndPushOperation.LaunchedAddPushProcess
 import org.archivekeep.app.core.operations.addpush.AddAndPushOperation.NotReadyAddPushProcess
 import org.archivekeep.app.core.operations.addpush.AddAndPushOperation.ReadyAddPushProcess
+import org.archivekeep.app.core.persistence.platform.demo.DocumentsInBackBlaze
 import org.archivekeep.app.core.persistence.platform.demo.DocumentsInHDDA
-import org.archivekeep.app.core.persistence.platform.demo.DocumentsInHDDB
 import org.archivekeep.app.core.persistence.platform.demo.DocumentsInLaptopSSD
+import org.archivekeep.app.core.persistence.platform.demo.DocumentsInSSDKeyChain
 import org.archivekeep.app.core.utils.identifiers.RepositoryURI
 import org.archivekeep.app.desktop.ui.components.DestinationManySelect
 import org.archivekeep.app.desktop.ui.components.FileManySelect
@@ -176,8 +177,13 @@ class AddAndPushRepoDialog(
 @Preview
 @Composable
 private fun AddAndPushDialogContentsCompletedPreview() {
-    val selectedFilenames = listOf("2024/08/01.JPG", "2024/08/02.JPG")
-    val selectedDestinations = setOf(DocumentsInHDDA.uri, DocumentsInHDDB.uri)
+    val allMoves =
+        listOf(
+            AddOperation.PreparationResult.Move("Invoices/2024/01.PDF", "Contracting/Invoices/2024/01.PDF"),
+            AddOperation.PreparationResult.Move("Invoices/2024/02.PDF", "Contracting/Invoices/2024/02.PDF"),
+        )
+    val allNewFiles = listOf("2024/08/01.JPG", "2024/08/02.JPG")
+    val allDestinations = setOf(DocumentsInBackBlaze.uri, DocumentsInSSDKeyChain.uri)
 
     DialogPreviewColumn {
         val dialog = AddAndPushRepoDialog(DocumentsInLaptopSSD.uri)
@@ -187,20 +193,21 @@ private fun AddAndPushDialogContentsCompletedPreview() {
                 repoName = "Documents",
                 ReadyAddPushProcess(
                     AddOperation.PreparationResult(
-                        newFiles = selectedFilenames,
-                        moves = emptyList(),
+                        newFiles = allNewFiles,
+                        moves = allMoves,
                         missingFiles = emptyList(),
                     ),
                     launch = {},
                 ),
-                selectedFilenames = mutableStateOf(selectedFilenames.toSet()),
-                selectedMoves = mutableStateOf(emptySet()),
-                selectedDestinationRepositories = mutableStateOf(selectedDestinations),
+                selectedFilenames = mutableStateOf(allNewFiles.toSet()),
+                selectedMoves = mutableStateOf(allMoves.toSet()),
+                selectedDestinationRepositories = mutableStateOf(allDestinations),
                 otherRepositoryCandidates =
                     Loadable.Loaded(
                         listOf(
+                            DocumentsInBackBlaze.storageRepository,
+                            DocumentsInSSDKeyChain.storageRepository,
                             DocumentsInHDDA.storageRepository,
-                            DocumentsInHDDB.storageRepository,
                         ),
                     ),
                 onCancel = {},

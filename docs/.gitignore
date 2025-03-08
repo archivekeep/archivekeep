@@ -4,5 +4,8 @@
 /content/reference/cli
 /resources/_gen
 
+# generated inputs
+/static/generated_screenshots
+
 # build outputs
 /public

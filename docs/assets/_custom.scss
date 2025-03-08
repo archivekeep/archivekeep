@@ -1,5 +1,5 @@
-$home-page-container-max-width: 60rem;
-$horizontal-inner-padding: 1rem;
+$home-page-container-max-width: 61rem;
+$horizontal-inner-padding: 1.5rem;
 
 body {
   overflow-y: scroll;
@@ -118,9 +118,15 @@ div.home-page {
 
       .other {
         align-self: stretch;
-        background: #F0F5FF;
-        background: radial-gradient(rgba(240, 245, 255, 0.07) 20%, #dbe8ff 100%);
-        border-radius: 2rem;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+
+        &:not(:has(img)) {
+          background: #F0F5FF;
+          background: radial-gradient(rgba(240, 245, 255, 0.07) 20%, #dbe8ff 100%);
+          border-radius: 2rem;
+        }
       }
 
       h2 {
@@ -187,7 +193,7 @@ div.home-page {
     }
 
     .sub-display-container {
-      padding: 2rem 0 1rem;
+      padding: 2rem 0 2rem;
 
       h2 {
         line-height: 1.15;
@@ -195,10 +201,15 @@ div.home-page {
         margin-top: 0;
         margin-bottom: 1rem;
         letter-spacing: 0.051rem;
+        padding-top: 1.5rem ;
       }
 
       .sub-display-inner-container {
-        padding: 1.5rem $horizontal-inner-padding;
+        padding: 0 $horizontal-inner-padding;
+
+        &:first-child h2:first-child {
+          padding-top: 0;
+        }
       }
 
       .text {
@@ -206,10 +217,10 @@ div.home-page {
       }
 
       @media screen and (max-width: $mobile-breakpoint) {
-        padding: 0.125rem 0 1.5rem;
+        padding: 2rem 0 1.5rem;
 
-        .sub-display-inner-container {
-          padding: 2rem $horizontal-inner-padding 0;
+        .h2 {
+          padding-top: 3rem;
         }
       }
     }

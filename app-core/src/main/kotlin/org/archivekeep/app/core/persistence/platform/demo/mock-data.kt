@@ -115,6 +115,26 @@ val hddA =
             ),
     )
 
+val ssdKeyChain =
+    DemoEnvironment.DemoPhysicalMedium(
+        physicalID = "TODO",
+        driveType = DriveType.HDD,
+        displayName = "KeyChain SSD",
+        logicalLocation = "ip-address.archivekeep-server",
+        connectionStatus = Storage.ConnectionStatus.CONNECTED,
+        repositories =
+            listOf(
+                Documents,
+                Photos.withContents {
+                    deletePattern("2024/07/.*".toRegex())
+                },
+                Music,
+                Private,
+                Books,
+                Productions,
+            ),
+    )
+
 val phone =
     DemoEnvironment.DemoPhysicalMedium(
         physicalID = "TODO",
@@ -145,7 +165,7 @@ val eBook =
 
 val BackBlaze =
     DemoEnvironment.DemoOnlineStorage(
-        displayName = "Backblaze S3",
+        displayName = "Backblaze S3 (planned)",
         connectionStatus = Storage.ConnectionStatus.CONNECTED,
         repositories = allArchives,
     )
