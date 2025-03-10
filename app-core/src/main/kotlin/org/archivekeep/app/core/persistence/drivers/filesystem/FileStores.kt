@@ -16,7 +16,7 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.transformLatest
-import org.archivekeep.app.core.utils.generics.sharedWhileSubscribed
+import org.archivekeep.utils.coroutines.shareResourceIn
 import org.archivekeep.utils.io.watch
 import org.archivekeep.utils.loading.firstLoadedOrFailure
 import org.archivekeep.utils.loading.mapLoadedData
@@ -161,7 +161,7 @@ class FileStores(
                 }
         }.flowOn(Dispatchers.IO)
             .mapToLoadable()
-            .sharedWhileSubscribed(scope)
+            .shareResourceIn(scope)
 
     val mountedFileSystems =
         mountPoints.mapLoadedData { mountPoints ->

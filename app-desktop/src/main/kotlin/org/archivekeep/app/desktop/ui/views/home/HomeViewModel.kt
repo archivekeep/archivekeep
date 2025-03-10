@@ -9,8 +9,8 @@ import org.archivekeep.app.core.domain.repositories.RepositoryService
 import org.archivekeep.app.core.domain.storages.StorageService
 import org.archivekeep.app.core.operations.addpush.AddAndPushOperationService
 import org.archivekeep.app.core.operations.sync.RepoToRepoSyncService
-import org.archivekeep.app.core.utils.generics.sharedWhileSubscribed
 import org.archivekeep.utils.combineToList
+import org.archivekeep.utils.coroutines.shareResourceIn
 import org.archivekeep.utils.loading.Loadable
 import org.archivekeep.utils.loading.flatMapLatestLoadedData
 import org.archivekeep.utils.loading.flatMapLoadableFlow
@@ -137,6 +137,6 @@ class HomeViewModel(
                 }.sortedBy { it.displayName }
         }
 
-    val allLocalArchives = allLocalArchivesFlow.sharedWhileSubscribed(scope)
-    val allStorages = allStoragesFlow.sharedWhileSubscribed(scope)
+    val allLocalArchives = allLocalArchivesFlow.shareResourceIn(scope)
+    val allStorages = allStoragesFlow.shareResourceIn(scope)
 }

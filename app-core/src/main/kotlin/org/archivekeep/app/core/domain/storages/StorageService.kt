@@ -9,12 +9,12 @@ import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 import org.archivekeep.app.core.domain.repositories.RepositoryService
 import org.archivekeep.app.core.utils.generics.OptionalLoadable
-import org.archivekeep.app.core.utils.generics.sharedGlobalWhileSubscribed
-import org.archivekeep.app.core.utils.generics.sharedWhileSubscribed
 import org.archivekeep.app.core.utils.identifiers.RepositoryURI
 import org.archivekeep.app.core.utils.identifiers.StorageURI
 import org.archivekeep.utils.combineToFlatMapList
 import org.archivekeep.utils.combineToList
+import org.archivekeep.utils.coroutines.shareResourceIn
+import org.archivekeep.utils.coroutines.sharedResourceInGlobalScope
 import org.archivekeep.utils.loading.flatMapLatestLoadedData
 import org.archivekeep.utils.loading.mapLoadedData
 import org.archivekeep.utils.loading.waitLoadedValue
@@ -53,17 +53,17 @@ class StorageService(
                                         )
                                     }
                             },
-                        ).sharedWhileSubscribed(scope),
+                        ).shareResourceIn(scope),
                     )
                 }
-            }.sharedWhileSubscribed(scope)
+            }.shareResourceIn(scope)
 
     @OptIn(ExperimentalCoroutinesApi::class)
     val allRepos =
         allStorages
             .flatMapLatestLoadedData {
                 combineToFlatMapList(it.map { it.repositories })
-            }.sharedWhileSubscribed(scope)
+            }.shareResourceIn(scope)
 
     fun repository(repositoryURI: RepositoryURI): Flow<StorageRepository> =
         allRepos
@@ -80,5 +80,5 @@ fun notSupportedStorage(storageURI: StorageURI) =
         connectionStatus =
             flow<Storage.ConnectionStatus> {
                 throw RuntimeException("Not supported storage driver: $storageURI")
-            }.sharedGlobalWhileSubscribed(),
+            }.sharedResourceInGlobalScope(),
     )

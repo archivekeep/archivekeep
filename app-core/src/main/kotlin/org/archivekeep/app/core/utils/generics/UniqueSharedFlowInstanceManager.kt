@@ -7,7 +7,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.SharingStarted
-import kotlinx.coroutines.flow.shareIn
+import org.archivekeep.utils.coroutines.shareResourceIn
 
 class UniqueSharedFlowInstanceManager<T : Any, V>(
     val scope: CoroutineScope,
@@ -20,7 +20,7 @@ class UniqueSharedFlowInstanceManager<T : Any, V>(
             .weakValues()
             .build(
                 object : CacheLoader<T, SharedFlow<V>>() {
-                    override fun load(key: T): SharedFlow<V> = factory(key).shareIn(scope, started, 1)
+                    override fun load(key: T): SharedFlow<V> = factory(key).shareResourceIn(scope, started)
                 },
             )
 

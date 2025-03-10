@@ -9,12 +9,10 @@ import kotlinx.coroutines.channels.consumeEach
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.produceIn
-import kotlinx.coroutines.flow.shareIn
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.archivekeep.files.exceptions.UnsupportedFeatureException
@@ -31,6 +29,7 @@ import org.archivekeep.files.repo.ObservableRepo
 import org.archivekeep.files.repo.Repo
 import org.archivekeep.files.repo.RepoIndex
 import org.archivekeep.files.repo.RepositoryMetadata
+import org.archivekeep.utils.coroutines.shareResourceIn
 import org.archivekeep.utils.loading.Loadable
 import org.archivekeep.utils.loading.mapToLoadable
 import java.io.Closeable
@@ -225,7 +224,7 @@ class RemoteGrpcRepository(
     override val indexFlow =
         modifChannel
             .mapToLoadable { index() }
-            .shareIn(scope, SharingStarted.WhileSubscribed())
+            .shareResourceIn(scope)
 
     override val metadataFlow: Flow<Loadable<RepositoryMetadata>> =
         flowOf(

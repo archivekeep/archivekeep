@@ -20,7 +20,6 @@ import org.archivekeep.app.core.utils.exceptions.RepositoryLockedException
 import org.archivekeep.app.core.utils.generics.OptionalLoadable
 import org.archivekeep.app.core.utils.generics.firstFinished
 import org.archivekeep.app.core.utils.generics.mapIfLoadedOrNull
-import org.archivekeep.app.core.utils.generics.sharedWhileSubscribed
 import org.archivekeep.app.core.utils.identifiers.RepositoryURI
 import org.archivekeep.app.core.utils.mapAsLoadable
 import org.archivekeep.files.exceptions.UnsupportedFeatureException
@@ -28,6 +27,7 @@ import org.archivekeep.files.repo.LocalRepo
 import org.archivekeep.files.repo.Repo
 import org.archivekeep.files.repo.RepositoryMetadata
 import org.archivekeep.files.repo.remote.grpc.BasicAuthCredentials
+import org.archivekeep.utils.coroutines.shareResourceIn
 import org.archivekeep.utils.loading.flatMapLatestLoadedData
 
 /**
@@ -63,7 +63,7 @@ class Repository(
     val needsUnlock =
         rawAccessor
             .map { it is ProtectedLoadableResource.PendingAuthentication }
-            .sharedWhileSubscribed(scope)
+            .shareResourceIn(scope)
 
     val optionalAccessorFlow =
         rawAccessor
@@ -80,7 +80,7 @@ class Repository(
                     ProtectedLoadableResource.Loading -> OptionalLoadable.Loading
                     is ProtectedLoadableResource.PendingAuthentication -> OptionalLoadable.NotAvailable()
                 }
-            }.sharedWhileSubscribed(scope)
+            }.shareResourceIn(scope)
 
     val connectionStatusFlow =
         rawAccessor
@@ -121,7 +121,7 @@ class Repository(
                 associationId = metadata.mapIfLoadedOrNull { it.associationGroupId },
                 displayName = registryRepo?.displayLabel ?: uri.data,
             )
-        }.sharedWhileSubscribed(scope)
+        }.shareResourceIn(scope)
 
     val resolvedState =
         combine(
@@ -129,7 +129,7 @@ class Repository(
             connectionStatusFlow,
         ) { info, connectionStatus ->
             ResolvedRepositoryState(uri, info, connectionStatus)
-        }.sharedWhileSubscribed(scope)
+        }.shareResourceIn(scope)
 
     val indexFlow = memorizingRepositoryReader.indexFlow
 
@@ -142,7 +142,7 @@ class Repository(
                 } else {
                     flowOf()
                 }
-            }.sharedWhileSubscribed(scope)
+            }.shareResourceIn(scope)
 
     suspend fun unlock(
         basicCredentials: BasicAuthCredentials,

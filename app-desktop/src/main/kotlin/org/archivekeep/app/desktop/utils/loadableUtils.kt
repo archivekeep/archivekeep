@@ -20,16 +20,15 @@ fun <T> Flow<T>.collectAsLoadableState(): State<Loadable<T>> =
     }.collectLoadableFlowAsState()
 
 @Composable
-fun <T> Flow<Loadable<T>>.collectLoadableFlowAsState(): State<Loadable<T>> =
-    this.collectAsState(
-        Loadable.Loading,
-    )
+fun <T> Flow<Loadable<T>>.collectLoadableFlowAsState(): State<Loadable<T>> = this.collectAsState(Loadable.Loading)
 
 @Composable
 fun <T> Flow<Loadable<T>>.collectLoadableFlow(): Loadable<T> =
     remember(this) {
         this.onEach(::log)
-    }.collectAsState(Loadable.Loading).value
+    }.collectAsState(
+        Loadable.Loading,
+    ).value
 
 fun <T> log(loadable: Loadable<T>) {
     if (loadable is Loadable.Failed) {

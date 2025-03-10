@@ -24,6 +24,7 @@ import org.archivekeep.app.core.domain.storages.StorageNamedReference
 import org.archivekeep.app.core.domain.storages.StorageRepository
 import org.archivekeep.app.core.persistence.credentials.Credentials
 import org.archivekeep.app.core.persistence.credentials.JoseStorage
+import org.archivekeep.app.core.persistence.drivers.filesystem.FileStores
 import org.archivekeep.app.core.persistence.platform.Environment
 import org.archivekeep.app.core.persistence.registry.RegisteredRepository
 import org.archivekeep.app.core.persistence.registry.RegisteredStorage
@@ -33,7 +34,6 @@ import org.archivekeep.app.core.persistence.repository.MemorizedRepositoryMetada
 import org.archivekeep.app.core.utils.ProtectedLoadableResource
 import org.archivekeep.app.core.utils.generics.OptionalLoadable
 import org.archivekeep.app.core.utils.generics.UniqueSharedFlowInstanceManager
-import org.archivekeep.app.core.utils.generics.sharedWhileSubscribed
 import org.archivekeep.app.core.utils.identifiers.RepositoryURI
 import org.archivekeep.app.core.utils.identifiers.StorageURI
 import org.archivekeep.files.RepositoryAssociationGroupId
@@ -47,6 +47,7 @@ import org.archivekeep.testing.storage.InMemoryLocalRepo
 import org.archivekeep.testing.storage.InMemoryRepo
 import org.archivekeep.testing.storage.SpeedLimitedLocalRepoWrapper
 import org.archivekeep.testing.storage.SpeedLimitedRepoWrapper
+import org.archivekeep.utils.coroutines.shareResourceIn
 import org.archivekeep.utils.loading.Loadable
 import org.archivekeep.utils.loading.mapToLoadable
 
@@ -55,6 +56,7 @@ class DemoEnvironment(
     enableSpeedLimit: Boolean = true,
     physicalMediaData: List<DemoPhysicalMedium> = listOf(LaptopSSD, LaptopHDD, hddB, hddC),
     onlineStoragesData: List<DemoOnlineStorage> = emptyList(),
+    override val fileStores: FileStores = FileStores(scope),
 ) : Environment {
     data class InMemoryStorage(
         val registeredStorage: RegisteredStorage,
@@ -109,7 +111,7 @@ class DemoEnvironment(
                                     a
                                 }
                             }.toSet()
-                    }.sharedWhileSubscribed(scope)
+                    }.shareResourceIn(scope)
 
             override val registeredStorages: SharedFlow<Loadable<Set<RegisteredStorage>>> =
                 mediaMapped
@@ -121,7 +123,7 @@ class DemoEnvironment(
                                 storage.registeredStorage
                             }.toSet()
                     }.mapToLoadable()
-                    .sharedWhileSubscribed(scope)
+                    .shareResourceIn(scope)
 
             override suspend fun updateRepositories(fn: (old: Set<RegisteredRepository>) -> Set<RegisteredRepository>) {
                 TODO("Not yet implemented")

@@ -1,13 +1,10 @@
 package org.archivekeep.testing.storage
 
 import kotlinx.coroutines.DelicateCoroutinesApi
-import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.shareIn
 import kotlinx.coroutines.flow.update
 import org.archivekeep.files.exceptions.DestinationExists
 import org.archivekeep.files.exceptions.FileDoesntExist
@@ -16,6 +13,7 @@ import org.archivekeep.files.repo.ObservableRepo
 import org.archivekeep.files.repo.Repo
 import org.archivekeep.files.repo.RepoIndex
 import org.archivekeep.files.repo.RepositoryMetadata
+import org.archivekeep.utils.coroutines.sharedResourceInGlobalScope
 import org.archivekeep.utils.loading.Loadable
 import org.archivekeep.utils.loading.firstLoadedOrFailure
 import org.archivekeep.utils.loading.mapToLoadable
@@ -46,7 +44,7 @@ open class InMemoryRepo(
                         )
                     },
                 )
-            }.shareIn(GlobalScope, SharingStarted.WhileSubscribed(), replay = 1)
+            }.sharedResourceInGlobalScope()
 
     private val _metadataFlow = MutableStateFlow(metadata)
 

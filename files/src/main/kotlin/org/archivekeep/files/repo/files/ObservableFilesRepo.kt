@@ -4,17 +4,14 @@ import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.FlowPreview
-import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.conflate
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onStart
-import kotlinx.coroutines.flow.shareIn
 import kotlinx.coroutines.flow.transform
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.json.Json
@@ -22,6 +19,7 @@ import kotlinx.serialization.json.decodeFromStream
 import org.archivekeep.files.operations.StatusOperation
 import org.archivekeep.files.repo.ObservableWorkingRepo
 import org.archivekeep.files.repo.RepositoryMetadata
+import org.archivekeep.utils.coroutines.sharedResourceInGlobalScope
 import org.archivekeep.utils.io.watchRecursively
 import org.archivekeep.utils.loading.Loadable
 import org.archivekeep.utils.loading.mapToLoadable
@@ -43,7 +41,7 @@ class ObservableFilesRepo internal constructor(
             .watchRecursively(ioDispatcher)
             .debounce(100.milliseconds)
             .map { "update" }
-            .shareIn(GlobalScope, SharingStarted.WhileSubscribed())
+            .sharedResourceInGlobalScope()
             .onStart { emit("start") }
 
     override val localIndex: Flow<StatusOperation.Result> =
@@ -59,7 +57,7 @@ class ObservableFilesRepo internal constructor(
                 // throttle
                 delay(throttlePauseDuration)
             }.flowOn(Dispatchers.IO)
-            .shareIn(GlobalScope, SharingStarted.WhileSubscribed(), replay = 1)
+            .sharedResourceInGlobalScope()
 
     override val indexFlow =
         calculationCause
@@ -73,7 +71,7 @@ class ObservableFilesRepo internal constructor(
                 delay(throttlePauseDuration)
             }.flowOn(Dispatchers.IO)
             .mapToLoadable()
-            .shareIn(GlobalScope, SharingStarted.WhileSubscribed(), replay = 1)
+            .sharedResourceInGlobalScope()
 
     override val metadataFlow: Flow<Loadable<RepositoryMetadata>> =
         calculationCause
@@ -101,5 +99,5 @@ class ObservableFilesRepo internal constructor(
                 delay(throttlePauseDuration)
             }.catch { emit(Loadable.Failed(it)) }
             .flowOn(Dispatchers.IO)
-            .shareIn(GlobalScope, SharingStarted.WhileSubscribed(), replay = 1)
+            .sharedResourceInGlobalScope()
 }

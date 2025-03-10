@@ -19,6 +19,8 @@ import compose.icons.TablerIcons
 import compose.icons.tablericons.Database
 import compose.icons.tablericons.Folders
 import compose.icons.tablericons.InfoSquare
+import kotlinx.coroutines.plus
+import org.archivekeep.app.desktop.domain.services.SharingCoroutineDispatcher
 import org.archivekeep.app.desktop.ui.components.AppBar
 import org.archivekeep.app.desktop.ui.components.DraggableAreaIfWindowPresent
 import org.archivekeep.app.desktop.ui.designsystem.navigation.NavigationRail
@@ -33,6 +35,14 @@ import org.archivekeep.app.desktop.ui.views.storages.StoragesView
 @Composable
 fun MainWindowLayout(onCloseRequest: () -> Unit) {
     val scope = rememberCoroutineScope()
+
+    val sharingScope =
+        with(SharingCoroutineDispatcher) {
+            remember(scope) {
+                scope + this
+            }
+        }
+
     var selectedItem by remember { mutableStateOf<NavigableView<View<*>>>(navigables[0]) }
 
     @Composable
@@ -41,7 +51,7 @@ fun MainWindowLayout(onCloseRequest: () -> Unit) {
         current: Boolean,
         modifier: Modifier,
     ) {
-        val state = view.producePersistentState(scope)
+        val state = view.producePersistentState(sharingScope)
 
         if (current) {
             view.render(modifier, state)

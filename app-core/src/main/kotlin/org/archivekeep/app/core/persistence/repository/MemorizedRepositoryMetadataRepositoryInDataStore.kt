@@ -15,9 +15,9 @@ import kotlinx.serialization.json.Json
 import org.archivekeep.app.core.utils.environment.getRepositoryMetadataMemoryDatastorePath
 import org.archivekeep.app.core.utils.generics.OptionalLoadable
 import org.archivekeep.app.core.utils.generics.mapToOptionalLoadable
-import org.archivekeep.app.core.utils.generics.sharedWhileSubscribed
 import org.archivekeep.app.core.utils.identifiers.RepositoryURI
 import org.archivekeep.files.repo.RepositoryMetadata
+import org.archivekeep.utils.coroutines.shareResourceIn
 
 private val defaultDatastore by lazy {
     PreferenceDataStoreFactory.create(
@@ -38,7 +38,7 @@ class MemorizedRepositoryMetadataRepositoryInDataStore(
             .map(::getRememberedRepositoriesMetadataFromPreferences)
             .onEach {
                 println("Loaded repository metadata: $it")
-            }.sharedWhileSubscribed(scope)
+            }.shareResourceIn(scope)
 
     override fun repositoryCachedMetadataFlow(uri: RepositoryURI): Flow<OptionalLoadable<RepositoryMetadata>> =
         rememberedRepositoriesMetadata

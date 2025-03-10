@@ -18,7 +18,7 @@ import org.archivekeep.app.core.utils.environment.getWalletDatastorePath
 
 class DesktopEnvironment(
     val scope: CoroutineScope,
-    val fileStores: FileStores,
+    override val fileStores: FileStores = FileStores(scope),
 ) : Environment {
     override val registry: PreferenceDataStoreRegistryData = PreferenceDataStoreRegistryData(scope)
 

@@ -19,11 +19,11 @@ import org.archivekeep.app.core.utils.generics.mapLoadedData
 import org.archivekeep.app.core.utils.generics.mapLoadedDataAsOptional
 import org.archivekeep.app.core.utils.generics.mapLoadedDataToOptional
 import org.archivekeep.app.core.utils.generics.mapToOptionalLoadable
-import org.archivekeep.app.core.utils.generics.sharedWhileSubscribed
 import org.archivekeep.app.core.utils.identifiers.RepositoryURI
 import org.archivekeep.app.core.utils.identifiers.StorageURI
 import org.archivekeep.files.repo.Repo
 import org.archivekeep.files.repo.files.openFilesRepoOrNull
+import org.archivekeep.utils.coroutines.shareResourceIn
 import org.archivekeep.utils.loading.mapLoadedData
 import org.archivekeep.utils.loading.waitLoadedValue
 import java.nio.file.Path
@@ -69,7 +69,7 @@ class FileSystemStorageDriver(
                                 driveType = StorageInformation.Partition.DriveType.Other,
                             )
                         }
-                }.sharedWhileSubscribed(scope),
+                }.shareResourceIn(scope),
             liveStatusFlowManager[storageURI],
         )
 

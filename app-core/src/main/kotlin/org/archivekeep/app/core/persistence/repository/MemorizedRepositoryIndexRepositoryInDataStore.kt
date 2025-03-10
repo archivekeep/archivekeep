@@ -15,9 +15,9 @@ import kotlinx.serialization.json.Json
 import org.archivekeep.app.core.utils.environment.getRepositoryIndexMemoryDatastorePath
 import org.archivekeep.app.core.utils.generics.OptionalLoadable
 import org.archivekeep.app.core.utils.generics.mapToOptionalLoadable
-import org.archivekeep.app.core.utils.generics.sharedWhileSubscribed
 import org.archivekeep.app.core.utils.identifiers.RepositoryURI
 import org.archivekeep.files.repo.RepoIndex
+import org.archivekeep.utils.coroutines.shareResourceIn
 
 private val defaultDatastore by lazy {
     PreferenceDataStoreFactory.create(
@@ -38,7 +38,7 @@ class MemorizedRepositoryIndexRepositoryInDataStore(
             .map(::getRememberedRepositoriesIndexesFromPreferences)
             .onEach {
                 println("Loaded repository indexes from data store")
-            }.sharedWhileSubscribed(scope)
+            }.shareResourceIn(scope)
 
     override fun repositoryMemorizedIndexFlow(uri: RepositoryURI): Flow<OptionalLoadable<RepoIndex>> =
         rememberedRepositoriesIndexes

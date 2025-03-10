@@ -20,7 +20,7 @@ import kotlinx.coroutines.sync.withLock
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.json.Json
 import org.archivekeep.app.core.utils.ProtectedLoadableResource
-import org.archivekeep.app.core.utils.generics.sharedWhileSubscribed
+import org.archivekeep.utils.coroutines.shareResourceIn
 import org.archivekeep.utils.safeFileRead
 import org.archivekeep.utils.safeFileReadWrite
 import java.nio.file.Path
@@ -65,7 +65,7 @@ class JoseStorage<T>(
                     is State.Unlocked ->
                         ProtectedLoadableResource.Loaded(it.data)
                 }
-            }.sharedWhileSubscribed(scope)
+            }.shareResourceIn(scope)
 
     suspend fun tryInitialize() {
         mutex.withLock {

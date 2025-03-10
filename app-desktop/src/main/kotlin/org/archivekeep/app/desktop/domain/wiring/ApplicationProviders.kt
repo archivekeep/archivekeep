@@ -2,8 +2,13 @@ package org.archivekeep.app.desktop.domain.wiring
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.RememberObserver
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.DelicateCoroutinesApi
+import kotlinx.coroutines.newFixedThreadPoolContext
+import kotlinx.coroutines.plus
 import org.archivekeep.app.core.domain.archives.DefaultArchiveService
 import org.archivekeep.app.core.domain.repositories.DefaultRepositoryService
 import org.archivekeep.app.core.domain.storages.KnownStorageService
@@ -11,26 +16,31 @@ import org.archivekeep.app.core.domain.storages.StorageService
 import org.archivekeep.app.core.operations.add.AddOperationSupervisorServiceImpl
 import org.archivekeep.app.core.operations.addpush.AddAndPushOperationServiceImpl
 import org.archivekeep.app.core.operations.sync.RepoToRepoSyncServiceImpl
-import org.archivekeep.app.core.persistence.drivers.filesystem.FileStores
 import org.archivekeep.app.core.persistence.drivers.filesystem.FileSystemStorageDriver
 import org.archivekeep.app.core.persistence.platform.Environment
+import org.archivekeep.app.desktop.domain.services.LocalSharingCoroutineDispatcher
 import org.archivekeep.app.desktop.domain.services.RepositoryOpenService
 
+@OptIn(DelicateCoroutinesApi::class)
 @Composable
 fun ApplicationProviders(
-    scope: CoroutineScope,
-    environment: Environment,
-    fileStores: FileStores,
+    environmentFactory: (scope: CoroutineScope) -> Environment,
     content: @Composable () -> Unit,
 ) {
-    val derivedServices =
+    val basescope = rememberCoroutineScope()
+
+    val applicationServices =
         remember(
-            scope,
-            fileStores,
-            environment,
+            basescope,
+            environmentFactory,
         ) {
-            object {
-                val knownStorageService = KnownStorageService(environment.registry, fileStores)
+            object : RememberObserver {
+                val executor = newFixedThreadPoolContext(16, "Application Services")
+                val scope = basescope + executor
+
+                val environment = environmentFactory(scope)
+
+                val knownStorageService = KnownStorageService(environment.registry, environment.fileStores)
 
                 val repoService =
                     DefaultRepositoryService(
@@ -58,7 +68,7 @@ fun ApplicationProviders(
                     OperationFactory(
                         repoService,
                         environment.registry,
-                        fileStores,
+                        environment.fileStores,
                         knownStorageService,
                     )
 
@@ -68,22 +78,34 @@ fun ApplicationProviders(
                             .filterIsInstance<FileSystemStorageDriver>()
                             .firstOrNull(),
                     )
+
+                override fun onAbandoned() {
+                    executor.close()
+                }
+
+                override fun onForgotten() {
+                    executor.close()
+                }
+
+                override fun onRemembered() {
+                }
             }
         }
 
     CompositionLocalProvider(
-        LocalArchiveService provides derivedServices.archiveService,
-        LocalStorageService provides derivedServices.storageService,
-        LocalWalletDataStore provides environment.walletDataStore,
-        LocalRepoService provides derivedServices.repoService,
-        LocalRepoToRepoSyncService provides derivedServices.syncService,
-        LocalAddPushService provides derivedServices.addPushService,
-        LocalAddOperationSupervisorService provides derivedServices.addOperationSupervisorService,
-        LocalRegistry provides environment.registry,
-        LocalFileStores provides fileStores,
-        LocalStorageRegistry provides derivedServices.knownStorageService,
-        LocalOperationFactory provides derivedServices.operationFactory,
-        LocalRepositoryOpenService provides derivedServices.repositoryOpenService,
+        LocalArchiveService provides applicationServices.archiveService,
+        LocalStorageService provides applicationServices.storageService,
+        LocalWalletDataStore provides applicationServices.environment.walletDataStore,
+        LocalRepoService provides applicationServices.repoService,
+        LocalRepoToRepoSyncService provides applicationServices.syncService,
+        LocalAddPushService provides applicationServices.addPushService,
+        LocalAddOperationSupervisorService provides applicationServices.addOperationSupervisorService,
+        LocalRegistry provides applicationServices.environment.registry,
+        LocalFileStores provides applicationServices.environment.fileStores,
+        LocalStorageRegistry provides applicationServices.knownStorageService,
+        LocalOperationFactory provides applicationServices.operationFactory,
+        LocalRepositoryOpenService provides applicationServices.repositoryOpenService,
+        LocalSharingCoroutineDispatcher provides applicationServices.executor,
     ) {
         content()
     }
