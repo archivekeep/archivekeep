@@ -4,7 +4,6 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.window.WindowDraggableArea
 import androidx.compose.material.TopAppBar
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
@@ -17,7 +16,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.compose.ui.window.WindowScope
 import org.archivekeep.app.desktop.domain.data.canUnlock
 import org.archivekeep.app.desktop.domain.wiring.LocalWalletDataStore
 import org.archivekeep.app.desktop.domain.wiring.LocalWalletOperationLaunchers
@@ -26,12 +24,12 @@ import org.archivekeep.app.desktop.ui.designsystem.appbar.AppBarIconButton
 import org.archivekeep.app.desktop.ui.designsystem.styles.CColors
 
 @Composable
-fun WindowScope.AppBar(onCloseRequest: () -> Unit) {
+fun AppBar(onCloseRequest: () -> Unit) {
     val credentialStorage = LocalWalletDataStore.current
 
     val canUnlock = credentialStorage.canUnlock()
 
-    WindowDraggableArea {
+    DraggableAreaIfWindowPresent {
         CompositionLocalProvider(
             LocalContentColor provides Color.White,
         ) {

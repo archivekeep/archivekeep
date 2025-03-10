@@ -4,9 +4,9 @@ import androidx.compose.ui.test.ExperimentalTestApi
 import org.archivekeep.app.core.domain.repositories.RepositoryInformation
 import org.archivekeep.app.core.domain.storages.KnownStorage
 import org.archivekeep.app.core.persistence.platform.demo.DocumentsInLaptopSSD
-import org.archivekeep.app.desktop.ui.dialogs.testing.runHighDensityComposeUiTest
-import org.archivekeep.app.desktop.ui.dialogs.testing.saveDialogBitmap
 import org.archivekeep.app.desktop.ui.dialogs.testing.setContentInDialogScreenshotContainer
+import org.archivekeep.app.desktop.ui.testing.screenshots.runHighDensityComposeUiTest
+import org.archivekeep.app.desktop.ui.testing.screenshots.saveTestingContainerBitmap
 import org.junit.Test
 
 class UnassociateRepositoryDialogScreenshotTest {
@@ -27,7 +27,7 @@ class UnassociateRepositoryDialogScreenshotTest {
                 )
             }
 
-            saveDialogBitmap("dialogs/unassociate-repository/example.png")
+            saveTestingContainerBitmap("dialogs/unassociate-repository/example.png")
         }
     }
 }

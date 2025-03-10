@@ -1,5 +1,8 @@
 .hugo_build.lock
 
+### IntelliJ IDEA ###
+/.idea/*
+
 # generated
 /content/reference/cli
 /resources/_gen

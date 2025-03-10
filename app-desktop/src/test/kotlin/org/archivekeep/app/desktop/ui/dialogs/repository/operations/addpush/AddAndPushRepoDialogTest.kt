@@ -8,9 +8,9 @@ import org.archivekeep.app.core.persistence.platform.demo.DocumentsInHDDA
 import org.archivekeep.app.core.persistence.platform.demo.DocumentsInLaptopSSD
 import org.archivekeep.app.core.persistence.platform.demo.DocumentsInSSDKeyChain
 import org.archivekeep.app.desktop.ui.dialogs.repository.operations.addpush.AddAndPushRepoDialogViewModel.VMState
-import org.archivekeep.app.desktop.ui.dialogs.testing.runHighDensityComposeUiTest
-import org.archivekeep.app.desktop.ui.dialogs.testing.saveDialogBitmap
 import org.archivekeep.app.desktop.ui.dialogs.testing.setContentInDialogScreenshotContainer
+import org.archivekeep.app.desktop.ui.testing.screenshots.runHighDensityComposeUiTest
+import org.archivekeep.app.desktop.ui.testing.screenshots.saveTestingContainerBitmap
 import org.archivekeep.files.operations.AddOperation
 import org.archivekeep.utils.loading.Loadable
 import org.junit.Test
@@ -70,7 +70,7 @@ class AddAndPushRepoDialogScreenshotTest {
                 )
             }
 
-            saveDialogBitmap("dialogs/add-and-push/example.png")
+            saveTestingContainerBitmap("dialogs/add-and-push/example.png")
         }
     }
 }

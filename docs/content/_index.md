@@ -18,6 +18,7 @@
             <p><a href="{{< ref "/install" >}}">Install</a></p>
         </div>
         <div class="other">
+        <img src="/generated_screenshots/main-window.png" />
         </div>
     </div>
 

@@ -37,6 +37,8 @@ val LocalRepositoryOpenService = staticCompositionLocalOfNotProvided<RepositoryO
 
 val LocalComposeWindow = staticCompositionLocalOfNotProvided<ComposeWindow>()
 
+val LocalOptionalComposeWindow = staticCompositionLocalOf<ComposeWindow?>(defaultFactory = { null })
+
 inline fun <reified T> staticCompositionLocalOfNotProvided() =
     staticCompositionLocalOf<T> {
         error("CompositionLocal ${T::class.qualifiedName} not provided")

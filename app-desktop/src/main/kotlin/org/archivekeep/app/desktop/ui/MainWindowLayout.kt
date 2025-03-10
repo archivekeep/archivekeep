@@ -4,7 +4,6 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
-import androidx.compose.foundation.window.WindowDraggableArea
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Settings
@@ -16,12 +15,12 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.window.WindowScope
 import compose.icons.TablerIcons
 import compose.icons.tablericons.Database
 import compose.icons.tablericons.Folders
 import compose.icons.tablericons.InfoSquare
 import org.archivekeep.app.desktop.ui.components.AppBar
+import org.archivekeep.app.desktop.ui.components.DraggableAreaIfWindowPresent
 import org.archivekeep.app.desktop.ui.designsystem.navigation.NavigationRail
 import org.archivekeep.app.desktop.ui.designsystem.navigation.NavigationRailItem
 import org.archivekeep.app.desktop.ui.views.View
@@ -32,7 +31,7 @@ import org.archivekeep.app.desktop.ui.views.settings.SettingsView
 import org.archivekeep.app.desktop.ui.views.storages.StoragesView
 
 @Composable
-fun WindowScope.MainWindowLayout(onCloseRequest: () -> Unit) {
+fun MainWindowLayout(onCloseRequest: () -> Unit) {
     val scope = rememberCoroutineScope()
     var selectedItem by remember { mutableStateOf<NavigableView<View<*>>>(navigables[0]) }
 
@@ -52,7 +51,7 @@ fun WindowScope.MainWindowLayout(onCloseRequest: () -> Unit) {
     Column {
         AppBar(onCloseRequest = onCloseRequest)
         Row {
-            WindowDraggableArea {
+            DraggableAreaIfWindowPresent {
                 NavigationRail {
                     @Composable
                     fun renderItem(it: NavigableView<View<*>>) {

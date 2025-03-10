@@ -52,6 +52,7 @@ import org.archivekeep.utils.loading.mapToLoadable
 
 class DemoEnvironment(
     scope: CoroutineScope,
+    enableSpeedLimit: Boolean = true,
     physicalMediaData: List<DemoPhysicalMedium> = listOf(LaptopSSD, LaptopHDD, hddB, hddC),
     onlineStoragesData: List<DemoOnlineStorage> = emptyList(),
 ) : Environment {
@@ -239,9 +240,13 @@ class DemoEnvironment(
                         flow {
                             val repo =
                                 repo(uri)?.repo?.let { base ->
-                                    when (base) {
-                                        is LocalRepo -> SpeedLimitedLocalRepoWrapper(base)
-                                        else -> SpeedLimitedRepoWrapper(base)
+                                    if (enableSpeedLimit) {
+                                        when (base) {
+                                            is LocalRepo -> SpeedLimitedLocalRepoWrapper(base)
+                                            else -> SpeedLimitedRepoWrapper(base)
+                                        }
+                                    } else {
+                                        base
                                     }
                                 }
 
