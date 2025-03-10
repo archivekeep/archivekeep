@@ -40,9 +40,9 @@ modules:
       - find
       - mkdir /app/bin/
       - mkdir /app/lib/
-      - cp -r app-desktop/build/compose/binaries/main-release/app/archivekeep-desktop/bin/* /app/bin/
-      - cp -r app-desktop/build/compose/binaries/main-release/app/archivekeep-desktop/lib/* /app/lib/
-      - install -Dm644 app-desktop/src/main/composeResources/drawable/ic_app.svg /app/share/icons/hicolor/scalable/apps/org.archivekeep.ArchiveKeep.svg
+      - cp -r modules/app-desktop/build/compose/binaries/main-release/app/archivekeep-desktop/bin/* /app/bin/
+      - cp -r modules/app-desktop/build/compose/binaries/main-release/app/archivekeep-desktop/lib/* /app/lib/
+      - install -Dm644 modules/app-desktop/src/main/composeResources/drawable/ic_app.svg /app/share/icons/hicolor/scalable/apps/org.archivekeep.ArchiveKeep.svg
       - install -Dm644 distribution/resources/org.archivekeep.ArchiveKeep.desktop /app/share/applications/org.archivekeep.ArchiveKeep.desktop
       - find /app
     sources:

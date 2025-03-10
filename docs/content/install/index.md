@@ -56,8 +56,8 @@ sudo apt install openjdk-17-jdk fakeroot build-essential
 sudo mkdir /usr/share/desktop-directories/
 
 # install non-optimized or release build
-sudo apt install ./app-desktop/build/compose/binaries/main/deb/archivekeep-desktop_*.deb 
-sudo apt install ./app-desktop/build/compose/binaries/main-release/deb/archivekeep-desktop_*.deb
+sudo apt install ./modules/app-desktop/build/compose/binaries/main/deb/archivekeep-desktop_*.deb 
+sudo apt install ./modules/app-desktop/build/compose/binaries/main-release/deb/archivekeep-desktop_*.deb
 ```
 
 ### Building & installing RPM package
@@ -73,6 +73,6 @@ sudo dnf install rpm-build
 ./gradlew --console=plain --no-daemon app-desktop:packageReleaseRpm
 
 # install non-optimized or release build
-sudo dnf install app-desktop/build/compose/binaries/main/rpm/archivekeep-desktop-*.rpm
-sudo dnf install app-desktop/build/compose/binaries/main-release/rpm/archivekeep-desktop-*.rpm
+sudo dnf install modules/app-desktop/build/compose/binaries/main/rpm/archivekeep-desktop-*.rpm
+sudo dnf install modules/app-desktop/build/compose/binaries/main-release/rpm/archivekeep-desktop-*.rpm
 ```
