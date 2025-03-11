@@ -60,7 +60,7 @@ asciidoctor = { id = "org.asciidoctor.jvm.convert", version = "4.0.2" }
 
 compose = { id = "org.jetbrains.compose", version.ref = "compose" }
 
-flatpak-gradle-generator = { id = "io.github.jwharm.flatpak-gradle-generator", version = "1.2.0" }
+flatpak-gradle-generator = { id = "io.github.jwharm.flatpak-gradle-generator", version = "1.4.0" }
 
 protobuf = { id = "com.google.protobuf", version.ref = "protobuf" }
 

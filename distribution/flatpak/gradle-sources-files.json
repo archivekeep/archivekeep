@@ -778,6 +778,13 @@
   },
   {
     "type": "file",
+    "url": "https://repo.maven.apache.org/maven2/io/github/irgaly/kfswatch/kfswatch/1.3.0/kfswatch-1.3.0.jar",
+    "sha512": "74d1714acc984bd08ddb9cd359223068e871891b9348bb60ffd080fd3689cb8866e1b498d156e4dfc2fbdcbaa764faf681d8d72d548c0b2a463aa65311fea0d1",
+    "dest": "./offline-repository/io/github/irgaly/kfswatch/kfswatch/1.3.0",
+    "dest-filename": "kfswatch-1.3.0.jar"
+  },
+  {
+    "type": "file",
     "url": "https://repo.maven.apache.org/maven2/io/github/irgaly/kfswatch/kfswatch/1.3.0/kfswatch-1.3.0.module",
     "sha512": "7ed291d1139aab9e7f49847afbdad517bc99667589b5d5e15dc818b6d0c01340738cfd19d3b785f42715db4995a98ae604def4447070ff7bb4c3ebf2f047d656",
     "dest": "./offline-repository/io/github/irgaly/kfswatch/kfswatch/1.3.0",
@@ -1695,6 +1702,13 @@
   },
   {
     "type": "file",
+    "url": "https://repo.maven.apache.org/maven2/org/jetbrains/kotlinx/atomicfu/0.23.1/atomicfu-0.23.1.jar",
+    "sha512": "f802534f8efd9d346c3f56292189568e0ce8a62817714a5e2ceabf93314b0262051c328039704ef5af8ec35637687e517cd7926cd585bf671b0c339a6906fcc8",
+    "dest": "./offline-repository/org/jetbrains/kotlinx/atomicfu/0.23.1",
+    "dest-filename": "atomicfu-0.23.1.jar"
+  },
+  {
+    "type": "file",
     "url": "https://repo.maven.apache.org/maven2/org/jetbrains/kotlinx/atomicfu/0.23.1/atomicfu-0.23.1.module",
     "sha512": "40dc36e3310f965790b6a1d10eea84477c183c138855b27711f6a9f4d334e67a907032b5e41cece165c07ad2b771e49e1fcae09444901adf997be4d4801d946b",
     "dest": "./offline-repository/org/jetbrains/kotlinx/atomicfu/0.23.1",
@@ -1769,6 +1783,13 @@
     "sha512": "5b6ee13381e00ab4a46d82e357b2873d3c942a1cfaddb9ee59210945613cdacaa4a47a67278ebed1547d1fea4fbde1014b9f057d77826a309801d592cfb118ad",
     "dest": "./offline-repository/org/jetbrains/kotlinx/kotlinx-coroutines-core-jvm/1.6.4",
     "dest-filename": "kotlinx-coroutines-core-jvm-1.6.4.pom"
+  },
+  {
+    "type": "file",
+    "url": "https://repo.maven.apache.org/maven2/org/jetbrains/kotlinx/kotlinx-coroutines-core/1.10.1/kotlinx-coroutines-core-1.10.1.jar",
+    "sha512": "d797be0e69f7312d81728db9a0c7871fcf1eda6da5dc8bfb2f612e475c334b30692cfb62f49b46c50539711c91914c008edb757d247c3867d7e53cfdb71324b5",
+    "dest": "./offline-repository/org/jetbrains/kotlinx/kotlinx-coroutines-core/1.10.1",
+    "dest-filename": "kotlinx-coroutines-core-1.10.1.jar"
   },
   {
     "type": "file",
@@ -1961,6 +1982,13 @@
   },
   {
     "type": "file",
+    "url": "https://repo.maven.apache.org/maven2/org/jetbrains/kotlinx/kotlinx-serialization-core/1.6.3/kotlinx-serialization-core-1.6.3.jar",
+    "sha512": "c105c5d10548dab7da2d652bfbf606cc931e55f7dd66b6ab561d2b2c2adba2ddab6e19cf4ef9e2542b02e1f31a70e9b9172847b6718e09d124ed16b8a036e162",
+    "dest": "./offline-repository/org/jetbrains/kotlinx/kotlinx-serialization-core/1.6.3",
+    "dest-filename": "kotlinx-serialization-core-1.6.3.jar"
+  },
+  {
+    "type": "file",
     "url": "https://repo.maven.apache.org/maven2/org/jetbrains/kotlinx/kotlinx-serialization-core/1.6.3/kotlinx-serialization-core-1.6.3.module",
     "sha512": "12018985c9ce5f2a84635d7316d98f6fac7f5b14cb8fbb52011be469a70b3954b4185a84fdf612c59baae80e69db94ece6e99503bc007f7619176dab7bccfe35",
     "dest": "./offline-repository/org/jetbrains/kotlinx/kotlinx-serialization-core/1.6.3",
@@ -2049,6 +2077,13 @@
     "sha512": "297a3f7a8a8af3155dcf1387a0b3ae6df9ff6a66a13f52d5aa9a0522087037a5dc011f310ff6ab1171d7ebc7d804f3cae15f822ce22d6bfc76900561e16b0989",
     "dest": "./offline-repository/org/jetbrains/kotlinx/kotlinx-serialization-json/1.4.1",
     "dest-filename": "kotlinx-serialization-json-1.4.1.pom"
+  },
+  {
+    "type": "file",
+    "url": "https://repo.maven.apache.org/maven2/org/jetbrains/kotlinx/kotlinx-serialization-json/1.6.3/kotlinx-serialization-json-1.6.3.jar",
+    "sha512": "98883df0493ec263aa353fbec06832a978a9aec5402ef25a36f6179b4324c9ab92d58831cf8abe8993849dc52e92c528d07aec50196d995f0e9049fc5e12119e",
+    "dest": "./offline-repository/org/jetbrains/kotlinx/kotlinx-serialization-json/1.6.3",
+    "dest-filename": "kotlinx-serialization-json-1.6.3.jar"
   },
   {
     "type": "file",

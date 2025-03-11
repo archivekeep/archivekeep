@@ -58,21 +58,6 @@ modules:
         sha256: "f397b287023acdba1e9f6fc5ea72d22dd63669d59ed4a289a29b1a76eee151c6"
         dest: "gradle/wrapper"
         dest-filename: "gradle-bin.zip"
-      - type: file
-        url: "https://repo.maven.apache.org/maven2/io/github/vinceglb/filekit-core-jvm/0.8.3/filekit-core-jvm-0.8.3.jar"
-        sha256: "13036bf2c56432c167c4306bca37254ba80efac85bd93012240bc8f7ace28dc8"
-        dest: "offline-repository/io/github/vinceglb/filekit-core-jvm/0.8.3"
-        dest-filename: "filekit-core-jvm-0.8.3.jar"
-      - type: file
-        url: "https://repo.maven.apache.org/maven2/io/github/vinceglb/filekit-compose-jvm/0.8.3/filekit-compose-jvm-0.8.3.jar"
-        sha256: "26321e1f946ce6f238d456e9e61e6d73a08a4e94157f3b5aa990420c52e164ed"
-        dest: "offline-repository/io/github/vinceglb/filekit-compose-jvm/0.8.3"
-        dest-filename: "filekit-compose-jvm-0.8.3.jar"
-      - type: file
-        url: "https://repo.maven.apache.org/maven2/org/jetbrains/compose/components/components-resources-desktop/1.7.3/components-resources-desktop-1.7.3.jar"
-        sha256: "1584b739e8f1869e4f340519dc984d4a44582a80ef323e655999ddb18dd954c2"
-        dest: "offline-repository/org/jetbrains/compose/components/components-resources-desktop/1.7.3"
-        dest-filename: "components-resources-desktop-1.7.3.jar"
       - "gradle-sources-root.json"
       - "gradle-sources-app-core.json"
       - "gradle-sources-app-desktop.json"

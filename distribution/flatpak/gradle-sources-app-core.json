@@ -29,6 +29,13 @@
   },
   {
     "type": "file",
+    "url": "https://dl.google.com/dl/android/maven2/androidx/annotation/annotation/1.7.0/annotation-1.7.0.jar",
+    "sha512": "560d5db7932556eb9549adfe394ee0ebb18f25a22df2e368dc9bc772a81cb0746f66389626ee9d8b8e19a6d4948d1cd479b147f197f30ce38754a54890aac212",
+    "dest": "./offline-repository/androidx/annotation/annotation/1.7.0",
+    "dest-filename": "annotation-1.7.0.jar"
+  },
+  {
+    "type": "file",
     "url": "https://dl.google.com/dl/android/maven2/androidx/annotation/annotation/1.7.0/annotation-1.7.0.module",
     "sha512": "f1b320a2139fe3debdc118c2aa4b3d19bac36f5fb7d45f82d12664f03dbd07968b07a9964f2b01cba0298cc7a110e1a0c3947833937e3a768f4a98d74417ad7d",
     "dest": "./offline-repository/androidx/annotation/annotation/1.7.0",
@@ -92,6 +99,13 @@
   },
   {
     "type": "file",
+    "url": "https://dl.google.com/dl/android/maven2/androidx/datastore/datastore-core-okio/1.1.1/datastore-core-okio-1.1.1.jar",
+    "sha512": "5a80c677ef461fefc914db30c080e7f45a1c1464243770ebbb64180f0108d85008ccd68084cda20c75ecd16e1cc4cb8968cc6deb4cd95c5ea0ef67c45c2fa7e2",
+    "dest": "./offline-repository/androidx/datastore/datastore-core-okio/1.1.1",
+    "dest-filename": "datastore-core-okio-1.1.1.jar"
+  },
+  {
+    "type": "file",
     "url": "https://dl.google.com/dl/android/maven2/androidx/datastore/datastore-core-okio/1.1.1/datastore-core-okio-1.1.1.module",
     "sha512": "b0583503c3e6d77e52f6bf87a7624d001983c9cd21d5f333615ed37d7937d14407595ced7d83bb637e3969735596596b7130abd560446461581eb6437edc4050",
     "dest": "./offline-repository/androidx/datastore/datastore-core-okio/1.1.1",
@@ -110,6 +124,13 @@
     "sha512": "4c9d7da40dd69114de5e912822f477aababfcebfd9092cac7401dfc89862c5b1199f3afc0322563c3e4ab764014b7e10f6c959b03b923b7277f9792083428b3d",
     "dest": "./offline-repository/androidx/datastore/datastore-core/1.1.1/../../datastore-core-jvm/1.1.1",
     "dest-filename": "datastore-core-jvm-1.1.1.module"
+  },
+  {
+    "type": "file",
+    "url": "https://dl.google.com/dl/android/maven2/androidx/datastore/datastore-core/1.1.1/datastore-core-1.1.1.jar",
+    "sha512": "f798ae4022c50d0ab932bb8f58adf73b3d72a46d499bf5f8574d84199b23b55175c863e0531b0e33dae301f3eefbdf4b5246cd2979f34b2fc486286d22d2be7b",
+    "dest": "./offline-repository/androidx/datastore/datastore-core/1.1.1",
+    "dest-filename": "datastore-core-1.1.1.jar"
   },
   {
     "type": "file",
@@ -176,6 +197,13 @@
   },
   {
     "type": "file",
+    "url": "https://dl.google.com/dl/android/maven2/androidx/datastore/datastore-preferences-core/1.1.1/datastore-preferences-core-1.1.1.jar",
+    "sha512": "1b1eaef7277d884dcb2ed2a193908e341ff6962ecf103642c2cf293ede35ca143a0e424189d2e1fd87e3d3ecbd31af65467ee2ca5f95120e740d359c0b0eb04b",
+    "dest": "./offline-repository/androidx/datastore/datastore-preferences-core/1.1.1",
+    "dest-filename": "datastore-preferences-core-1.1.1.jar"
+  },
+  {
+    "type": "file",
     "url": "https://dl.google.com/dl/android/maven2/androidx/datastore/datastore-preferences-core/1.1.1/datastore-preferences-core-1.1.1.module",
     "sha512": "743a80228625691138169142a7f8f3769909d863cb4c59c38faa80cea3b4fdbb0c1453ea8c6738695c8daa4c9c91986db43a6489cc8b758d57c04a10c9c395b9",
     "dest": "./offline-repository/androidx/datastore/datastore-preferences-core/1.1.1",
@@ -232,6 +260,13 @@
   },
   {
     "type": "file",
+    "url": "https://dl.google.com/dl/android/maven2/androidx/datastore/datastore-preferences/1.1.1/datastore-preferences-1.1.1.jar",
+    "sha512": "a295af4b342ea4f73feab15a85253ca6687622b3bf05f85992fc46cbff332b5a66929d1803b461ae8ec9f7c65ce59c7dbadd30fd0bd0b429b2568c71c0673a8a",
+    "dest": "./offline-repository/androidx/datastore/datastore-preferences/1.1.1",
+    "dest-filename": "datastore-preferences-1.1.1.jar"
+  },
+  {
+    "type": "file",
     "url": "https://dl.google.com/dl/android/maven2/androidx/datastore/datastore-preferences/1.1.1/datastore-preferences-1.1.1.module",
     "sha512": "42ecc92d977a040075ab72aa3656333f8e67329cb6c731512debb2a09d074272c6502dd98a90f825a69360d5df3b17ad238ee2f027883afa14d1a33aa711692e",
     "dest": "./offline-repository/androidx/datastore/datastore-preferences/1.1.1",
@@ -264,6 +299,13 @@
     "sha512": "16b3a912c27c4d292f15e1d4057ce2a8ea038acc8eac9fbd32bf26c0eff9970cc50db774814a321fc25076cc74e4bf1151b66620c54bcad0316a3027ba0d2295",
     "dest": "./offline-repository/androidx/datastore/datastore/1.1.1/../../datastore-jvm/1.1.1",
     "dest-filename": "datastore-jvm-1.1.1.module"
+  },
+  {
+    "type": "file",
+    "url": "https://dl.google.com/dl/android/maven2/androidx/datastore/datastore/1.1.1/datastore-1.1.1.jar",
+    "sha512": "ec366034eb9088bfe9f544e5b13ab2cd77d3fcc86886a3dcb6acc48a1cc54c8ec2d6f8c7fbb74d9c211282425f3206262f3d49a498cd2ff1bec5f51740198986",
+    "dest": "./offline-repository/androidx/datastore/datastore/1.1.1",
+    "dest-filename": "datastore-1.1.1.jar"
   },
   {
     "type": "file",
@@ -981,6 +1023,13 @@
   },
   {
     "type": "file",
+    "url": "https://repo.maven.apache.org/maven2/com/squareup/okio/okio/3.4.0/okio-3.4.0-all.jar",
+    "sha512": "68932619f2d93b965386dcd4f1a8a62120978f1a07212bdee17cc3ed928f41c2879cf395c6b8cbfa22ee86191dedf1881f2ed7504ba2945c49ecf8461cbd64b5",
+    "dest": "./offline-repository/com/squareup/okio/okio/3.4.0",
+    "dest-filename": "okio-3.4.0-all.jar"
+  },
+  {
+    "type": "file",
     "url": "https://repo.maven.apache.org/maven2/com/squareup/okio/okio/3.4.0/okio-3.4.0.module",
     "sha512": "379efd4f9cda16f855a2d408d2c2d891d4056faa5a333b03622af6dbfba4ba8283f3dfc1147277855ffcca37528877b89d2aa2f3114494020268624e4e91b954",
     "dest": "./offline-repository/com/squareup/okio/okio/3.4.0",
@@ -1097,6 +1146,13 @@
     "sha512": "0f9d436ea380e1e3c291e2291e2e5ff318fd437d5a6f1259f3bc29288d0fc61e8ee8fd53cf1e4163f007a48ec659d2c6534a3df4041ec83b4cc1b297f65afa6e",
     "dest": "./offline-repository/io/github/irgaly/kfswatch/kfswatch-jvm/1.3.0",
     "dest-filename": "kfswatch-jvm-1.3.0.pom"
+  },
+  {
+    "type": "file",
+    "url": "https://repo.maven.apache.org/maven2/io/github/irgaly/kfswatch/kfswatch/1.3.0/kfswatch-1.3.0.jar",
+    "sha512": "74d1714acc984bd08ddb9cd359223068e871891b9348bb60ffd080fd3689cb8866e1b498d156e4dfc2fbdcbaa764faf681d8d72d548c0b2a463aa65311fea0d1",
+    "dest": "./offline-repository/io/github/irgaly/kfswatch/kfswatch/1.3.0",
+    "dest-filename": "kfswatch-1.3.0.jar"
   },
   {
     "type": "file",
@@ -2052,6 +2108,13 @@
   },
   {
     "type": "file",
+    "url": "https://repo.maven.apache.org/maven2/org/jetbrains/kotlinx/atomicfu/0.21.0/atomicfu-0.21.0-all.jar",
+    "sha512": "8a2f5dfca99e170c89acd9177d717a303c63c2168770be0182ff611bb9a3455ada9987958d9ef77f0280f1429483482fbcbba7e545a2d61aba2624ae54ac2601",
+    "dest": "./offline-repository/org/jetbrains/kotlinx/atomicfu/0.21.0",
+    "dest-filename": "atomicfu-0.21.0-all.jar"
+  },
+  {
+    "type": "file",
     "url": "https://repo.maven.apache.org/maven2/org/jetbrains/kotlinx/atomicfu/0.21.0/atomicfu-0.21.0.module",
     "sha512": "f40deb0d060a753708f436b594804460cfb97ce6f2c5384af331f625ccb4ca190af1b576c0312edf60e59c22e1c4e192e29b2c4b98fcfc7d533eea479ab0744a",
     "dest": "./offline-repository/org/jetbrains/kotlinx/atomicfu/0.21.0",
@@ -2063,6 +2126,13 @@
     "sha512": "4768f830af93c1c4a349b2747ca4f1603f43792cbde90f746ac2bc948fb3b94b726ff290dec5f68046d7eac868e6c2756a530f47fc1265e2c6aefcebae95975f",
     "dest": "./offline-repository/org/jetbrains/kotlinx/atomicfu/0.21.0",
     "dest-filename": "atomicfu-0.21.0.pom"
+  },
+  {
+    "type": "file",
+    "url": "https://repo.maven.apache.org/maven2/org/jetbrains/kotlinx/atomicfu/0.23.1/atomicfu-0.23.1.jar",
+    "sha512": "f802534f8efd9d346c3f56292189568e0ce8a62817714a5e2ceabf93314b0262051c328039704ef5af8ec35637687e517cd7926cd585bf671b0c339a6906fcc8",
+    "dest": "./offline-repository/org/jetbrains/kotlinx/atomicfu/0.23.1",
+    "dest-filename": "atomicfu-0.23.1.jar"
   },
   {
     "type": "file",
@@ -2150,6 +2220,13 @@
   },
   {
     "type": "file",
+    "url": "https://repo.maven.apache.org/maven2/org/jetbrains/kotlinx/kotlinx-coroutines-core/1.10.1/kotlinx-coroutines-core-1.10.1.jar",
+    "sha512": "d797be0e69f7312d81728db9a0c7871fcf1eda6da5dc8bfb2f612e475c334b30692cfb62f49b46c50539711c91914c008edb757d247c3867d7e53cfdb71324b5",
+    "dest": "./offline-repository/org/jetbrains/kotlinx/kotlinx-coroutines-core/1.10.1",
+    "dest-filename": "kotlinx-coroutines-core-1.10.1.jar"
+  },
+  {
+    "type": "file",
     "url": "https://repo.maven.apache.org/maven2/org/jetbrains/kotlinx/kotlinx-coroutines-core/1.10.1/kotlinx-coroutines-core-1.10.1.module",
     "sha512": "891754e1a21733594ac0526acb39dfd4f2f83782a2260c2e0723a76daef9bfee648bc805a7bb604d688036d326473129eeadf5a58cdd34bb3eb268547282e9c4",
     "dest": "./offline-repository/org/jetbrains/kotlinx/kotlinx-coroutines-core/1.10.1",
@@ -2161,6 +2238,13 @@
     "sha512": "0699abef4f344b3c0911ecc584682a834be9a2cdbd8e80645a35e44e75c490ba29d98cdb0b6718f40401b0e590b7e35fcd398353cb252202290ef8e1c6d3607d",
     "dest": "./offline-repository/org/jetbrains/kotlinx/kotlinx-coroutines-core/1.10.1",
     "dest-filename": "kotlinx-coroutines-core-1.10.1.pom"
+  },
+  {
+    "type": "file",
+    "url": "https://repo.maven.apache.org/maven2/org/jetbrains/kotlinx/kotlinx-coroutines-core/1.7.3/kotlinx-coroutines-core-1.7.3.jar",
+    "sha512": "98a2570c4fb5cf2b0c78be731367b219e66c6e23f7fac4218ec447104266ee46714c3c233686fb8a2525c0a9829250dce8b72df7f53ff6881460b241d8f6a462",
+    "dest": "./offline-repository/org/jetbrains/kotlinx/kotlinx-coroutines-core/1.7.3",
+    "dest-filename": "kotlinx-coroutines-core-1.7.3.jar"
   },
   {
     "type": "file",
@@ -2353,6 +2437,13 @@
   },
   {
     "type": "file",
+    "url": "https://repo.maven.apache.org/maven2/org/jetbrains/kotlinx/kotlinx-serialization-core/1.6.3/kotlinx-serialization-core-1.6.3.jar",
+    "sha512": "c105c5d10548dab7da2d652bfbf606cc931e55f7dd66b6ab561d2b2c2adba2ddab6e19cf4ef9e2542b02e1f31a70e9b9172847b6718e09d124ed16b8a036e162",
+    "dest": "./offline-repository/org/jetbrains/kotlinx/kotlinx-serialization-core/1.6.3",
+    "dest-filename": "kotlinx-serialization-core-1.6.3.jar"
+  },
+  {
+    "type": "file",
     "url": "https://repo.maven.apache.org/maven2/org/jetbrains/kotlinx/kotlinx-serialization-core/1.6.3/kotlinx-serialization-core-1.6.3.module",
     "sha512": "12018985c9ce5f2a84635d7316d98f6fac7f5b14cb8fbb52011be469a70b3954b4185a84fdf612c59baae80e69db94ece6e99503bc007f7619176dab7bccfe35",
     "dest": "./offline-repository/org/jetbrains/kotlinx/kotlinx-serialization-core/1.6.3",
@@ -2444,6 +2535,13 @@
   },
   {
     "type": "file",
+    "url": "https://repo.maven.apache.org/maven2/org/jetbrains/kotlinx/kotlinx-serialization-json/1.6.3/kotlinx-serialization-json-1.6.3.jar",
+    "sha512": "98883df0493ec263aa353fbec06832a978a9aec5402ef25a36f6179b4324c9ab92d58831cf8abe8993849dc52e92c528d07aec50196d995f0e9049fc5e12119e",
+    "dest": "./offline-repository/org/jetbrains/kotlinx/kotlinx-serialization-json/1.6.3",
+    "dest-filename": "kotlinx-serialization-json-1.6.3.jar"
+  },
+  {
+    "type": "file",
     "url": "https://repo.maven.apache.org/maven2/org/jetbrains/kotlinx/kotlinx-serialization-json/1.6.3/kotlinx-serialization-json-1.6.3.module",
     "sha512": "9f6ad57288c0eaafa25150456d41f73fdb958addc30cba8ed8a4966e4253f749c6500f983fdec04119067fac10faeb3bc2b7310509a9ad305cdfdad86afe34db",
     "dest": "./offline-repository/org/jetbrains/kotlinx/kotlinx-serialization-json/1.6.3",
@@ -2476,6 +2574,13 @@
     "sha512": "3ceaed2552d94257ad728a2c4effded5692975c557f6d24c3239c4fa255e4212def941bc98d4fd3b2a456daf497961b09d7aff5f2d78f311869ca7716786175b",
     "dest": "./offline-repository/org/jetbrains/kotlinx/kotlinx-serialization-protobuf-jvm/1.6.3",
     "dest-filename": "kotlinx-serialization-protobuf-jvm-1.6.3.pom"
+  },
+  {
+    "type": "file",
+    "url": "https://repo.maven.apache.org/maven2/org/jetbrains/kotlinx/kotlinx-serialization-protobuf/1.6.3/kotlinx-serialization-protobuf-1.6.3.jar",
+    "sha512": "3fbd8efe40f23b6a32076f5dfa8f7c8a0dcd153ea5bab8dbf4462acadfc3480e974539b375e70a2ba0d09037aa82f58095b77244a4ad333bc0d560196d56a61d",
+    "dest": "./offline-repository/org/jetbrains/kotlinx/kotlinx-serialization-protobuf/1.6.3",
+    "dest-filename": "kotlinx-serialization-protobuf-1.6.3.jar"
   },
   {
     "type": "file",

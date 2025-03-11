@@ -1786,6 +1786,13 @@
   },
   {
     "type": "file",
+    "url": "https://repo.maven.apache.org/maven2/org/jetbrains/kotlinx/atomicfu/0.23.1/atomicfu-0.23.1.jar",
+    "sha512": "f802534f8efd9d346c3f56292189568e0ce8a62817714a5e2ceabf93314b0262051c328039704ef5af8ec35637687e517cd7926cd585bf671b0c339a6906fcc8",
+    "dest": "./offline-repository/org/jetbrains/kotlinx/atomicfu/0.23.1",
+    "dest-filename": "atomicfu-0.23.1.jar"
+  },
+  {
+    "type": "file",
     "url": "https://repo.maven.apache.org/maven2/org/jetbrains/kotlinx/atomicfu/0.23.1/atomicfu-0.23.1.module",
     "sha512": "40dc36e3310f965790b6a1d10eea84477c183c138855b27711f6a9f4d334e67a907032b5e41cece165c07ad2b771e49e1fcae09444901adf997be4d4801d946b",
     "dest": "./offline-repository/org/jetbrains/kotlinx/atomicfu/0.23.1",
@@ -1860,6 +1867,13 @@
     "sha512": "5b6ee13381e00ab4a46d82e357b2873d3c942a1cfaddb9ee59210945613cdacaa4a47a67278ebed1547d1fea4fbde1014b9f057d77826a309801d592cfb118ad",
     "dest": "./offline-repository/org/jetbrains/kotlinx/kotlinx-coroutines-core-jvm/1.6.4",
     "dest-filename": "kotlinx-coroutines-core-jvm-1.6.4.pom"
+  },
+  {
+    "type": "file",
+    "url": "https://repo.maven.apache.org/maven2/org/jetbrains/kotlinx/kotlinx-coroutines-core/1.10.1/kotlinx-coroutines-core-1.10.1.jar",
+    "sha512": "d797be0e69f7312d81728db9a0c7871fcf1eda6da5dc8bfb2f612e475c334b30692cfb62f49b46c50539711c91914c008edb757d247c3867d7e53cfdb71324b5",
+    "dest": "./offline-repository/org/jetbrains/kotlinx/kotlinx-coroutines-core/1.10.1",
+    "dest-filename": "kotlinx-coroutines-core-1.10.1.jar"
   },
   {
     "type": "file",
@@ -1979,6 +1993,13 @@
     "sha512": "77591975ae3ae76bbd297070fd4214cfad1477f8334fbe6c9f273295feaafe33b368f18a4f864c5c184b91e423a34a4f8444b10d8cd0fd98cf2567a25154a23d",
     "dest": "./offline-repository/org/jetbrains/kotlinx/kotlinx-coroutines-test-jvm/1.10.1",
     "dest-filename": "kotlinx-coroutines-test-jvm-1.10.1.pom"
+  },
+  {
+    "type": "file",
+    "url": "https://repo.maven.apache.org/maven2/org/jetbrains/kotlinx/kotlinx-coroutines-test/1.10.1/kotlinx-coroutines-test-1.10.1.jar",
+    "sha512": "4fbb3a96eb34b8d2dd284cc876b186d92146644d7c4b2eb740af6998d3742246a371255efba1ee3af78e6d8a2eacd7ebb7ae515254727381d800257d62034a9c",
+    "dest": "./offline-repository/org/jetbrains/kotlinx/kotlinx-coroutines-test/1.10.1",
+    "dest-filename": "kotlinx-coroutines-test-1.10.1.jar"
   },
   {
     "type": "file",
