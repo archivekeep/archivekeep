@@ -14,3 +14,12 @@ val DocumentsInSSDKeyChain: DemoEnvironment.MockedRepository
 
 val DocumentsInBackBlaze: DemoEnvironment.MockedRepository
     get() = Documents.inStorage(BackBlaze.reference)
+
+val PhotosInLaptopSSD: DemoEnvironment.MockedRepository
+    get() = Photos.inStorage(LaptopSSD.reference)
+
+val PhotosInHDDA: DemoEnvironment.MockedRepository
+    get() = Photos.inStorage(hddA.reference)
+
+val PhotosInHDDB: DemoEnvironment.MockedRepository
+    get() = Photos.inStorage(hddB.reference)

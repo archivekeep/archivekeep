@@ -23,14 +23,14 @@ val documentsContents: FixtureRepoBuilder.() -> Unit = {
 val photosBaseContents: FixtureRepoBuilder.() -> Unit = {
     (2010..2023).forEach { year ->
         (1..12).forEach { month ->
-            (1..(43312 % (month + 32))).forEach {
+            (1..(43312 * (month + 1) % 37 + 1)).forEach {
                 addStored("$year/$month/$it.JPG")
             }
         }
     }
     (2024..2024).forEach { year ->
         (1..7).forEach { month ->
-            (1..(12342 % (month + 44))).forEach {
+            (1..(12342 * (month + 1) % 29 + 3)).forEach {
                 addStored("$year/$month/$it.JPG")
             }
         }

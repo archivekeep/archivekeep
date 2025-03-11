@@ -31,7 +31,7 @@ fun (ColumnScope).RepoToRepoSyncMainContents(
             is State.Prepared -> {
                 val t =
                     remember(operation.preparedSyncOperation) {
-                        describePreparedSyncOperationWithDetails(operation.preparedSyncOperation, "Upload")
+                        describePreparedSyncOperationWithDetails(operation.preparedSyncOperation, "Copy")
                     }
 
                 if (operation.comparisonResult.value.relocations

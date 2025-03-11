@@ -13,7 +13,7 @@
 <div class="main-display-container">
     <div class="main-display-inner-container">
         <div class="text">
-            <h2>Personal files archivation<span class="sub">Under your uncompromised control</span></h2>
+            <h2>Personal files archivation<span class="sub">With uncompromised control for the user</span></h2>
             <p>No vendor lock-in. Use your own storages, rent hosted or cloud storages from vendors of your choice, or self-host. And, combine them as you want.</p>
             <p><a href="{{< ref "/install" >}}">Install</a></p>
         </div>
@@ -32,9 +32,6 @@ This software is still under development.
 
 <div class="sub-display-container">
 <div class="sub-display-inner-container">
-<div class="other">
-
-</div>
 <div class="text">
 
 ## Plain files
@@ -43,10 +40,13 @@ Access your archived files directly without any external tool.
 
 The archivekeep only facilitates archivation process to help you replicate your data for preservation.
 </div>
+<div class="other small">
+<img src="/generated_screenshots/dialogs/add-and-push/example.png" />
+</div>
 </div>
 <div class="sub-display-inner-container">
-<div class="other">
-<img src="/generated_screenshots/dialogs/add-and-push/example.png" />
+<div class="other small">
+<img src="/generated_screenshots/dialogs/sync/upload-example.png" />
 </div>
 <div class="text">
 
@@ -55,12 +55,19 @@ The archivekeep only facilitates archivation process to help you replicate your 
 <p>Offline storages are not always online, because they are offline. And, drives aren't a computer.</p>
 <p>The archivekeep is designed for such asynchronous approach of synchronization in repositories with archive replicas.</p>
 
+</div>
+</div>
+<div class="sub-display-inner-container">
+<div class="text">
 
 ## Nondestructive replication
 
 The replication process prevents propagation of redactions, deletions, corruption or other destructive changes in files.
 
 The contents of files stored in repositories are verifiable using digistal checksums.
+</div>
+<div class="other small">
+<img src="/generated_screenshots/dialogs/sync/download-example.png" />
 </div>
 </div>
 </div>

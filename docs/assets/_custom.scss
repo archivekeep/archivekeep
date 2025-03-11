@@ -1,6 +1,8 @@
 $home-page-container-max-width: 61rem;
 $horizontal-inner-padding: 1.5rem;
 
+$home-page-mobile-breakpoint: 750px;
+
 body {
   overflow-y: scroll;
 }
@@ -66,7 +68,7 @@ div.home-page {
         margin-left: 1rem;
       }
 
-      @media screen and (max-width: $mobile-breakpoint) {
+      @media screen and (max-width: $home-page-mobile-breakpoint) {
         flex-direction: column;
         align-items: center;
 
@@ -110,9 +112,17 @@ div.home-page {
         flex-direction: row;
         gap: 3rem;
 
-        @media screen and (max-width: $mobile-breakpoint) {
+        @media screen and (max-width: $home-page-mobile-breakpoint) {
           gap: 0;
           flex-direction: column;
+
+          .text {
+            order: 1;
+          }
+
+          .other {
+            order: 2;
+          }
         }
       }
 
@@ -121,12 +131,15 @@ div.home-page {
         display: flex;
         flex-direction: column;
         justify-content: center;
+        align-items: center;
 
         &:not(:has(img)) {
-          background: #F0F5FF;
-          background: radial-gradient(rgba(240, 245, 255, 0.07) 20%, #dbe8ff 100%);
           border-radius: 2rem;
         }
+      }
+
+      .other.small img {
+        max-width: 330px;
       }
 
       h2 {
@@ -183,7 +196,7 @@ div.home-page {
         padding: 3rem $horizontal-inner-padding 0.75rem;
       }
 
-      @media screen and (max-width: $mobile-breakpoint) {
+      @media screen and (max-width: $home-page-mobile-breakpoint) {
         padding: 2rem 0 1.5rem;
 
         .main-display-inner-container {
@@ -193,7 +206,7 @@ div.home-page {
     }
 
     .sub-display-container {
-      padding: 2rem 0 2rem;
+      padding: 1rem 0 2rem;
 
       h2 {
         line-height: 1.15;
@@ -201,23 +214,48 @@ div.home-page {
         margin-top: 0;
         margin-bottom: 1rem;
         letter-spacing: 0.051rem;
-        padding-top: 1.5rem ;
+        padding-top: 0;
       }
 
       .sub-display-inner-container {
-        padding: 0 $horizontal-inner-padding;
+        padding: 2rem $horizontal-inner-padding;
+        align-items: center;
 
         &:first-child h2:first-child {
           padding-top: 0;
         }
+
+        .other {
+          padding-left: 2rem;
+          padding-right: 2rem;
+          flex: 1.7 0 0;
+        }
+
+        .other:first-child {
+          padding-left: 4rem;
+        }
+
+        .other:last-child {
+          padding-right: 4rem;
+        }
+
+        @media screen and (max-width: $home-page-mobile-breakpoint) {
+          padding: 1rem $horizontal-inner-padding;
+          gap: 0.75rem;
+
+          .other:first-child, .other:last-child {
+            padding-left: 2rem;
+            padding-right: 2rem;
+          }
+        }
       }
 
       .text {
-        flex: 2 0 0;
+        flex: 2.3 0 0;
       }
 
-      @media screen and (max-width: $mobile-breakpoint) {
-        padding: 2rem 0 1.5rem;
+      @media screen and (max-width: $home-page-mobile-breakpoint) {
+        padding: 1rem 0 1.5rem;
 
         .h2 {
           padding-top: 3rem;
@@ -233,7 +271,7 @@ div.home-page {
 
       padding: 2.5rem 0 1rem;
 
-      @media screen and (max-width: $mobile-breakpoint) {
+      @media screen and (max-width: $home-page-mobile-breakpoint) {
         padding: 1.25rem 0 0.5rem;
       }
 
@@ -251,7 +289,7 @@ div.home-page {
           margin-bottom: 0;
         }
 
-        @media screen and (max-width: $mobile-breakpoint) {
+        @media screen and (max-width: $home-page-mobile-breakpoint) {
           padding: 1rem 1rem;
           flex: 100% 0 0;
         }

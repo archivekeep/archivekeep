@@ -14,9 +14,12 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.combine
 import org.archivekeep.app.core.domain.storages.StorageRepository
 import org.archivekeep.app.core.domain.storages.StorageService
+import org.archivekeep.app.core.operations.sync.RepoToRepoSync
 import org.archivekeep.app.core.operations.sync.RepoToRepoSyncService
-import org.archivekeep.app.core.persistence.platform.demo.DocumentsInHDDA
-import org.archivekeep.app.core.persistence.platform.demo.DocumentsInHDDB
+import org.archivekeep.app.core.persistence.platform.demo.Photos
+import org.archivekeep.app.core.persistence.platform.demo.PhotosInHDDA
+import org.archivekeep.app.core.persistence.platform.demo.PhotosInLaptopSSD
+import org.archivekeep.app.core.utils.generics.OptionalLoadable
 import org.archivekeep.app.core.utils.identifiers.RepositoryURI
 import org.archivekeep.app.desktop.domain.wiring.LocalRepoToRepoSyncService
 import org.archivekeep.app.desktop.domain.wiring.LocalStorageService
@@ -27,7 +30,9 @@ import org.archivekeep.app.desktop.ui.dialogs.repository.operations.sync.parts.R
 import org.archivekeep.app.desktop.ui.utils.appendBoldSpan
 import org.archivekeep.app.desktop.utils.asMutableState
 import org.archivekeep.app.desktop.utils.collectAsLoadable
+import org.archivekeep.files.operations.CompareOperation
 import org.archivekeep.files.operations.RelocationSyncMode
+import org.archivekeep.files.operations.SyncOperation
 import org.archivekeep.utils.loading.Loadable
 
 data class UploadToRepoDialog(
@@ -48,7 +53,7 @@ data class UploadToRepoDialog(
                 appendBoldSpan(sourceRepository.displayName)
                 append(" in ")
                 appendBoldSpan(sourceRepository.storage.displayName)
-                append(" - upload to other")
+                append(" - copy to")
             }
     }
 
@@ -107,7 +112,7 @@ data class UploadToRepoDialog(
         Text(
             remember(state.targetRepository) {
                 buildAnnotatedString {
-                    append("Upload to repository ")
+                    append("Copy changes to repository ")
                     appendBoldSpan(state.targetRepository.displayName)
                     append(" in storage ")
                     appendBoldSpan(state.targetRepository.storage.displayName)
@@ -137,24 +142,48 @@ data class UploadToRepoDialog(
 @Composable
 private fun preview1() {
     DialogPreviewColumn {
-        val dialog =
-            UploadToRepoDialog(
-                DocumentsInHDDA.uri,
-                DocumentsInHDDB.uri,
-            )
-
-        dialog.renderDialogCard(
-            UploadToRepoDialog.State(
-                DocumentsInHDDA.storageRepository,
-                DocumentsInHDDB.storageRepository,
-                mutableStateOf(RepoToRepoSyncUserFlow.defaultRelocationSyncMode),
-                RepoToRepoSyncUserFlow.State(
-                    Loadable.Loading,
-                ),
-                onLaunch = {},
-                onCancel = {},
-                onClose = {},
-            ),
-        )
+        UploadToRepoDialogPreview1Contents()
     }
+}
+
+@Composable
+internal fun UploadToRepoDialogPreview1Contents() {
+    val dialog =
+        UploadToRepoDialog(
+            PhotosInHDDA.uri,
+            PhotosInLaptopSSD.uri,
+        )
+
+    val compareResult =
+        CompareOperation().calculate(
+            Photos.contentsFixture._index,
+            Photos
+                .withContents {
+                    deletePattern("2024/6/.*".toRegex())
+                }.contentsFixture
+                ._index,
+        )
+
+    val preparedSync = SyncOperation(RepoToRepoSyncUserFlow.defaultRelocationSyncMode).prepareFromComparison(compareResult)
+
+    dialog.renderDialogCard(
+        UploadToRepoDialog.State(
+            PhotosInHDDA.storageRepository,
+            PhotosInLaptopSSD.storageRepository,
+            mutableStateOf(RepoToRepoSyncUserFlow.defaultRelocationSyncMode),
+            RepoToRepoSyncUserFlow.State(
+                Loadable.Loaded(
+                    value =
+                        RepoToRepoSync.State.Prepared(
+                            comparisonResult = OptionalLoadable.LoadedAvailable(compareResult),
+                            preparedSyncOperation = preparedSync,
+                            startExecution = { error("should not be called in preview") },
+                        ),
+                ),
+            ),
+            onLaunch = {},
+            onCancel = {},
+            onClose = {},
+        ),
+    )
 }

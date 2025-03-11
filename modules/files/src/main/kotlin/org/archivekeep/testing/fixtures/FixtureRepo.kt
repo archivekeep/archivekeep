@@ -17,7 +17,7 @@ class FixtureRepo(
     val uncommittedContents: Map<String, String> = emptyMap(),
 ) : Repo,
     ObservableRepo {
-    private val _index by lazy {
+    val _index by lazy {
         RepoIndex(
             contents.entries.map {
                 RepoIndex.File(
