@@ -3,59 +3,67 @@ package org.archivekeep.app.desktop.ui.dialogs.repository.operations.sync.parts
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.sp
+import androidx.compose.ui.unit.dp
 import org.archivekeep.app.core.operations.sync.RepoToRepoSync.JobState
 import org.archivekeep.app.core.operations.sync.RepoToRepoSync.State
+import org.archivekeep.app.desktop.ui.components.ItemManySelect
 import org.archivekeep.app.desktop.ui.components.LoadableGuard
-import org.archivekeep.app.desktop.ui.components.RelocationSyncModeOptions
+import org.archivekeep.app.desktop.ui.components.rememberManySelectWithMergedState
 import org.archivekeep.app.desktop.ui.dialogs.repository.operations.sync.RepoToRepoSyncUserFlow
-import org.archivekeep.app.desktop.ui.dialogs.repository.operations.sync.describePreparedSyncOperationWithDetails
-import org.archivekeep.files.operations.RelocationSyncMode
+import org.archivekeep.app.desktop.ui.dialogs.repository.operations.sync.describe
+import org.archivekeep.files.operations.sync.AdditiveRelocationsSyncStep
+import org.archivekeep.files.operations.sync.NewFilesSyncStep
+import org.archivekeep.files.operations.sync.RelocationsMoveApplySyncStep
 
 @Composable
-fun (ColumnScope).RepoToRepoSyncMainContents(
-    relocationsSyncModeState: MutableState<RelocationSyncMode>,
-    userFlowState: RepoToRepoSyncUserFlow.State,
-) {
+fun (ColumnScope).RepoToRepoSyncMainContents(userFlowState: RepoToRepoSyncUserFlow.State) {
     LoadableGuard(userFlowState.operation) { operation ->
         when (operation) {
             is State.Prepared -> {
-                val t =
-                    remember(operation.preparedSyncOperation) {
-                        describePreparedSyncOperationWithDetails(operation.preparedSyncOperation, "Copy")
-                    }
-
-                if (operation.comparisonResult.value.relocations
-                        .isNotEmpty()
-                ) {
-                    RelocationSyncModeOptions(
-                        relocationsSyncModeState.value,
-                        onRelocationSyncModeChange = { relocationsSyncModeState.value = it },
-                    )
-                }
-
-                Text("Prepared")
-                Box(
+                Column(
                     modifier =
                         Modifier
                             .verticalScroll(rememberScrollState())
                             .weight(weight = 1f, fill = false),
                 ) {
-                    Text(
-                        t,
-                        fontSize = 12.sp,
-                        lineHeight = 15.sp,
-                        softWrap = true,
-                    )
+                    operation.preparedSyncOperation.steps.forEach { step ->
+                        Spacer(Modifier.height(12.dp))
+                        when (step) {
+                            is AdditiveRelocationsSyncStep -> {
+                                ItemManySelect(
+                                    "Existing files to replicate:",
+                                    allItemsLabel = { "All $it replications" },
+                                    itemLabelText = { it.describe() },
+                                    state = rememberManySelectWithMergedState(step.subOperations, userFlowState.selectedOperations),
+                                )
+                            }
+                            is NewFilesSyncStep -> {
+                                ItemManySelect(
+                                    "New files to copy:",
+                                    allItemsLabel = { "All $it new files" },
+                                    itemLabelText = { it.unmatchedBaseExtra.filenames.let { if (it.size == 1) it[0] else it.toString() } },
+                                    state = rememberManySelectWithMergedState(step.subOperations, userFlowState.selectedOperations),
+                                )
+                            }
+                            is RelocationsMoveApplySyncStep -> {
+                                ItemManySelect(
+                                    "Relocations to execute:",
+                                    allItemsLabel = { "All relocations ($it)" },
+                                    itemLabel = { Text(it.describe()) },
+                                    state = rememberManySelectWithMergedState(step.subOperations, userFlowState.selectedOperations),
+                                )
+                            }
+                        }
+                    }
                 }
             }
             is JobState.Running -> {

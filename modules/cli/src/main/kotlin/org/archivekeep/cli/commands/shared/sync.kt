@@ -2,13 +2,13 @@ package org.archivekeep.cli.commands.shared
 
 import org.archivekeep.cli.MainCommand
 import org.archivekeep.cli.commands.mixins.SyncOptions
-import org.archivekeep.files.operations.AdditiveRelocationsSyncStep
 import org.archivekeep.files.operations.CompareOperation
-import org.archivekeep.files.operations.NewFilesSyncStep
-import org.archivekeep.files.operations.RelocationSyncMode
-import org.archivekeep.files.operations.RelocationsMoveApplySyncStep
-import org.archivekeep.files.operations.SyncLogger
-import org.archivekeep.files.operations.SyncOperation
+import org.archivekeep.files.operations.sync.AdditiveRelocationsSyncStep
+import org.archivekeep.files.operations.sync.NewFilesSyncStep
+import org.archivekeep.files.operations.sync.RelocationSyncMode
+import org.archivekeep.files.operations.sync.RelocationsMoveApplySyncStep
+import org.archivekeep.files.operations.sync.SyncLogger
+import org.archivekeep.files.operations.sync.SyncOperation
 import org.archivekeep.files.repo.Repo
 import java.io.PrintWriter
 

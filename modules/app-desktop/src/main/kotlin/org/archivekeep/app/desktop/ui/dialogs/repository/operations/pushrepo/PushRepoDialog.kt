@@ -32,7 +32,7 @@ import org.archivekeep.app.desktop.ui.dialogs.repository.AbstractRepositoryDialo
 import org.archivekeep.app.desktop.ui.utils.appendBoldSpan
 import org.archivekeep.app.desktop.utils.asMutableState
 import org.archivekeep.app.desktop.utils.collectLoadableFlow
-import org.archivekeep.files.operations.RelocationSyncMode
+import org.archivekeep.files.operations.sync.RelocationSyncMode
 import org.archivekeep.utils.loading.Loadable
 import org.archivekeep.utils.loading.mapToLoadable
 

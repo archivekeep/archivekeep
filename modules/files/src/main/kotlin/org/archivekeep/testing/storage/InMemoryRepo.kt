@@ -13,6 +13,7 @@ import org.archivekeep.files.repo.ObservableRepo
 import org.archivekeep.files.repo.Repo
 import org.archivekeep.files.repo.RepoIndex
 import org.archivekeep.files.repo.RepositoryMetadata
+import org.archivekeep.testing.fixtures.FixtureRepo
 import org.archivekeep.utils.coroutines.sharedResourceInGlobalScope
 import org.archivekeep.utils.loading.Loadable
 import org.archivekeep.utils.loading.firstLoadedOrFailure
@@ -119,3 +120,5 @@ open class InMemoryRepo(
 
     override val observable: ObservableRepo = this
 }
+
+fun FixtureRepo.toInMemoryRepo(): InMemoryRepo = InMemoryRepo(this.contents.mapValues { (_, v) -> v.toByteArray() })

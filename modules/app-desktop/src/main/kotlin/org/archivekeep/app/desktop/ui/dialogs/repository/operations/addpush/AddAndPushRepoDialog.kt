@@ -105,7 +105,7 @@ class AddAndPushRepoDialog(
                     ItemManySelect(
                         "Moves",
                         allItemsLabel = { "All moves ($it)" },
-                        itemLabel = { "${it.from} -> ${it.to}" },
+                        itemLabelText = { "${it.from} -> ${it.to}" },
                         allItems = moves,
                         state.selectedMoves,
                     )

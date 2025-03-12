@@ -164,7 +164,7 @@ class UpdateIndexOperationDialog(
                 ItemManySelect(
                     "Moves",
                     allItemsLabel = { "All moves ($it)" },
-                    itemLabel = { "${it.from} -> ${it.to}" },
+                    itemLabelText = { "${it.from} -> ${it.to}" },
                     allItems = state.preparedResult.moves,
                     selectedMoves,
                 )

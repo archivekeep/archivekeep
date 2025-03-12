@@ -20,7 +20,7 @@ import org.archivekeep.app.core.utils.UniqueJobGuard
 import org.archivekeep.app.core.utils.generics.singleInstanceWeakValueMap
 import org.archivekeep.app.core.utils.identifiers.RepositoryURI
 import org.archivekeep.files.operations.AddOperation
-import org.archivekeep.files.operations.copyFile
+import org.archivekeep.files.operations.sync.copyFile
 import org.archivekeep.files.repo.LocalRepo
 import org.archivekeep.utils.loading.Loadable
 import org.archivekeep.utils.loading.firstLoadedOrFailure

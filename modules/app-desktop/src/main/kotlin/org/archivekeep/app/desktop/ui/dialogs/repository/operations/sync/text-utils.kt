@@ -1,11 +1,13 @@
 package org.archivekeep.app.desktop.ui.dialogs.repository.operations.sync
 
-import org.archivekeep.files.operations.AdditiveRelocationsSyncStep
-import org.archivekeep.files.operations.CompareOperation
-import org.archivekeep.files.operations.NewFilesSyncStep
-import org.archivekeep.files.operations.PreparedSyncOperation
-import org.archivekeep.files.operations.RelocationsMoveApplySyncStep
-import java.util.Locale
+import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.text.buildAnnotatedString
+import org.archivekeep.app.desktop.ui.utils.appendBoldSpan
+import org.archivekeep.app.desktop.ui.utils.appendBoldStrikeThroughSpan
+import org.archivekeep.files.operations.sync.AdditiveRelocationsSyncStep
+import org.archivekeep.files.operations.sync.NewFilesSyncStep
+import org.archivekeep.files.operations.sync.PreparedSyncOperation
+import org.archivekeep.files.operations.sync.RelocationsMoveApplySyncStep
 
 fun describePreparedSyncOperation(a: PreparedSyncOperation) =
     if (a.steps.isEmpty()) {
@@ -13,10 +15,10 @@ fun describePreparedSyncOperation(a: PreparedSyncOperation) =
     } else {
         a.steps.joinToString("\n") {
             when (it) {
-                is AdditiveRelocationsSyncStep -> "Duplicate ${it.relocations.size} files."
+                is AdditiveRelocationsSyncStep -> "Duplicate ${it.subOperations.size} files."
 
                 is RelocationsMoveApplySyncStep -> {
-                    var text = "Move ${it.toApply.size} files."
+                    var text = "Move ${it.subOperations.size} files."
 
                     if (it.toIgnore.isNotEmpty()) {
                         text += "Ignore ${it.toIgnore.size} relocations."
@@ -25,67 +27,70 @@ fun describePreparedSyncOperation(a: PreparedSyncOperation) =
                     text
                 }
 
-                is NewFilesSyncStep -> "Upload ${it.unmatchedBaseExtras.size} files."
+                is NewFilesSyncStep -> "Upload ${it.subOperations.size} files."
             }
         }
     }
 
-fun describePreparedSyncOperationWithDetails(
-    a: PreparedSyncOperation,
-    action: String = "Add",
-) = if (a.steps.isEmpty()) {
-    "Nothing to do"
-} else {
-    a.steps
-        .flatMap {
-            when (it) {
-                is AdditiveRelocationsSyncStep ->
-                    listOf("Duplicate ${it.relocations.size} files:") +
-                        it.relocations.map { relocation ->
-                            " - duplicate ${relocation.baseFilenames} to ${relocation.extraBaseLocations}"
-                        }
+fun AdditiveRelocationsSyncStep.AdditiveReplicationSubOperation.describe() =
+    with(relocation) {
+        "duplicate ${relocation.baseFilenames} to ${relocation.extraBaseLocations}"
+    }
 
-                is RelocationsMoveApplySyncStep ->
-                    (
-                        if (it.toApply.isNotEmpty()) {
-                            listOf("Execute ${it.toApply.size} relocations:")
-                        } else {
-                            emptyList()
-                        }
-                    ) + (
-                        it.toApply.map { relocation ->
-                            "- ${relocation.describe()}"
-                        }
-                    ) + (
-                        if (it.toIgnore.isNotEmpty()) {
-                            listOf("Ignore ${it.toIgnore.size} relocations:")
-                        } else {
-                            emptyList()
-                        }
-                    ) + (
-                        it.toIgnore.map { relocation ->
-                            " - ignore ${relocation.describe()}"
-                        }
-                    )
-
-                is NewFilesSyncStep ->
-                    listOf("${action.capitalize()} ${it.unmatchedBaseExtras.size} files:") +
-                        it.unmatchedBaseExtras.map { group ->
-                            " - $action new ${group.filenames}"
-                        }
+fun RelocationsMoveApplySyncStep.RelocationApplySubOperation.describe() =
+    buildAnnotatedString {
+        with(relocation) {
+            if (isIncreasingDuplicates) {
+                append("duplicate ")
+                appendTransformingList(otherFilenames, crossNotIn(baseFilenames))
+                append(" to ")
+                appendTransformingList(baseFilenames, boldNotIn(otherFilenames))
+            } else if (isDecreasingDuplicates) {
+                append("deduplicate ")
+                appendTransformingList(otherFilenames, crossNotIn(baseFilenames))
+                append(" to keep only ")
+                appendTransformingList(baseFilenames, boldNotIn(otherFilenames))
+            } else {
+                append("move ")
+                appendTransformingList(extraOtherLocations, crossNotIn(extraBaseLocations))
+                append(" to ")
+                appendTransformingList(extraBaseLocations, boldNotIn(extraOtherLocations))
             }
-        }.joinToString("\n")
+        }
+    }
+
+fun boldNotIn(other: Collection<String>): AnnotatedString.Builder.(s: String) -> Unit {
+    val s = other.toSet()
+
+    return {
+        if (it in s) {
+            append(it)
+        } else {
+            appendBoldSpan(it)
+        }
+    }
 }
 
-private fun String.capitalize(): String = this.replaceFirstChar { if (it.isLowerCase()) it.titlecase(Locale.getDefault()) else it.toString() }
+fun crossNotIn(other: Collection<String>): AnnotatedString.Builder.(s: String) -> Unit {
+    val s = other.toSet()
 
-fun CompareOperation.Result.Relocation.describe() =
-    (
-        if (isIncreasingDuplicates) {
-            "duplication increase from $otherFilenames to $baseFilenames"
-        } else if (isDecreasingDuplicates) {
-            "duplication decrease from $otherFilenames to $baseFilenames"
+    return {
+        if (it in s) {
+            append(it)
         } else {
-            "move from $extraOtherLocations to $extraBaseLocations"
+            appendBoldStrikeThroughSpan(it)
         }
-    )
+    }
+}
+
+inline fun AnnotatedString.Builder.appendTransformingList(
+    texts: List<String>,
+    appendItem: AnnotatedString.Builder.(s: String) -> Unit,
+) {
+    texts.forEachIndexed { idx, it ->
+        if (idx > 0) {
+            append(", ")
+        }
+        appendItem(it)
+    }
+}

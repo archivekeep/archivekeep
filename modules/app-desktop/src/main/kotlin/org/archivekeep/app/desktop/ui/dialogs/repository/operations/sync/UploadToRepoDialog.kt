@@ -5,7 +5,6 @@ import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.text.AnnotatedString
@@ -28,12 +27,13 @@ import org.archivekeep.app.desktop.ui.dialogs.AbstractDialog
 import org.archivekeep.app.desktop.ui.dialogs.repository.operations.sync.parts.RepoToRepoSyncFlowButtons
 import org.archivekeep.app.desktop.ui.dialogs.repository.operations.sync.parts.RepoToRepoSyncMainContents
 import org.archivekeep.app.desktop.ui.utils.appendBoldSpan
-import org.archivekeep.app.desktop.utils.asMutableState
 import org.archivekeep.app.desktop.utils.collectAsLoadable
 import org.archivekeep.files.operations.CompareOperation
-import org.archivekeep.files.operations.RelocationSyncMode
-import org.archivekeep.files.operations.SyncOperation
+import org.archivekeep.files.operations.CompareOperation.Result.ExtraGroup
+import org.archivekeep.files.operations.sync.NewFilesSyncStep.CopyNewFileSubOperation
+import org.archivekeep.files.operations.sync.SyncOperation
 import org.archivekeep.utils.loading.Loadable
+import org.archivekeep.utils.sha256
 
 data class UploadToRepoDialog(
     val repositoryURI: RepositoryURI,
@@ -42,7 +42,6 @@ data class UploadToRepoDialog(
     data class State(
         val targetRepository: StorageRepository,
         val sourceRepository: StorageRepository,
-        val relocationSyncMode: MutableState<RelocationSyncMode>,
         val userFlowState: RepoToRepoSyncUserFlow.State,
         val onLaunch: () -> Unit,
         val onCancel: () -> Unit,
@@ -51,8 +50,6 @@ data class UploadToRepoDialog(
         override val title: AnnotatedString =
             buildAnnotatedString {
                 appendBoldSpan(sourceRepository.displayName)
-                append(" in ")
-                appendBoldSpan(sourceRepository.storage.displayName)
                 append(" - copy to")
             }
     }
@@ -85,10 +82,8 @@ data class UploadToRepoDialog(
     }
 
     @Composable
-    override fun rememberState(vm: UploadToRepoDialog.VM): Loadable<State> {
-        val relocationSyncModeMutableState = vm.userFlow.relocationSyncModeFlow.asMutableState()
-
-        return remember(vm) {
+    override fun rememberState(vm: UploadToRepoDialog.VM): Loadable<State> =
+        remember(vm) {
             combine(
                 vm.storageService.repository(repositoryURI),
                 vm.storageService.repository(from),
@@ -97,7 +92,6 @@ data class UploadToRepoDialog(
                 State(
                     targetRepository,
                     sourceRepository,
-                    relocationSyncModeMutableState,
                     userFlowState,
                     vm.userFlow::launch,
                     vm.userFlow::cancel,
@@ -105,16 +99,22 @@ data class UploadToRepoDialog(
                 )
             }
         }.collectAsLoadable()
-    }
 
     @Composable
     override fun ColumnScope.renderContent(state: State) {
         Text(
-            remember(state.targetRepository) {
+            remember(state.targetRepository, state.sourceRepository) {
                 buildAnnotatedString {
-                    append("Copy changes to repository ")
-                    appendBoldSpan(state.targetRepository.displayName)
-                    append(" in storage ")
+                    append("Copy changes from ")
+                    appendBoldSpan(state.sourceRepository.storage.displayName)
+                    append(" to ")
+
+                    if (state.targetRepository.displayName != state.sourceRepository.displayName) {
+                        append(" repository ")
+                        appendBoldSpan(state.targetRepository.displayName)
+                        append(" stored in ")
+                    }
+
                     appendBoldSpan(state.targetRepository.storage.displayName)
                     append(".")
                 }
@@ -122,7 +122,6 @@ data class UploadToRepoDialog(
         )
 
         RepoToRepoSyncMainContents(
-            state.relocationSyncMode,
             state.userFlowState,
         )
     }
@@ -156,21 +155,29 @@ internal fun UploadToRepoDialogPreview1Contents() {
 
     val compareResult =
         CompareOperation().calculate(
-            Photos.contentsFixture._index,
+            Photos
+                .withContents {
+                    deletePattern("2024/5/5.JPG".toRegex())
+                    deletePattern("2024/5/7.JPG".toRegex())
+                    deletePattern("2024/5/12.JPG".toRegex())
+                    addStored("2024/5/5-special.JPG", "2024/5/5.JPG")
+                    addStored("2024/5/7-special.JPG", "2024/5/7.JPG")
+                    addStored("2024/5/12-special.JPG", "2024/5/12.JPG")
+                }.contentsFixture._index,
             Photos
                 .withContents {
                     deletePattern("2024/6/.*".toRegex())
+                    addStored("2024/4/2-previous-extra-copy.JPG", "2024/4/2.JPG")
                 }.contentsFixture
                 ._index,
         )
 
-    val preparedSync = SyncOperation(RepoToRepoSyncUserFlow.defaultRelocationSyncMode).prepareFromComparison(compareResult)
+    val preparedSync = SyncOperation(RepoToRepoSyncUserFlow.relocationSyncMode).prepareFromComparison(compareResult)
 
     dialog.renderDialogCard(
         UploadToRepoDialog.State(
             PhotosInHDDA.storageRepository,
             PhotosInLaptopSSD.storageRepository,
-            mutableStateOf(RepoToRepoSyncUserFlow.defaultRelocationSyncMode),
             RepoToRepoSyncUserFlow.State(
                 Loadable.Loaded(
                     value =
@@ -179,6 +186,14 @@ internal fun UploadToRepoDialogPreview1Contents() {
                             preparedSyncOperation = preparedSync,
                             startExecution = { error("should not be called in preview") },
                         ),
+                ),
+                mutableStateOf(
+                    setOf(
+                        CopyNewFileSubOperation(ExtraGroup("2024/6/1.JPG".sha256(), listOf("2024/6/1.JPG"))),
+                        CopyNewFileSubOperation(ExtraGroup("2024/6/2.JPG".sha256(), listOf("2024/6/2.JPG"))),
+                        CopyNewFileSubOperation(ExtraGroup("2024/6/3.JPG".sha256(), listOf("2024/6/3.JPG"))),
+                        CopyNewFileSubOperation(ExtraGroup("2024/6/4.JPG".sha256(), listOf("2024/6/4.JPG"))),
+                    ),
                 ),
             ),
             onLaunch = {},

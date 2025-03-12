@@ -1,8 +1,11 @@
-package org.archivekeep.files.operations
+package org.archivekeep.files.operations.sync
 
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import kotlinx.coroutines.yield
+import org.archivekeep.files.operations.CompareOperation
+import org.archivekeep.files.operations.sync.AdditiveRelocationsSyncStep.AdditiveReplicationSubOperation
+import org.archivekeep.files.operations.sync.NewFilesSyncStep.CopyNewFileSubOperation
+import org.archivekeep.files.operations.sync.RelocationsMoveApplySyncStep.RelocationApplySubOperation
 import org.archivekeep.files.repo.Repo
 import kotlin.math.min
 
@@ -35,7 +38,10 @@ class SyncOperation(
                 if (comparisonResult.hasRelocations) {
                     when (relocationSyncMode) {
                         RelocationSyncMode.Disabled -> RelocationsMoveApplySyncStep(emptyList(), comparisonResult.relocations)
-                        RelocationSyncMode.AdditiveDuplicating -> AdditiveRelocationsSyncStep(comparisonResult.relocations)
+                        RelocationSyncMode.AdditiveDuplicating ->
+                            AdditiveRelocationsSyncStep(
+                                comparisonResult.relocations.map { AdditiveReplicationSubOperation(it) },
+                            )
 
                         is RelocationSyncMode.Move -> {
                             fun canBeApplied(relocation: CompareOperation.Result.Relocation): Boolean =
@@ -48,7 +54,7 @@ class SyncOperation(
                                 }
 
                             RelocationsMoveApplySyncStep(
-                                toApply = comparisonResult.relocations.filter { canBeApplied(it) },
+                                toApply = comparisonResult.relocations.filter { canBeApplied(it) }.map { RelocationApplySubOperation(it) },
                                 toIgnore = comparisonResult.relocations.filter { !canBeApplied(it) },
                             )
                         }
@@ -61,7 +67,7 @@ class SyncOperation(
         val newFilesSyncStep =
             run {
                 if (comparisonResult.unmatchedBaseExtras.isNotEmpty()) {
-                    NewFilesSyncStep(comparisonResult.unmatchedBaseExtras)
+                    NewFilesSyncStep(comparisonResult.unmatchedBaseExtras.map { CopyNewFileSubOperation(it) })
                 } else {
                     null
                 }
@@ -73,78 +79,52 @@ class SyncOperation(
                 newFilesSyncStep,
             )
 
-        return PreparedSyncOperation(
-            steps,
-        )
-    }
-}
-
-sealed interface SyncPlanStep {
-    suspend fun execute(
-        base: Repo,
-        dst: Repo,
-        logger: SyncLogger,
-        progressReport: (progress: Progress) -> Unit,
-    ): SyncPlanStep.Progress
-
-    fun isNoOp(): Boolean
-
-    sealed interface Progress {
-        // TODO: localization
-        fun summaryText(): String
+        return PreparedSyncOperation(steps)
     }
 }
 
 class AdditiveRelocationsSyncStep internal constructor(
-    val relocations: List<CompareOperation.Result.Relocation>,
-) : SyncPlanStep {
-    override suspend fun execute(
-        base: Repo,
-        dst: Repo,
-        logger: SyncLogger,
-        progressReport: (progress: SyncPlanStep.Progress) -> Unit,
-    ): SyncPlanStep.Progress {
-        var completedRelocations = emptyList<CompareOperation.Result.Relocation>()
-
-        relocations.forEach { relocation ->
+    steps: List<AdditiveReplicationSubOperation>,
+) : SyncSubOperationGroup<AdditiveReplicationSubOperation>(steps) {
+    data class AdditiveReplicationSubOperation(
+        val relocation: CompareOperation.Result.Relocation,
+    ) : SyncSubOperation {
+        override suspend fun apply(
+            base: Repo,
+            dst: Repo,
+            logger: SyncLogger,
+        ) {
             relocation.extraBaseLocations.forEach { extraBaseLocation ->
                 copyFileAndLog(dst, base, extraBaseLocation, logger)
             }
-
-            completedRelocations = completedRelocations + listOf(relocation)
-            progressReport(
-                Progress(relocations, completedRelocations),
-            )
-
-            yield()
         }
-
-        return Progress(relocations, completedRelocations)
     }
 
-    override fun isNoOp() = relocations.isEmpty()
+    override fun constructProgress(
+        all: List<AdditiveReplicationSubOperation>,
+        completed: List<AdditiveReplicationSubOperation>,
+    ): SyncSubOperationGroup.Progress = Progress(all, completed)
 
     class Progress(
-        val allRelocations: List<CompareOperation.Result.Relocation>,
-        val completedRelocations: List<CompareOperation.Result.Relocation>,
-    ) : SyncPlanStep.Progress {
+        val allRelocations: List<AdditiveReplicationSubOperation>,
+        val completedRelocations: List<AdditiveReplicationSubOperation>,
+    ) : SyncSubOperationGroup.Progress {
         override fun summaryText(): String = "replicated ${completedRelocations.size} of ${allRelocations.size}"
     }
 }
 
 class RelocationsMoveApplySyncStep internal constructor(
-    val toApply: List<CompareOperation.Result.Relocation>,
+    toApply: List<RelocationApplySubOperation>,
     val toIgnore: List<CompareOperation.Result.Relocation>,
-) : SyncPlanStep {
-    override suspend fun execute(
-        base: Repo,
-        dst: Repo,
-        logger: SyncLogger,
-        progressReport: (progress: SyncPlanStep.Progress) -> Unit,
-    ): SyncPlanStep.Progress {
-        var completedRelocations = emptyList<CompareOperation.Result.Relocation>()
-
-        toApply.forEach { relocation ->
+) : SyncSubOperationGroup<RelocationApplySubOperation>(toApply) {
+    data class RelocationApplySubOperation(
+        val relocation: CompareOperation.Result.Relocation,
+    ) : SyncSubOperation {
+        override suspend fun apply(
+            base: Repo,
+            dst: Repo,
+            logger: SyncLogger,
+        ) {
             if (relocation.isIncreasingDuplicates) {
                 relocation.extraBaseLocations
                     .subList(
@@ -171,59 +151,48 @@ class RelocationsMoveApplySyncStep internal constructor(
                 dst.move(from, to)
                 logger.onFileMoved(from, to)
             }
-
-            completedRelocations = completedRelocations + listOf(relocation)
-            progressReport(
-                Progress(toApply, completedRelocations),
-            )
         }
-
-        return Progress(toApply, completedRelocations)
     }
 
-    override fun isNoOp() = toApply.isEmpty()
+    override fun constructProgress(
+        all: List<RelocationApplySubOperation>,
+        completed: List<RelocationApplySubOperation>,
+    ): SyncSubOperationGroup.Progress = Progress(all, completed)
 
     class Progress(
-        val allRelocations: List<CompareOperation.Result.Relocation>,
-        val completedRelocations: List<CompareOperation.Result.Relocation>,
-    ) : SyncPlanStep.Progress {
+        val allRelocations: List<RelocationApplySubOperation>,
+        val completedRelocations: List<RelocationApplySubOperation>,
+    ) : SyncSubOperationGroup.Progress {
         override fun summaryText(): String = "moved ${completedRelocations.size} of ${allRelocations.size}"
     }
 }
 
 class NewFilesSyncStep internal constructor(
-    val unmatchedBaseExtras: List<CompareOperation.Result.ExtraGroup>,
-) : SyncPlanStep {
-    override suspend fun execute(
-        base: Repo,
-        dst: Repo,
-        logger: SyncLogger,
-        progressReport: (progress: SyncPlanStep.Progress) -> Unit,
-    ): SyncPlanStep.Progress {
-        var completed = emptyList<CompareOperation.Result.ExtraGroup>()
-
-        unmatchedBaseExtras.forEach { unmatchedBaseExtra ->
+    unmatchedBaseExtras: List<CopyNewFileSubOperation>,
+) : SyncSubOperationGroup<CopyNewFileSubOperation>(unmatchedBaseExtras) {
+    data class CopyNewFileSubOperation(
+        val unmatchedBaseExtra: CompareOperation.Result.ExtraGroup,
+    ) : SyncSubOperation {
+        override suspend fun apply(
+            base: Repo,
+            dst: Repo,
+            logger: SyncLogger,
+        ) {
             unmatchedBaseExtra.filenames.forEach { filename ->
                 copyFileAndLog(dst, base, filename, logger)
             }
-
-            completed = completed + listOf(unmatchedBaseExtra)
-            progressReport(
-                Progress(unmatchedBaseExtras, completed),
-            )
-
-            yield()
         }
-
-        return Progress(unmatchedBaseExtras, completed)
     }
 
-    override fun isNoOp() = unmatchedBaseExtras.isEmpty()
+    override fun constructProgress(
+        all: List<CopyNewFileSubOperation>,
+        completed: List<CopyNewFileSubOperation>,
+    ): SyncSubOperationGroup.Progress = Progress(all, completed)
 
     class Progress(
-        val all: List<CompareOperation.Result.ExtraGroup>,
-        val completed: List<CompareOperation.Result.ExtraGroup>,
-    ) : SyncPlanStep.Progress {
+        val all: List<CopyNewFileSubOperation>,
+        val completed: List<CopyNewFileSubOperation>,
+    ) : SyncSubOperationGroup.Progress {
         override fun summaryText(): String = "copied ${completed.size} of ${all.size}"
     }
 }
@@ -240,16 +209,17 @@ interface SyncLogger {
 }
 
 class PreparedSyncOperation internal constructor(
-    val steps: List<SyncPlanStep>,
+    val steps: List<SyncSubOperationGroup<*>>,
 ) {
     suspend fun execute(
         base: Repo,
         dst: Repo,
-        prompter: suspend (step: SyncPlanStep) -> Boolean,
+        prompter: suspend (step: SyncSubOperationGroup<*>) -> Boolean,
         logger: SyncLogger,
-        progressReport: (progress: List<SyncPlanStep.Progress>) -> Unit = {},
+        progressReport: (progress: List<SyncSubOperationGroup.Progress>) -> Unit = {},
+        limitToSubset: Set<SyncSubOperation>? = null,
     ) {
-        var finishedStepProgress = listOf<SyncPlanStep.Progress>()
+        var finishedStepProgress = listOf<SyncSubOperationGroup.Progress>()
 
         steps.forEach { step ->
             val confirmed = prompter(step)
@@ -261,7 +231,7 @@ class PreparedSyncOperation internal constructor(
             val resultProgress =
                 step.execute(base, dst, logger, progressReport = {
                     progressReport(finishedStepProgress + listOf(it))
-                })
+                }, limitToSubset)
 
             finishedStepProgress = finishedStepProgress + listOf(resultProgress)
         }

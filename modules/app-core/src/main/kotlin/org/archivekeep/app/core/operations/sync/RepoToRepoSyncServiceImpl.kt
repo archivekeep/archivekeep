@@ -29,11 +29,12 @@ import org.archivekeep.app.core.utils.generics.mapLoadedData
 import org.archivekeep.app.core.utils.generics.singleInstanceWeakValueMap
 import org.archivekeep.app.core.utils.identifiers.RepositoryURI
 import org.archivekeep.files.operations.CompareOperation
-import org.archivekeep.files.operations.PreparedSyncOperation
-import org.archivekeep.files.operations.RelocationSyncMode
-import org.archivekeep.files.operations.SyncLogger
-import org.archivekeep.files.operations.SyncOperation
-import org.archivekeep.files.operations.SyncPlanStep
+import org.archivekeep.files.operations.sync.PreparedSyncOperation
+import org.archivekeep.files.operations.sync.RelocationSyncMode
+import org.archivekeep.files.operations.sync.SyncLogger
+import org.archivekeep.files.operations.sync.SyncOperation
+import org.archivekeep.files.operations.sync.SyncSubOperation
+import org.archivekeep.files.operations.sync.SyncSubOperationGroup
 import org.archivekeep.files.repo.Repo
 import org.archivekeep.utils.coroutines.shareResourceIn
 import org.archivekeep.utils.loading.Loadable
@@ -232,13 +233,14 @@ class RepoToRepoSyncServiceImpl(
                         emit(
                             State.Prepared(
                                 comparisonLoadable,
-                                startExecution = {
+                                startExecution = { limitToSubset ->
                                     val newJob =
                                         JobImpl(
                                             comparisonLoadable = comparisonLoadable,
                                             preparedSyncOperation = prepared,
                                             base = base,
                                             other = other,
+                                            limitToSubset = limitToSubset,
                                         )
                                     jobGuards.launch(scope, Dispatchers.IO, this@RepoToRepoSyncImpl.key, newJob)
                                     newJob
@@ -266,6 +268,7 @@ class RepoToRepoSyncServiceImpl(
         val preparedSyncOperation: PreparedSyncOperation,
         val base: Repo,
         val other: Repo,
+        val limitToSubset: Set<SyncSubOperation>,
     ) : RepoToRepoSync.Job,
         UniqueJobGuard.RunnableJob {
         private var job: Job? = null
@@ -281,7 +284,7 @@ class RepoToRepoSyncServiceImpl(
 
             try {
                 executeResult = SyncFlowStringWriter()
-                val progress = MutableStateFlow(emptyList<SyncPlanStep.Progress>())
+                val progress = MutableStateFlow(emptyList<SyncSubOperationGroup.Progress>())
 
                 _currentState.value =
                     JobState.Running(
@@ -292,7 +295,7 @@ class RepoToRepoSyncServiceImpl(
                         this@JobImpl,
                     )
 
-                val progressReport = { newProgress: List<SyncPlanStep.Progress> ->
+                val progressReport = { newProgress: List<SyncSubOperationGroup.Progress> ->
                     progress.value = newProgress
                 }
 
@@ -300,6 +303,7 @@ class RepoToRepoSyncServiceImpl(
                     base,
                     other,
                     prompter = { true },
+                    limitToSubset = limitToSubset,
                     logger =
                         object : SyncLogger {
                             override fun onFileStored(filename: String) {

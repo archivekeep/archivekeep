@@ -9,9 +9,11 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.selection.toggleable
 import androidx.compose.material3.Checkbox
+import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.scale
@@ -25,6 +27,30 @@ fun CheckboxWithText(
     role: Role? = Role.Checkbox,
     onValueChange: (Boolean) -> Unit,
     text: String,
+    extraItems: (@Composable RowScope.() -> Unit)? = null,
+    modifier: Modifier =
+        Modifier
+            .defaultMinSize(minHeight = 40.dp)
+            .padding(horizontal = 8.dp, vertical = 6.dp),
+) {
+    CheckboxWithText(
+        value,
+        enabled,
+        role,
+        onValueChange,
+        text = { Text(text) },
+        extraItems,
+        modifier,
+    )
+}
+
+@Composable
+fun CheckboxWithText(
+    value: Boolean,
+    enabled: Boolean = true,
+    role: Role? = Role.Checkbox,
+    onValueChange: (Boolean) -> Unit,
+    text: @Composable () -> Unit,
     extraItems: (@Composable RowScope.() -> Unit)? = null,
     modifier: Modifier =
         Modifier
@@ -52,11 +78,12 @@ fun CheckboxWithText(
                 // null recommended for accessibility with screenreaders
                 onCheckedChange = null,
             )
-            Text(
-                text = text,
-                style = MaterialTheme.typography.bodyMedium,
-                modifier = Modifier.padding(start = 2.dp),
-            )
+            Spacer(Modifier.width(2.dp))
+            CompositionLocalProvider(
+                LocalTextStyle provides MaterialTheme.typography.bodyMedium,
+            ) {
+                text()
+            }
             extraItems?.let {
                 Spacer(Modifier.width(4.dp))
                 it()

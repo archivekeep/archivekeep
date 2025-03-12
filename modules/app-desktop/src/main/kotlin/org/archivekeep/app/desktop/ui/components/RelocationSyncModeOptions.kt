@@ -18,7 +18,7 @@ import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.dp
 import org.archivekeep.app.desktop.ui.designsystem.dialog.LabelText
 import org.archivekeep.app.desktop.ui.designsystem.input.CheckboxWithText
-import org.archivekeep.files.operations.RelocationSyncMode
+import org.archivekeep.files.operations.sync.RelocationSyncMode
 
 @Preview
 @Composable
@@ -35,7 +35,7 @@ fun RelocationSyncModeOptions(
     onRelocationSyncModeChange: (RelocationSyncMode) -> Unit,
 ) {
     Column {
-        LabelText("Relocations resolution:")
+        LabelText("Relocations resolution mode:")
         Row(
             Modifier.selectableGroup(),
             horizontalArrangement = Arrangement.spacedBy(4.dp),

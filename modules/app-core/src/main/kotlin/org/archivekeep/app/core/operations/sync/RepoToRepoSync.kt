@@ -4,9 +4,10 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.StateFlow
 import org.archivekeep.app.core.utils.generics.OptionalLoadable
 import org.archivekeep.files.operations.CompareOperation
-import org.archivekeep.files.operations.PreparedSyncOperation
-import org.archivekeep.files.operations.RelocationSyncMode
-import org.archivekeep.files.operations.SyncPlanStep
+import org.archivekeep.files.operations.sync.PreparedSyncOperation
+import org.archivekeep.files.operations.sync.RelocationSyncMode
+import org.archivekeep.files.operations.sync.SyncSubOperation
+import org.archivekeep.files.operations.sync.SyncSubOperationGroup
 import org.archivekeep.utils.loading.Loadable
 
 interface RepoToRepoSync {
@@ -41,7 +42,7 @@ interface RepoToRepoSync {
         data class Prepared(
             override val comparisonResult: OptionalLoadable.LoadedAvailable<CompareOperation.Result>,
             val preparedSyncOperation: PreparedSyncOperation,
-            val startExecution: () -> Job,
+            val startExecution: (limitToSubset: Set<SyncSubOperation>) -> Job,
         ) : State
     }
 
@@ -50,7 +51,7 @@ interface RepoToRepoSync {
             override val comparisonResult: OptionalLoadable.LoadedAvailable<CompareOperation.Result>,
             val preparedSyncOperation: PreparedSyncOperation,
             val progressLog: StateFlow<String>,
-            val progress: StateFlow<List<SyncPlanStep.Progress>>,
+            val progress: StateFlow<List<SyncSubOperationGroup.Progress>>,
             val job: Job,
         ) : JobState
 

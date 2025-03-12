@@ -5,7 +5,6 @@ import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.text.AnnotatedString
@@ -28,11 +27,9 @@ import org.archivekeep.app.desktop.ui.dialogs.AbstractDialog
 import org.archivekeep.app.desktop.ui.dialogs.repository.operations.sync.parts.RepoToRepoSyncFlowButtons
 import org.archivekeep.app.desktop.ui.dialogs.repository.operations.sync.parts.RepoToRepoSyncMainContents
 import org.archivekeep.app.desktop.ui.utils.appendBoldSpan
-import org.archivekeep.app.desktop.utils.asMutableState
 import org.archivekeep.app.desktop.utils.collectAsLoadable
 import org.archivekeep.files.operations.CompareOperation
-import org.archivekeep.files.operations.RelocationSyncMode
-import org.archivekeep.files.operations.SyncOperation
+import org.archivekeep.files.operations.sync.SyncOperation
 import org.archivekeep.utils.loading.Loadable
 
 data class DownloadFromRepoDialog(
@@ -42,7 +39,6 @@ data class DownloadFromRepoDialog(
     data class State(
         val fromRepository: StorageRepository,
         val toRepository: StorageRepository,
-        val relocationSyncMode: MutableState<RelocationSyncMode>,
         val userFlowState: RepoToRepoSyncUserFlow.State,
         val onLaunch: () -> Unit,
         val onCancel: () -> Unit,
@@ -85,10 +81,8 @@ data class DownloadFromRepoDialog(
     }
 
     @Composable
-    override fun rememberState(vm: DownloadFromRepoDialog.VM): Loadable<State> {
-        val relocationSyncModeMutableState = vm.userFlow.relocationSyncModeFlow.asMutableState()
-
-        return remember(vm) {
+    override fun rememberState(vm: DownloadFromRepoDialog.VM): Loadable<State> =
+        remember(vm) {
             combine(
                 vm.storageService.repository(from),
                 vm.storageService.repository(to),
@@ -97,7 +91,6 @@ data class DownloadFromRepoDialog(
                 State(
                     fromRepository,
                     toRepository,
-                    relocationSyncModeMutableState,
                     userFlowState,
                     vm.userFlow::launch,
                     vm.userFlow::cancel,
@@ -105,7 +98,6 @@ data class DownloadFromRepoDialog(
                 )
             }
         }.collectAsLoadable()
-    }
 
     @Composable
     override fun ColumnScope.renderContent(state: State) {
@@ -122,7 +114,6 @@ data class DownloadFromRepoDialog(
         )
 
         RepoToRepoSyncMainContents(
-            state.relocationSyncMode,
             state.userFlowState,
         )
     }
@@ -159,18 +150,18 @@ internal fun DownloadFromRepoDialogPreview1Contents() {
             Photos.contentsFixture._index,
             Photos
                 .withContents {
-                    deletePattern("2024/5/.*".toRegex())
+                    deletePattern("2024/1/.*".toRegex())
+                    addStored("2024/4/6-duplicate.JPG", "2024/4/6.JPG")
                 }.contentsFixture
                 ._index,
         )
 
-    val preparedSync = SyncOperation(RepoToRepoSyncUserFlow.defaultRelocationSyncMode).prepareFromComparison(compareResult)
+    val preparedSync = SyncOperation(RepoToRepoSyncUserFlow.relocationSyncMode).prepareFromComparison(compareResult)
 
     dialog.renderDialogCard(
         DownloadFromRepoDialog.State(
             PhotosInHDDB.storageRepository,
             PhotosInLaptopSSD.storageRepository,
-            mutableStateOf(RepoToRepoSyncUserFlow.defaultRelocationSyncMode),
             RepoToRepoSyncUserFlow.State(
                 Loadable.Loaded(
                     value =
@@ -180,6 +171,7 @@ internal fun DownloadFromRepoDialogPreview1Contents() {
                             startExecution = { error("should not be called in preview") },
                         ),
                 ),
+                mutableStateOf(preparedSync.steps[0].subOperations.toSet()),
             ),
             onLaunch = {},
             onCancel = {},

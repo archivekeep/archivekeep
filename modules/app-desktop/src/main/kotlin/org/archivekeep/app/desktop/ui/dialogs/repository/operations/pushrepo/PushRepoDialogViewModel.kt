@@ -18,7 +18,7 @@ import org.archivekeep.app.desktop.domain.data.getSyncCandidates
 import org.archivekeep.app.desktop.ui.dialogs.AbstractDialog
 import org.archivekeep.app.desktop.ui.dialogs.repository.operations.sync.describePreparedSyncOperation
 import org.archivekeep.app.desktop.utils.stickToFirstNotNullAsState
-import org.archivekeep.files.operations.RelocationSyncMode
+import org.archivekeep.files.operations.sync.RelocationSyncMode
 import org.archivekeep.utils.loading.Loadable
 import org.archivekeep.utils.loading.mapLoadedData
 import org.archivekeep.utils.loading.mapToLoadable
@@ -111,7 +111,7 @@ class PushRepoDialogViewModel(
                 throw RuntimeException("illegal state")
             }
 
-            status.startExecution()
+            // TODO: status.startExecution()
         }
     }
 }

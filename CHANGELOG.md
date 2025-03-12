@@ -7,6 +7,7 @@
 - feature: relocations with duplication decrease support
 - UI: open repository folder in system's file manager application
 - UI: support relocations in Upload/Download dialogs (including duplication increase and/or decrease)
+- UI: support custom selection of operations to execute in Upload/Download dialogs
 - UI: Material Design TopAppBar (with client side decorations)
 - build: DEB and RPM packaging support
 - build: Maven Central publishing support

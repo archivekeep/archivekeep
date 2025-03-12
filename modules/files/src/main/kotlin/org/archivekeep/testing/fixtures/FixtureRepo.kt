@@ -64,7 +64,7 @@ class FixtureRepo(
     fun derive(modifications: FixtureRepoBuilder.() -> Unit): FixtureRepo {
         val builder = FixtureRepoBuilder(contents, uncommittedContents)
         builder.modifications()
-        return FixtureRepo(builder.repoContents, builder.repoUncommittedContents)
+        return builder.build()
     }
 
     override val observable: ObservableRepo = this
