@@ -2,10 +2,12 @@ package org.archivekeep.app.desktop.ui
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.ApplicationScope
 import androidx.compose.ui.window.Window
 import androidx.compose.ui.window.WindowPlacement
+import androidx.compose.ui.window.WindowState
 import androidx.compose.ui.window.rememberWindowState
 import org.archivekeep.app.desktop.domain.wiring.LocalComposeWindow
 import org.archivekeep.app.desktop.domain.wiring.LocalOptionalComposeWindow
@@ -23,6 +25,8 @@ fun (ApplicationScope).MainWindow() {
             width = DefaultMainWindowWidth,
             height = DefaultMainWindowHeight,
         )
+
+    ensureMinimumSize(windowState)
 
     Window(
         onCloseRequest = ::exitApplication,
@@ -44,5 +48,18 @@ fun (ApplicationScope).MainWindow() {
                 ::exitApplication,
             )
         }
+    }
+}
+
+private fun ensureMinimumSize(windowState: WindowState) {
+    val minWidth = 360.dp
+    val minHeight = 120.dp
+
+    if (windowState.size.width < minWidth || windowState.size.height < minHeight) {
+        windowState.size =
+            DpSize(
+                width = windowState.size.width.let { if (it < minWidth) minWidth else it },
+                height = windowState.size.height.let { if (it < minHeight) minHeight else it },
+            )
     }
 }
