@@ -33,6 +33,7 @@ import org.archivekeep.app.desktop.ui.designsystem.dialog.DialogPrimaryButton
 import org.archivekeep.app.desktop.ui.designsystem.dialog.DialogSecondaryButton
 import org.archivekeep.app.desktop.ui.designsystem.dialog.LabelText
 import org.archivekeep.app.desktop.ui.designsystem.dialog.previewWith
+import org.archivekeep.app.desktop.ui.designsystem.layout.scrollable.ScrollableColumn
 import org.archivekeep.app.desktop.ui.designsystem.progress.ProgressRow
 import org.archivekeep.app.desktop.ui.designsystem.progress.ProgressRowList
 import org.archivekeep.app.desktop.ui.dialogs.repository.AbstractRepositoryDialog
@@ -97,83 +98,93 @@ class AddAndPushRepoDialog(
                 Text("Loading")
 
             is ReadyAddPushProcess -> {
-                LoadableGuard(
-                    state.otherRepositoryCandidates,
-                ) {
-                    DestinationManySelect(
-                        it,
-                        state.selectedDestinationRepositories,
-                    )
-                }
-                Spacer(modifier = Modifier.height(6.dp))
+                ScrollableColumn(Modifier.weight(1f, fill = false)) {
+                    LoadableGuard(
+                        state.otherRepositoryCandidates,
+                    ) {
+                        DestinationManySelect(
+                            it,
+                            state.selectedDestinationRepositories,
+                        )
+                    }
+                    Spacer(modifier = Modifier.height(6.dp))
 
-                status.addPreprationResult.moves.ifNotEmpty { moves ->
-                    ItemManySelect(
-                        "Moves",
-                        allItemsLabel = { "All moves ($it)" },
-                        itemLabelText = { "${it.from} -> ${it.to}" },
-                        allItems = moves,
-                        state.selectedMoves,
-                    )
-                    Spacer(Modifier.height(12.dp))
-                }
+                    status.addPreprationResult.moves.ifNotEmpty { moves ->
+                        ItemManySelect(
+                            "Moves",
+                            allItemsLabel = { "All moves ($it)" },
+                            itemLabelText = { "${it.from} -> ${it.to}" },
+                            allItems = moves,
+                            state.selectedMoves,
+                        )
+                        Spacer(Modifier.height(12.dp))
+                    }
 
-                status.addPreprationResult.newFiles.ifNotEmpty { newFiles ->
-                    FileManySelect(
-                        "Files to add and push:",
-                        newFiles,
-                        state.selectedFilenames,
-                    )
+                    status.addPreprationResult.newFiles.ifNotEmpty { newFiles ->
+                        FileManySelect(
+                            "Files to add and push:",
+                            newFiles,
+                            state.selectedFilenames,
+                        )
+                    }
                 }
             }
 
             is LaunchedAddPushProcess -> {
-                Spacer(Modifier.height(4.dp))
+                ScrollableColumn(Modifier.weight(1f, fill = false)) {
+                    Spacer(Modifier.height(4.dp))
 
-                LabelText("Local index update")
+                    LabelText("Local index update")
 
-                val mte = status.options.movesToExecute
-                val fta = status.options.filesToAdd
+                    val mte = status.options.movesToExecute
+                    val fta = status.options.filesToAdd
 
-                ProgressRowList {
-                    if (mte.isNotEmpty()) {
-                        ProgressRow(progress = {
-                            status.moveProgress.moved.size / mte.size.toFloat()
-                        }, "Moved ${status.moveProgress.moved.size} of ${mte.size} ${filesAutoPlural(mte)}")
+                    ProgressRowList {
+                        if (mte.isNotEmpty()) {
+                            ProgressRow(progress = {
+                                status.moveProgress.moved.size / mte.size.toFloat()
+                            }, "Moved ${status.moveProgress.moved.size} of ${mte.size} ${filesAutoPlural(mte)}")
+                        }
+                        if (fta.isNotEmpty()) {
+                            ProgressRow(
+                                progress = { status.addProgress.added.size / fta.size.toFloat() },
+                                "Added ${status.addProgress.added.size} of ${fta.size} ${filesAutoPlural(fta)}",
+                            )
+                        }
                     }
-                    if (fta.isNotEmpty()) {
-                        ProgressRow(
-                            progress = { status.addProgress.added.size / fta.size.toFloat() },
-                            "Added ${status.addProgress.added.size} of ${fta.size} ${filesAutoPlural(fta)}",
-                        )
-                    }
-                }
 
-                Spacer(Modifier.height(4.dp))
+                    Spacer(Modifier.height(4.dp))
 
-                LabelText("Push progress")
+                    LabelText("Push progress")
 
-                ProgressRowList {
-                    status.pushProgress.forEach { (repo, pp) ->
-                        val storageRepository =
-                            state.otherRepositoryCandidates.mapIfLoadedOrDefault(null) {
-                                it.firstOrNull { it.uri == repo }
-                            }
+                    ProgressRowList {
+                        status.pushProgress.forEach { (repo, pp) ->
+                            val storageRepository =
+                                state.otherRepositoryCandidates.mapIfLoadedOrDefault(null) {
+                                    it.firstOrNull { it.uri == repo }
+                                }
 
-                        ProgressRow(
-                            progress = { (pp.moved.size + pp.added.size) / (mte.size.toFloat() + fta.size.toFloat()) },
-                            text =
-                                if (storageRepository != null) {
-                                    "Push to ${contextualStorageReference(state.repoName,storageRepository)}"
-                                } else {
-                                    "Push to $repo"
-                                },
-                        ) {
-                            if (mte.isNotEmpty()) {
-                                ProgressRow(progress = { pp.moved.size / mte.size.toFloat() }, "Moved ${pp.moved.size} of ${mte.size} ${filesAutoPlural(mte)}")
-                            }
-                            if (fta.isNotEmpty()) {
-                                ProgressRow(progress = { pp.added.size / fta.size.toFloat() }, "Added ${pp.added.size} of ${fta.size} ${filesAutoPlural(fta)}")
+                            ProgressRow(
+                                progress = { (pp.moved.size + pp.added.size) / (mte.size.toFloat() + fta.size.toFloat()) },
+                                text =
+                                    if (storageRepository != null) {
+                                        "Push to ${contextualStorageReference(state.repoName, storageRepository)}"
+                                    } else {
+                                        "Push to $repo"
+                                    },
+                            ) {
+                                if (mte.isNotEmpty()) {
+                                    ProgressRow(
+                                        progress = { pp.moved.size / mte.size.toFloat() },
+                                        "Moved ${pp.moved.size} of ${mte.size} ${filesAutoPlural(mte)}",
+                                    )
+                                }
+                                if (fta.isNotEmpty()) {
+                                    ProgressRow(
+                                        progress = { pp.added.size / fta.size.toFloat() },
+                                        "Added ${pp.added.size} of ${fta.size} ${filesAutoPlural(fta)}",
+                                    )
+                                }
                             }
                         }
                     }

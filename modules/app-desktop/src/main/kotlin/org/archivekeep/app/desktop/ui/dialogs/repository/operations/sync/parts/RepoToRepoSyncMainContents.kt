@@ -1,12 +1,9 @@
 package org.archivekeep.app.desktop.ui.dialogs.repository.operations.sync.parts
 
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -18,6 +15,7 @@ import org.archivekeep.app.core.operations.sync.RepoToRepoSync.State
 import org.archivekeep.app.desktop.ui.components.ItemManySelect
 import org.archivekeep.app.desktop.ui.components.LoadableGuard
 import org.archivekeep.app.desktop.ui.components.rememberManySelectWithMergedState
+import org.archivekeep.app.desktop.ui.designsystem.layout.scrollable.ScrollableColumn
 import org.archivekeep.app.desktop.ui.dialogs.repository.operations.sync.RepoToRepoSyncUserFlow
 import org.archivekeep.app.desktop.ui.dialogs.repository.operations.sync.describe
 import org.archivekeep.files.operations.sync.AdditiveRelocationsSyncStep
@@ -29,12 +27,7 @@ fun (ColumnScope).RepoToRepoSyncMainContents(userFlowState: RepoToRepoSyncUserFl
     LoadableGuard(userFlowState.operation) { operation ->
         when (operation) {
             is State.Prepared -> {
-                Column(
-                    modifier =
-                        Modifier
-                            .verticalScroll(rememberScrollState())
-                            .weight(weight = 1f, fill = false),
-                ) {
+                ScrollableColumn(Modifier.weight(1f, fill = false)) {
                     operation.preparedSyncOperation.steps.forEach { step ->
                         Spacer(Modifier.height(12.dp))
                         when (step) {
@@ -71,12 +64,7 @@ fun (ColumnScope).RepoToRepoSyncMainContents(userFlowState: RepoToRepoSyncUserFl
 
                 Column {
                     Text("Running")
-                    Box(
-                        modifier =
-                            Modifier
-                                .verticalScroll(rememberScrollState())
-                                .weight(weight = 1f, fill = false),
-                    ) {
+                    ScrollableColumn(modifier = Modifier.weight(weight = 1f, fill = false)) {
                         Text(t)
                     }
                 }
@@ -85,12 +73,7 @@ fun (ColumnScope).RepoToRepoSyncMainContents(userFlowState: RepoToRepoSyncUserFl
             is JobState.Finished ->
                 Column {
                     Text("Finished")
-                    Box(
-                        modifier =
-                            Modifier
-                                .verticalScroll(rememberScrollState())
-                                .weight(weight = 1f, fill = false),
-                    ) {
+                    ScrollableColumn(modifier = Modifier.weight(weight = 1f, fill = false)) {
                         Text(operation.progressLog, softWrap = true)
                     }
                 }

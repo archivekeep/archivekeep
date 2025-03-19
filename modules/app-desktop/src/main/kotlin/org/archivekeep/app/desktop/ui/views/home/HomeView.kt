@@ -6,8 +6,6 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -24,6 +22,7 @@ import org.archivekeep.app.desktop.domain.wiring.LocalArchiveService
 import org.archivekeep.app.desktop.domain.wiring.LocalRepoService
 import org.archivekeep.app.desktop.domain.wiring.LocalRepoToRepoSyncService
 import org.archivekeep.app.desktop.domain.wiring.LocalStorageService
+import org.archivekeep.app.desktop.ui.designsystem.layout.views.ViewScrollableContainer
 import org.archivekeep.app.desktop.ui.designsystem.sections.SectionTitle
 import org.archivekeep.app.desktop.ui.designsystem.styles.CColors
 import org.archivekeep.app.desktop.ui.views.View
@@ -80,8 +79,6 @@ class HomeView : View<HomeViewModel> {
 
 @Composable
 private fun homeViewContent(vm: HomeViewModel) {
-    val scrollState = rememberScrollState()
-
     val allLocalArchivesLoadable = vm.allLocalArchives.collectLoadableFlow()
     val externalStoragesLoadable = vm.allStorages.collectLoadableFlow()
 
@@ -96,14 +93,12 @@ private fun homeViewContent(vm: HomeViewModel) {
     val showLocalAddButton = !showLocalAddIntro
     val showExternalAddButton = !showExternalAddIntro
 
-    Column(
-        Modifier.verticalScroll(scrollState),
-    ) {
+    ViewScrollableContainer {
         Column(
             modifier =
                 Modifier
                     .fillMaxWidth()
-                    .padding(vertical = 20.dp, horizontal = 32.dp),
+                    .padding(vertical = 12.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
             Text(
@@ -119,7 +114,7 @@ private fun homeViewContent(vm: HomeViewModel) {
         }
 
         Column(
-            modifier = Modifier.padding(top = 6.dp, start = 32.dp, end = 32.dp, bottom = 32.dp),
+            modifier = Modifier.padding(top = 6.dp, bottom = 32.dp),
             verticalArrangement = Arrangement.spacedBy(10.dp),
         ) {
             if (showLocalAddIntro) {

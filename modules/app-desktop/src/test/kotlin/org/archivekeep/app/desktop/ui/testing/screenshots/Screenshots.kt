@@ -1,6 +1,5 @@
 package org.archivekeep.app.desktop.ui.testing.screenshots
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.height
@@ -10,7 +9,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.geometry.Size
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.layer.GraphicsLayer
 import androidx.compose.ui.graphics.layer.drawLayer
 import androidx.compose.ui.graphics.rememberGraphicsLayer
@@ -49,7 +47,6 @@ fun ScreenshotContainer(
             Box(
                 modifier =
                     modifier
-                        .background(Color.Blue)
                         .semantics {
                             set(semanticsKey, graphicsLayer)
                         }.drawWithContent {

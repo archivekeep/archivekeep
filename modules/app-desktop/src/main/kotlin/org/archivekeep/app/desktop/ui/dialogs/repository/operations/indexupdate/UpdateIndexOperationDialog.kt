@@ -1,13 +1,10 @@
 package org.archivekeep.app.desktop.ui.dialogs.repository.operations.indexupdate
 
 import androidx.compose.desktop.ui.tooling.preview.Preview
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
@@ -35,6 +32,7 @@ import org.archivekeep.app.desktop.ui.components.ItemManySelect
 import org.archivekeep.app.desktop.ui.designsystem.dialog.DialogDismissButton
 import org.archivekeep.app.desktop.ui.designsystem.dialog.DialogPreviewColumn
 import org.archivekeep.app.desktop.ui.designsystem.dialog.DialogPrimaryButton
+import org.archivekeep.app.desktop.ui.designsystem.layout.scrollable.ScrollableColumn
 import org.archivekeep.app.desktop.ui.dialogs.repository.AbstractRepositoryDialog
 import org.archivekeep.app.desktop.ui.utils.appendBoldSpan
 import org.archivekeep.app.desktop.utils.collectAsLoadable
@@ -128,7 +126,7 @@ class UpdateIndexOperationDialog(
     @Composable
     override fun ColumnScope.renderContent(state: State) {
         if (state.isExecuting || state.executeResult.isNotEmpty()) {
-            Box(Modifier.verticalScroll(rememberScrollState())) {
+            ScrollableColumn {
                 Text(state.executeResult)
             }
         } else if (state.preparedResult != null) {
