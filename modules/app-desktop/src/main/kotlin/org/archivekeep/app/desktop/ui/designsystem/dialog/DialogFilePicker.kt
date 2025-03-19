@@ -18,14 +18,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 
 @Composable
-fun DialogInputLabel(text: String) {
-    Text(
-        text,
-        modifier = Modifier.padding(top = 6.dp, bottom = 2.dp),
-    )
-}
-
-@Composable
 fun DialogFilePicker(
     path: String?,
     onTriggerChange: () -> Unit,
@@ -50,7 +42,11 @@ fun DialogFilePicker(
             ) {
                 path.let {
                     if (it == null) {
-                        Text("No directory selected", color = Color.Black.copy(alpha = 0.4f), softWrap = true)
+                        Text(
+                            "No directory selected",
+                            color = Color.Black.copy(alpha = 0.4f),
+                            softWrap = true,
+                        )
                     } else {
                         Text(it, softWrap = true)
                     }
