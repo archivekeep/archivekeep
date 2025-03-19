@@ -10,7 +10,7 @@ import org.archivekeep.utils.loading.Loadable
 interface AddOperationSupervisor {
     val currentJobFlow: StateFlow<Job?>
 
-    fun prepare(): Flow<Loadable<Prepared>>
+    fun prepare(): Flow<Loadable<Preparation>>
 
     interface Job {
         val preparationResult: PreparationResult
@@ -35,8 +35,8 @@ interface AddOperationSupervisor {
         }
     }
 
-    data class Prepared(
-        val result: PreparationResult,
+    data class Preparation(
+        val result: AddOperation.Preparation,
         val launch: (launchOptions: AddOperation.LaunchOptions) -> Unit,
     ) : State
 

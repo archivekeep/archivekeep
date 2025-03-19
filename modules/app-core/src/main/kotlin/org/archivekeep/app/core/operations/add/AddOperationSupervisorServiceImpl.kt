@@ -12,6 +12,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.conflate
 import kotlinx.coroutines.flow.flowOn
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.update
 import org.archivekeep.app.core.domain.repositories.RepositoryService
 import org.archivekeep.app.core.operations.add.AddOperationSupervisor.AddProgress
@@ -24,8 +25,8 @@ import org.archivekeep.files.operations.AddOperation
 import org.archivekeep.files.operations.AddOperationTextWriter
 import org.archivekeep.files.repo.Repo
 import org.archivekeep.utils.loading.Loadable
+import org.archivekeep.utils.loading.LoadableWithProgress
 import org.archivekeep.utils.loading.flatMapLoadableFlow
-import org.archivekeep.utils.loading.mapLoadedData
 import java.io.PrintWriter
 
 class AddOperationSupervisorServiceImpl(
@@ -44,34 +45,52 @@ class AddOperationSupervisorServiceImpl(
         override val currentJobFlow: StateFlow<JobImpl?> = jobGuards.stateHoldersWeakReference[repositoryURI].asStateFlow()
 
         @OptIn(ExperimentalCoroutinesApi::class)
-        override fun prepare(): Flow<Loadable<AddOperationSupervisor.Prepared>> =
+        override fun prepare(): Flow<Loadable<AddOperationSupervisor.Preparation>> =
             repositoryService
                 .getRepository(repositoryURI)
                 .accessorFlow
                 .flatMapLoadableFlow { repositoryAccess ->
                     repositoryAccess.observable.indexFlow
                         .conflate()
-                        .mapLoadedData {
-                            val preparedResult =
-                                AddOperation(
-                                    subsetGlobs = listOf("."),
-                                    disableFilenameCheck = false,
-                                    disableMovesCheck = false,
-                                ).prepare(repositoryAccess)
+                        .flatMapLoadableFlow {
+                            AddOperation(
+                                subsetGlobs = listOf("."),
+                                disableFilenameCheck = false,
+                                disableMovesCheck = false,
+                            ).prepare(repositoryAccess)
+                                .map {
+                                    when (it) {
+                                        is LoadableWithProgress.Failed -> Loadable.Failed(it.throwable)
+                                        is LoadableWithProgress.Loaded -> {
+                                            Loadable.Loaded(
+                                                AddOperationSupervisor.Preparation(
+                                                    it.value,
+                                                    launch = { launchOptions ->
+                                                        val job =
+                                                            JobImpl(
+                                                                repositoryAccess,
+                                                                it.value,
+                                                                launchOptions,
+                                                            )
 
-                            AddOperationSupervisor.Prepared(
-                                preparedResult,
-                                launch = { launchOptions ->
-                                    val job =
-                                        JobImpl(
-                                            repositoryAccess,
-                                            preparedResult,
-                                            launchOptions,
-                                        )
-
-                                    jobGuards.launch(scope, Dispatchers.IO, repositoryURI, job)
-                                },
-                            )
+                                                        jobGuards.launch(scope, Dispatchers.IO, repositoryURI, job)
+                                                    },
+                                                ),
+                                            )
+                                        }
+                                        LoadableWithProgress.Loading -> Loadable.Loading
+                                        is LoadableWithProgress.LoadingProgress -> {
+                                            Loadable.Loaded(
+                                                AddOperationSupervisor.Preparation(
+                                                    it.progress,
+                                                    launch = {
+                                                        throw IllegalStateException("Not prepared")
+                                                    },
+                                                ),
+                                            )
+                                        }
+                                    }
+                                }
                         }.flowOn(Dispatchers.IO)
                 }
     }

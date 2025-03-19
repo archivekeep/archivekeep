@@ -22,6 +22,10 @@ interface AddAndPushOperation {
 
     data object NotReadyAddPushProcess : State
 
+    data class PreparingAddPushProcess(
+        val addPreparationProgress: AddOperation.PreparationProgress,
+    ) : State
+
     data class ReadyAddPushProcess(
         val addPreprationResult: AddOperation.PreparationResult,
         val launch: (options: LaunchOptions) -> Unit,

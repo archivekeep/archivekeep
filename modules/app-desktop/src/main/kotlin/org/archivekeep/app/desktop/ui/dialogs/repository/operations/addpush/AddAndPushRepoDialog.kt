@@ -18,6 +18,7 @@ import org.archivekeep.app.core.domain.repositories.Repository
 import org.archivekeep.app.core.operations.addpush.AddAndPushOperation
 import org.archivekeep.app.core.operations.addpush.AddAndPushOperation.LaunchedAddPushProcess
 import org.archivekeep.app.core.operations.addpush.AddAndPushOperation.NotReadyAddPushProcess
+import org.archivekeep.app.core.operations.addpush.AddAndPushOperation.PreparingAddPushProcess
 import org.archivekeep.app.core.operations.addpush.AddAndPushOperation.ReadyAddPushProcess
 import org.archivekeep.app.core.persistence.platform.demo.DocumentsInBackBlaze
 import org.archivekeep.app.core.persistence.platform.demo.DocumentsInHDDA
@@ -28,6 +29,7 @@ import org.archivekeep.app.desktop.ui.components.DestinationManySelect
 import org.archivekeep.app.desktop.ui.components.FileManySelect
 import org.archivekeep.app.desktop.ui.components.ItemManySelect
 import org.archivekeep.app.desktop.ui.components.LoadableGuard
+import org.archivekeep.app.desktop.ui.components.operations.IndexUpdatePreparationProgress
 import org.archivekeep.app.desktop.ui.designsystem.dialog.DialogDismissButton
 import org.archivekeep.app.desktop.ui.designsystem.dialog.DialogPrimaryButton
 import org.archivekeep.app.desktop.ui.designsystem.dialog.DialogSecondaryButton
@@ -96,6 +98,11 @@ class AddAndPushRepoDialog(
         when (val status = state.state) {
             is NotReadyAddPushProcess ->
                 Text("Loading")
+
+            is PreparingAddPushProcess -> {
+                LabelText("Preparing add and push operation:")
+                IndexUpdatePreparationProgress(status.addPreparationProgress)
+            }
 
             is ReadyAddPushProcess -> {
                 ScrollableColumn(Modifier.weight(1f, fill = false)) {
@@ -254,6 +261,7 @@ private fun AddAndPushDialogContentsCompletedPreview() {
                         newFiles = allNewFiles,
                         moves = allTestMoves,
                         missingFiles = emptyList(),
+                        errorFiles = emptyMap(),
                     ),
                     launch = {},
                 ),
@@ -286,6 +294,7 @@ private fun AddAndPushDialogContentsCompletedPreview2() {
                         newFiles = allNewFiles,
                         moves = emptyList(),
                         missingFiles = emptyList(),
+                        errorFiles = emptyMap(),
                     ),
                     options = AddAndPushOperation.LaunchOptions(allNewFiles.toSet(), emptySet(), selectedDestinations.toSet()),
                     addProgress = AddAndPushOperation.AddProgress(emptySet(), emptyMap(), false),
@@ -322,6 +331,7 @@ private fun AddAndPushDialogContentsCompletedPreview3() {
                         newFiles = allNewFiles,
                         moves = allTestMoves,
                         missingFiles = emptyList(),
+                        errorFiles = emptyMap(),
                     ),
                     options = AddAndPushOperation.LaunchOptions(allNewFiles.toSet(), allTestMoves.toSet(), selectedDestinations.toSet()),
                     addProgress = AddAndPushOperation.AddProgress(setOf(allNewFiles[0]), emptyMap(), false),

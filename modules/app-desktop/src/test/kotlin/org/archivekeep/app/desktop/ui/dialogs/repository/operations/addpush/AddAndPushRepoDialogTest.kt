@@ -44,6 +44,7 @@ class AddAndPushRepoDialogScreenshotTest {
                                 newFiles = allNewFiles,
                                 moves = allMoves,
                                 missingFiles = emptyList(),
+                                errorFiles = emptyMap(),
                             ),
                             launch = {},
                         ),

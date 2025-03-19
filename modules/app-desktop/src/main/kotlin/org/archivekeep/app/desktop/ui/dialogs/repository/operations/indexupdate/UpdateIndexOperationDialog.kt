@@ -29,9 +29,11 @@ import org.archivekeep.app.core.utils.identifiers.RepositoryURI
 import org.archivekeep.app.desktop.domain.wiring.LocalAddOperationSupervisorService
 import org.archivekeep.app.desktop.ui.components.FileManySelect
 import org.archivekeep.app.desktop.ui.components.ItemManySelect
+import org.archivekeep.app.desktop.ui.components.operations.IndexUpdatePreparationProgress
 import org.archivekeep.app.desktop.ui.designsystem.dialog.DialogDismissButton
 import org.archivekeep.app.desktop.ui.designsystem.dialog.DialogPreviewColumn
 import org.archivekeep.app.desktop.ui.designsystem.dialog.DialogPrimaryButton
+import org.archivekeep.app.desktop.ui.designsystem.dialog.LabelText
 import org.archivekeep.app.desktop.ui.designsystem.layout.scrollable.ScrollableColumn
 import org.archivekeep.app.desktop.ui.dialogs.repository.AbstractRepositoryDialog
 import org.archivekeep.app.desktop.ui.utils.appendBoldSpan
@@ -60,7 +62,7 @@ class UpdateIndexOperationDialog(
                 append(" - index update")
             }
 
-        val preparedResult = (operationState as? AddOperationSupervisor.Prepared)?.result
+        val preparation = (operationState as? AddOperationSupervisor.Preparation)?.result
         val executeResult = (operationState as? AddOperationSupervisor.ExecutionState.Running)?.log ?: ""
         val isExecuting = operationState is AddOperationSupervisor.ExecutionState.Running
     }
@@ -129,7 +131,10 @@ class UpdateIndexOperationDialog(
             ScrollableColumn {
                 Text(state.executeResult)
             }
-        } else if (state.preparedResult != null) {
+        } else if (state.preparation != null && state.preparation is AddOperation.PreparationProgress) {
+            LabelText("Preparing index update operation:")
+            IndexUpdatePreparationProgress(state.preparation)
+        } else if (state.preparation != null && state.preparation is AddOperation.PreparationResult) {
             val selectedFilenames =
                 remember {
                     derivedMutableStateOf(
@@ -158,19 +163,19 @@ class UpdateIndexOperationDialog(
                     }
                 }
 
-            if (state.preparedResult.moves.isNotEmpty()) {
+            if (state.preparation.moves.isNotEmpty()) {
                 ItemManySelect(
                     "Moves",
                     allItemsLabel = { "All moves ($it)" },
                     itemLabelText = { "${it.from} -> ${it.to}" },
-                    allItems = state.preparedResult.moves,
+                    allItems = state.preparation.moves,
                     selectedMoves,
                 )
                 Spacer(Modifier.height(12.dp))
             }
 
-            if (state.preparedResult.newFiles.isNotEmpty()) {
-                FileManySelect("New files", state.preparedResult.newFiles, selectedFilenames)
+            if (state.preparation.newFiles.isNotEmpty()) {
+                FileManySelect("New files", state.preparation.newFiles, selectedFilenames)
             }
         } else {
             Text("Preparing...")
@@ -180,7 +185,7 @@ class UpdateIndexOperationDialog(
     @Composable
     override fun RowScope.renderButtons(state: State) {
         val onTriggerExecute = {
-            (state.operationState as AddOperationSupervisor.Prepared).launch(state.launchOptions.value)
+            (state.operationState as AddOperationSupervisor.Preparation).launch(state.launchOptions.value)
         }
 
         var closeShown = false
@@ -200,8 +205,8 @@ class UpdateIndexOperationDialog(
                 }
             }
 
-            is AddOperationSupervisor.Prepared -> {
-                DialogPrimaryButton("Execute index update", onClick = onTriggerExecute, enabled = true)
+            is AddOperationSupervisor.Preparation -> {
+                DialogPrimaryButton("Execute index update", onClick = onTriggerExecute, enabled = opState.result is AddOperation.PreparationResult)
             }
         }
 
@@ -244,6 +249,7 @@ private val demo_preparation_result =
                 Move("Document/bad-name.pdf", "Document/corrected-name.pdf"),
             ),
         missingFiles = emptyList(),
+        errorFiles = emptyMap(),
     )
 
 @Preview
@@ -253,9 +259,9 @@ private fun UpdateIndexOperationViewPreview() {
         renderPreview(
             archiveName = "Family Stuff",
             state =
-                AddOperationSupervisor.Prepared(
+                AddOperationSupervisor.Preparation(
                     demo_preparation_result,
-                    {},
+                    launch = {},
                 ),
             launchOptions = mutableStateOf(AddOperation.LaunchOptions()),
         )
@@ -263,9 +269,9 @@ private fun UpdateIndexOperationViewPreview() {
         renderPreview(
             archiveName = "Family Stuff",
             state =
-                AddOperationSupervisor.Prepared(
+                AddOperationSupervisor.Preparation(
                     demo_preparation_result,
-                    {},
+                    launch = {},
                 ),
             launchOptions = mutableStateOf(AddOperation.LaunchOptions()),
         )

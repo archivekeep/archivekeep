@@ -10,7 +10,9 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combineTransform
+import kotlinx.coroutines.flow.emitAll
 import kotlinx.coroutines.flow.flowOn
+import kotlinx.coroutines.flow.transform
 import kotlinx.coroutines.joinAll
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
@@ -23,6 +25,7 @@ import org.archivekeep.files.operations.AddOperation
 import org.archivekeep.files.operations.sync.copyFile
 import org.archivekeep.files.repo.LocalRepo
 import org.archivekeep.utils.loading.Loadable
+import org.archivekeep.utils.loading.LoadableWithProgress
 import org.archivekeep.utils.loading.firstLoadedOrFailure
 
 class AddAndPushOperationServiceImpl(
@@ -225,21 +228,35 @@ class AddAndPushOperationServiceImpl(
                 // TODO: reuse already computed index and local repo status
 
                 if (accessor is Loadable.Loaded) {
-                    val preparedAddOperation =
+                    val preparationFlow =
                         AddOperation(
                             subsetGlobs = listOf("."),
                             disableFilenameCheck = false,
                             disableMovesCheck = false,
                         ).prepare(accessor.value)
+                            .transform {
+                                when (it) {
+                                    is LoadableWithProgress.Failed -> throw it.throwable
+                                    is LoadableWithProgress.Loaded -> {
+                                        val preparedAddOperation = it.value
 
-                    emit(
-                        AddAndPushOperation.ReadyAddPushProcess(
-                            preparedAddOperation,
-                            launch = { launchOptions ->
-                                launch(preparedAddOperation, launchOptions)
-                            },
-                        ),
-                    )
+                                        emit(
+                                            AddAndPushOperation.ReadyAddPushProcess(
+                                                preparedAddOperation,
+                                                launch = { launchOptions ->
+                                                    launch(preparedAddOperation, launchOptions)
+                                                },
+                                            ),
+                                        )
+                                    }
+                                    LoadableWithProgress.Loading -> {}
+                                    is LoadableWithProgress.LoadingProgress -> {
+                                        emit(AddAndPushOperation.PreparingAddPushProcess(it.progress))
+                                    }
+                                }
+                            }
+
+                    emitAll(preparationFlow)
                 }
             }.flowOn(ioDispatcher)
 

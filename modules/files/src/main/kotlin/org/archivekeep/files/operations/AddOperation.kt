@@ -1,8 +1,13 @@
 package org.archivekeep.files.operations
 
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.flow
+import org.archivekeep.files.exceptions.InvalidFilename
 import org.archivekeep.files.operations.AddOperation.PreparationResult.Move
 import org.archivekeep.files.repo.LocalRepo
 import org.archivekeep.files.repo.Repo
+import org.archivekeep.utils.loading.LoadableWithProgress
 import java.io.PrintWriter
 import kotlin.io.path.invariantSeparatorsPathString
 
@@ -26,79 +31,123 @@ class AddOperation(
         val movesSubsetLimit: Set<Move>? = null,
     )
 
-    suspend fun prepare(repo: Repo): PreparationResult {
-        val localRepo = repo as? LocalRepo ?: throw RuntimeException("not local repo")
+    fun prepare(repo: Repo): Flow<LoadableWithProgress<PreparationResult, PreparationProgress>> =
+        flow {
+            val localRepo = repo as? LocalRepo ?: throw RuntimeException("not local repo")
 
-        val matchedFiles = localRepo.findAllFiles(subsetGlobs)
+            val matchedFiles = localRepo.findAllFiles(subsetGlobs)
 
-        val unindexedFilesMatchingPattern =
-            matchedFiles.filter {
-                !localRepo.contains(it.invariantSeparatorsPathString)
+            var progress =
+                PreparationProgress(
+                    emptyList(),
+                    emptyList(),
+                    emptyList(),
+                    emptyMap(),
+                )
+
+            suspend fun updateProgress(updater: (old: PreparationProgress) -> PreparationProgress) {
+                progress = updater(progress)
+                emit(LoadableWithProgress.LoadingProgress(progress))
             }
 
-        if (!disableFilenameCheck) {
-            unindexedFilesMatchingPattern.forEach {
-                it.invariantSeparatorsPathString.let { pathString ->
-                    illegalCharacters
-                        .firstOrNull { illegalCharacter -> pathString.contains(illegalCharacter) }
-                        ?.let { illegalCharacter ->
-                            throw RuntimeException("$pathString contains illegal character $illegalCharacter")
+            val unindexedFilesMatchingPattern =
+                matchedFiles.filter {
+                    !localRepo.contains(it.invariantSeparatorsPathString)
+                }
+
+            updateProgress { it.copy(filesToCheck = unindexedFilesMatchingPattern.map { it.toString() }) }
+
+            val filesWithWrongFilenames =
+                unindexedFilesMatchingPattern
+                    .mapNotNull {
+                        it.invariantSeparatorsPathString.let { pathString ->
+                            illegalCharacters
+                                .firstOrNull { illegalCharacter -> pathString.contains(illegalCharacter) }
+                                ?.let { illegalCharacter ->
+                                    pathString to InvalidFilename(pathString, "$pathString contains illegal character $illegalCharacter")
+                                }
                         }
-                }
-            }
-        }
+                    }.toMap<String, Any>()
 
-        if (!disableMovesCheck) {
-            val storedFiles = localRepo.storedFiles().sorted()
+            updateProgress { it.copy(errorFiles = filesWithWrongFilenames) }
 
-            val missingIndexedFilesByChecksum =
-                storedFiles
-                    .filter { !localRepo.verifyFileExists(it) }
-                    .associateBy {
-                        localRepo.fileChecksum(it)
+            if (!disableMovesCheck) {
+                val storedFiles = localRepo.storedFiles().sorted()
+
+                val missingIndexedFilesByChecksum =
+                    storedFiles
+                        .filter { !localRepo.verifyFileExists(it) }
+                        .associateBy {
+                            localRepo.fileChecksum(it)
+                        }
+
+                val remainingMissingIndexedFilesByChecksum = missingIndexedFilesByChecksum.toMutableMap()
+                val moves = mutableListOf<PreparationResult.Move>()
+                val unmatchedNewFiles = mutableListOf<String>()
+
+                unindexedFilesMatchingPattern.forEach { newUnindexedFile ->
+                    val checksum = localRepo.computeFileChecksum(newUnindexedFile)
+
+                    val missingFilePath = remainingMissingIndexedFilesByChecksum[checksum]
+
+                    if (missingFilePath != null) {
+                        moves.add(
+                            PreparationResult.Move(
+                                from = missingFilePath,
+                                to = newUnindexedFile.invariantSeparatorsPathString,
+                            ),
+                        )
+                        remainingMissingIndexedFilesByChecksum.remove(checksum)
+
+                        updateProgress { it.copy(moves = moves.toList()) }
+                    } else {
+                        unmatchedNewFiles.add(newUnindexedFile.invariantSeparatorsPathString)
+
+                        updateProgress { it.copy(newFiles = unmatchedNewFiles.toList()) }
                     }
-
-            val remainingMissingIndexedFilesByChecksum = missingIndexedFilesByChecksum.toMutableMap()
-            val moves = mutableListOf<PreparationResult.Move>()
-            val unmatchedNewFiles = mutableListOf<String>()
-
-            unindexedFilesMatchingPattern.forEach { newUnindexedFile ->
-                val checksum = localRepo.computeFileChecksum(newUnindexedFile)
-
-                val missingFilePath = remainingMissingIndexedFilesByChecksum[checksum]
-
-                if (missingFilePath != null) {
-                    moves.add(
-                        PreparationResult.Move(
-                            from = missingFilePath,
-                            to = newUnindexedFile.invariantSeparatorsPathString,
-                        ),
-                    )
-                    remainingMissingIndexedFilesByChecksum.remove(checksum)
-                } else {
-                    unmatchedNewFiles.add(newUnindexedFile.invariantSeparatorsPathString)
                 }
-            }
 
-            return PreparationResult(
-                newFiles = unmatchedNewFiles.sorted(),
-                moves = moves,
-                missingFiles = remainingMissingIndexedFilesByChecksum.values.toList().sorted(),
-            )
-        } else {
-            return PreparationResult(
-                unindexedFilesMatchingPattern.map { it.invariantSeparatorsPathString }.sorted(),
-                emptyList(),
-                emptyList(),
-            )
-        }
+                emit(
+                    LoadableWithProgress.Loaded(
+                        PreparationResult(
+                            newFiles = unmatchedNewFiles.sorted(),
+                            moves = moves,
+                            missingFiles = remainingMissingIndexedFilesByChecksum.values.toList().sorted(),
+                            errorFiles = filesWithWrongFilenames,
+                        ),
+                    ),
+                )
+            } else {
+                emit(
+                    LoadableWithProgress.Loaded(
+                        PreparationResult(
+                            unindexedFilesMatchingPattern.map { it.invariantSeparatorsPathString }.sorted(),
+                            emptyList(),
+                            emptyList(),
+                            filesWithWrongFilenames,
+                        ),
+                    ),
+                )
+            }
+        }.catch { e -> emit(LoadableWithProgress.Failed(e)) }
+
+    sealed interface Preparation
+
+    data class PreparationProgress(
+        val filesToCheck: List<String>,
+        val newFiles: List<String>,
+        val moves: List<Move>,
+        val errorFiles: Map<String, Any>,
+    ) : Preparation {
+        val checkedFiles = newFiles + moves.map { it.from }
     }
 
     data class PreparationResult(
         val newFiles: List<String>,
         val moves: List<Move>,
         val missingFiles: List<String>,
-    ) {
+        val errorFiles: Map<String, Any>,
+    ) : Preparation {
         data class Move(
             val from: String,
             val to: String,

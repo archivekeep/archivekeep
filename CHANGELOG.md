@@ -9,6 +9,7 @@
 - UI: support relocations in Upload/Download dialogs (including duplication increase and/or decrease)
 - UI: support custom selection of operations to execute in Upload/Download dialogs
 - UI: Material Design TopAppBar (with client side decorations)
+- UI: show preparation progress of index updating operations
 - build: DEB and RPM packaging support
 - build: Maven Central publishing support
 - build: Flatpak offline Gradle build support
