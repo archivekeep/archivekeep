@@ -3,11 +3,11 @@ package org.archivekeep.files.operations.indexupdate
 import java.io.PrintWriter
 import java.nio.file.Path
 
-class AddOperationTextWriter(
+class IndexUpdateTextualProgressTracker(
     val out: PrintWriter,
     val fromArchiveToRelativePath: (path: String) -> Path = { Path.of(it) },
-) {
-    public fun onMoveCompleted(move: AddOperation.PreparationResult.Move) {
+) : IndexUpdateProgressTracker {
+    override fun onMoveCompleted(move: AddOperation.PreparationResult.Move) {
         out.println(
             "moved: ${fromArchiveToRelativePath(move.from)} to ${
                 fromArchiveToRelativePath(
@@ -17,7 +17,15 @@ class AddOperationTextWriter(
         )
     }
 
-    public fun onAddCompleted(newFile: String) {
+    override fun onAddCompleted(newFile: String) {
         out.println("added: ${fromArchiveToRelativePath(newFile)}")
+    }
+
+    override fun onMovesFinished() {
+        out.println("finished moving files")
+    }
+
+    override fun onAddFinished() {
+        out.println("finished adding files")
     }
 }

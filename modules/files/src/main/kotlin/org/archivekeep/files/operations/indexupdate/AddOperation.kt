@@ -153,10 +153,20 @@ class AddOperation(
             val to: String,
         )
 
+        suspend fun execute(
+            repo: Repo,
+            movesSubsetLimit: Set<Move>? = null,
+            addFilesSubsetLimit: Set<String>? = null,
+            vararg progressTrackers: IndexUpdateProgressTracker,
+        ) {
+            executeMovesReindex(repo, movesSubsetLimit, *progressTrackers)
+            executeAddNewFiles(repo, addFilesSubsetLimit, *progressTrackers)
+        }
+
         suspend fun executeMovesReindex(
             repo: Repo,
             movesSubsetLimit: Set<Move>? = null,
-            onMoveCompleted: suspend (move: Move) -> Unit,
+            vararg progressTrackers: IndexUpdateProgressTracker,
         ) {
             val localRepo = repo as? LocalRepo ?: throw RuntimeException("not local repo")
 
@@ -168,14 +178,16 @@ class AddOperation(
                 localRepo.add(move.to)
                 localRepo.remove(move.from)
 
-                onMoveCompleted(move)
+                progressTrackers.forEach { it.onMoveCompleted(move) }
             }
+
+            progressTrackers.forEach { it.onMovesFinished() }
         }
 
         suspend fun executeAddNewFiles(
             repo: Repo,
             addFilesSubsetLimit: Set<String>? = null,
-            onAddCompleted: suspend (newFile: String) -> Unit,
+            vararg progressTrackers: IndexUpdateProgressTracker,
         ) {
             val localRepo = repo as? LocalRepo ?: throw RuntimeException("not local repo")
 
@@ -186,8 +198,10 @@ class AddOperation(
 
                 localRepo.add(newFile)
 
-                onAddCompleted(newFile)
+                progressTrackers.forEach { it.onAddCompleted(newFile) }
             }
+
+            progressTrackers.forEach { it.onAddFinished() }
         }
 
         fun printSummary(

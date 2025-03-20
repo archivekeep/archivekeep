@@ -26,6 +26,7 @@ class AddTest : CommandTestBase() {
                         "",
                         "added: dir/c",
                         "added: dir/f",
+                        "finished adding files",
                     ),
                     listOf(
                         "a",
@@ -48,6 +49,7 @@ class AddTest : CommandTestBase() {
                         "",
                         "added: c",
                         "added: f",
+                        "finished adding files",
                     ),
                     listOf(
                         "a",
@@ -70,6 +72,7 @@ class AddTest : CommandTestBase() {
                         "",
                         "added: ../other/d",
                         "added: ../other/g",
+                        "finished adding files",
                     ),
                     listOf(
                         "a",
@@ -94,6 +97,7 @@ class AddTest : CommandTestBase() {
                         "added: f",
                         "added: ../e",
                         "added: ../other/g",
+                        "finished adding files",
                     ),
                     listOf(
                         "a",
@@ -163,7 +167,9 @@ class AddTest : CommandTestBase() {
                         "Do want to perform move? [y/n]: ",
                         "proceeding ...",
                         "moved: ../missing/old_c to c",
+                        "finished moving files",
                         "added: f",
+                        "finished adding files",
                     ),
                     listOf(
                         "a",

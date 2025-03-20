@@ -18,8 +18,8 @@ import org.archivekeep.app.core.utils.generics.SyncFlowStringWriter
 import org.archivekeep.app.core.utils.generics.singleInstanceWeakValueMap
 import org.archivekeep.app.core.utils.identifiers.RepositoryURI
 import org.archivekeep.files.operations.indexupdate.AddOperation
-import org.archivekeep.files.operations.indexupdate.AddOperationProgressTracker
-import org.archivekeep.files.operations.indexupdate.AddOperationTextWriter
+import org.archivekeep.files.operations.indexupdate.IndexUpdateStructuredProgressTracker
+import org.archivekeep.files.operations.indexupdate.IndexUpdateTextualProgressTracker
 import org.archivekeep.files.repo.Repo
 import org.archivekeep.utils.loading.Loadable
 import org.archivekeep.utils.loading.LoadableWithProgress
@@ -98,10 +98,10 @@ class AddOperationSupervisorServiceImpl(
         override val launchOptions: AddOperation.LaunchOptions,
     ) : AddOperationSupervisor.Job,
         UniqueJobGuard.RunnableJob {
-        private val executeResult = SyncFlowStringWriter()
-        private val writter = AddOperationTextWriter(PrintWriter(executeResult.writer, true))
+        private val executionLog = SyncFlowStringWriter()
+        private val writter = IndexUpdateTextualProgressTracker(PrintWriter(executionLog.writer, true))
 
-        private val indexUpdateProgressTracker = AddOperationProgressTracker()
+        private val indexUpdateProgressTracker = IndexUpdateStructuredProgressTracker()
 
         private val movesToExecute = (launchOptions.movesSubsetLimit?.intersect(preparationResult.moves.toSet()) ?: preparationResult.moves).toSet()
         private val filesToAdd = (launchOptions.addFilesSubsetLimit?.intersect(preparationResult.newFiles.toSet()) ?: preparationResult.newFiles).toSet()
@@ -110,7 +110,7 @@ class AddOperationSupervisorServiceImpl(
             combine(
                 indexUpdateProgressTracker.addProgressFlow,
                 indexUpdateProgressTracker.moveProgressFlow,
-                executeResult.string,
+                executionLog.string,
             ) { addProgress, moveProgress, log ->
                 AddOperationSupervisor.ExecutionState.Running(
                     movesToExecute,
@@ -125,25 +125,15 @@ class AddOperationSupervisorServiceImpl(
 
         override suspend fun run(job: Job) {
             try {
-                preparationResult.executeMovesReindex(
+                preparationResult.execute(
                     repositoryAccess,
                     launchOptions.movesSubsetLimit,
-                ) { move ->
-                    writter.onMoveCompleted(move)
-                    indexUpdateProgressTracker.onMoveCompleted(move)
-                }
-                indexUpdateProgressTracker.onMovesFinished()
-
-                preparationResult.executeAddNewFiles(
-                    repositoryAccess,
                     launchOptions.addFilesSubsetLimit,
-                ) { add ->
-                    writter.onAddCompleted(add)
-                    indexUpdateProgressTracker.onAddCompleted(add)
-                }
-                indexUpdateProgressTracker.onAddFinished()
+                    writter,
+                    indexUpdateProgressTracker,
+                )
             } finally {
-                executeResult.writer.flush()
+                executionLog.writer.flush()
                 this.job = null
             }
         }

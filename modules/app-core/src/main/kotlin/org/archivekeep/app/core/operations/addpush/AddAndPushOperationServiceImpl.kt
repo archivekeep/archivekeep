@@ -8,21 +8,22 @@ import kotlinx.coroutines.cancel
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.combineTransform
 import kotlinx.coroutines.flow.emitAll
 import kotlinx.coroutines.flow.flowOn
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.transform
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.joinAll
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.sync.Mutex
-import kotlinx.coroutines.sync.withLock
 import org.archivekeep.app.core.domain.repositories.RepositoryService
 import org.archivekeep.app.core.utils.UniqueJobGuard
 import org.archivekeep.app.core.utils.generics.singleInstanceWeakValueMap
 import org.archivekeep.app.core.utils.identifiers.RepositoryURI
 import org.archivekeep.files.operations.indexupdate.AddOperation
-import org.archivekeep.files.operations.indexupdate.AddOperationProgressTracker
+import org.archivekeep.files.operations.indexupdate.IndexUpdateStructuredProgressTracker
 import org.archivekeep.files.operations.sync.copyFile
 import org.archivekeep.files.repo.LocalRepo
 import org.archivekeep.utils.loading.Loadable
@@ -44,57 +45,50 @@ class AddAndPushOperationServiceImpl(
         private val launchOptions: AddAndPushOperation.LaunchOptions,
     ) : AddAndPushOperation.Job,
         UniqueJobGuard.RunnableJob {
-        val updateMutex = Mutex()
+        private val structuredProgressTracker = IndexUpdateStructuredProgressTracker()
 
-        private val indexUpdateProgressTracker = AddOperationProgressTracker()
-
-        var repositoryPushStatus =
-            launchOptions.selectedDestinationRepositories
-                .associateWith {
-                    AddAndPushOperation.PushProgress(emptySet(), emptySet(), emptyMap(), false)
-                }
-        var finished = false
-
-        private val _state =
+        val repositoryPushStatus =
             MutableStateFlow(
-                AddAndPushOperation.LaunchedAddPushProcess(
-                    addPreparationResult,
-                    launchOptions,
-                    indexUpdateProgressTracker.addProgressFlow.value,
-                    indexUpdateProgressTracker.moveProgressFlow.value,
-                    repositoryPushStatus,
-                    finished,
-                ),
+                launchOptions.selectedDestinationRepositories
+                    .associateWith {
+                        AddAndPushOperation.PushProgress(emptySet(), emptySet(), emptyMap(), false)
+                    },
             )
+
+        val finished = MutableStateFlow(false)
 
         private var job: Job? = null
 
-        override val state = _state.asStateFlow()
+        override val state =
+            combine(
+                structuredProgressTracker.addProgressFlow,
+                structuredProgressTracker.moveProgressFlow,
+                repositoryPushStatus,
+                finished,
+            ) { addProgress, moveProgress, repositoryPushStatus, finished ->
+                AddAndPushOperation.LaunchedAddPushProcess(
+                    addPreparationResult,
+                    launchOptions,
+                    addProgress,
+                    moveProgress,
+                    repositoryPushStatus,
+                    finished,
+                )
+            }.stateIn(
+                scope,
+                SharingStarted.Lazily,
+                AddAndPushOperation.LaunchedAddPushProcess(
+                    addPreparationResult,
+                    launchOptions,
+                    structuredProgressTracker.addProgressFlow.value,
+                    structuredProgressTracker.moveProgressFlow.value,
+                    repositoryPushStatus.value,
+                    finished.value,
+                ),
+            )
 
         override suspend fun run(job: Job) {
             this.job = job
-
-            suspend fun report() {
-                _state.emit(
-                    AddAndPushOperation.LaunchedAddPushProcess(
-                        addPreparationResult,
-                        launchOptions,
-                        indexUpdateProgressTracker.addProgressFlow.value,
-                        indexUpdateProgressTracker.moveProgressFlow.value,
-                        repositoryPushStatus,
-                        finished,
-                    ),
-                )
-            }
-
-            suspend fun updateProgress(updater: () -> Unit) {
-                updateMutex.withLock {
-                    updater()
-                    report()
-                }
-            }
-
-            report()
 
             try {
                 val repo =
@@ -107,31 +101,12 @@ class AddAndPushOperationServiceImpl(
                     throw RuntimeException("not local repo: ${addPush.repositoryURI}")
                 }
 
-                addPreparationResult.executeMovesReindex(
+                addPreparationResult.execute(
                     repo,
                     launchOptions.movesToExecute,
-                    onMoveCompleted = {
-                        updateProgress {
-                            indexUpdateProgressTracker.onMoveCompleted(it)
-                        }
-                    },
-                )
-                updateProgress {
-                    indexUpdateProgressTracker.onMovesFinished()
-                }
-
-                addPreparationResult.executeAddNewFiles(
-                    repo,
                     launchOptions.filesToAdd,
-                    onAddCompleted = {
-                        updateProgress {
-                            indexUpdateProgressTracker.onAddCompleted(it)
-                        }
-                    },
+                    structuredProgressTracker,
                 )
-                updateProgress {
-                    indexUpdateProgressTracker.onAddFinished()
-                }
 
                 coroutineScope {
                     launchOptions
@@ -149,17 +124,16 @@ class AddAndPushOperationServiceImpl(
                                 launchOptions.movesToExecute.forEach { move ->
                                     destinationRepo.move(move.from, move.to)
 
-                                    updateProgress {
-                                        repositoryPushStatus =
-                                            repositoryPushStatus.mapValues { (k, v) ->
-                                                if (k == destinationRepoID) {
-                                                    v.copy(
-                                                        moved = v.moved + setOf(move),
-                                                    )
-                                                } else {
-                                                    v
-                                                }
+                                    repositoryPushStatus.update {
+                                        it.mapValues { (k, v) ->
+                                            if (k == destinationRepoID) {
+                                                v.copy(
+                                                    moved = v.moved + setOf(move),
+                                                )
+                                            } else {
+                                                v
                                             }
+                                        }
                                     }
                                 }
 
@@ -172,25 +146,23 @@ class AddAndPushOperationServiceImpl(
 
                                     println("copied: $destinationRepoID - $fileToPush")
 
-                                    updateProgress {
-                                        repositoryPushStatus =
-                                            repositoryPushStatus.mapValues { (k, v) ->
-                                                if (k == destinationRepoID) {
-                                                    v.copy(
-                                                        added = v.added + setOf(fileToPush),
-                                                    )
-                                                } else {
-                                                    v
-                                                }
+                                    repositoryPushStatus.update {
+                                        it.mapValues { (k, v) ->
+                                            if (k == destinationRepoID) {
+                                                v.copy(
+                                                    added = v.added + setOf(fileToPush),
+                                                )
+                                            } else {
+                                                v
                                             }
+                                        }
                                     }
                                 }
                             }
                         }.joinAll()
                 }
             } finally {
-                finished = true
-                report()
+                finished.value = true
             }
         }
 
