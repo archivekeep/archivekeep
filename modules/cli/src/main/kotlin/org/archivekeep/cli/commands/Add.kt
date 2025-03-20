@@ -4,8 +4,8 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.transform
 import kotlinx.coroutines.runBlocking
 import org.archivekeep.cli.MainCommand
-import org.archivekeep.files.operations.AddOperation
-import org.archivekeep.files.operations.AddOperationTextWriter
+import org.archivekeep.files.operations.indexupdate.AddOperation
+import org.archivekeep.files.operations.indexupdate.AddOperationTextWriter
 import org.archivekeep.utils.loading.LoadableWithProgress
 import picocli.CommandLine.Command
 import picocli.CommandLine.Model.CommandSpec

@@ -4,6 +4,7 @@ import androidx.compose.desktop.ui.tooling.preview.Preview
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -30,6 +31,7 @@ import org.archivekeep.app.desktop.domain.wiring.LocalAddOperationSupervisorServ
 import org.archivekeep.app.desktop.ui.components.FileManySelect
 import org.archivekeep.app.desktop.ui.components.ItemManySelect
 import org.archivekeep.app.desktop.ui.components.operations.IndexUpdatePreparationProgress
+import org.archivekeep.app.desktop.ui.components.operations.LocalIndexUpdateProgress
 import org.archivekeep.app.desktop.ui.designsystem.dialog.DialogDismissButton
 import org.archivekeep.app.desktop.ui.designsystem.dialog.DialogPreviewColumn
 import org.archivekeep.app.desktop.ui.designsystem.dialog.DialogPrimaryButton
@@ -38,10 +40,11 @@ import org.archivekeep.app.desktop.ui.designsystem.layout.scrollable.ScrollableC
 import org.archivekeep.app.desktop.ui.dialogs.repository.AbstractRepositoryDialog
 import org.archivekeep.app.desktop.ui.utils.appendBoldSpan
 import org.archivekeep.app.desktop.utils.collectAsLoadable
-import org.archivekeep.app.desktop.utils.derivedMutableStateOf
 import org.archivekeep.app.desktop.utils.stickToFirstNotNull
-import org.archivekeep.files.operations.AddOperation
-import org.archivekeep.files.operations.AddOperation.PreparationResult.Move
+import org.archivekeep.files.operations.indexupdate.AddOperation
+import org.archivekeep.files.operations.indexupdate.AddOperation.PreparationResult.Move
+import org.archivekeep.files.operations.indexupdate.IndexUpdateAddProgress
+import org.archivekeep.files.operations.indexupdate.IndexUpdateMoveProgress
 import org.archivekeep.utils.loading.Loadable
 import org.archivekeep.utils.loading.mapToLoadable
 import org.archivekeep.utils.loading.waitLoadedValue
@@ -53,7 +56,8 @@ class UpdateIndexOperationDialog(
         val archiveName: String,
         // TODO: this should be Loadable - show loading of contents
         val operationState: AddOperationSupervisor.State,
-        val launchOptions: MutableState<AddOperation.LaunchOptions>,
+        val selectedFilesToAdd: MutableState<Set<String>>,
+        val selectedMovesToExecute: MutableState<Set<Move>>,
         val onClose: () -> Unit,
     ) : IState {
         override val title =
@@ -61,10 +65,6 @@ class UpdateIndexOperationDialog(
                 appendBoldSpan(archiveName)
                 append(" - index update")
             }
-
-        val preparation = (operationState as? AddOperationSupervisor.Preparation)?.result
-        val executeResult = (operationState as? AddOperationSupervisor.ExecutionState.Running)?.log ?: ""
-        val isExecuting = operationState is AddOperationSupervisor.ExecutionState.Running
     }
 
     inner class VM(
@@ -83,8 +83,6 @@ class UpdateIndexOperationDialog(
                 .flatMapLatest { job ->
                     job?.executionStateFlow?.mapToLoadable() ?: operation.prepare()
                 }
-
-        val launchOptions = mutableStateOf(AddOperation.LaunchOptions(addFilesSubsetLimit = emptySet(), movesSubsetLimit = emptySet()))
 
         override fun onClose() {
             _onClose()
@@ -119,7 +117,8 @@ class UpdateIndexOperationDialog(
                 State(
                     archiveName = repository.displayName,
                     operationState = operationState,
-                    vm.launchOptions,
+                    selectedFilesToAdd = mutableStateOf(emptySet()),
+                    selectedMovesToExecute = mutableStateOf(emptySet()),
                     onClose = vm::onClose,
                 )
             }
@@ -127,65 +126,62 @@ class UpdateIndexOperationDialog(
 
     @Composable
     override fun ColumnScope.renderContent(state: State) {
-        if (state.isExecuting || state.executeResult.isNotEmpty()) {
-            ScrollableColumn {
-                Text(state.executeResult)
+        when (val operationState = state.operationState) {
+            AddOperationSupervisor.ExecutionState.NotRunning -> {
+                Text("Preparing...")
             }
-        } else if (state.preparation != null && state.preparation is AddOperation.PreparationProgress) {
-            LabelText("Preparing index update operation:")
-            IndexUpdatePreparationProgress(state.preparation)
-        } else if (state.preparation != null && state.preparation is AddOperation.PreparationResult) {
-            val selectedFilenames =
-                remember {
-                    derivedMutableStateOf(
-                        onSet = { newValue ->
-                            state.launchOptions.value =
-                                state.launchOptions.value.copy(
-                                    addFilesSubsetLimit = newValue,
+            is AddOperationSupervisor.Preparation -> {
+                ScrollableColumn {
+                    when (val preparationState = operationState.result) {
+                        is AddOperation.PreparationProgress -> {
+                            LabelText("Preparing index update operation:")
+                            IndexUpdatePreparationProgress(preparationState)
+                        }
+
+                        is AddOperation.PreparationResult -> {
+                            if (preparationState.moves.isNotEmpty()) {
+                                ItemManySelect(
+                                    "Moves",
+                                    allItemsLabel = { "All moves ($it)" },
+                                    itemLabelText = { "${it.from} -> ${it.to}" },
+                                    allItems = preparationState.moves,
+                                    state.selectedMovesToExecute,
                                 )
-                        },
-                    ) {
-                        state.launchOptions.value.addFilesSubsetLimit ?: emptySet()
+                                Spacer(Modifier.height(12.dp))
+                            }
+
+                            if (preparationState.newFiles.isNotEmpty()) {
+                                FileManySelect("New files", preparationState.newFiles, state.selectedFilesToAdd)
+                            }
+                        }
                     }
                 }
-
-            val selectedMoves =
-                remember {
-                    derivedMutableStateOf(
-                        onSet = { newValue ->
-                            state.launchOptions.value =
-                                state.launchOptions.value.copy(
-                                    movesSubsetLimit = newValue,
-                                )
-                        },
-                    ) {
-                        state.launchOptions.value.movesSubsetLimit ?: emptySet()
-                    }
-                }
-
-            if (state.preparation.moves.isNotEmpty()) {
-                ItemManySelect(
-                    "Moves",
-                    allItemsLabel = { "All moves ($it)" },
-                    itemLabelText = { "${it.from} -> ${it.to}" },
-                    allItems = state.preparation.moves,
-                    selectedMoves,
+            }
+            is AddOperationSupervisor.ExecutionState.Running -> {
+                LocalIndexUpdateProgress(
+                    operationState.movesToExecute,
+                    operationState.filesToAdd,
+                    operationState.moveProgress,
+                    operationState.addProgress,
                 )
-                Spacer(Modifier.height(12.dp))
+                Spacer(Modifier.height(4.dp))
+                LabelText("Log")
+                ScrollableColumn(Modifier.fillMaxWidth()) {
+                    Text(operationState.log)
+                }
             }
-
-            if (state.preparation.newFiles.isNotEmpty()) {
-                FileManySelect("New files", state.preparation.newFiles, selectedFilenames)
-            }
-        } else {
-            Text("Preparing...")
         }
     }
 
     @Composable
     override fun RowScope.renderButtons(state: State) {
         val onTriggerExecute = {
-            (state.operationState as AddOperationSupervisor.Preparation).launch(state.launchOptions.value)
+            (state.operationState as AddOperationSupervisor.Preparation).launch(
+                AddOperation.LaunchOptions(
+                    state.selectedFilesToAdd.value,
+                    state.selectedMovesToExecute.value,
+                ),
+            )
         }
 
         var closeShown = false
@@ -221,7 +217,8 @@ class UpdateIndexOperationDialog(
 private fun renderPreview(
     archiveName: String,
     state: AddOperationSupervisor.State,
-    launchOptions: MutableState<AddOperation.LaunchOptions>,
+    selectedFilesToAdd: MutableState<Set<String>>,
+    selectedMovesToExecute: MutableState<Set<Move>>,
 ) {
     val DocumentsInLaptop = Documents.inStorage(LaptopSSD.reference).storageRepository
 
@@ -231,7 +228,8 @@ private fun renderPreview(
         UpdateIndexOperationDialog.State(
             archiveName,
             state,
-            launchOptions,
+            selectedFilesToAdd,
+            selectedMovesToExecute,
             onClose = {},
         ),
     )
@@ -263,7 +261,8 @@ private fun UpdateIndexOperationViewPreview() {
                     demo_preparation_result,
                     launch = {},
                 ),
-            launchOptions = mutableStateOf(AddOperation.LaunchOptions()),
+            selectedFilesToAdd = mutableStateOf(emptySet()),
+            selectedMovesToExecute = mutableStateOf(emptySet()),
         )
 
         renderPreview(
@@ -273,38 +272,48 @@ private fun UpdateIndexOperationViewPreview() {
                     demo_preparation_result,
                     launch = {},
                 ),
-            launchOptions = mutableStateOf(AddOperation.LaunchOptions()),
+            selectedFilesToAdd = mutableStateOf(emptySet()),
+            selectedMovesToExecute = mutableStateOf(emptySet()),
         )
 
         renderPreview(
             archiveName = "Family Stuff",
             state =
                 AddOperationSupervisor.ExecutionState.Running(
-                    AddOperationSupervisor.AddProgress(setOf("Documents/Something/There.pdf"), emptyMap(), false),
-                    AddOperationSupervisor.MoveProgress(emptySet(), emptyMap(), false),
+                    emptySet(),
+                    setOf("Documents/Something/There.pdf"),
+                    IndexUpdateAddProgress(setOf("Documents/Something/There.pdf"), emptyMap(), false),
+                    IndexUpdateMoveProgress(emptySet(), emptyMap(), false),
                     "added: Documents/Something/There.pdf",
                 ),
-            launchOptions = mutableStateOf(AddOperation.LaunchOptions()),
+            selectedFilesToAdd = mutableStateOf(emptySet()),
+            selectedMovesToExecute = mutableStateOf(emptySet()),
         )
 
         renderPreview(
             archiveName = "Family Stuff",
             AddOperationSupervisor.ExecutionState.Running(
-                AddOperationSupervisor.AddProgress(setOf("Documents/Something/There.pdf", "Photos/2024/04/photo_09.JPG"), emptyMap(), false),
-                AddOperationSupervisor.MoveProgress(emptySet(), emptyMap(), false),
+                emptySet(),
+                setOf("Documents/Something/There.pdf", "Photos/2024/04/photo_09.JPG"),
+                IndexUpdateAddProgress(setOf("Documents/Something/There.pdf", "Photos/2024/04/photo_09.JPG"), emptyMap(), false),
+                IndexUpdateMoveProgress(emptySet(), emptyMap(), false),
                 "added: Documents/Something/There.pdf\nadded: Photos/2024/04/photo_09.JPG",
             ),
-            launchOptions = mutableStateOf(AddOperation.LaunchOptions()),
+            selectedFilesToAdd = mutableStateOf(emptySet()),
+            selectedMovesToExecute = mutableStateOf(emptySet()),
         )
 
         renderPreview(
             archiveName = "Family Stuff",
             AddOperationSupervisor.ExecutionState.Running(
-                AddOperationSupervisor.AddProgress(setOf("Documents/Something/There.pdf", "Photos/2024/04/photo_09.JPG"), emptyMap(), true),
-                AddOperationSupervisor.MoveProgress(emptySet(), emptyMap(), false),
+                emptySet(),
+                setOf("Documents/Something/There.pdf", "Photos/2024/04/photo_09.JPG"),
+                IndexUpdateAddProgress(setOf("Documents/Something/There.pdf", "Photos/2024/04/photo_09.JPG"), emptyMap(), true),
+                IndexUpdateMoveProgress(emptySet(), emptyMap(), false),
                 "added: Documents/Something/There.pdf\nadded: Photos/2024/04/photo_09.JPG",
             ),
-            launchOptions = mutableStateOf(AddOperation.LaunchOptions()),
+            selectedFilesToAdd = mutableStateOf(emptySet()),
+            selectedMovesToExecute = mutableStateOf(emptySet()),
         )
     }
 }

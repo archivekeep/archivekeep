@@ -11,7 +11,7 @@ import org.archivekeep.app.desktop.ui.dialogs.repository.operations.addpush.AddA
 import org.archivekeep.app.desktop.ui.dialogs.testing.setContentInDialogScreenshotContainer
 import org.archivekeep.app.desktop.ui.testing.screenshots.runHighDensityComposeUiTest
 import org.archivekeep.app.desktop.ui.testing.screenshots.saveTestingContainerBitmap
-import org.archivekeep.files.operations.AddOperation
+import org.archivekeep.files.operations.indexupdate.AddOperation
 import org.archivekeep.utils.loading.Loadable
 import org.junit.Test
 

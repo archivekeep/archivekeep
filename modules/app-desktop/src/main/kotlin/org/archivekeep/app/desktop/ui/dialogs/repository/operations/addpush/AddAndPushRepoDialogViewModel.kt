@@ -29,7 +29,7 @@ import org.archivekeep.app.desktop.domain.wiring.LocalStorageService
 import org.archivekeep.app.desktop.ui.dialogs.AbstractDialog
 import org.archivekeep.app.desktop.ui.utils.appendBoldSpan
 import org.archivekeep.app.desktop.utils.stickToFirstNotNullAsState
-import org.archivekeep.files.operations.AddOperation
+import org.archivekeep.files.operations.indexupdate.AddOperation
 import org.archivekeep.utils.loading.Loadable
 import org.archivekeep.utils.loading.mapIfLoadedOrDefault
 import org.archivekeep.utils.loading.mapToLoadable

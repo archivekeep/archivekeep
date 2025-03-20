@@ -6,23 +6,20 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.conflate
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.update
 import org.archivekeep.app.core.domain.repositories.RepositoryService
-import org.archivekeep.app.core.operations.add.AddOperationSupervisor.AddProgress
-import org.archivekeep.app.core.operations.add.AddOperationSupervisor.MoveProgress
 import org.archivekeep.app.core.utils.UniqueJobGuard
 import org.archivekeep.app.core.utils.generics.SyncFlowStringWriter
 import org.archivekeep.app.core.utils.generics.singleInstanceWeakValueMap
 import org.archivekeep.app.core.utils.identifiers.RepositoryURI
-import org.archivekeep.files.operations.AddOperation
-import org.archivekeep.files.operations.AddOperationTextWriter
+import org.archivekeep.files.operations.indexupdate.AddOperation
+import org.archivekeep.files.operations.indexupdate.AddOperationProgressTracker
+import org.archivekeep.files.operations.indexupdate.AddOperationTextWriter
 import org.archivekeep.files.repo.Repo
 import org.archivekeep.utils.loading.Loadable
 import org.archivekeep.utils.loading.LoadableWithProgress
@@ -104,16 +101,20 @@ class AddOperationSupervisorServiceImpl(
         private val executeResult = SyncFlowStringWriter()
         private val writter = AddOperationTextWriter(PrintWriter(executeResult.writer, true))
 
-        private val addProgressFlow = MutableStateFlow(AddProgress(emptySet(), emptyMap(), false))
-        private val moveProgressFlow = MutableStateFlow(MoveProgress(emptySet(), emptyMap(), false))
+        private val indexUpdateProgressTracker = AddOperationProgressTracker()
+
+        private val movesToExecute = (launchOptions.movesSubsetLimit?.intersect(preparationResult.moves.toSet()) ?: preparationResult.moves).toSet()
+        private val filesToAdd = (launchOptions.addFilesSubsetLimit?.intersect(preparationResult.newFiles.toSet()) ?: preparationResult.newFiles).toSet()
 
         override val executionStateFlow: Flow<AddOperationSupervisor.ExecutionState.Running> =
             combine(
-                addProgressFlow,
-                moveProgressFlow,
+                indexUpdateProgressTracker.addProgressFlow,
+                indexUpdateProgressTracker.moveProgressFlow,
                 executeResult.string,
             ) { addProgress, moveProgress, log ->
                 AddOperationSupervisor.ExecutionState.Running(
+                    movesToExecute,
+                    filesToAdd,
                     addProgress,
                     moveProgress,
                     log,
@@ -129,30 +130,18 @@ class AddOperationSupervisorServiceImpl(
                     launchOptions.movesSubsetLimit,
                 ) { move ->
                     writter.onMoveCompleted(move)
-                    moveProgressFlow.update {
-                        it.copy(
-                            moved = it.moved + setOf(move),
-                        )
-                    }
+                    indexUpdateProgressTracker.onMoveCompleted(move)
                 }
-                moveProgressFlow.update {
-                    it.copy(finished = true)
-                }
+                indexUpdateProgressTracker.onMovesFinished()
 
                 preparationResult.executeAddNewFiles(
                     repositoryAccess,
                     launchOptions.addFilesSubsetLimit,
                 ) { add ->
                     writter.onAddCompleted(add)
-                    addProgressFlow.update {
-                        it.copy(
-                            added = it.added + setOf(add),
-                        )
-                    }
+                    indexUpdateProgressTracker.onAddCompleted(add)
                 }
-                addProgressFlow.update {
-                    it.copy(finished = true)
-                }
+                indexUpdateProgressTracker.onAddFinished()
             } finally {
                 executeResult.writer.flush()
                 this.job = null

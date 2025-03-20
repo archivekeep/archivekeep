@@ -13,13 +13,10 @@ import kotlin.math.nextUp
 class SpeedLimitedLocalRepoWrapper(
     val base: LocalRepo,
 ) : LocalRepo {
-    override suspend fun index(): RepoIndex {
-        val result = base.index()
-
-        delay(logDescending(result.files.size))
-
-        return result
-    }
+    override suspend fun index(): RepoIndex =
+        base.index().also {
+            delay(lessThanLinearlyIncreasing(it.files.size))
+        }
 
     override suspend fun move(
         from: String,
@@ -61,36 +58,33 @@ class SpeedLimitedLocalRepoWrapper(
             base.contains(path)
         }
 
-    override suspend fun findAllFiles(globs: List<String>): List<Path> {
-        val result = base.findAllFiles(globs)
-
-        delay(logDescending(result.size))
-
-        return result
-    }
+    override suspend fun findAllFiles(globs: List<String>): List<Path> =
+        base.findAllFiles(globs).also {
+            delay(lessThanLinearlyIncreasing(it.size))
+        }
 
     override suspend fun storedFiles(): List<String> =
         base.storedFiles().also {
-            delay(logDescending(it.size))
+            delay(lessThanLinearlyIncreasing(it.size))
         }
 
     override suspend fun verifyFileExists(path: String): Boolean =
-        delayed(10) {
+        delayed(1) {
             base.verifyFileExists(path)
         }
 
     override suspend fun fileChecksum(path: String): String =
-        delayed(50) {
+        delayed(5) {
             base.fileChecksum(path)
         }
 
     override suspend fun computeFileChecksum(path: Path): String =
-        delayed(75) {
+        delayed(500) {
             base.computeFileChecksum(path)
         }
 
     override suspend fun add(path: String) =
-        delayed(100) {
+        delayed(1000) {
             base.add(path)
         }
 
@@ -110,7 +104,7 @@ class SpeedLimitedLocalRepoWrapper(
         return result
     }
 
-    private fun logDescending(v: Int): Long = v / log10((v * 1000).toDouble()).nextUp().toLong()
+    private fun lessThanLinearlyIncreasing(v: Int): Long = v / log10((v * 1000).toDouble()).nextUp().toLong()
 
     override val observable
         get() = base.observable

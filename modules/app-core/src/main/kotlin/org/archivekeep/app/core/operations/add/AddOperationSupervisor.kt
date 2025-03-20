@@ -2,9 +2,10 @@ package org.archivekeep.app.core.operations.add
 
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.StateFlow
-import org.archivekeep.files.operations.AddOperation
-import org.archivekeep.files.operations.AddOperation.PreparationResult
-import org.archivekeep.files.operations.AddOperation.PreparationResult.Move
+import org.archivekeep.files.operations.indexupdate.AddOperation
+import org.archivekeep.files.operations.indexupdate.AddOperation.PreparationResult
+import org.archivekeep.files.operations.indexupdate.IndexUpdateAddProgress
+import org.archivekeep.files.operations.indexupdate.IndexUpdateMoveProgress
 import org.archivekeep.utils.loading.Loadable
 
 interface AddOperationSupervisor {
@@ -27,8 +28,10 @@ interface AddOperationSupervisor {
         data object NotRunning : ExecutionState
 
         data class Running(
-            val addProgress: AddProgress,
-            val moveProgress: MoveProgress,
+            val movesToExecute: Set<PreparationResult.Move>,
+            val filesToAdd: Set<String>,
+            val addProgress: IndexUpdateAddProgress,
+            val moveProgress: IndexUpdateMoveProgress,
             val log: String,
         ) : ExecutionState {
             val finished = addProgress.finished && moveProgress.finished
@@ -39,16 +42,4 @@ interface AddOperationSupervisor {
         val result: AddOperation.Preparation,
         val launch: (launchOptions: AddOperation.LaunchOptions) -> Unit,
     ) : State
-
-    data class AddProgress(
-        val added: Set<String>,
-        val error: Map<String, Any>,
-        val finished: Boolean,
-    )
-
-    data class MoveProgress(
-        val moved: Set<Move>,
-        val error: Map<Move, Any>,
-        val finished: Boolean,
-    )
 }

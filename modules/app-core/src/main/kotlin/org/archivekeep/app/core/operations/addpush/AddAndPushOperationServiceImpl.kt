@@ -21,7 +21,8 @@ import org.archivekeep.app.core.domain.repositories.RepositoryService
 import org.archivekeep.app.core.utils.UniqueJobGuard
 import org.archivekeep.app.core.utils.generics.singleInstanceWeakValueMap
 import org.archivekeep.app.core.utils.identifiers.RepositoryURI
-import org.archivekeep.files.operations.AddOperation
+import org.archivekeep.files.operations.indexupdate.AddOperation
+import org.archivekeep.files.operations.indexupdate.AddOperationProgressTracker
 import org.archivekeep.files.operations.sync.copyFile
 import org.archivekeep.files.repo.LocalRepo
 import org.archivekeep.utils.loading.Loadable
@@ -44,8 +45,9 @@ class AddAndPushOperationServiceImpl(
     ) : AddAndPushOperation.Job,
         UniqueJobGuard.RunnableJob {
         val updateMutex = Mutex()
-        var addProgress = AddAndPushOperation.AddProgress(emptySet(), emptyMap(), false)
-        var moveProgress = AddAndPushOperation.MoveProgress(emptySet(), emptyMap(), false)
+
+        private val indexUpdateProgressTracker = AddOperationProgressTracker()
+
         var repositoryPushStatus =
             launchOptions.selectedDestinationRepositories
                 .associateWith {
@@ -58,8 +60,8 @@ class AddAndPushOperationServiceImpl(
                 AddAndPushOperation.LaunchedAddPushProcess(
                     addPreparationResult,
                     launchOptions,
-                    addProgress,
-                    moveProgress,
+                    indexUpdateProgressTracker.addProgressFlow.value,
+                    indexUpdateProgressTracker.moveProgressFlow.value,
                     repositoryPushStatus,
                     finished,
                 ),
@@ -77,8 +79,8 @@ class AddAndPushOperationServiceImpl(
                     AddAndPushOperation.LaunchedAddPushProcess(
                         addPreparationResult,
                         launchOptions,
-                        addProgress,
-                        moveProgress,
+                        indexUpdateProgressTracker.addProgressFlow.value,
+                        indexUpdateProgressTracker.moveProgressFlow.value,
                         repositoryPushStatus,
                         finished,
                     ),
@@ -110,18 +112,12 @@ class AddAndPushOperationServiceImpl(
                     launchOptions.movesToExecute,
                     onMoveCompleted = {
                         updateProgress {
-                            moveProgress =
-                                moveProgress.copy(
-                                    moved = moveProgress.moved + listOf(it),
-                                )
+                            indexUpdateProgressTracker.onMoveCompleted(it)
                         }
                     },
                 )
                 updateProgress {
-                    moveProgress =
-                        moveProgress.copy(
-                            finished = true,
-                        )
+                    indexUpdateProgressTracker.onMovesFinished()
                 }
 
                 addPreparationResult.executeAddNewFiles(
@@ -129,18 +125,12 @@ class AddAndPushOperationServiceImpl(
                     launchOptions.filesToAdd,
                     onAddCompleted = {
                         updateProgress {
-                            addProgress =
-                                addProgress.copy(
-                                    added = addProgress.added + listOf(it),
-                                )
+                            indexUpdateProgressTracker.onAddCompleted(it)
                         }
                     },
                 )
                 updateProgress {
-                    addProgress =
-                        addProgress.copy(
-                            finished = true,
-                        )
+                    indexUpdateProgressTracker.onAddFinished()
                 }
 
                 coroutineScope {

@@ -1,10 +1,10 @@
-package org.archivekeep.files.operations
+package org.archivekeep.files.operations.indexupdate
 
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.flow
 import org.archivekeep.files.exceptions.InvalidFilename
-import org.archivekeep.files.operations.AddOperation.PreparationResult.Move
+import org.archivekeep.files.operations.indexupdate.AddOperation.PreparationResult.Move
 import org.archivekeep.files.repo.LocalRepo
 import org.archivekeep.files.repo.Repo
 import org.archivekeep.utils.loading.LoadableWithProgress

@@ -30,6 +30,7 @@ import org.archivekeep.app.desktop.ui.components.FileManySelect
 import org.archivekeep.app.desktop.ui.components.ItemManySelect
 import org.archivekeep.app.desktop.ui.components.LoadableGuard
 import org.archivekeep.app.desktop.ui.components.operations.IndexUpdatePreparationProgress
+import org.archivekeep.app.desktop.ui.components.operations.LocalIndexUpdateProgress
 import org.archivekeep.app.desktop.ui.designsystem.dialog.DialogDismissButton
 import org.archivekeep.app.desktop.ui.designsystem.dialog.DialogPrimaryButton
 import org.archivekeep.app.desktop.ui.designsystem.dialog.DialogSecondaryButton
@@ -44,7 +45,9 @@ import org.archivekeep.app.desktop.ui.utils.contextualStorageReference
 import org.archivekeep.app.desktop.ui.utils.filesAutoPlural
 import org.archivekeep.app.desktop.utils.asMutableState
 import org.archivekeep.app.desktop.utils.collectAsLoadable
-import org.archivekeep.files.operations.AddOperation
+import org.archivekeep.files.operations.indexupdate.AddOperation
+import org.archivekeep.files.operations.indexupdate.IndexUpdateAddProgress
+import org.archivekeep.files.operations.indexupdate.IndexUpdateMoveProgress
 import org.archivekeep.utils.collections.ifNotEmpty
 import org.archivekeep.utils.loading.Loadable
 import org.archivekeep.utils.loading.mapIfLoadedOrDefault
@@ -141,24 +144,10 @@ class AddAndPushRepoDialog(
                 ScrollableColumn(Modifier.weight(1f, fill = false)) {
                     Spacer(Modifier.height(4.dp))
 
-                    LabelText("Local index update")
-
                     val mte = status.options.movesToExecute
                     val fta = status.options.filesToAdd
 
-                    ProgressRowList {
-                        if (mte.isNotEmpty()) {
-                            ProgressRow(progress = {
-                                status.moveProgress.moved.size / mte.size.toFloat()
-                            }, "Moved ${status.moveProgress.moved.size} of ${mte.size} ${filesAutoPlural(mte)}")
-                        }
-                        if (fta.isNotEmpty()) {
-                            ProgressRow(
-                                progress = { status.addProgress.added.size / fta.size.toFloat() },
-                                "Added ${status.addProgress.added.size} of ${fta.size} ${filesAutoPlural(fta)}",
-                            )
-                        }
-                    }
+                    LocalIndexUpdateProgress(mte, fta, status.moveProgress, status.addProgress)
 
                     Spacer(Modifier.height(4.dp))
 
@@ -297,8 +286,8 @@ private fun AddAndPushDialogContentsCompletedPreview2() {
                         errorFiles = emptyMap(),
                     ),
                     options = AddAndPushOperation.LaunchOptions(allNewFiles.toSet(), emptySet(), selectedDestinations.toSet()),
-                    addProgress = AddAndPushOperation.AddProgress(emptySet(), emptyMap(), false),
-                    moveProgress = AddAndPushOperation.MoveProgress(emptySet(), emptyMap(), false),
+                    addProgress = IndexUpdateAddProgress(emptySet(), emptyMap(), false),
+                    moveProgress = IndexUpdateMoveProgress(emptySet(), emptyMap(), false),
                     pushProgress = selectedDestinations.associateWith { AddAndPushOperation.PushProgress(emptySet(), emptySet(), emptyMap(), false) },
                     finished = false,
                 ),
@@ -334,8 +323,8 @@ private fun AddAndPushDialogContentsCompletedPreview3() {
                         errorFiles = emptyMap(),
                     ),
                     options = AddAndPushOperation.LaunchOptions(allNewFiles.toSet(), allTestMoves.toSet(), selectedDestinations.toSet()),
-                    addProgress = AddAndPushOperation.AddProgress(setOf(allNewFiles[0]), emptyMap(), false),
-                    moveProgress = AddAndPushOperation.MoveProgress(allTestMoves.subList(0, 3).toSet(), emptyMap(), false),
+                    addProgress = IndexUpdateAddProgress(setOf(allNewFiles[0]), emptyMap(), false),
+                    moveProgress = IndexUpdateMoveProgress(allTestMoves.subList(0, 3).toSet(), emptyMap(), false),
                     pushProgress = selectedDestinations.associateWith { AddAndPushOperation.PushProgress(emptySet(), emptySet(), emptyMap(), false) },
                     finished = false,
                 ),

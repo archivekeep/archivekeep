@@ -1,4 +1,4 @@
-package org.archivekeep.files.operations
+package org.archivekeep.files.operations.indexupdate
 
 import java.io.PrintWriter
 import java.nio.file.Path
