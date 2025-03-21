@@ -63,9 +63,11 @@ class DemoEnvironment(
         val repos: Flow<List<MockedRepository>>,
     )
 
+    private val demoTempDirectory = kotlin.io.path.createTempDirectory("archivekeep-demo-env")
+
     override val walletDataStore: JoseStorage<Credentials> =
         JoseStorage(
-            kotlin.io.path.createTempFile(),
+            demoTempDirectory.resolve("credentials.jwe"),
             Json.serializersModule.serializer(),
             defaultValueProducer = { Credentials(emptySet()) },
         )
