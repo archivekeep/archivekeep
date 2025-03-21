@@ -1,6 +1,11 @@
 # Changelog
 
-## [Unreleased]
+## [0.3.0] - 2025-03-21 - Improve GUI and add packaging support
+
+This release is focused on:
+
+- improving GUI for existing functionality,
+- adding Flatpak packaging support.
 
 ### Added
 
