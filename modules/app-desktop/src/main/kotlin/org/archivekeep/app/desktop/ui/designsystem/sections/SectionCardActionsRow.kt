@@ -23,7 +23,10 @@ import org.archivekeep.utils.loading.Loadable
 import org.archivekeep.utils.loading.isLoading
 
 @Composable
-fun SectionCardActionsRow(actions: List<Loadable<Action>>) {
+fun SectionCardActionsRow(
+    actions: List<Loadable<Action>>,
+    noActionsText: String,
+) {
     val availableActions = actions.filterIsInstance<Loadable.Loaded<Action>>().filter { it.value.isAvailable }.map { it.value }
 
     Row(
@@ -41,7 +44,7 @@ fun SectionCardActionsRow(actions: List<Loadable<Action>>) {
     ) {
         if (availableActions.isEmpty()) {
             if (actions.none { it.isLoading }) {
-                SectionCardActionsRowText("Up to date. No pending actions.", modifier = Modifier.fillMaxWidth())
+                SectionCardActionsRowText(noActionsText, modifier = Modifier.fillMaxWidth())
             } else {
                 SectionCardActionsRowText("Loading.", modifier = Modifier.fillMaxWidth())
             }

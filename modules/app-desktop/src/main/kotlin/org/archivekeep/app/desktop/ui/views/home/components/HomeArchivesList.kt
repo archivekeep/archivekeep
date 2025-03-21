@@ -24,6 +24,7 @@ import org.archivekeep.app.desktop.ui.designsystem.styles.CIcons
 import org.archivekeep.app.desktop.ui.views.home.HomeArchiveEntryViewModel
 import org.archivekeep.app.desktop.ui.views.home.actions
 import org.archivekeep.utils.loading.Loadable
+import org.archivekeep.utils.loading.mapIfLoadedOrDefault
 
 val TinyRoundShape = RoundedCornerShape(4.dp)
 
@@ -78,7 +79,15 @@ private fun HomeArchiveEntry(
 
         HomeCardStateText(state.indexStatusText)
 
-        SectionCardActionsRow(state.actions(archiveOperationLaunchers, localArchive))
+        SectionCardActionsRow(
+            state.actions(archiveOperationLaunchers, localArchive),
+            noActionsText =
+                if (state.canPush.mapIfLoadedOrDefault(false) { it }) {
+                    "Copies out of sync."
+                } else {
+                    "No available actions."
+                },
+        )
 
         SectionCardBottomList(
             localArchive.secondaryRepositories.collectAsState().value,

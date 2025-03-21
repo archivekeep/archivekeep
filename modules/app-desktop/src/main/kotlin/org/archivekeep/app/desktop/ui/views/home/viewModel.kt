@@ -19,6 +19,7 @@ import org.archivekeep.app.core.utils.generics.isLoading
 import org.archivekeep.app.core.utils.generics.mapIfLoadedOrNull
 import org.archivekeep.app.core.utils.identifiers.NamedRepositoryReference
 import org.archivekeep.app.desktop.domain.wiring.ArchiveOperationLaunchers
+import org.archivekeep.app.desktop.enableUnfinishedFeatures
 import org.archivekeep.app.desktop.utils.Action
 import org.archivekeep.utils.loading.Loadable
 import org.archivekeep.utils.loading.isLoading
@@ -196,7 +197,7 @@ fun HomeArchiveEntryViewModel.VMState.actions(
                         localArchive.primaryRepository.reference.uri,
                     )
                 },
-                isAvailable = it,
+                isAvailable = it && enableUnfinishedFeatures,
                 text = "Push to all",
             )
         },

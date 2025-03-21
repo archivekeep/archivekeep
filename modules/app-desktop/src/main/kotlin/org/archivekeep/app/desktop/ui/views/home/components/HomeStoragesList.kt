@@ -18,6 +18,7 @@ import androidx.compose.ui.unit.sp
 import com.cheonjaeung.compose.grid.SimpleGridCells
 import com.cheonjaeung.compose.grid.VerticalGrid
 import org.archivekeep.app.desktop.domain.wiring.LocalArchiveOperationLaunchers
+import org.archivekeep.app.desktop.enableUnfinishedFeatures
 import org.archivekeep.app.desktop.ui.components.LoadableGuard
 import org.archivekeep.app.desktop.ui.components.richcomponents.StorageDropdownIconLaunched
 import org.archivekeep.app.desktop.ui.designsystem.sections.SectionCard
@@ -73,7 +74,7 @@ fun HomeStoragesList(allStoragesFlow: Loadable<List<HomeViewStorage>>) {
                     val canPushAny = storageState.canPushAny
                     val canPullAny = storageState.canPullAny
 
-                    if (canPushAny || canPullAny) {
+                    if (enableUnfinishedFeatures && (canPushAny || canPullAny)) {
                         FlowRow(
                             horizontalArrangement = Arrangement.spacedBy(8.dp),
                             modifier =
