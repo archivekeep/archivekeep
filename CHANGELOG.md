@@ -2,6 +2,15 @@
 
 ## [Unreleased]
 
+### Added
+
+- distribution: [AppStream] MetaInfo
+
+### Changed
+
+- flatpak: add `--share=ipc` (for `--socket=x11`)
+- flatpak: cleanup manifest
+
 ## [0.3.0] - 2025-03-21 - Improve GUI and add packaging support
 
 This release is focused on:
@@ -84,4 +93,5 @@ The multi-platform support for Jetpack Compose is provided by [Compose Multiplat
 
 Undocumented
 
+[AppStream]: https://www.freedesktop.org/software/appstream/docs/
 [compose-multiplatform]: https://www.jetbrains.com/compose-multiplatform/

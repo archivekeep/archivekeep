@@ -11,6 +11,7 @@ finish-args:
   - --socket=x11
   - --device=dri
   - --share=network
+  - --share=ipc
   # access to /dev/disk/by-uuid/ and /dev/mapper/ needed for disk UUID resolution
   - --device=all
   - --filesystem=home
@@ -37,14 +38,12 @@ modules:
     build-commands:
       - "sed -i s/distributionUrl.*/distributionUrl=gradle-bin.zip/ gradle/wrapper/gradle-wrapper.properties"
       - ./gradlew --no-daemon --offline --console=plain createReleaseDistributable
-      - find
-      - mkdir /app/bin/
-      - mkdir /app/lib/
+      - mkdir -p /app/bin /app/lib
       - cp -r modules/app-desktop/build/compose/binaries/main-release/app/archivekeep-desktop/bin/* /app/bin/
       - cp -r modules/app-desktop/build/compose/binaries/main-release/app/archivekeep-desktop/lib/* /app/lib/
-      - install -Dm644 modules/app-desktop/src/main/composeResources/drawable/ic_app.svg /app/share/icons/hicolor/scalable/apps/org.archivekeep.ArchiveKeep.svg
-      - install -Dm644 distribution/resources/org.archivekeep.ArchiveKeep.desktop /app/share/applications/org.archivekeep.ArchiveKeep.desktop
-      - find /app
+      - install -Dm644 modules/app-desktop/src/main/composeResources/drawable/ic_app.svg /app/share/icons/hicolor/scalable/apps/$FLATPAK_ID.svg
+      - install -Dm644 distribution/resources/$FLATPAK_ID.appdata.xml /app/share/appdata/$FLATPAK_ID.appdata.xml
+      - install -Dm644 distribution/resources/$FLATPAK_ID.desktop /app/share/applications/$FLATPAK_ID.desktop
     sources:
       - type: dir
         path: ../../
