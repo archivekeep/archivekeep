@@ -1,5 +1,7 @@
 # Changelog
 
+## [Unreleased]
+
 ## [0.3.1] - 2025-03-22 - Flatpak build improvements
 
 ### Added
