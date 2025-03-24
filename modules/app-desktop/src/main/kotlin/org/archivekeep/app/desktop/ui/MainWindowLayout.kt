@@ -24,6 +24,7 @@ import org.archivekeep.app.desktop.domain.services.SharingCoroutineDispatcher
 import org.archivekeep.app.desktop.enableUnfinishedFeatures
 import org.archivekeep.app.desktop.ui.components.AppBar
 import org.archivekeep.app.desktop.ui.components.DraggableAreaIfWindowPresent
+import org.archivekeep.app.desktop.ui.components.VersionText
 import org.archivekeep.app.desktop.ui.designsystem.navigation.NavigationRail
 import org.archivekeep.app.desktop.ui.designsystem.navigation.NavigationRailItem
 import org.archivekeep.app.desktop.ui.views.View
@@ -78,6 +79,7 @@ fun MainWindowLayout(onCloseRequest: () -> Unit) {
                         renderItem(it)
                     }
                     Spacer(Modifier.weight(1f))
+                    VersionText()
                     navigablesEnd.forEach {
                         renderItem(it)
                     }

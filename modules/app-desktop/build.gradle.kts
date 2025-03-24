@@ -52,6 +52,16 @@ kotlin {
     jvmToolchain(17)
 }
 
+tasks.named<ProcessResources>("processResources") {
+    filesMatching("org/archivekeep/app/desktop/application.properties") {
+        expand(
+            mapOf(
+                "version" to libs.versions.archivekeep.get(),
+            ),
+        )
+    }
+}
+
 tasks.named<Test>("test") {
     useJUnit()
 

@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 
+### Added
+
+- UI: show version info in navigation rail
+
 ### Removed
 
 - UI: hide Archives and Settings views offering no features yet
