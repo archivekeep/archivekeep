@@ -34,7 +34,8 @@ flatpak remote-add --if-not-exists --user flathub https://dl.flathub.org/repo/fl
 ```
 
 ```shell
-./gradlew app-desktop:createReleaseDistributable
+# this needs to be run once for the first time, and after each change to dependencies 
+./bin/generate-flatpak-sources-for-gradle-dependencies.sh
 
 ./bin/build-install-flatpak.sh
 ```

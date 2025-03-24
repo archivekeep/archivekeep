@@ -107,6 +107,8 @@ allprojects {
     tasks.named<FlatpakGradleGeneratorTask>("flatpakGradleGenerator") {
         outputFile = project.layout.buildDirectory.file("flatpak/dependencies-sources.json")
         downloadDirectory = "./offline-repository"
+
+        excludeConfigurations = setOf("kotlinNativeBundleConfiguration")
     }
 }
 

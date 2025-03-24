@@ -6,25 +6,84 @@ on:
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    name: "Build Flatpak"
+    strategy:
+      matrix:
+        architecture: [x86_64, aarch64]
+        include:
+          - architecture: x86_64
+            runner: ubuntu-24.04
+          - architecture: aarch64
+            runner: ubuntu-24.04-arm
+      fail-fast: false
     container:
-      image: bilelmoussaoui/flatpak-github-actions:freedesktop-24.08
+      image: ghcr.io/flathub-infra/flatpak-github-actions:freedesktop-24.08
       options: --privileged
+    runs-on: ${{ matrix.runner }}
     steps:
       - uses: actions/checkout@v4
-      - name: Build
-        uses: flatpak/flatpak-github-actions/flatpak-builder@b8be6bc0ede43cb3a2cc55895654312b14f84a0d
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
         with:
-          bundle: archivekeep-desktop.flatpak
+          java-version: '17'
+          distribution: 'temurin'
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v4
+
+      - name: Generate Flatpak sources for gradle dependencies
+        run: ./bin/generate-flatpak-sources-for-gradle-dependencies.sh
+
+      - name: 'Upload artifact: Flatpak sources'
+        uses: actions/upload-artifact@v4
+        with:
+          name: flatpak-sources-${{ matrix.architecture }}
+          path: ./distribution/flatpak/gradle-sources-*
+          if-no-files-found: error
+          compression-level: 0
+          retention-days: 45
+
+      - name: Build
+        uses: flathub-infra/flatpak-github-actions/flatpak-builder@fd6057f0ee4fac29a1a51c036b92c9c03ec74e17
+        with:
+          bundle: archivekeep-desktop.${{ matrix.architecture }}.flatpak
           manifest-path: distribution/flatpak/org.archivekeep.ArchiveKeep.yaml
           cache-key: flatpak-builder-${{ github.sha }}
           upload-artifact: false
-      - name: Upload artifact
+          arch: ${{ matrix.architecture }}
+
+      - name: 'Upload artifact: Flatpak Bundle'
         if: github.ref == 'refs/heads/main'
         uses: actions/upload-artifact@v4
         with:
-          name: archivekeep-desktop.x86-64.flatpak
-          path: archivekeep-desktop.flatpak
+          name: archivekeep-desktop.${{ matrix.architecture }}.flatpak
+          path: archivekeep-desktop.${{ matrix.architecture }}.flatpak
+          if-no-files-found: error
+          compression-level: 0
+          retention-days: 45
+
+  merge-sources:
+    name: "Merge multi-arch Flatpak sources"
+    runs-on: ubuntu-24.04
+    needs:
+      - build
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Download Artifacts with Flatpak sources
+        uses: actions/download-artifact@v4
+        with:
+          pattern: flatpak-sources-*
+
+      - name: "Generate merged Flatpak sources"
+        run: ./.github/workflows/bin/merge-flatpak-sources.sh
+
+      - name: 'Upload artifact: merged & processed Flatpak sources'
+        uses: actions/upload-artifact@v4
+        with:
+          name: flatpak-sources-merged
+          path: ./flatpak-sources-merged/*
           if-no-files-found: error
           compression-level: 0
           retention-days: 45

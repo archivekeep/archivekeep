@@ -5,6 +5,11 @@
 ### Added
 
 - UI: show version info in navigation rail
+- build: ARM64 Flatpak build support
+
+## Changed
+
+- build: Flatpak source lists are generated within CI/CD pipeline
 
 ### Removed
 
