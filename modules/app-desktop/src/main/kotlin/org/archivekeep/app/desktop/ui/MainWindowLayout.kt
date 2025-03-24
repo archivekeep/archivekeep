@@ -21,6 +21,7 @@ import compose.icons.tablericons.Folders
 import compose.icons.tablericons.InfoSquare
 import kotlinx.coroutines.plus
 import org.archivekeep.app.desktop.domain.services.SharingCoroutineDispatcher
+import org.archivekeep.app.desktop.enableUnfinishedFeatures
 import org.archivekeep.app.desktop.ui.components.AppBar
 import org.archivekeep.app.desktop.ui.components.DraggableAreaIfWindowPresent
 import org.archivekeep.app.desktop.ui.designsystem.navigation.NavigationRail
@@ -102,19 +103,23 @@ data class NavigableView<out V : View<*>>(
 )
 
 private val navigables =
-    listOf(
+    listOfNotNull(
         NavigableView(
             key = "home",
             title = "Home",
             icon = Icons.Default.Home,
             view = HomeView(),
         ),
-        NavigableView(
-            key = "archives",
-            title = "Archives",
-            icon = TablerIcons.Folders,
-            view = ArchivesView(),
-        ),
+        if (enableUnfinishedFeatures) {
+            NavigableView(
+                key = "archives",
+                title = "Archives",
+                icon = TablerIcons.Folders,
+                view = ArchivesView(),
+            )
+        } else {
+            null
+        },
         NavigableView(
             key = "storages",
             title = "Storages",
@@ -124,19 +129,23 @@ private val navigables =
     )
 
 private val navigablesEnd =
-    listOf(
+    listOfNotNull(
         NavigableView(
             key = "info",
             title = "Info",
             icon = TablerIcons.InfoSquare,
             view = InfoView(),
         ),
-        NavigableView(
-            key = "settings",
-            title = "Settings",
-            icon = Icons.Default.Settings,
-            view = SettingsView(),
-        ),
+        if (enableUnfinishedFeatures) {
+            NavigableView(
+                key = "settings",
+                title = "Settings",
+                icon = Icons.Default.Settings,
+                view = SettingsView(),
+            )
+        } else {
+            null
+        },
     )
 
 private val allNavigables = navigables + navigablesEnd

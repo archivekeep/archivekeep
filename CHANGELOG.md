@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 
+### Removed
+
+- UI: hide Archives and Settings views offering no features yet
+
 ### Fixed
 
 - XdgFilePickerPortal based directory picker not working in ProGuard optimized build
