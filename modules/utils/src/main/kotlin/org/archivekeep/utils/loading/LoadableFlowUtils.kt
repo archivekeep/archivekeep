@@ -10,10 +10,12 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.transform
 
-fun <T> Flow<T>.mapToLoadable(message: String? = null): Flow<Loadable<T>> = this.mapToLoadable(message = message) { it }
+fun <T> Flow<T>.mapToLoadable(): Flow<Loadable<T>> = this.mapToLoadable { it }
+
+inline fun <T, R> Flow<T>.mapToLoadable(crossinline transform: suspend (value: T) -> R): Flow<Loadable<R>> = this.mapToLoadable("Map to loadable", transform)
 
 inline fun <T, R> Flow<T>.mapToLoadable(
-    message: String? = null,
+    message: String,
     crossinline transform: suspend (value: T) -> R,
 ): Flow<Loadable<R>> =
     this
@@ -23,7 +25,7 @@ inline fun <T, R> Flow<T>.mapToLoadable(
             emit(
                 Loadable.Failed(
                     RuntimeException(
-                        "${message ?: "Require wait value"}: ${it.message ?: it.toString()}",
+                        "$message: ${it.message ?: it.toString()}",
                         it,
                     ),
                 ),
@@ -97,7 +99,7 @@ suspend fun <T> Flow<Loadable<T>>.firstLoadedOrFailure(): T =
                 emit(it.value)
             is Loadable.Loading -> {}
             is Loadable.Failed ->
-                throw RuntimeException("Wait first loaded failed: ${it.throwable}")
+                throw RuntimeException("Wait first loaded failed: ${it.throwable}", it.throwable)
         }
     }.first()
 

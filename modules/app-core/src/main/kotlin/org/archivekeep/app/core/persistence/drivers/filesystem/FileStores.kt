@@ -5,19 +5,18 @@ import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.FlowPreview
-import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.conflate
-import kotlinx.coroutines.flow.debounce
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.emitAll
-import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.transformLatest
 import org.archivekeep.utils.coroutines.shareResourceIn
-import org.archivekeep.utils.io.watch
+import org.archivekeep.utils.io.debounceAndRepeatAfterDelay
+import org.archivekeep.utils.io.listFilesFlow
 import org.archivekeep.utils.loading.firstLoadedOrFailure
 import org.archivekeep.utils.loading.mapLoadedData
 import org.archivekeep.utils.loading.mapToLoadable
@@ -30,42 +29,26 @@ import oshi.util.platform.linux.ProcPath
 import java.io.File
 import kotlin.coroutines.coroutineContext
 import kotlin.io.path.Path
-import kotlin.time.Duration.Companion.milliseconds
+import kotlin.io.path.exists
 
-@OptIn(FlowPreview::class, ExperimentalCoroutinesApi::class)
+@OptIn(ExperimentalCoroutinesApi::class)
 class FileStores(
     scope: CoroutineScope,
     ioDispatcher: CoroutineDispatcher = Dispatchers.IO,
 ) {
-    val updateFrequencyOrRateLimit = 100.milliseconds
+    private val mediaPath = Path("/run/media/")
 
-    // TODO: ideally immediate + delayed refresh
-    val updateRefreshDelay = 250.milliseconds
+    private val mediaDirectoriesFlow =
+        if (mediaPath.exists()) {
+            mediaPath
+                .listFilesFlow { it.isDirectory }
+                .distinctUntilChanged()
+        } else {
+            flowOf(emptyList())
+        }
 
-    val mediaPath = Path("/run/media/")
-
-    val mediaDirectories =
-        mediaPath
-            .watch()
-            .onEach {
-                println("Media change: $it")
-            }.debounce(updateFrequencyOrRateLimit)
-            .map {
-                delay(updateRefreshDelay)
-
-                "Update after media change"
-            }.onStart {
-                emit("Get on start")
-            }.map {
-                println("Loading list of media, reason: $it")
-
-                mediaPath.toFile().listFiles()?.filter {
-                    it.isDirectory
-                } ?: emptyList()
-            }.flowOn(Dispatchers.IO)
-
-    val devChangesFlow =
-        mediaDirectories
+    private val changeEventsFlow =
+        mediaDirectoriesFlow
             .transformLatest { mediaDirectories ->
                 println("New media directories: $mediaDirectories")
 
@@ -83,26 +66,22 @@ class FileStores(
                     emitAll(
                         watcher
                             .onEventFlow
-                            .onEach {
-                                println("Change: $it")
-                            }.debounce(updateFrequencyOrRateLimit)
-                            .map {
-                                delay(updateRefreshDelay)
-
-                                "update"
-                            },
+                            .map { "update" }
+                            .debounceAndRepeatAfterDelay(),
                     )
                 } finally {
                     watcher.close()
                 }
+            }.catch {
+                throw RuntimeException("watch dev changes error: ${it.message}", it)
             }.flowOn(ioDispatcher)
             .conflate()
 
-    val mountPoints =
-        flow {
-            val systemInfo = SystemInfo()
+    private val mountPoints =
+        run {
+            fun collectMounts(): List<MountedFileSystem.MountPoint> {
+                val systemInfo = SystemInfo()
 
-            suspend fun send() {
                 GlobalConfig.set(LinuxFileSystem.OSHI_LINUX_FS_PATH_INCLUDES, "/run/media/**")
 
                 val fileStores: List<OSFileStore> = systemInfo.operatingSystem.fileSystem.getFileStores(false)
@@ -149,19 +128,16 @@ class FileStores(
                             println("...")
                         }
 
-                emit(mountPoints)
+                return mountPoints
             }
 
-            send()
-
-            devChangesFlow
+            changeEventsFlow
+                .onStart { emit("Start") }
                 .conflate()
-                .collect {
-                    send()
-                }
-        }.flowOn(Dispatchers.IO)
-            .mapToLoadable()
-            .shareResourceIn(scope)
+                .mapToLoadable("Collect mounts") { collectMounts() }
+                .flowOn(Dispatchers.IO)
+                .shareResourceIn(scope)
+        }
 
     val mountedFileSystems =
         mountPoints.mapLoadedData { mountPoints ->

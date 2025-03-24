@@ -28,6 +28,7 @@ import org.archivekeep.app.core.persistence.drivers.filesystem.operations.AddFil
 import org.archivekeep.app.desktop.domain.wiring.LocalComposeWindow
 import org.archivekeep.app.desktop.domain.wiring.LocalOperationFactory
 import org.archivekeep.app.desktop.domain.wiring.OperationFactory
+import org.archivekeep.app.desktop.ui.components.errors.AutomaticErrorMessage
 import org.archivekeep.app.desktop.ui.designsystem.dialog.DialogButtonContainer
 import org.archivekeep.app.desktop.ui.designsystem.dialog.DialogCard
 import org.archivekeep.app.desktop.ui.designsystem.dialog.DialogDismissButton
@@ -38,6 +39,7 @@ import org.archivekeep.app.desktop.ui.designsystem.dialog.DialogOverlay
 import org.archivekeep.app.desktop.ui.designsystem.dialog.DialogPreviewColumn
 import org.archivekeep.app.desktop.ui.designsystem.dialog.DialogPrimaryButton
 import org.archivekeep.app.desktop.ui.designsystem.input.CheckboxWithText
+import org.archivekeep.app.desktop.ui.designsystem.layout.scrollable.ScrollableColumn
 import org.archivekeep.app.desktop.ui.dialogs.Dialog
 
 class AddFileSystemRepositoryDialog(
@@ -191,48 +193,53 @@ private fun AddRepositoryDialogContents(
                     changeEnabled = initStatus == null && addStatus == null,
                 )
 
-                if (preparationStatus is PreparationStatus.ReadyForAdd || preparationStatus is PreparationStatus.ReadyForInit) {
-                    when (storageMarkMatch) {
-                        StorageMarking.ALRIGHT -> {
-                            ProgressText(
-                                preparationStatusText(
+                ScrollableColumn {
+                    if (preparationStatus is PreparationStatus.ReadyForAdd || preparationStatus is PreparationStatus.ReadyForInit) {
+                        when (storageMarkMatch) {
+                            StorageMarking.ALRIGHT -> {
+                                PreparationStatus(
                                     preparationStatus,
                                     addStatus,
                                     initStatus,
-                                ),
-                            )
+                                )
+                            }
+
+                            StorageMarking.NEEDS_MARK_AS_LOCAL -> {
+                                Text("Storage will be marked as local")
+                            }
+
+                            StorageMarking.NEEDS_MARK_AS_EXTERNAL -> {
+                                Text("Storage will be marked as external")
+                            }
+
+                            StorageMarking.NEEDS_REMARK_AS_LOCAL -> {
+                                Text("Storage is currently external, re-mark it to local?")
+                                CheckboxWithText(
+                                    markConfirmed == true,
+                                    text = "Yes, re-mark storage as local",
+                                    onValueChange = { setMarkConfirmed(it) },
+                                )
+                            }
+
+                            StorageMarking.NEEDS_REMARK_AS_EXTERNAL -> {
+                                Text("Storage is currently local, re-mark it as external?")
+                                CheckboxWithText(
+                                    markConfirmed == true,
+                                    text = "Yes, re-mark storage as external",
+                                    onValueChange = { setMarkConfirmed(it) },
+                                )
+                            }
+
+                            null -> {
+                                ProgressText("Preparing ...")
+                            }
                         }
-                        StorageMarking.NEEDS_MARK_AS_LOCAL -> {
-                            Text("Storage will be marked as local")
-                        }
-                        StorageMarking.NEEDS_MARK_AS_EXTERNAL -> {
-                            Text("Storage will be marked as external")
-                        }
-                        StorageMarking.NEEDS_REMARK_AS_LOCAL -> {
-                            Text("Storage is currently external, re-mark it to local?")
-                            CheckboxWithText(
-                                markConfirmed == true,
-                                text = "Yes, re-mark storage as local",
-                                onValueChange = { setMarkConfirmed(it) },
-                            )
-                        }
-                        StorageMarking.NEEDS_REMARK_AS_EXTERNAL -> {
-                            Text("Storage is currently local, re-mark it as external?")
-                            CheckboxWithText(
-                                markConfirmed == true,
-                                text = "Yes, re-mark storage as external",
-                                onValueChange = { setMarkConfirmed(it) },
-                            )
-                        }
-                        null -> {
-                            ProgressText("Preparing ...")
-                        }
+                    } else {
+                        PreparationStatus(preparationStatus, addStatus, initStatus)
                     }
-                } else {
-                    ProgressText(preparationStatusText(preparationStatus, addStatus, initStatus))
+                    InitStatus(initStatus)
+                    AddStatus(addStatus)
                 }
-                ProgressText(initStatusText(initStatus))
-                ProgressText(addStatusText(addStatus))
             },
             bottomContent = {
                 DialogButtonContainer {
@@ -278,48 +285,58 @@ private fun AddRepositoryDialogContents(
     }
 }
 
-private fun preparationStatusText(
+@Composable
+private fun PreparationStatus(
     preparationStatus: PreparationStatus?,
     addStatus: AddStatus?,
     initStatus: InitStatus?,
-) = when (preparationStatus) {
-    is PreparationStatus.PreparationNoContinue -> "Error $preparationStatus"
+) {
+    when (preparationStatus) {
+        is PreparationStatus.PreparationException ->
+            AutomaticErrorMessage(preparationStatus.cause, onResolve = {})
 
-    PreparationStatus.Preparing -> "Preparing..."
+        is PreparationStatus.PreparationNoContinue -> ProgressText("Error $preparationStatus")
 
-    is PreparationStatus.ReadyForAdd -> {
-        if (addStatus == null) {
-            "Repository can be added."
-        } else {
-            null
+        PreparationStatus.Preparing -> ProgressText("Preparing...")
+
+        is PreparationStatus.ReadyForAdd -> {
+            if (addStatus == null) {
+                ProgressText("Repository can be added.")
+            }
         }
+
+        is PreparationStatus.ReadyForInit ->
+            if (initStatus == null) {
+                ProgressText("The directory is not a repository, yet. Continue to initialize it as an archive repository.")
+            }
+
+        null -> {}
     }
-
-    is PreparationStatus.ReadyForInit ->
-        if (initStatus == null) {
-            "The directory is not a repository, yet. Continue to initialize it as an archive repository."
-        } else {
-            null
-        }
-
-    null -> null
 }
 
-private fun initStatusText(initStatus: InitStatus?) =
+@Composable
+private fun InitStatus(initStatus: InitStatus?) {
     when (initStatus) {
-        is InitStatus.InitFailed -> "Error: $initStatus"
-        InitStatus.InitSuccessful -> "Initialized successfully."
-        InitStatus.Initializing -> "Initializing..."
-        null -> null
+        is InitStatus.InitFailed -> {
+            AutomaticErrorMessage(initStatus.cause, onResolve = {})
+        }
+        InitStatus.InitSuccessful -> ProgressText("Initialized successfully.")
+        InitStatus.Initializing -> ProgressText("Initializing...")
+        null -> {}
     }
+}
 
-private fun addStatusText(addStatus: AddStatus?) =
+@Composable
+private fun AddStatus(addStatus: AddStatus?) {
     when (addStatus) {
-        is AddStatus.AddFailed -> "Error: $addStatus"
-        AddStatus.AddSuccessful -> "Added successfully."
-        AddStatus.Adding -> "Adding..."
-        null -> null
+        is AddStatus.AddFailed -> {
+            AutomaticErrorMessage(addStatus.cause, onResolve = {})
+        }
+        AddStatus.AddSuccessful -> ProgressText("Added successfully.")
+        AddStatus.Adding -> ProgressText("Adding...")
+        null -> {}
     }
+}
 
 @Composable
 private fun ProgressText(text: String?) {

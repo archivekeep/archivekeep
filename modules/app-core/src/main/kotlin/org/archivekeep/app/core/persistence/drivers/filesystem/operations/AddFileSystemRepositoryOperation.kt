@@ -69,7 +69,7 @@ interface AddFileSystemRepositoryOperation {
 
         data class InitFailed(
             val reason: String,
-            val cause: Throwable?,
+            val cause: Throwable,
         ) : InitStatus
     }
 
@@ -80,7 +80,7 @@ interface AddFileSystemRepositoryOperation {
 
         data class AddFailed(
             val reason: String,
-            val cause: Throwable?,
+            val cause: Throwable,
         ) : AddStatus
     }
 

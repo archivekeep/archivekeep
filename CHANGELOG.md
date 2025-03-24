@@ -5,10 +5,12 @@
 ### Added
 
 - UI: show version info in navigation rail
+- UI: support copy-paste of error stacktraces
 - build: ARM64 Flatpak build support
 
 ## Changed
 
+- UI: show details instead of short text for errors in filesystem repository add dialog
 - build: Flatpak source lists are generated within CI/CD pipeline
 
 ### Removed
@@ -17,6 +19,7 @@
 
 ### Fixed
 
+- storage related functionality not working if /run/media doesn't exist
 - XdgFilePickerPortal based directory picker not working in ProGuard optimized build
 
 ## [0.3.1] - 2025-03-22 - Flatpak build improvements
