@@ -1,5 +1,9 @@
 # TODO: cleanup this and document why which rules are added
 
+# needed for io.github.vinceglb.filekit.core.platform.xdg.XdgFilePickerPortal.isAvailable
+-keep class org.freedesktop.** { *; }
+-keep class io.github.vinceglb.filekit.** { *; }
+
 # resources:
 #  - https://stackoverflow.com/a/61707441/409102
 #  - https://stackoverflow.com/a/58057593/409102

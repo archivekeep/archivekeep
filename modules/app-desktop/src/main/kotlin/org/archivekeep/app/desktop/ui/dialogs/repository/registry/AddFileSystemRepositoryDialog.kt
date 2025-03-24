@@ -116,6 +116,8 @@ class AddFileSystemRepositoryDialog(
                     val path = directory.path ?: throw Error("Path not present for $directory")
 
                     vm.ssetSelectedPath(path)
+                } else {
+                    println("Directory picker returned null directory")
                 }
             }
 
