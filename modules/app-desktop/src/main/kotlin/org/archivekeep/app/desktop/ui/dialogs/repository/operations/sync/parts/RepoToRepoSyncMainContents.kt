@@ -59,6 +59,9 @@ fun (ColumnScope).RepoToRepoSyncMainContents(userFlowState: RepoToRepoSyncUserFl
                     }
                 }
             }
+            is JobState.Created -> {
+                Text("Starting")
+            }
             is JobState.Running -> {
                 val t by operation.progressLog.collectAsState("")
 

@@ -90,6 +90,9 @@ class PushRepoDialogViewModel(
                         is State.Prepared ->
                             describePreparedSyncOperation(it.preparedSyncOperation)
 
+                        is JobState.Created ->
+                            "Starting"
+
                         is JobState.Running ->
                             "Running"
 

@@ -273,7 +273,14 @@ class RepoToRepoSyncServiceImpl(
         UniqueJobGuard.RunnableJob {
         private var job: Job? = null
 
-        private val _currentState = MutableStateFlow<JobState?>(null)
+        private val _currentState =
+            MutableStateFlow<JobState>(
+                JobState.Created(
+                    comparisonLoadable,
+                    preparedSyncOperation,
+                    this,
+                ),
+            )
 
         override val currentState = _currentState.asStateFlow()
 

@@ -31,7 +31,7 @@ interface RepoToRepoSync {
     }
 
     interface Job {
-        val currentState: StateFlow<JobState?>
+        val currentState: StateFlow<JobState>
 
         fun cancel()
     }
@@ -47,6 +47,12 @@ interface RepoToRepoSync {
     }
 
     sealed interface JobState : State {
+        data class Created(
+            override val comparisonResult: OptionalLoadable.LoadedAvailable<CompareOperation.Result>,
+            val preparedSyncOperation: PreparedSyncOperation,
+            val job: Job,
+        ) : JobState
+
         data class Running(
             override val comparisonResult: OptionalLoadable.LoadedAvailable<CompareOperation.Result>,
             val preparedSyncOperation: PreparedSyncOperation,

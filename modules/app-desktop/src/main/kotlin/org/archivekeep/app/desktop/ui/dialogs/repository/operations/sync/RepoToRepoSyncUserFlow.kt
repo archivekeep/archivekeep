@@ -37,18 +37,18 @@ class RepoToRepoSyncUserFlow(
         val canLaunch = operation.mapIfLoadedOrDefault(false) { it is RepoToRepoSync.State.Prepared && !it.preparedSyncOperation.isNoOp() }
     }
 
-    val currentOperation = sync.currentJobFlow.stickToFirstNotNullAsState(scope)
+    val currentOperationFlow = sync.currentJobFlow.stickToFirstNotNullAsState(scope)
 
     val selectedOperations = mutableStateOf<Set<SyncSubOperation>>(emptySet())
 
     @OptIn(ExperimentalCoroutinesApi::class)
     val operationStateFlow =
-        currentOperation
+        currentOperationFlow
             .flatMapLatest {
                 if (it == null) {
                     sync.prepare(relocationSyncMode)
                 } else {
-                    it.currentState.map { it as RepoToRepoSync.State }.mapToLoadable()
+                    it.currentState.mapToLoadable()
                 }
             }.stateIn(scope, SharingStarted.WhileSubscribed(), Loadable.Loading)
 
@@ -65,7 +65,7 @@ class RepoToRepoSyncUserFlow(
     }
 
     fun cancel() {
-        val operation = currentOperation.value ?: throw IllegalStateException("Must be launched")
+        val operation = currentOperationFlow.value ?: throw IllegalStateException("Must be launched")
 
         operation.cancel()
     }
