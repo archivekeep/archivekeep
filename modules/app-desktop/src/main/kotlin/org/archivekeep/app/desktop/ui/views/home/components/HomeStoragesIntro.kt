@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -55,19 +56,19 @@ fun HomeStoragesIntro() {
             ) {
                 FilledTonalButton(
                     onClick = {
-                        archiveOperationLaunchers.openAddRemoteRepository()
-                    },
-                    modifier = Modifier.defaultMinSize(120.dp),
-                ) {
-                    Text("Add URL…")
-                }
-                FilledTonalButton(
-                    onClick = {
                         archiveOperationLaunchers.openAddFileSystemRepository(FileSystemStorageType.EXTERNAL)
                     },
                     modifier = Modifier.defaultMinSize(120.dp),
                 ) {
                     Text("Add directory (in external storage)…")
+                }
+                TextButton(
+                    onClick = {
+                        archiveOperationLaunchers.openAddRemoteRepository()
+                    },
+                    modifier = Modifier.defaultMinSize(120.dp),
+                ) {
+                    Text("Add URL…")
                 }
             }
         }
