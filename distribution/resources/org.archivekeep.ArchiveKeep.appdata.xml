@@ -43,6 +43,7 @@
     <content_rating type="oars-1.1" />
 
     <releases>
+        <release version="0.3.2" date="2025-03-25" />
         <release version="0.3.1" date="2025-03-22" />
         <release version="0.3.0" date="2025-03-21" />
         <release version="0.2.0" date="2025-02-05" />
