@@ -4,6 +4,7 @@
 
 ### Added
 
+- UI: add ability to forget repository stored in local storage
 - UI: show version info in navigation rail
 - UI: support copy-paste of error stacktraces
 - build: ARM64 Flatpak build support

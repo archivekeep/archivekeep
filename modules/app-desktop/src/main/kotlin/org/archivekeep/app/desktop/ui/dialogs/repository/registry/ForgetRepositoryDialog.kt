@@ -100,11 +100,11 @@ class ForgetRepositoryDialog(
         Text(
             remember(state.currentRepo) {
                 buildAnnotatedString {
-                    append("Remove repository ")
+                    append("Repository ")
                     appendBoldSpan(state.currentRepo.repositoryState.displayName)
                     append(" stored in ")
                     appendBoldSpan(state.currentRepo.storage.displayName)
-                    append(" from local registry of known repositories.")
+                    append(" will be removed from local registry of known repositories.")
                 }
             },
         )

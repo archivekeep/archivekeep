@@ -56,6 +56,13 @@ fun ArchiveDropdownIconLaunched(
                     Text("Associate")
                 })
             }
+
+            DropdownMenuItem(onClick = {
+                operationsLaunchers.openForgetRepository(repositoryURI)
+                isDropdownExpanded = false
+            }, text = {
+                Text("Forget")
+            })
         }
     }
 }
