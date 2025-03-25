@@ -18,13 +18,14 @@ class StoragesVM(
     val allStorages =
         storageService
             .allStorages
-            .flatMapLatestLoadedData { storage ->
+            .flatMapLatestLoadedData { storages ->
                 combineToList(
-                    storage.map { physicalMedium ->
-                        physicalMedium.repositories.map { repositories ->
+                    storages.map { storage ->
+                        storage.repositories.map { repositories ->
                             Storage(
-                                uri = physicalMedium.uri,
-                                displayName = physicalMedium.knownStorage.label,
+                                uri = storage.uri,
+                                displayName = storage.knownStorage.label,
+                                isLocal = storage.knownStorage.isLocal,
                                 repositoriesInThisStorage = repositories.map { it.repositoryState.namedReference },
                             )
                         }
@@ -35,6 +36,7 @@ class StoragesVM(
     class Storage(
         val uri: StorageURI,
         val displayName: String,
+        val isLocal: Boolean,
         val repositoriesInThisStorage: List<NamedRepositoryReference>,
     )
 }

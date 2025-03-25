@@ -5,6 +5,7 @@
 ### Added
 
 - UI: add ability to forget repository stored in local storage
+- UI: show if storage is local or external in storages view
 - UI: show version info in navigation rail
 - UI: support copy-paste of error stacktraces
 - build: ARM64 Flatpak build support
@@ -17,6 +18,7 @@
 ### Removed
 
 - UI: hide Archives and Settings views offering no features yet
+- UI: remove icon for not-implemented dropdown for repositories in storages view
 
 ### Fixed
 
