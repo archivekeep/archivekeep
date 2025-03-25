@@ -50,8 +50,6 @@ class FileStores(
     private val changeEventsFlow =
         mediaDirectoriesFlow
             .transformLatest { mediaDirectories ->
-                println("New media directories: $mediaDirectories")
-
                 val watcherScope = CoroutineScope(coroutineContext)
                 val watcher = KfsDirectoryWatcher(watcherScope)
 
@@ -66,8 +64,8 @@ class FileStores(
                     emitAll(
                         watcher
                             .onEventFlow
-                            .map { "update" }
-                            .debounceAndRepeatAfterDelay(),
+                            .map { "update: $it" }
+                            .onStart { emit("new media directories: $mediaDirectories") },
                     )
                 } finally {
                     watcher.close()
@@ -132,10 +130,15 @@ class FileStores(
             }
 
             changeEventsFlow
-                .onStart { emit("Start") }
-                .conflate()
-                .mapToLoadable("Collect mounts") { collectMounts() }
-                .flowOn(Dispatchers.IO)
+                .map { "change event: $it" }
+                .onStart { emit("start") }
+                .debounceAndRepeatAfterDelay(
+                    mapDelayed = { "double-check retry after delay: $it" },
+                ).mapToLoadable("Collect mounts") {
+                    println("Collection of mounts triggered by: $it")
+
+                    collectMounts()
+                }.flowOn(Dispatchers.IO)
                 .shareResourceIn(scope)
         }
 

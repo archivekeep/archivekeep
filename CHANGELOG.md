@@ -22,6 +22,7 @@
 
 ### Fixed
 
+- the first user mount, in /run/media/<user>/<media>, after OS start not detected, when directory /run/media/<user> is just created
 - storage related functionality not working if /run/media doesn't exist
 - XdgFilePickerPortal based directory picker not working in ProGuard optimized build
 
