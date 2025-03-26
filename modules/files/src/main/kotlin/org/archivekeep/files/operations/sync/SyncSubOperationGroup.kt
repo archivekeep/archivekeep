@@ -15,22 +15,25 @@ sealed class SyncSubOperationGroup<T : SyncSubOperation>(
     ): Progress {
         var completedSteps = emptyList<T>()
 
-        subOperations.forEach { operation ->
-            if (limitToSubset != null && !limitToSubset.contains(operation)) {
-                return@forEach
+        val operationsToExecute =
+            if (limitToSubset == null) {
+                subOperations
+            } else {
+                subOperations.filter { it in limitToSubset }
             }
 
+        operationsToExecute.forEach { operation ->
             operation.apply(base, dst, logger)
 
             completedSteps = completedSteps + listOf(operation)
             progressReport(
-                constructProgress(subOperations, completedSteps),
+                constructProgress(operationsToExecute, completedSteps),
             )
 
             yield()
         }
 
-        return constructProgress(subOperations, completedSteps)
+        return constructProgress(operationsToExecute, completedSteps)
     }
 
     fun isNoOp(): Boolean = subOperations.isEmpty()
