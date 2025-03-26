@@ -1,20 +1,23 @@
 package org.archivekeep.app.desktop.ui.dialogs.repository.operations.sync.parts
 
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import kotlinx.coroutines.CancellationException
 import org.archivekeep.app.core.operations.sync.RepoToRepoSync.JobState
 import org.archivekeep.app.core.operations.sync.RepoToRepoSync.State
 import org.archivekeep.app.desktop.ui.components.ItemManySelect
 import org.archivekeep.app.desktop.ui.components.LoadableGuard
+import org.archivekeep.app.desktop.ui.components.errors.AutomaticErrorMessage
+import org.archivekeep.app.desktop.ui.components.operations.ScrollableLogTextInDialog
+import org.archivekeep.app.desktop.ui.components.operations.SyncProgress
 import org.archivekeep.app.desktop.ui.components.rememberManySelectWithMergedState
+import org.archivekeep.app.desktop.ui.designsystem.dialog.LabelText
 import org.archivekeep.app.desktop.ui.designsystem.layout.scrollable.ScrollableColumn
 import org.archivekeep.app.desktop.ui.dialogs.repository.operations.sync.RepoToRepoSyncUserFlow
 import org.archivekeep.app.desktop.ui.dialogs.repository.operations.sync.describe
@@ -63,23 +66,35 @@ fun (ColumnScope).RepoToRepoSyncMainContents(userFlowState: RepoToRepoSyncUserFl
                 Text("Starting")
             }
             is JobState.Running -> {
-                val t by operation.progressLog.collectAsState("")
+                Spacer(Modifier.height(8.dp))
+                LabelText("Progress")
+                SyncProgress(operation.progress.collectAsState().value)
+                Spacer(Modifier.height(8.dp))
+                ScrollableLogTextInDialog(operation.progressLog.collectAsState("").value)
+            }
 
-                Column {
-                    Text("Running")
-                    ScrollableColumn(modifier = Modifier.weight(weight = 1f, fill = false)) {
-                        Text(t)
+            is JobState.Finished -> {
+                Spacer(Modifier.height(8.dp))
+                LabelText(
+                    if (operation.success) {
+                        "Finished"
+                    } else if (operation.cancelled) {
+                        "Cancelled"
+                    } else {
+                        "Failed"
+                    },
+                )
+                SyncProgress(operation.progress)
+                Spacer(Modifier.height(8.dp))
+                ScrollableLogTextInDialog(operation.progressLog)
+
+                operation.error?.let { error ->
+                    if (error !is CancellationException) {
+                        Spacer(Modifier.height(12.dp))
+                        AutomaticErrorMessage(error, onResolve = {})
                     }
                 }
             }
-
-            is JobState.Finished ->
-                Column {
-                    Text("Finished")
-                    ScrollableColumn(modifier = Modifier.weight(weight = 1f, fill = false)) {
-                        Text(operation.progressLog, softWrap = true)
-                    }
-                }
         }
     }
 }

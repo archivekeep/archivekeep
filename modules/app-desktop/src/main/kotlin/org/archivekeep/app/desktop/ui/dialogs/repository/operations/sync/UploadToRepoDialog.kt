@@ -10,6 +10,8 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.buildAnnotatedString
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import org.archivekeep.app.core.domain.storages.StorageRepository
 import org.archivekeep.app.core.domain.storages.StorageService
@@ -18,6 +20,8 @@ import org.archivekeep.app.core.operations.sync.RepoToRepoSyncService
 import org.archivekeep.app.core.persistence.platform.demo.Photos
 import org.archivekeep.app.core.persistence.platform.demo.PhotosInHDDA
 import org.archivekeep.app.core.persistence.platform.demo.PhotosInLaptopSSD
+import org.archivekeep.app.core.persistence.platform.photosAdjustmentA
+import org.archivekeep.app.core.persistence.platform.photosAdjustmentB
 import org.archivekeep.app.core.utils.generics.OptionalLoadable
 import org.archivekeep.app.core.utils.identifiers.RepositoryURI
 import org.archivekeep.app.desktop.domain.wiring.LocalRepoToRepoSyncService
@@ -29,11 +33,10 @@ import org.archivekeep.app.desktop.ui.dialogs.repository.operations.sync.parts.R
 import org.archivekeep.app.desktop.ui.utils.appendBoldSpan
 import org.archivekeep.app.desktop.utils.collectAsLoadable
 import org.archivekeep.files.operations.CompareOperation
-import org.archivekeep.files.operations.CompareOperation.Result.ExtraGroup
-import org.archivekeep.files.operations.sync.NewFilesSyncStep.CopyNewFileSubOperation
+import org.archivekeep.files.operations.sync.NewFilesSyncStep
 import org.archivekeep.files.operations.sync.SyncOperation
+import org.archivekeep.testing.fixtures.FixtureRepoBuilder
 import org.archivekeep.utils.loading.Loadable
-import org.archivekeep.utils.sha256
 
 data class UploadToRepoDialog(
     val repositoryURI: RepositoryURI,
@@ -82,7 +85,7 @@ data class UploadToRepoDialog(
     }
 
     @Composable
-    override fun rememberState(vm: UploadToRepoDialog.VM): Loadable<State> =
+    override fun rememberState(vm: VM): Loadable<State> =
         remember(vm) {
             combine(
                 vm.storageService.repository(repositoryURI),
@@ -155,24 +158,15 @@ internal fun UploadToRepoDialogPreview1Contents() {
 
     val compareResult =
         CompareOperation().calculate(
+            Photos.withContents(FixtureRepoBuilder::photosAdjustmentA).contentsFixture._index,
             Photos
-                .withContents {
-                    deletePattern("2024/5/5.JPG".toRegex())
-                    deletePattern("2024/5/7.JPG".toRegex())
-                    deletePattern("2024/5/12.JPG".toRegex())
-                    addStored("2024/5/5-special.JPG", "2024/5/5.JPG")
-                    addStored("2024/5/7-special.JPG", "2024/5/7.JPG")
-                    addStored("2024/5/12-special.JPG", "2024/5/12.JPG")
-                }.contentsFixture._index,
-            Photos
-                .withContents {
-                    deletePattern("2024/6/.*".toRegex())
-                    addStored("2024/4/2-previous-extra-copy.JPG", "2024/4/2.JPG")
-                }.contentsFixture
+                .withContents(FixtureRepoBuilder::photosAdjustmentB)
+                .contentsFixture
                 ._index,
         )
 
     val preparedSync = SyncOperation(RepoToRepoSyncUserFlow.relocationSyncMode).prepareFromComparison(compareResult)
+    val selectedNewFiles = (preparedSync.steps[1] as NewFilesSyncStep).subOperations.subList(0, 4)
 
     dialog.renderDialogCard(
         UploadToRepoDialog.State(
@@ -187,18 +181,133 @@ internal fun UploadToRepoDialogPreview1Contents() {
                             startExecution = { error("should not be called in preview") },
                         ),
                 ),
-                mutableStateOf(
-                    setOf(
-                        CopyNewFileSubOperation(ExtraGroup("2024/6/1.JPG".sha256(), listOf("2024/6/1.JPG"))),
-                        CopyNewFileSubOperation(ExtraGroup("2024/6/2.JPG".sha256(), listOf("2024/6/2.JPG"))),
-                        CopyNewFileSubOperation(ExtraGroup("2024/6/3.JPG".sha256(), listOf("2024/6/3.JPG"))),
-                        CopyNewFileSubOperation(ExtraGroup("2024/6/4.JPG".sha256(), listOf("2024/6/4.JPG"))),
-                    ),
-                ),
+                mutableStateOf(selectedNewFiles.toSet()),
             ),
             onLaunch = {},
             onCancel = {},
             onClose = {},
         ),
     )
+}
+
+@Preview
+@Composable
+private fun preview2() {
+    DialogPreviewColumn {
+        UploadToRepoDialogPreview2Contents()
+    }
+}
+
+@Composable
+internal fun UploadToRepoDialogPreview2Contents() {
+    val dialog =
+        UploadToRepoDialog(
+            PhotosInHDDA.uri,
+            PhotosInLaptopSSD.uri,
+        )
+
+    val compareResult =
+        CompareOperation().calculate(
+            Photos.withContents(FixtureRepoBuilder::photosAdjustmentA).contentsFixture._index,
+            Photos
+                .withContents(FixtureRepoBuilder::photosAdjustmentB)
+                .contentsFixture
+                ._index,
+        )
+
+    val preparedSync = SyncOperation(RepoToRepoSyncUserFlow.relocationSyncMode).prepareFromComparison(compareResult)
+    val selectedNewFiles = (preparedSync.steps[1] as NewFilesSyncStep).subOperations.subList(0, 4)
+
+    dialog.renderDialogCard(
+        UploadToRepoDialog.State(
+            PhotosInHDDA.storageRepository,
+            PhotosInLaptopSSD.storageRepository,
+            RepoToRepoSyncUserFlow.State(
+                Loadable.Loaded(
+                    value =
+                        RepoToRepoSync.JobState.Running(
+                            comparisonResult = OptionalLoadable.LoadedAvailable(compareResult),
+                            preparedSyncOperation = preparedSync,
+                            MutableStateFlow(
+                                "copied: 2024/6/1.JPG\ncopied: 2024/6/2.JPG",
+                            ),
+                            MutableStateFlow(
+                                listOf(
+                                    NewFilesSyncStep.Progress(
+                                        selectedNewFiles,
+                                        selectedNewFiles.subList(0, 2),
+                                    ),
+                                ),
+                            ),
+                            JobMock(),
+                        ),
+                ),
+                mutableStateOf(selectedNewFiles.toSet()),
+            ),
+            onLaunch = {},
+            onCancel = {},
+            onClose = {},
+        ),
+    )
+}
+
+@Preview
+@Composable
+private fun preview3() {
+    DialogPreviewColumn {
+        UploadToRepoDialogPreview3Contents()
+    }
+}
+
+@Composable
+internal fun UploadToRepoDialogPreview3Contents() {
+    val dialog = UploadToRepoDialog(PhotosInHDDA.uri, PhotosInLaptopSSD.uri)
+
+    val compareResult =
+        CompareOperation().calculate(
+            Photos.withContents(FixtureRepoBuilder::photosAdjustmentA).contentsFixture._index,
+            Photos
+                .withContents(FixtureRepoBuilder::photosAdjustmentB)
+                .contentsFixture
+                ._index,
+        )
+
+    val preparedSync = SyncOperation(RepoToRepoSyncUserFlow.relocationSyncMode).prepareFromComparison(compareResult)
+    val selectedNewFiles = (preparedSync.steps[1] as NewFilesSyncStep).subOperations.subList(0, 4)
+
+    dialog.renderDialogCard(
+        UploadToRepoDialog.State(
+            PhotosInHDDA.storageRepository,
+            PhotosInLaptopSSD.storageRepository,
+            RepoToRepoSyncUserFlow.State(
+                Loadable.Loaded(
+                    value =
+                        RepoToRepoSync.JobState.Finished(
+                            comparisonResult = OptionalLoadable.LoadedAvailable(compareResult),
+                            preparedSyncOperation = preparedSync,
+                            progressLog = "copied: 2024/6/1.JPG\ncopied: 2024/6/2.JPG",
+                            progress =
+                                listOf(
+                                    NewFilesSyncStep.Progress(
+                                        selectedNewFiles,
+                                        selectedNewFiles.subList(0, 2),
+                                    ),
+                                ),
+                            error = RuntimeException("Something went wrong ..."),
+                        ),
+                ),
+                mutableStateOf(selectedNewFiles.toSet()),
+            ),
+            onLaunch = {},
+            onCancel = {},
+            onClose = {},
+        ),
+    )
+}
+
+private class JobMock : RepoToRepoSync.Job {
+    override val currentState: StateFlow<RepoToRepoSync.JobState>
+        get() = error("shouldn't be called")
+
+    override fun cancel() = error("shouldn't be called")
 }

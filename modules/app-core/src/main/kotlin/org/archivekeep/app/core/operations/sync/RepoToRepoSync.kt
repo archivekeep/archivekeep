@@ -1,5 +1,6 @@
 package org.archivekeep.app.core.operations.sync
 
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.StateFlow
 import org.archivekeep.app.core.utils.generics.OptionalLoadable
@@ -64,9 +65,13 @@ interface RepoToRepoSync {
         data class Finished(
             override val comparisonResult: OptionalLoadable.LoadedAvailable<CompareOperation.Result>,
             val preparedSyncOperation: PreparedSyncOperation,
+            val progress: List<SyncSubOperationGroup.Progress>,
             val progressLog: String,
-            val success: Boolean,
-            val cancelled: Boolean,
-        ) : JobState
+            val error: Throwable?,
+        ) : JobState {
+            val success = error == null
+
+            val cancelled = error != null && error is CancellationException
+        }
     }
 }

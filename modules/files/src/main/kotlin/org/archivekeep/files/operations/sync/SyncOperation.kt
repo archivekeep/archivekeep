@@ -7,6 +7,7 @@ import org.archivekeep.files.operations.sync.AdditiveRelocationsSyncStep.Additiv
 import org.archivekeep.files.operations.sync.NewFilesSyncStep.CopyNewFileSubOperation
 import org.archivekeep.files.operations.sync.RelocationsMoveApplySyncStep.RelocationApplySubOperation
 import org.archivekeep.files.repo.Repo
+import org.archivekeep.utils.filesAutoPlural
 import kotlin.math.min
 
 sealed interface RelocationSyncMode {
@@ -110,6 +111,8 @@ class AdditiveRelocationsSyncStep internal constructor(
         val completedRelocations: List<AdditiveReplicationSubOperation>,
     ) : SyncSubOperationGroup.Progress {
         override fun summaryText(): String = "replicated ${completedRelocations.size} of ${allRelocations.size}"
+
+        override fun progress(): Float = completedRelocations.size / allRelocations.size.toFloat()
     }
 }
 
@@ -164,6 +167,8 @@ class RelocationsMoveApplySyncStep internal constructor(
         val completedRelocations: List<RelocationApplySubOperation>,
     ) : SyncSubOperationGroup.Progress {
         override fun summaryText(): String = "moved ${completedRelocations.size} of ${allRelocations.size}"
+
+        override fun progress(): Float = completedRelocations.size / allRelocations.size.toFloat()
     }
 }
 
@@ -193,7 +198,9 @@ class NewFilesSyncStep internal constructor(
         val all: List<CopyNewFileSubOperation>,
         val completed: List<CopyNewFileSubOperation>,
     ) : SyncSubOperationGroup.Progress {
-        override fun summaryText(): String = "copied ${completed.size} of ${all.size}"
+        override fun summaryText(): String = "copied ${completed.size} of ${all.size} ${filesAutoPlural(all)}"
+
+        override fun progress(): Float = completed.size / all.size.toFloat()
     }
 }
 

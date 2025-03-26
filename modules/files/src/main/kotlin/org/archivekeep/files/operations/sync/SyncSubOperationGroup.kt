@@ -43,5 +43,7 @@ sealed class SyncSubOperationGroup<T : SyncSubOperation>(
     sealed interface Progress {
         // TODO: localization
         fun summaryText(): String
+
+        fun progress(): Float
     }
 }

@@ -4,10 +4,10 @@ import androidx.compose.runtime.Composable
 import org.archivekeep.app.desktop.ui.designsystem.dialog.LabelText
 import org.archivekeep.app.desktop.ui.designsystem.progress.ProgressRow
 import org.archivekeep.app.desktop.ui.designsystem.progress.ProgressRowList
-import org.archivekeep.app.desktop.ui.utils.filesAutoPlural
 import org.archivekeep.files.operations.indexupdate.AddOperation
 import org.archivekeep.files.operations.indexupdate.IndexUpdateAddProgress
 import org.archivekeep.files.operations.indexupdate.IndexUpdateMoveProgress
+import org.archivekeep.utils.filesAutoPlural
 
 @Composable
 fun LocalIndexUpdateProgress(

@@ -4,7 +4,6 @@ import androidx.compose.desktop.ui.tooling.preview.Preview
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -32,6 +31,7 @@ import org.archivekeep.app.desktop.ui.components.FileManySelect
 import org.archivekeep.app.desktop.ui.components.ItemManySelect
 import org.archivekeep.app.desktop.ui.components.operations.IndexUpdatePreparationProgress
 import org.archivekeep.app.desktop.ui.components.operations.LocalIndexUpdateProgress
+import org.archivekeep.app.desktop.ui.components.operations.ScrollableLogTextInDialog
 import org.archivekeep.app.desktop.ui.designsystem.dialog.DialogDismissButton
 import org.archivekeep.app.desktop.ui.designsystem.dialog.DialogPreviewColumn
 import org.archivekeep.app.desktop.ui.designsystem.dialog.DialogPrimaryButton
@@ -165,10 +165,7 @@ class UpdateIndexOperationDialog(
                     operationState.addProgress,
                 )
                 Spacer(Modifier.height(4.dp))
-                LabelText("Log")
-                ScrollableColumn(Modifier.fillMaxWidth()) {
-                    Text(operationState.log)
-                }
+                ScrollableLogTextInDialog(operationState.log)
             }
         }
     }
@@ -302,12 +299,18 @@ private fun UpdateIndexOperationViewPreview() {
             selectedFilesToAdd = mutableStateOf(emptySet()),
             selectedMovesToExecute = mutableStateOf(emptySet()),
         )
+    }
+}
 
+@Preview
+@Composable
+private fun UpdateIndexOperationViewPreview2() {
+    DialogPreviewColumn {
         renderPreview(
             archiveName = "Family Stuff",
             AddOperationSupervisor.ExecutionState.Running(
                 emptySet(),
-                setOf("Documents/Something/There.pdf", "Photos/2024/04/photo_09.JPG"),
+                setOf("Documents/Something/There.pdf", "Photos/2024/04/photo_09.JPG", "Photos/2024/04/photo_10.JPG"),
                 IndexUpdateAddProgress(setOf("Documents/Something/There.pdf", "Photos/2024/04/photo_09.JPG"), emptyMap(), true),
                 IndexUpdateMoveProgress(emptySet(), emptyMap(), false),
                 "added: Documents/Something/There.pdf\nadded: Photos/2024/04/photo_09.JPG",

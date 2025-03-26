@@ -284,15 +284,13 @@ class RepoToRepoSyncServiceImpl(
 
         override val currentState = _currentState.asStateFlow()
 
+        private val executeResult = SyncFlowStringWriter()
+        private val progress = MutableStateFlow(emptyList<SyncSubOperationGroup.Progress>())
+
         override suspend fun run(job: Job) {
             this.job = job
 
-            var executeResult: SyncFlowStringWriter? = null
-
             try {
-                executeResult = SyncFlowStringWriter()
-                val progress = MutableStateFlow(emptyList<SyncSubOperationGroup.Progress>())
-
                 _currentState.value =
                     JobState.Running(
                         comparisonLoadable,
@@ -340,9 +338,9 @@ class RepoToRepoSyncServiceImpl(
                     JobState.Finished(
                         comparisonLoadable,
                         preparedSyncOperation,
+                        progress.value,
                         executeResult.string.value,
-                        success = true,
-                        cancelled = false,
+                        error = null,
                     )
             } catch (e: CancellationException) {
                 println("Sync cancelled: $e")
@@ -350,9 +348,9 @@ class RepoToRepoSyncServiceImpl(
                     JobState.Finished(
                         comparisonLoadable,
                         preparedSyncOperation,
-                        executeResult?.string?.value ?: "",
-                        success = true,
-                        cancelled = true,
+                        progress.value,
+                        executeResult.string.value ?: "",
+                        e,
                     )
             } catch (e: Throwable) {
                 println("Sync failed: $e")
@@ -361,9 +359,9 @@ class RepoToRepoSyncServiceImpl(
                     JobState.Finished(
                         comparisonLoadable,
                         preparedSyncOperation,
-                        executeResult?.string?.value ?: "",
-                        success = false,
-                        cancelled = false,
+                        progress.value,
+                        executeResult.string.value ?: "",
+                        e,
                     )
             }
         }
