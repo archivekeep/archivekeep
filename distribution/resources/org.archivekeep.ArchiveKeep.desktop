@@ -1,6 +1,8 @@
 [Desktop Entry]
 Name=ArchiveKeep
+Comment=Archive files the easy way
 Exec=archivekeep-desktop
 Type=Application
 Icon=org.archivekeep.ArchiveKeep
 Categories=Utility;Archiving;
+Keywords=files;archivation;replication;backup;synchronization;offline;
