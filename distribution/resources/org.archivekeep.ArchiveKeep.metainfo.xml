@@ -49,7 +49,7 @@
     </recommends>
 
     <requires>
-      <display_length compare="ge">800</display_length>
+      <display_length compare="ge">720</display_length>
     </requires>
 
     <metadata_license>FSFAP</metadata_license>
