@@ -4,7 +4,7 @@
     <launchable type="desktop-id">org.archivekeep.ArchiveKeep.desktop</launchable>
 
     <name>ArchiveKeep</name>
-    <summary>Preserve personal files archive in multiple storages</summary>
+    <summary>Archive files the easy way</summary>
     <description>
         <p>
             <em>DISCLAIMER:</em> This is an early release. The author already uses the software to fulfil own needs, but there's still a room for improvement and a potential to find undiscovered issues, bugs or edge-cases.
@@ -26,12 +26,31 @@
         </screenshot>
     </screenshots>
 
+    <branding>
+      <color type="primary" scheme_preference="light">#899cff</color>
+      <color type="primary" scheme_preference="dark">#375fdc</color>
+    </branding>
+
     <url type="homepage">https://archivekeep.org/</url>
     <url type="vcs-browser">https://github.com/archivekeep/archivekeep</url>
+    <url type="bugtracker">https://github.com/archivekeep/archivekeep/issues</url>
 
     <provides>
         <binary>archivekeep-desktop</binary>
     </provides>
+
+    <supports>
+      <control>keyboard</control>
+      <control>pointing</control>
+    </supports>
+
+    <recommends>
+      <internet>always</internet>
+    </recommends>
+
+    <requires>
+      <display_length compare="ge">800</display_length>
+    </requires>
 
     <metadata_license>FSFAP</metadata_license>
     <project_license>AGPL-3.0-or-later</project_license>
