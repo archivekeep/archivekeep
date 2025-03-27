@@ -40,7 +40,7 @@ modules:
       - cp -r modules/app-desktop/build/compose/binaries/main-release/app/archivekeep-desktop/bin/* /app/bin/
       - cp -r modules/app-desktop/build/compose/binaries/main-release/app/archivekeep-desktop/lib/* /app/lib/
       - install -Dm644 modules/app-desktop/src/main/composeResources/drawable/ic_app.svg /app/share/icons/hicolor/scalable/apps/$FLATPAK_ID.svg
-      - install -Dm644 distribution/resources/$FLATPAK_ID.appdata.xml /app/share/appdata/$FLATPAK_ID.appdata.xml
+      - install -Dm644 distribution/resources/$FLATPAK_ID.metainfo.xml /app/share/metainfo/$FLATPAK_ID.metainfo.xml
       - install -Dm644 distribution/resources/$FLATPAK_ID.desktop /app/share/applications/$FLATPAK_ID.desktop
     sources:
       - type: dir
