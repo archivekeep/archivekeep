@@ -27,6 +27,7 @@ import org.archivekeep.app.desktop.domain.wiring.LocalAddPushService
 import org.archivekeep.app.desktop.domain.wiring.LocalRepoService
 import org.archivekeep.app.desktop.domain.wiring.LocalStorageService
 import org.archivekeep.app.desktop.ui.components.dialogs.operations.DialogOperationControlState
+import org.archivekeep.app.desktop.ui.components.dialogs.operations.toDialogOperationControlState
 import org.archivekeep.app.desktop.ui.dialogs.AbstractDialog
 import org.archivekeep.app.desktop.ui.utils.appendBoldSpan
 import org.archivekeep.app.desktop.utils.stickToFirstNotNullAsState
@@ -80,11 +81,11 @@ class AddAndPushRepoDialogViewModel(
         val controlState: DialogOperationControlState by derivedStateOf {
             when (state) {
                 is LaunchedAddPushProcess ->
-                    if (state.finished) {
-                        DialogOperationControlState.Completed(outcome = "Finished", onClose = onClose)
-                    } else {
-                        DialogOperationControlState.Running(onCancel = onCancel, onHide = onClose)
-                    }
+                    state.executionState.toDialogOperationControlState(
+                        onCancel = onCancel,
+                        onHide = onClose,
+                        onClose = onClose,
+                    )
                 AddAndPushOperation.NotReadyAddPushProcess, is AddAndPushOperation.PreparingAddPushProcess ->
                     DialogOperationControlState.NotRunning(onLaunch = {}, onClose = onClose, canLaunch = false)
                 is ReadyAddPushProcess -> {

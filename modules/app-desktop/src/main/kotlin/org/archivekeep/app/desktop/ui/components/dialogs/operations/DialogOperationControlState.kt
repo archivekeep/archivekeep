@@ -1,5 +1,10 @@
 package org.archivekeep.app.desktop.ui.components.dialogs.operations
 
+import org.archivekeep.app.core.utils.operations.OperationExecutionState
+import org.archivekeep.app.desktop.ui.components.dialogs.operations.DialogOperationControlState.Completed
+import org.archivekeep.app.desktop.ui.components.dialogs.operations.DialogOperationControlState.Running
+import java.util.concurrent.CancellationException
+
 sealed interface DialogOperationControlState {
     data class NotRunning(
         val onLaunch: () -> Unit,
@@ -17,3 +22,22 @@ sealed interface DialogOperationControlState {
         val onClose: () -> Unit,
     ) : DialogOperationControlState
 }
+
+fun OperationExecutionState.toDialogOperationControlState(
+    onCancel: (() -> Unit)?,
+    onHide: (() -> Unit)?,
+    onClose: () -> Unit,
+): DialogOperationControlState =
+    when (this) {
+        OperationExecutionState.NotStarted, OperationExecutionState.Running ->
+            Running(onCancel = onCancel, onHide = onHide)
+        is OperationExecutionState.Finished ->
+            Completed(outcome = outcome(), onClose = onClose)
+    }
+
+fun OperationExecutionState.Finished.outcome(): String =
+    when (error) {
+        null -> "Finished"
+        is CancellationException -> "Cancelled"
+        else -> "Failed"
+    }

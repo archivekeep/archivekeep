@@ -10,6 +10,7 @@
 ### Change
 
 - UI: unify and improve dialog control buttons for repository data operation dialogs
+- refactor: extract operation execution lifecycle related boilerplate from individual implementations
 
 ### Fixed
 

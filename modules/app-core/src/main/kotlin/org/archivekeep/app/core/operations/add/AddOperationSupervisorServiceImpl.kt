@@ -3,8 +3,6 @@ package org.archivekeep.app.core.operations.add
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -17,6 +15,7 @@ import org.archivekeep.app.core.utils.UniqueJobGuard
 import org.archivekeep.app.core.utils.generics.SyncFlowStringWriter
 import org.archivekeep.app.core.utils.generics.singleInstanceWeakValueMap
 import org.archivekeep.app.core.utils.identifiers.RepositoryURI
+import org.archivekeep.app.core.utils.operations.AbstractOperationJob
 import org.archivekeep.files.operations.indexupdate.AddOperation
 import org.archivekeep.files.operations.indexupdate.IndexUpdateStructuredProgressTracker
 import org.archivekeep.files.operations.indexupdate.IndexUpdateTextualProgressTracker
@@ -96,8 +95,8 @@ class AddOperationSupervisorServiceImpl(
         private val repositoryAccess: Repo,
         override val preparationResult: AddOperation.PreparationResult,
         override val launchOptions: AddOperation.LaunchOptions,
-    ) : AddOperationSupervisor.Job,
-        UniqueJobGuard.RunnableJob {
+    ) : AbstractOperationJob(),
+        AddOperationSupervisor.Job {
         private val executionLog = SyncFlowStringWriter()
         private val writter = IndexUpdateTextualProgressTracker(PrintWriter(executionLog.writer, true))
 
@@ -111,36 +110,26 @@ class AddOperationSupervisorServiceImpl(
                 indexUpdateProgressTracker.addProgressFlow,
                 indexUpdateProgressTracker.moveProgressFlow,
                 executionLog.string,
-            ) { addProgress, moveProgress, log ->
+                executionState,
+            ) { addProgress, moveProgress, log, jobState ->
                 AddOperationSupervisor.ExecutionState.Running(
                     movesToExecute,
                     filesToAdd,
                     addProgress,
                     moveProgress,
                     log,
+                    jobState,
                 )
             }
 
-        private var job: Job? = null
-
-        override suspend fun run(job: Job) {
-            try {
-                preparationResult.execute(
-                    repositoryAccess,
-                    launchOptions.movesSubsetLimit,
-                    launchOptions.addFilesSubsetLimit,
-                    writter,
-                    indexUpdateProgressTracker,
-                )
-            } finally {
-                executionLog.writer.flush()
-                this.job = null
-            }
-        }
-
-        override fun cancel() {
-            job!!.cancel(message = "Cancelled by user")
-            println("Cancelled")
+        override suspend fun execute() {
+            preparationResult.execute(
+                repositoryAccess,
+                launchOptions.movesSubsetLimit,
+                launchOptions.addFilesSubsetLimit,
+                writter,
+                indexUpdateProgressTracker,
+            )
         }
     }
 }

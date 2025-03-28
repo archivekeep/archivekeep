@@ -32,7 +32,7 @@ interface RepoToRepoSync {
     }
 
     interface Job {
-        val currentState: StateFlow<JobState>
+        val currentState: Flow<JobState>
 
         fun cancel()
     }

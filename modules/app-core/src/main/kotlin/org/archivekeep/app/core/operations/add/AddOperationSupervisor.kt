@@ -2,6 +2,7 @@ package org.archivekeep.app.core.operations.add
 
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.StateFlow
+import org.archivekeep.app.core.utils.operations.OperationExecutionState
 import org.archivekeep.files.operations.indexupdate.AddOperation
 import org.archivekeep.files.operations.indexupdate.AddOperation.PreparationResult
 import org.archivekeep.files.operations.indexupdate.IndexUpdateAddProgress
@@ -33,9 +34,8 @@ interface AddOperationSupervisor {
             val addProgress: IndexUpdateAddProgress,
             val moveProgress: IndexUpdateMoveProgress,
             val log: String,
-        ) : ExecutionState {
-            val finished = addProgress.finished && moveProgress.finished
-        }
+            val state: OperationExecutionState,
+        ) : ExecutionState
     }
 
     data class Preparation(

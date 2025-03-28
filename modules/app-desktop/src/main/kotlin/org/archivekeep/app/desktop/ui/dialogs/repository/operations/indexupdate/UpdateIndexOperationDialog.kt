@@ -26,11 +26,13 @@ import org.archivekeep.app.core.operations.add.AddOperationSupervisorService
 import org.archivekeep.app.core.persistence.platform.demo.Documents
 import org.archivekeep.app.core.persistence.platform.demo.LaptopSSD
 import org.archivekeep.app.core.utils.identifiers.RepositoryURI
+import org.archivekeep.app.core.utils.operations.OperationExecutionState
 import org.archivekeep.app.desktop.domain.wiring.LocalAddOperationSupervisorService
 import org.archivekeep.app.desktop.ui.components.FileManySelect
 import org.archivekeep.app.desktop.ui.components.ItemManySelect
 import org.archivekeep.app.desktop.ui.components.dialogs.operations.DialogOperationControlButtons
 import org.archivekeep.app.desktop.ui.components.dialogs.operations.DialogOperationControlState
+import org.archivekeep.app.desktop.ui.components.dialogs.operations.toDialogOperationControlState
 import org.archivekeep.app.desktop.ui.components.operations.IndexUpdatePreparationProgress
 import org.archivekeep.app.desktop.ui.components.operations.LocalIndexUpdateProgress
 import org.archivekeep.app.desktop.ui.components.operations.ScrollableLogTextInDialog
@@ -71,11 +73,11 @@ class UpdateIndexOperationDialog(
                 AddOperationSupervisor.ExecutionState.NotRunning ->
                     DialogOperationControlState.NotRunning(onLaunch = {}, onClose = onClose, canLaunch = false)
                 is AddOperationSupervisor.ExecutionState.Running ->
-                    if (opState.finished) {
-                        DialogOperationControlState.Completed(onClose = onClose)
-                    } else {
-                        DialogOperationControlState.Running(onHide = onClose)
-                    }
+                    opState.state.toDialogOperationControlState(
+                        onCancel = null,
+                        onHide = onClose,
+                        onClose = onClose,
+                    )
                 is AddOperationSupervisor.Preparation ->
                     DialogOperationControlState.NotRunning(
                         onLaunch = ::onTriggerExecute,
@@ -278,6 +280,7 @@ private fun UpdateIndexOperationViewPreview() {
                     IndexUpdateAddProgress(setOf("Documents/Something/There.pdf"), emptyMap(), false),
                     IndexUpdateMoveProgress(emptySet(), emptyMap(), false),
                     "added: Documents/Something/There.pdf",
+                    OperationExecutionState.Running,
                 ),
             selectedFilesToAdd = mutableStateOf(emptySet()),
             selectedMovesToExecute = mutableStateOf(emptySet()),
@@ -291,6 +294,7 @@ private fun UpdateIndexOperationViewPreview() {
                 IndexUpdateAddProgress(setOf("Documents/Something/There.pdf", "Photos/2024/04/photo_09.JPG"), emptyMap(), false),
                 IndexUpdateMoveProgress(emptySet(), emptyMap(), false),
                 "added: Documents/Something/There.pdf\nadded: Photos/2024/04/photo_09.JPG",
+                OperationExecutionState.Running,
             ),
             selectedFilesToAdd = mutableStateOf(emptySet()),
             selectedMovesToExecute = mutableStateOf(emptySet()),
@@ -310,6 +314,7 @@ private fun UpdateIndexOperationViewPreview2() {
                 IndexUpdateAddProgress(setOf("Documents/Something/There.pdf", "Photos/2024/04/photo_09.JPG"), emptyMap(), true),
                 IndexUpdateMoveProgress(emptySet(), emptyMap(), false),
                 "added: Documents/Something/There.pdf\nadded: Photos/2024/04/photo_09.JPG",
+                OperationExecutionState.Running,
             ),
             selectedFilesToAdd = mutableStateOf(emptySet()),
             selectedMovesToExecute = mutableStateOf(emptySet()),

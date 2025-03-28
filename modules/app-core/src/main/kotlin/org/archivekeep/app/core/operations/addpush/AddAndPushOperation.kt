@@ -3,6 +3,7 @@ package org.archivekeep.app.core.operations.addpush
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.StateFlow
 import org.archivekeep.app.core.utils.identifiers.RepositoryURI
+import org.archivekeep.app.core.utils.operations.OperationExecutionState
 import org.archivekeep.files.operations.indexupdate.AddOperation
 import org.archivekeep.files.operations.indexupdate.AddOperation.PreparationResult.Move
 import org.archivekeep.files.operations.indexupdate.IndexUpdateAddProgress
@@ -15,7 +16,7 @@ interface AddAndPushOperation {
 
     interface Job {
         val addPreparationResult: AddOperation.PreparationResult
-        val state: StateFlow<State>
+        val state: Flow<State>
 
         fun cancel()
     }
@@ -45,7 +46,7 @@ interface AddAndPushOperation {
         val addProgress: IndexUpdateAddProgress,
         val moveProgress: IndexUpdateMoveProgress,
         val pushProgress: Map<RepositoryURI, PushProgress>,
-        val finished: Boolean,
+        val executionState: OperationExecutionState,
     ) : State
 
     data class PushProgress(

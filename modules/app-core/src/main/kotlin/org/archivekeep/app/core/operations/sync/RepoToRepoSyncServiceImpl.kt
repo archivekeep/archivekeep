@@ -1,12 +1,9 @@
 package org.archivekeep.app.core.operations.sync
 
-import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.cancel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -17,6 +14,7 @@ import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.flowOn
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.transform
 import org.archivekeep.app.core.domain.repositories.RepositoryService
@@ -28,13 +26,15 @@ import org.archivekeep.app.core.utils.generics.SyncFlowStringWriter
 import org.archivekeep.app.core.utils.generics.mapLoadedData
 import org.archivekeep.app.core.utils.generics.singleInstanceWeakValueMap
 import org.archivekeep.app.core.utils.identifiers.RepositoryURI
+import org.archivekeep.app.core.utils.operations.AbstractOperationJob
+import org.archivekeep.app.core.utils.operations.OperationExecutionState
 import org.archivekeep.files.operations.CompareOperation
 import org.archivekeep.files.operations.sync.PreparedSyncOperation
 import org.archivekeep.files.operations.sync.RelocationSyncMode
-import org.archivekeep.files.operations.sync.SyncLogger
 import org.archivekeep.files.operations.sync.SyncOperation
 import org.archivekeep.files.operations.sync.SyncSubOperation
 import org.archivekeep.files.operations.sync.SyncSubOperationGroup
+import org.archivekeep.files.operations.sync.WritterSyncLogger
 import org.archivekeep.files.repo.Repo
 import org.archivekeep.utils.coroutines.shareResourceIn
 import org.archivekeep.utils.loading.Loadable
@@ -269,106 +269,49 @@ class RepoToRepoSyncServiceImpl(
         val base: Repo,
         val other: Repo,
         val limitToSubset: Set<SyncSubOperation>,
-    ) : RepoToRepoSync.Job,
-        UniqueJobGuard.RunnableJob {
-        private var job: Job? = null
-
-        private val _currentState =
-            MutableStateFlow<JobState>(
-                JobState.Created(
-                    comparisonLoadable,
-                    preparedSyncOperation,
-                    this,
-                ),
-            )
-
-        override val currentState = _currentState.asStateFlow()
-
-        private val executeResult = SyncFlowStringWriter()
+    ) : AbstractOperationJob(),
+        RepoToRepoSync.Job {
+        private val executionLog = SyncFlowStringWriter()
         private val progress = MutableStateFlow(emptyList<SyncSubOperationGroup.Progress>())
 
-        override suspend fun run(job: Job) {
-            this.job = job
-
-            try {
-                _currentState.value =
-                    JobState.Running(
-                        comparisonLoadable,
-                        preparedSyncOperation,
-                        executeResult.string,
-                        progress,
-                        this@JobImpl,
-                    )
-
-                val progressReport = { newProgress: List<SyncSubOperationGroup.Progress> ->
-                    progress.value = newProgress
+        override val currentState: Flow<JobState> =
+            executionState
+                .map {
+                    when (it) {
+                        OperationExecutionState.NotStarted ->
+                            JobState.Created(
+                                comparisonLoadable,
+                                preparedSyncOperation,
+                                this,
+                            )
+                        is OperationExecutionState.Running ->
+                            JobState.Running(
+                                comparisonLoadable,
+                                preparedSyncOperation,
+                                executionLog.string,
+                                progress,
+                                this@JobImpl,
+                            )
+                        is OperationExecutionState.Finished ->
+                            JobState.Finished(
+                                comparisonLoadable,
+                                preparedSyncOperation,
+                                progress.value,
+                                executionLog.string.value,
+                                it.error,
+                            )
+                    }
                 }
 
-                preparedSyncOperation.execute(
-                    base,
-                    other,
-                    prompter = { true },
-                    limitToSubset = limitToSubset,
-                    logger =
-                        object : SyncLogger {
-                            override fun onFileStored(filename: String) {
-                                executeResult.writer.println("file stored: $filename")
-                                executeResult.writer.flush()
-                            }
-
-                            override fun onFileMoved(
-                                from: String,
-                                to: String,
-                            ) {
-                                executeResult.writer.println("file moved: $from -> $to")
-                                executeResult.writer.flush()
-                            }
-
-                            override fun onFileDeleted(filename: String) {
-                                executeResult.writer.println("file deleted: $filename")
-                                executeResult.writer.flush()
-                            }
-                        },
-                    progressReport = progressReport,
-                )
-
-                executeResult.writer.flush()
-
-                _currentState.value =
-                    JobState.Finished(
-                        comparisonLoadable,
-                        preparedSyncOperation,
-                        progress.value,
-                        executeResult.string.value,
-                        error = null,
-                    )
-            } catch (e: CancellationException) {
-                println("Sync cancelled: $e")
-                _currentState.value =
-                    JobState.Finished(
-                        comparisonLoadable,
-                        preparedSyncOperation,
-                        progress.value,
-                        executeResult.string.value ?: "",
-                        e,
-                    )
-            } catch (e: Throwable) {
-                println("Sync failed: $e")
-                e.printStackTrace()
-                _currentState.value =
-                    JobState.Finished(
-                        comparisonLoadable,
-                        preparedSyncOperation,
-                        progress.value,
-                        executeResult.string.value ?: "",
-                        e,
-                    )
-            }
-        }
-
-        override fun cancel() {
-            job!!.cancel(message = "Cancelled by user")
-            println("Cancelled")
+        override suspend fun execute() {
+            preparedSyncOperation.execute(
+                base,
+                other,
+                prompter = { true },
+                limitToSubset = limitToSubset,
+                logger = WritterSyncLogger(executionLog.writer),
+                progressReport = { progress.value = it },
+            )
         }
     }
 }

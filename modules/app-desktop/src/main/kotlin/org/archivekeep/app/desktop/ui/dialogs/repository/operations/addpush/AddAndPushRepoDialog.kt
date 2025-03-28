@@ -25,6 +25,7 @@ import org.archivekeep.app.core.persistence.platform.demo.DocumentsInHDDA
 import org.archivekeep.app.core.persistence.platform.demo.DocumentsInLaptopSSD
 import org.archivekeep.app.core.persistence.platform.demo.DocumentsInSSDKeyChain
 import org.archivekeep.app.core.utils.identifiers.RepositoryURI
+import org.archivekeep.app.core.utils.operations.OperationExecutionState
 import org.archivekeep.app.desktop.ui.components.DestinationManySelect
 import org.archivekeep.app.desktop.ui.components.FileManySelect
 import org.archivekeep.app.desktop.ui.components.ItemManySelect
@@ -263,7 +264,7 @@ private fun AddAndPushDialogContentsCompletedPreview2() {
                     addProgress = IndexUpdateAddProgress(emptySet(), emptyMap(), false),
                     moveProgress = IndexUpdateMoveProgress(emptySet(), emptyMap(), false),
                     pushProgress = selectedDestinations.associateWith { AddAndPushOperation.PushProgress(emptySet(), emptySet(), emptyMap(), false) },
-                    finished = false,
+                    executionState = OperationExecutionState.Running,
                 ),
                 selectedFilenames = mutableStateOf(allNewFiles.toSet()),
                 selectedMoves = mutableStateOf(emptySet()),
@@ -300,7 +301,7 @@ private fun AddAndPushDialogContentsCompletedPreview3() {
                     addProgress = IndexUpdateAddProgress(setOf(allNewFiles[0]), emptyMap(), false),
                     moveProgress = IndexUpdateMoveProgress(allTestMoves.subList(0, 3).toSet(), emptyMap(), false),
                     pushProgress = selectedDestinations.associateWith { AddAndPushOperation.PushProgress(emptySet(), emptySet(), emptyMap(), false) },
-                    finished = false,
+                    executionState = OperationExecutionState.Running,
                 ),
                 selectedFilenames = mutableStateOf(allNewFiles.toSet()),
                 selectedMoves = mutableStateOf(allTestMoves.toSet()),
