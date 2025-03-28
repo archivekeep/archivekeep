@@ -37,9 +37,8 @@ import org.archivekeep.app.desktop.domain.data.canUnlockFlow
 import org.archivekeep.app.desktop.domain.wiring.LocalWalletDataStore
 import org.archivekeep.app.desktop.domain.wiring.LocalWalletOperationLaunchers
 import org.archivekeep.app.desktop.domain.wiring.WalletOperationLaunchers
-import org.archivekeep.app.desktop.ui.designsystem.dialog.DialogDismissButton
+import org.archivekeep.app.desktop.ui.components.dialogs.SimpleActionDialogControlButtons
 import org.archivekeep.app.desktop.ui.designsystem.dialog.DialogPreviewColumn
-import org.archivekeep.app.desktop.ui.designsystem.dialog.DialogPrimaryButton
 import org.archivekeep.app.desktop.ui.designsystem.input.CheckboxWithText
 import org.archivekeep.app.desktop.ui.designsystem.input.PasswordField
 import org.archivekeep.app.desktop.ui.designsystem.input.TextField
@@ -248,17 +247,11 @@ class RepositoryUnlockDialog(
 
     @Composable
     override fun RowScope.renderButtons(state: State) {
-        DialogPrimaryButton(
+        SimpleActionDialogControlButtons(
             "Authenticate",
-            onClick = state.onLaunch,
-            enabled = state.canLaunch,
-        )
-
-        Spacer(modifier = Modifier.weight(1f))
-
-        DialogDismissButton(
-            "Cancel",
-            onClick = state.onClose,
+            onLaunch = state.onLaunch,
+            onClose = state.onClose,
+            canLaunch = state.canLaunch,
         )
     }
 }

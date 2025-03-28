@@ -3,7 +3,6 @@ package org.archivekeep.app.desktop.ui.dialogs.repository.registry
 import androidx.compose.desktop.ui.tooling.preview.Preview
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.RowScope
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -24,9 +23,8 @@ import org.archivekeep.app.core.persistence.registry.RegistryDataStore
 import org.archivekeep.app.core.utils.identifiers.RepositoryURI
 import org.archivekeep.app.desktop.domain.wiring.LocalRegistry
 import org.archivekeep.app.desktop.domain.wiring.LocalStorageService
-import org.archivekeep.app.desktop.ui.designsystem.dialog.DialogDismissButton
+import org.archivekeep.app.desktop.ui.components.dialogs.SimpleActionDialogControlButtons
 import org.archivekeep.app.desktop.ui.designsystem.dialog.DialogPreviewColumn
-import org.archivekeep.app.desktop.ui.designsystem.dialog.DialogPrimaryButton
 import org.archivekeep.app.desktop.ui.dialogs.repository.AbstractRepositoryDialog
 import org.archivekeep.app.desktop.ui.utils.appendBoldSpan
 import org.archivekeep.app.desktop.utils.collectLoadableFlow
@@ -120,18 +118,10 @@ class ForgetRepositoryDialog(
 
     @Composable
     override fun RowScope.renderButtons(state: State) {
-        DialogPrimaryButton(
+        SimpleActionDialogControlButtons(
             "Forget",
-            onClick = state.onLaunch,
-            enabled = true,
-        )
-
-        Spacer(modifier = Modifier.weight(1f))
-
-        DialogDismissButton(
-            "Cancel",
-            onClick = state.onClose,
-            enabled = true,
+            onLaunch = state.onLaunch,
+            onClose = state.onClose,
         )
     }
 }

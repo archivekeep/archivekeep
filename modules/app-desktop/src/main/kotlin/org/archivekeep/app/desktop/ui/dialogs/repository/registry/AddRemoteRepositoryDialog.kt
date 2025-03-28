@@ -22,14 +22,13 @@ import org.archivekeep.app.core.operations.AddRemoteRepositoryOperation
 import org.archivekeep.app.core.operations.AddRemoteRepositoryOperation.AddStatus
 import org.archivekeep.app.desktop.domain.wiring.LocalOperationFactory
 import org.archivekeep.app.desktop.domain.wiring.OperationFactory
+import org.archivekeep.app.desktop.ui.components.dialogs.SimpleActionDialogControlButtons
 import org.archivekeep.app.desktop.ui.components.errors.AutomaticErrorMessage
 import org.archivekeep.app.desktop.ui.designsystem.dialog.DialogButtonContainer
 import org.archivekeep.app.desktop.ui.designsystem.dialog.DialogCard
-import org.archivekeep.app.desktop.ui.designsystem.dialog.DialogDismissButton
 import org.archivekeep.app.desktop.ui.designsystem.dialog.DialogInnerContainer
 import org.archivekeep.app.desktop.ui.designsystem.dialog.DialogOverlay
 import org.archivekeep.app.desktop.ui.designsystem.dialog.DialogPreviewColumn
-import org.archivekeep.app.desktop.ui.designsystem.dialog.DialogPrimaryButton
 import org.archivekeep.app.desktop.ui.designsystem.input.TextField
 import org.archivekeep.app.desktop.ui.dialogs.Dialog
 import org.archivekeep.files.repo.remote.grpc.BasicAuthCredentials
@@ -151,27 +150,27 @@ private fun AddRemoteRepositoryDialogContents(
             },
             bottomContent = {
                 DialogButtonContainer {
-                    if (authNeededOrWasNeeded) {
-                        DialogPrimaryButton(
-                            "Authenticate & add",
-                            onClick = launchAdd,
-                            enabled =
+                    val (name, onLaunch, canLaunch) =
+                        if (authNeededOrWasNeeded) {
+                            Triple(
+                                "Authenticate & add",
+                                launchAdd,
                                 addStatus !is AddStatus.Adding &&
                                     basicAuthCredentials?.let { it.username.isNotBlank() && it.password.isNotBlank() } ?: false,
-                        )
-                    } else {
-                        DialogPrimaryButton(
-                            "Add",
-                            onClick = launchAdd,
-                            enabled = uriText.isNotBlank() && addStatus !is AddStatus.Adding,
-                        )
-                    }
+                            )
+                        } else {
+                            Triple(
+                                "Add",
+                                launchAdd,
+                                uriText.isNotBlank() && addStatus !is AddStatus.Adding,
+                            )
+                        }
 
-                    Spacer(modifier = Modifier.weight(1f))
-
-                    DialogDismissButton(
-                        "Cancel",
-                        onClick = onClose,
+                    SimpleActionDialogControlButtons(
+                        name,
+                        onLaunch = onLaunch,
+                        onClose = onClose,
+                        canLaunch = canLaunch,
                     )
                 }
             },

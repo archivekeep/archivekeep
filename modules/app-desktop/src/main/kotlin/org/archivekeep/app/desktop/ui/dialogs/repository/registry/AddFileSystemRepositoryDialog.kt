@@ -1,7 +1,6 @@
 package org.archivekeep.app.desktop.ui.dialogs.repository.registry
 
 import androidx.compose.desktop.ui.tooling.preview.Preview
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -28,16 +27,15 @@ import org.archivekeep.app.core.persistence.drivers.filesystem.operations.AddFil
 import org.archivekeep.app.desktop.domain.wiring.LocalComposeWindow
 import org.archivekeep.app.desktop.domain.wiring.LocalOperationFactory
 import org.archivekeep.app.desktop.domain.wiring.OperationFactory
+import org.archivekeep.app.desktop.ui.components.dialogs.SimpleActionDialogControlButtons
 import org.archivekeep.app.desktop.ui.components.errors.AutomaticErrorMessage
 import org.archivekeep.app.desktop.ui.designsystem.dialog.DialogButtonContainer
 import org.archivekeep.app.desktop.ui.designsystem.dialog.DialogCard
-import org.archivekeep.app.desktop.ui.designsystem.dialog.DialogDismissButton
 import org.archivekeep.app.desktop.ui.designsystem.dialog.DialogFilePicker
 import org.archivekeep.app.desktop.ui.designsystem.dialog.DialogInnerContainer
 import org.archivekeep.app.desktop.ui.designsystem.dialog.DialogInputLabel
 import org.archivekeep.app.desktop.ui.designsystem.dialog.DialogOverlay
 import org.archivekeep.app.desktop.ui.designsystem.dialog.DialogPreviewColumn
-import org.archivekeep.app.desktop.ui.designsystem.dialog.DialogPrimaryButton
 import org.archivekeep.app.desktop.ui.designsystem.input.CheckboxWithText
 import org.archivekeep.app.desktop.ui.designsystem.layout.scrollable.ScrollableColumn
 import org.archivekeep.app.desktop.ui.dialogs.Dialog
@@ -243,41 +241,34 @@ private fun AddRepositoryDialogContents(
             },
             bottomContent = {
                 DialogButtonContainer {
-                    when (preparationStatus) {
-                        null, is PreparationStatus.PreparationNoContinue, PreparationStatus.Preparing -> {
-                            DialogPrimaryButton(
-                                "Add",
-                                enabled = false,
-                                onClick = {},
-                            )
+                    val (name, canLaunch, onLaunch) =
+                        when (preparationStatus) {
+                            null, is PreparationStatus.PreparationNoContinue, PreparationStatus.Preparing -> {
+                                Triple("Add", false, {})
+                            }
+
+                            is PreparationStatus.ReadyForAdd -> {
+                                Triple(
+                                    "Add",
+                                    addStatus == null && (storageMarkMatch?.isRemark == false || markConfirmed == true),
+                                    { preparationStatus.startAddExecution(markConfirmed) },
+                                )
+                            }
+
+                            is PreparationStatus.ReadyForInit -> {
+                                Triple(
+                                    "Init",
+                                    initStatus == null && (storageMarkMatch?.isRemark == false || markConfirmed == true),
+                                    { preparationStatus.startInit(markConfirmed) },
+                                )
+                            }
                         }
 
-                        is PreparationStatus.ReadyForAdd -> {
-                            DialogPrimaryButton(
-                                "Add",
-                                enabled = addStatus == null && (storageMarkMatch?.isRemark == false || markConfirmed == true),
-                                onClick = {
-                                    preparationStatus.startAddExecution(markConfirmed)
-                                },
-                            )
-                        }
-
-                        is PreparationStatus.ReadyForInit -> {
-                            DialogPrimaryButton(
-                                "Init",
-                                enabled = initStatus == null && (storageMarkMatch?.isRemark == false || markConfirmed == true),
-                                onClick = {
-                                    preparationStatus.startInit(markConfirmed)
-                                },
-                            )
-                        }
-                    }
-
-                    Spacer(modifier = Modifier.weight(1f))
-                    DialogDismissButton(
-                        "Dismiss",
-                        onClick = onClose,
-                        enabled = true,
+                    SimpleActionDialogControlButtons(
+                        name,
+                        onLaunch = onLaunch,
+                        onClose = onClose,
+                        canLaunch = canLaunch,
                     )
                 }
             },

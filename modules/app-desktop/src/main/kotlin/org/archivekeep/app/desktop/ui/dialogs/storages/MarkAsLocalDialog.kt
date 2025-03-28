@@ -2,7 +2,6 @@ package org.archivekeep.app.desktop.ui.dialogs.storages
 
 import androidx.compose.desktop.ui.tooling.preview.Preview
 import androidx.compose.foundation.layout.RowScope
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -24,9 +23,8 @@ import org.archivekeep.app.core.persistence.platform.demo.hddA
 import org.archivekeep.app.core.persistence.registry.RegistryDataStore
 import org.archivekeep.app.core.utils.identifiers.StorageURI
 import org.archivekeep.app.desktop.domain.wiring.LocalRegistry
-import org.archivekeep.app.desktop.ui.designsystem.dialog.DialogDismissButton
+import org.archivekeep.app.desktop.ui.components.dialogs.SimpleActionDialogControlButtons
 import org.archivekeep.app.desktop.ui.designsystem.dialog.DialogPreviewColumn
-import org.archivekeep.app.desktop.ui.designsystem.dialog.DialogPrimaryButton
 import org.archivekeep.app.desktop.ui.utils.appendBoldSpan
 import org.archivekeep.utils.loading.Loadable
 
@@ -106,12 +104,11 @@ class MarkAsLocalDialog(
         onClose: () -> Unit,
         state: State,
     ) {
-        DialogPrimaryButton(
+        SimpleActionDialogControlButtons(
             "Mark as local",
-            onClick = state.onLaunch,
+            onLaunch = state.onLaunch,
+            onClose = onClose,
         )
-        Spacer(Modifier.weight(1f))
-        DialogDismissButton("Cancel", onClick = onClose)
     }
 }
 

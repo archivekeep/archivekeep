@@ -7,7 +7,6 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.RadioButton
@@ -44,10 +43,9 @@ import org.archivekeep.app.desktop.domain.wiring.LocalArchiveService
 import org.archivekeep.app.desktop.domain.wiring.LocalOperationFactory
 import org.archivekeep.app.desktop.domain.wiring.LocalRepoService
 import org.archivekeep.app.desktop.domain.wiring.OperationFactory
+import org.archivekeep.app.desktop.ui.components.dialogs.SimpleActionDialogControlButtons
 import org.archivekeep.app.desktop.ui.components.errors.AutomaticErrorMessage
-import org.archivekeep.app.desktop.ui.designsystem.dialog.DialogDismissButton
 import org.archivekeep.app.desktop.ui.designsystem.dialog.DialogPreviewColumn
-import org.archivekeep.app.desktop.ui.designsystem.dialog.DialogPrimaryButton
 import org.archivekeep.app.desktop.ui.designsystem.layout.scrollable.ScrollableColumn
 import org.archivekeep.app.desktop.ui.dialogs.repository.AbstractRepositoryDialog
 import org.archivekeep.app.desktop.ui.dialogs.repository.management.AssociateRepositoryDialog.VM
@@ -330,18 +328,11 @@ class AssociateRepositoryDialog(
 
     @Composable
     override fun RowScope.renderButtons(state: VM.State) {
-        DialogPrimaryButton(
+        SimpleActionDialogControlButtons(
             "Associate",
-            onClick = state.onLaunch,
-            enabled = state.canLaunch,
-        )
-
-        Spacer(modifier = Modifier.weight(1f))
-
-        DialogDismissButton(
-            "Cancel",
-            onClick = state.onClose,
-            enabled = true,
+            onLaunch = state.onLaunch,
+            onClose = state.onClose,
+            canLaunch = state.canLaunch,
         )
     }
 }
