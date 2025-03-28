@@ -8,13 +8,12 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import kotlinx.coroutines.CancellationException
 import org.archivekeep.app.core.operations.sync.RepoToRepoSync.JobState
 import org.archivekeep.app.core.operations.sync.RepoToRepoSync.State
 import org.archivekeep.app.core.utils.operations.OperationExecutionState
 import org.archivekeep.app.desktop.ui.components.ItemManySelect
 import org.archivekeep.app.desktop.ui.components.LoadableGuard
-import org.archivekeep.app.desktop.ui.components.errors.AutomaticErrorMessage
+import org.archivekeep.app.desktop.ui.components.dialogs.operations.ExecutionErrorIfPresent
 import org.archivekeep.app.desktop.ui.components.operations.ScrollableLogTextInDialog
 import org.archivekeep.app.desktop.ui.components.operations.SyncProgress
 import org.archivekeep.app.desktop.ui.components.rememberManySelectWithMergedState
@@ -84,15 +83,7 @@ fun (ColumnScope).RepoToRepoSyncMainContents(userFlowState: RepoToRepoSyncUserFl
                 SyncProgress(operation.progress.collectAsState().value)
                 Spacer(Modifier.height(8.dp))
                 ScrollableLogTextInDialog(operation.progressLog.collectAsState("").value)
-
-                (operation.executionState as? OperationExecutionState.Finished)
-                    ?.error
-                    ?.let { error ->
-                        if (error !is CancellationException) {
-                            Spacer(Modifier.height(12.dp))
-                            AutomaticErrorMessage(error, onResolve = {})
-                        }
-                    }
+                ExecutionErrorIfPresent(operation.executionState)
             }
         }
     }

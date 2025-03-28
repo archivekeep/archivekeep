@@ -31,6 +31,7 @@ import org.archivekeep.app.desktop.ui.components.FileManySelect
 import org.archivekeep.app.desktop.ui.components.ItemManySelect
 import org.archivekeep.app.desktop.ui.components.LoadableGuard
 import org.archivekeep.app.desktop.ui.components.dialogs.operations.DialogOperationControlButtons
+import org.archivekeep.app.desktop.ui.components.dialogs.operations.ExecutionErrorIfPresent
 import org.archivekeep.app.desktop.ui.components.operations.IndexUpdatePreparationProgress
 import org.archivekeep.app.desktop.ui.components.operations.LocalIndexUpdateProgress
 import org.archivekeep.app.desktop.ui.designsystem.dialog.LabelText
@@ -181,6 +182,8 @@ class AddAndPushRepoDialog(
                                     )
                                 }
                             }
+
+                            ExecutionErrorIfPresent(status.executionState)
                         }
                     }
                 }

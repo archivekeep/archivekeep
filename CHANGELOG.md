@@ -5,6 +5,7 @@
 ### Added
 
 - UI: improve Upload/Download dialog: add progress summary, and error details in case of failure 
+- UI: show execution error (if failed) also for index update dialog and add and push dialog
 - build: GH Actions cancel in-progress build in the same branch
 
 ### Change
