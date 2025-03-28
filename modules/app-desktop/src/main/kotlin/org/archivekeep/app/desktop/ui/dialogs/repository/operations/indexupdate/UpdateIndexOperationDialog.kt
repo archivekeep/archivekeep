@@ -29,12 +29,12 @@ import org.archivekeep.app.core.utils.identifiers.RepositoryURI
 import org.archivekeep.app.desktop.domain.wiring.LocalAddOperationSupervisorService
 import org.archivekeep.app.desktop.ui.components.FileManySelect
 import org.archivekeep.app.desktop.ui.components.ItemManySelect
+import org.archivekeep.app.desktop.ui.components.dialogs.operations.DialogOperationControlButtons
+import org.archivekeep.app.desktop.ui.components.dialogs.operations.DialogOperationControlState
 import org.archivekeep.app.desktop.ui.components.operations.IndexUpdatePreparationProgress
 import org.archivekeep.app.desktop.ui.components.operations.LocalIndexUpdateProgress
 import org.archivekeep.app.desktop.ui.components.operations.ScrollableLogTextInDialog
-import org.archivekeep.app.desktop.ui.designsystem.dialog.DialogDismissButton
 import org.archivekeep.app.desktop.ui.designsystem.dialog.DialogPreviewColumn
-import org.archivekeep.app.desktop.ui.designsystem.dialog.DialogPrimaryButton
 import org.archivekeep.app.desktop.ui.designsystem.dialog.LabelText
 import org.archivekeep.app.desktop.ui.designsystem.layout.scrollable.ScrollableColumn
 import org.archivekeep.app.desktop.ui.dialogs.repository.AbstractRepositoryDialog
@@ -65,6 +65,33 @@ class UpdateIndexOperationDialog(
                 appendBoldSpan(archiveName)
                 append(" - index update")
             }
+
+        val controlState: DialogOperationControlState =
+            when (val opState = operationState) {
+                AddOperationSupervisor.ExecutionState.NotRunning ->
+                    DialogOperationControlState.NotRunning(onLaunch = {}, onClose = onClose, canLaunch = false)
+                is AddOperationSupervisor.ExecutionState.Running ->
+                    if (opState.finished) {
+                        DialogOperationControlState.Completed(onClose = onClose)
+                    } else {
+                        DialogOperationControlState.Running(onHide = onClose)
+                    }
+                is AddOperationSupervisor.Preparation ->
+                    DialogOperationControlState.NotRunning(
+                        onLaunch = ::onTriggerExecute,
+                        onClose = onClose,
+                        canLaunch = opState.result is AddOperation.PreparationResult,
+                    )
+            }
+
+        private fun onTriggerExecute() {
+            (operationState as AddOperationSupervisor.Preparation).launch(
+                AddOperation.LaunchOptions(
+                    selectedFilesToAdd.value,
+                    selectedMovesToExecute.value,
+                ),
+            )
+        }
     }
 
     inner class VM(
@@ -172,41 +199,10 @@ class UpdateIndexOperationDialog(
 
     @Composable
     override fun RowScope.renderButtons(state: State) {
-        val onTriggerExecute = {
-            (state.operationState as AddOperationSupervisor.Preparation).launch(
-                AddOperation.LaunchOptions(
-                    state.selectedFilesToAdd.value,
-                    state.selectedMovesToExecute.value,
-                ),
-            )
-        }
-
-        var closeShown = false
-
-        when (val opState = state.operationState) {
-            AddOperationSupervisor.ExecutionState.NotRunning -> {
-                DialogPrimaryButton("Execute index update", onClick = {}, enabled = false)
-            }
-
-            is AddOperationSupervisor.ExecutionState.Running -> {
-                if (opState.finished) {
-                    DialogDismissButton("Close", state.onClose)
-                    closeShown = true
-                } else {
-                    DialogPrimaryButton("Execute index update", onClick = {}, enabled = false)
-                    Text("Running ...")
-                }
-            }
-
-            is AddOperationSupervisor.Preparation -> {
-                DialogPrimaryButton("Execute index update", onClick = onTriggerExecute, enabled = opState.result is AddOperation.PreparationResult)
-            }
-        }
-
-        if (!closeShown) {
-            Spacer(Modifier.weight(1f))
-            DialogDismissButton("Dismiss", state.onClose)
-        }
+        DialogOperationControlButtons(
+            state.controlState,
+            launchText = "Execute index update",
+        )
     }
 }
 

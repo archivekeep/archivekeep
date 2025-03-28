@@ -98,7 +98,9 @@ abstract class AbstractStorageDialog<T_State : AbstractStorageDialog.IState, T_V
                         },
                         content = {},
                         bottomContent = {
-                            DialogDismissButton("Dismiss", onClick = onClose)
+                            DialogButtonContainer {
+                                DialogDismissButton("Dismiss", onClick = onClose)
+                            }
                         },
                     )
                 }

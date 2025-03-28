@@ -10,6 +10,7 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import org.archivekeep.app.core.operations.sync.RepoToRepoSync
 import org.archivekeep.app.core.operations.sync.RepoToRepoSync.JobState
+import org.archivekeep.app.desktop.ui.components.dialogs.operations.DialogOperationControlState
 import org.archivekeep.app.desktop.utils.stickToFirstNotNullAsState
 import org.archivekeep.files.operations.sync.RelocationSyncMode
 import org.archivekeep.files.operations.sync.SyncSubOperation
@@ -29,12 +30,31 @@ class RepoToRepoSyncUserFlow(
         val operation: Loadable<RepoToRepoSync.State>,
         val selectedOperations: MutableState<Set<SyncSubOperation>>,
     ) {
-        val isRunning = operation.mapIfLoadedOrDefault(false) { it is JobState.Running }
-        val isCancelled = operation.mapIfLoadedOrDefault(false) { it is JobState.Finished && it.cancelled }
-        val isCompleted = operation.mapIfLoadedOrDefault(false) { it is JobState.Finished }
-
-        val canCancel = isRunning
-        val canLaunch = operation.mapIfLoadedOrDefault(false) { it is RepoToRepoSync.State.Prepared && !it.preparedSyncOperation.isNoOp() }
+        fun control(
+            onLaunch: () -> Unit,
+            onCancel: () -> Unit,
+            onClose: () -> Unit,
+        ): DialogOperationControlState =
+            operation.mapIfLoadedOrDefault(
+                DialogOperationControlState.NotRunning(onLaunch = {}, onClose = onClose, canLaunch = false),
+            ) { operationState ->
+                when (operationState) {
+                    is RepoToRepoSync.State.Prepared ->
+                        DialogOperationControlState.NotRunning(
+                            onLaunch,
+                            onClose,
+                            canLaunch = !operationState.preparedSyncOperation.isNoOp(),
+                        )
+                    is JobState.Created, is JobState.Running ->
+                        DialogOperationControlState.Running(onCancel = onCancel, onHide = onClose)
+                    is JobState.Finished ->
+                        if (operationState.cancelled) {
+                            DialogOperationControlState.Completed(outcome = "Cancelled", onClose = onClose)
+                        } else {
+                            DialogOperationControlState.Completed(onClose = onClose)
+                        }
+                }
+            }
     }
 
     val currentOperationFlow = sync.currentJobFlow.stickToFirstNotNullAsState(scope)

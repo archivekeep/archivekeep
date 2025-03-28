@@ -22,9 +22,9 @@ import org.archivekeep.app.core.utils.generics.OptionalLoadable
 import org.archivekeep.app.core.utils.identifiers.RepositoryURI
 import org.archivekeep.app.desktop.domain.wiring.LocalRepoToRepoSyncService
 import org.archivekeep.app.desktop.domain.wiring.LocalStorageService
+import org.archivekeep.app.desktop.ui.components.dialogs.operations.DialogOperationControlButtons
 import org.archivekeep.app.desktop.ui.designsystem.dialog.DialogPreviewColumn
 import org.archivekeep.app.desktop.ui.dialogs.AbstractDialog
-import org.archivekeep.app.desktop.ui.dialogs.repository.operations.sync.parts.RepoToRepoSyncFlowButtons
 import org.archivekeep.app.desktop.ui.dialogs.repository.operations.sync.parts.RepoToRepoSyncMainContents
 import org.archivekeep.app.desktop.ui.utils.appendBoldSpan
 import org.archivekeep.app.desktop.utils.collectAsLoadable
@@ -120,11 +120,12 @@ data class DownloadFromRepoDialog(
 
     @Composable
     override fun RowScope.renderButtons(state: State) {
-        RepoToRepoSyncFlowButtons(
-            userFlowState = state.userFlowState,
-            onLaunch = state.onLaunch,
-            onCancel = state.onCancel,
-            onClose = state.onClose,
+        DialogOperationControlButtons(
+            state.userFlowState.control(
+                onLaunch = state.onLaunch,
+                onCancel = state.onCancel,
+                onClose = state.onClose,
+            ),
         )
     }
 }

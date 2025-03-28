@@ -7,6 +7,10 @@
 - UI: improve Upload/Download dialog: add progress summary, and error details in case of failure 
 - build: GH Actions cancel in-progress build in the same branch
 
+### Change
+
+- UI: unify and improve dialog control buttons for repository data operation dialogs
+
 ### Fixed
 
 - build: GH pages build cancels runs from different branches 

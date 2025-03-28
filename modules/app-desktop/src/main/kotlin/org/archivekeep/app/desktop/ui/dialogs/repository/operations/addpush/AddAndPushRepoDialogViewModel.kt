@@ -26,6 +26,7 @@ import org.archivekeep.app.desktop.domain.data.getSyncCandidates
 import org.archivekeep.app.desktop.domain.wiring.LocalAddPushService
 import org.archivekeep.app.desktop.domain.wiring.LocalRepoService
 import org.archivekeep.app.desktop.domain.wiring.LocalStorageService
+import org.archivekeep.app.desktop.ui.components.dialogs.operations.DialogOperationControlState
 import org.archivekeep.app.desktop.ui.dialogs.AbstractDialog
 import org.archivekeep.app.desktop.ui.utils.appendBoldSpan
 import org.archivekeep.app.desktop.utils.stickToFirstNotNullAsState
@@ -76,30 +77,38 @@ class AddAndPushRepoDialogViewModel(
                 append("add and push")
             }
 
-        val showLaunch =
-            run {
-                state !is LaunchedAddPushProcess || !state.finished
-            }
+        val controlState: DialogOperationControlState by derivedStateOf {
+            when (state) {
+                is LaunchedAddPushProcess ->
+                    if (state.finished) {
+                        DialogOperationControlState.Completed(outcome = "Finished", onClose = onClose)
+                    } else {
+                        DialogOperationControlState.Running(onCancel = onCancel, onHide = onClose)
+                    }
+                AddAndPushOperation.NotReadyAddPushProcess, is AddAndPushOperation.PreparingAddPushProcess ->
+                    DialogOperationControlState.NotRunning(onLaunch = {}, onClose = onClose, canLaunch = false)
+                is ReadyAddPushProcess -> {
+                    val candidates = otherRepositoryCandidates.mapIfLoadedOrDefault(emptyList()) { it }
+                    val selections = selectedDestinationRepositories
 
-        val canLaunch by derivedStateOf {
-            val candidates = otherRepositoryCandidates.mapIfLoadedOrDefault(emptyList()) { it }
-            val selections = selectedDestinationRepositories
+                    val anyOperationSelected = selectedFilenames.value.isNotEmpty() || selectedMoves.value.isNotEmpty()
 
-            val anyOperationSelected = selectedFilenames.value.isNotEmpty() || selectedMoves.value.isNotEmpty()
+                    val candidateSelectedAndValid =
+                        selections.value.isNotEmpty() &&
+                            selections.value.all { selection ->
+                                candidates
+                                    .first { it.uri == selection }
+                                    .repositoryState.connectionState.isConnected
+                            }
 
-            state is ReadyAddPushProcess &&
-                anyOperationSelected &&
-                selections.value.isNotEmpty() &&
-                selections.value.all { selection ->
-                    candidates
-                        .first { it.uri == selection }
-                        .repositoryState.connectionState.isConnected
+                    DialogOperationControlState.NotRunning(
+                        onLaunch = ::launch,
+                        onClose = onClose,
+                        canLaunch = anyOperationSelected && candidateSelectedAndValid,
+                    )
                 }
+            }
         }
-
-        val canStop = state is LaunchedAddPushProcess && !state.finished
-
-        val canHide = state is LaunchedAddPushProcess && !state.finished
 
         fun launch() {
             if (state !is ReadyAddPushProcess) {

@@ -13,7 +13,9 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 
 @Composable
 fun DialogButtonContainer(content: @Composable RowScope.() -> Unit) {
@@ -25,7 +27,7 @@ fun DialogButtonContainer(content: @Composable RowScope.() -> Unit) {
 }
 
 @Composable
-fun DialogPrimaryButton(
+fun (RowScope).DialogPrimaryButton(
     text: String,
     enabled: Boolean = true,
     onClick: () -> Unit,
@@ -34,13 +36,14 @@ fun DialogPrimaryButton(
         onClick = onClick,
         enabled = enabled,
         shape = MaterialTheme.shapes.small,
+        modifier = Modifier.alignByBaseline(),
     ) {
         Text(text)
     }
 }
 
 @Composable
-fun DialogSecondaryButton(
+fun (RowScope).DialogSecondaryButton(
     text: String,
     enabled: Boolean = true,
     onClick: () -> Unit,
@@ -51,13 +54,14 @@ fun DialogSecondaryButton(
         shape = MaterialTheme.shapes.small,
         border = ButtonDefaults.outlinedButtonBorder(enabled),
         colors = ButtonDefaults.outlinedButtonColors(),
+        modifier = Modifier.alignByBaseline(),
     ) {
         Text(text)
     }
 }
 
 @Composable
-fun DialogDismissButton(
+fun (RowScope).DialogDismissButton(
     text: String = "Cancel",
     onClick: () -> Unit,
     enabled: Boolean = true,
@@ -66,7 +70,21 @@ fun DialogDismissButton(
         onClick = onClick,
         shape = MaterialTheme.shapes.small,
         enabled = enabled,
+        modifier = Modifier.alignByBaseline(),
     ) {
         Text(text)
     }
+}
+
+@Composable
+fun (RowScope).DialogButtonsStatusText(
+    text: String,
+    modifier: Modifier = Modifier,
+) {
+    Text(
+        text,
+        modifier.alignByBaseline(),
+        fontSize = 14.sp,
+        color = Color.Black.copy(alpha = 0.8f),
+    )
 }

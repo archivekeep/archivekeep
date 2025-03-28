@@ -29,11 +29,9 @@ import org.archivekeep.app.desktop.ui.components.DestinationManySelect
 import org.archivekeep.app.desktop.ui.components.FileManySelect
 import org.archivekeep.app.desktop.ui.components.ItemManySelect
 import org.archivekeep.app.desktop.ui.components.LoadableGuard
+import org.archivekeep.app.desktop.ui.components.dialogs.operations.DialogOperationControlButtons
 import org.archivekeep.app.desktop.ui.components.operations.IndexUpdatePreparationProgress
 import org.archivekeep.app.desktop.ui.components.operations.LocalIndexUpdateProgress
-import org.archivekeep.app.desktop.ui.designsystem.dialog.DialogDismissButton
-import org.archivekeep.app.desktop.ui.designsystem.dialog.DialogPrimaryButton
-import org.archivekeep.app.desktop.ui.designsystem.dialog.DialogSecondaryButton
 import org.archivekeep.app.desktop.ui.designsystem.dialog.LabelText
 import org.archivekeep.app.desktop.ui.designsystem.dialog.previewWith
 import org.archivekeep.app.desktop.ui.designsystem.layout.scrollable.ScrollableColumn
@@ -191,31 +189,7 @@ class AddAndPushRepoDialog(
 
     @Composable
     override fun RowScope.renderButtons(state: VMState) {
-        if (state.showLaunch) {
-            DialogPrimaryButton(
-                "Launch",
-                onClick = state::launch,
-                enabled = state.canLaunch,
-            )
-        }
-
-        if (state.canStop) {
-            DialogSecondaryButton(
-                (if (false) "Stopping ..." else "Stop"),
-                onClick = state.onCancel,
-            )
-        }
-
-        Spacer(modifier = Modifier.weight(1f))
-
-        DialogDismissButton(
-            if (state.canHide) {
-                "Hide"
-            } else {
-                "Dismiss"
-            },
-            onClick = state.onClose,
-        )
+        DialogOperationControlButtons(state.controlState)
     }
 }
 
