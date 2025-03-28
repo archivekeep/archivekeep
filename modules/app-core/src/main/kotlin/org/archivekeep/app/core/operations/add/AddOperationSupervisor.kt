@@ -18,25 +18,21 @@ interface AddOperationSupervisor {
         val preparationResult: PreparationResult
         val launchOptions: AddOperation.LaunchOptions
 
-        val executionStateFlow: Flow<ExecutionState.Running>
+        val executionStateFlow: Flow<JobState>
 
         fun cancel()
     }
 
     sealed interface State
 
-    sealed interface ExecutionState : State {
-        data object NotRunning : ExecutionState
-
-        data class Running(
-            val movesToExecute: Set<PreparationResult.Move>,
-            val filesToAdd: Set<String>,
-            val addProgress: IndexUpdateAddProgress,
-            val moveProgress: IndexUpdateMoveProgress,
-            val log: String,
-            val state: OperationExecutionState,
-        ) : ExecutionState
-    }
+    data class JobState(
+        val movesToExecute: Set<PreparationResult.Move>,
+        val filesToAdd: Set<String>,
+        val addProgress: IndexUpdateAddProgress,
+        val moveProgress: IndexUpdateMoveProgress,
+        val log: String,
+        val state: OperationExecutionState,
+    ) : State
 
     data class Preparation(
         val result: AddOperation.Preparation,

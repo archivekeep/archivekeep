@@ -18,8 +18,8 @@ import org.archivekeep.app.core.domain.repositories.RepositoryService
 import org.archivekeep.app.core.domain.storages.StorageRepository
 import org.archivekeep.app.core.domain.storages.StorageService
 import org.archivekeep.app.core.operations.addpush.AddAndPushOperation
+import org.archivekeep.app.core.operations.addpush.AddAndPushOperation.JobState
 import org.archivekeep.app.core.operations.addpush.AddAndPushOperation.LaunchOptions
-import org.archivekeep.app.core.operations.addpush.AddAndPushOperation.LaunchedAddPushProcess
 import org.archivekeep.app.core.operations.addpush.AddAndPushOperation.ReadyAddPushProcess
 import org.archivekeep.app.core.utils.identifiers.RepositoryURI
 import org.archivekeep.app.desktop.domain.data.getSyncCandidates
@@ -80,7 +80,7 @@ class AddAndPushRepoDialogViewModel(
 
         val controlState: DialogOperationControlState by derivedStateOf {
             when (state) {
-                is LaunchedAddPushProcess ->
+                is JobState ->
                     state.executionState.toDialogOperationControlState(
                         onCancel = onCancel,
                         onHide = onClose,

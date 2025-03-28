@@ -40,7 +40,7 @@ interface AddAndPushOperation {
         val selectedDestinationRepositories: Set<RepositoryURI>,
     )
 
-    data class LaunchedAddPushProcess(
+    data class JobState(
         val addPreparationResult: AddOperation.PreparationResult,
         val options: LaunchOptions,
         val addProgress: IndexUpdateAddProgress,

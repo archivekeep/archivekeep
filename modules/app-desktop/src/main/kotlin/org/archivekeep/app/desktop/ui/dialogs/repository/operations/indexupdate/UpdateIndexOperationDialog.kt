@@ -5,7 +5,6 @@ import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
@@ -70,9 +69,7 @@ class UpdateIndexOperationDialog(
 
         val controlState: DialogOperationControlState =
             when (val opState = operationState) {
-                AddOperationSupervisor.ExecutionState.NotRunning ->
-                    DialogOperationControlState.NotRunning(onLaunch = {}, onClose = onClose, canLaunch = false)
-                is AddOperationSupervisor.ExecutionState.Running ->
+                is AddOperationSupervisor.JobState ->
                     opState.state.toDialogOperationControlState(
                         onCancel = null,
                         onHide = onClose,
@@ -156,9 +153,6 @@ class UpdateIndexOperationDialog(
     @Composable
     override fun ColumnScope.renderContent(state: State) {
         when (val operationState = state.operationState) {
-            AddOperationSupervisor.ExecutionState.NotRunning -> {
-                Text("Preparing...")
-            }
             is AddOperationSupervisor.Preparation -> {
                 ScrollableColumn {
                     when (val preparationState = operationState.result) {
@@ -186,7 +180,7 @@ class UpdateIndexOperationDialog(
                     }
                 }
             }
-            is AddOperationSupervisor.ExecutionState.Running -> {
+            is AddOperationSupervisor.JobState -> {
                 LocalIndexUpdateProgress(
                     operationState.movesToExecute,
                     operationState.filesToAdd,
@@ -274,7 +268,7 @@ private fun UpdateIndexOperationViewPreview() {
         renderPreview(
             archiveName = "Family Stuff",
             state =
-                AddOperationSupervisor.ExecutionState.Running(
+                AddOperationSupervisor.JobState(
                     emptySet(),
                     setOf("Documents/Something/There.pdf"),
                     IndexUpdateAddProgress(setOf("Documents/Something/There.pdf"), emptyMap(), false),
@@ -288,7 +282,7 @@ private fun UpdateIndexOperationViewPreview() {
 
         renderPreview(
             archiveName = "Family Stuff",
-            AddOperationSupervisor.ExecutionState.Running(
+            AddOperationSupervisor.JobState(
                 emptySet(),
                 setOf("Documents/Something/There.pdf", "Photos/2024/04/photo_09.JPG"),
                 IndexUpdateAddProgress(setOf("Documents/Something/There.pdf", "Photos/2024/04/photo_09.JPG"), emptyMap(), false),
@@ -308,7 +302,7 @@ private fun UpdateIndexOperationViewPreview2() {
     DialogPreviewColumn {
         renderPreview(
             archiveName = "Family Stuff",
-            AddOperationSupervisor.ExecutionState.Running(
+            AddOperationSupervisor.JobState(
                 emptySet(),
                 setOf("Documents/Something/There.pdf", "Photos/2024/04/photo_09.JPG", "Photos/2024/04/photo_10.JPG"),
                 IndexUpdateAddProgress(setOf("Documents/Something/There.pdf", "Photos/2024/04/photo_09.JPG"), emptyMap(), true),

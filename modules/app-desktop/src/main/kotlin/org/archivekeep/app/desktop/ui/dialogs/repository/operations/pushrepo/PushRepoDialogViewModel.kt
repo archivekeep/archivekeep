@@ -14,6 +14,7 @@ import org.archivekeep.app.core.operations.sync.RepoToRepoSync.JobState
 import org.archivekeep.app.core.operations.sync.RepoToRepoSync.State
 import org.archivekeep.app.core.operations.sync.RepoToRepoSyncService
 import org.archivekeep.app.core.utils.identifiers.RepositoryURI
+import org.archivekeep.app.core.utils.operations.OperationExecutionState
 import org.archivekeep.app.desktop.domain.data.getSyncCandidates
 import org.archivekeep.app.desktop.ui.dialogs.AbstractDialog
 import org.archivekeep.app.desktop.ui.dialogs.repository.operations.sync.describePreparedSyncOperation
@@ -90,14 +91,12 @@ class PushRepoDialogViewModel(
                         is State.Prepared ->
                             describePreparedSyncOperation(it.preparedSyncOperation)
 
-                        is JobState.Created ->
-                            "Starting"
-
-                        is JobState.Running ->
-                            "Running"
-
-                        is JobState.Finished ->
-                            "Completed"
+                        is JobState ->
+                            when (it.executionState) {
+                                OperationExecutionState.NotStarted -> "Starting"
+                                OperationExecutionState.Running -> "Running"
+                                is OperationExecutionState.Finished -> "Finished"
+                            }
                     }
                 }
 

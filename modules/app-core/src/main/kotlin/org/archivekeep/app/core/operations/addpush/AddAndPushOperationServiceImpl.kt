@@ -59,7 +59,7 @@ class AddAndPushOperationServiceImpl(
                 repositoryPushStatus,
                 executionState,
             ) { addProgress, moveProgress, repositoryPushStatus, executionState ->
-                AddAndPushOperation.LaunchedAddPushProcess(
+                AddAndPushOperation.JobState(
                     addPreparationResult,
                     launchOptions,
                     addProgress,

@@ -1,5 +1,7 @@
 package org.archivekeep.app.core.utils.operations
 
+import kotlinx.coroutines.CancellationException
+
 sealed interface OperationExecutionState {
     data object NotStarted : OperationExecutionState
 
@@ -7,5 +9,8 @@ sealed interface OperationExecutionState {
 
     data class Finished(
         val error: Throwable?,
-    ) : OperationExecutionState
+    ) : OperationExecutionState {
+        val success = error == null
+        val cancelled = error is CancellationException
+    }
 }

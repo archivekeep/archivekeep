@@ -11,6 +11,7 @@ import kotlinx.coroutines.flow.stateIn
 import org.archivekeep.app.core.operations.sync.RepoToRepoSync
 import org.archivekeep.app.core.operations.sync.RepoToRepoSync.JobState
 import org.archivekeep.app.desktop.ui.components.dialogs.operations.DialogOperationControlState
+import org.archivekeep.app.desktop.ui.components.dialogs.operations.toDialogOperationControlState
 import org.archivekeep.app.desktop.utils.stickToFirstNotNullAsState
 import org.archivekeep.files.operations.sync.RelocationSyncMode
 import org.archivekeep.files.operations.sync.SyncSubOperation
@@ -45,14 +46,12 @@ class RepoToRepoSyncUserFlow(
                             onClose,
                             canLaunch = !operationState.preparedSyncOperation.isNoOp(),
                         )
-                    is JobState.Created, is JobState.Running ->
-                        DialogOperationControlState.Running(onCancel = onCancel, onHide = onClose)
-                    is JobState.Finished ->
-                        if (operationState.cancelled) {
-                            DialogOperationControlState.Completed(outcome = "Cancelled", onClose = onClose)
-                        } else {
-                            DialogOperationControlState.Completed(onClose = onClose)
-                        }
+                    is JobState ->
+                        operationState.executionState.toDialogOperationControlState(
+                            onCancel = onCancel,
+                            onHide = onClose,
+                            onClose = onClose,
+                        )
                 }
             }
     }

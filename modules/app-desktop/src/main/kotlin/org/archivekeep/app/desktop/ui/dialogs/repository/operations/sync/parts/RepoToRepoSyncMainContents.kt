@@ -11,6 +11,7 @@ import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.CancellationException
 import org.archivekeep.app.core.operations.sync.RepoToRepoSync.JobState
 import org.archivekeep.app.core.operations.sync.RepoToRepoSync.State
+import org.archivekeep.app.core.utils.operations.OperationExecutionState
 import org.archivekeep.app.desktop.ui.components.ItemManySelect
 import org.archivekeep.app.desktop.ui.components.LoadableGuard
 import org.archivekeep.app.desktop.ui.components.errors.AutomaticErrorMessage
@@ -62,38 +63,36 @@ fun (ColumnScope).RepoToRepoSyncMainContents(userFlowState: RepoToRepoSyncUserFl
                     }
                 }
             }
-            is JobState.Created -> {
-                Text("Starting")
-            }
-            is JobState.Running -> {
+            is JobState -> {
                 Spacer(Modifier.height(8.dp))
-                LabelText("Progress")
+
+                LabelText(
+                    when (val executionState = operation.executionState) {
+                        OperationExecutionState.NotStarted -> "Starting"
+                        OperationExecutionState.Running -> "Progress"
+                        is OperationExecutionState.Finished ->
+                            if (executionState.success) {
+                                "Finished"
+                            } else if (executionState.cancelled) {
+                                "Cancelled"
+                            } else {
+                                "Failed"
+                            }
+                    },
+                )
+
                 SyncProgress(operation.progress.collectAsState().value)
                 Spacer(Modifier.height(8.dp))
                 ScrollableLogTextInDialog(operation.progressLog.collectAsState("").value)
-            }
 
-            is JobState.Finished -> {
-                Spacer(Modifier.height(8.dp))
-                LabelText(
-                    if (operation.success) {
-                        "Finished"
-                    } else if (operation.cancelled) {
-                        "Cancelled"
-                    } else {
-                        "Failed"
-                    },
-                )
-                SyncProgress(operation.progress)
-                Spacer(Modifier.height(8.dp))
-                ScrollableLogTextInDialog(operation.progressLog)
-
-                operation.error?.let { error ->
-                    if (error !is CancellationException) {
-                        Spacer(Modifier.height(12.dp))
-                        AutomaticErrorMessage(error, onResolve = {})
+                (operation.executionState as? OperationExecutionState.Finished)
+                    ?.error
+                    ?.let { error ->
+                        if (error !is CancellationException) {
+                            Spacer(Modifier.height(12.dp))
+                            AutomaticErrorMessage(error, onResolve = {})
+                        }
                     }
-                }
             }
         }
     }

@@ -16,7 +16,7 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.onEach
 import org.archivekeep.app.core.domain.repositories.Repository
 import org.archivekeep.app.core.operations.addpush.AddAndPushOperation
-import org.archivekeep.app.core.operations.addpush.AddAndPushOperation.LaunchedAddPushProcess
+import org.archivekeep.app.core.operations.addpush.AddAndPushOperation.JobState
 import org.archivekeep.app.core.operations.addpush.AddAndPushOperation.NotReadyAddPushProcess
 import org.archivekeep.app.core.operations.addpush.AddAndPushOperation.PreparingAddPushProcess
 import org.archivekeep.app.core.operations.addpush.AddAndPushOperation.ReadyAddPushProcess
@@ -139,7 +139,7 @@ class AddAndPushRepoDialog(
                 }
             }
 
-            is LaunchedAddPushProcess -> {
+            is JobState -> {
                 ScrollableColumn(Modifier.weight(1f, fill = false)) {
                     Spacer(Modifier.height(4.dp))
 
@@ -253,7 +253,7 @@ private fun AddAndPushDialogContentsCompletedPreview2() {
         .previewWith(
             VMState(
                 repoName = "Documents",
-                LaunchedAddPushProcess(
+                JobState(
                     AddOperation.PreparationResult(
                         newFiles = allNewFiles,
                         moves = emptyList(),
@@ -290,7 +290,7 @@ private fun AddAndPushDialogContentsCompletedPreview3() {
         .previewWith(
             VMState(
                 repoName = "Documents",
-                LaunchedAddPushProcess(
+                JobState(
                     AddOperation.PreparationResult(
                         newFiles = allNewFiles,
                         moves = allTestMoves,

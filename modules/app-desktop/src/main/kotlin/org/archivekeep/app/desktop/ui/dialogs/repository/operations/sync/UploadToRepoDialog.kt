@@ -11,7 +11,6 @@ import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.buildAnnotatedString
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import org.archivekeep.app.core.domain.storages.StorageRepository
 import org.archivekeep.app.core.domain.storages.StorageService
@@ -24,6 +23,7 @@ import org.archivekeep.app.core.persistence.platform.photosAdjustmentA
 import org.archivekeep.app.core.persistence.platform.photosAdjustmentB
 import org.archivekeep.app.core.utils.generics.OptionalLoadable
 import org.archivekeep.app.core.utils.identifiers.RepositoryURI
+import org.archivekeep.app.core.utils.operations.OperationExecutionState
 import org.archivekeep.app.desktop.domain.wiring.LocalRepoToRepoSyncService
 import org.archivekeep.app.desktop.domain.wiring.LocalStorageService
 import org.archivekeep.app.desktop.ui.components.dialogs.operations.DialogOperationControlButtons
@@ -226,21 +226,20 @@ internal fun UploadToRepoDialogPreview2Contents() {
             RepoToRepoSyncUserFlow.State(
                 Loadable.Loaded(
                     value =
-                        RepoToRepoSync.JobState.Running(
+                        RepoToRepoSync.JobState(
                             comparisonResult = OptionalLoadable.LoadedAvailable(compareResult),
                             preparedSyncOperation = preparedSync,
-                            MutableStateFlow(
-                                "copied: 2024/6/1.JPG\ncopied: 2024/6/2.JPG",
-                            ),
-                            MutableStateFlow(
-                                listOf(
-                                    NewFilesSyncStep.Progress(
-                                        selectedNewFiles,
-                                        selectedNewFiles.subList(0, 2),
+                            progressLog = MutableStateFlow("copied: 2024/6/1.JPG\ncopied: 2024/6/2.JPG"),
+                            progress =
+                                MutableStateFlow(
+                                    listOf(
+                                        NewFilesSyncStep.Progress(
+                                            selectedNewFiles,
+                                            selectedNewFiles.subList(0, 2),
+                                        ),
                                     ),
                                 ),
-                            ),
-                            JobMock(),
+                            executionState = OperationExecutionState.Finished(error = RuntimeException("Something went wrong ...")),
                         ),
                 ),
                 mutableStateOf(selectedNewFiles.toSet()),
@@ -283,18 +282,20 @@ internal fun UploadToRepoDialogPreview3Contents() {
             RepoToRepoSyncUserFlow.State(
                 Loadable.Loaded(
                     value =
-                        RepoToRepoSync.JobState.Finished(
+                        RepoToRepoSync.JobState(
                             comparisonResult = OptionalLoadable.LoadedAvailable(compareResult),
                             preparedSyncOperation = preparedSync,
-                            progressLog = "copied: 2024/6/1.JPG\ncopied: 2024/6/2.JPG",
+                            progressLog = MutableStateFlow("copied: 2024/6/1.JPG\ncopied: 2024/6/2.JPG"),
                             progress =
-                                listOf(
-                                    NewFilesSyncStep.Progress(
-                                        selectedNewFiles,
-                                        selectedNewFiles.subList(0, 2),
+                                MutableStateFlow(
+                                    listOf(
+                                        NewFilesSyncStep.Progress(
+                                            selectedNewFiles,
+                                            selectedNewFiles.subList(0, 2),
+                                        ),
                                     ),
                                 ),
-                            error = RuntimeException("Something went wrong ..."),
+                            executionState = OperationExecutionState.Finished(error = RuntimeException("Something went wrong ...")),
                         ),
                 ),
                 mutableStateOf(selectedNewFiles.toSet()),
@@ -304,11 +305,4 @@ internal fun UploadToRepoDialogPreview3Contents() {
             onClose = {},
         ),
     )
-}
-
-private class JobMock : RepoToRepoSync.Job {
-    override val currentState: StateFlow<RepoToRepoSync.JobState>
-        get() = error("shouldn't be called")
-
-    override fun cancel() = error("shouldn't be called")
 }

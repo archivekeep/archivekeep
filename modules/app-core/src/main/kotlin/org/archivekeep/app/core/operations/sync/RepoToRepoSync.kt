@@ -1,9 +1,9 @@
 package org.archivekeep.app.core.operations.sync
 
-import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.StateFlow
 import org.archivekeep.app.core.utils.generics.OptionalLoadable
+import org.archivekeep.app.core.utils.operations.OperationExecutionState
 import org.archivekeep.files.operations.CompareOperation
 import org.archivekeep.files.operations.sync.PreparedSyncOperation
 import org.archivekeep.files.operations.sync.RelocationSyncMode
@@ -47,31 +47,11 @@ interface RepoToRepoSync {
         ) : State
     }
 
-    sealed interface JobState : State {
-        data class Created(
-            override val comparisonResult: OptionalLoadable.LoadedAvailable<CompareOperation.Result>,
-            val preparedSyncOperation: PreparedSyncOperation,
-            val job: Job,
-        ) : JobState
-
-        data class Running(
-            override val comparisonResult: OptionalLoadable.LoadedAvailable<CompareOperation.Result>,
-            val preparedSyncOperation: PreparedSyncOperation,
-            val progressLog: StateFlow<String>,
-            val progress: StateFlow<List<SyncSubOperationGroup.Progress>>,
-            val job: Job,
-        ) : JobState
-
-        data class Finished(
-            override val comparisonResult: OptionalLoadable.LoadedAvailable<CompareOperation.Result>,
-            val preparedSyncOperation: PreparedSyncOperation,
-            val progress: List<SyncSubOperationGroup.Progress>,
-            val progressLog: String,
-            val error: Throwable?,
-        ) : JobState {
-            val success = error == null
-
-            val cancelled = error != null && error is CancellationException
-        }
-    }
+    data class JobState(
+        override val comparisonResult: OptionalLoadable.LoadedAvailable<CompareOperation.Result>,
+        val preparedSyncOperation: PreparedSyncOperation,
+        val progress: StateFlow<List<SyncSubOperationGroup.Progress>>,
+        val progressLog: StateFlow<String>,
+        val executionState: OperationExecutionState,
+    ) : State
 }

@@ -27,7 +27,6 @@ import org.archivekeep.app.core.utils.generics.mapLoadedData
 import org.archivekeep.app.core.utils.generics.singleInstanceWeakValueMap
 import org.archivekeep.app.core.utils.identifiers.RepositoryURI
 import org.archivekeep.app.core.utils.operations.AbstractOperationJob
-import org.archivekeep.app.core.utils.operations.OperationExecutionState
 import org.archivekeep.files.operations.CompareOperation
 import org.archivekeep.files.operations.sync.PreparedSyncOperation
 import org.archivekeep.files.operations.sync.RelocationSyncMode
@@ -277,30 +276,13 @@ class RepoToRepoSyncServiceImpl(
         override val currentState: Flow<JobState> =
             executionState
                 .map {
-                    when (it) {
-                        OperationExecutionState.NotStarted ->
-                            JobState.Created(
-                                comparisonLoadable,
-                                preparedSyncOperation,
-                                this,
-                            )
-                        is OperationExecutionState.Running ->
-                            JobState.Running(
-                                comparisonLoadable,
-                                preparedSyncOperation,
-                                executionLog.string,
-                                progress,
-                                this@JobImpl,
-                            )
-                        is OperationExecutionState.Finished ->
-                            JobState.Finished(
-                                comparisonLoadable,
-                                preparedSyncOperation,
-                                progress.value,
-                                executionLog.string.value,
-                                it.error,
-                            )
-                    }
+                    JobState(
+                        comparisonLoadable,
+                        preparedSyncOperation,
+                        progress,
+                        executionLog.string,
+                        it,
+                    )
                 }
 
         override suspend fun execute() {

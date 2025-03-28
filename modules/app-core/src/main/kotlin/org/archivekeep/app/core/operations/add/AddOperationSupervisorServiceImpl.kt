@@ -105,14 +105,14 @@ class AddOperationSupervisorServiceImpl(
         private val movesToExecute = (launchOptions.movesSubsetLimit?.intersect(preparationResult.moves.toSet()) ?: preparationResult.moves).toSet()
         private val filesToAdd = (launchOptions.addFilesSubsetLimit?.intersect(preparationResult.newFiles.toSet()) ?: preparationResult.newFiles).toSet()
 
-        override val executionStateFlow: Flow<AddOperationSupervisor.ExecutionState.Running> =
+        override val executionStateFlow: Flow<AddOperationSupervisor.JobState> =
             combine(
                 indexUpdateProgressTracker.addProgressFlow,
                 indexUpdateProgressTracker.moveProgressFlow,
                 executionLog.string,
                 executionState,
             ) { addProgress, moveProgress, log, jobState ->
-                AddOperationSupervisor.ExecutionState.Running(
+                AddOperationSupervisor.JobState(
                     movesToExecute,
                     filesToAdd,
                     addProgress,
