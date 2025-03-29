@@ -9,7 +9,7 @@ import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.state.ToggleableState
 
 data class ManySelectState<O, K, S_K>(
-    val allItems: Collection<O>,
+    val allItems: List<O>,
     val selectedItems: Set<S_K>,
     val onItemChangeState: State<(K, Boolean) -> Unit>,
     val selectAllState: ToggleableState,
@@ -21,13 +21,13 @@ data class ManySelectState<O, K, S_K>(
 
 @Composable
 fun <T> rememberManySelect(
-    allItems: Collection<T>,
+    allItems: List<T>,
     selectionState: MutableState<Set<T>>,
 ): ManySelectState<T, T, T> = rememberManySelect(allItems, selectionState, keyMapper = { it })
 
 @Composable
 fun <O, K> rememberManySelect(
-    allItems: Collection<O>,
+    allItems: List<O>,
     selectionState: MutableState<Set<K>>,
     keyMapper: (option: O) -> K,
 ): ManySelectState<O, K, K> {

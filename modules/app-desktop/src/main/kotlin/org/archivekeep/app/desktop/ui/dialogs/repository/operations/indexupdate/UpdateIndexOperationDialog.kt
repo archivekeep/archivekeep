@@ -27,18 +27,19 @@ import org.archivekeep.app.core.persistence.platform.demo.LaptopSSD
 import org.archivekeep.app.core.utils.identifiers.RepositoryURI
 import org.archivekeep.app.core.utils.operations.OperationExecutionState
 import org.archivekeep.app.desktop.domain.wiring.LocalAddOperationSupervisorService
-import org.archivekeep.app.desktop.ui.components.FileManySelect
-import org.archivekeep.app.desktop.ui.components.ItemManySelect
 import org.archivekeep.app.desktop.ui.components.dialogs.operations.DialogOperationControlButtons
 import org.archivekeep.app.desktop.ui.components.dialogs.operations.DialogOperationControlState
 import org.archivekeep.app.desktop.ui.components.dialogs.operations.ExecutionErrorIfPresent
 import org.archivekeep.app.desktop.ui.components.dialogs.operations.toDialogOperationControlState
+import org.archivekeep.app.desktop.ui.components.fileManySelect
+import org.archivekeep.app.desktop.ui.components.itemManySelect
 import org.archivekeep.app.desktop.ui.components.operations.IndexUpdatePreparationProgress
 import org.archivekeep.app.desktop.ui.components.operations.LocalIndexUpdateProgress
 import org.archivekeep.app.desktop.ui.components.operations.ScrollableLogTextInDialog
+import org.archivekeep.app.desktop.ui.components.rememberManySelect
 import org.archivekeep.app.desktop.ui.designsystem.dialog.DialogPreviewColumn
 import org.archivekeep.app.desktop.ui.designsystem.dialog.LabelText
-import org.archivekeep.app.desktop.ui.designsystem.layout.scrollable.ScrollableColumn
+import org.archivekeep.app.desktop.ui.designsystem.layout.scrollable.ScrollableLazyColumn
 import org.archivekeep.app.desktop.ui.dialogs.repository.AbstractRepositoryDialog
 import org.archivekeep.app.desktop.ui.utils.appendBoldSpan
 import org.archivekeep.app.desktop.utils.collectAsLoadable
@@ -155,27 +156,29 @@ class UpdateIndexOperationDialog(
     override fun ColumnScope.renderContent(state: State) {
         when (val operationState = state.operationState) {
             is AddOperationSupervisor.Preparation -> {
-                ScrollableColumn {
-                    when (val preparationState = operationState.result) {
-                        is AddOperation.PreparationProgress -> {
-                            LabelText("Preparing index update operation:")
-                            IndexUpdatePreparationProgress(preparationState)
-                        }
+                when (val preparationState = operationState.result) {
+                    is AddOperation.PreparationProgress -> {
+                        LabelText("Preparing index update operation:")
+                        IndexUpdatePreparationProgress(preparationState)
+                    }
 
-                        is AddOperation.PreparationResult -> {
+                    is AddOperation.PreparationResult -> {
+                        val movesSelectState = rememberManySelect(preparationState.moves, state.selectedMovesToExecute)
+                        val filesSelectState = rememberManySelect(preparationState.newFiles, state.selectedFilesToAdd)
+
+                        ScrollableLazyColumn {
                             if (preparationState.moves.isNotEmpty()) {
-                                ItemManySelect(
+                                itemManySelect(
                                     "Moves",
                                     allItemsLabel = { "All moves ($it)" },
                                     itemLabelText = { "${it.from} -> ${it.to}" },
-                                    allItems = preparationState.moves,
-                                    state.selectedMovesToExecute,
+                                    state = movesSelectState,
                                 )
-                                Spacer(Modifier.height(12.dp))
+                                item { Spacer(Modifier.height(12.dp)) }
                             }
 
                             if (preparationState.newFiles.isNotEmpty()) {
-                                FileManySelect("New files", preparationState.newFiles, state.selectedFilesToAdd)
+                                fileManySelect("New files", filesSelectState)
                             }
                         }
                     }

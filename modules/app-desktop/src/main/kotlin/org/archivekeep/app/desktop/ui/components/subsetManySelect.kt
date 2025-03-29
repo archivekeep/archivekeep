@@ -8,13 +8,13 @@ import androidx.compose.ui.state.ToggleableState
 
 @Composable
 fun <O_I, O_S> rememberManySelectWithMergedState(
-    allItems: Collection<O_I>,
+    allItems: List<O_I>,
     selectionState: MutableState<Set<O_S>>,
 ): ManySelectState<O_I, O_I, O_S> where O_I : O_S = rememberManySelectWithMergedState(allItems, selectionState, keyMapper = { it })
 
 @Composable
 fun <O, K> rememberManySelectWithMergedState(
-    allItems: Collection<O>,
+    allItems: List<O>,
     selectionState: MutableState<Set<K>>,
     keyMapper: (option: O) -> K,
 ): ManySelectState<O, O, K> where O : K {

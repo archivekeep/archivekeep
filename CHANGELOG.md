@@ -16,6 +16,7 @@
 
 ### Fixed
 
+- UI: crash with large amounts of items (to add/commit/push)
 - build: GH pages build cancels runs from different branches 
 
 ## [0.3.2] - 2025-03-25

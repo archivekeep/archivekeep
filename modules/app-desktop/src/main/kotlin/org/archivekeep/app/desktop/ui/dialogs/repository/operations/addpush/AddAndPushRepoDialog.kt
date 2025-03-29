@@ -27,16 +27,18 @@ import org.archivekeep.app.core.persistence.platform.demo.DocumentsInSSDKeyChain
 import org.archivekeep.app.core.utils.identifiers.RepositoryURI
 import org.archivekeep.app.core.utils.operations.OperationExecutionState
 import org.archivekeep.app.desktop.ui.components.DestinationManySelect
-import org.archivekeep.app.desktop.ui.components.FileManySelect
-import org.archivekeep.app.desktop.ui.components.ItemManySelect
 import org.archivekeep.app.desktop.ui.components.LoadableGuard
 import org.archivekeep.app.desktop.ui.components.dialogs.operations.DialogOperationControlButtons
 import org.archivekeep.app.desktop.ui.components.dialogs.operations.ExecutionErrorIfPresent
+import org.archivekeep.app.desktop.ui.components.fileManySelect
+import org.archivekeep.app.desktop.ui.components.itemManySelect
 import org.archivekeep.app.desktop.ui.components.operations.IndexUpdatePreparationProgress
 import org.archivekeep.app.desktop.ui.components.operations.LocalIndexUpdateProgress
+import org.archivekeep.app.desktop.ui.components.rememberManySelect
 import org.archivekeep.app.desktop.ui.designsystem.dialog.LabelText
 import org.archivekeep.app.desktop.ui.designsystem.dialog.previewWith
 import org.archivekeep.app.desktop.ui.designsystem.layout.scrollable.ScrollableColumn
+import org.archivekeep.app.desktop.ui.designsystem.layout.scrollable.ScrollableLazyColumn
 import org.archivekeep.app.desktop.ui.designsystem.progress.ProgressRow
 import org.archivekeep.app.desktop.ui.designsystem.progress.ProgressRowList
 import org.archivekeep.app.desktop.ui.dialogs.repository.AbstractRepositoryDialog
@@ -108,34 +110,36 @@ class AddAndPushRepoDialog(
             }
 
             is ReadyAddPushProcess -> {
-                ScrollableColumn(Modifier.weight(1f, fill = false)) {
-                    LoadableGuard(
-                        state.otherRepositoryCandidates,
-                    ) {
-                        DestinationManySelect(
-                            it,
-                            state.selectedDestinationRepositories,
-                        )
-                    }
-                    Spacer(modifier = Modifier.height(6.dp))
+                val movesSelectState = rememberManySelect(status.addPreprationResult.moves, state.selectedMoves)
+                val newFilesSelectState = rememberManySelect(status.addPreprationResult.newFiles, state.selectedFilenames)
 
-                    status.addPreprationResult.moves.ifNotEmpty { moves ->
-                        ItemManySelect(
+                ScrollableLazyColumn(Modifier.weight(1f, fill = false)) {
+                    item {
+                        LoadableGuard(
+                            state.otherRepositoryCandidates,
+                        ) {
+                            DestinationManySelect(
+                                it,
+                                state.selectedDestinationRepositories,
+                            )
+                        }
+                        Spacer(modifier = Modifier.height(6.dp))
+                    }
+
+                    status.addPreprationResult.moves.ifNotEmpty {
+                        itemManySelect(
                             "Moves",
                             allItemsLabel = { "All moves ($it)" },
                             itemLabelText = { "${it.from} -> ${it.to}" },
-                            allItems = moves,
-                            state.selectedMoves,
+                            state = movesSelectState,
                         )
-                        Spacer(Modifier.height(12.dp))
+                        item {
+                            Spacer(Modifier.height(12.dp))
+                        }
                     }
 
-                    status.addPreprationResult.newFiles.ifNotEmpty { newFiles ->
-                        FileManySelect(
-                            "Files to add and push:",
-                            newFiles,
-                            state.selectedFilenames,
-                        )
+                    status.addPreprationResult.newFiles.ifNotEmpty {
+                        fileManySelect("Files to add and push:", newFilesSelectState)
                     }
                 }
             }

@@ -1,20 +1,15 @@
 package org.archivekeep.app.desktop.ui.components
 
-import androidx.compose.foundation.layout.ColumnScope
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.MutableState
+import androidx.compose.foundation.lazy.LazyListScope
 
-@Composable
-fun ColumnScope.FileManySelect(
+fun LazyListScope.fileManySelect(
     label: String,
-    allFiles: List<String>,
-    selectedFilenames: MutableState<Set<String>>,
+    state: ManySelectState<String, String, String>,
 ) {
-    ItemManySelect(
+    itemManySelect(
         label,
         { "All new files ($it)" },
-        { it },
-        allFiles,
-        selectedFilenames,
+        itemLabelText = { it },
+        state,
     )
 }

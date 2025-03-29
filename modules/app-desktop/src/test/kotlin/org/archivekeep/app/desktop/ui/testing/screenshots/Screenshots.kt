@@ -1,7 +1,6 @@
 package org.archivekeep.app.desktop.ui.testing.screenshots
 
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
@@ -39,11 +38,7 @@ fun ScreenshotContainer(
     val graphicsLayer = rememberGraphicsLayer()
 
     DesktopAppTheme {
-        Box(
-            Modifier
-                .width(IntrinsicSize.Max)
-                .height(IntrinsicSize.Min),
-        ) {
+        Box {
             Box(
                 modifier =
                     modifier
