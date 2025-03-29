@@ -6,14 +6,10 @@ import androidx.compose.foundation.layout.RowScope
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.buildAnnotatedString
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.launch
 import org.archivekeep.app.core.domain.archives.ArchiveService
 import org.archivekeep.app.core.domain.repositories.Repository
 import org.archivekeep.app.core.domain.repositories.RepositoryInformation
@@ -24,10 +20,15 @@ import org.archivekeep.app.core.utils.identifiers.RepositoryURI
 import org.archivekeep.app.desktop.domain.wiring.LocalArchiveService
 import org.archivekeep.app.desktop.domain.wiring.LocalRepoService
 import org.archivekeep.app.desktop.ui.components.dialogs.SimpleActionDialogControlButtons
+import org.archivekeep.app.desktop.ui.components.dialogs.operations.LaunchableExecutionErrorIfPresent
 import org.archivekeep.app.desktop.ui.designsystem.dialog.DialogPreviewColumn
 import org.archivekeep.app.desktop.ui.dialogs.repository.AbstractRepositoryDialog
 import org.archivekeep.app.desktop.ui.utils.appendBoldSpan
+import org.archivekeep.app.desktop.utils.Launchable
+import org.archivekeep.app.desktop.utils.asTrivialAction
 import org.archivekeep.app.desktop.utils.collectLoadableFlow
+import org.archivekeep.app.desktop.utils.mockLaunchable
+import org.archivekeep.app.desktop.utils.simpleLaunchable
 import org.archivekeep.utils.loading.Loadable
 import org.archivekeep.utils.loading.mapLoadedData
 
@@ -37,13 +38,15 @@ class UnassociateRepositoryDialog(
     data class State(
         val currentRepoStorage: KnownStorage,
         val currentRepoInformation: RepositoryInformation,
-        val onLaunch: () -> Unit,
+        val launchable: Launchable<Unit>,
         val onClose: () -> Unit,
     ) : IState {
         override val title: AnnotatedString =
             buildAnnotatedString {
                 append("Unassociate repository")
             }
+
+        val action by launchable.asTrivialAction()
     }
 
     inner class VM(
@@ -54,19 +57,16 @@ class UnassociateRepositoryDialog(
     ) : IVM {
         val repository = repositoryService.getRepository(uri)
 
-        var runningJob by mutableStateOf<Job?>(null)
+        val launchable =
+            simpleLaunchable(coroutineScope) {
 
-        fun launch() {
-            runningJob =
-                coroutineScope.launch {
-                    repository.updateMetadata {
-                        it.copy(
-                            associationGroupId = null,
-                        )
-                    }
-                    onClose()
+                repository.updateMetadata {
+                    it.copy(
+                        associationGroupId = null,
+                    )
                 }
-        }
+                onClose()
+            }
 
         override fun onClose() {
             _onClose()
@@ -109,7 +109,7 @@ class UnassociateRepositoryDialog(
                     State(
                         currentRepo.first.knownStorage,
                         currentRepo.second.information,
-                        onLaunch = vm::launch,
+                        launchable = vm.launchable,
                         onClose = vm::onClose,
                     )
                 }
@@ -130,13 +130,15 @@ class UnassociateRepositoryDialog(
         )
 
         // TODO: add associated repositories with the archive - list them for information
+
+        LaunchableExecutionErrorIfPresent(state.launchable)
     }
 
     @Composable
     override fun RowScope.renderButtons(state: State) {
         SimpleActionDialogControlButtons(
             "Unassociate",
-            onLaunch = state.onLaunch,
+            actionState = state.action,
             onClose = state.onClose,
         )
     }
@@ -152,7 +154,7 @@ private fun Preview() {
             UnassociateRepositoryDialog.State(
                 KnownStorage(DocumentsInLaptopSSD.storage.uri, null, emptyList()),
                 RepositoryInformation(null, "A Repo"),
-                onLaunch = {},
+                launchable = mockLaunchable(false, null),
                 onClose = {},
             ),
         )

@@ -5,8 +5,6 @@ import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.MutableState
-import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -14,16 +12,18 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.buildAnnotatedString
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
 import org.archivekeep.app.core.persistence.credentials.Credentials
 import org.archivekeep.app.core.persistence.credentials.JoseStorage
 import org.archivekeep.app.desktop.domain.wiring.LocalWalletDataStore
 import org.archivekeep.app.desktop.ui.components.dialogs.SimpleActionDialogControlButtons
-import org.archivekeep.app.desktop.ui.components.errors.AutomaticErrorMessage
+import org.archivekeep.app.desktop.ui.components.dialogs.operations.LaunchableExecutionErrorIfPresent
 import org.archivekeep.app.desktop.ui.designsystem.dialog.DialogPreviewColumn
 import org.archivekeep.app.desktop.ui.designsystem.input.PasswordField
 import org.archivekeep.app.desktop.ui.dialogs.AbstractDialog
-import org.archivekeep.app.desktop.utils.LaunchableAction
+import org.archivekeep.app.desktop.utils.Launchable
+import org.archivekeep.app.desktop.utils.asAction
+import org.archivekeep.app.desktop.utils.mockLaunchable
+import org.archivekeep.app.desktop.utils.simpleLaunchable
 import org.archivekeep.utils.loading.Loadable
 
 class UnlockWalletDialog(
@@ -34,21 +34,9 @@ class UnlockWalletDialog(
         val joseStorage: JoseStorage<Credentials>,
         val _onClose: () -> Unit,
     ) : IVM {
-        val openAction =
-            LaunchableAction(
-                scope = scope,
-            )
-
-        var unlockError = mutableStateOf<Throwable?>(null)
-
-        fun launch(password: String) {
-            openAction.launch {
-                try {
-                    joseStorage.unlock(password)
-                } catch (e: Throwable) {
-                    unlockError.value = e
-                    return@launch
-                }
+        val launchable =
+            simpleLaunchable(scope) { password: String ->
+                joseStorage.unlock(password)
 
                 try {
                     onClose()
@@ -58,7 +46,6 @@ class UnlockWalletDialog(
                     e.printStackTrace()
                 }
             }
-        }
 
         override fun onClose() {
             _onClose()
@@ -66,9 +53,7 @@ class UnlockWalletDialog(
     }
 
     class State(
-        val openAction: LaunchableAction,
-        val unlockError: MutableState<Throwable?>,
-        val onLaunch: (password: String) -> Unit,
+        val launchable: Launchable<String>,
         val onClose: () -> Unit,
     ) : IState {
         var password by mutableStateOf<String?>(null)
@@ -78,13 +63,11 @@ class UnlockWalletDialog(
                 append("Open wallet")
             }
 
-        val launchOpen by derivedStateOf {
-            password?.let { password ->
-                {
-                    onLaunch(password)
-                }
-            }
-        }
+        val action =
+            launchable.asAction(
+                onLaunch = { password!!.let { onLaunch(it) } },
+                canLaunch = { password?.isNotBlank() ?: false },
+            )
     }
 
     @Composable
@@ -102,9 +85,7 @@ class UnlockWalletDialog(
         remember(vm) {
             Loadable.Loaded(
                 State(
-                    vm.openAction,
-                    vm.unlockError,
-                    vm::launch,
+                    vm.launchable,
                     vm::onClose,
                 ),
             )
@@ -128,20 +109,15 @@ class UnlockWalletDialog(
             placeholder = { Text("Enter password  ...") },
         )
 
-        state.unlockError.value?.let {
-            AutomaticErrorMessage(it, onResolve = { state.unlockError.value = null })
-        }
+        LaunchableExecutionErrorIfPresent(state.launchable)
     }
 
     @Composable
     override fun RowScope.renderButtons(state: State) {
         SimpleActionDialogControlButtons(
             "Authenticate",
-            onLaunch = state.launchOpen ?: {},
+            actionState = state.action.value,
             onClose = state.onClose,
-            canLaunch =
-                !state.openAction.isRunning &&
-                    state.launchOpen != null,
         )
     }
 }
@@ -154,9 +130,7 @@ private fun preview1() {
 
         dialog.renderDialogCard(
             UnlockWalletDialog.State(
-                LaunchableAction(CoroutineScope(Dispatchers.Main)),
-                mutableStateOf(null),
-                onLaunch = {},
+                mockLaunchable(false, null),
                 onClose = {},
             ),
         )

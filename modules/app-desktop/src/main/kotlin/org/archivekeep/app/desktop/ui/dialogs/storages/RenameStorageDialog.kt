@@ -14,8 +14,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.launch
 import org.archivekeep.app.core.domain.storages.KnownStorage
 import org.archivekeep.app.core.domain.storages.Storage
 import org.archivekeep.app.core.persistence.platform.demo.asKnownRegisteredStorage
@@ -25,9 +23,14 @@ import org.archivekeep.app.core.persistence.registry.RegistryDataStore
 import org.archivekeep.app.core.utils.identifiers.StorageURI
 import org.archivekeep.app.desktop.domain.wiring.LocalRegistry
 import org.archivekeep.app.desktop.ui.components.dialogs.SimpleActionDialogControlButtons
+import org.archivekeep.app.desktop.ui.components.dialogs.operations.LaunchableExecutionErrorIfPresent
 import org.archivekeep.app.desktop.ui.designsystem.dialog.DialogPreviewColumn
 import org.archivekeep.app.desktop.ui.designsystem.input.TextField
 import org.archivekeep.app.desktop.ui.utils.appendBoldSpan
+import org.archivekeep.app.desktop.utils.Launchable
+import org.archivekeep.app.desktop.utils.asAction
+import org.archivekeep.app.desktop.utils.mockLaunchable
+import org.archivekeep.app.desktop.utils.simpleLaunchable
 import org.archivekeep.utils.loading.Loadable
 
 class RenameStorageDialog(
@@ -39,24 +42,20 @@ class RenameStorageDialog(
         val storage: KnownStorage,
         val onClose: () -> Unit,
     ) {
-        var runningJob by mutableStateOf<Job?>(null)
-
-        fun launch(newName: String) {
-            runningJob =
-                coroutineScope.launch {
-                    registry.updateStorage(
-                        storage.storageURI,
-                    ) {
-                        it.copy(label = newName)
-                    }
-                    onClose()
+        var launchable =
+            simpleLaunchable(coroutineScope) { newName: String ->
+                registry.updateStorage(
+                    storage.storageURI,
+                ) {
+                    it.copy(label = newName)
                 }
-        }
+                onClose()
+            }
     }
 
     class State(
         val storage: KnownStorage,
-        val onLaunch: (newName: String) -> Unit,
+        val launchable: Launchable<String>,
     ) : IState {
         val isNewName = storage.registeredStorage?.let { it.label != null } != true
 
@@ -64,9 +63,10 @@ class RenameStorageDialog(
 
         var newName by mutableStateOf(initialValue)
 
-        val canSubmit: Boolean
-            @Composable
-            get() = newName.trim() != initialValue && newName.isNotBlank()
+        val action by launchable.asAction(
+            onLaunch = { onLaunch(newName.trim()) },
+            canLaunch = { newName.trim() != initialValue && newName.isNotBlank() },
+        )
 
         override val title =
             buildAnnotatedString {
@@ -78,10 +78,6 @@ class RenameStorageDialog(
                     },
                 )
             }
-
-        fun launch() {
-            onLaunch(newName.trim())
-        }
     }
 
     @Composable
@@ -104,7 +100,7 @@ class RenameStorageDialog(
             Loadable.Loaded(
                 State(
                     vm.storage,
-                    vm::launch,
+                    vm.launchable,
                 ),
             )
         }
@@ -136,6 +132,7 @@ class RenameStorageDialog(
             },
             singleLine = true,
         )
+        LaunchableExecutionErrorIfPresent(state.launchable)
     }
 
     @Composable
@@ -145,9 +142,8 @@ class RenameStorageDialog(
     ) {
         SimpleActionDialogControlButtons(
             "Submit",
-            onLaunch = state::launch,
+            actionState = state.action,
             onClose = onClose,
-            canLaunch = state.canSubmit,
         )
     }
 }
@@ -161,7 +157,7 @@ private fun preview1() {
         dialog.renderDialogCardForPreview(
             RenameStorageDialog.State(
                 hddA.asKnownStorage(),
-                onLaunch = {},
+                mockLaunchable(false, null),
             ),
         )
     }
@@ -176,7 +172,7 @@ private fun preview2() {
         dialog.renderDialogCardForPreview(
             RenameStorageDialog.State(
                 hddA.asKnownRegisteredStorage(),
-                onLaunch = {},
+                mockLaunchable(false, null),
             ),
         )
     }

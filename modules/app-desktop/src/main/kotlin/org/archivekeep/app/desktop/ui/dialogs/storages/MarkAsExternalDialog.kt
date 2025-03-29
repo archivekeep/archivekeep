@@ -6,16 +6,12 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.launch
 import org.archivekeep.app.core.domain.storages.KnownStorage
 import org.archivekeep.app.core.domain.storages.Storage
 import org.archivekeep.app.core.persistence.platform.demo.asKnownStorage
@@ -24,8 +20,13 @@ import org.archivekeep.app.core.persistence.registry.RegistryDataStore
 import org.archivekeep.app.core.utils.identifiers.StorageURI
 import org.archivekeep.app.desktop.domain.wiring.LocalRegistry
 import org.archivekeep.app.desktop.ui.components.dialogs.SimpleActionDialogControlButtons
+import org.archivekeep.app.desktop.ui.components.dialogs.operations.LaunchableExecutionErrorIfPresent
 import org.archivekeep.app.desktop.ui.designsystem.dialog.DialogPreviewColumn
 import org.archivekeep.app.desktop.ui.utils.appendBoldSpan
+import org.archivekeep.app.desktop.utils.Launchable
+import org.archivekeep.app.desktop.utils.asAction
+import org.archivekeep.app.desktop.utils.mockLaunchable
+import org.archivekeep.app.desktop.utils.simpleLaunchable
 import org.archivekeep.utils.loading.Loadable
 
 class MarkAsExternalDialog(
@@ -37,31 +38,31 @@ class MarkAsExternalDialog(
         val storage: KnownStorage,
         val onClose: () -> Unit,
     ) {
-        var runningJob by mutableStateOf<Job?>(null)
-
-        fun launch() {
-            runningJob =
-                coroutineScope.launch {
-                    registry.updateStorage(
-                        storage.storageURI,
-                    ) {
-                        it.copy(
-                            isLocal = false,
-                        )
-                    }
-                    onClose()
+        val launchable =
+            simpleLaunchable(coroutineScope) {
+                registry.updateStorage(
+                    storage.storageURI,
+                ) {
+                    it.copy(
+                        isLocal = false,
+                    )
                 }
-        }
+                onClose()
+            }
     }
 
     class State(
         val storage: KnownStorage,
-        val onLaunch: () -> Unit,
+        val launchable: Launchable<Unit>,
     ) : IState {
         override val title =
             buildAnnotatedString {
                 append("Mark storage as external")
             }
+
+        val action by launchable.asAction(
+            onLaunch = { onLaunch(Unit) },
+        )
     }
 
     @Composable
@@ -84,7 +85,7 @@ class MarkAsExternalDialog(
             Loadable.Loaded(
                 State(
                     vm.storage,
-                    vm::launch,
+                    vm.launchable,
                 ),
             )
         }
@@ -100,6 +101,7 @@ class MarkAsExternalDialog(
                     append(" as external")
                 },
         )
+        LaunchableExecutionErrorIfPresent(state.launchable)
     }
 
     @Composable
@@ -109,7 +111,7 @@ class MarkAsExternalDialog(
     ) {
         SimpleActionDialogControlButtons(
             "Mark as external",
-            onLaunch = state.onLaunch,
+            actionState = state.action,
             onClose = onClose,
         )
     }
@@ -124,7 +126,7 @@ private fun preview1() {
         dialog.renderDialogCardForPreview(
             MarkAsExternalDialog.State(
                 hddA.asKnownStorage(),
-                onLaunch = {},
+                mockLaunchable(false, null),
             ),
         )
     }

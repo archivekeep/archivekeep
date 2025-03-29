@@ -7,6 +7,7 @@ import org.archivekeep.app.core.persistence.platform.demo.DocumentsInLaptopSSD
 import org.archivekeep.app.desktop.ui.dialogs.testing.setContentInDialogScreenshotContainer
 import org.archivekeep.app.desktop.ui.testing.screenshots.runHighDensityComposeUiTest
 import org.archivekeep.app.desktop.ui.testing.screenshots.saveTestingContainerBitmap
+import org.archivekeep.app.desktop.utils.mockLaunchable
 import org.junit.Test
 
 class UnassociateRepositoryDialogScreenshotTest {
@@ -21,7 +22,7 @@ class UnassociateRepositoryDialogScreenshotTest {
                     UnassociateRepositoryDialog.State(
                         KnownStorage(DocumentsInLaptopSSD.storage.uri, null, emptyList()),
                         RepositoryInformation(null, "A Repo"),
-                        onLaunch = {},
+                        mockLaunchable(false, null),
                         onClose = {},
                     ),
                 )

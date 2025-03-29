@@ -14,6 +14,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -26,8 +27,6 @@ import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Deferred
-import kotlinx.coroutines.async
 import org.archivekeep.app.core.domain.archives.ArchiveService
 import org.archivekeep.app.core.domain.archives.AssociatedArchive
 import org.archivekeep.app.core.domain.repositories.Repository
@@ -44,14 +43,17 @@ import org.archivekeep.app.desktop.domain.wiring.LocalOperationFactory
 import org.archivekeep.app.desktop.domain.wiring.LocalRepoService
 import org.archivekeep.app.desktop.domain.wiring.OperationFactory
 import org.archivekeep.app.desktop.ui.components.dialogs.SimpleActionDialogControlButtons
-import org.archivekeep.app.desktop.ui.components.errors.AutomaticErrorMessage
+import org.archivekeep.app.desktop.ui.components.dialogs.operations.LaunchableExecutionErrorIfPresent
 import org.archivekeep.app.desktop.ui.designsystem.dialog.DialogPreviewColumn
 import org.archivekeep.app.desktop.ui.designsystem.layout.scrollable.ScrollableColumn
 import org.archivekeep.app.desktop.ui.dialogs.repository.AbstractRepositoryDialog
 import org.archivekeep.app.desktop.ui.dialogs.repository.management.AssociateRepositoryDialog.VM
 import org.archivekeep.app.desktop.ui.dialogs.repository.management.AssociateRepositoryDialog.VM.State
+import org.archivekeep.app.desktop.utils.Launchable
+import org.archivekeep.app.desktop.utils.asAction
 import org.archivekeep.app.desktop.utils.collectLoadableFlow
-import org.archivekeep.app.desktop.utils.produceState
+import org.archivekeep.app.desktop.utils.mockLaunchable
+import org.archivekeep.app.desktop.utils.simpleLaunchable
 import org.archivekeep.files.RepositoryAssociationGroupId
 import org.archivekeep.utils.loading.Loadable
 import org.archivekeep.utils.loading.mapLoadedData
@@ -73,8 +75,7 @@ class AssociateRepositoryDialog(
             val currentRepoStorage: KnownStorage,
             val currentRepoInformation: RepositoryInformation,
             val selectedItem: MutableState<Target?>,
-            val lastLaunch: MutableState<Deferred<ExecutionOutcome>?>,
-            val onLaunch: () -> Unit,
+            val launchable: Launchable<Unit>,
             val onClose: () -> Unit,
         ) : IState {
             override val title =
@@ -86,14 +87,15 @@ class AssociateRepositoryDialog(
                     }
                 }
 
-            val canLaunch: Boolean
-                get() = selectedItem.value != null
+            val action by launchable.asAction(
+                onLaunch = { onLaunch(Unit) },
+                canLaunch = { selectedItem.value != null },
+            )
         }
 
         val uri = repository.uri
 
         val selectedItem = mutableStateOf<Target?>(null)
-        val lastLaunch = mutableStateOf<Deferred<ExecutionOutcome>?>(null)
 
         val operation =
             operationFactory.get(AssociateRepositoryOperation.Factory::class.java).create(
@@ -105,26 +107,23 @@ class AssociateRepositoryDialog(
             _onClose()
         }
 
-        fun launch() {
-            lastLaunch.value =
-                scope.async {
-                    val result =
-                        operation.execute(
-                            selectedItem.value ?: throw IllegalStateException("Must select first"),
-                        )
+        val launchable =
+            simpleLaunchable(scope) {
+                val result =
+                    operation.execute(
+                        selectedItem.value ?: throw IllegalStateException("Must select first"),
+                    )
 
-                    when (result) {
-                        is ExecutionOutcome.Failed -> {
-                            println("Error: ${result.cause}")
-                            result.cause.printStackTrace()
-                        }
-
-                        is ExecutionOutcome.Success -> onClose()
+                when (result) {
+                    is ExecutionOutcome.Failed -> {
+                        println("Error: ${result.cause}")
+                        result.cause.printStackTrace()
+                        throw result.cause
                     }
 
-                    result
+                    is ExecutionOutcome.Success -> onClose()
                 }
-        }
+            }
     }
 
     @Composable
@@ -173,8 +172,7 @@ class AssociateRepositoryDialog(
                         currentRepo.first.knownStorage,
                         currentRepo.second.information,
                         vm.selectedItem,
-                        vm.lastLaunch,
-                        onLaunch = vm::launch,
+                        launchable = vm.launchable,
                         onClose = vm::onClose,
                     )
                 }
@@ -316,13 +314,7 @@ class AssociateRepositoryDialog(
                     }
                 }
 
-            state.lastLaunch.value?.let { lastLaunch ->
-                lastLaunch.produceState().value.let { result ->
-                    if (result is ExecutionOutcome.Failed) {
-                        AutomaticErrorMessage(result, onResolve = { state.lastLaunch.value = null })
-                    }
-                }
-            }
+            LaunchableExecutionErrorIfPresent(state.launchable)
         }
     }
 
@@ -330,9 +322,8 @@ class AssociateRepositoryDialog(
     override fun RowScope.renderButtons(state: VM.State) {
         SimpleActionDialogControlButtons(
             "Associate",
-            onLaunch = state.onLaunch,
+            actionState = state.action,
             onClose = state.onClose,
-            canLaunch = state.canLaunch,
         )
     }
 }
@@ -350,8 +341,7 @@ private fun Preview() {
                 KnownStorage(DocumentsInLaptopSSD.storage.uri, null, emptyList()),
                 RepositoryInformation(null, "A Repo"),
                 mutableStateOf(null),
-                mutableStateOf(null),
-                onLaunch = {},
+                launchable = mockLaunchable(false, null),
                 onClose = {},
             ),
         )

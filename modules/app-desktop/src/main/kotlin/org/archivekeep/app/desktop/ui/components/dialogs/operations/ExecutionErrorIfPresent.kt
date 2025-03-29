@@ -5,8 +5,10 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import org.archivekeep.app.core.utils.generics.ExecutionOutcome
 import org.archivekeep.app.core.utils.operations.OperationExecutionState
 import org.archivekeep.app.desktop.ui.components.errors.AutomaticErrorMessage
+import org.archivekeep.app.desktop.utils.Launchable
 import java.util.concurrent.CancellationException
 
 @Composable
@@ -17,6 +19,17 @@ fun ExecutionErrorIfPresent(executionState: OperationExecutionState) {
             if (error !is CancellationException) {
                 Spacer(Modifier.height(12.dp))
                 AutomaticErrorMessage(error, onResolve = {})
+            }
+        }
+}
+
+@Composable
+fun LaunchableExecutionErrorIfPresent(launchable: Launchable<*>) {
+    (launchable.executionOutcome.value as? ExecutionOutcome.Failed)
+        ?.let { outcome ->
+            if (outcome.cause !is CancellationException) {
+                Spacer(Modifier.height(12.dp))
+                AutomaticErrorMessage(outcome.cause, onResolve = launchable.reset)
             }
         }
 }

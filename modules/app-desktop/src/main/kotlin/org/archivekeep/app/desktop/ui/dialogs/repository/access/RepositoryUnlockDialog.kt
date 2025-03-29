@@ -25,7 +25,6 @@ import androidx.compose.ui.unit.dp
 import compose.icons.TablerIcons
 import compose.icons.tablericons.Lock
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.combine
 import org.archivekeep.app.core.domain.repositories.Repository
 import org.archivekeep.app.core.domain.repositories.RepositoryInformation
@@ -38,14 +37,18 @@ import org.archivekeep.app.desktop.domain.wiring.LocalWalletDataStore
 import org.archivekeep.app.desktop.domain.wiring.LocalWalletOperationLaunchers
 import org.archivekeep.app.desktop.domain.wiring.WalletOperationLaunchers
 import org.archivekeep.app.desktop.ui.components.dialogs.SimpleActionDialogControlButtons
+import org.archivekeep.app.desktop.ui.components.dialogs.operations.LaunchableExecutionErrorIfPresent
 import org.archivekeep.app.desktop.ui.designsystem.dialog.DialogPreviewColumn
 import org.archivekeep.app.desktop.ui.designsystem.input.CheckboxWithText
 import org.archivekeep.app.desktop.ui.designsystem.input.PasswordField
 import org.archivekeep.app.desktop.ui.designsystem.input.TextField
 import org.archivekeep.app.desktop.ui.dialogs.repository.AbstractRepositoryDialog
 import org.archivekeep.app.desktop.ui.utils.appendBoldSpan
-import org.archivekeep.app.desktop.utils.LaunchableAction
+import org.archivekeep.app.desktop.utils.Launchable
+import org.archivekeep.app.desktop.utils.asAction
 import org.archivekeep.app.desktop.utils.collectAsLoadable
+import org.archivekeep.app.desktop.utils.mockLaunchable
+import org.archivekeep.app.desktop.utils.simpleLaunchable
 import org.archivekeep.files.repo.remote.grpc.BasicAuthCredentials
 import org.archivekeep.utils.loading.Loadable
 
@@ -57,19 +60,18 @@ class RepositoryUnlockDialog(
         val repositoryInfo: RepositoryInformation,
         val needsUnlock: Boolean,
         val canUnlockCredentials: Boolean,
-        val unlockAction: LaunchableAction,
+        val launchable: Launchable<Unit>,
         val basicAuthCredentialsState: MutableState<BasicAuthCredentials?>,
         val unlockOptionsState: MutableState<UnlockOptions>,
-        val onLaunch: () -> Unit,
         val onClose: () -> Unit,
     ) : IState {
         var basicAuthCredentials by basicAuthCredentialsState
         var unlockOptions by unlockOptionsState
 
-        val canLaunch: Boolean
-            get() =
-                !unlockAction.isRunning &&
-                    basicAuthCredentials?.let { it.username.isNotBlank() && it.password.isNotBlank() } ?: false
+        val action by launchable.asAction(
+            onLaunch = { onLaunch(Unit) },
+            canLaunch = { basicAuthCredentials?.let { it.username.isNotBlank() && it.password.isNotBlank() } ?: false },
+        )
 
         override val title: AnnotatedString =
             buildAnnotatedString {
@@ -84,32 +86,27 @@ class RepositoryUnlockDialog(
         val credentialStorage: JoseStorage<Credentials>,
         val _onClose: () -> Unit,
     ) : IVM {
-        val unlockAction = LaunchableAction(coroutineScope)
-
         val basicAuthCredentialsState = mutableStateOf<BasicAuthCredentials?>(null)
         var basicAuthCredentials by basicAuthCredentialsState
 
         val unlockOptionsState = mutableStateOf(UnlockOptions(rememberSession = false))
         var unlockOptions by unlockOptionsState
 
-        fun launch() {
-            basicAuthCredentials?.let { presentBasicCredentials ->
-                {
-                    unlockAction.launch {
-                        if (unlockOptions.rememberSession) {
-                            if (!walletOperationLaunchers.ensureWalletForWrite()) {
-                                return@launch
-                            }
+        val unlockAction =
+            simpleLaunchable(coroutineScope) { _: Unit ->
+                basicAuthCredentials?.let { presentBasicCredentials ->
+                    if (unlockOptions.rememberSession) {
+                        if (!walletOperationLaunchers.ensureWalletForWrite()) {
+                            return@simpleLaunchable
                         }
-
-                        repository.unlock(
-                            presentBasicCredentials,
-                            unlockOptions,
-                        )
                     }
+
+                    repository.unlock(
+                        presentBasicCredentials,
+                        unlockOptions,
+                    )
                 }
             }
-        }
 
         override fun onClose() {
             _onClose()
@@ -148,10 +145,9 @@ class RepositoryUnlockDialog(
                     repositoryInfo = resolvedState.information,
                     needsUnlock = needsUnlock,
                     canUnlockCredentials = canUnlockCredentials,
-                    unlockAction = vm.unlockAction,
+                    launchable = vm.unlockAction,
                     basicAuthCredentialsState = vm.basicAuthCredentialsState,
                     unlockOptionsState = vm.unlockOptionsState,
-                    onLaunch = vm::launch,
                     onClose = vm::onClose,
                 )
             }
@@ -243,15 +239,15 @@ class RepositoryUnlockDialog(
             },
             text = "Remember session",
         )
+        LaunchableExecutionErrorIfPresent(state.launchable)
     }
 
     @Composable
     override fun RowScope.renderButtons(state: State) {
         SimpleActionDialogControlButtons(
             "Authenticate",
-            onLaunch = state.onLaunch,
+            actionState = state.action,
             onClose = state.onClose,
-            canLaunch = state.canLaunch,
         )
     }
 }
@@ -268,10 +264,9 @@ private fun Preview() {
                 repositoryInfo = RepositoryInformation(null, "Documents"),
                 needsUnlock = true,
                 canUnlockCredentials = false,
-                unlockAction = LaunchableAction(CoroutineScope(Dispatchers.Default)),
+                launchable = mockLaunchable(false, null),
                 basicAuthCredentialsState = mutableStateOf(null),
                 unlockOptionsState = mutableStateOf(UnlockOptions(rememberSession = false)),
-                onLaunch = {},
                 onClose = {},
             ),
         )

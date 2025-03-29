@@ -6,22 +6,24 @@ import androidx.compose.foundation.layout.RowScope
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
-import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.text.buildAnnotatedString
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
 import org.archivekeep.app.core.persistence.credentials.Credentials
 import org.archivekeep.app.core.persistence.credentials.JoseStorage
 import org.archivekeep.app.desktop.domain.wiring.LocalWalletDataStore
 import org.archivekeep.app.desktop.ui.components.dialogs.SimpleActionDialogControlButtons
+import org.archivekeep.app.desktop.ui.components.dialogs.operations.LaunchableExecutionErrorIfPresent
 import org.archivekeep.app.desktop.ui.designsystem.dialog.DialogPreviewColumn
 import org.archivekeep.app.desktop.ui.designsystem.input.PasswordField
 import org.archivekeep.app.desktop.ui.dialogs.AbstractDialog
-import org.archivekeep.app.desktop.utils.LaunchableAction
+import org.archivekeep.app.desktop.utils.Launchable
+import org.archivekeep.app.desktop.utils.asAction
+import org.archivekeep.app.desktop.utils.mockLaunchable
+import org.archivekeep.app.desktop.utils.simpleLaunchable
 import org.archivekeep.utils.loading.Loadable
 
 class CreateWalletDialog : AbstractDialog<CreateWalletDialog.State, CreateWalletDialog.VM>() {
@@ -30,14 +32,11 @@ class CreateWalletDialog : AbstractDialog<CreateWalletDialog.State, CreateWallet
         val joseStorage: JoseStorage<Credentials>,
         val _onClose: () -> Unit,
     ) : IVM {
-        val createAction = LaunchableAction(scope)
-
-        fun launch(password: String) {
-            createAction.launch {
+        val launchable =
+            simpleLaunchable(scope) { password: String ->
                 joseStorage.create(password)
                 onClose()
             }
-        }
 
         override fun onClose() {
             _onClose()
@@ -45,8 +44,7 @@ class CreateWalletDialog : AbstractDialog<CreateWalletDialog.State, CreateWallet
     }
 
     class State(
-        val createAction: LaunchableAction,
-        val onLaunch: (password: String) -> Unit,
+        val launchable: Launchable<String>,
         val onClose: () -> Unit,
         val passwordState: MutableState<String?> = mutableStateOf(null),
         val passwordState2: MutableState<String?> = mutableStateOf(null),
@@ -54,19 +52,15 @@ class CreateWalletDialog : AbstractDialog<CreateWalletDialog.State, CreateWallet
         var password by passwordState
         var password2 by passwordState2
 
-        val launchCreate by derivedStateOf {
-            password?.let { passwordNotNull ->
-                {
-                    onLaunch(passwordNotNull)
-                }
-            }
-        }
-
-        val canLaunch by derivedStateOf {
-            !createAction.isRunning &&
-                launchCreate != null &&
-                password == password2
-        }
+        val action =
+            launchable.asAction(
+                onLaunch = {
+                    password!!.let { passwordNotNull ->
+                        onLaunch(passwordNotNull)
+                    }
+                },
+                canLaunch = { (password?.isNotBlank() ?: false) && password == password2 },
+            )
 
         override val title =
             buildAnnotatedString {
@@ -84,7 +78,10 @@ class CreateWalletDialog : AbstractDialog<CreateWalletDialog.State, CreateWallet
     }
 
     @Composable
-    override fun rememberState(vm: VM): Loadable<State> = remember { Loadable.Loaded(State(vm.createAction, vm::launch, vm::onClose)) }
+    override fun rememberState(vm: VM): Loadable<State> =
+        remember {
+            Loadable.Loaded(State(vm.launchable, vm::onClose))
+        }
 
     @Composable
     override fun ColumnScope.renderContent(state: State) {
@@ -114,15 +111,15 @@ class CreateWalletDialog : AbstractDialog<CreateWalletDialog.State, CreateWallet
             label = { Text("Password verify") },
             placeholder = { Text("Enter password to verify...") },
         )
+        LaunchableExecutionErrorIfPresent(state.launchable)
     }
 
     @Composable
     override fun RowScope.renderButtons(state: State) {
         SimpleActionDialogControlButtons(
             "Authenticate",
-            onLaunch = state.launchCreate ?: {},
+            actionState = state.action.value,
             onClose = state.onClose,
-            canLaunch = state.canLaunch,
         )
     }
 }
@@ -135,8 +132,7 @@ private fun preview1() {
 
         dialog.renderDialogCard(
             CreateWalletDialog.State(
-                LaunchableAction(CoroutineScope(Dispatchers.Main)),
-                onLaunch = {},
+                mockLaunchable(false, null),
                 onClose = {},
             ),
         )
@@ -151,8 +147,7 @@ private fun preview2() {
 
         dialog.renderDialogCard(
             CreateWalletDialog.State(
-                LaunchableAction(CoroutineScope(Dispatchers.Main)),
-                onLaunch = {},
+                mockLaunchable(false, null),
                 onClose = {},
                 passwordState = mutableStateOf("The first password"),
             ),
@@ -168,8 +163,7 @@ private fun preview3() {
 
         dialog.renderDialogCard(
             CreateWalletDialog.State(
-                LaunchableAction(CoroutineScope(Dispatchers.Main)),
-                onLaunch = {},
+                mockLaunchable(false, null),
                 onClose = {},
                 passwordState = mutableStateOf("The first password"),
                 passwordState2 = mutableStateOf("The first"),
@@ -186,8 +180,7 @@ private fun preview4() {
 
         dialog.renderDialogCard(
             CreateWalletDialog.State(
-                LaunchableAction(CoroutineScope(Dispatchers.Main)),
-                onLaunch = {},
+                mockLaunchable(false, null),
                 onClose = {},
                 passwordState = mutableStateOf("The same password"),
                 passwordState2 = mutableStateOf("The same password"),

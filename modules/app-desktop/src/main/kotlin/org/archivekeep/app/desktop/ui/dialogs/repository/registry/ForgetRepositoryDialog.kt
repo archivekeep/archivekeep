@@ -6,15 +6,13 @@ import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.launch
 import org.archivekeep.app.core.domain.repositories.Repository
 import org.archivekeep.app.core.domain.storages.StorageRepository
 import org.archivekeep.app.core.domain.storages.StorageService
@@ -24,10 +22,15 @@ import org.archivekeep.app.core.utils.identifiers.RepositoryURI
 import org.archivekeep.app.desktop.domain.wiring.LocalRegistry
 import org.archivekeep.app.desktop.domain.wiring.LocalStorageService
 import org.archivekeep.app.desktop.ui.components.dialogs.SimpleActionDialogControlButtons
+import org.archivekeep.app.desktop.ui.components.dialogs.operations.LaunchableExecutionErrorIfPresent
 import org.archivekeep.app.desktop.ui.designsystem.dialog.DialogPreviewColumn
 import org.archivekeep.app.desktop.ui.dialogs.repository.AbstractRepositoryDialog
 import org.archivekeep.app.desktop.ui.utils.appendBoldSpan
+import org.archivekeep.app.desktop.utils.Launchable
+import org.archivekeep.app.desktop.utils.asTrivialAction
 import org.archivekeep.app.desktop.utils.collectLoadableFlow
+import org.archivekeep.app.desktop.utils.mockLaunchable
+import org.archivekeep.app.desktop.utils.simpleLaunchable
 import org.archivekeep.utils.loading.Loadable
 import org.archivekeep.utils.loading.mapToLoadable
 
@@ -43,17 +46,13 @@ class ForgetRepositoryDialog(
     ) : IVM {
         val storageRepository = storageService.repository(uri)
 
-        val runningJob = mutableStateOf<Job?>(null)
-
-        fun launch() {
-            runningJob.value =
-                scope.launch {
-                    registry.updateRepositories { old ->
-                        old.filter { it.uri != this@VM.uri }.toSet()
-                    }
-                    onClose()
+        val launchable =
+            simpleLaunchable(scope) {
+                registry.updateRepositories { old ->
+                    old.filter { it.uri != this@VM.uri }.toSet()
                 }
-        }
+                onClose()
+            }
 
         override fun onClose() {
             _onClose()
@@ -62,13 +61,15 @@ class ForgetRepositoryDialog(
 
     data class State(
         val currentRepo: StorageRepository,
-        val onLaunch: () -> Unit,
+        val launchable: Launchable<Unit>,
         val onClose: () -> Unit,
     ) : IState {
         override val title: AnnotatedString =
             buildAnnotatedString {
                 append("Forget repository")
             }
+
+        val action by launchable.asTrivialAction()
     }
 
     @Composable
@@ -89,7 +90,7 @@ class ForgetRepositoryDialog(
     override fun rememberState(vm: VM): Loadable<State> =
         remember(vm) {
             vm.storageRepository.mapToLoadable { storageRepository ->
-                State(storageRepository, vm::launch, vm::onClose)
+                State(storageRepository, vm.launchable, vm::onClose)
             }
         }.collectLoadableFlow()
 
@@ -114,13 +115,14 @@ class ForgetRepositoryDialog(
             },
             modifier = Modifier.padding(top = 10.dp),
         )
+        LaunchableExecutionErrorIfPresent(state.launchable)
     }
 
     @Composable
     override fun RowScope.renderButtons(state: State) {
         SimpleActionDialogControlButtons(
             "Forget",
-            onLaunch = state.onLaunch,
+            actionState = state.action,
             onClose = state.onClose,
         )
     }
@@ -135,7 +137,7 @@ private fun preview1() {
         dialog.renderDialogCard(
             ForgetRepositoryDialog.State(
                 DocumentsInHDDA.storageRepository,
-                onLaunch = {},
+                mockLaunchable(false, null),
                 onClose = {},
             ),
         )
