@@ -44,5 +44,11 @@ class StatusOperation(
     ) {
         val hasChanges: Boolean
             get() = newFiles.isNotEmpty()
+
+        val summary = Summary(newFiles.size)
+
+        data class Summary(
+            val totalNewFiles: Int,
+        )
     }
 }

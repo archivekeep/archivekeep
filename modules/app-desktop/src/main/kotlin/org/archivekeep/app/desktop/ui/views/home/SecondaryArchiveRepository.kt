@@ -18,6 +18,9 @@ import org.archivekeep.app.core.utils.generics.mapIfLoadedOrNull
 import org.archivekeep.app.core.utils.generics.mapLoadedData
 import org.archivekeep.app.core.utils.identifiers.NamedRepositoryReference
 import org.archivekeep.app.core.utils.identifiers.RepositoryURI
+import org.archivekeep.app.desktop.ui.utils.combineTexts
+import org.archivekeep.files.operations.StatusOperation
+import org.archivekeep.utils.filesAutoPlural
 
 class SecondaryArchiveRepository(
     val primaryRepositoryURI: RepositoryURI?,
@@ -29,17 +32,34 @@ class SecondaryArchiveRepository(
 
     data class State(
         val repo: SecondaryArchiveRepository,
+        val localRepoStatus: OptionalLoadable<StatusOperation.Result.Summary>,
         val connectionStatus: Repository.ConnectionState,
         val syncRunning: Boolean,
         val canPushLoadable: OptionalLoadable<Boolean>,
         val canPull: Boolean,
-        val texts: OptionalLoadable<String>,
+        val syncTexts: OptionalLoadable<List<String>>,
     ) {
         val needsUnlock = connectionStatus is Repository.ConnectionState.ConnectedLocked
 
-        val isLoading = texts.isLoading || syncRunning
+        val addTexts =
+            localRepoStatus.mapLoadedData {
+                if (it.totalNewFiles > 0) {
+                    listOf("Uncommitted ${it.totalNewFiles} ${filesAutoPlural(it.totalNewFiles)}")
+                } else {
+                    emptyList()
+                }
+            }
 
-        val canPush: Boolean = canPushLoadable.mapIfLoadedOrNull { it } ?: false
+        val texts: OptionalLoadable<String> =
+            combineTexts(
+                addTexts,
+                syncTexts,
+            ).mapLoadedData { it.joinToString(", ") }
+
+        val isLoading = syncTexts.isLoading || syncRunning || localRepoStatus.isLoading
+
+        val canAdd = localRepoStatus.mapIfLoadedOrNull { it.totalNewFiles > 0 } ?: false
+        val canPush = canPushLoadable.mapIfLoadedOrNull { it } ?: false
     }
 
     fun stateFlow(
@@ -61,16 +81,18 @@ class SecondaryArchiveRepository(
             State(
                 repo = this,
                 connectionStatus = otherRepositoryState.connectionState,
+                localRepoStatus = OptionalLoadable.Loading,
                 syncRunning = false,
                 canPushLoadable = OptionalLoadable.Loading,
                 canPull = false,
-                texts = OptionalLoadable.Loading,
+                syncTexts = OptionalLoadable.Loading,
             )
 
         return combine(
             syncStatusFlow,
             syncRunningFlow,
-        ) { syncStatus, syncRunning ->
+            repository.localRepoStatus,
+        ) { syncStatus, syncRunning, localRepoStatus ->
             val connectionStatus = otherRepositoryState.connectionState
 
             val canPushLoadable =
@@ -83,32 +105,27 @@ class SecondaryArchiveRepository(
                     it.missingOtherInBase != 0 || it.relocations > 0
                 } ?: false
 
-            val texts = syncStatus?.mapLoadedData(::textTags) ?: OptionalLoadable.NotAvailable()
+            val syncTexts = syncStatus?.mapLoadedData(::textTags) ?: OptionalLoadable.NotAvailable()
 
             State(
                 repo = this,
                 connectionStatus = connectionStatus,
+                localRepoStatus = localRepoStatus.mapLoadedData { it.summary },
                 syncRunning = syncRunning,
                 canPushLoadable = canPushLoadable,
                 canPull = canPull && connectionStatus.isAvailable,
-                texts = texts,
+                syncTexts = syncTexts,
             )
         }.stateIn(scope, SharingStarted.Lazily, initialValue)
     }
 }
 
-fun textTags(status: RepoToRepoSync.CompareState): String {
-    val outOfSyncParts =
-        listOfNotNull(
-            if (status.missingBaseInOther > 0) "${status.missingBaseInOther} missing" else null,
-            if (status.missingOtherInBase > 0) "${status.missingOtherInBase} extra" else null,
-            if (status.relocations == 1) "${status.relocations} relocation" else null,
-            if (status.relocations > 1) "${status.relocations} relocations" else null,
-        )
-
-    return if (outOfSyncParts.isNotEmpty()) {
-        outOfSyncParts.joinToString(", ")
-    } else {
-        "100% synced"
+fun textTags(status: RepoToRepoSync.CompareState): List<String> =
+    listOfNotNull(
+        if (status.missingBaseInOther > 0) "${status.missingBaseInOther} missing" else null,
+        if (status.missingOtherInBase > 0) "${status.missingOtherInBase} extra" else null,
+        if (status.relocations == 1) "${status.relocations} relocation" else null,
+        if (status.relocations > 1) "${status.relocations} relocations" else null,
+    ).ifEmpty {
+        listOf("100% synced")
     }
-}

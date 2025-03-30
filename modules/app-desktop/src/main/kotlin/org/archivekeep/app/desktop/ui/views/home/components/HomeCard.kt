@@ -28,7 +28,7 @@ fun HomeCardStateText(loadable: Loadable<String>) {
         when (loadable) {
             is Loadable.Failed ->
                 Text(
-                    "Failed ...",
+                    "ERROR: ${loadable.throwable.message}",
                     overflow = TextOverflow.Ellipsis,
                     softWrap = false,
                     fontSize = 11.sp,

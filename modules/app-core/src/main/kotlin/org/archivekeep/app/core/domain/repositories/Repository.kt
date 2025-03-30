@@ -6,7 +6,6 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.transform
@@ -19,7 +18,10 @@ import org.archivekeep.app.core.utils.exceptions.DisconnectedStorageException
 import org.archivekeep.app.core.utils.exceptions.RepositoryLockedException
 import org.archivekeep.app.core.utils.generics.OptionalLoadable
 import org.archivekeep.app.core.utils.generics.firstFinished
+import org.archivekeep.app.core.utils.generics.flatMapLatestLoadedData
 import org.archivekeep.app.core.utils.generics.mapIfLoadedOrNull
+import org.archivekeep.app.core.utils.generics.mapLoaded
+import org.archivekeep.app.core.utils.generics.mapToOptionalLoadable
 import org.archivekeep.app.core.utils.identifiers.RepositoryURI
 import org.archivekeep.app.core.utils.mapAsLoadable
 import org.archivekeep.files.exceptions.UnsupportedFeatureException
@@ -28,7 +30,6 @@ import org.archivekeep.files.repo.Repo
 import org.archivekeep.files.repo.RepositoryMetadata
 import org.archivekeep.files.repo.remote.grpc.BasicAuthCredentials
 import org.archivekeep.utils.coroutines.shareResourceIn
-import org.archivekeep.utils.loading.flatMapLatestLoadedData
 
 /**
  * Object to access repository state:
@@ -112,6 +113,16 @@ class Repository(
         rawAccessor
             .mapAsLoadable()
 
+    val localRepoAccessorFlow: Flow<OptionalLoadable<LocalRepo>> =
+        optionalAccessorFlow
+            .mapLoaded {
+                if (it is LocalRepo) {
+                    OptionalLoadable.LoadedAvailable(it)
+                } else {
+                    OptionalLoadable.NotAvailable(RuntimeException("Not a local repo: ${it.javaClass.simpleName}"))
+                }
+            }
+
     val informationFlow =
         combine(
             registeredRepositoryFlow,
@@ -135,14 +146,9 @@ class Repository(
 
     @OptIn(ExperimentalCoroutinesApi::class)
     val localRepoStatus =
-        accessorFlow
-            .flatMapLatestLoadedData { repo ->
-                if (repo is LocalRepo) {
-                    repo.observable.localIndex
-                } else {
-                    flowOf()
-                }
-            }.shareResourceIn(scope)
+        localRepoAccessorFlow
+            .flatMapLatestLoadedData { repo -> repo.observable.localIndex.mapToOptionalLoadable { it } }
+            .shareResourceIn(scope)
 
     suspend fun unlock(
         basicCredentials: BasicAuthCredentials,

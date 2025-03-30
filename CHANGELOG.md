@@ -4,6 +4,7 @@
 
 ### Added
 
+- feature: support index update for non-primary (filesystem) repositories of archives
 - UI: improve Upload/Download dialog: add progress summary, and error details in case of failure 
 - UI: show execution indicator in dialogs
 - UI: show execution error (if failed) in dialogs

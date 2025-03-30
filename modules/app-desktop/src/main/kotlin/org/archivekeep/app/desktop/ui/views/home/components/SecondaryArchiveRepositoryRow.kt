@@ -66,6 +66,7 @@ fun SecondaryArchiveRepositoryRow(
             )
             InArchiveRepositoryDropdownIconLaunched(
                 repository = repository,
+                canAdd = nonPrimaryRepository.canAdd,
                 isAssociated = storageRepo.otherRepositoryState.associationId != null,
             )
         },

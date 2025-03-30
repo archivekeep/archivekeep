@@ -15,9 +15,9 @@ import org.archivekeep.app.core.utils.generics.OptionalLoadable
 import org.archivekeep.app.core.utils.generics.OptionalLoadable.LoadedAvailable
 import org.archivekeep.app.core.utils.generics.OptionalLoadable.NotAvailable
 import org.archivekeep.app.core.utils.generics.UniqueSharedFlowInstanceManager
+import org.archivekeep.app.core.utils.generics.mapLoaded
 import org.archivekeep.app.core.utils.generics.mapLoadedData
 import org.archivekeep.app.core.utils.generics.mapLoadedDataAsOptional
-import org.archivekeep.app.core.utils.generics.mapLoadedDataToOptional
 import org.archivekeep.app.core.utils.generics.mapToOptionalLoadable
 import org.archivekeep.app.core.utils.identifiers.RepositoryURI
 import org.archivekeep.app.core.utils.identifiers.StorageURI
@@ -110,12 +110,12 @@ class FileSystemStorageDriver(
         return fileStores
             .mountedFileSystems
             .mapToOptionalLoadable()
-            .mapLoadedDataToOptional { mountedFileSystems ->
+            .mapLoaded { mountedFileSystems ->
                 mountedFileSystems
                     .firstOrNull { it.fsUUID == repo.fsUUID }
                     ?.let { LoadedAvailable(it) }
                     ?: NotAvailable(FileSystemNotFoundException(repo.fsUUID))
-            }.mapLoadedDataToOptional { connectedFS ->
+            }.mapLoaded { connectedFS ->
                 connectedFS.mountPoints
                     .filter { pathInFS.startsWith(it.fsSubPath) }
                     .maxByOrNull { it.fsSubPath.length }

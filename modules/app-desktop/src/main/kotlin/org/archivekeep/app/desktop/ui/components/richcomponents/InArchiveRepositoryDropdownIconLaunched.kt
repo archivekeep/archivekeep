@@ -22,6 +22,7 @@ import org.archivekeep.app.desktop.ui.designsystem.sections.SectionCardBottomLis
 fun InArchiveRepositoryDropdownIconLaunched(
     repository: Repository,
     isAssociated: Boolean,
+    canAdd: Boolean = false,
 ) {
     val repositoryURI = repository.uri
     val operationsLaunchers = LocalArchiveOperationLaunchers.current
@@ -55,6 +56,15 @@ fun InArchiveRepositoryDropdownIconLaunched(
                     closeDropdown()
                 }, text = {
                     Text("Open")
+                })
+            }
+
+            if (canAdd) {
+                DropdownMenuItem(onClick = {
+                    operationsLaunchers.openIndexUpdateOperation(repositoryURI)
+                    closeDropdown()
+                }, text = {
+                    Text("Add")
                 })
             }
 

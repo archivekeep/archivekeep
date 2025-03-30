@@ -12,7 +12,7 @@ fun SectionCardItemStateText(loadable: Loadable<String>) {
     when (loadable) {
         is Loadable.Failed ->
             Text(
-                "Failed ...",
+                "ERROR: ${loadable.throwable.message}",
                 overflow = TextOverflow.Ellipsis,
                 softWrap = false,
                 fontSize = 11.sp,
@@ -44,7 +44,7 @@ fun SectionCardItemStateText(loadable: OptionalLoadable<String>) {
     when (loadable) {
         is OptionalLoadable.Failed ->
             Text(
-                "Failed ...",
+                "ERROR: ${loadable.cause.message}",
                 overflow = TextOverflow.Ellipsis,
                 softWrap = false,
                 fontSize = 11.sp,

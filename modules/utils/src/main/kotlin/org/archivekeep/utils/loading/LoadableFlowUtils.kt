@@ -6,6 +6,7 @@ import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.transform
@@ -71,7 +72,11 @@ fun <T, R> Flow<Loadable<T>>.flatMapLatestLoadedData(function: (data: T) -> Flow
     this.flatMapLatest {
         when (it) {
             is Loadable.Loaded ->
-                function(it.value).mapToLoadable()
+                try {
+                    function(it.value).mapToLoadable()
+                } catch (e: Throwable) {
+                    flowOf(Loadable.Failed(e))
+                }
             is Loadable.Loading ->
                 flow { emit(it) }
             is Loadable.Failed ->

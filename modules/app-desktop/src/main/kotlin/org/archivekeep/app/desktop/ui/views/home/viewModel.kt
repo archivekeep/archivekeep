@@ -17,6 +17,8 @@ import org.archivekeep.app.core.operations.addpush.AddAndPushOperationService
 import org.archivekeep.app.core.operations.sync.RepoToRepoSyncService
 import org.archivekeep.app.core.utils.generics.isLoading
 import org.archivekeep.app.core.utils.generics.mapIfLoadedOrNull
+import org.archivekeep.app.core.utils.generics.mapLoadedData
+import org.archivekeep.app.core.utils.generics.mapToLoadable
 import org.archivekeep.app.core.utils.identifiers.NamedRepositoryReference
 import org.archivekeep.app.desktop.domain.wiring.ArchiveOperationLaunchers
 import org.archivekeep.app.desktop.enableUnfinishedFeatures
@@ -66,7 +68,7 @@ class HomeArchiveEntryViewModel(
             addPushOperation.currentJobFlow.map { it != null },
         ) { indexStatus, nonLocalRepositories, addPushOperationRunning ->
             VMState(
-                canAdd = indexStatus.mapLoadedData { it.hasChanges },
+                canAdd = indexStatus.mapLoadedData { it.hasChanges }.mapToLoadable(false),
                 canPush =
                     if (nonLocalRepositories.any { it.second.canPushLoadable.mapIfLoadedOrNull { it } ?: false }) {
                         Loadable.Loaded(true)
@@ -80,9 +82,12 @@ class HomeArchiveEntryViewModel(
                 anySecondaryAvailable = nonLocalRepositories.any { it.second.connectionStatus.isAvailable },
                 loading = indexStatus.isLoading,
                 indexStatusText =
-                    indexStatus.mapLoadedData {
-                        "${it.storedFiles.size} files${it.newFiles.size.let { if (it > 0) ", $it uncommitted" else "" }}"
-                    },
+                    indexStatus
+                        .mapLoadedData {
+                            "${it.storedFiles.size} files${it.newFiles.size.let { if (it > 0) ", $it uncommitted" else "" }}"
+                        }.mapToLoadable {
+                            Loadable.Failed(it.cause ?: RuntimeException("Expected status data"))
+                        },
                 addPushOperationRunning = addPushOperationRunning,
             )
         }.onEach {

@@ -54,7 +54,7 @@ fun <T, R> Flow<OptionalLoadable<T>>.mapLoadedData(function: suspend (data: T) -
             }
         }.autoCatch()
 
-fun <T, R> Flow<OptionalLoadable<T>>.mapLoadedDataToOptional(transform: suspend (data: T) -> OptionalLoadable<R>): Flow<OptionalLoadable<R>> =
+fun <T, R> Flow<OptionalLoadable<T>>.mapLoaded(transform: suspend (data: T) -> OptionalLoadable<R>): Flow<OptionalLoadable<R>> =
     this
         .map {
             when (it) {
@@ -67,9 +67,9 @@ fun <T, R> Flow<OptionalLoadable<T>>.mapLoadedDataToOptional(transform: suspend 
 
 @ExperimentalCoroutinesApi
 fun <T, R> Flow<OptionalLoadable<T>>.flatMapLatestLoadedData(
-    onNotAvailable: suspend (l: OptionalLoadable.NotAvailable) -> Flow<OptionalLoadable<R>>,
+    onNotAvailable: suspend (OptionalLoadable.NotAvailable) -> Flow<OptionalLoadable<R>> = { flowOf(it) },
     onLoading: suspend () -> Flow<OptionalLoadable<R>> = { flowOf(OptionalLoadable.Loading) },
-    onFailed: suspend (l: OptionalLoadable.Failed) -> Flow<OptionalLoadable<R>> = {
+    onFailed: suspend (OptionalLoadable.Failed) -> Flow<OptionalLoadable<R>> = {
         it.cause.printStackTrace()
         flowOf(OptionalLoadable.Failed(it.cause))
     },
@@ -148,3 +148,19 @@ suspend inline fun <T> Flow<OptionalLoadable<T>>.firstFinished(): T? =
                 is OptionalLoadable.NotAvailable -> emit(null)
             }
         }.first()
+
+fun <T> OptionalLoadable<T>.mapToLoadable(defaultValue: T): Loadable<T> =
+    when (this) {
+        is OptionalLoadable.Failed -> Loadable.Failed(cause)
+        OptionalLoadable.Loading -> Loadable.Loading
+        is OptionalLoadable.LoadedAvailable -> Loadable.Loaded(value)
+        is OptionalLoadable.NotAvailable -> Loadable.Loaded(defaultValue)
+    }
+
+fun <T> OptionalLoadable<T>.mapToLoadable(defaultValue: (OptionalLoadable.NotAvailable) -> Loadable<T>): Loadable<T> =
+    when (this) {
+        is OptionalLoadable.Failed -> Loadable.Failed(cause)
+        OptionalLoadable.Loading -> Loadable.Loading
+        is OptionalLoadable.LoadedAvailable -> Loadable.Loaded(value)
+        is OptionalLoadable.NotAvailable -> defaultValue(this)
+    }

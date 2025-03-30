@@ -25,6 +25,13 @@ class FixtureRepoBuilder(
         repoContents.keys.removeAll(regex::matches)
     }
 
+    fun moveToUncommitted(regex: Regex) {
+        val keysToMove = repoContents.keys.filter(regex::matches).toSet()
+
+        repoUncommittedContents.putAll(repoContents.filter { it.key in keysToMove })
+        repoContents.keys.removeAll(keysToMove)
+    }
+
     fun addFrom(fixtureRepo: FixtureRepo) {
         repoContents.putAll(fixtureRepo.contents)
         repoUncommittedContents.putAll(fixtureRepo.uncommittedContents)

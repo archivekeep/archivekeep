@@ -47,9 +47,12 @@ val hddB =
         repositories =
             listOf(
                 Documents,
-                Photos.withContents {
-                    deletePattern("2024/[4-7]/.*".toRegex())
-                },
+                Photos
+                    .withContents {
+                        deletePattern("2024/[4-7]/.*".toRegex())
+                        moveToUncommitted("2024/3/.*".toRegex())
+                        addUncommitted("2025/something-weird.jpg")
+                    }.localInMemoryFactory(),
                 Music,
                 Private,
                 Books,
