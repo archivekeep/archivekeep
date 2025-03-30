@@ -13,6 +13,7 @@
 ### Change
 
 - UI: unify and improve dialog control buttons for repository data operation dialogs
+- metadata: expand and improve AppStream metainfo (by [@bragefuglseth])
 - refactor: extract operation execution lifecycle related boilerplate from individual implementations
 
 ### Fixed
@@ -142,3 +143,4 @@ Undocumented
 
 [AppStream]: https://www.freedesktop.org/software/appstream/docs/
 [compose-multiplatform]: https://www.jetbrains.com/compose-multiplatform/
+[@bragefuglseth]: https://github.com/bragefuglseth
