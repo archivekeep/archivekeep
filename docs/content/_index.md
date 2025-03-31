@@ -15,7 +15,10 @@
         <div class="text">
             <h2>Personal files archivation<span class="sub">With uncompromised control for the user</span></h2>
             <p>No vendor lock-in. Use your own storages, rent hosted or cloud storages from vendors of your choice, or self-host. And, combine them as you want.</p>
-            <p><a href="{{< ref "/install" >}}">Install</a></p>
+            <div class="links">
+                <a href='https://flathub.org/apps/org.archivekeep.ArchiveKeep'><picture><source type="image/svg+xml" srcset="https://flathub.org/api/badge?svg&locale=en"><img width="180" alt="Get it on Flathub" srcset="https://flathub.org/api/badge?locale=en 240w" src="https://flathub.org/api/badge?locale=en"/></picture></a>
+                <a class="other-link" href="{{< ref "/install" >}}">Or, install from sources</a>
+            </div>
         </div>
         <div class="other">
         <img src="/generated_screenshots/main-window.png" />

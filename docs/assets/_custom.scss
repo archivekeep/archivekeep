@@ -176,20 +176,29 @@ div.home-page {
       background: white;
       padding: 2rem 0 2.5rem;
 
-      p {
+      p, div.links {
         margin-block-end: 1.25rem;
       }
 
-      a, a:visited {
+      div.links {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 1.5rem;
+        row-gap: 1rem;
+        margin-top: 2rem;
+        margin-bottom: 1.5rem;
+
+        picture {
+          display: flex;
+        }
+      }
+
+      a.other-link, a.other-link:visited {
         display: inline-block;
-        border-radius: 1rem;
-        padding: 1rem 3rem;
-        margin-top: 1rem;
-        margin-bottom: 0.5rem;
-        border: #0055bb solid 1px;
+        padding: 0.125rem 0;
         color: #0055bb;
         font-weight: 500;
-        letter-spacing: 0.2rem;
       }
 
       .main-display-inner-container {
