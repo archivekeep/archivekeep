@@ -52,6 +52,13 @@ jobs:
         id: pages
         uses: actions/configure-pages@v2
 
+      - name: Create org.flathub.VerifiedApps.txt
+        run: |
+          mkdir -p docs/static/.well-known
+          echo "${FLATHUB_VERIFIED_APPS}" > docs/static/.well-known/org.flathub.VerifiedApps.txt
+        env:
+          FLATHUB_VERIFIED_APPS: ${{ vars.FLATHUB_VERIFIED_APPS }}
+
       - name: Build reference pages
         run: |
           ./bin/generate_cli_adoc_pages.sh ]
