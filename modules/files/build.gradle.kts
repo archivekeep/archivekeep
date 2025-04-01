@@ -25,7 +25,7 @@ dependencies {
 
     api(libs.grpc.kotlin.stub)
 
-    implementation(libs.protobuf.kotlin)
+    implementation(libs.protobuf.kotlin.lite)
 
     implementation(libs.kfswatch)
 
