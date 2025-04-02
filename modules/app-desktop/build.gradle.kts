@@ -19,27 +19,11 @@ val gradleOfflineBuildExtra by
     }
 
 dependencies {
-    implementation(project(":files"))
     implementation(project(":app-core"))
+    implementation(project(":app-ui"))
 
     implementation(compose.components.resources)
     implementation(compose.desktop.currentOs)
-    implementation(compose.runtime)
-
-    implementation(compose.preview)
-
-    implementation(compose.material3)
-    implementation(compose.materialIconsExtended)
-
-    implementation(compose.preview)
-
-    implementation(libs.kotlinx.serialization.json)
-
-    implementation(libs.compose.grid)
-    implementation(libs.compose.filekit)
-    implementation(libs.compose.resources.tabler.icons)
-
-    implementation(libs.guava)
 
     testImplementation("org.jetbrains.kotlin:kotlin-test")
     testImplementation(compose.desktop.uiTestJUnit4)

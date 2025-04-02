@@ -9,7 +9,6 @@ import org.archivekeep.app.core.persistence.platform.Environment
 import org.archivekeep.app.core.persistence.platform.demo.DemoEnvironment
 import org.archivekeep.app.core.persistence.platform.desktop.DesktopEnvironment
 import org.archivekeep.app.desktop.domain.wiring.ApplicationProviders
-import org.archivekeep.app.desktop.ui.MainWindow
 
 fun main(args: Array<String>) {
     application {

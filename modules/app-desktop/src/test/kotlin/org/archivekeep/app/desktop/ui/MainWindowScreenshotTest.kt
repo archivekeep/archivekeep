@@ -4,6 +4,8 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.test.ExperimentalTestApi
 import org.archivekeep.app.core.persistence.platform.demo.DemoEnvironment
+import org.archivekeep.app.desktop.DefaultMainWindowHeight
+import org.archivekeep.app.desktop.DefaultMainWindowWidth
 import org.archivekeep.app.desktop.domain.wiring.ApplicationProviders
 import org.archivekeep.app.desktop.ui.testing.screenshots.runHighDensityComposeUiTest
 import org.archivekeep.app.desktop.ui.testing.screenshots.saveTestingContainerBitmap

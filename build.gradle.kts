@@ -2,10 +2,12 @@ import io.github.jwharm.flatpakgradlegenerator.FlatpakGradleGeneratorTask
 
 plugins {
     alias(libs.plugins.kotlin.jvm) apply false
+    alias(libs.plugins.kotlin.multiplatform) apply false
     alias(libs.plugins.kotlin.compose) apply false
     alias(libs.plugins.kotlin.kapt) apply false
     alias(libs.plugins.kotlin.serialization) apply false
 
+    alias(libs.plugins.android.application) apply false
     alias(libs.plugins.compose) apply false
     alias(libs.plugins.flatpak.gradle.generator)
     alias(libs.plugins.svg2ico) apply false
@@ -20,24 +22,11 @@ plugins {
 }
 
 subprojects {
-    apply {
-        plugin("java")
-        plugin("maven-publish")
-        plugin("signing")
-    }
-
     group = "org.archivekeep"
+
     version =
         rootProject.libs.versions.archivekeep
             .get()
-
-    java {
-        sourceCompatibility = JavaVersion.VERSION_17
-        targetCompatibility = JavaVersion.VERSION_17
-
-        withJavadocJar()
-        withSourcesJar()
-    }
 
     repositories {
         mavenCentral()
@@ -46,6 +35,26 @@ subprojects {
 
         // for Flatpak offline no-network-access build
         maven(uri(rootDir.resolve("offline-repository")))
+    }
+}
+
+subprojects {
+    if (name in listOf("app-android", "app-ui")) {
+        return@subprojects
+    }
+
+    apply {
+        plugin("java")
+        plugin("maven-publish")
+        plugin("signing")
+    }
+
+    java {
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
+
+        withJavadocJar()
+        withSourcesJar()
     }
 
     publishing {
@@ -100,6 +109,10 @@ subprojects {
 }
 
 allprojects {
+    if (name in listOf("app-android", "app-ui")) {
+        return@allprojects
+    }
+
     apply {
         plugin("io.github.jwharm.flatpak-gradle-generator")
     }

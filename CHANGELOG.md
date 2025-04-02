@@ -2,6 +2,14 @@
 
 ## Unreleased
 
+### Added
+
+- setup: create Android application gradle module
+
+### Changed
+
+- refactor: extract UI to app-ui module
+
 ## 0.3.3 - 2025-03-31
 
 ### Added
