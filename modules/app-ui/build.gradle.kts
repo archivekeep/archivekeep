@@ -33,6 +33,8 @@ kotlin {
                 implementation(libs.compose.grid)
                 implementation(libs.compose.filekit)
                 implementation(libs.compose.resources.tabler.icons)
+
+                api(libs.compose.material3.windowsizeclass)
             }
         }
         val androidMain by getting {

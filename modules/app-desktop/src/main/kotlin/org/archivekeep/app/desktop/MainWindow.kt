@@ -1,5 +1,7 @@
 package org.archivekeep.app.desktop
 
+import androidx.compose.material3.windowsizeclass.ExperimentalMaterial3WindowSizeClassApi
+import androidx.compose.material3.windowsizeclass.calculateWindowSizeClass
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.unit.DpSize
@@ -19,6 +21,7 @@ import org.jetbrains.compose.resources.painterResource
 val DefaultMainWindowWidth = 1050.dp
 val DefaultMainWindowHeight = 800.dp
 
+@OptIn(ExperimentalMaterial3WindowSizeClassApi::class)
 @Composable
 fun (ApplicationScope).MainWindow() {
     val windowState =
@@ -46,6 +49,7 @@ fun (ApplicationScope).MainWindow() {
         ) {
             MainWindowContent(
                 isFloating = windowState.placement == WindowPlacement.Floating,
+                windowSizeClass = calculateWindowSizeClass(),
                 ::exitApplication,
             )
         }

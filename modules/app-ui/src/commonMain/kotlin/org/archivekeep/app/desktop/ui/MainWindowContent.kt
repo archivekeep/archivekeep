@@ -3,6 +3,7 @@ package org.archivekeep.app.desktop.ui
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Surface
+import androidx.compose.material3.windowsizeclass.WindowSizeClass
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.remember
@@ -22,6 +23,7 @@ import org.archivekeep.app.desktop.ui.designsystem.styles.DesktopAppTheme
 @Composable
 fun MainWindowContent(
     isFloating: Boolean,
+    windowSizeClass: WindowSizeClass,
     onCloseRequest: () -> Unit,
 ) {
     val dialogRenderer = remember { OverlayDialogRenderer() }
@@ -53,7 +55,10 @@ fun MainWindowContent(
                         ),
                     ),
             ) {
-                MainWindowLayout(onCloseRequest = onCloseRequest)
+                MainWindowLayout(
+                    windowSizeClass = windowSizeClass,
+                    onCloseRequest = onCloseRequest,
+                )
 
                 dialogRenderer.render()
             }

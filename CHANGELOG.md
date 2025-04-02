@@ -4,6 +4,7 @@
 
 ### Added
 
+- UI: navigation bar instead of navigation rail on small width screens (window sizes)
 - setup: create Android application gradle module
 
 ### Changed

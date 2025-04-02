@@ -1,8 +1,11 @@
 package org.archivekeep.app.desktop.ui
 
 import androidx.compose.foundation.layout.size
+import androidx.compose.material3.windowsizeclass.ExperimentalMaterial3WindowSizeClassApi
+import androidx.compose.material3.windowsizeclass.WindowSizeClass
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.test.ExperimentalTestApi
+import androidx.compose.ui.unit.DpSize
 import org.archivekeep.app.core.persistence.platform.demo.DemoEnvironment
 import org.archivekeep.app.desktop.DefaultMainWindowHeight
 import org.archivekeep.app.desktop.DefaultMainWindowWidth
@@ -13,7 +16,7 @@ import org.archivekeep.app.desktop.ui.testing.screenshots.setContentScreenshotCo
 import org.junit.Test
 
 class MainWindowScreenshotTest {
-    @OptIn(ExperimentalTestApi::class)
+    @OptIn(ExperimentalTestApi::class, ExperimentalMaterial3WindowSizeClassApi::class)
     @Test
     fun makeScreenshot() {
         runHighDensityComposeUiTest {
@@ -30,6 +33,10 @@ class MainWindowScreenshotTest {
                 ) {
                     MainWindowContent(
                         isFloating = true,
+                        windowSizeClass =
+                            WindowSizeClass.calculateFromSize(
+                                DpSize(DefaultMainWindowWidth, DefaultMainWindowHeight),
+                            ),
                         onCloseRequest = {},
                     )
                 }

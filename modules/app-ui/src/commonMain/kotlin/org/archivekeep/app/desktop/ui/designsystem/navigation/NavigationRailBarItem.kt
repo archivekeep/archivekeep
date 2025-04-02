@@ -1,7 +1,6 @@
 package org.archivekeep.app.desktop.ui.designsystem.navigation
 
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.Icon
@@ -19,11 +18,12 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
 @Composable
-fun NavigationRailItem(
+fun NavigationRailBarItem(
     text: String,
     icon: ImageVector,
     selected: Boolean,
     onClick: () -> Unit,
+    modifier: Modifier,
 ) {
     val contentColor = if (selected) Color.White else Color(200, 210, 240)
     val backgroundColor = if (selected) Color(60, 92, 154) else Color.Transparent
@@ -39,7 +39,7 @@ fun NavigationRailItem(
             LocalContentColor provides contentColor,
         ) {
             Column(
-                modifier = Modifier.fillMaxWidth().padding(6.dp),
+                modifier = modifier.padding(6.dp),
                 horizontalAlignment = Alignment.CenterHorizontally,
             ) {
                 Icon(

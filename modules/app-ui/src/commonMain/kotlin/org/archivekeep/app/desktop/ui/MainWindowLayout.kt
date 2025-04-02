@@ -3,10 +3,14 @@ package org.archivekeep.app.desktop.ui
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material3.windowsizeclass.WindowSizeClass
+import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -15,6 +19,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.unit.dp
 import compose.icons.TablerIcons
 import compose.icons.tablericons.Database
 import compose.icons.tablericons.Folders
@@ -25,8 +30,9 @@ import org.archivekeep.app.desktop.enableUnfinishedFeatures
 import org.archivekeep.app.desktop.ui.components.AppBar
 import org.archivekeep.app.desktop.ui.components.DraggableAreaIfWindowPresent
 import org.archivekeep.app.desktop.ui.components.VersionText
+import org.archivekeep.app.desktop.ui.designsystem.navigation.NavigationBar
 import org.archivekeep.app.desktop.ui.designsystem.navigation.NavigationRail
-import org.archivekeep.app.desktop.ui.designsystem.navigation.NavigationRailItem
+import org.archivekeep.app.desktop.ui.designsystem.navigation.NavigationRailBarItem
 import org.archivekeep.app.desktop.ui.views.View
 import org.archivekeep.app.desktop.ui.views.archives.ArchivesView
 import org.archivekeep.app.desktop.ui.views.home.HomeView
@@ -35,7 +41,10 @@ import org.archivekeep.app.desktop.ui.views.settings.SettingsView
 import org.archivekeep.app.desktop.ui.views.storages.StoragesView
 
 @Composable
-fun MainWindowLayout(onCloseRequest: () -> Unit) {
+fun MainWindowLayout(
+    windowSizeClass: WindowSizeClass,
+    onCloseRequest: () -> Unit,
+) {
     val scope = rememberCoroutineScope()
 
     val sharingScope =
@@ -46,6 +55,8 @@ fun MainWindowLayout(onCloseRequest: () -> Unit) {
         }
 
     var selectedItem by remember { mutableStateOf<NavigableView<View<*>>>(navigables[0]) }
+
+    val showRail = windowSizeClass.widthSizeClass != WindowWidthSizeClass.Compact
 
     @Composable
     fun <V> renderView(
@@ -60,28 +71,34 @@ fun MainWindowLayout(onCloseRequest: () -> Unit) {
         }
     }
 
+    @Composable
+    fun renderItem(
+        modifier: Modifier,
+        it: NavigableView<View<*>>,
+    ) {
+        NavigationRailBarItem(
+            text = it.title,
+            icon = it.icon,
+            selected = selectedItem == it,
+            onClick = { selectedItem = it },
+            modifier = modifier,
+        )
+    }
+
     Column {
         AppBar(onCloseRequest = onCloseRequest)
-        Row {
-            DraggableAreaIfWindowPresent {
-                NavigationRail {
-                    @Composable
-                    fun renderItem(it: NavigableView<View<*>>) {
-                        NavigationRailItem(
-                            text = it.title,
-                            icon = it.icon,
-                            selected = selectedItem == it,
-                            onClick = { selectedItem = it },
-                        )
-                    }
-
-                    navigables.forEach {
-                        renderItem(it)
-                    }
-                    Spacer(Modifier.weight(1f))
-                    VersionText()
-                    navigablesEnd.forEach {
-                        renderItem(it)
+        Row(Modifier.weight(1f, fill = true)) {
+            if (showRail) {
+                DraggableAreaIfWindowPresent {
+                    NavigationRail {
+                        navigables.forEach {
+                            renderItem(Modifier.fillMaxWidth(), it)
+                        }
+                        Spacer(Modifier.weight(1f))
+                        VersionText()
+                        navigablesEnd.forEach {
+                            renderItem(Modifier.fillMaxWidth(), it)
+                        }
                     }
                 }
             }
@@ -92,6 +109,16 @@ fun MainWindowLayout(onCloseRequest: () -> Unit) {
                     selectedItem == it,
                     Modifier.weight(1f).fillMaxHeight(),
                 )
+            }
+        }
+
+        if (!showRail) {
+            DraggableAreaIfWindowPresent {
+                NavigationBar {
+                    (navigables + navigablesEnd).forEach {
+                        renderItem(Modifier.fillMaxHeight().defaultMinSize(minWidth = 40.dp), it)
+                    }
+                }
             }
         }
     }
