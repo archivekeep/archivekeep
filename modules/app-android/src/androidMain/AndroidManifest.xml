@@ -6,7 +6,8 @@
         android:icon="@drawable/ic_app"
         android:label="@string/app_name"
         android:supportsRtl="true"
-        android:theme="@style/Theme.ArchiveKeep">
+        android:theme="@style/Theme.ArchiveKeep"
+        android:name=".MainApplication">
         <activity
             android:name=".MainActivity"
             android:exported="true"
