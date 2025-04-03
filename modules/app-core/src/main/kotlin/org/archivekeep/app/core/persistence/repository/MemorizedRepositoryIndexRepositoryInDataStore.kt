@@ -1,6 +1,5 @@
 package org.archivekeep.app.core.persistence.repository
 
-import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.PreferenceDataStoreFactory
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.edit
@@ -12,27 +11,26 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
-import org.archivekeep.app.core.utils.environment.getRepositoryIndexMemoryDatastorePath
 import org.archivekeep.app.core.utils.generics.OptionalLoadable
 import org.archivekeep.app.core.utils.generics.mapToOptionalLoadable
 import org.archivekeep.app.core.utils.identifiers.RepositoryURI
 import org.archivekeep.files.repo.RepoIndex
 import org.archivekeep.utils.coroutines.shareResourceIn
-
-private val defaultDatastore by lazy {
-    PreferenceDataStoreFactory.create(
-        corruptionHandler = null,
-        migrations = emptyList(),
-        produceFile = { getRepositoryIndexMemoryDatastorePath().toFile() },
-    )
-}
+import java.io.File
 
 private val REMEMBERED_REPOSITORY_INDEX_KEY = stringSetPreferencesKey("remembered_repository_index")
 
 class MemorizedRepositoryIndexRepositoryInDataStore(
     val scope: CoroutineScope,
-    val datastore: DataStore<Preferences> = defaultDatastore,
+    val datastoreFile: File,
 ) : MemorizedRepositoryIndexRepository {
+    private val datastore =
+        PreferenceDataStoreFactory.create(
+            corruptionHandler = null,
+            migrations = emptyList(),
+            produceFile = { datastoreFile },
+        )
+
     val rememberedRepositoriesIndexes =
         datastore.data
             .map(::getRememberedRepositoriesIndexesFromPreferences)

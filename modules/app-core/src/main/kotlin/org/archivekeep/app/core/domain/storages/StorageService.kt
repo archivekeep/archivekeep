@@ -4,7 +4,6 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 import org.archivekeep.app.core.domain.repositories.RepositoryService
@@ -15,6 +14,7 @@ import org.archivekeep.utils.combineToFlatMapList
 import org.archivekeep.utils.combineToList
 import org.archivekeep.utils.coroutines.shareResourceIn
 import org.archivekeep.utils.coroutines.sharedResourceInGlobalScope
+import org.archivekeep.utils.loading.Loadable
 import org.archivekeep.utils.loading.flatMapLatestLoadedData
 import org.archivekeep.utils.loading.mapLoadedData
 import org.archivekeep.utils.loading.waitLoadedValue
@@ -78,7 +78,7 @@ fun notSupportedStorage(storageURI: StorageURI) =
         storageURI,
         information = flowOf(OptionalLoadable.NotAvailable()),
         connectionStatus =
-            flow<Storage.ConnectionStatus> {
-                throw RuntimeException("Not supported storage driver: $storageURI")
-            }.sharedResourceInGlobalScope(),
+            flowOf(
+                Loadable.Failed(RuntimeException("Not supported storage driver: $storageURI")),
+            ).sharedResourceInGlobalScope(),
     )

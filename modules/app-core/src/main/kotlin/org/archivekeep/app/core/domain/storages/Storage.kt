@@ -7,7 +7,7 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.stateIn
 import org.archivekeep.app.core.utils.identifiers.StorageURI
 import org.archivekeep.utils.loading.Loadable
-import org.archivekeep.utils.loading.mapToLoadable
+import org.archivekeep.utils.loading.mapLoadedData
 
 class Storage(
     val uri: StorageURI,
@@ -42,7 +42,7 @@ class Storage(
     @OptIn(DelicateCoroutinesApi::class)
     val state =
         connection.connectionStatus
-            .mapToLoadable { connectionStatus ->
+            .mapLoadedData { connectionStatus ->
                 State(connectionStatus)
             }.stateIn(GlobalScope, SharingStarted.WhileSubscribed(), Loadable.Loading)
 }

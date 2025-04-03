@@ -1,4 +1,4 @@
-package org.archivekeep.app.core.utils.environment
+package org.archivekeep.app.desktop
 
 import java.nio.file.Path
 import kotlin.io.path.Path

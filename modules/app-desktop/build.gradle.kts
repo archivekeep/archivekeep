@@ -22,6 +22,8 @@ dependencies {
     implementation(project(":app-core"))
     implementation(project(":app-ui"))
 
+    implementation(libs.kotlinx.serialization.json)
+
     implementation(compose.components.resources)
     implementation(compose.desktop.currentOs)
 

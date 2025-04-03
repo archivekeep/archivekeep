@@ -8,6 +8,7 @@ import org.archivekeep.app.core.utils.generics.OptionalLoadable
 import org.archivekeep.app.core.utils.identifiers.RepositoryURI
 import org.archivekeep.app.core.utils.identifiers.StorageURI
 import org.archivekeep.files.repo.Repo
+import org.archivekeep.utils.loading.Loadable
 
 interface StorageDriver {
     fun getStorageAccessor(storageURI: StorageURI): StorageConnection
@@ -18,5 +19,5 @@ interface StorageDriver {
 data class StorageConnection(
     val storageURI: StorageURI,
     val information: Flow<OptionalLoadable<StorageInformation>>,
-    val connectionStatus: SharedFlow<Storage.ConnectionStatus>,
+    val connectionStatus: SharedFlow<Loadable<Storage.ConnectionStatus>>,
 )

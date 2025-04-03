@@ -15,6 +15,8 @@ kotlin {
                 implementation(project(":app-core"))
                 implementation(project(":app-ui"))
 
+                implementation(libs.kotlinx.serialization.json)
+
                 implementation(compose.ui)
                 implementation(compose.foundation)
                 implementation(compose.material)
@@ -30,7 +32,7 @@ android {
 
     defaultConfig {
         applicationId = "org.archivekeep.ArchiveKeep"
-        minSdk = 24
+        minSdk = 26
         targetSdk = 34
         versionCode = 1
         versionName = libs.versions.archivekeep.get()

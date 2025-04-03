@@ -25,7 +25,6 @@ import org.archivekeep.files.repo.Repo
 import org.archivekeep.files.repo.files.openFilesRepoOrNull
 import org.archivekeep.utils.coroutines.shareResourceIn
 import org.archivekeep.utils.loading.mapLoadedData
-import org.archivekeep.utils.loading.waitLoadedValue
 import java.nio.file.Path
 import kotlin.io.path.Path
 
@@ -51,7 +50,7 @@ class FileSystemStorageDriver(
                         }
                     }.onEach {
                         println("Storage status: $key = $it")
-                    }.waitLoadedValue()
+                    }
             },
         )
 

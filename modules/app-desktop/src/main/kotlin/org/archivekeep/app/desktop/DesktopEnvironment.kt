@@ -1,4 +1,4 @@
-package org.archivekeep.app.core.persistence.platform.desktop
+package org.archivekeep.app.desktop
 
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.serialization.json.Json
@@ -14,13 +14,16 @@ import org.archivekeep.app.core.persistence.platform.Environment
 import org.archivekeep.app.core.persistence.registry.PreferenceDataStoreRegistryData
 import org.archivekeep.app.core.persistence.repository.MemorizedRepositoryIndexRepositoryInDataStore
 import org.archivekeep.app.core.persistence.repository.MemorizedRepositoryMetadataRepositoryInDataStore
-import org.archivekeep.app.core.utils.environment.getWalletDatastorePath
 
 class DesktopEnvironment(
     val scope: CoroutineScope,
     override val fileStores: FileStores = FileStores(scope),
 ) : Environment {
-    override val registry: PreferenceDataStoreRegistryData = PreferenceDataStoreRegistryData(scope)
+    override val registry: PreferenceDataStoreRegistryData =
+        PreferenceDataStoreRegistryData(
+            scope,
+            getRegistryDatastorePath().toFile(),
+        )
 
     override val walletDataStore =
         JoseStorage(
@@ -31,8 +34,8 @@ class DesktopEnvironment(
 
     val credentialsStore: CredentialsStore = CredentialsInProtectedDataStore(walletDataStore)
 
-    override val repositoryIndexMemory = MemorizedRepositoryIndexRepositoryInDataStore(scope)
-    override val repositoryMetadataMemory = MemorizedRepositoryMetadataRepositoryInDataStore(scope)
+    override val repositoryIndexMemory = MemorizedRepositoryIndexRepositoryInDataStore(scope, getRepositoryIndexMemoryDatastorePath().toFile())
+    override val repositoryMetadataMemory = MemorizedRepositoryMetadataRepositoryInDataStore(scope, getRepositoryMetadataMemoryDatastorePath().toFile())
 
     override val storageDrivers =
         mapOf(

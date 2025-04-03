@@ -224,7 +224,7 @@ class DemoEnvironment(
                 }
 
                 flowOf(
-                    realStatus ?: Storage.ConnectionStatus.DISCONNECTED,
+                    Loadable.Loaded(realStatus ?: Storage.ConnectionStatus.DISCONNECTED),
                 )
             },
         )

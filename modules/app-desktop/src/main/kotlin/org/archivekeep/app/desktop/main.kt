@@ -7,7 +7,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.plus
 import org.archivekeep.app.core.persistence.platform.Environment
 import org.archivekeep.app.core.persistence.platform.demo.DemoEnvironment
-import org.archivekeep.app.core.persistence.platform.desktop.DesktopEnvironment
 import org.archivekeep.app.desktop.domain.wiring.ApplicationProviders
 
 fun main(args: Array<String>) {

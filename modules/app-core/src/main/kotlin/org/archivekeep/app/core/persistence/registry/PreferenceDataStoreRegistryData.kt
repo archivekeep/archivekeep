@@ -1,6 +1,5 @@
 package org.archivekeep.app.core.persistence.registry
 
-import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.PreferenceDataStoreFactory
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.edit
@@ -10,26 +9,25 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
-import org.archivekeep.app.core.utils.environment.getRegistryDatastorePath
 import org.archivekeep.app.core.utils.identifiers.StorageURI
 import org.archivekeep.utils.coroutines.shareResourceIn
 import org.archivekeep.utils.loading.mapToLoadable
-
-private val defaultDatastore by lazy {
-    PreferenceDataStoreFactory.create(
-        corruptionHandler = null,
-        migrations = emptyList(),
-        produceFile = { getRegistryDatastorePath().toFile() },
-    )
-}
+import java.io.File
 
 private val REGISTERED_REPO_KEY = stringSetPreferencesKey("registered_repositories")
 private val REGISTERED_FS_STORAGE_KEY = stringSetPreferencesKey("registered_filesystem_storages")
 
 class PreferenceDataStoreRegistryData(
     val scope: CoroutineScope,
-    val datastore: DataStore<Preferences> = defaultDatastore,
+    val datastoreFile: File,
 ) : RegistryDataStore {
+    private val datastore =
+        PreferenceDataStoreFactory.create(
+            corruptionHandler = null,
+            migrations = emptyList(),
+            produceFile = { datastoreFile },
+        )
+
     override val registeredRepositories =
         datastore.data
             .map(::getRepositoriesFromPreferences)
