@@ -18,6 +18,7 @@ class MainApplication : Application() {
         services =
             ApplicationServices(scope) { scope ->
                 AndroidEnvironment(
+                    applicationContext,
                     scope + Dispatchers.Default,
                     AndroidEnvironmentPaths(filesDir),
                 )

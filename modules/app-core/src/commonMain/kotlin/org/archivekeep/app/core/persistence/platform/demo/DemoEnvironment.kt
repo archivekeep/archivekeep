@@ -25,6 +25,7 @@ import org.archivekeep.app.core.domain.storages.StorageRepository
 import org.archivekeep.app.core.persistence.credentials.Credentials
 import org.archivekeep.app.core.persistence.credentials.JoseStorage
 import org.archivekeep.app.core.persistence.drivers.filesystem.FileStores
+import org.archivekeep.app.core.persistence.drivers.filesystem.MountedFileSystem
 import org.archivekeep.app.core.persistence.platform.Environment
 import org.archivekeep.app.core.persistence.registry.RegisteredRepository
 import org.archivekeep.app.core.persistence.registry.RegisteredStorage
@@ -56,12 +57,23 @@ class DemoEnvironment(
     enableSpeedLimit: Boolean = true,
     physicalMediaData: List<DemoPhysicalMedium> = listOf(LaptopSSD, LaptopHDD, hddB, hddC),
     onlineStoragesData: List<DemoOnlineStorage> = emptyList(),
-    override val fileStores: FileStores = FileStores(scope),
 ) : Environment {
     data class InMemoryStorage(
         val registeredStorage: RegisteredStorage,
         val repos: Flow<List<MockedRepository>>,
     )
+
+    override val fileStores: FileStores =
+        object : FileStores {
+            override val mountPoints: SharedFlow<Loadable<List<MountedFileSystem.MountPoint>>> =
+                flowOf(emptyList<MountedFileSystem.MountPoint>())
+                    .mapToLoadable()
+                    .shareResourceIn(scope)
+
+            override val mountedFileSystems: Flow<Loadable<List<MountedFileSystem>>> = flowOf(Loadable.Loaded(emptyList()))
+
+            override suspend fun getFileSystemForPath(path: String): MountedFileSystem.MountPoint? = null
+        }
 
     private val demoTempDirectory = kotlin.io.path.createTempDirectory("archivekeep-demo-env")
 

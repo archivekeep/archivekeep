@@ -39,7 +39,7 @@ subprojects {
 }
 
 subprojects {
-    if (name in listOf("app-android", "app-ui")) {
+    if (name in listOf("app-android", "app-ui", "app-core")) {
         return@subprojects
     }
 
@@ -109,7 +109,7 @@ subprojects {
 }
 
 allprojects {
-    if (name in listOf("app-android", "app-ui")) {
+    if (name in listOf("app-android")) {
         return@allprojects
     }
 
@@ -121,6 +121,25 @@ allprojects {
         outputFile = project.layout.buildDirectory.file("flatpak/dependencies-sources.json")
         downloadDirectory = "./offline-repository"
 
+        includeConfigurations =
+            setOf(
+                "commonCompileClasspath",
+                "commonRuntimeClasspath",
+                "desktopCompileClasspath",
+                "desktopRuntimeClasspath",
+                "kotlinBuildToolsApiClasspath",
+                "kotlinCompilerClasspath",
+                "kotlinCompilerPluginClasspath",
+                "kotlinCompilerPluginClasspathMain",
+                "annotationProcessor",
+                "compileClasspath",
+                "runtimeClasspath",
+                "protobuf",
+                "protobufToolsLocator_grpc",
+                "protobufToolsLocator_grpckt",
+                "protobufToolsLocator_protoc",
+                "gradleOfflineBuildExtra",
+            )
         excludeConfigurations = setOf("kotlinNativeBundleConfiguration")
     }
 }

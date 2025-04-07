@@ -16,10 +16,9 @@ import org.archivekeep.app.core.domain.storages.StorageService
 import org.archivekeep.app.core.operations.add.AddOperationSupervisorServiceImpl
 import org.archivekeep.app.core.operations.addpush.AddAndPushOperationServiceImpl
 import org.archivekeep.app.core.operations.sync.RepoToRepoSyncServiceImpl
-import org.archivekeep.app.core.persistence.drivers.filesystem.FileSystemStorageDriver
 import org.archivekeep.app.core.persistence.platform.Environment
 import org.archivekeep.app.desktop.domain.services.LocalSharingCoroutineDispatcher
-import org.archivekeep.app.desktop.domain.services.RepositoryOpenService
+import org.archivekeep.app.desktop.domain.services.createRepositoryOpenService
 
 @OptIn(DelicateCoroutinesApi::class)
 class ApplicationServices(
@@ -63,13 +62,6 @@ class ApplicationServices(
             knownStorageService,
         )
 
-    val repositoryOpenService =
-        RepositoryOpenService(
-            environment.storageDrivers.values
-                .filterIsInstance<FileSystemStorageDriver>()
-                .firstOrNull(),
-        )
-
     fun close() {
         executor.close()
     }
@@ -107,6 +99,11 @@ fun ApplicationProviders(
     applicationServices: ApplicationServices,
     content: @Composable () -> Unit,
 ) {
+    val repositoryOpenService =
+        remember(applicationServices) {
+            createRepositoryOpenService(applicationServices)
+        }
+
     CompositionLocalProvider(
         LocalArchiveService provides applicationServices.archiveService,
         LocalStorageService provides applicationServices.storageService,
@@ -119,7 +116,7 @@ fun ApplicationProviders(
         LocalFileStores provides applicationServices.environment.fileStores,
         LocalStorageRegistry provides applicationServices.knownStorageService,
         LocalOperationFactory provides applicationServices.operationFactory,
-        LocalRepositoryOpenService provides applicationServices.repositoryOpenService,
+        LocalRepositoryOpenService provides repositoryOpenService,
         LocalSharingCoroutineDispatcher provides applicationServices.executor,
     ) {
         content()

@@ -6,6 +6,7 @@ kotlinx-coroutines = "1.10.1"
 compose = "1.7.3"
 grpc = "1.70.0"
 grpc-kotlin = "1.4.1"
+oshi = "6.8.0"
 picocli = "4.7.5"
 protobuf = "0.9.4"
 protobuf-kotlin = "3.25.5"
@@ -22,7 +23,7 @@ kotlinx-serialization-json = { group = "org.jetbrains.kotlinx", name = "kotlinx-
 
 compose-material3-windowsizeclass = { group = "org.jetbrains.compose.material3", name = "material3-window-size-class", version.ref = "compose" }
 compose-grid = { group = "com.cheonjaeung.compose.grid", name = "grid", version = "2.0.0" }
-compose-filekit = { group = "io.github.vinceglb", name = "filekit-compose", version = "0.8.3" }
+compose-filekit = { group = "io.github.vinceglb", name = "filekit-compose", version = "0.8.8" }
 compose-resources-tabler-icons = { group = "br.com.devsrsouza.compose.icons", name = "tabler-icons", version = "1.1.1" }
 
 grpc-protobuf-lite = { group = "io.grpc", name = "grpc-protobuf-lite", version.ref = "grpc" }
@@ -37,7 +38,7 @@ protobuf-kotlin-lite = { group = "com.google.protobuf", name = "protobuf-kotlin-
 picocli = { group = "info.picocli", name = "picocli", version.ref = "picocli" }
 picocli-codegen = { group = "info.picocli", name = "picocli-codegen", version.ref = "picocli" }
 
-oshi-core = { group = "com.github.oshi", name = "oshi-core", version = "6.6.5" }
+oshi-core = { group = "com.github.oshi", name = "oshi-core", version.ref = "oshi" }
 
 androidx-datastore = { group = "androidx.datastore", name = "datastore", version = "1.1.1" }
 androidx-datastore-preferences = { group = "androidx.datastore", name = "datastore-preferences", version = "1.1.1" }

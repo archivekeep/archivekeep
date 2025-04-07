@@ -58,5 +58,6 @@ modules:
       - "gradle-sources-root.json"
       - "gradle-sources-app-core.json"
       - "gradle-sources-app-desktop.json"
+      - "gradle-sources-app-ui.json"
       - "gradle-sources-cli.json"
       - "gradle-sources-files.json"

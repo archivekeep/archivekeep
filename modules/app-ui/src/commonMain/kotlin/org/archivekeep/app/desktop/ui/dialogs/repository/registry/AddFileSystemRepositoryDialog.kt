@@ -1,6 +1,11 @@
 package org.archivekeep.app.desktop.ui.dialogs.repository.registry
 
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.Button
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -14,8 +19,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.unit.dp
-import io.github.vinceglb.filekit.compose.rememberDirectoryPickerLauncher
-import io.github.vinceglb.filekit.core.FileKitPlatformSettings
 import kotlinx.coroutines.CoroutineScope
 import org.archivekeep.app.core.persistence.drivers.filesystem.FileSystemStorageType
 import org.archivekeep.app.core.persistence.drivers.filesystem.operations.AddFileSystemRepositoryOperation
@@ -46,7 +49,7 @@ class AddFileSystemRepositoryDialog(
         val coroutineScope: CoroutineScope,
         val operationFactory: OperationFactory,
     ) : RememberObserver {
-        var selectedPath by mutableStateOf<String?>(null)
+        var pickResult by mutableStateOf<PickResult?>(null)
             private set
 
         var markConfirmed by mutableStateOf<Boolean?>(false)
@@ -54,22 +57,29 @@ class AddFileSystemRepositoryDialog(
         var addOperation by mutableStateOf<AddFileSystemRepositoryOperation?>(null)
             private set
 
-        fun ssetSelectedPath(path: String) {
-            selectedPath = path
+        fun setPick(result: PickResult) {
+            pickResult = result
             markConfirmed = null
 
             addOperation?.run { cancel() }
 
-            val newOperation =
-                operationFactory
-                    .get(AddFileSystemRepositoryOperation.Factory::class.java)
-                    .create(
-                        coroutineScope,
-                        path,
-                        intendedStorageType,
-                    )
+            when (result) {
+                is PickResult.Success -> {
+                    val newOperation =
+                        operationFactory
+                            .get(AddFileSystemRepositoryOperation.Factory::class.java)
+                            .create(
+                                coroutineScope,
+                                result.path,
+                                intendedStorageType,
+                            )
 
-            addOperation = newOperation
+                    addOperation = newOperation
+                }
+                is PickResult.Failure -> {
+                    addOperation = null
+                }
+            }
         }
 
         override fun onAbandoned() {
@@ -103,37 +113,28 @@ class AddFileSystemRepositoryDialog(
         val initStatus = addOperation?.initStatus?.collectAsState()?.value
         val addStatus = addOperation?.addStatus?.collectAsState()?.value
 
-        val launcher =
-            rememberDirectoryPickerLauncher(
-                title = "Pick a directory",
-                platformSettings =
-                    fileKitPlatformSettings(),
-            ) { directory ->
-                if (directory != null) {
-                    val path = directory.path ?: throw Error("Path not present for $directory")
+        val permissionGrant = platformSpecificFileSystemRepositoryGuard()
 
-                    vm.ssetSelectedPath(path)
-                } else {
-                    println("Directory picker returned null directory")
-                }
+        val onLaunch = filesystemRepositoryDirectoryPicker(vm::setPick)
+
+        LaunchedEffect(permissionGrant) {
+            if (permissionGrant == PlatformSpecificPermissionFulfilment.IsFine) {
+                onLaunch()
             }
-
-        LaunchedEffect(0) {
-            launcher.launch()
         }
 
         if (addStatus is AddStatus.AddSuccessful) {
             // TODO: init storage as local or so
             // TODO: auto close: onClose()
         }
-        val selectedPath = vm.selectedPath
-        val onTriggerChange = launcher::launch
+        val selectedPath = vm.pickResult
 
         DialogOverlay(onDismissRequest = onClose) {
             AddRepositoryDialogContents(
                 intendedStorageType,
+                permissionGrant,
                 selectedPath,
-                onTriggerChange,
+                onLaunch,
                 vm.markConfirmed,
                 { vm.markConfirmed = it },
                 preparationStatus,
@@ -145,13 +146,37 @@ class AddFileSystemRepositoryDialog(
     }
 }
 
+sealed interface PlatformSpecificPermissionFulfilment {
+    data object IsFine : PlatformSpecificPermissionFulfilment
+
+    data class NeedsGrant(
+        val texts: List<String>,
+        val buttonText: String,
+        val onLaunch: () -> Unit,
+    ) : PlatformSpecificPermissionFulfilment
+}
+
 @Composable
-expect fun fileKitPlatformSettings(): FileKitPlatformSettings
+expect fun platformSpecificFileSystemRepositoryGuard(): PlatformSpecificPermissionFulfilment
+
+sealed interface PickResult {
+    data class Success(
+        val path: String,
+    ) : PickResult
+
+    data class Failure(
+        val error: Throwable,
+    ) : PickResult
+}
+
+@Composable
+expect fun filesystemRepositoryDirectoryPicker(onResult: (result: PickResult) -> Unit): () -> Unit
 
 @Composable
 private fun AddRepositoryDialogContents(
     intendedStorageType: FileSystemStorageType?,
-    selectedPath: String?,
+    permissionFulfilment: PlatformSpecificPermissionFulfilment,
+    pick: PickResult?,
     onTriggerChange: () -> Unit,
     markConfirmed: Boolean?,
     setMarkConfirmed: (newValue: Boolean?) -> Unit,
@@ -183,13 +208,35 @@ private fun AddRepositoryDialogContents(
                 }
             },
             content = {
-                DialogInputLabel("Repository directory:")
+                when (permissionFulfilment) {
+                    PlatformSpecificPermissionFulfilment.IsFine -> {
+                        DialogInputLabel("Repository directory:")
 
-                DialogFilePicker(
-                    selectedPath,
-                    onTriggerChange = onTriggerChange,
-                    changeEnabled = initStatus == null && addStatus == null,
-                )
+                        DialogFilePicker(
+                            pick?.let {
+                                when (pick) {
+                                    is PickResult.Failure -> "ERROR"
+                                    is PickResult.Success -> pick.path
+                                }
+                            },
+                            onTriggerChange = onTriggerChange,
+                            changeEnabled = initStatus == null && addStatus == null,
+                        )
+                    }
+                    is PlatformSpecificPermissionFulfilment.NeedsGrant -> {
+                        HorizontalDivider()
+                        Spacer(Modifier)
+                        Column(
+                            modifier = Modifier.padding(10.dp),
+                            verticalArrangement = Arrangement.spacedBy(4.dp),
+                        ) {
+                            permissionFulfilment.texts.forEach { Text(it) }
+                            Button(onClick = permissionFulfilment.onLaunch) { Text(permissionFulfilment.buttonText) }
+                        }
+                        Spacer(Modifier)
+                        HorizontalDivider()
+                    }
+                }
 
                 ScrollableColumn {
                     if (preparationStatus is PreparationStatus.ReadyForAdd || preparationStatus is PreparationStatus.ReadyForInit) {
@@ -342,6 +389,7 @@ private fun AddRepositoryDialogPreview1() {
     DialogPreviewColumn {
         AddRepositoryDialogContents(
             null,
+            PlatformSpecificPermissionFulfilment.IsFine,
             null,
             onTriggerChange = {},
             markConfirmed = false,
@@ -353,7 +401,8 @@ private fun AddRepositoryDialogPreview1() {
         )
         AddRepositoryDialogContents(
             null,
-            "/home/you/Archive/PersonalStuff",
+            PlatformSpecificPermissionFulfilment.IsFine,
+            PickResult.Success("/home/you/Archive/PersonalStuff"),
             onTriggerChange = {},
             markConfirmed = false,
             setMarkConfirmed = {},
@@ -371,7 +420,8 @@ private fun AddRepositoryDialogPreview2() {
     DialogPreviewColumn {
         AddRepositoryDialogContents(
             null,
-            "/home/you/Archive/PersonalStuff",
+            PlatformSpecificPermissionFulfilment.IsFine,
+            PickResult.Success("/home/you/Archive/PersonalStuff"),
             onTriggerChange = {},
             markConfirmed = false,
             setMarkConfirmed = {},
@@ -382,7 +432,8 @@ private fun AddRepositoryDialogPreview2() {
         )
         AddRepositoryDialogContents(
             null,
-            "/home/you/Archive/PersonalStuff",
+            PlatformSpecificPermissionFulfilment.IsFine,
+            PickResult.Success("/home/you/Archive/PersonalStuff"),
             onTriggerChange = {},
             markConfirmed = false,
             setMarkConfirmed = {},
@@ -400,7 +451,8 @@ private fun AddRepositoryDialogPreview3() {
     DialogPreviewColumn {
         AddRepositoryDialogContents(
             null,
-            "/home/you/Archive/PersonalStuff",
+            PlatformSpecificPermissionFulfilment.IsFine,
+            PickResult.Success("/home/you/Archive/PersonalStuff"),
             onTriggerChange = {},
             markConfirmed = false,
             setMarkConfirmed = {},
@@ -411,7 +463,8 @@ private fun AddRepositoryDialogPreview3() {
         )
         AddRepositoryDialogContents(
             null,
-            "/home/you/Archive/PersonalStuff",
+            PlatformSpecificPermissionFulfilment.IsFine,
+            PickResult.Success("/home/you/Archive/PersonalStuff"),
             onTriggerChange = {},
             markConfirmed = false,
             setMarkConfirmed = {},
@@ -429,7 +482,8 @@ private fun AddRepositoryDialogPreview4() {
     DialogPreviewColumn {
         AddRepositoryDialogContents(
             null,
-            "/home/you/Archive/PersonalStuff",
+            PlatformSpecificPermissionFulfilment.IsFine,
+            PickResult.Success("/home/you/Archive/PersonalStuff"),
             onTriggerChange = {},
             markConfirmed = false,
             setMarkConfirmed = {},
@@ -440,7 +494,8 @@ private fun AddRepositoryDialogPreview4() {
         )
         AddRepositoryDialogContents(
             null,
-            "/home/you/Archive/PersonalStuff",
+            PlatformSpecificPermissionFulfilment.IsFine,
+            PickResult.Success("/home/you/Archive/PersonalStuff"),
             onTriggerChange = {},
             markConfirmed = false,
             setMarkConfirmed = {},
@@ -458,7 +513,8 @@ private fun AddRepositoryDialogPreview5() {
     DialogPreviewColumn {
         AddRepositoryDialogContents(
             null,
-            "/home/you/Archive/PersonalStuff",
+            PlatformSpecificPermissionFulfilment.IsFine,
+            PickResult.Success("/home/you/Archive/PersonalStuff"),
             onTriggerChange = {},
             markConfirmed = false,
             setMarkConfirmed = {},

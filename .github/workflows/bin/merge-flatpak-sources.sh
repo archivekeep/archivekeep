@@ -16,6 +16,7 @@ echo 'def comm: (.[0]-(.[0]-.[1])) as $d | [.[0]-$d,.[1]-$d, $d];' > comm.jq
 
 process_list gradle-sources-app-core
 process_list gradle-sources-app-desktop
+process_list gradle-sources-app-ui
 process_list gradle-sources-cli
 process_list gradle-sources-files
 process_list gradle-sources-root

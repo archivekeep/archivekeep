@@ -7,6 +7,7 @@ import org.archivekeep.app.core.persistence.credentials.Credentials
 import org.archivekeep.app.core.persistence.credentials.CredentialsInProtectedDataStore
 import org.archivekeep.app.core.persistence.credentials.CredentialsStore
 import org.archivekeep.app.core.persistence.credentials.JoseStorage
+import org.archivekeep.app.core.persistence.drivers.filesystem.DesktopFileStores
 import org.archivekeep.app.core.persistence.drivers.filesystem.FileStores
 import org.archivekeep.app.core.persistence.drivers.filesystem.FileSystemStorageDriver
 import org.archivekeep.app.core.persistence.drivers.grpc.GRPCStorageDriver
@@ -17,8 +18,9 @@ import org.archivekeep.app.core.persistence.repository.MemorizedRepositoryMetada
 
 class DesktopEnvironment(
     val scope: CoroutineScope,
-    override val fileStores: FileStores = FileStores(scope),
 ) : Environment {
+    override val fileStores: FileStores = DesktopFileStores(scope)
+
     override val registry: PreferenceDataStoreRegistryData =
         PreferenceDataStoreRegistryData(
             scope,

@@ -27,13 +27,13 @@ kotlin {
 }
 
 android {
-    compileSdk = 34
+    compileSdk = 35
     namespace = "org.archivekeep.app.android"
 
     defaultConfig {
         applicationId = "org.archivekeep.ArchiveKeep"
-        minSdk = 26
-        targetSdk = 34
+        minSdk = 30
+        targetSdk = 35
         versionCode = 1
         versionName = libs.versions.archivekeep.get()
     }
@@ -52,5 +52,6 @@ android {
     }
     buildFeatures {
         compose = true
+        buildConfig = true
     }
 }

@@ -1,6 +1,6 @@
 plugins {
-    kotlin("multiplatform")
-    kotlin("plugin.compose")
+    alias(libs.plugins.kotlin.multiplatform)
+    alias(libs.plugins.kotlin.compose)
     id("com.android.library")
     id("org.jetbrains.compose")
 }
@@ -42,6 +42,8 @@ kotlin {
                 api("androidx.activity:activity-compose:1.7.2")
                 api("androidx.appcompat:appcompat:1.6.1")
                 api("androidx.core:core-ktx:1.10.1")
+
+                implementation("com.google.accompanist:accompanist-permissions:0.37.2")
             }
         }
         val desktopMain by getting {
@@ -60,7 +62,7 @@ compose.resources {
 }
 
 android {
-    compileSdk = 34
+    compileSdk = 35
     namespace = "org.archivekeep.app.ui.common"
 
     sourceSets["main"].res.srcDirs("src/androidMain/res")
@@ -69,7 +71,7 @@ android {
     sourceSets["main"].resources.srcDirs("src/commonMain/composeResources")
 
     defaultConfig {
-        minSdk = 24
+        minSdk = 30
     }
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_17

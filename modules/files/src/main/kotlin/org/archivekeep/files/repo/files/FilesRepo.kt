@@ -28,6 +28,7 @@ import java.nio.file.PathMatcher
 import java.nio.file.StandardOpenOption
 import java.util.Collections.singletonList
 import kotlin.io.path.Path
+import kotlin.io.path.createDirectory
 import kotlin.io.path.createParentDirectories
 import kotlin.io.path.deleteExisting
 import kotlin.io.path.deleteIfExists
@@ -42,6 +43,7 @@ import kotlin.io.path.moveTo
 import kotlin.io.path.readText
 import kotlin.io.path.relativeTo
 import kotlin.io.path.writeText
+import kotlin.streams.asSequence
 
 const val ignorePatternsFileName = ".archivekeepignore"
 
@@ -72,7 +74,8 @@ class FilesRepo(
                 } else {
                     Files.walk(it).filter { it.isRegularFile() }
                 }
-            }.map { it.relativeTo(root) }
+            }.asSequence()
+            .map { it.relativeTo(root) }
             .filter { path ->
                 val parts =
                     path
@@ -94,6 +97,7 @@ class FilesRepo(
     override suspend fun storedFiles(): List<String> =
         Files
             .walk(checksumsRoot)
+            .asSequence()
             .filter { it.isRegularFile() && it.extension == "sha256" }
             .map { it.relativeTo(checksumsRoot).invariantSeparatorsPathString.removeSuffix(".sha256") }
             .toList()
@@ -301,6 +305,7 @@ class FilesRepo(
         val files =
             Files
                 .walk(checksumsRoot)
+                .asSequence()
                 .filter { it.isRegularFile() && it.extension == "sha256" }
                 .map {
                     RepoIndex.File(
@@ -345,15 +350,15 @@ fun openFilesRepoOrNull(path: Path): FilesRepo? {
 }
 
 fun createFilesRepo(path: Path): FilesRepo {
-    val checksumDir = path.resolve(".archive").resolve("checksums")
+    val archiveDir = path.resolve(".archive")
+    val checksumDir = archiveDir.resolve("checksums")
 
     if (checksumDir.isDirectory()) {
         throw RuntimeException("Already exists")
     }
 
-    if (!checksumDir.toFile().mkdirs()) {
-        throw RuntimeException("Failed to create checksum dir")
-    }
+    archiveDir.createDirectory()
+    checksumDir.createDirectory()
 
     return FilesRepo(path)
 }

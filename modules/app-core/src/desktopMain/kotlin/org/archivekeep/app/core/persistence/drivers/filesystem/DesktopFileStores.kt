@@ -17,7 +17,6 @@ import kotlinx.coroutines.flow.transformLatest
 import org.archivekeep.utils.coroutines.shareResourceIn
 import org.archivekeep.utils.io.debounceAndRepeatAfterDelay
 import org.archivekeep.utils.io.listFilesFlow
-import org.archivekeep.utils.loading.firstLoadedOrFailure
 import org.archivekeep.utils.loading.mapLoadedData
 import org.archivekeep.utils.loading.mapToLoadable
 import oshi.SystemInfo
@@ -32,10 +31,10 @@ import kotlin.io.path.Path
 import kotlin.io.path.exists
 
 @OptIn(ExperimentalCoroutinesApi::class)
-class FileStores(
+class DesktopFileStores(
     scope: CoroutineScope,
     ioDispatcher: CoroutineDispatcher = Dispatchers.IO,
-) {
+) : FileStores {
     private val mediaPath = Path("/run/media/")
 
     private val mediaDirectoriesFlow =
@@ -75,7 +74,7 @@ class FileStores(
             }.flowOn(ioDispatcher)
             .conflate()
 
-    private val mountPoints =
+    override val mountPoints =
         run {
             fun collectMounts(): List<MountedFileSystem.MountPoint> {
                 val systemInfo = SystemInfo()
@@ -142,7 +141,7 @@ class FileStores(
                 .shareResourceIn(scope)
         }
 
-    val mountedFileSystems =
+    override val mountedFileSystems =
         mountPoints.mapLoadedData { mountPoints ->
             mountPoints
                 .map { it.fsUUID }
@@ -158,12 +157,4 @@ class FileStores(
                     )
                 }
         }
-
-    suspend fun getFileSystemForPath(path: String): MountedFileSystem.MountPoint? {
-        val mp = mountPoints.firstLoadedOrFailure().toMutableList()
-
-        return mp
-            .filter { path.startsWith(it.mountPath) }
-            .maxByOrNull { it.mountPath }
-    }
 }
