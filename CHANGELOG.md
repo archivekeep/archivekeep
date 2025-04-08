@@ -12,6 +12,10 @@
 - refactor: extract UI to app-ui module
 - build: limit collection of Gradle dependencies for Flatpak to sourceSets needed for its build
 
+### Fixed
+
+- repository shouldn't be added if init fails
+
 ## 0.3.3 - 2025-03-31
 
 ### Added

@@ -189,6 +189,7 @@ class AddFileSystemRepositoryOperationImpl(
                             e,
                         )
                     )
+                    return@launch
                 }
 
                 launchAdd()
