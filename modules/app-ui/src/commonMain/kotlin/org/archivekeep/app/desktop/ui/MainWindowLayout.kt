@@ -43,7 +43,7 @@ import org.archivekeep.app.desktop.ui.views.storages.StoragesView
 @Composable
 fun MainWindowLayout(
     windowSizeClass: WindowSizeClass,
-    onCloseRequest: () -> Unit,
+    onCloseRequest: (() -> Unit)?,
 ) {
     val scope = rememberCoroutineScope()
 

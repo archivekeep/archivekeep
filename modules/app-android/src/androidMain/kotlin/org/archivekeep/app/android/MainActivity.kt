@@ -28,7 +28,7 @@ class MainActivity : AppCompatActivity() {
                 MainWindowContent(
                     isFloating = false,
                     windowSizeClass = calculateWindowSizeClass(this@MainActivity),
-                    onCloseRequest = { this@MainActivity.onBackPressed() },
+                    onCloseRequest = null,
                 )
             }
         }

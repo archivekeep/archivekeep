@@ -28,7 +28,7 @@ import org.archivekeep.app.desktop.ui.designsystem.appbar.AppBarIconButton
 import org.archivekeep.app.desktop.ui.designsystem.styles.CColors
 
 @Composable
-fun AppBar(onCloseRequest: () -> Unit) {
+fun AppBar(onCloseRequest: (() -> Unit)?) {
     val credentialStorage = LocalWalletDataStore.current
 
     val canUnlock = credentialStorage.canUnlock()
@@ -60,11 +60,13 @@ fun AppBar(onCloseRequest: () -> Unit) {
                             )
                         }
 
-                        AppBarIconButton(
-                            icon = Icons.Default.Close,
-                            contentDescription = "Close application",
-                            onClick = onCloseRequest,
-                        )
+                        onCloseRequest?.let {
+                            AppBarIconButton(
+                                icon = Icons.Default.Close,
+                                contentDescription = "Close application",
+                                onClick = it,
+                            )
+                        }
                     }
                 },
             )

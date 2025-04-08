@@ -24,7 +24,7 @@ import org.archivekeep.app.desktop.ui.designsystem.styles.DesktopAppTheme
 fun MainWindowContent(
     isFloating: Boolean,
     windowSizeClass: WindowSizeClass,
-    onCloseRequest: () -> Unit,
+    onCloseRequest: (() -> Unit)?,
 ) {
     val dialogRenderer = remember { OverlayDialogRenderer() }
 
