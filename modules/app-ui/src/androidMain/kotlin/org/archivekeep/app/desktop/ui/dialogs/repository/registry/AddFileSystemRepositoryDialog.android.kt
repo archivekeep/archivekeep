@@ -14,10 +14,16 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.LifecycleEventEffect
 import io.github.vinceglb.filekit.compose.rememberDirectoryPickerLauncher
 import io.github.vinceglb.filekit.core.FileKitPlatformSettings
+import org.archivekeep.app.core.persistence.drivers.filesystem.MountedFileSystem
+import org.archivekeep.app.desktop.domain.wiring.LocalFileStores
+import org.archivekeep.app.desktop.utils.collectLoadableFlow
+import org.archivekeep.utils.loading.mapIfLoadedOrDefault
 import java.io.File
 
 @Composable
 actual fun filesystemRepositoryDirectoryPicker(onResult: (result: PickResult) -> Unit): () -> Unit {
+    val mountPoints = LocalFileStores.current.mountPoints.collectLoadableFlow()
+
     val pickerLauncher =
         rememberDirectoryPickerLauncher(
             title = "Pick a directory",
@@ -31,7 +37,14 @@ actual fun filesystemRepositoryDirectoryPicker(onResult: (result: PickResult) ->
                 if (path == null) {
                     onResult(PickResult.Failure(RuntimeException("Path not present for $directory")))
                 } else {
-                    onResult(PickResult.Success(getPathFromURI(directory.uri)))
+                    onResult(
+                        PickResult.Success(
+                            getPathFromURI(
+                                mountPoints.mapIfLoadedOrDefault(emptyList()) { it },
+                                directory.uri,
+                            ),
+                        ),
+                    )
                 }
             }
         }
@@ -71,7 +84,10 @@ fun storageManagerGuard(): PlatformSpecificPermissionFulfilment {
     }
 }
 
-fun getPathFromURI(uri: Uri): String {
+fun getPathFromURI(
+    mountPoints: List<MountedFileSystem.MountPoint>,
+    uri: Uri,
+): String {
     if (isExternalStorageDocument(uri)) {
         if (uri.pathSegments.size == 2) {
             if (uri.pathSegments[0] == "tree") {
@@ -81,7 +97,24 @@ fun getPathFromURI(uri: Uri): String {
                         .dropLastWhile { it.isEmpty() }
                         .toTypedArray()
 
-                if ("primary".equals(storageID, ignoreCase = true)) {
+                val mountedPathFromPointPoints =
+                    mountPoints.firstNotNullOfOrNull {
+                        if (it.fsUUID == storageID) {
+                            val f = File(it.mountPath).resolve(path)
+
+                            if (f.exists()) {
+                                f
+                            } else {
+                                null
+                            }
+                        } else {
+                            null
+                        }
+                    }
+
+                if (mountedPathFromPointPoints != null) {
+                    return mountedPathFromPointPoints.absolutePath
+                } else if ("primary".equals(storageID, ignoreCase = true)) {
                     return "${Environment.getExternalStorageDirectory()}/$path"
                 } else {
                     val storageFile = File("/storage/$storageID")

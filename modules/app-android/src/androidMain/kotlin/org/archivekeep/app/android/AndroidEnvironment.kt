@@ -16,13 +16,15 @@ import org.archivekeep.app.core.persistence.platform.Environment
 import org.archivekeep.app.core.persistence.registry.PreferenceDataStoreRegistryData
 import org.archivekeep.app.core.persistence.repository.MemorizedRepositoryIndexRepositoryInDataStore
 import org.archivekeep.app.core.persistence.repository.MemorizedRepositoryMetadataRepositoryInDataStore
+import java.util.concurrent.Executor
 
 class AndroidEnvironment(
     context: Context,
-    val scope: CoroutineScope,
+    executor: Executor,
+    scope: CoroutineScope,
     paths: AndroidEnvironmentPaths,
 ) : Environment {
-    override val fileStores: FileStores = AndroidFileStores(context, scope)
+    override val fileStores: FileStores = AndroidFileStores(context, scope, executor)
 
     override val registry: PreferenceDataStoreRegistryData = PreferenceDataStoreRegistryData(scope, paths.getRegistryDatastoreFile())
 
