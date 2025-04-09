@@ -4,6 +4,11 @@
 
 ### Added
 
+- UI: responsive app navigation supporting mobile screens:
+  - top bar & drawer for small screens, 
+  - top & bottom bar on narrow but tall screens,
+  - rail bar for wide screens with low height,
+  - top bar with embedded navigation for big screens.
 - UI: navigation bar instead of navigation rail on small width screens (window sizes)
 - setup: create Android application gradle module
 

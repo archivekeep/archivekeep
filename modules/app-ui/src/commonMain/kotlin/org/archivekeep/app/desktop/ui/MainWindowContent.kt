@@ -18,6 +18,9 @@ import org.archivekeep.app.desktop.domain.wiring.OverlayDialogRenderer
 import org.archivekeep.app.desktop.domain.wiring.archiveOperationLaunchersAsDialogs
 import org.archivekeep.app.desktop.domain.wiring.rememberWalletOperationLaunchersAsDialogs
 import org.archivekeep.app.desktop.domain.wiring.storageOperationsLaunchersAsDialogs
+import org.archivekeep.app.desktop.ui.components.layout.ApplicationNavigationLayout
+import org.archivekeep.app.desktop.ui.components.layout.MainWindowLayout
+import org.archivekeep.app.desktop.ui.components.layout.calculateNavigationLocation
 import org.archivekeep.app.desktop.ui.designsystem.styles.DesktopAppTheme
 
 @Composable
@@ -31,6 +34,8 @@ fun MainWindowContent(
     val archiveOperationLaunchers = remember { archiveOperationLaunchersAsDialogs(dialogRenderer) }
     val storageOperationsLaunchers = remember { storageOperationsLaunchersAsDialogs(dialogRenderer) }
     val walletOperationLaunchers = rememberWalletOperationLaunchersAsDialogs(dialogRenderer)
+
+    val applicationNavigationLayout = windowSizeClass.calculateNavigationLocation()
 
     DesktopAppTheme {
         CompositionLocalProvider(
@@ -46,17 +51,18 @@ fun MainWindowContent(
                         RectangleShape
                     },
                 border =
-                    BorderStroke(
-                        1.dp,
-                        Brush.linearGradient(
-                            0.0f to Color.Transparent,
-                            0.3f to Color.Transparent,
-                            1.0f to Color.Black.copy(alpha = 0.15f),
-                        ),
-                    ),
+                    if (isFloating) {
+                        if (applicationNavigationLayout != ApplicationNavigationLayout.RAIL_BAR) {
+                            BorderStroke(1.dp, verticalGradient)
+                        } else {
+                            BorderStroke(1.dp, horizontalGradient)
+                        }
+                    } else {
+                        null
+                    },
             ) {
                 MainWindowLayout(
-                    windowSizeClass = windowSizeClass,
+                    applicationNavigationLayout = applicationNavigationLayout,
                     onCloseRequest = onCloseRequest,
                 )
 
@@ -65,3 +71,21 @@ fun MainWindowContent(
         }
     }
 }
+
+private val verticalGradient =
+    Brush.verticalGradient(
+        0.0f to Color.Transparent,
+        0.05f to Color.Transparent,
+        0.12f to Color.Black.copy(alpha = 0.10f),
+        0.89f to Color.Black.copy(alpha = 0.15f),
+        1.0f to Color.Black.copy(alpha = 0.20f),
+    )
+
+private val horizontalGradient =
+    Brush.horizontalGradient(
+        0.0f to Color.Transparent,
+        0.05f to Color.Transparent,
+        0.12f to Color.Black.copy(alpha = 0.10f),
+        0.89f to Color.Black.copy(alpha = 0.15f),
+        1.0f to Color.Black.copy(alpha = 0.20f),
+    )

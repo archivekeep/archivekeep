@@ -11,7 +11,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.systemBars
+import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -25,7 +25,7 @@ fun NavigationBar(content: @Composable RowScope.() -> Unit) {
         Modifier
             .zIndex(10f)
             .background(navigationRailColor)
-            .windowInsetsPadding(WindowInsets.systemBars.only(WindowInsetsSides.Bottom))
+            .windowInsetsPadding(WindowInsets.safeDrawing.only(WindowInsetsSides.Bottom))
             .padding(6.dp)
             .height(IntrinsicSize.Min)
             .fillMaxWidth(),
