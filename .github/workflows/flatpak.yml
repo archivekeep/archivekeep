@@ -9,8 +9,8 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  build:
-    name: "Build Flatpak"
+  flatpak-sources:
+    name: "Generate Flatpak sources for dependencies"
     strategy:
       matrix:
         architecture: [x86_64, aarch64]
@@ -20,9 +20,6 @@ jobs:
           - architecture: aarch64
             runner: ubuntu-24.04-arm
       fail-fast: false
-    container:
-      image: ghcr.io/flathub-infra/flatpak-github-actions:freedesktop-24.08
-      options: --privileged
     runs-on: ${{ matrix.runner }}
     steps:
       - uses: actions/checkout@v4
@@ -48,6 +45,32 @@ jobs:
           compression-level: 0
           retention-days: 45
 
+  build:
+    name: "Build Flatpak"
+    needs:
+      - flatpak-sources
+    strategy:
+      matrix:
+        architecture: [x86_64, aarch64]
+        include:
+          - architecture: x86_64
+            runner: ubuntu-24.04
+          - architecture: aarch64
+            runner: ubuntu-24.04-arm
+      fail-fast: false
+    container:
+      image: ghcr.io/flathub-infra/flatpak-github-actions:freedesktop-24.08
+      options: --privileged
+    runs-on: ${{ matrix.runner }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Download Artifact with Flatpak sources
+        uses: actions/download-artifact@v4
+        with:
+          name: flatpak-sources-${{ matrix.architecture }}
+          path: ./distribution/flatpak
+
       - name: Build
         uses: flathub-infra/flatpak-github-actions/flatpak-builder@fd6057f0ee4fac29a1a51c036b92c9c03ec74e17
         with:
@@ -71,7 +94,7 @@ jobs:
     name: "Merge multi-arch Flatpak sources"
     runs-on: ubuntu-24.04
     needs:
-      - build
+      - flatpak-sources
     steps:
       - uses: actions/checkout@v4
 

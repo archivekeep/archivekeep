@@ -16,6 +16,7 @@
 
 - refactor: extract UI to app-ui module
 - build: limit collection of Gradle dependencies for Flatpak to sourceSets needed for its build
+- build: split Flatpak sources generation from build in GH Actions
 
 ### Fixed
 
