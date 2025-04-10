@@ -6,7 +6,6 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -16,7 +15,6 @@ import androidx.compose.ui.Modifier
 actual fun ScrollableColumn(
     modifier: Modifier,
     columnModifier: Modifier,
-    columnPadding: PaddingValues,
     verticalArrangement: Arrangement.Vertical,
     horizontalAlignment: Alignment.Horizontal,
     scrollState: ScrollState,
@@ -27,7 +25,7 @@ actual fun ScrollableColumn(
         modifier = modifier,
     ) {
         Column(
-            modifier = columnModifier.verticalScroll(scrollState).padding(columnPadding),
+            modifier = Modifier.verticalScroll(scrollState).then(columnModifier),
             verticalArrangement = verticalArrangement,
             horizontalAlignment = horizontalAlignment,
             content = content,

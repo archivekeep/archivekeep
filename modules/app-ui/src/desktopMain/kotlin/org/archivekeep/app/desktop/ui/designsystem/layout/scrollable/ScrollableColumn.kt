@@ -26,7 +26,6 @@ import androidx.compose.ui.unit.IntSize
 actual fun ScrollableColumn(
     modifier: Modifier,
     columnModifier: Modifier,
-    columnPadding: PaddingValues,
     verticalArrangement: Arrangement.Vertical,
     horizontalAlignment: Alignment.Horizontal,
     scrollState: ScrollState,
@@ -40,10 +39,10 @@ actual fun ScrollableColumn(
     ) {
         Column(
             modifier =
-                columnModifier
+                Modifier
                     .verticalScroll(scrollState)
                     .onSizeChanged { size -> columnSize = size }
-                    .padding(columnPadding),
+                    .then(columnModifier),
             verticalArrangement = verticalArrangement,
             horizontalAlignment = horizontalAlignment,
             content = content,

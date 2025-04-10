@@ -14,7 +14,6 @@ import androidx.compose.ui.unit.dp
 expect fun ScrollableColumn(
     modifier: Modifier = Modifier,
     columnModifier: Modifier = Modifier,
-    columnPadding: PaddingValues = PaddingValues(0.dp),
     verticalArrangement: Arrangement.Vertical = Arrangement.Top,
     horizontalAlignment: Alignment.Horizontal = Alignment.Start,
     scrollState: ScrollState = rememberScrollState(),

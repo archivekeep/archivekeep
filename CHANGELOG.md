@@ -4,8 +4,7 @@
 
 ### Added
 
-- UI: remove welcome text from home page once setup for more efficient space use
-- UI: responsive app navigation supporting mobile screens:
+- UI: responsive app navigation layout supporting mobile screens:
   - top bar & drawer for small screens, 
   - top & bottom bar on narrow but tall screens,
   - rail bar for wide screens with low height,
@@ -15,6 +14,8 @@
 
 ### Changed
 
+- UI: less framed look of the application (make content flow behind window insets)
+- UI: remove welcome text from home page once setup for more efficient space use
 - refactor: extract UI to app-ui module
 - build: limit collection of Gradle dependencies for Flatpak to sourceSets needed for its build
 - build: merge generated Flatpak sources to one file

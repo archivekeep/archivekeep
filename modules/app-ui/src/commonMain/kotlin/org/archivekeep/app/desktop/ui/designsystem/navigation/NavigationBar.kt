@@ -25,7 +25,7 @@ fun NavigationBar(content: @Composable RowScope.() -> Unit) {
         Modifier
             .zIndex(10f)
             .background(navigationRailColor)
-            .windowInsetsPadding(WindowInsets.safeDrawing.only(WindowInsetsSides.Bottom))
+            .windowInsetsPadding(WindowInsets.safeDrawing.only(WindowInsetsSides.Bottom + WindowInsetsSides.Horizontal))
             .padding(6.dp)
             .height(IntrinsicSize.Min)
             .fillMaxWidth(),

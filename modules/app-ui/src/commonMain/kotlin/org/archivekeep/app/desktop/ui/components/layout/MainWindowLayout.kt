@@ -1,6 +1,5 @@
 package org.archivekeep.app.desktop.ui.components.layout
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -8,14 +7,13 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.WindowInsetsSides
+import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawing
-import androidx.compose.foundation.layout.windowInsetsPadding
-import androidx.compose.foundation.layout.windowInsetsTopHeight
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
@@ -45,8 +43,6 @@ import org.archivekeep.app.desktop.ui.designsystem.navigation.NavigationBar
 import org.archivekeep.app.desktop.ui.designsystem.navigation.NavigationRail
 import org.archivekeep.app.desktop.ui.designsystem.navigation.NavigationRailBarItem
 import org.archivekeep.app.desktop.ui.designsystem.navigation.NavigationTopBarItem
-import org.archivekeep.app.desktop.ui.designsystem.styles.CColors
-import org.archivekeep.app.desktop.ui.designsystem.styles.CColors.Companion.navigationRailColor
 import org.archivekeep.app.desktop.ui.views.View
 import org.archivekeep.app.desktop.ui.views.archives.ArchivesView
 import org.archivekeep.app.desktop.ui.views.home.HomeView
@@ -98,36 +94,26 @@ fun MainWindowLayout(
                 }
             }
 
-            if (applicationNavigationLayout == ApplicationNavigationLayout.RAIL_BAR) {
-                Spacer(
-                    Modifier
-                        .windowInsetsTopHeight(WindowInsets.safeDrawing)
-                        .background(CColors.appBarBackground)
-                        .fillMaxWidth(),
-                )
-            }
-
-            val insetsSides =
-                when (applicationNavigationLayout) {
-                    ApplicationNavigationLayout.RAIL_BAR ->
-                        WindowInsetsSides.Bottom + WindowInsetsSides.End
-                    ApplicationNavigationLayout.TOP_AND_BOTTOM ->
-                        WindowInsetsSides.Horizontal
-                    else ->
-                        WindowInsetsSides.Horizontal + WindowInsetsSides.Bottom
-                }
-
-            Row(
-                Modifier
-                    .weight(1f, fill = true)
-                    .background(navigationRailColor)
-                    .windowInsetsPadding(WindowInsets.safeDrawing.only(insetsSides)),
-            ) {
+            Row(Modifier.weight(1f, fill = true)) {
                 if (applicationNavigationLayout == ApplicationNavigationLayout.RAIL_BAR) {
                     RailBar(selectedItem)
                 }
 
-                Box(Modifier.weight(1f).fillMaxHeight()) {
+                Box(
+                    Modifier
+                        .weight(1f)
+                        .fillMaxHeight()
+                        .consumeWindowInsets(
+                            WindowInsets.safeDrawing.only(
+                                when (applicationNavigationLayout) {
+                                    ApplicationNavigationLayout.RAIL_BAR -> WindowInsetsSides.Left
+                                    ApplicationNavigationLayout.TOP_AND_BOTTOM -> WindowInsetsSides.Vertical
+                                    ApplicationNavigationLayout.TOP_BAR_EMBEDDED_NAVIGATION -> WindowInsetsSides.Top
+                                    ApplicationNavigationLayout.TOP_BAR_AND_DRAWER -> WindowInsetsSides.Top
+                                },
+                            ),
+                        ),
+                ) {
                     allNavigables.forEach {
                         renderView(
                             it.view,
