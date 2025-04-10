@@ -23,7 +23,7 @@ fun SectionTitle(
     Row(
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.Bottom,
-        modifier = Modifier.padding(top = 18.dp).fillMaxWidth(),
+        modifier = Modifier.padding(bottom = 12.dp).fillMaxWidth(),
     ) {
         Row(
             horizontalArrangement = Arrangement.spacedBy(4.dp),
@@ -34,8 +34,9 @@ fun SectionTitle(
                 style =
                     TextStyle(
                         color = Color(160, 160, 160),
-                        fontSize = 12.sp,
-                        fontWeight = FontWeight.Bold,
+                        fontSize = 14.sp,
+                        fontWeight = FontWeight.SemiBold,
+                        lineHeight = 20.sp,
                     ),
                 modifier = Modifier.alignByBaseline(),
             )

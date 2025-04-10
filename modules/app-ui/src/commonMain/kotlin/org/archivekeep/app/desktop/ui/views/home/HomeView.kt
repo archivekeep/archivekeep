@@ -1,17 +1,11 @@
 package org.archivekeep.app.desktop.ui.views.home
 
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.CoroutineScope
@@ -22,8 +16,9 @@ import org.archivekeep.app.desktop.domain.wiring.LocalArchiveService
 import org.archivekeep.app.desktop.domain.wiring.LocalRepoService
 import org.archivekeep.app.desktop.domain.wiring.LocalRepoToRepoSyncService
 import org.archivekeep.app.desktop.domain.wiring.LocalStorageService
+import org.archivekeep.app.desktop.ui.components.various.WelcomeText
 import org.archivekeep.app.desktop.ui.designsystem.layout.views.ViewScrollableContainer
-import org.archivekeep.app.desktop.ui.designsystem.sections.SectionTitle
+import org.archivekeep.app.desktop.ui.designsystem.sections.SectionBlock
 import org.archivekeep.app.desktop.ui.designsystem.styles.CColors
 import org.archivekeep.app.desktop.ui.views.View
 import org.archivekeep.app.desktop.ui.views.home.components.HomeActionsList
@@ -94,58 +89,44 @@ private fun homeViewContent(vm: HomeViewModel) {
     val showExternalAddButton = !showExternalAddIntro
 
     ViewScrollableContainer {
-        Column(
-            modifier =
-                Modifier
-                    .fillMaxWidth()
-                    .padding(vertical = 12.dp),
-            horizontalAlignment = Alignment.CenterHorizontally,
-        ) {
-            Text(
-                "Welcome to ArchiveKeep",
-                modifier = Modifier.padding(top = 20.dp, bottom = 0.dp),
-                style = MaterialTheme.typography.titleLarge,
-            )
-            Text(
-                "Personal archivation - file synchronization and replication across multiple storages (repositories)",
-                modifier = Modifier.padding(top = 8.dp),
-                style = MaterialTheme.typography.titleSmall,
-            )
-        }
+        if (showLocalAddIntro) {
+            WelcomeText()
 
-        Column(
-            modifier = Modifier.padding(top = 6.dp, bottom = 32.dp),
-            verticalArrangement = Arrangement.spacedBy(10.dp),
-        ) {
-            if (showLocalAddIntro) {
-                SectionTitle("Introduction")
+            SectionBlock("Introduction") {
                 HomeArchivesIntro()
-            } else {
-                SectionTitle("Local archives")
+                if (showExternalAddIntro) {
+                    Spacer(Modifier.height(16.dp))
+                    HomeStoragesIntro()
+                }
+            }
+        } else {
+            SectionBlock("Local archives") {
                 HomeArchivesList(allLocalArchivesLoadable)
             }
+        }
 
-            vm.otherArchivesFlow.collectLoadableFlow().let { otherArchives ->
-                if (otherArchives is Loadable.Loaded && otherArchives.value.isNotEmpty()) {
-                    Spacer(Modifier.height(8.dp))
-                    SectionTitle("External archives")
+        vm.otherArchivesFlow.collectLoadableFlow().let { otherArchives ->
+            if (otherArchives is Loadable.Loaded && otherArchives.value.isNotEmpty()) {
+                SectionBlock("External archives") {
                     HomeNonLocalArchivesList(otherArchives)
                 }
             }
+        }
 
-            if (showExternalAddIntro) {
-                if (!showLocalAddIntro) {
-                    SectionTitle("Introduction")
+        if (showExternalAddIntro) {
+            if (!showLocalAddIntro) {
+                SectionBlock("Introduction") {
+                    HomeStoragesIntro()
                 }
-                HomeStoragesIntro()
-            } else {
-                SectionTitle("External storages")
+            }
+        } else {
+            SectionBlock("External storages") {
                 HomeStoragesList(externalStoragesLoadable)
             }
+        }
 
-            if (showLocalAddButton || showExternalAddButton) {
-                Spacer(Modifier.height(12.dp))
-                SectionTitle("More")
+        if (showLocalAddButton || showExternalAddButton) {
+            SectionBlock("More") {
                 HomeActionsList(
                     allActions =
                         listOfNotNull(

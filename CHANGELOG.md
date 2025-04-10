@@ -4,6 +4,7 @@
 
 ### Added
 
+- UI: remove welcome text from home page once setup for more efficient space use
 - UI: responsive app navigation supporting mobile screens:
   - top bar & drawer for small screens, 
   - top & bottom bar on narrow but tall screens,
