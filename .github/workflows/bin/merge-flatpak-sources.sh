@@ -20,3 +20,5 @@ process_list gradle-sources-app-ui
 process_list gradle-sources-cli
 process_list gradle-sources-files
 process_list gradle-sources-root
+
+process_list gradle-sources

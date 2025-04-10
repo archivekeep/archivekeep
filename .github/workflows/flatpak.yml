@@ -40,7 +40,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: flatpak-sources-${{ matrix.architecture }}
-          path: ./distribution/flatpak/gradle-sources-*
+          path: ./distribution/flatpak/gradle-sources*
           if-no-files-found: error
           compression-level: 0
           retention-days: 45

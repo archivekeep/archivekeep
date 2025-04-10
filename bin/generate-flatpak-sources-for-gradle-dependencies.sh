@@ -8,3 +8,5 @@ cp ./modules/app-desktop/build/flatpak/dependencies-sources.json ./distribution/
 cp ./modules/app-ui/build/flatpak/dependencies-sources.json ./distribution/flatpak/gradle-sources-app-ui.json
 cp ./modules/cli/build/flatpak/dependencies-sources.json ./distribution/flatpak/gradle-sources-cli.json
 cp ./modules/files/build/flatpak/dependencies-sources.json ./distribution/flatpak/gradle-sources-files.json
+
+jq --slurp 'reduce .[] as $i ([]; . + ($i - .))' ./distribution/flatpak/gradle-sources-*.json > ./distribution/flatpak/gradle-sources.json
