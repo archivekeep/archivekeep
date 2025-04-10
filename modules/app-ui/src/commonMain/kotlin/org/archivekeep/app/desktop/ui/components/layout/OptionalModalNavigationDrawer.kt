@@ -31,14 +31,13 @@ fun OptionalModalNavigationDrawer(
     }
 
     ModalNavigationDrawer(
+        gesturesEnabled = false,
         drawerState = drawerState,
         drawerContent = {
             ModalDrawerSheet(
                 windowInsets = WindowInsets.safeDrawing.only(WindowInsetsSides.Start + WindowInsetsSides.Vertical),
             ) {
-                navigationItems(
-                    { scope.launch { drawerState.close() } },
-                )
+                navigationItems { scope.launch { drawerState.close() } }
             }
         },
     ) {
