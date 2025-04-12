@@ -9,11 +9,12 @@ import org.archivekeep.app.core.domain.repositories.RepositoryService
 import org.archivekeep.app.core.domain.storages.StorageService
 import org.archivekeep.app.core.operations.addpush.AddAndPushOperationService
 import org.archivekeep.app.core.operations.sync.RepoToRepoSyncService
-import org.archivekeep.utils.combineToList
+import org.archivekeep.utils.combineToObject
 import org.archivekeep.utils.coroutines.shareResourceIn
 import org.archivekeep.utils.loading.Loadable
 import org.archivekeep.utils.loading.flatMapLatestLoadedData
 import org.archivekeep.utils.loading.flatMapLoadableFlow
+import org.archivekeep.utils.loading.isLoading
 import org.archivekeep.utils.loading.mapIfLoadedOrDefault
 import org.archivekeep.utils.loading.mapLoadedData
 
@@ -26,41 +27,42 @@ class HomeViewModel(
     val addAndPushOperationService: AddAndPushOperationService,
 ) {
     val allLocalArchivesFlow =
-        archiveService.allArchives.mapLoadedData {
-            it
-                .mapNotNull { a ->
-                    val (storage, primaryRepository) =
-                        a.primaryRepository ?: return@mapNotNull null
+        archiveService.allArchives
+            .mapLoadedData {
+                it
+                    .mapNotNull { a ->
+                        val (storage, primaryRepository) =
+                            a.primaryRepository ?: return@mapNotNull null
 
-                    HomeArchiveEntryViewModel(
-                        scope,
-                        addAndPushOperationService,
-                        repoToRepoSyncService,
-                        repositoryService.getRepository(primaryRepository.uri),
-                        archive = a,
-                        primaryRepository.displayName,
-                        primaryRepository =
-                            HomeArchiveEntryViewModel.PrimaryRepositoryDetails(
-                                primaryRepository.namedReference,
-                                storage.namedReference,
-                                stats = mutableStateOf(Loadable.Loading),
-                            ),
-                        otherRepositories =
-                            a.repositories
-                                .filter { it.second.uri != primaryRepository.uri }
-                                .map { (storage, repo) ->
-                                    Pair(
-                                        storage,
-                                        SecondaryArchiveRepository(
-                                            primaryRepository.uri,
-                                            repo,
-                                            repository = repositoryService.getRepository(repo.namedReference.uri),
-                                        ),
-                                    )
-                                },
-                    )
-                }.sortedBy { it.displayName }
-        }
+                        HomeArchiveEntryViewModel(
+                            scope,
+                            addAndPushOperationService,
+                            repoToRepoSyncService,
+                            repositoryService.getRepository(primaryRepository.uri),
+                            archive = a,
+                            primaryRepository.displayName,
+                            primaryRepository =
+                                HomeArchiveEntryViewModel.PrimaryRepositoryDetails(
+                                    primaryRepository.namedReference,
+                                    storage.namedReference,
+                                    stats = mutableStateOf(Loadable.Loading),
+                                ),
+                            otherRepositories =
+                                a.repositories
+                                    .filter { it.second.uri != primaryRepository.uri }
+                                    .map { (storage, repo) ->
+                                        Pair(
+                                            storage,
+                                            SecondaryArchiveRepository(
+                                                primaryRepository.uri,
+                                                repo,
+                                                repository = repositoryService.getRepository(repo.namedReference.uri),
+                                            ),
+                                        )
+                                    },
+                        )
+                    }.sortedBy { it.displayName }
+            }.shareResourceIn(scope)
 
     @OptIn(ExperimentalCoroutinesApi::class)
     val allStoragesFlow =
@@ -105,13 +107,18 @@ class HomeViewModel(
                         v.storage.state.map { Pair(it, v) }
                     }
 
-                combineToList(withState) {
-                    it
-                        .sortedBy { it.second.reference.displayName }
-                        .sortedByDescending { it.first.mapIfLoadedOrDefault(false) { it.isConnected } }
-                        .map { it.second }
+                combineToObject(withState) { storages ->
+                    HomeStoragesState(
+                        isLoadingSomeItems = storages.any { it.first.isLoading },
+                        hasAnyRegistered = storages.isNotEmpty(),
+                        availableStorages =
+                            storages
+                                .filter { it.first.mapIfLoadedOrDefault(false) { it.isConnected } }
+                                .sortedBy { it.second.reference.displayName }
+                                .map { it.second },
+                    )
                 }
-            }
+            }.shareResourceIn(scope)
 
     val otherArchivesFlow =
         archiveService.allArchives.mapLoadedData {
@@ -136,7 +143,4 @@ class HomeViewModel(
                     )
                 }.sortedBy { it.displayName }
         }
-
-    val allLocalArchives = allLocalArchivesFlow.shareResourceIn(scope)
-    val allStorages = allStoragesFlow.shareResourceIn(scope)
 }

@@ -14,6 +14,16 @@ inline fun <reified T, R> safeCombine(
         combine(flows, transform)
     }
 
+inline fun <reified T, R> combineToObject(
+    flows: Collection<Flow<T>>,
+    crossinline transform: suspend (Array<T>) -> R,
+): Flow<R> =
+    if (flows.isEmpty()) {
+        flow { emit(transform(emptyArray())) }
+    } else {
+        combine(flows, transform)
+    }
+
 inline fun <reified T, R> combineToList(
     flows: Collection<Flow<T>>,
     crossinline transform: suspend (Array<T>) -> List<R>,

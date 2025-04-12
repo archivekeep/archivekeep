@@ -248,7 +248,35 @@ class DemoEnvironment(
                     override fun getStorageAccessor(storageURI: StorageURI): StorageConnection =
                         StorageConnection(
                             storageURI,
-                            flowOf(OptionalLoadable.NotAvailable()),
+                            flow {
+                                val physicalStorage =
+                                    physicalMediaData.firstOrNull {
+                                        it.id == storageURI.data
+                                    }
+                                if (physicalStorage != null) {
+                                    emit(
+                                        OptionalLoadable.LoadedAvailable(
+                                            StorageInformation.Partition(
+                                                physicalID = physicalStorage.physicalID,
+                                                // TODO - implement real
+                                                driveType = StorageInformation.Partition.DriveType.Other,
+                                            ),
+                                        ),
+                                    )
+                                    return@flow
+                                }
+
+                                val onlineStorage =
+                                    onlineStoragesData.firstOrNull {
+                                        it.id == storageURI.data
+                                    }
+                                if (onlineStorage != null) {
+                                    emit(OptionalLoadable.LoadedAvailable(StorageInformation.OnlineStorage))
+                                    return@flow
+                                }
+
+                                emit(OptionalLoadable.Failed(RuntimeException("Storage with $storageURI not found")))
+                            },
                             liveStatusFlowManager[storageURI],
                         )
 

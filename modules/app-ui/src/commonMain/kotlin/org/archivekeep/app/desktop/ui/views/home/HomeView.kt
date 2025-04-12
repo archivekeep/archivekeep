@@ -29,7 +29,8 @@ import org.archivekeep.app.desktop.ui.views.home.components.HomeStoragesIntro
 import org.archivekeep.app.desktop.ui.views.home.components.HomeStoragesList
 import org.archivekeep.app.desktop.utils.collectLoadableFlow
 import org.archivekeep.utils.loading.Loadable
-import org.archivekeep.utils.loading.isLoading
+import org.archivekeep.utils.loading.mapIfLoadedOrDefault
+import org.archivekeep.utils.loading.mapLoadedData
 
 class HomeView : View<HomeViewModel> {
     @Composable
@@ -67,45 +68,42 @@ class HomeView : View<HomeViewModel> {
             modifier,
             color = CColors.cardsGridBackground,
         ) {
-            homeViewContent(state)
+            val allLocalArchivesLoadable = state.allLocalArchivesFlow.collectLoadableFlow()
+            val otherArchives = state.otherArchivesFlow.collectLoadableFlow()
+            val externalStoragesLoadable = state.allStoragesFlow.collectLoadableFlow()
+
+            val homeViewState = HomeViewState(allLocalArchivesLoadable, otherArchives, externalStoragesLoadable)
+
+            homeViewContent(homeViewState)
         }
     }
 }
 
 @Composable
-private fun homeViewContent(vm: HomeViewModel) {
-    val allLocalArchivesLoadable = vm.allLocalArchives.collectLoadableFlow()
-    val externalStoragesLoadable = vm.allStorages.collectLoadableFlow()
-
-    if (allLocalArchivesLoadable.isLoading || externalStoragesLoadable.isLoading) {
+private fun homeViewContent(state: HomeViewState) {
+    if (state.showBaseLoading) {
         Text("Loading ...")
         return
     }
 
-    val showLocalAddIntro = if (allLocalArchivesLoadable is Loadable.Loaded) allLocalArchivesLoadable.value.isEmpty() else false
-    val showExternalAddIntro = if (externalStoragesLoadable is Loadable.Loaded) externalStoragesLoadable.value.isEmpty() else false
-
-    val showLocalAddButton = !showLocalAddIntro
-    val showExternalAddButton = !showExternalAddIntro
-
     ViewScrollableContainer {
-        if (showLocalAddIntro) {
+        if (state.showLocalAddIntro) {
             WelcomeText()
 
             SectionBlock("Introduction") {
                 HomeArchivesIntro()
-                if (showExternalAddIntro) {
+                if (state.showExternalAddIntro) {
                     Spacer(Modifier.height(16.dp))
                     HomeStoragesIntro()
                 }
             }
         } else {
             SectionBlock("Local archives") {
-                HomeArchivesList(allLocalArchivesLoadable)
+                HomeArchivesList(state.allLocalArchivesLoadable)
             }
         }
 
-        vm.otherArchivesFlow.collectLoadableFlow().let { otherArchives ->
+        state.otherArchives.let { otherArchives ->
             if (otherArchives is Loadable.Loaded && otherArchives.value.isNotEmpty()) {
                 SectionBlock("External archives") {
                     HomeNonLocalArchivesList(otherArchives)
@@ -113,24 +111,29 @@ private fun homeViewContent(vm: HomeViewModel) {
             }
         }
 
-        if (showExternalAddIntro) {
-            if (!showLocalAddIntro) {
+        if (state.showExternalAddIntro) {
+            if (!state.showLocalAddIntro) {
                 SectionBlock("Introduction") {
                     HomeStoragesIntro()
                 }
             }
         } else {
-            SectionBlock("External storages") {
-                HomeStoragesList(externalStoragesLoadable)
+            if (state.showExternalStoragesSection) {
+                SectionBlock(
+                    "External storages",
+                    isLoading = state.externalStoragesLoadable.mapIfLoadedOrDefault(true) { it.isLoadingSomeItems },
+                ) {
+                    HomeStoragesList(state.externalStoragesLoadable.mapLoadedData { it.availableStorages })
+                }
             }
         }
 
-        if (showLocalAddButton || showExternalAddButton) {
+        if (state.showLocalAddButton || state.showExternalAddButton) {
             SectionBlock("More") {
                 HomeActionsList(
                     allActions =
                         listOfNotNull(
-                            if (showLocalAddButton) {
+                            if (state.showLocalAddButton) {
                                 HomeViewAction(
                                     "Add local file repository …",
                                     onTrigger =
@@ -143,7 +146,7 @@ private fun homeViewContent(vm: HomeViewModel) {
                             } else {
                                 null
                             },
-                            if (showExternalAddButton) {
+                            if (state.showExternalAddButton) {
                                 HomeViewAction(
                                     "Add external file repository …",
                                     onTrigger =
@@ -156,7 +159,7 @@ private fun homeViewContent(vm: HomeViewModel) {
                             } else {
                                 null
                             },
-                            if (showExternalAddButton) {
+                            if (state.showExternalAddButton) {
                                 HomeViewAction(
                                     "Add remote repository …",
                                     onTrigger =

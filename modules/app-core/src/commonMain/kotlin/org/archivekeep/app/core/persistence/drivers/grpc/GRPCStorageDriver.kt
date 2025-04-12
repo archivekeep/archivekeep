@@ -6,18 +6,21 @@ import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.FlowCollector
 import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.job
 import org.archivekeep.app.core.domain.repositories.RepoAuthRequest
 import org.archivekeep.app.core.domain.repositories.UnlockOptions
+import org.archivekeep.app.core.domain.storages.Storage
 import org.archivekeep.app.core.domain.storages.StorageConnection
 import org.archivekeep.app.core.domain.storages.StorageDriver
-import org.archivekeep.app.core.domain.storages.notSupportedStorage
+import org.archivekeep.app.core.domain.storages.StorageInformation
 import org.archivekeep.app.core.persistence.credentials.CredentialsStore
 import org.archivekeep.app.core.utils.ProtectedLoadableResource
 import org.archivekeep.app.core.utils.filterLoaded
 import org.archivekeep.app.core.utils.firstLoadedOrNullOnErrorOrLocked
+import org.archivekeep.app.core.utils.generics.OptionalLoadable
 import org.archivekeep.app.core.utils.identifiers.RepositoryURI
 import org.archivekeep.app.core.utils.identifiers.StorageURI
 import org.archivekeep.files.repo.Repo
@@ -26,14 +29,22 @@ import org.archivekeep.files.repo.remote.grpc.Options
 import org.archivekeep.files.repo.remote.grpc.createPAT
 import org.archivekeep.files.repo.remote.grpc.isNotAuthorized
 import org.archivekeep.files.repo.remote.grpc.openGrpcArchive
+import org.archivekeep.utils.coroutines.shareResourceIn
+import org.archivekeep.utils.loading.Loadable
 
 class GRPCStorageDriver(
+    val scope: CoroutineScope,
     val credentialsStore: CredentialsStore,
 ) : StorageDriver {
-    override fun getStorageAccessor(storageURI: StorageURI): StorageConnection {
-        // TODO: implement
-        return notSupportedStorage(storageURI)
-    }
+    override fun getStorageAccessor(storageURI: StorageURI): StorageConnection =
+        StorageConnection(
+            storageURI,
+            flowOf(OptionalLoadable.LoadedAvailable(StorageInformation.OnlineStorage)),
+            flowOf(
+                // TODO: implement ONLINE/OFFLINE status check
+                Loadable.Loaded(Storage.ConnectionStatus.ONLINE),
+            ).shareResourceIn(scope),
+        )
 
     override fun openRepoFlow(uri: RepositoryURI) = flow { accessor(uri) }
 

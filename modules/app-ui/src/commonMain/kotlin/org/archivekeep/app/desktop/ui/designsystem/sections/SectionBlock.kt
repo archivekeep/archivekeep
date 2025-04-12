@@ -8,11 +8,12 @@ import androidx.compose.runtime.Composable
 @Composable
 fun SectionBlock(
     text: String,
+    isLoading: Boolean = false,
     buttons: @Composable RowScope.() -> Unit = {},
     content: @Composable ColumnScope.() -> Unit,
 ) {
     Column {
-        SectionTitle(text, buttons)
+        SectionTitle(text, isLoading, buttons)
 
         content()
     }

@@ -14,6 +14,7 @@
 
 ### Changed
 
+- UI: show only available and connected storages in home view
 - UI: less framed look of the application (make content flow behind window insets)
 - UI: remove welcome text from home page once setup for more efficient space use
 - refactor: extract UI to app-ui module

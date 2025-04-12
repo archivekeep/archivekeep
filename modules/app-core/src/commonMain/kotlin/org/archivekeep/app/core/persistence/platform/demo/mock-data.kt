@@ -43,7 +43,7 @@ val hddB =
         driveType = DriveType.HDD,
         displayName = "HDD B",
         logicalLocation = "ip-address.archivekeep-server",
-        connectionStatus = Storage.ConnectionStatus.DISCONNECTED,
+        connectionStatus = Storage.ConnectionStatus.CONNECTED,
         repositories =
             listOf(
                 Documents,

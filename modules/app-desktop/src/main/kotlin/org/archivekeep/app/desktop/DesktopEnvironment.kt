@@ -42,6 +42,6 @@ class DesktopEnvironment(
     override val storageDrivers =
         mapOf(
             "filesystem" to FileSystemStorageDriver(scope, fileStores),
-            "grpc" to GRPCStorageDriver(credentialsStore),
+            "grpc" to GRPCStorageDriver(scope, credentialsStore),
         )
 }

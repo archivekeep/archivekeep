@@ -65,6 +65,7 @@ class FileSystemStorageDriver(
                         ?.let { connectedFS ->
                             StorageInformation.Partition(
                                 physicalID = connectedFS.fsUUID,
+                                // TODO - implement real
                                 driveType = StorageInformation.Partition.DriveType.Other,
                             )
                         }
