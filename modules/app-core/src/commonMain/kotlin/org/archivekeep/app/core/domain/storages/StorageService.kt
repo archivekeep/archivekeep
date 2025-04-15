@@ -7,7 +7,6 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 import org.archivekeep.app.core.domain.repositories.RepositoryService
-import org.archivekeep.app.core.utils.generics.OptionalLoadable
 import org.archivekeep.app.core.utils.identifiers.RepositoryURI
 import org.archivekeep.app.core.utils.identifiers.StorageURI
 import org.archivekeep.utils.combineToFlatMapList
@@ -76,7 +75,7 @@ class StorageService(
 fun notSupportedStorage(storageURI: StorageURI) =
     StorageConnection(
         storageURI,
-        information = flowOf(OptionalLoadable.NotAvailable()),
+        information = StorageInformation.Error(RuntimeException("Not supported storage driver: $storageURI")),
         connectionStatus =
             flowOf(
                 Loadable.Failed(RuntimeException("Not supported storage driver: $storageURI")),

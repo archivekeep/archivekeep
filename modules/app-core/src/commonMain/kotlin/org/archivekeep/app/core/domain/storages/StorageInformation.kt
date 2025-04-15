@@ -1,5 +1,8 @@
 package org.archivekeep.app.core.domain.storages
 
+import kotlinx.coroutines.flow.Flow
+import org.archivekeep.app.core.utils.generics.OptionalLoadable
+
 sealed interface StorageInformation {
     /**
      * Physical medium storage is something, that you can carry with yourself,
@@ -10,9 +13,13 @@ sealed interface StorageInformation {
      * It can be HDD, SSD, FlashDrive, SDCard,... other Media
      */
     class Partition(
-        val physicalID: String,
-        val driveType: DriveType,
+        val details: Flow<OptionalLoadable<Details>>,
     ) : StorageInformation {
+        data class Details(
+            val physicalID: String,
+            val driveType: DriveType,
+        )
+
         enum class DriveType {
             SSD,
             HDD,
@@ -46,4 +53,8 @@ sealed interface StorageInformation {
     data object OnlineStorage : StorageInformation
 
     data object CompoundStorage : StorageInformation
+
+    data class Error(
+        val error: Throwable,
+    ) : StorageInformation
 }

@@ -20,7 +20,6 @@ import org.archivekeep.app.core.persistence.credentials.CredentialsStore
 import org.archivekeep.app.core.utils.ProtectedLoadableResource
 import org.archivekeep.app.core.utils.filterLoaded
 import org.archivekeep.app.core.utils.firstLoadedOrNullOnErrorOrLocked
-import org.archivekeep.app.core.utils.generics.OptionalLoadable
 import org.archivekeep.app.core.utils.identifiers.RepositoryURI
 import org.archivekeep.app.core.utils.identifiers.StorageURI
 import org.archivekeep.files.repo.Repo
@@ -39,7 +38,7 @@ class GRPCStorageDriver(
     override fun getStorageAccessor(storageURI: StorageURI): StorageConnection =
         StorageConnection(
             storageURI,
-            flowOf(OptionalLoadable.LoadedAvailable(StorageInformation.OnlineStorage)),
+            StorageInformation.OnlineStorage,
             flowOf(
                 // TODO: implement ONLINE/OFFLINE status check
                 Loadable.Loaded(Storage.ConnectionStatus.ONLINE),

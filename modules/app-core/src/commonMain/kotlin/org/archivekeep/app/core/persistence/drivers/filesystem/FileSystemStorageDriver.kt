@@ -57,19 +57,22 @@ class FileSystemStorageDriver(
     override fun getStorageAccessor(storageURI: StorageURI): StorageConnection =
         StorageConnection(
             storageURI,
-            fileStores.mountedFileSystems
-                .mapLoadedDataAsOptional { connectedFSList ->
-                    connectedFSList
-                        .filter { it.fsUUID == storageURI.data }
-                        .firstOrNull()
-                        ?.let { connectedFS ->
-                            StorageInformation.Partition(
-                                physicalID = connectedFS.fsUUID,
-                                // TODO - implement real
-                                driveType = StorageInformation.Partition.DriveType.Other,
-                            )
-                        }
-                }.shareResourceIn(scope),
+            StorageInformation.Partition(
+                details =
+                    fileStores.mountedFileSystems
+                        .mapLoadedDataAsOptional { connectedFSList ->
+                            connectedFSList
+                                .filter { it.fsUUID == storageURI.data }
+                                .firstOrNull()
+                                ?.let { connectedFS ->
+                                    StorageInformation.Partition.Details(
+                                        physicalID = connectedFS.fsUUID,
+                                        // TODO - implement real
+                                        driveType = StorageInformation.Partition.DriveType.Other,
+                                    )
+                                }
+                        }.shareResourceIn(scope),
+            ),
             liveStatusFlowManager[storageURI],
         )
 

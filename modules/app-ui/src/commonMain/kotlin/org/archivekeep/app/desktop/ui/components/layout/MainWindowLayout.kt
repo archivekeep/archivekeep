@@ -72,10 +72,10 @@ fun MainWindowLayout(
         current: Boolean,
         modifier: Modifier,
     ) {
-        val state = view.producePersistentState(sharingScope)
+        val vm = view.produceViewModel(sharingScope)
 
         if (current) {
-            view.render(modifier, state)
+            view.render(modifier, vm)
         }
     }
 

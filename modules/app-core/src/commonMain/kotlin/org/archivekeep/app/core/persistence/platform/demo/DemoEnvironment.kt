@@ -248,22 +248,23 @@ class DemoEnvironment(
                     override fun getStorageAccessor(storageURI: StorageURI): StorageConnection =
                         StorageConnection(
                             storageURI,
-                            flow {
+                            run {
                                 val physicalStorage =
                                     physicalMediaData.firstOrNull {
                                         it.id == storageURI.data
                                     }
                                 if (physicalStorage != null) {
-                                    emit(
-                                        OptionalLoadable.LoadedAvailable(
-                                            StorageInformation.Partition(
-                                                physicalID = physicalStorage.physicalID,
-                                                // TODO - implement real
-                                                driveType = StorageInformation.Partition.DriveType.Other,
+                                    return@run StorageInformation.Partition(
+                                        flowOf(
+                                            OptionalLoadable.LoadedAvailable(
+                                                StorageInformation.Partition.Details(
+                                                    physicalID = physicalStorage.physicalID,
+                                                    // TODO - implement real
+                                                    driveType = StorageInformation.Partition.DriveType.Other,
+                                                ),
                                             ),
                                         ),
                                     )
-                                    return@flow
                                 }
 
                                 val onlineStorage =
@@ -271,11 +272,10 @@ class DemoEnvironment(
                                         it.id == storageURI.data
                                     }
                                 if (onlineStorage != null) {
-                                    emit(OptionalLoadable.LoadedAvailable(StorageInformation.OnlineStorage))
-                                    return@flow
+                                    return@run StorageInformation.OnlineStorage
                                 }
 
-                                emit(OptionalLoadable.Failed(RuntimeException("Storage with $storageURI not found")))
+                                return@run StorageInformation.Error(RuntimeException("Storage with $storageURI not found"))
                             },
                             liveStatusFlowManager[storageURI],
                         )

@@ -14,12 +14,12 @@ import org.archivekeep.app.desktop.ui.views.View
 
 class ArchivesView : View<String> {
     @Composable
-    override fun producePersistentState(scope: CoroutineScope): String = "TODO"
+    override fun produceViewModel(scope: CoroutineScope): String = "TODO"
 
     @Composable
     override fun render(
         modifier: Modifier,
-        state: String,
+        vm: String,
     ) {
         Surface(
             modifier = modifier,

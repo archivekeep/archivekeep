@@ -10,16 +10,17 @@ import org.archivekeep.app.desktop.ui.designsystem.layout.views.ViewScrollableCo
 import org.archivekeep.app.desktop.ui.designsystem.sections.SectionBlock
 import org.archivekeep.app.desktop.ui.designsystem.styles.CColors
 import org.archivekeep.app.desktop.ui.views.View
-import org.archivekeep.app.desktop.ui.views.storages.components.AllStoragesList
+import org.archivekeep.app.desktop.ui.views.storages.components.StoragesList
 import org.archivekeep.app.desktop.utils.collectLoadableFlow
+import org.archivekeep.utils.loading.mapLoadedData
 
-class StoragesView : View<StoragesVM> {
+class StoragesView : View<StoragesViewModel> {
     @Composable
-    override fun producePersistentState(scope: CoroutineScope): StoragesVM {
+    override fun produceViewModel(scope: CoroutineScope): StoragesViewModel {
         val storageService = LocalStorageService.current
 
         return remember(scope, storageService) {
-            StoragesVM(
+            StoragesViewModel(
                 scope,
                 storageService,
             )
@@ -29,15 +30,23 @@ class StoragesView : View<StoragesVM> {
     @Composable
     override fun render(
         modifier: Modifier,
-        state: StoragesVM,
+        vm: StoragesViewModel,
     ) {
+        val state = vm.state.collectLoadableFlow()
+
         Surface(
             modifier = modifier,
             color = CColors.cardsGridBackground,
         ) {
             ViewScrollableContainer {
-                SectionBlock("All storages") {
-                    AllStoragesList(state.allStorages.collectLoadableFlow())
+                SectionBlock("Local storages") {
+                    StoragesList(state.mapLoadedData { it.localStorages })
+                }
+                SectionBlock("External storages") {
+                    StoragesList(state.mapLoadedData { it.externalStorages })
+                }
+                SectionBlock("Online storages") {
+                    StoragesList(state.mapLoadedData { it.onlineStorages })
                 }
             }
         }

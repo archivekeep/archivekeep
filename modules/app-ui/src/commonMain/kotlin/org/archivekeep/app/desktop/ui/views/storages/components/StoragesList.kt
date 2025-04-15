@@ -23,17 +23,21 @@ import org.archivekeep.app.desktop.ui.designsystem.sections.SectionCardActionsRo
 import org.archivekeep.app.desktop.ui.designsystem.sections.SectionCardBottomList
 import org.archivekeep.app.desktop.ui.designsystem.sections.SectionCardTitle
 import org.archivekeep.app.desktop.ui.designsystem.sections.sectionCardHorizontalPadding
-import org.archivekeep.app.desktop.ui.views.storages.StoragesVM
+import org.archivekeep.app.desktop.ui.views.storages.StoragesViewState
 import org.archivekeep.utils.loading.Loadable
 
 @Composable
-fun AllStoragesList(allStoragesLoadable: Loadable<List<StoragesVM.Storage>>) {
+fun StoragesList(allStoragesLoadable: Loadable<List<StoragesViewState.Storage>>) {
     LoadableGuard(allStoragesLoadable) { allStorages ->
         VerticalGrid(
             columns = SimpleGridCells.Adaptive(minSize = 240.dp),
             horizontalArrangement = Arrangement.spacedBy(8.dp),
             verticalArrangement = Arrangement.spacedBy(8.dp),
         ) {
+            if (allStorages.isEmpty()) {
+                Text("Nothing here")
+            }
+
             allStorages.forEach { storage ->
                 SectionCard {
                     SectionCardTitle(

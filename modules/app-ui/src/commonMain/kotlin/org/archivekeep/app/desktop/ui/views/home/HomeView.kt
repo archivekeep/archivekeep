@@ -34,7 +34,7 @@ import org.archivekeep.utils.loading.mapLoadedData
 
 class HomeView : View<HomeViewModel> {
     @Composable
-    override fun producePersistentState(scope: CoroutineScope): HomeViewModel {
+    override fun produceViewModel(scope: CoroutineScope): HomeViewModel {
         val archiveService = LocalArchiveService.current
         val repositoryService = LocalRepoService.current
         val storageService = LocalStorageService.current
@@ -62,19 +62,19 @@ class HomeView : View<HomeViewModel> {
     @Composable
     override fun render(
         modifier: Modifier,
-        state: HomeViewModel,
+        vm: HomeViewModel,
     ) {
         Surface(
             modifier,
             color = CColors.cardsGridBackground,
         ) {
-            val allLocalArchivesLoadable = state.allLocalArchivesFlow.collectLoadableFlow()
-            val otherArchives = state.otherArchivesFlow.collectLoadableFlow()
-            val externalStoragesLoadable = state.allStoragesFlow.collectLoadableFlow()
+            val allLocalArchivesLoadable = vm.allLocalArchivesFlow.collectLoadableFlow()
+            val otherArchives = vm.otherArchivesFlow.collectLoadableFlow()
+            val externalStoragesLoadable = vm.allStoragesFlow.collectLoadableFlow()
 
-            val homeViewState = HomeViewState(allLocalArchivesLoadable, otherArchives, externalStoragesLoadable)
+            val state = HomeViewState(allLocalArchivesLoadable, otherArchives, externalStoragesLoadable)
 
-            homeViewContent(homeViewState)
+            homeViewContent(state)
         }
     }
 }

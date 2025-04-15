@@ -12,19 +12,19 @@ import org.archivekeep.app.desktop.ui.views.home.components.HomeArchiveKeepFunct
 
 class InfoView : View<Unit> {
     @Composable
-    override fun producePersistentState(scope: CoroutineScope) {
+    override fun produceViewModel(scope: CoroutineScope) {
     }
 
     @Composable
     override fun render(
         modifier: Modifier,
-        state: Unit,
+        vm: Unit,
     ) {
         Surface(
             modifier,
             color = CColors.cardsGridBackground,
         ) {
-            homeViewContent(state)
+            homeViewContent(vm)
         }
     }
 }
