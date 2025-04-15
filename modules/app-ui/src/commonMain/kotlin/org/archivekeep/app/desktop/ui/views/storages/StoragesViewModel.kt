@@ -3,13 +3,12 @@ package org.archivekeep.app.desktop.ui.views.storages
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.map
 import org.archivekeep.app.core.domain.storages.Storage
 import org.archivekeep.app.core.domain.storages.StorageInformation
 import org.archivekeep.app.core.domain.storages.StorageService
 import org.archivekeep.utils.combineToObject
-import org.archivekeep.utils.coroutines.shareResourceIn
 import org.archivekeep.utils.loading.flatMapLatestLoadedData
+import org.archivekeep.utils.loading.stateIn
 import org.archivekeep.utils.loading.waitLoadedValue
 
 class StoragesViewModel(
@@ -26,7 +25,7 @@ class StoragesViewModel(
                 ) { resolvedStorages ->
                     StoragesViewState(resolvedStorages.toList())
                 }
-            }.shareResourceIn(scope)
+            }.stateIn(scope)
 
     private fun resolveStorage(storage: Storage) =
         combine(

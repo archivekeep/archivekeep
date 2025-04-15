@@ -7,8 +7,8 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.flowOn
 import org.archivekeep.app.core.domain.storages.StorageService
 import org.archivekeep.utils.combineToList
-import org.archivekeep.utils.coroutines.shareResourceIn
 import org.archivekeep.utils.loading.flatMapLatestLoadedData
+import org.archivekeep.utils.loading.stateIn
 
 class DefaultArchiveService(
     scope: CoroutineScope,
@@ -66,5 +66,5 @@ class DefaultArchiveService(
                     correlatedArchives + uncorrelatedArchives
                 }
             }.flowOn(computeDispatcher)
-            .shareResourceIn(scope)
+            .stateIn(scope)
 }

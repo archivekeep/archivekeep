@@ -19,11 +19,11 @@ import org.archivekeep.app.core.utils.generics.mapLoaded
 import org.archivekeep.app.core.utils.generics.mapLoadedData
 import org.archivekeep.app.core.utils.generics.mapLoadedDataAsOptional
 import org.archivekeep.app.core.utils.generics.mapToOptionalLoadable
+import org.archivekeep.app.core.utils.generics.stateIn
 import org.archivekeep.app.core.utils.identifiers.RepositoryURI
 import org.archivekeep.app.core.utils.identifiers.StorageURI
 import org.archivekeep.files.repo.Repo
 import org.archivekeep.files.repo.files.openFilesRepoOrNull
-import org.archivekeep.utils.coroutines.shareResourceIn
 import org.archivekeep.utils.loading.mapLoadedData
 import java.nio.file.Path
 import kotlin.io.path.Path
@@ -71,7 +71,7 @@ class FileSystemStorageDriver(
                                         driveType = StorageInformation.Partition.DriveType.Other,
                                     )
                                 }
-                        }.shareResourceIn(scope),
+                        }.stateIn(scope),
             ),
             liveStatusFlowManager[storageURI],
         )

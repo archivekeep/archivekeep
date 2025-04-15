@@ -10,13 +10,13 @@ import org.archivekeep.app.core.domain.storages.StorageService
 import org.archivekeep.app.core.operations.addpush.AddAndPushOperationService
 import org.archivekeep.app.core.operations.sync.RepoToRepoSyncService
 import org.archivekeep.utils.combineToObject
-import org.archivekeep.utils.coroutines.shareResourceIn
 import org.archivekeep.utils.loading.Loadable
 import org.archivekeep.utils.loading.flatMapLatestLoadedData
 import org.archivekeep.utils.loading.flatMapLoadableFlow
 import org.archivekeep.utils.loading.isLoading
 import org.archivekeep.utils.loading.mapIfLoadedOrDefault
 import org.archivekeep.utils.loading.mapLoadedData
+import org.archivekeep.utils.loading.stateIn
 
 class HomeViewModel(
     val scope: CoroutineScope,
@@ -62,7 +62,7 @@ class HomeViewModel(
                                     },
                         )
                     }.sortedBy { it.displayName }
-            }.shareResourceIn(scope)
+            }.stateIn(scope)
 
     @OptIn(ExperimentalCoroutinesApi::class)
     val allStoragesFlow =
@@ -118,7 +118,7 @@ class HomeViewModel(
                                 .map { it.second },
                     )
                 }
-            }.shareResourceIn(scope)
+            }.stateIn(scope)
 
     val otherArchivesFlow =
         archiveService.allArchives.mapLoadedData {

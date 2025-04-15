@@ -25,6 +25,7 @@ import org.archivekeep.app.core.utils.generics.OptionalLoadable
 import org.archivekeep.app.core.utils.generics.SyncFlowStringWriter
 import org.archivekeep.app.core.utils.generics.mapLoadedData
 import org.archivekeep.app.core.utils.generics.singleInstanceWeakValueMap
+import org.archivekeep.app.core.utils.generics.stateIn
 import org.archivekeep.app.core.utils.identifiers.RepositoryURI
 import org.archivekeep.app.core.utils.operations.AbstractOperationJob
 import org.archivekeep.files.operations.CompareOperation
@@ -35,9 +36,9 @@ import org.archivekeep.files.operations.sync.SyncSubOperation
 import org.archivekeep.files.operations.sync.SyncSubOperationGroup
 import org.archivekeep.files.operations.sync.WritterSyncLogger
 import org.archivekeep.files.repo.Repo
-import org.archivekeep.utils.coroutines.shareResourceIn
 import org.archivekeep.utils.loading.Loadable
 import org.archivekeep.utils.loading.mapToLoadable
+import org.archivekeep.utils.loading.stateIn
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.milliseconds
 
@@ -158,7 +159,7 @@ class RepoToRepoSyncServiceImpl(
                         OptionalLoadable.Loading -> {}
                     }
                 }.flowOn(computeDispatcher)
-                .shareResourceIn(scope)
+                .stateIn(scope)
 
         override val compareStateFlow =
             compareStatusFlow.mapLoadedData {
@@ -257,7 +258,7 @@ class RepoToRepoSyncServiceImpl(
                     flowOf()
                 } else {
                     preparationFlow
-                }.shareResourceIn(scope)
+                }.stateIn(scope)
             }
         }
     }

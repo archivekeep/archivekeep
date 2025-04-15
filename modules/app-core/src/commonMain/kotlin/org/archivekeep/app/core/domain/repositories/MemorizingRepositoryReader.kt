@@ -13,11 +13,11 @@ import org.archivekeep.app.core.persistence.repository.MemorizedRepositoryMetada
 import org.archivekeep.app.core.utils.generics.OptionalLoadable
 import org.archivekeep.app.core.utils.generics.flatMapLatestLoadedData
 import org.archivekeep.app.core.utils.generics.mapToOptionalLoadable
+import org.archivekeep.app.core.utils.generics.stateIn
 import org.archivekeep.app.core.utils.identifiers.RepositoryURI
 import org.archivekeep.files.exceptions.UnsupportedFeatureException
 import org.archivekeep.files.repo.Repo
 import org.archivekeep.files.repo.RepositoryMetadata
-import org.archivekeep.utils.coroutines.shareResourceIn
 import org.archivekeep.utils.loading.Loadable
 
 @OptIn(ExperimentalCoroutinesApi::class)
@@ -53,7 +53,7 @@ class MemorizingRepositoryReader(
                         }.mapToOptionalLoadable()
                 }.onEach {
                     println("Loaded repository index for $uri")
-                }.shareResourceIn(scope)
+                }.stateIn(scope)
         }
 
     val metadataFlow: Flow<OptionalLoadable<RepositoryMetadata>> =
@@ -91,6 +91,6 @@ class MemorizingRepositoryReader(
                         }
                 }.onEach {
                     println("Loaded repository metadata for $uri - $it")
-                }.shareResourceIn(scope)
+                }.stateIn(scope)
         }
 }

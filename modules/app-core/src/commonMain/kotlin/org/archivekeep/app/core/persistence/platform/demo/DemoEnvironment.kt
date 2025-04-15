@@ -51,6 +51,7 @@ import org.archivekeep.testing.storage.SpeedLimitedRepoWrapper
 import org.archivekeep.utils.coroutines.shareResourceIn
 import org.archivekeep.utils.loading.Loadable
 import org.archivekeep.utils.loading.mapToLoadable
+import org.archivekeep.utils.loading.stateIn
 
 class DemoEnvironment(
     scope: CoroutineScope,
@@ -68,7 +69,7 @@ class DemoEnvironment(
             override val mountPoints: SharedFlow<Loadable<List<MountedFileSystem.MountPoint>>> =
                 flowOf(emptyList<MountedFileSystem.MountPoint>())
                     .mapToLoadable()
-                    .shareResourceIn(scope)
+                    .stateIn(scope)
 
             override val mountedFileSystems: Flow<Loadable<List<MountedFileSystem>>> = flowOf(Loadable.Loaded(emptyList()))
 
@@ -137,7 +138,7 @@ class DemoEnvironment(
                                 storage.registeredStorage
                             }.toSet()
                     }.mapToLoadable()
-                    .shareResourceIn(scope)
+                    .stateIn(scope)
 
             override suspend fun updateRepositories(fn: (old: Set<RegisteredRepository>) -> Set<RegisteredRepository>) {
                 TODO("Not yet implemented")

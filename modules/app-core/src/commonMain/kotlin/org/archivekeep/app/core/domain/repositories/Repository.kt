@@ -23,6 +23,7 @@ import org.archivekeep.app.core.utils.generics.flatMapLatestLoadedData
 import org.archivekeep.app.core.utils.generics.mapIfLoadedOrNull
 import org.archivekeep.app.core.utils.generics.mapLoaded
 import org.archivekeep.app.core.utils.generics.mapToOptionalLoadable
+import org.archivekeep.app.core.utils.generics.stateIn
 import org.archivekeep.app.core.utils.identifiers.RepositoryURI
 import org.archivekeep.app.core.utils.mapAsLoadable
 import org.archivekeep.files.exceptions.UnsupportedFeatureException
@@ -87,7 +88,7 @@ class Repository(
                     ProtectedLoadableResource.Loading -> OptionalLoadable.Loading
                     is ProtectedLoadableResource.PendingAuthentication -> OptionalLoadable.NotAvailable()
                 }
-            }.shareResourceIn(scope)
+            }.stateIn(scope)
 
     val connectionStatusFlow =
         rawAccessor
@@ -154,7 +155,7 @@ class Repository(
     val localRepoStatus =
         localRepoAccessorFlow
             .flatMapLatestLoadedData { repo -> repo.observable.localIndex.mapToOptionalLoadable { it } }
-            .shareResourceIn(scope)
+            .stateIn(scope)
 
     suspend fun unlock(
         basicCredentials: BasicAuthCredentials,

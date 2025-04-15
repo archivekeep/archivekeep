@@ -1,12 +1,16 @@
 package org.archivekeep.app.core.utils.generics
 
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.SharedFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.transform
 import org.archivekeep.utils.loading.Loadable
 
@@ -164,3 +168,14 @@ fun <T> OptionalLoadable<T>.mapToLoadable(defaultValue: (OptionalLoadable.NotAva
         is OptionalLoadable.LoadedAvailable -> Loadable.Loaded(value)
         is OptionalLoadable.NotAvailable -> defaultValue(this)
     }
+
+fun <T> Flow<OptionalLoadable<T>>.stateIn(
+    scope: CoroutineScope,
+    started: SharingStarted = SharingStarted.WhileSubscribed(100),
+): SharedFlow<OptionalLoadable<T>> =
+    this
+        .stateIn(
+            scope,
+            started,
+            OptionalLoadable.Loading,
+        )

@@ -28,8 +28,8 @@ import org.archivekeep.files.repo.remote.grpc.Options
 import org.archivekeep.files.repo.remote.grpc.createPAT
 import org.archivekeep.files.repo.remote.grpc.isNotAuthorized
 import org.archivekeep.files.repo.remote.grpc.openGrpcArchive
-import org.archivekeep.utils.coroutines.shareResourceIn
 import org.archivekeep.utils.loading.Loadable
+import org.archivekeep.utils.loading.stateIn
 
 class GRPCStorageDriver(
     val scope: CoroutineScope,
@@ -42,7 +42,7 @@ class GRPCStorageDriver(
             flowOf(
                 // TODO: implement ONLINE/OFFLINE status check
                 Loadable.Loaded(Storage.ConnectionStatus.ONLINE),
-            ).shareResourceIn(scope),
+            ).stateIn(scope),
         )
 
     override fun openRepoFlow(uri: RepositoryURI) = flow { accessor(uri) }

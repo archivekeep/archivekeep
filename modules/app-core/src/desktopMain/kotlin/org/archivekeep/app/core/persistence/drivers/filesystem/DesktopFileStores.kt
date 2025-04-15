@@ -14,11 +14,11 @@ import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.transformLatest
-import org.archivekeep.utils.coroutines.shareResourceIn
 import org.archivekeep.utils.io.debounceAndRepeatAfterDelay
 import org.archivekeep.utils.io.listFilesFlow
 import org.archivekeep.utils.loading.mapLoadedData
 import org.archivekeep.utils.loading.mapToLoadable
+import org.archivekeep.utils.loading.stateIn
 import oshi.SystemInfo
 import oshi.software.os.OSFileStore
 import oshi.software.os.linux.LinuxFileSystem
@@ -138,7 +138,7 @@ class DesktopFileStores(
 
                     collectMounts()
                 }.flowOn(Dispatchers.IO)
-                .shareResourceIn(scope)
+                .stateIn(scope)
         }
 
     override val mountedFileSystems =

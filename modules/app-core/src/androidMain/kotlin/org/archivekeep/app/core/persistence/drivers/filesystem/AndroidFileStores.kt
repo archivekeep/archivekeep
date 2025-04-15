@@ -14,11 +14,11 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.consumeAsFlow
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.onStart
-import org.archivekeep.utils.coroutines.shareResourceIn
 import org.archivekeep.utils.io.debounceAndRepeatAfterDelay
 import org.archivekeep.utils.loading.Loadable
 import org.archivekeep.utils.loading.mapLoadedData
 import org.archivekeep.utils.loading.mapToLoadable
+import org.archivekeep.utils.loading.stateIn
 import java.util.Date
 import java.util.concurrent.Executor
 
@@ -62,7 +62,7 @@ class AndroidFileStores(
 
                 listOf(internal) + external
             }.flowOn(ioDispatcher)
-            .shareResourceIn(scope, SharingStarted.Eagerly)
+            .stateIn(scope, SharingStarted.Eagerly)
 
     override val mountedFileSystems: Flow<Loadable<List<MountedFileSystem>>> =
         mountPoints.mapLoadedData { mountPoints ->

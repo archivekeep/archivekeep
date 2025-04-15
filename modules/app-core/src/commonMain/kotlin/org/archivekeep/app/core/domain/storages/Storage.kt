@@ -12,10 +12,10 @@ import org.archivekeep.app.core.domain.repositories.RepositoryService
 import org.archivekeep.app.core.utils.identifiers.StorageURI
 import org.archivekeep.utils.combineToList
 import org.archivekeep.utils.coroutines.InstanceProtector
-import org.archivekeep.utils.coroutines.shareResourceIn
 import org.archivekeep.utils.loading.Loadable
 import org.archivekeep.utils.loading.flatMapLatestLoadedData
 import org.archivekeep.utils.loading.mapLoadedData
+import org.archivekeep.utils.loading.stateIn
 
 private val InstanceProtector = InstanceProtector<Storage>()
 
@@ -54,7 +54,7 @@ class Storage(
                             }
                     },
                 )
-            }.shareResourceIn(scope)
+            }.stateIn(scope)
 
     enum class ConnectionStatus {
         ONLINE,
@@ -76,5 +76,5 @@ class Storage(
                     knownStorage,
                     this,
                 )
-            }.shareResourceIn(scope)
+            }.stateIn(scope)
 }

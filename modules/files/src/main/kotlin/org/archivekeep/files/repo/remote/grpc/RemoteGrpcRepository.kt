@@ -29,9 +29,9 @@ import org.archivekeep.files.repo.ObservableRepo
 import org.archivekeep.files.repo.Repo
 import org.archivekeep.files.repo.RepoIndex
 import org.archivekeep.files.repo.RepositoryMetadata
-import org.archivekeep.utils.coroutines.shareResourceIn
 import org.archivekeep.utils.loading.Loadable
 import org.archivekeep.utils.loading.mapToLoadable
+import org.archivekeep.utils.loading.stateIn
 import java.io.Closeable
 import java.io.InputStream
 import java.io.PipedInputStream
@@ -224,7 +224,7 @@ class RemoteGrpcRepository(
     override val indexFlow =
         modifChannel
             .mapToLoadable { index() }
-            .shareResourceIn(scope)
+            .stateIn(scope)
 
     override val metadataFlow: Flow<Loadable<RepositoryMetadata>> =
         flowOf(

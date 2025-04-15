@@ -1,7 +1,10 @@
 package org.archivekeep.utils.loading
 
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.SharedFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flatMapLatest
@@ -9,6 +12,7 @@ import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onStart
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.transform
 
 fun <T> Flow<T>.mapToLoadable(): Flow<Loadable<T>> = this.mapToLoadable { it }
@@ -109,3 +113,14 @@ suspend fun <T> Flow<Loadable<T>>.firstLoadedOrFailure(): T =
     }.first()
 
 fun <T> Flow<Loadable<T>>.waitLoadedValue(): Flow<T> = this.transform { if (it is Loadable.Loaded) emit(it.value) }
+
+fun <T> Flow<Loadable<T>>.stateIn(
+    scope: CoroutineScope,
+    started: SharingStarted = SharingStarted.WhileSubscribed(100),
+): SharedFlow<Loadable<T>> =
+    this
+        .stateIn(
+            scope,
+            started,
+            Loadable.Loading,
+        )

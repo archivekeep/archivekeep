@@ -11,11 +11,11 @@ import org.archivekeep.app.core.utils.identifiers.RepositoryURI
 import org.archivekeep.app.core.utils.identifiers.StorageURI
 import org.archivekeep.utils.combineToFlatMapList
 import org.archivekeep.utils.combineToList
-import org.archivekeep.utils.coroutines.shareResourceIn
 import org.archivekeep.utils.coroutines.sharedResourceInGlobalScope
 import org.archivekeep.utils.loading.Loadable
 import org.archivekeep.utils.loading.flatMapLatestLoadedData
 import org.archivekeep.utils.loading.mapLoadedData
+import org.archivekeep.utils.loading.stateIn
 import org.archivekeep.utils.loading.waitLoadedValue
 
 class StorageService(
@@ -43,7 +43,7 @@ class StorageService(
         knownStorageService
             .knownStorageURIs
             .mapLoadedData(storageInstances::get)
-            .shareResourceIn(scope)
+            .stateIn(scope)
 
     @OptIn(ExperimentalCoroutinesApi::class)
     val allStoragesPartiallyResolved =
@@ -55,14 +55,14 @@ class StorageService(
                         storage.partiallyResolved.waitLoadedValue()
                     },
                 )
-            }.shareResourceIn(scope)
+            }.stateIn(scope)
 
     @OptIn(ExperimentalCoroutinesApi::class)
     val allRepos =
         allStoragesPartiallyResolved
             .flatMapLatestLoadedData {
                 combineToFlatMapList(it.map { it.repositories })
-            }.shareResourceIn(scope)
+            }.stateIn(scope)
 
     fun repository(repositoryURI: RepositoryURI): Flow<StorageRepository> =
         allRepos
