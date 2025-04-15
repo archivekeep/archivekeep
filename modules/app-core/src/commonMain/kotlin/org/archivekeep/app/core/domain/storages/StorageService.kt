@@ -5,8 +5,8 @@ import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flowOf
-import kotlinx.coroutines.flow.map
 import org.archivekeep.app.core.domain.repositories.RepositoryService
+import org.archivekeep.app.core.utils.generics.UniqueInstanceManager
 import org.archivekeep.app.core.utils.identifiers.RepositoryURI
 import org.archivekeep.app.core.utils.identifiers.StorageURI
 import org.archivekeep.utils.combineToFlatMapList
@@ -24,42 +24,42 @@ class StorageService(
     val storageDrivers: Map<String, StorageDriver>,
     val repositoryService: RepositoryService,
 ) {
+    private val storageInstances =
+        UniqueInstanceManager(factory = { storageURI: StorageURI ->
+            Storage(
+                scope,
+                repositoryService,
+                storageURI,
+                knownStorageService.storage(storageURI),
+                storageDrivers[storageURI.driver]?.getStorageAccessor(
+                    storageURI,
+                ) ?: notSupportedStorage(storageURI),
+            )
+        })
+
+    fun storage(uri: StorageURI) = storageInstances[uri]
+
     val allStorages =
         knownStorageService
-            .knownStorages
-            .mapLoadedData { knownStorages ->
-                knownStorages.map { knownStorage ->
-                    val storageURI = knownStorage.storageURI
+            .knownStorageURIs
+            .mapLoadedData(storageInstances::get)
+            .shareResourceIn(scope)
 
-                    val storageRef = StorageNamedReference(storageURI, knownStorage.label)
-
-                    Storage(
-                        storageURI,
-                        knownStorage,
-                        storageDrivers[storageURI.driver]?.getStorageAccessor(
-                            storageURI,
-                        ) ?: notSupportedStorage(storageURI),
-                        combineToList(
-                            knownStorage.registeredRepositories.map { registeredRepo ->
-                                repositoryService
-                                    .getRepository(registeredRepo.uri)
-                                    .resolvedState
-                                    .map {
-                                        StorageRepository(
-                                            storageRef,
-                                            it.uri,
-                                            it,
-                                        )
-                                    }
-                            },
-                        ).shareResourceIn(scope),
-                    )
-                }
+    @OptIn(ExperimentalCoroutinesApi::class)
+    val allStoragesPartiallyResolved =
+        allStorages
+            .flatMapLatestLoadedData { storages ->
+                combineToList(
+                    storages.map { storage ->
+                        // TODO: get rid of waitLoadedValue - don't make list depend on resolution of all instances
+                        storage.partiallyResolved.waitLoadedValue()
+                    },
+                )
             }.shareResourceIn(scope)
 
     @OptIn(ExperimentalCoroutinesApi::class)
     val allRepos =
-        allStorages
+        allStoragesPartiallyResolved
             .flatMapLatestLoadedData {
                 combineToFlatMapList(it.map { it.repositories })
             }.shareResourceIn(scope)

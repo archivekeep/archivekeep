@@ -13,13 +13,10 @@ import org.archivekeep.app.desktop.domain.wiring.LocalStorageService
 import org.archivekeep.app.desktop.ui.components.LoadableGuard
 import org.archivekeep.app.desktop.ui.designsystem.dialog.DialogButtonContainer
 import org.archivekeep.app.desktop.ui.designsystem.dialog.DialogCard
-import org.archivekeep.app.desktop.ui.designsystem.dialog.DialogDismissButton
 import org.archivekeep.app.desktop.ui.designsystem.dialog.DialogInnerContainer
 import org.archivekeep.app.desktop.ui.designsystem.dialog.DialogOverlayCard
 import org.archivekeep.app.desktop.ui.dialogs.Dialog
-import org.archivekeep.app.desktop.utils.collectLoadableFlow
 import org.archivekeep.utils.loading.Loadable
-import org.archivekeep.utils.loading.mapLoadedData
 
 abstract class AbstractStorageDialog<T_State : AbstractStorageDialog.IState, T_VM : Any>(
     val uri: StorageURI,
@@ -75,35 +72,17 @@ abstract class AbstractStorageDialog<T_State : AbstractStorageDialog.IState, T_V
     @Composable
     override fun render(onClose: () -> Unit) {
         val storageService = LocalStorageService.current
-        val storageLoadable =
+
+        val storage =
             remember(storageService, uri) {
-                storageService.allStorages
-                    .mapLoadedData { it.firstOrNull { it.uri == uri } }
-            }.collectLoadableFlow()
+                storageService.storage(uri)
+            }
 
         DialogOverlayCard(onDismissRequest = onClose) {
-            LoadableGuard(
-                storageLoadable,
-            ) { storage ->
-                if (storage != null) {
-                    val vm = rememberVM(rememberCoroutineScope(), storage, onClose)
+            val vm = rememberVM(rememberCoroutineScope(), storage, onClose)
 
-                    LoadableGuard(rememberState(vm)) { state ->
-                        renderDialogContents(state, onClose)
-                    }
-                } else {
-                    DialogInnerContainer(
-                        buildAnnotatedString {
-                            append("Storage `$uri` not found")
-                        },
-                        content = {},
-                        bottomContent = {
-                            DialogButtonContainer {
-                                DialogDismissButton("Dismiss", onClick = onClose)
-                            }
-                        },
-                    )
-                }
+            LoadableGuard(rememberState(vm)) { state ->
+                renderDialogContents(state, onClose)
             }
         }
     }

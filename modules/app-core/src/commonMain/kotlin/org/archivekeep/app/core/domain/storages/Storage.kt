@@ -1,37 +1,60 @@
 package org.archivekeep.app.core.domain.storages
 
-import kotlinx.coroutines.DelicateCoroutinesApi
-import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.plus
+import org.archivekeep.app.core.domain.repositories.RepositoryService
 import org.archivekeep.app.core.utils.identifiers.StorageURI
+import org.archivekeep.utils.combineToList
+import org.archivekeep.utils.coroutines.InstanceProtector
+import org.archivekeep.utils.coroutines.shareResourceIn
 import org.archivekeep.utils.loading.Loadable
+import org.archivekeep.utils.loading.flatMapLatestLoadedData
 import org.archivekeep.utils.loading.mapLoadedData
 
+private val InstanceProtector = InstanceProtector<Storage>()
+
 class Storage(
+    baseScope: CoroutineScope,
+    private val repositoryService: RepositoryService,
     val uri: StorageURI,
-    val knownStorage: KnownStorage,
+    val knownStorageFlow: Flow<Loadable<KnownStorage>>,
     val connection: StorageConnection,
-    val repositories: SharedFlow<List<StorageRepository>>,
 ) {
+    private val scope = baseScope + InstanceProtector.forInstance(this)
+
     data class State(
         val connectionStatus: ConnectionStatus,
     ) {
         val isConnected = connectionStatus == ConnectionStatus.CONNECTED || connectionStatus == ConnectionStatus.ONLINE
     }
 
-    val isLocal: Boolean
-        get() = knownStorage.isLocal
+    @OptIn(ExperimentalCoroutinesApi::class)
+    val repositories: SharedFlow<Loadable<List<StorageRepository>>> =
+        knownStorageFlow
+            .flatMapLatestLoadedData { knownStorage ->
+                val storageRef = StorageNamedReference(uri, knownStorage.label)
 
-    val label: String
-        get() = knownStorage.label
-
-    val namedReference =
-        StorageNamedReference(
-            uri,
-            label,
-        )
+                combineToList(
+                    knownStorage.registeredRepositories.map { registeredRepo ->
+                        repositoryService
+                            .getRepository(registeredRepo.uri)
+                            .resolvedState
+                            .map {
+                                StorageRepository(
+                                    storageRef,
+                                    it.uri,
+                                    it,
+                                )
+                            }
+                    },
+                )
+            }.shareResourceIn(scope)
 
     enum class ConnectionStatus {
         ONLINE,
@@ -39,15 +62,19 @@ class Storage(
         DISCONNECTED,
     }
 
-    @OptIn(DelicateCoroutinesApi::class)
     val state =
         connection.connectionStatus
-            .mapLoadedData { connectionStatus ->
-                State(connectionStatus)
-            }.stateIn(GlobalScope, SharingStarted.WhileSubscribed(), Loadable.Loading)
-}
+            .mapLoadedData(::State)
+            .stateIn(scope, SharingStarted.WhileSubscribed(), Loadable.Loading)
 
-data class StorageNamedReference(
-    val uri: StorageURI,
-    val displayName: String,
-)
+    val partiallyResolved =
+        knownStorageFlow
+            .mapLoadedData { knownStorage ->
+                StoragePartiallyResolved(
+                    scope,
+                    uri,
+                    knownStorage,
+                    this,
+                )
+            }.shareResourceIn(scope)
+}

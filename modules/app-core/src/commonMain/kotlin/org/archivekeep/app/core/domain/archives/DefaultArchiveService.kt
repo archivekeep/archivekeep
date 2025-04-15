@@ -18,7 +18,7 @@ class DefaultArchiveService(
     @OptIn(ExperimentalCoroutinesApi::class)
     override val allArchives =
         storageService
-            .allStorages
+            .allStoragesPartiallyResolved
             .flatMapLatestLoadedData { allStorages ->
                 val repositoriesFlows =
                     allStorages.map { it.repositories }

@@ -28,7 +28,7 @@ fun StorageDropdownIconLaunched(uri: StorageURI) {
     val storageLoadable =
         remember(storageService, uri) {
             storageService
-                .allStorages
+                .allStoragesPartiallyResolved
                 .mapLoadedData { allStorages ->
                     allStorages.firstOrNull {
                         it.uri == uri

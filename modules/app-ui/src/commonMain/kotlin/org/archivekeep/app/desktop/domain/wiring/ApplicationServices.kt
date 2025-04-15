@@ -19,7 +19,7 @@ class ApplicationServices(
 ) {
     val scope = basescope + serviceWorkDispatcher
 
-    val knownStorageService = KnownStorageService(environment.registry, environment.fileStores)
+    val knownStorageService = KnownStorageService(scope, environment.registry, environment.fileStores)
 
     val repoService =
         DefaultRepositoryService(

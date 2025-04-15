@@ -11,8 +11,8 @@ import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.stateIn
 import org.archivekeep.app.core.domain.archives.AssociatedArchive
 import org.archivekeep.app.core.domain.repositories.Repository
-import org.archivekeep.app.core.domain.storages.Storage
 import org.archivekeep.app.core.domain.storages.StorageNamedReference
+import org.archivekeep.app.core.domain.storages.StoragePartiallyResolved
 import org.archivekeep.app.core.operations.addpush.AddAndPushOperationService
 import org.archivekeep.app.core.operations.sync.RepoToRepoSyncService
 import org.archivekeep.app.core.utils.generics.isLoading
@@ -36,7 +36,7 @@ class HomeArchiveEntryViewModel(
     val archive: AssociatedArchive,
     val displayName: String,
     val primaryRepository: PrimaryRepositoryDetails,
-    val otherRepositories: List<Pair<Storage, SecondaryArchiveRepository>>,
+    val otherRepositories: List<Pair<StoragePartiallyResolved, SecondaryArchiveRepository>>,
 ) {
     data class VMState(
         val canAdd: Loadable<Boolean>,
@@ -51,7 +51,7 @@ class HomeArchiveEntryViewModel(
 
     val addPushOperation = addAndPushOperationService.getAddPushOperation(primaryRepository.reference.uri)
 
-    val secondaryRepositories: StateFlow<List<Pair<Storage, SecondaryArchiveRepository.State>>> =
+    val secondaryRepositories: StateFlow<List<Pair<StoragePartiallyResolved, SecondaryArchiveRepository.State>>> =
         safeCombine(
             otherRepositories.map { (storage, secondaryArchiveRepository) ->
                 secondaryArchiveRepository.stateFlow(scope, repoToRepoSyncService).map { Pair(storage, it) }
@@ -130,7 +130,7 @@ class HomeArchiveNonLocalArchive(
 class HomeViewStorage(
     scope: CoroutineScope,
     val repoToRepoSyncService: RepoToRepoSyncService,
-    val storage: Storage,
+    val storage: StoragePartiallyResolved,
     val reference: StorageNamedReference = storage.namedReference,
     val name: String? = storage.knownStorage.registeredStorage?.label,
     val otherRepositoriesInThisStorage: List<SecondaryArchiveRepository>,

@@ -66,7 +66,7 @@ class HomeViewModel(
 
     @OptIn(ExperimentalCoroutinesApi::class)
     val allStoragesFlow =
-        storageService.allStorages
+        storageService.allStoragesPartiallyResolved
             .flatMapLoadableFlow { allStorages ->
                 val nonLocalStorages =
                     allStorages.filter { !it.isLocal }

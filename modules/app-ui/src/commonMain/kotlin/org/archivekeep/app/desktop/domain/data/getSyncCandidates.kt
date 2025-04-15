@@ -21,7 +21,7 @@ fun getSyncCandidates(
     storageService: StorageService,
     repositoryURI: RepositoryURI,
 ): Flow<List<StorageRepository>> =
-    storageService.allStorages
+    storageService.allStoragesPartiallyResolved
         .flatMapLatestLoadedData { storages ->
             val allReposFlow = combineToFlatMapList(storages.map { s -> s.repositories })
 

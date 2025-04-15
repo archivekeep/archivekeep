@@ -31,6 +31,10 @@
 -keep class org.archivekeep.files.internal.grpc.**{ *; }
 -dontwarn org.archivekeep.files.internal.grpc.**
 
+-keepclassmembers class org.archivekeep.utils.coroutines.InstanceProtector$Instance {
+    <fields>;
+}
+
 -keep class com.google.protobuf.**{ *; }
 -dontwarn com.google.protobuf.**
 

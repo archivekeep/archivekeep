@@ -18,4 +18,6 @@ class UniqueInstanceManager<T : Any, V : Any>(
             )
 
     operator fun get(key: T): V = values.get(key)
+
+    fun get(keys: Collection<T>): List<V> = keys.map { get(it) }
 }

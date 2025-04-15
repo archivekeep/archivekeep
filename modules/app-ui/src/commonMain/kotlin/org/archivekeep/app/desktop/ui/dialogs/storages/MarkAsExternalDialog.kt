@@ -24,9 +24,11 @@ import org.archivekeep.app.desktop.ui.designsystem.dialog.DialogPreviewColumn
 import org.archivekeep.app.desktop.ui.utils.appendBoldSpan
 import org.archivekeep.app.desktop.utils.Launchable
 import org.archivekeep.app.desktop.utils.asAction
+import org.archivekeep.app.desktop.utils.collectLoadableFlow
 import org.archivekeep.app.desktop.utils.mockLaunchable
 import org.archivekeep.app.desktop.utils.simpleLaunchable
 import org.archivekeep.utils.loading.Loadable
+import org.archivekeep.utils.loading.mapLoadedData
 import org.jetbrains.compose.ui.tooling.preview.Preview
 
 class MarkAsExternalDialog(
@@ -35,13 +37,13 @@ class MarkAsExternalDialog(
     class VM(
         val coroutineScope: CoroutineScope,
         val registry: RegistryDataStore,
-        val storage: KnownStorage,
+        val storage: Storage,
         val onClose: () -> Unit,
     ) {
         val launchable =
             simpleLaunchable(coroutineScope) {
                 registry.updateStorage(
-                    storage.storageURI,
+                    storage.uri,
                 ) {
                     it.copy(
                         isLocal = false,
@@ -75,20 +77,23 @@ class MarkAsExternalDialog(
         val coroutineScope = rememberCoroutineScope()
 
         return remember {
-            VM(coroutineScope, registry, storage.knownStorage, onClose)
+            VM(coroutineScope, registry, storage, onClose)
         }
     }
 
     @Composable
-    override fun rememberState(vm: VM): Loadable<State> =
-        remember {
-            Loadable.Loaded(
+    override fun rememberState(vm: VM): Loadable<State> {
+        val knownStorage = vm.storage.knownStorageFlow.collectLoadableFlow()
+
+        return remember(knownStorage) {
+            knownStorage.mapLoadedData {
                 State(
-                    vm.storage,
+                    it,
                     vm.launchable,
-                ),
-            )
+                )
+            }
         }
+    }
 
     @Composable
     override fun renderContent(state: State) {

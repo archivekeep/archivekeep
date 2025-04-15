@@ -10,6 +10,7 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.transform
 import kotlinx.coroutines.flow.transformWhile
+import kotlinx.coroutines.plus
 import org.archivekeep.app.core.persistence.registry.RegisteredRepository
 import org.archivekeep.app.core.persistence.repository.MemorizedRepositoryIndexRepository
 import org.archivekeep.app.core.persistence.repository.MemorizedRepositoryMetadataRepository
@@ -29,7 +30,10 @@ import org.archivekeep.files.repo.LocalRepo
 import org.archivekeep.files.repo.Repo
 import org.archivekeep.files.repo.RepositoryMetadata
 import org.archivekeep.files.repo.remote.grpc.BasicAuthCredentials
+import org.archivekeep.utils.coroutines.InstanceProtector
 import org.archivekeep.utils.coroutines.shareResourceIn
+
+private val InstanceProtector = InstanceProtector<Repository>()
 
 /**
  * Object to access repository state:
@@ -38,7 +42,7 @@ import org.archivekeep.utils.coroutines.shareResourceIn
  * * what is in this repository (metadata (can be cached), contents,...).
  */
 class Repository(
-    scope: CoroutineScope,
+    baseScope: CoroutineScope,
     val uri: RepositoryURI,
     val registeredRepositoryFlow: Flow<RegisteredRepository?>,
     val rawAccessor: Flow<ProtectedLoadableResource<Repo, RepoAuthRequest>>,
@@ -60,6 +64,8 @@ class Repository(
             cause: Throwable?,
         ) : ConnectionState(false, false, false)
     }
+
+    private val scope = baseScope + InstanceProtector.forInstance(this)
 
     val needsUnlock =
         rawAccessor
