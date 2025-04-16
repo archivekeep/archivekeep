@@ -40,13 +40,22 @@ class StoragesView : View<StoragesViewModel> {
         ) {
             ViewScrollableContainer {
                 SectionBlock("Local storages") {
-                    StoragesList(state.mapLoadedData { it.localStorages })
+                    StoragesList(
+                        state.mapLoadedData { it.localStorages },
+                        emptyText = "No local storages registered. Add repository belonging to a local storage.",
+                    )
                 }
                 SectionBlock("External storages") {
-                    StoragesList(state.mapLoadedData { it.externalStorages })
+                    StoragesList(
+                        state.mapLoadedData { it.externalStorages },
+                        emptyText = "No external storages registered. Add repository belonging to an external storage.",
+                    )
                 }
                 SectionBlock("Online storages") {
-                    StoragesList(state.mapLoadedData { it.onlineStorages })
+                    StoragesList(
+                        state.mapLoadedData { it.onlineStorages },
+                        emptyText = "No online storages registered. Add repository from online storage.",
+                    )
                 }
             }
         }

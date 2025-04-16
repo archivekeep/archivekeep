@@ -26,7 +26,7 @@ fun SectionTitle(
     Row(
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.Bottom,
-        modifier = Modifier.padding(bottom = 12.dp).fillMaxWidth(),
+        modifier = Modifier.padding(top = 8.dp, bottom = 12.dp).fillMaxWidth(),
     ) {
         Row(
             horizontalArrangement = Arrangement.spacedBy(4.dp),

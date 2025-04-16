@@ -30,13 +30,15 @@ class StoragesViewModel(
     private fun resolveStorage(storage: Storage) =
         combine(
             storage.repositories.waitLoadedValue(),
+            storage.connection.connectionStatus.waitLoadedValue(),
             storage.knownStorageFlow.waitLoadedValue(),
-        ) { repositories, knownStorage ->
+        ) { repositories, connectionStatus, knownStorage ->
             StoragesViewState.Storage(
                 uri = storage.uri,
                 displayName = knownStorage.label,
                 isLocal = knownStorage.isLocal,
                 isOnline = storage.connection.information is StorageInformation.OnlineStorage,
+                connectionStatus = connectionStatus,
                 repositoriesInThisStorage = repositories.map { it.repositoryState.namedReference },
             )
         }

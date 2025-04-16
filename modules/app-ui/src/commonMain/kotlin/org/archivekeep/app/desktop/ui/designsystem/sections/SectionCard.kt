@@ -13,8 +13,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
+import org.archivekeep.app.desktop.ui.designsystem.layout.views.SectionCardShape
 import org.archivekeep.app.desktop.ui.designsystem.styles.CColors
-import org.archivekeep.app.desktop.ui.views.home.components.TinyRoundShape
 
 @Composable
 fun SectionCard(
@@ -48,12 +48,12 @@ fun SectionCard(
 
     Card(
         colors = cardColors,
-        shape = TinyRoundShape,
+        shape = SectionCardShape,
         modifier =
             modifier
                 .shadow(
                     4.dp,
-                    shape = TinyRoundShape,
+                    shape = SectionCardShape,
                     ambientColor = Color.Blue,
                     spotColor = CColors.cardsGridCardBorder,
                 ).let {

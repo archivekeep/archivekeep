@@ -10,7 +10,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
-import org.archivekeep.app.desktop.ui.views.home.components.TinyRoundShape
+import org.archivekeep.app.desktop.ui.designsystem.layout.views.SectionCardShape
 
 @Composable
 fun SectionEmptyCard(content: @Composable ColumnScope.() -> Unit) {
@@ -26,7 +26,7 @@ fun SectionEmptyCard(content: @Composable ColumnScope.() -> Unit) {
 
     Card(
         colors = cardColors,
-        shape = TinyRoundShape,
+        shape = SectionCardShape,
     ) {
         Column(modifier = Modifier.padding(12.dp)) {
             content()

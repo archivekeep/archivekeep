@@ -1,7 +1,6 @@
 package org.archivekeep.app.desktop.ui.views.home.components
 
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -25,8 +24,6 @@ import org.archivekeep.app.desktop.ui.views.home.HomeArchiveEntryViewModel
 import org.archivekeep.app.desktop.ui.views.home.actions
 import org.archivekeep.utils.loading.Loadable
 import org.archivekeep.utils.loading.mapIfLoadedOrDefault
-
-val TinyRoundShape = RoundedCornerShape(4.dp)
 
 @Composable
 fun HomeArchivesList(allLocalArchivesLoadable: Loadable<List<HomeArchiveEntryViewModel>>) {

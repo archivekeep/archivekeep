@@ -4,6 +4,7 @@
 
 ### Added
 
+- UI: add connection status tag for storages in Storages view
 - UI: responsive app navigation layout supporting mobile screens:
   - top bar & drawer for small screens, 
   - top & bottom bar on narrow but tall screens,
@@ -14,6 +15,7 @@
 
 ### Changed
 
+- UI: improve look and feel of storages view
 - UI: show only available and connected storages in home view
 - UI: split storages based on type (local/external/online) in storages view
 - UI: less framed look of the application (make content flow behind window insets)

@@ -16,73 +16,81 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.cheonjaeung.compose.grid.SimpleGridCells
 import com.cheonjaeung.compose.grid.VerticalGrid
+import org.archivekeep.app.core.domain.storages.Storage
 import org.archivekeep.app.desktop.ui.components.LoadableGuard
 import org.archivekeep.app.desktop.ui.components.richcomponents.StorageDropdownIconLaunched
+import org.archivekeep.app.desktop.ui.designsystem.elements.ConnectionStatusTag
+import org.archivekeep.app.desktop.ui.designsystem.sections.EmptySectionCard
 import org.archivekeep.app.desktop.ui.designsystem.sections.SectionCard
-import org.archivekeep.app.desktop.ui.designsystem.sections.SectionCardActionsRow
 import org.archivekeep.app.desktop.ui.designsystem.sections.SectionCardBottomList
 import org.archivekeep.app.desktop.ui.designsystem.sections.SectionCardTitle
 import org.archivekeep.app.desktop.ui.designsystem.sections.sectionCardHorizontalPadding
+import org.archivekeep.app.desktop.ui.designsystem.sections.sectionCardItem
 import org.archivekeep.app.desktop.ui.views.storages.StoragesViewState
 import org.archivekeep.utils.loading.Loadable
 
 @Composable
-fun StoragesList(allStoragesLoadable: Loadable<List<StoragesViewState.Storage>>) {
+fun StoragesList(
+    allStoragesLoadable: Loadable<List<StoragesViewState.Storage>>,
+    emptyText: String,
+) {
     LoadableGuard(allStoragesLoadable) { allStorages ->
         VerticalGrid(
             columns = SimpleGridCells.Adaptive(minSize = 240.dp),
-            horizontalArrangement = Arrangement.spacedBy(8.dp),
-            verticalArrangement = Arrangement.spacedBy(8.dp),
+            horizontalArrangement = Arrangement.spacedBy(14.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp),
         ) {
             if (allStorages.isEmpty()) {
-                Text("Nothing here")
+                EmptySectionCard(emptyText)
             }
 
-            allStorages.forEach { storage ->
-                SectionCard {
-                    SectionCardTitle(
-                        // TODO
-                        false,
-                        storage.displayName,
-                        icons = {
-                            StorageDropdownIconLaunched(storage.uri)
-                        },
+            allStorages.forEach { StorageEntry(it) }
+        }
+    }
+}
+
+@Composable
+private fun StorageEntry(storage: StoragesViewState.Storage) {
+    SectionCard {
+        SectionCardTitle(
+            // TODO
+            false,
+            storage.displayName,
+            icons = {
+                StorageDropdownIconLaunched(storage.uri)
+            },
+        )
+
+        Row(Modifier.sectionCardItem().padding(top = 5.dp, bottom = 8.dp)) {
+            ConnectionStatusTag(storage.connectionStatus)
+        }
+
+        Spacer(Modifier.height(4.dp))
+
+        SectionCardBottomList(storage.repositoriesInThisStorage) {
+            Row(
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically,
+                modifier =
+                    Modifier
+                        .fillMaxWidth()
+                        .padding(
+                            vertical = 4.dp,
+                            horizontal = sectionCardHorizontalPadding,
+                        ),
+            ) {
+                Column(
+                    verticalArrangement = Arrangement.Center,
+                ) {
+                    val name = it.displayName
+
+                    Text(
+                        name,
+                        overflow = TextOverflow.Ellipsis,
+                        softWrap = false,
+                        fontSize = 14.sp,
+                        lineHeight = 16.sp,
                     )
-
-                    SectionCardActionsRow(
-                        emptyList(),
-                        noActionsText = if (storage.isLocal) "Local storage" else "External storage",
-                    )
-
-                    Spacer(Modifier.height(4.dp))
-
-                    SectionCardBottomList(storage.repositoriesInThisStorage) {
-                        Row(
-                            horizontalArrangement = Arrangement.SpaceBetween,
-                            verticalAlignment = Alignment.CenterVertically,
-                            modifier =
-                                Modifier
-                                    .fillMaxWidth()
-                                    .padding(
-                                        vertical = 4.dp,
-                                        horizontal = sectionCardHorizontalPadding,
-                                    ),
-                        ) {
-                            Column(
-                                verticalArrangement = Arrangement.Center,
-                            ) {
-                                val name = it.displayName
-
-                                Text(
-                                    name,
-                                    overflow = TextOverflow.Ellipsis,
-                                    softWrap = false,
-                                    fontSize = 14.sp,
-                                    lineHeight = 16.sp,
-                                )
-                            }
-                        }
-                    }
                 }
             }
         }
