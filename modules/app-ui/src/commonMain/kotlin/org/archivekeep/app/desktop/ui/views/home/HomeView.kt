@@ -3,7 +3,6 @@ package org.archivekeep.app.desktop.ui.views.home
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
 import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
@@ -17,6 +16,7 @@ import org.archivekeep.app.desktop.domain.wiring.LocalRepoService
 import org.archivekeep.app.desktop.domain.wiring.LocalRepoToRepoSyncService
 import org.archivekeep.app.desktop.domain.wiring.LocalStorageService
 import org.archivekeep.app.desktop.ui.components.various.WelcomeText
+import org.archivekeep.app.desktop.ui.designsystem.layout.views.ViewLoading
 import org.archivekeep.app.desktop.ui.designsystem.layout.views.ViewScrollableContainer
 import org.archivekeep.app.desktop.ui.designsystem.sections.SectionBlock
 import org.archivekeep.app.desktop.ui.designsystem.styles.CColors
@@ -82,7 +82,7 @@ class HomeView : View<HomeViewModel> {
 @Composable
 private fun homeViewContent(state: HomeViewState) {
     if (state.showBaseLoading) {
-        Text("Loading ...")
+        ViewLoading()
         return
     }
 
