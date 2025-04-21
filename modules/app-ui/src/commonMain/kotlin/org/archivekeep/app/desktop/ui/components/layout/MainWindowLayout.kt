@@ -28,6 +28,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
 import compose.icons.TablerIcons
@@ -199,12 +200,16 @@ fun renderItem(
     modifier: Modifier,
     selectedItem: MutableState<NavigableView<View<*>>>,
     it: NavigableView<View<*>>,
+    contentColor: Color = Color.White,
+    selectedBackground: Color = Color(60, 92, 154),
 ) {
     NavigationRailBarItem(
         text = it.title,
         icon = it.icon,
         selected = selectedItem.value == it,
         onClick = { selectedItem.value = it },
+        contentColor = contentColor,
+        selectedColor = selectedBackground,
         modifier = modifier,
     )
 }
@@ -231,7 +236,13 @@ private fun BottomBar(selectedItem: MutableState<NavigableView<View<*>>>) {
     DraggableAreaIfWindowPresent {
         NavigationBar {
             (navigables + navigablesEnd).forEach {
-                renderItem(Modifier.fillMaxHeight().defaultMinSize(minWidth = 40.dp), selectedItem, it)
+                renderItem(
+                    Modifier.fillMaxHeight().defaultMinSize(minWidth = 40.dp),
+                    selectedItem,
+                    it,
+                    contentColor = Color.Black.copy(alpha = 0.7f),
+                    selectedBackground = Color.Black.copy(alpha = 0.1f),
+                )
             }
         }
     }

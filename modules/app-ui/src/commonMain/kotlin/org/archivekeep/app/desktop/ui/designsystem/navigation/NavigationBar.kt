@@ -17,14 +17,14 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
-import org.archivekeep.app.desktop.ui.designsystem.styles.CColors.Companion.navigationRailColor
+import org.archivekeep.app.desktop.ui.designsystem.styles.CColors
 
 @Composable
 fun NavigationBar(content: @Composable RowScope.() -> Unit) {
     Row(
         Modifier
             .zIndex(10f)
-            .background(navigationRailColor)
+            .background(CColors.navigationBarColor)
             .windowInsetsPadding(WindowInsets.safeDrawing.only(WindowInsetsSides.Bottom + WindowInsetsSides.Horizontal))
             .padding(6.dp)
             .height(IntrinsicSize.Min)

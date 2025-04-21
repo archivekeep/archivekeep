@@ -12,6 +12,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
@@ -23,10 +24,11 @@ fun NavigationRailBarItem(
     icon: ImageVector,
     selected: Boolean,
     onClick: () -> Unit,
+    contentColor: Color,
+    selectedColor: Color,
     modifier: Modifier,
 ) {
-    val contentColor = if (selected) Color.White else Color(200, 210, 240)
-    val backgroundColor = if (selected) Color(60, 92, 154) else Color.Transparent
+    val backgroundColor = if (selected) selectedColor else Color.Transparent
 
     Surface(
         selected = selected,
@@ -34,6 +36,7 @@ fun NavigationRailBarItem(
         contentColor = contentColor,
         color = backgroundColor,
         shape = MaterialTheme.shapes.small,
+        modifier = Modifier.let { if (selected) it else it.alpha(0.8f) },
     ) {
         CompositionLocalProvider(
             LocalContentColor provides contentColor,
