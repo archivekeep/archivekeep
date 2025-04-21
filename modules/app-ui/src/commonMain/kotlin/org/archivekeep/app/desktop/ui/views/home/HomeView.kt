@@ -8,9 +8,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.CoroutineScope
-import org.archivekeep.app.core.persistence.drivers.filesystem.FileSystemStorageType
 import org.archivekeep.app.desktop.domain.wiring.LocalAddPushService
-import org.archivekeep.app.desktop.domain.wiring.LocalArchiveOperationLaunchers
 import org.archivekeep.app.desktop.domain.wiring.LocalArchiveService
 import org.archivekeep.app.desktop.domain.wiring.LocalRepoService
 import org.archivekeep.app.desktop.domain.wiring.LocalRepoToRepoSyncService
@@ -21,7 +19,6 @@ import org.archivekeep.app.desktop.ui.designsystem.layout.views.ViewScrollableCo
 import org.archivekeep.app.desktop.ui.designsystem.sections.SectionBlock
 import org.archivekeep.app.desktop.ui.designsystem.styles.CColors
 import org.archivekeep.app.desktop.ui.views.View
-import org.archivekeep.app.desktop.ui.views.home.components.HomeActionsList
 import org.archivekeep.app.desktop.ui.views.home.components.HomeArchivesIntro
 import org.archivekeep.app.desktop.ui.views.home.components.HomeArchivesList
 import org.archivekeep.app.desktop.ui.views.home.components.HomeNonLocalArchivesList
@@ -125,55 +122,6 @@ private fun homeViewContent(state: HomeViewState) {
                 ) {
                     HomeStoragesList(state.externalStoragesLoadable.mapLoadedData { it.availableStorages })
                 }
-            }
-        }
-
-        if (state.showLocalAddButton || state.showExternalAddButton) {
-            SectionBlock("More") {
-                HomeActionsList(
-                    allActions =
-                        listOfNotNull(
-                            if (state.showLocalAddButton) {
-                                HomeViewAction(
-                                    "Add local file repository …",
-                                    onTrigger =
-                                        LocalArchiveOperationLaunchers.current.let {
-                                            {
-                                                it.openAddFileSystemRepository(FileSystemStorageType.LOCAL)
-                                            }
-                                        },
-                                )
-                            } else {
-                                null
-                            },
-                            if (state.showExternalAddButton) {
-                                HomeViewAction(
-                                    "Add external file repository …",
-                                    onTrigger =
-                                        LocalArchiveOperationLaunchers.current.let {
-                                            {
-                                                it.openAddFileSystemRepository(FileSystemStorageType.EXTERNAL)
-                                            }
-                                        },
-                                )
-                            } else {
-                                null
-                            },
-                            if (state.showExternalAddButton) {
-                                HomeViewAction(
-                                    "Add remote repository …",
-                                    onTrigger =
-                                        LocalArchiveOperationLaunchers.current.let {
-                                            {
-                                                it.openAddRemoteRepository()
-                                            }
-                                        },
-                                )
-                            } else {
-                                null
-                            },
-                        ),
-                )
             }
         }
     }

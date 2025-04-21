@@ -39,6 +39,7 @@ import org.archivekeep.app.desktop.domain.services.SharingCoroutineDispatcher
 import org.archivekeep.app.desktop.enableUnfinishedFeatures
 import org.archivekeep.app.desktop.ui.components.DraggableAreaIfWindowPresent
 import org.archivekeep.app.desktop.ui.components.VersionText
+import org.archivekeep.app.desktop.ui.components.richcomponents.MainMenuDropdownIconLaunched
 import org.archivekeep.app.desktop.ui.designsystem.navigation.NavigationBar
 import org.archivekeep.app.desktop.ui.designsystem.navigation.NavigationRail
 import org.archivekeep.app.desktop.ui.designsystem.navigation.NavigationRailBarItem
@@ -220,6 +221,7 @@ private fun RailBar(selectedItem: MutableState<NavigableView<View<*>>>) {
             navigablesEnd.forEach {
                 renderItem(Modifier.fillMaxWidth(), selectedItem, it)
             }
+            MainMenuDropdownIconLaunched(Modifier.fillMaxWidth())
         }
     }
 }

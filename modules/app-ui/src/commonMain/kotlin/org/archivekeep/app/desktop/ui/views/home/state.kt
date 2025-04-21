@@ -14,9 +14,6 @@ class HomeViewState(
     val showLocalAddIntro = if (allLocalArchivesLoadable is Loadable.Loaded) allLocalArchivesLoadable.value.isEmpty() else false
     val showExternalAddIntro = if (externalStoragesLoadable is Loadable.Loaded) !externalStoragesLoadable.value.hasAnyRegistered else false
 
-    val showLocalAddButton = !showLocalAddIntro
-    val showExternalAddButton = !showExternalAddIntro
-
     val showExternalStoragesSection = externalStoragesLoadable.mapIfLoadedOrDefault(false) { it.availableStorages.isNotEmpty() }
 }
 

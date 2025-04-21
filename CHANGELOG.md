@@ -15,6 +15,7 @@
 
 ### Changed
 
+- UI: move repository add actions to dropdown in app bar (or rail bar)
 - UI: improve look and feel of storages view
 - UI: show only available and connected storages in home view
 - UI: split storages based on type (local/external/online) in storages view

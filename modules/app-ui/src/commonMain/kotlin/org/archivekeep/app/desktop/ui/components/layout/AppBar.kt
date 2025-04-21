@@ -28,6 +28,7 @@ import org.archivekeep.app.desktop.domain.wiring.LocalWalletDataStore
 import org.archivekeep.app.desktop.domain.wiring.LocalWalletOperationLaunchers
 import org.archivekeep.app.desktop.ui.components.DraggableAreaIfWindowPresent
 import org.archivekeep.app.desktop.ui.components.buttons.drawerIconButton
+import org.archivekeep.app.desktop.ui.components.richcomponents.MainMenuDropdownIconLaunched
 import org.archivekeep.app.desktop.ui.designsystem.appbar.AppBarCredentialsUnlockButton
 import org.archivekeep.app.desktop.ui.designsystem.appbar.AppBarIconButton
 import org.archivekeep.app.desktop.ui.designsystem.styles.CColors
@@ -68,6 +69,8 @@ fun AppBar(
                                 onClick = LocalWalletOperationLaunchers.current.let { { it.openUnlockWallet(null) } },
                             )
                         }
+
+                        MainMenuDropdownIconLaunched()
 
                         onCloseRequest?.let {
                             AppBarIconButton(
