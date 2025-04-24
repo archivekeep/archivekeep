@@ -1,9 +1,7 @@
 package org.archivekeep.app.desktop.ui.testing.screenshots
 
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawWithContent
@@ -23,7 +21,7 @@ import androidx.compose.ui.test.runSkikoComposeUiTest
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.runBlocking
-import org.archivekeep.app.desktop.ui.designsystem.styles.DesktopAppTheme
+import org.archivekeep.app.desktop.ui.designsystem.theme.AppTheme
 import org.archivekeep.app.desktop.ui.testing.save
 import kotlin.io.path.Path
 import kotlin.io.path.createParentDirectories
@@ -37,7 +35,7 @@ fun ScreenshotContainer(
 ) {
     val graphicsLayer = rememberGraphicsLayer()
 
-    DesktopAppTheme {
+    AppTheme {
         Box {
             Box(
                 modifier =

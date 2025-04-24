@@ -1,4 +1,4 @@
-package org.archivekeep.app.desktop.ui.designsystem.styles
+package org.archivekeep.app.desktop.ui.designsystem.theme
 
 import androidx.compose.ui.graphics.Color
 

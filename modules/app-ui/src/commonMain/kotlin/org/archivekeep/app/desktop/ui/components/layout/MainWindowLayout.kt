@@ -13,7 +13,7 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.safeDrawing
+import androidx.compose.foundation.layout.safeContent
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
@@ -106,7 +106,7 @@ fun MainWindowLayout(
                         .weight(1f)
                         .fillMaxHeight()
                         .consumeWindowInsets(
-                            WindowInsets.safeDrawing.only(
+                            WindowInsets.safeContent.only(
                                 when (applicationNavigationLayout) {
                                     ApplicationNavigationLayout.RAIL_BAR -> WindowInsetsSides.Left
                                     ApplicationNavigationLayout.TOP_AND_BOTTOM -> WindowInsetsSides.Vertical

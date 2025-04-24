@@ -7,17 +7,20 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import org.archivekeep.app.desktop.ui.designsystem.theme.AppTheme
 
 @Composable
 fun ViewLoading() {
+    val viewPadding = AppTheme.dimens.viewPadding
+
     Box(
         Modifier
             .padding(
                 PaddingValues(
-                    start = ViewPadding,
-                    end = ViewPadding,
-                    top = ViewPadding,
-                    bottom = ViewPadding,
+                    start = viewPadding,
+                    end = viewPadding,
+                    top = viewPadding,
+                    bottom = viewPadding,
                 ),
             ),
         contentAlignment = Alignment.Center,

@@ -4,40 +4,41 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.WindowInsets
-import androidx.compose.foundation.layout.WindowInsetsSides
 import androidx.compose.foundation.layout.consumeWindowInsets
-import androidx.compose.foundation.layout.only
+import androidx.compose.foundation.layout.mandatorySystemGestures
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawing
-import androidx.compose.foundation.layout.safeGestures
+import androidx.compose.foundation.layout.union
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import org.archivekeep.app.desktop.ui.designsystem.layout.scrollable.ScrollableColumn
+import org.archivekeep.app.desktop.ui.designsystem.theme.AppTheme
 
 @Composable
 fun ViewScrollableContainer(content: @Composable ColumnScope.() -> Unit) {
+    val dimens = AppTheme.dimens
+
     ScrollableColumn(
         columnModifier =
             Modifier
                 .consumeWindowInsets(
                     PaddingValues(
-                        top = ViewPadding / 2,
-                        start = ViewPadding,
-                        end = ViewPadding + ViewExtraPaddingForScrollbar,
-                        bottom = ViewPadding,
+                        top = dimens.viewPadding / 2,
+                        start = dimens.viewPadding,
+                        end = dimens.viewPadding + dimens.viewExtraPaddingForScrollbar,
+                        bottom = dimens.viewPadding,
                     ),
-                ).windowInsetsPadding(WindowInsets.safeDrawing.only(WindowInsetsSides.Top))
-                .windowInsetsPadding(WindowInsets.safeGestures.only(WindowInsetsSides.Horizontal + WindowInsetsSides.Bottom))
+                ).windowInsetsPadding(WindowInsets.mandatorySystemGestures.union(WindowInsets.safeDrawing))
                 .padding(
                     PaddingValues(
-                        start = ViewPadding,
-                        end = ViewPadding + ViewExtraPaddingForScrollbar,
-                        top = ViewPadding,
-                        bottom = ViewPadding,
+                        start = dimens.viewPadding,
+                        end = dimens.viewPadding + dimens.viewExtraPaddingForScrollbar,
+                        top = dimens.viewPadding,
+                        bottom = dimens.viewPadding,
                     ),
                 ),
-        verticalArrangement = Arrangement.spacedBy(ViewItemSpacing),
+        verticalArrangement = Arrangement.spacedBy(dimens.viewItemSpacing),
         scrollbarPadding = ScrollbarPadding,
         content = content,
     )

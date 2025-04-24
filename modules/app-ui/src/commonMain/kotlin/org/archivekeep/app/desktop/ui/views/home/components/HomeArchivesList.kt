@@ -20,6 +20,7 @@ import org.archivekeep.app.desktop.ui.designsystem.sections.SectionCardBottomLis
 import org.archivekeep.app.desktop.ui.designsystem.sections.SectionCardTitle
 import org.archivekeep.app.desktop.ui.designsystem.sections.SectionCardTitleIconButton
 import org.archivekeep.app.desktop.ui.designsystem.styles.CIcons
+import org.archivekeep.app.desktop.ui.designsystem.theme.AppTheme
 import org.archivekeep.app.desktop.ui.views.home.HomeArchiveEntryViewModel
 import org.archivekeep.app.desktop.ui.views.home.actions
 import org.archivekeep.utils.loading.Loadable
@@ -32,8 +33,8 @@ fun HomeArchivesList(allLocalArchivesLoadable: Loadable<List<HomeArchiveEntryVie
     LoadableGuard(allLocalArchivesLoadable) { allLocalArchives ->
         VerticalGrid(
             columns = SimpleGridCells.Adaptive(minSize = 240.dp),
-            horizontalArrangement = Arrangement.spacedBy(14.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp),
+            horizontalArrangement = Arrangement.spacedBy(AppTheme.dimens.gridSpacingHorizontal),
+            verticalArrangement = Arrangement.spacedBy(AppTheme.dimens.gridSpacingVertical),
         ) {
             if (allLocalArchives.isEmpty()) {
                 Text("nothing here ...")

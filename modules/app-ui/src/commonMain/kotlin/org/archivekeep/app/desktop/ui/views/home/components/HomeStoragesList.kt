@@ -27,6 +27,7 @@ import org.archivekeep.app.desktop.ui.designsystem.sections.SectionCardButton
 import org.archivekeep.app.desktop.ui.designsystem.sections.SectionCardTitle
 import org.archivekeep.app.desktop.ui.designsystem.sections.sectionCardHorizontalPadding
 import org.archivekeep.app.desktop.ui.designsystem.styles.CIcons
+import org.archivekeep.app.desktop.ui.designsystem.theme.AppTheme
 import org.archivekeep.app.desktop.ui.views.home.HomeViewStorage
 import org.archivekeep.utils.loading.Loadable
 
@@ -36,8 +37,8 @@ fun HomeStoragesList(allStoragesFlow: Loadable<List<HomeViewStorage>>) {
     LoadableGuard(allStoragesFlow) { allStorages ->
         VerticalGrid(
             columns = SimpleGridCells.Adaptive(minSize = 240.dp),
-            horizontalArrangement = Arrangement.spacedBy(14.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp),
+            horizontalArrangement = Arrangement.spacedBy(AppTheme.dimens.gridSpacingHorizontal),
+            verticalArrangement = Arrangement.spacedBy(AppTheme.dimens.gridSpacingVertical),
         ) {
             if (allStorages.isEmpty()) {
                 Text("Nothing here ...")

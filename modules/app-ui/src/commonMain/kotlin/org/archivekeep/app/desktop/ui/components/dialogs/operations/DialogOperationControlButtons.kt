@@ -20,7 +20,7 @@ import org.archivekeep.app.desktop.ui.designsystem.dialog.DialogContentButtonsSp
 import org.archivekeep.app.desktop.ui.designsystem.dialog.DialogDismissButton
 import org.archivekeep.app.desktop.ui.designsystem.dialog.DialogPrimaryButton
 import org.archivekeep.app.desktop.ui.designsystem.dialog.DialogSecondaryButton
-import org.archivekeep.app.desktop.ui.designsystem.styles.DesktopAppTheme
+import org.archivekeep.app.desktop.ui.designsystem.theme.AppTheme
 import org.jetbrains.compose.ui.tooling.preview.Preview
 
 @Composable
@@ -90,7 +90,7 @@ fun (RowScope).DialogOperationControlButtons(
 @Preview
 @Composable
 private fun preview() {
-    DesktopAppTheme {
+    AppTheme {
         Box(
             modifier =
                 Modifier

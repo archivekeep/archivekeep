@@ -4,6 +4,7 @@ import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Surface
 import androidx.compose.material3.windowsizeclass.WindowSizeClass
+import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.remember
@@ -21,7 +22,7 @@ import org.archivekeep.app.desktop.domain.wiring.storageOperationsLaunchersAsDia
 import org.archivekeep.app.desktop.ui.components.layout.ApplicationNavigationLayout
 import org.archivekeep.app.desktop.ui.components.layout.MainWindowLayout
 import org.archivekeep.app.desktop.ui.components.layout.calculateNavigationLocation
-import org.archivekeep.app.desktop.ui.designsystem.styles.DesktopAppTheme
+import org.archivekeep.app.desktop.ui.designsystem.theme.AppTheme
 
 @Composable
 fun MainWindowContent(
@@ -37,7 +38,9 @@ fun MainWindowContent(
 
     val applicationNavigationLayout = windowSizeClass.calculateNavigationLocation()
 
-    DesktopAppTheme {
+    AppTheme(
+        small = windowSizeClass.widthSizeClass < WindowWidthSizeClass.Expanded,
+    ) {
         CompositionLocalProvider(
             LocalArchiveOperationLaunchers provides archiveOperationLaunchers,
             LocalStorageOperationsLaunchers provides storageOperationsLaunchers,

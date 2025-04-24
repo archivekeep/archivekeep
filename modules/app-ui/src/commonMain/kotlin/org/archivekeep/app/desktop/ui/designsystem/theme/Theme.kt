@@ -1,15 +1,9 @@
-package org.archivekeep.app.desktop.ui.designsystem.styles
+package org.archivekeep.app.desktop.ui.designsystem.theme
 
-import androidx.compose.foundation.isSystemInDarkTheme
-import androidx.compose.material3.LocalMinimumInteractiveComponentSize
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.lightColorScheme
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.CompositionLocalProvider
-import androidx.compose.ui.unit.dp
 
-private val lightScheme =
+internal val lightScheme =
     lightColorScheme(
         primary = primaryLight,
         onPrimary = onPrimaryLight,
@@ -48,7 +42,7 @@ private val lightScheme =
         surfaceContainerHighest = surfaceContainerHighestLight,
     )
 
-private val darkScheme =
+internal val darkScheme =
     darkColorScheme(
         primary = primaryDark,
         onPrimary = onPrimaryDark,
@@ -86,18 +80,3 @@ private val darkScheme =
         surfaceContainerHigh = surfaceContainerHighDark,
         surfaceContainerHighest = surfaceContainerHighestDark,
     )
-
-@Composable
-fun DesktopAppTheme(
-    darkTheme: Boolean = isSystemInDarkTheme(),
-    content: @Composable () -> Unit,
-) {
-    CompositionLocalProvider(
-        LocalMinimumInteractiveComponentSize provides 20.dp,
-    ) {
-        MaterialTheme(
-            colorScheme = if (darkTheme) darkScheme else lightScheme,
-            content = content,
-        )
-    }
-}

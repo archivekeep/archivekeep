@@ -13,11 +13,11 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
-import org.archivekeep.app.desktop.ui.designsystem.styles.DesktopAppTheme
+import org.archivekeep.app.desktop.ui.designsystem.theme.AppTheme
 
 @Composable
 fun DialogPreviewColumn(content: @Composable ColumnScope.() -> Unit) {
-    DesktopAppTheme {
+    AppTheme {
         Box(
             modifier =
                 Modifier

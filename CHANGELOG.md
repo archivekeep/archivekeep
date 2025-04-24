@@ -22,6 +22,7 @@
 - UI: split storages based on type (local/external/online) in storages view
 - UI: less framed look of the application (make content flow behind window insets)
 - UI: remove welcome text from home page once setup for more efficient space use
+- UI: more compact dimensions for small window/screen sizes
 - refactor: extract UI to app-ui module
 - build: limit collection of Gradle dependencies for Flatpak to sourceSets needed for its build
 - build: merge generated Flatpak sources to one file

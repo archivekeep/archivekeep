@@ -30,6 +30,7 @@ import org.archivekeep.app.desktop.ui.designsystem.sections.SectionCard
 import org.archivekeep.app.desktop.ui.designsystem.sections.SectionCardBottomList
 import org.archivekeep.app.desktop.ui.designsystem.sections.SectionCardTitle
 import org.archivekeep.app.desktop.ui.designsystem.sections.sectionCardHorizontalPadding
+import org.archivekeep.app.desktop.ui.designsystem.theme.AppTheme
 import org.archivekeep.app.desktop.ui.views.home.HomeArchiveNonLocalArchive
 import org.archivekeep.utils.loading.Loadable
 
@@ -38,8 +39,8 @@ fun HomeNonLocalArchivesList(otherArchivesLoadable: Loadable<List<HomeArchiveNon
     LoadableGuard(otherArchivesLoadable) { nonLocalArchives ->
         VerticalGrid(
             columns = SimpleGridCells.Adaptive(minSize = 240.dp),
-            horizontalArrangement = Arrangement.spacedBy(14.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp),
+            horizontalArrangement = Arrangement.spacedBy(AppTheme.dimens.gridSpacingHorizontal),
+            verticalArrangement = Arrangement.spacedBy(AppTheme.dimens.gridSpacingVertical),
         ) {
             if (nonLocalArchives.isEmpty()) {
                 Text("Empty")
