@@ -25,13 +25,14 @@ import org.archivekeep.app.core.utils.generics.OptionalLoadable
 fun SectionCardBottomListItem(
     title: String,
     statusText: OptionalLoadable<String>,
+    modifier: Modifier = Modifier,
     icon: @Composable BoxScope.() -> Unit,
     actions: @Composable RowScope.() -> Unit,
 ) {
     Row(
         verticalAlignment = Alignment.CenterVertically,
         modifier =
-            Modifier
+            modifier
                 .fillMaxWidth()
                 .padding(
                     vertical = 4.dp,

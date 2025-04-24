@@ -52,6 +52,9 @@ class SecondaryArchiveRepository(
 
         val texts: OptionalLoadable<String> =
             combineTexts(
+                OptionalLoadable.LoadedAvailable(
+                    if (!connectionStatus.isConnected) listOf("Disconnected") else emptyList(),
+                ),
                 addTexts,
                 syncTexts,
             ).mapLoadedData { it.joinToString(", ") }

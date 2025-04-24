@@ -5,6 +5,7 @@
 ### Added
 
 - UI: add connection status tag for storages in Storages view
+- UI: indicate disconnected status of repositories (reduce alpha, add text)
 - UI: responsive app navigation layout supporting mobile screens:
   - top bar & drawer for small screens, 
   - top & bottom bar on narrow but tall screens,
