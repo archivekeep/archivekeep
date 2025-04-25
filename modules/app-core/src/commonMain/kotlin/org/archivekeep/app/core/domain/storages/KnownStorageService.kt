@@ -51,13 +51,10 @@ class KnownStorageService(
 
     fun storage(storageURI: StorageURI) = knownStorages.mapLoadedData { it.first { storage -> storage.storageURI == storageURI } }
 
-    override suspend fun getStorageForPath(path: String): RegisteredStorage? {
-        val fileStorage = fileStores.getFileSystemForPath(path) ?: return null
-
-        return knownStorages
+    override suspend fun getStorageByURI(storageURI: StorageURI): RegisteredStorage? =
+        knownStorages
             .firstLoadedOrFailure()
             .firstOrNull {
-                it.storageURI == fileStorage.storageURI
+                it.storageURI == storageURI
             }?.registeredStorage
-    }
 }

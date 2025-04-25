@@ -9,16 +9,12 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.channels.trySendBlocking
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.SharedFlow
-import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.consumeAsFlow
-import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.onStart
 import org.archivekeep.utils.io.debounceAndRepeatAfterDelay
+import org.archivekeep.utils.loading.AutoRefreshLoadableFlow
 import org.archivekeep.utils.loading.Loadable
 import org.archivekeep.utils.loading.mapLoadedData
-import org.archivekeep.utils.loading.mapToLoadable
-import org.archivekeep.utils.loading.stateIn
 import java.util.Date
 import java.util.concurrent.Executor
 
@@ -33,12 +29,15 @@ class AndroidFileStores(
 
     private val changes = Channel<Date>(capacity = 1)
 
-    override val mountPoints: SharedFlow<Loadable<List<MountedFileSystem.MountPoint>>> =
-        changes
-            .consumeAsFlow()
-            .onStart { emit(Date()) }
-            .debounceAndRepeatAfterDelay()
-            .mapToLoadable {
+    private val autoRefreshMountPoints =
+        AutoRefreshLoadableFlow(
+            scope,
+            updateTriggerFlow =
+                changes
+                    .consumeAsFlow()
+                    .onStart { emit(Date()) }
+                    .debounceAndRepeatAfterDelay(),
+            loadFn = {
                 val storageManager = context.getSystemService(Context.STORAGE_SERVICE) as StorageManager
 
                 val internal =
@@ -61,8 +60,13 @@ class AndroidFileStores(
                     }
 
                 listOf(internal) + external
-            }.flowOn(ioDispatcher)
-            .stateIn(scope, SharingStarted.Eagerly)
+            },
+            dispatcher = ioDispatcher,
+        )
+
+    override suspend fun loadFreshMountPoints() = autoRefreshMountPoints.getFreshAndUpdateState()
+
+    override val mountPoints = autoRefreshMountPoints.stateFlow
 
     override val mountedFileSystems: Flow<Loadable<List<MountedFileSystem>>> =
         mountPoints.mapLoadedData { mountPoints ->

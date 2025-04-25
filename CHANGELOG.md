@@ -31,6 +31,7 @@
 ### Fixed
 
 - repository shouldn't be added if init fails
+- repository addition not always detects correct filesystem (on new mounts) and mixes up different filesystems
 
 ## 0.3.3 - 2025-03-31
 

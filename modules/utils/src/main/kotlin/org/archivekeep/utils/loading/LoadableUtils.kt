@@ -1,5 +1,7 @@
 package org.archivekeep.utils.loading
 
+import kotlinx.coroutines.flow.MutableStateFlow
+
 val <T> Loadable<T>.isLoading
     get() = this is Loadable.Loading
 
@@ -12,3 +14,12 @@ fun <T, R> Loadable<T>.mapIfLoadedOrDefault(
     } else {
         default
     }
+
+inline fun <T> MutableStateFlow<Loadable<T>>.produceAndGet(producer: () -> T): T {
+    try {
+        return producer().also { value = Loadable.Loaded(it) }
+    } catch (e: Throwable) {
+        value = Loadable.Failed(e)
+        throw e
+    }
+}

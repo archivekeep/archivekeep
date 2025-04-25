@@ -3,8 +3,8 @@ package org.archivekeep.utils.loading
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flatMapLatest
@@ -117,7 +117,7 @@ fun <T> Flow<Loadable<T>>.waitLoadedValue(): Flow<T> = this.transform { if (it i
 fun <T> Flow<Loadable<T>>.stateIn(
     scope: CoroutineScope,
     started: SharingStarted = SharingStarted.WhileSubscribed(100),
-): SharedFlow<Loadable<T>> =
+): StateFlow<Loadable<T>> =
     this
         .stateIn(
             scope,

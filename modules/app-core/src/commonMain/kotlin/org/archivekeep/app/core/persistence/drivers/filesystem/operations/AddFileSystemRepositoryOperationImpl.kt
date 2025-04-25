@@ -9,6 +9,7 @@ import org.archivekeep.app.core.domain.storages.StorageRegistry
 import org.archivekeep.app.core.persistence.drivers.filesystem.FileStores
 import org.archivekeep.app.core.persistence.drivers.filesystem.FileSystemRepositoryURIData
 import org.archivekeep.app.core.persistence.drivers.filesystem.FileSystemStorageType
+import org.archivekeep.app.core.persistence.drivers.filesystem.getFileSystemForPath
 import org.archivekeep.app.core.persistence.drivers.filesystem.operations.AddFileSystemRepositoryOperation.AddStatus
 import org.archivekeep.app.core.persistence.drivers.filesystem.operations.AddFileSystemRepositoryOperation.InitStatus
 import org.archivekeep.app.core.persistence.drivers.filesystem.operations.AddFileSystemRepositoryOperation.PreparationStatus
@@ -148,7 +149,8 @@ class AddFileSystemRepositoryOperationImpl(
     }
 
     private suspend fun getStorageMarking(path: String): StorageMarking {
-        val storage = storageRegistry.getStorageForPath(path)
+        val fs = fileStores.loadFreshMountPoints().getFileSystemForPath(path)
+        val storage = fs?.let { storageRegistry.getStorageByURI(it.storageURI) }
 
         return when (intendedStorageType) {
             FileSystemStorageType.LOCAL -> {
@@ -207,7 +209,7 @@ class AddFileSystemRepositoryOperationImpl(
             scope.launch {
                 try {
                     val largest =
-                        fileStores.getFileSystemForPath(path)
+                        fileStores.loadFreshMountPoints().getFileSystemForPath(path)
                             ?: throw RuntimeException("Mount point for `$path` not found")
 
                     println("PATH: $path")

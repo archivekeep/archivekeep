@@ -12,13 +12,13 @@ import kotlinx.coroutines.flow.emitAll
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.transformLatest
 import org.archivekeep.utils.io.debounceAndRepeatAfterDelay
 import org.archivekeep.utils.io.listFilesFlow
+import org.archivekeep.utils.loading.AutoRefreshLoadableFlow
 import org.archivekeep.utils.loading.mapLoadedData
-import org.archivekeep.utils.loading.mapToLoadable
-import org.archivekeep.utils.loading.stateIn
 import oshi.SystemInfo
 import oshi.software.os.OSFileStore
 import oshi.software.os.linux.LinuxFileSystem
@@ -74,9 +74,11 @@ class DesktopFileStores(
             }.flowOn(ioDispatcher)
             .conflate()
 
-    override val mountPoints =
-        run {
-            fun collectMounts(): List<MountedFileSystem.MountPoint> {
+    val autoRefreshMountPoints =
+        AutoRefreshLoadableFlow(
+            scope,
+            ioDispatcher,
+            loadFn = {
                 val systemInfo = SystemInfo()
 
                 GlobalConfig.set(LinuxFileSystem.OSHI_LINUX_FS_PATH_INCLUDES, "/run/media/**")
@@ -125,21 +127,20 @@ class DesktopFileStores(
                             println("...")
                         }
 
-                return mountPoints
-            }
+                return@AutoRefreshLoadableFlow mountPoints
+            },
+            updateTriggerFlow =
+                changeEventsFlow
+                    .map { "change event: $it" }
+                    .onStart { emit("start") }
+                    .debounceAndRepeatAfterDelay(
+                        mapDelayed = { "double-check retry after delay: $it" },
+                    ).onEach { println("Collection of mounts triggered by: $it") },
+        )
 
-            changeEventsFlow
-                .map { "change event: $it" }
-                .onStart { emit("start") }
-                .debounceAndRepeatAfterDelay(
-                    mapDelayed = { "double-check retry after delay: $it" },
-                ).mapToLoadable("Collect mounts") {
-                    println("Collection of mounts triggered by: $it")
+    override suspend fun loadFreshMountPoints() = autoRefreshMountPoints.getFreshAndUpdateState()
 
-                    collectMounts()
-                }.flowOn(Dispatchers.IO)
-                .stateIn(scope)
-        }
+    override val mountPoints = autoRefreshMountPoints.stateFlow
 
     override val mountedFileSystems =
         mountPoints.mapLoadedData { mountPoints ->

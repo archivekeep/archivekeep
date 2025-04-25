@@ -4,6 +4,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
@@ -66,14 +67,14 @@ class DemoEnvironment(
 
     override val fileStores: FileStores =
         object : FileStores {
-            override val mountPoints: SharedFlow<Loadable<List<MountedFileSystem.MountPoint>>> =
+            override val mountPoints: StateFlow<Loadable<List<MountedFileSystem.MountPoint>>> =
                 flowOf(emptyList<MountedFileSystem.MountPoint>())
                     .mapToLoadable()
                     .stateIn(scope)
 
             override val mountedFileSystems: Flow<Loadable<List<MountedFileSystem>>> = flowOf(Loadable.Loaded(emptyList()))
 
-            override suspend fun getFileSystemForPath(path: String): MountedFileSystem.MountPoint? = null
+            override suspend fun loadFreshMountPoints(): List<MountedFileSystem.MountPoint> = emptyList()
         }
 
     private val demoTempDirectory = kotlin.io.path.createTempDirectory("archivekeep-demo-env")
