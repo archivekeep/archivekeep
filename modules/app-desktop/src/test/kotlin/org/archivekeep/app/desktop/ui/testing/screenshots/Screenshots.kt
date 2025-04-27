@@ -21,8 +21,8 @@ import androidx.compose.ui.test.runSkikoComposeUiTest
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.runBlocking
-import org.archivekeep.app.desktop.ui.designsystem.theme.AppTheme
 import org.archivekeep.app.desktop.ui.testing.save
+import org.archivekeep.app.ui.components.designsystem.theme.AppTheme
 import kotlin.io.path.Path
 import kotlin.io.path.createParentDirectories
 

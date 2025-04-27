@@ -7,10 +7,11 @@ import org.archivekeep.app.core.persistence.platform.demo.DocumentsInBackBlaze
 import org.archivekeep.app.core.persistence.platform.demo.DocumentsInHDDA
 import org.archivekeep.app.core.persistence.platform.demo.DocumentsInLaptopSSD
 import org.archivekeep.app.core.persistence.platform.demo.DocumentsInSSDKeyChain
-import org.archivekeep.app.desktop.ui.dialogs.repository.operations.addpush.AddAndPushRepoDialogViewModel.VMState
 import org.archivekeep.app.desktop.ui.dialogs.testing.setContentInDialogScreenshotContainer
 import org.archivekeep.app.desktop.ui.testing.screenshots.runHighDensityComposeUiTest
 import org.archivekeep.app.desktop.ui.testing.screenshots.saveTestingContainerBitmap
+import org.archivekeep.app.ui.dialogs.repository.operations.addpush.AddAndPushRepoDialog
+import org.archivekeep.app.ui.dialogs.repository.operations.addpush.AddAndPushRepoDialogViewModel.VMState
 import org.archivekeep.files.operations.indexupdate.AddOperation
 import org.archivekeep.utils.loading.Loadable
 import org.junit.Test

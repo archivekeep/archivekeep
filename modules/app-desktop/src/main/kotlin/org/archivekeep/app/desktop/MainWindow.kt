@@ -11,11 +11,11 @@ import androidx.compose.ui.window.Window
 import androidx.compose.ui.window.WindowPlacement
 import androidx.compose.ui.window.WindowState
 import androidx.compose.ui.window.rememberWindowState
-import org.archivekeep.app.desktop.domain.wiring.LocalComposeWindow
-import org.archivekeep.app.desktop.domain.wiring.LocalOptionalComposeWindow
-import org.archivekeep.app.desktop.ui.MainWindowContent
-import org.archivekeep.ui.common.resources.Res
-import org.archivekeep.ui.common.resources.ic_app
+import org.archivekeep.app.ui.MainWindowContent
+import org.archivekeep.app.ui.domain.wiring.LocalComposeWindow
+import org.archivekeep.app.ui.domain.wiring.LocalOptionalComposeWindow
+import org.archivekeep.ui.resources.Res
+import org.archivekeep.ui.resources.ic_app
 import org.jetbrains.compose.resources.painterResource
 
 val DefaultMainWindowWidth = 1050.dp

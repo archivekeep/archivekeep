@@ -57,13 +57,13 @@ kotlin {
 
 compose.resources {
     publicResClass = true
-    packageOfResClass = "org.archivekeep.ui.common.resources"
+    packageOfResClass = "org.archivekeep.ui.resources"
     generateResClass = always
 }
 
 android {
     compileSdk = 35
-    namespace = "org.archivekeep.app.ui.common"
+    namespace = "org.archivekeep.app.ui"
 
     sourceSets["main"].res.srcDirs("src/androidMain/res")
     sourceSets["main"].res.srcDirs("src/commonMain/composeResources")

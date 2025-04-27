@@ -1,6 +1,7 @@
 package org.archivekeep.app.desktop.ui.dialogs.repository.operations.sync
 
 import org.archivekeep.app.desktop.ui.dialogs.testing.makeDialogScreenshot
+import org.archivekeep.app.ui.dialogs.repository.operations.sync.DownloadFromRepoDialogPreview1Contents
 import org.junit.Test
 
 class DownloadFromRepoDialogScreenshotTest {

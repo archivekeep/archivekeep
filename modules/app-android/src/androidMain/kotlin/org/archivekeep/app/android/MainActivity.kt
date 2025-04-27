@@ -9,8 +9,8 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.material3.windowsizeclass.ExperimentalMaterial3WindowSizeClassApi
 import androidx.compose.material3.windowsizeclass.calculateWindowSizeClass
 import org.archivekeep.app.android.components.StatusBarProtection
-import org.archivekeep.app.desktop.domain.wiring.ApplicationProviders
-import org.archivekeep.app.desktop.ui.MainWindowContent
+import org.archivekeep.app.ui.MainWindowContent
+import org.archivekeep.app.ui.domain.wiring.ApplicationProviders
 
 class MainActivity : AppCompatActivity() {
     @OptIn(ExperimentalMaterial3WindowSizeClassApi::class)

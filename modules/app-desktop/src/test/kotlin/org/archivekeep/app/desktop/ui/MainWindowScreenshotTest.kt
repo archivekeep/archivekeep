@@ -9,10 +9,11 @@ import androidx.compose.ui.unit.DpSize
 import org.archivekeep.app.core.persistence.platform.demo.DemoEnvironment
 import org.archivekeep.app.desktop.DefaultMainWindowHeight
 import org.archivekeep.app.desktop.DefaultMainWindowWidth
-import org.archivekeep.app.desktop.domain.wiring.ApplicationProviders
 import org.archivekeep.app.desktop.ui.testing.screenshots.runHighDensityComposeUiTest
 import org.archivekeep.app.desktop.ui.testing.screenshots.saveTestingContainerBitmap
 import org.archivekeep.app.desktop.ui.testing.screenshots.setContentScreenshotContainer
+import org.archivekeep.app.ui.MainWindowContent
+import org.archivekeep.app.ui.domain.wiring.ApplicationProviders
 import org.junit.Test
 
 class MainWindowScreenshotTest {
