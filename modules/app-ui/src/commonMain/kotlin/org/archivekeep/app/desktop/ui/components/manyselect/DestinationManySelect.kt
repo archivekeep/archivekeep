@@ -1,4 +1,4 @@
-package org.archivekeep.app.desktop.ui.components
+package org.archivekeep.app.desktop.ui.components.manyselect
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.ColumnScope

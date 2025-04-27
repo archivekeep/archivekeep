@@ -5,6 +5,7 @@ import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.buildAnnotatedString
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -28,6 +29,7 @@ import org.archivekeep.app.desktop.domain.wiring.LocalRepoService
 import org.archivekeep.app.desktop.domain.wiring.LocalStorageService
 import org.archivekeep.app.desktop.ui.components.dialogs.operations.DialogOperationControlState
 import org.archivekeep.app.desktop.ui.components.dialogs.operations.toDialogOperationControlState
+import org.archivekeep.app.desktop.ui.designsystem.dialog.fullWidthDialogWidthModifier
 import org.archivekeep.app.desktop.ui.dialogs.AbstractDialog
 import org.archivekeep.app.desktop.ui.utils.appendBoldSpan
 import org.archivekeep.app.desktop.utils.stickToFirstNotNullAsState
@@ -124,6 +126,8 @@ class AddAndPushRepoDialogViewModel(
                 ),
             )
         }
+
+        override fun dialogWidthModifier(): Modifier = fullWidthDialogWidthModifier
     }
 
     override fun onClose() {

@@ -9,6 +9,7 @@ data class AppDimensions(
     val viewExtraPaddingForScrollbar: Dp,
     val gridSpacingHorizontal: Dp,
     val gridSpacingVertical: Dp,
+    val dialogContainerPadding: Dp,
 )
 
 internal expect fun viewExtraPaddingForScrollbar(): Dp
@@ -20,6 +21,7 @@ val smallDimensions =
         viewExtraPaddingForScrollbar = viewExtraPaddingForScrollbar(),
         gridSpacingHorizontal = 12.dp,
         gridSpacingVertical = 14.dp,
+        dialogContainerPadding = 16.dp,
     )
 
 val largeDimensions =
@@ -29,4 +31,5 @@ val largeDimensions =
         viewExtraPaddingForScrollbar = viewExtraPaddingForScrollbar(),
         gridSpacingHorizontal = 14.dp,
         gridSpacingVertical = 16.dp,
+        dialogContainerPadding = 24.dp,
     )

@@ -6,6 +6,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.buildAnnotatedString
 import kotlinx.coroutines.CoroutineScope
@@ -23,6 +24,7 @@ import org.archivekeep.app.desktop.domain.wiring.LocalRepoToRepoSyncService
 import org.archivekeep.app.desktop.domain.wiring.LocalStorageService
 import org.archivekeep.app.desktop.ui.components.dialogs.operations.DialogOperationControlButtons
 import org.archivekeep.app.desktop.ui.designsystem.dialog.DialogPreviewColumn
+import org.archivekeep.app.desktop.ui.designsystem.dialog.fullWidthDialogWidthModifier
 import org.archivekeep.app.desktop.ui.dialogs.AbstractDialog
 import org.archivekeep.app.desktop.ui.dialogs.repository.operations.sync.parts.RepoToRepoSyncMainContents
 import org.archivekeep.app.desktop.ui.utils.appendBoldSpan
@@ -51,6 +53,8 @@ data class DownloadFromRepoDialog(
                 appendBoldSpan(toRepository.storage.displayName)
                 append(" - copy from")
             }
+
+        override fun dialogWidthModifier(): Modifier = fullWidthDialogWidthModifier
     }
 
     inner class VM(

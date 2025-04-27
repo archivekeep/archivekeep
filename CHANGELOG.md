@@ -23,6 +23,7 @@
 - UI: less framed look of the application (make content flow behind window insets)
 - UI: remove welcome text from home page once setup for more efficient space use
 - UI: more compact dimensions for small window/screen sizes
+- UI: make dialogs utilize (more) screen space (dynamically based on items in many select) 
 - refactor: extract UI to app-ui module
 - build: limit collection of Gradle dependencies for Flatpak to sourceSets needed for its build
 - build: merge generated Flatpak sources to one file

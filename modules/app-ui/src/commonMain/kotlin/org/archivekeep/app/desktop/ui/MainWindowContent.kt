@@ -68,9 +68,9 @@ fun MainWindowContent(
                     applicationNavigationLayout = applicationNavigationLayout,
                     onCloseRequest = onCloseRequest,
                 )
-
-                dialogRenderer.render()
             }
+
+            dialogRenderer.render()
         }
     }
 }

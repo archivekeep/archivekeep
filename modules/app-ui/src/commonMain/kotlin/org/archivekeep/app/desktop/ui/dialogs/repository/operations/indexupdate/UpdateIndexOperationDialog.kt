@@ -6,11 +6,14 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.max
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.SharedFlow
@@ -30,14 +33,14 @@ import org.archivekeep.app.desktop.ui.components.dialogs.operations.DialogOperat
 import org.archivekeep.app.desktop.ui.components.dialogs.operations.DialogOperationControlState
 import org.archivekeep.app.desktop.ui.components.dialogs.operations.ExecutionErrorIfPresent
 import org.archivekeep.app.desktop.ui.components.dialogs.operations.toDialogOperationControlState
-import org.archivekeep.app.desktop.ui.components.fileManySelect
-import org.archivekeep.app.desktop.ui.components.itemManySelect
+import org.archivekeep.app.desktop.ui.components.layout.IntrinsicSizeWrapperLayout
+import org.archivekeep.app.desktop.ui.components.manyselect.rememberManySelectForRender
 import org.archivekeep.app.desktop.ui.components.operations.IndexUpdatePreparationProgress
 import org.archivekeep.app.desktop.ui.components.operations.LocalIndexUpdateProgress
 import org.archivekeep.app.desktop.ui.components.operations.ScrollableLogTextInDialog
-import org.archivekeep.app.desktop.ui.components.rememberManySelect
 import org.archivekeep.app.desktop.ui.designsystem.dialog.DialogPreviewColumn
 import org.archivekeep.app.desktop.ui.designsystem.dialog.LabelText
+import org.archivekeep.app.desktop.ui.designsystem.dialog.fullWidthDialogWidthModifier
 import org.archivekeep.app.desktop.ui.designsystem.layout.scrollable.ScrollableLazyColumn
 import org.archivekeep.app.desktop.ui.dialogs.repository.AbstractRepositoryDialog
 import org.archivekeep.app.desktop.ui.utils.appendBoldSpan
@@ -77,6 +80,7 @@ class UpdateIndexOperationDialog(
                         onHide = onClose,
                         onClose = onClose,
                     )
+
                 is AddOperationSupervisor.Preparation ->
                     DialogOperationControlState.NotRunning(
                         onLaunch = ::onTriggerExecute,
@@ -93,6 +97,8 @@ class UpdateIndexOperationDialog(
                 ),
             )
         }
+
+        override fun dialogWidthModifier(): Modifier = fullWidthDialogWidthModifier
     }
 
     inner class VM(
@@ -163,27 +169,44 @@ class UpdateIndexOperationDialog(
                     }
 
                     is AddOperation.PreparationResult -> {
-                        val movesSelectState = rememberManySelect(preparationState.moves, state.selectedMovesToExecute)
-                        val filesSelectState = rememberManySelect(preparationState.newFiles, state.selectedFilesToAdd)
+                        val movesManySelect =
+                            rememberManySelectForRender(
+                                preparationState.moves,
+                                state.selectedMovesToExecute,
+                                "Moves",
+                                allItemsLabel = { "All moves ($it)" },
+                                itemLabelText = { "${it.from} -> ${it.to}" },
+                            )
+                        val filesManySelect =
+                            rememberManySelectForRender(
+                                preparationState.newFiles,
+                                state.selectedFilesToAdd,
+                                "New files",
+                                allItemsLabel = { "All new files ($it)" },
+                                itemLabelText = { it },
+                            )
 
-                        ScrollableLazyColumn {
-                            if (preparationState.moves.isNotEmpty()) {
-                                itemManySelect(
-                                    "Moves",
-                                    allItemsLabel = { "All moves ($it)" },
-                                    itemLabelText = { "${it.from} -> ${it.to}" },
-                                    state = movesSelectState,
-                                )
-                                item { Spacer(Modifier.height(12.dp)) }
-                            }
+                        val guessedWidth = max(filesManySelect.guessedWidth, movesManySelect.guessedWidth)
 
-                            if (preparationState.newFiles.isNotEmpty()) {
-                                fileManySelect("New files", filesSelectState)
+                        IntrinsicSizeWrapperLayout(
+                            minIntrinsicWidth = guessedWidth,
+                            maxIntrinsicWidth = guessedWidth,
+                        ) {
+                            ScrollableLazyColumn {
+                                if (preparationState.moves.isNotEmpty()) {
+                                    movesManySelect.render(this)
+                                    item { Spacer(Modifier.height(12.dp)) }
+                                }
+
+                                if (preparationState.newFiles.isNotEmpty()) {
+                                    filesManySelect.render(this)
+                                }
                             }
                         }
                     }
                 }
             }
+
             is AddOperationSupervisor.JobState -> {
                 LocalIndexUpdateProgress(
                     operationState.movesToExecute,

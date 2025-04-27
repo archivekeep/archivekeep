@@ -3,8 +3,6 @@ package org.archivekeep.app.desktop.ui.dialogs.repository.operations.sync.parts
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.lazy.LazyListScope
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Modifier
@@ -14,10 +12,13 @@ import org.archivekeep.app.core.operations.sync.RepoToRepoSync.State
 import org.archivekeep.app.core.utils.operations.OperationExecutionState
 import org.archivekeep.app.desktop.ui.components.LoadableGuard
 import org.archivekeep.app.desktop.ui.components.dialogs.operations.ExecutionErrorIfPresent
-import org.archivekeep.app.desktop.ui.components.itemManySelect
+import org.archivekeep.app.desktop.ui.components.layout.IntrinsicSizeWrapperLayout
+import org.archivekeep.app.desktop.ui.components.manyselect.ManySelectForRender
+import org.archivekeep.app.desktop.ui.components.manyselect.rememberManySelectForRenderFromState
+import org.archivekeep.app.desktop.ui.components.manyselect.rememberManySelectForRenderFromStateAnnotated
+import org.archivekeep.app.desktop.ui.components.manyselect.rememberManySelectWithMergedState
 import org.archivekeep.app.desktop.ui.components.operations.ScrollableLogTextInDialog
 import org.archivekeep.app.desktop.ui.components.operations.SyncProgress
-import org.archivekeep.app.desktop.ui.components.rememberManySelectWithMergedState
 import org.archivekeep.app.desktop.ui.designsystem.dialog.LabelText
 import org.archivekeep.app.desktop.ui.designsystem.layout.scrollable.ScrollableLazyColumn
 import org.archivekeep.app.desktop.ui.dialogs.repository.operations.sync.RepoToRepoSyncUserFlow
@@ -32,51 +33,52 @@ fun (ColumnScope).RepoToRepoSyncMainContents(userFlowState: RepoToRepoSyncUserFl
     LoadableGuard(userFlowState.operation) { operation ->
         when (operation) {
             is State.Prepared -> {
-                val renderables =
+                val blocks =
                     operation.preparedSyncOperation.steps
-                        .map<SyncSubOperationGroup<*>, LazyListScope.() -> Unit> { step ->
+                        .map<SyncSubOperationGroup<*>, ManySelectForRender<*, *, *>> { step ->
                             when (step) {
                                 is AdditiveRelocationsSyncStep -> {
                                     val state = rememberManySelectWithMergedState(step.subOperations, userFlowState.selectedOperations)
 
-                                    return@map {
-                                        itemManySelect(
-                                            "Existing files to replicate:",
-                                            allItemsLabel = { "All $it replications" },
-                                            itemLabelText = { it.describe() },
-                                            state = state,
-                                        )
-                                    }
+                                    rememberManySelectForRenderFromState(
+                                        state,
+                                        "Existing files to replicate:",
+                                        allItemsLabel = { "All $it replications" },
+                                        itemLabelText = { it.describe() },
+                                    )
                                 }
                                 is NewFilesSyncStep -> {
                                     val state = rememberManySelectWithMergedState(step.subOperations, userFlowState.selectedOperations)
 
-                                    return@map {
-                                        itemManySelect(
-                                            "New files to copy:",
-                                            allItemsLabel = { "All $it new files" },
-                                            itemLabelText = { it.unmatchedBaseExtra.filenames.let { if (it.size == 1) it[0] else it.toString() } },
-                                            state = state,
-                                        )
-                                    }
+                                    rememberManySelectForRenderFromState(
+                                        state,
+                                        "New files to copy:",
+                                        allItemsLabel = { "All $it new files" },
+                                        itemLabelText = { it.unmatchedBaseExtra.filenames.let { if (it.size == 1) it[0] else it.toString() } },
+                                    )
                                 }
                                 is RelocationsMoveApplySyncStep -> {
                                     val state = rememberManySelectWithMergedState(step.subOperations, userFlowState.selectedOperations)
 
-                                    return@map {
-                                        itemManySelect(
-                                            "Relocations to execute:",
-                                            allItemsLabel = { "All relocations ($it)" },
-                                            itemLabel = { Text(it.describe()) },
-                                            state = state,
-                                        )
-                                    }
+                                    rememberManySelectForRenderFromStateAnnotated(
+                                        state = state,
+                                        label = "Relocations to execute:",
+                                        allItemsLabel = { "All relocations ($it)" },
+                                        itemAnnotatedLabel = { it.describe() },
+                                    )
                                 }
                             }
                         }
 
-                ScrollableLazyColumn(Modifier.weight(1f, fill = false)) {
-                    renderables.forEach { it() }
+                val guessedWidth = blocks.maxOf { it.guessedWidth }
+
+                IntrinsicSizeWrapperLayout(
+                    minIntrinsicWidth = guessedWidth,
+                    maxIntrinsicWidth = guessedWidth,
+                ) {
+                    ScrollableLazyColumn(Modifier.weight(1f, fill = false)) {
+                        blocks.forEach { it.render(this) }
+                    }
                 }
             }
             is JobState -> {

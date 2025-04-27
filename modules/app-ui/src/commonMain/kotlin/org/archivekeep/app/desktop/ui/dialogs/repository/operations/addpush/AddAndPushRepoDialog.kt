@@ -10,6 +10,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.max
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.onEach
@@ -25,15 +26,14 @@ import org.archivekeep.app.core.persistence.platform.demo.DocumentsInLaptopSSD
 import org.archivekeep.app.core.persistence.platform.demo.DocumentsInSSDKeyChain
 import org.archivekeep.app.core.utils.identifiers.RepositoryURI
 import org.archivekeep.app.core.utils.operations.OperationExecutionState
-import org.archivekeep.app.desktop.ui.components.DestinationManySelect
 import org.archivekeep.app.desktop.ui.components.LoadableGuard
 import org.archivekeep.app.desktop.ui.components.dialogs.operations.DialogOperationControlButtons
 import org.archivekeep.app.desktop.ui.components.dialogs.operations.ExecutionErrorIfPresent
-import org.archivekeep.app.desktop.ui.components.fileManySelect
-import org.archivekeep.app.desktop.ui.components.itemManySelect
+import org.archivekeep.app.desktop.ui.components.layout.IntrinsicSizeWrapperLayout
+import org.archivekeep.app.desktop.ui.components.manyselect.DestinationManySelect
+import org.archivekeep.app.desktop.ui.components.manyselect.rememberManySelectForRender
 import org.archivekeep.app.desktop.ui.components.operations.IndexUpdatePreparationProgress
 import org.archivekeep.app.desktop.ui.components.operations.LocalIndexUpdateProgress
-import org.archivekeep.app.desktop.ui.components.rememberManySelect
 import org.archivekeep.app.desktop.ui.designsystem.dialog.LabelText
 import org.archivekeep.app.desktop.ui.designsystem.dialog.previewWith
 import org.archivekeep.app.desktop.ui.designsystem.layout.scrollable.ScrollableColumn
@@ -110,36 +110,52 @@ class AddAndPushRepoDialog(
             }
 
             is ReadyAddPushProcess -> {
-                val movesSelectState = rememberManySelect(status.addPreprationResult.moves, state.selectedMoves)
-                val newFilesSelectState = rememberManySelect(status.addPreprationResult.newFiles, state.selectedFilenames)
+                val movesManySelect =
+                    rememberManySelectForRender(
+                        status.addPreprationResult.moves,
+                        state.selectedMoves,
+                        "Moves",
+                        allItemsLabel = { "All moves ($it)" },
+                        itemLabelText = { "${it.from} -> ${it.to}" },
+                    )
+                val filesManySelect =
+                    rememberManySelectForRender(
+                        status.addPreprationResult.newFiles,
+                        state.selectedFilenames,
+                        "Files to add and push",
+                        allItemsLabel = { "All new files ($it)" },
+                        itemLabelText = { it },
+                    )
 
-                ScrollableLazyColumn(Modifier.weight(1f, fill = false)) {
-                    item {
-                        LoadableGuard(
-                            state.otherRepositoryCandidates,
-                        ) {
-                            DestinationManySelect(
-                                it,
-                                state.selectedDestinationRepositories,
-                            )
-                        }
-                        Spacer(modifier = Modifier.height(6.dp))
-                    }
+                val guessedWidth = max(filesManySelect.guessedWidth, movesManySelect.guessedWidth)
 
-                    status.addPreprationResult.moves.ifNotEmpty {
-                        itemManySelect(
-                            "Moves",
-                            allItemsLabel = { "All moves ($it)" },
-                            itemLabelText = { "${it.from} -> ${it.to}" },
-                            state = movesSelectState,
-                        )
+                IntrinsicSizeWrapperLayout(
+                    minIntrinsicWidth = guessedWidth,
+                    maxIntrinsicWidth = guessedWidth,
+                ) {
+                    ScrollableLazyColumn {
                         item {
-                            Spacer(Modifier.height(12.dp))
+                            LoadableGuard(
+                                state.otherRepositoryCandidates,
+                            ) {
+                                DestinationManySelect(
+                                    it,
+                                    state.selectedDestinationRepositories,
+                                )
+                            }
+                            Spacer(modifier = Modifier.height(6.dp))
                         }
-                    }
 
-                    status.addPreprationResult.newFiles.ifNotEmpty {
-                        fileManySelect("Files to add and push:", newFilesSelectState)
+                        status.addPreprationResult.moves.ifNotEmpty {
+                            movesManySelect.render(this)
+                            item {
+                                Spacer(Modifier.height(12.dp))
+                            }
+                        }
+
+                        status.addPreprationResult.newFiles.ifNotEmpty {
+                            filesManySelect.render(this)
+                        }
                     }
                 }
             }

@@ -5,8 +5,10 @@ import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.window.Dialog
+import androidx.compose.ui.window.DialogProperties
+import org.archivekeep.app.desktop.ui.designsystem.theme.AppTheme
 
 @Composable
 fun DialogOverlay(
@@ -15,7 +17,18 @@ fun DialogOverlay(
 ) {
     Dialog(
         onDismissRequest = onDismissRequest,
+        properties = dialogProperties(),
     ) {
-        Box(modifier = Modifier.padding(24.dp), content = content)
+        Box(
+            modifier =
+                Modifier
+                    .padding(AppTheme.dimens.dialogContainerPadding)
+                    .padding(bottom = dialogBottomPaddingHack()),
+            content = content,
+        )
     }
 }
+
+expect fun dialogProperties(): DialogProperties
+
+expect fun dialogBottomPaddingHack(): Dp

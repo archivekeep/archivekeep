@@ -1,4 +1,4 @@
-package org.archivekeep.app.desktop.ui.components
+package org.archivekeep.app.desktop.ui.components.manyselect
 
 import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxWidth
