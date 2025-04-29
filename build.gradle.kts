@@ -21,6 +21,8 @@ plugins {
     idea
 }
 
+val isFDroidBuild = providers.gradleProperty("isFDroidBuild").orNull.toBoolean()
+
 subprojects {
     group = "org.archivekeep"
 
@@ -30,11 +32,12 @@ subprojects {
 
     repositories {
         mavenCentral()
-        maven("https://maven.pkg.jetbrains.space/public/p/compose/dev")
         google()
 
-        // for Flatpak offline no-network-access build
-        maven(uri(rootDir.resolve("offline-repository")))
+        if (!isFDroidBuild) {
+            // for Flatpak offline no-network-access build
+            maven(uri(rootDir.resolve("offline-repository")))
+        }
     }
 }
 
@@ -86,15 +89,17 @@ subprojects {
                     }
                 }
 
-                repositories {
-                    maven {
-                        name = "LocalOutput"
-                        url = uri(rootProject.layout.buildDirectory.dir("maven-publish-output"))
-                    }
-                    maven {
-                        name = "CentralSnapshots"
-                        url = uri("https://central.sonatype.com/repository/maven-snapshots/")
-                        credentials(PasswordCredentials::class)
+                if (!isFDroidBuild) {
+                    repositories {
+                        maven {
+                            name = "LocalOutput"
+                            url = uri(rootProject.layout.buildDirectory.dir("maven-publish-output"))
+                        }
+                        maven {
+                            name = "CentralSnapshots"
+                            url = uri("https://central.sonatype.com/repository/maven-snapshots/")
+                            credentials(PasswordCredentials::class)
+                        }
                     }
                 }
             }

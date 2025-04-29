@@ -1,10 +1,14 @@
 pluginManagement {
     repositories {
+        val isFDroidBuild = providers.gradleProperty("isFDroidBuild").orNull.toBoolean()
+
         mavenCentral()
         gradlePluginPortal()
         google()
 
-        maven(uri(rootDir.resolve("./offline-repository")))
+        if (!isFDroidBuild) {
+            maven(uri(rootDir.resolve("./offline-repository")))
+        }
     }
 }
 

@@ -28,6 +28,7 @@
 - build: limit collection of Gradle dependencies for Flatpak to sourceSets needed for its build
 - build: merge generated Flatpak sources to one file
 - build: split Flatpak sources generation from build in GH Actions
+- build: adjustments for F-Droib build (scanning)
 
 ### Fixed
 
