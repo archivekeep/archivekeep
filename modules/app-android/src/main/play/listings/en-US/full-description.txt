@@ -1,0 +1,12 @@
+<em>DISCLAIMER:</em> This is an early release. The author already uses the software to fulfil own needs, but there's still a room for improvement and a potential to find undiscovered issues, bugs or edge-cases.
+
+Utility facilitating preservation of personal archive of files, replicated in multiple storages of own choice.
+
+The main focus is on preservation - keep identical copies while not performing any destructive operations, nor replication of corruption, nor other means of data loss.
+
+Features:
+<ul>
+    <li>Plain files - archived files aren't wrapped in custom format, and are readable with any application.</li>
+    <li>Incremental synchronization - update offline and other storages incrementally, when they become available.</li>
+    <li>Filesystem agnostic</li>
+</ul>
