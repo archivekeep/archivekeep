@@ -22,9 +22,12 @@ class MainActivity : AppCompatActivity() {
             SystemBarStyle.dark(Color.argb(40, 0, 0, 0)),
         )
 
+        val applicationMetadata = AndroidApplicationMetadata()
+
         setContent {
             ApplicationProviders(
                 (this.application as MainApplication).services,
+                applicationMetadata,
             ) {
                 MainWindowContent(
                     isFloating = false,

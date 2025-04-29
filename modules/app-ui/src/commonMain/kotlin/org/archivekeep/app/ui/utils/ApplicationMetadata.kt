@@ -1,23 +1,16 @@
 package org.archivekeep.app.ui.utils
 
-import java.io.InputStream
-import java.util.Properties
+import androidx.compose.runtime.Composable
+import org.archivekeep.app.ui.domain.wiring.staticCompositionLocalOfNotProvided
 
-class ApplicationMetadata {
+interface ApplicationMetadata {
+    val version: String
+
     companion object {
-        val version by lazy {
-            val properties =
-                Properties().also {
-                    val file: InputStream? = this::class.java.classLoader.getResourceAsStream("org/archivekeep/app/desktop/application.properties")
-
-                    if (file != null) {
-                        it.load(file)
-                    } else {
-                        it.setProperty("version", "failed to load")
-                    }
-                }
-
-            properties["version"].toString()
-        }
+        val version: String
+            @Composable
+            get() = LocalApplicationMetadata.current.version
     }
 }
+
+val LocalApplicationMetadata = staticCompositionLocalOfNotProvided<ApplicationMetadata>()

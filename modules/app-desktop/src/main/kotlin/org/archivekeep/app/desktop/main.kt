@@ -26,7 +26,9 @@ fun main(args: Array<String>) {
                 }
             }
 
-        ApplicationProviders(environment) {
+        val applicationMetadata = remember { DesktopApplicationMetadata() }
+
+        ApplicationProviders(environment, applicationMetadata) {
             MainWindow()
         }
     }

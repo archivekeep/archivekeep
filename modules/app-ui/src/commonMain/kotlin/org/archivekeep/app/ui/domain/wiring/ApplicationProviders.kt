@@ -12,10 +12,13 @@ import kotlinx.coroutines.plus
 import org.archivekeep.app.core.persistence.platform.Environment
 import org.archivekeep.app.ui.domain.services.LocalSharingCoroutineDispatcher
 import org.archivekeep.app.ui.domain.services.createRepositoryOpenService
+import org.archivekeep.app.ui.utils.ApplicationMetadata
+import org.archivekeep.app.ui.utils.LocalApplicationMetadata
 
 @Composable
 fun ApplicationProviders(
     environmentFactory: (scope: CoroutineScope) -> Environment,
+    applicationMetadata: ApplicationMetadata,
     content: @Composable () -> Unit,
 ) {
     val basescope = rememberCoroutineScope()
@@ -43,12 +46,13 @@ fun ApplicationProviders(
             }
         }
 
-    ApplicationProviders(applicationServicesRemember.services, content)
+    ApplicationProviders(applicationServicesRemember.services, applicationMetadata, content)
 }
 
 @Composable
 fun ApplicationProviders(
     applicationServices: ApplicationServices,
+    applicationMetadata: ApplicationMetadata,
     content: @Composable () -> Unit,
 ) {
     val repositoryOpenService =
@@ -57,6 +61,7 @@ fun ApplicationProviders(
         }
 
     CompositionLocalProvider(
+        LocalApplicationMetadata provides applicationMetadata,
         LocalArchiveService provides applicationServices.archiveService,
         LocalStorageService provides applicationServices.storageService,
         LocalWalletDataStore provides applicationServices.environment.walletDataStore,
