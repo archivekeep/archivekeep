@@ -1,6 +1,6 @@
 pluginManagement {
     repositories {
-        val isFDroidBuild = providers.gradleProperty("isFDroidBuild").orNull.toBoolean()
+        val isFDroidBuild = true
 
         mavenCentral()
         gradlePluginPortal()

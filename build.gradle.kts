@@ -21,7 +21,7 @@ plugins {
     idea
 }
 
-val isFDroidBuild = providers.gradleProperty("isFDroidBuild").orNull.toBoolean()
+val isFDroidBuild = true
 
 subprojects {
     group = "org.archivekeep"
