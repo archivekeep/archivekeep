@@ -34,7 +34,12 @@ android {
         applicationId = "org.archivekeep.ArchiveKeep"
         minSdk = 30
         targetSdk = 35
-        versionCode = 1
+
+        versionCode =
+            libs.versions.archivekeepAndroidVersionCode
+                .get()
+                .toInt()
+
         versionName = libs.versions.archivekeep.get()
     }
     compileOptions {

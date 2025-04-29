@@ -14,7 +14,8 @@ svg2ico = "2.6"
 
 ktlint = "12.1.2"
 
-archivekeep = "0.3.4-SNAPSHOT"
+archivekeep = "0.4.0"
+archivekeepAndroidVersionCode = "40"
 
 [libraries]
 kotlinx-coroutines-core = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-core", version.ref = "kotlinx-coroutines" }
