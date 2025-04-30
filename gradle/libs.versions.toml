@@ -14,7 +14,7 @@ svg2ico = "2.6"
 
 ktlint = "12.1.2"
 
-archivekeep = "0.4.0"
+archivekeep = "0.4.1-SNAPSHOT"
 archivekeepAndroidVersionCode = "40"
 
 [libraries]

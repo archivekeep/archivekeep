@@ -1,5 +1,7 @@
 # Changelog
 
+## Unreleased
+
 ## 0.4.0 - 2025-04-29 - Initial Android application, and UI improvements
 
 ### Added
