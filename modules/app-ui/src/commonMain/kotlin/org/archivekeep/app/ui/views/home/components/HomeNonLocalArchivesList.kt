@@ -38,7 +38,7 @@ import org.archivekeep.utils.loading.Loadable
 fun HomeNonLocalArchivesList(otherArchivesLoadable: Loadable<List<HomeArchiveNonLocalArchive>>) {
     LoadableGuard(otherArchivesLoadable) { nonLocalArchives ->
         VerticalGrid(
-            columns = SimpleGridCells.Adaptive(minSize = 240.dp),
+            columns = SimpleGridCells.Adaptive(minSize = 250.dp),
             horizontalArrangement = Arrangement.spacedBy(AppTheme.dimens.gridSpacingHorizontal),
             verticalArrangement = Arrangement.spacedBy(AppTheme.dimens.gridSpacingVertical),
         ) {

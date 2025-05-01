@@ -19,8 +19,8 @@ val smallDimensions =
         viewPadding = 18.dp,
         viewItemSpacing = 18.dp,
         viewExtraPaddingForScrollbar = viewExtraPaddingForScrollbar(),
-        gridSpacingHorizontal = 12.dp,
-        gridSpacingVertical = 14.dp,
+        gridSpacingHorizontal = 10.dp,
+        gridSpacingVertical = 10.dp,
         dialogContainerPadding = 16.dp,
     )
 
@@ -29,7 +29,7 @@ val largeDimensions =
         viewPadding = 24.dp,
         viewItemSpacing = 24.dp,
         viewExtraPaddingForScrollbar = viewExtraPaddingForScrollbar(),
-        gridSpacingHorizontal = 14.dp,
-        gridSpacingVertical = 16.dp,
+        gridSpacingHorizontal = 12.dp,
+        gridSpacingVertical = 14.dp,
         dialogContainerPadding = 24.dp,
     )

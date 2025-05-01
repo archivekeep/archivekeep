@@ -36,7 +36,7 @@ fun StoragesList(
 ) {
     LoadableGuard(allStoragesLoadable) { allStorages ->
         VerticalGrid(
-            columns = SimpleGridCells.Adaptive(minSize = 240.dp),
+            columns = SimpleGridCells.Adaptive(minSize = 250.dp),
             horizontalArrangement = Arrangement.spacedBy(AppTheme.dimens.gridSpacingHorizontal),
             verticalArrangement = Arrangement.spacedBy(AppTheme.dimens.gridSpacingVertical),
         ) {

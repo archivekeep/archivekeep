@@ -36,7 +36,7 @@ import org.archivekeep.utils.loading.Loadable
 fun HomeStoragesList(allStoragesFlow: Loadable<List<HomeViewStorage>>) {
     LoadableGuard(allStoragesFlow) { allStorages ->
         VerticalGrid(
-            columns = SimpleGridCells.Adaptive(minSize = 240.dp),
+            columns = SimpleGridCells.Adaptive(minSize = 250.dp),
             horizontalArrangement = Arrangement.spacedBy(AppTheme.dimens.gridSpacingHorizontal),
             verticalArrangement = Arrangement.spacedBy(AppTheme.dimens.gridSpacingVertical),
         ) {
@@ -47,9 +47,7 @@ fun HomeStoragesList(allStoragesFlow: Loadable<List<HomeViewStorage>>) {
             allStorages.forEach { storage ->
                 val storageState by storage.stateFlow.collectAsState()
 
-                SectionCard(
-                    enabled = storageState.isConnected,
-                ) {
+                SectionCard {
                     SectionCardTitle(
                         // TODO
                         false,

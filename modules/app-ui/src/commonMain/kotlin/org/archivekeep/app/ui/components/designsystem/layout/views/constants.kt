@@ -6,4 +6,4 @@ import androidx.compose.ui.unit.dp
 
 val ScrollbarPadding = PaddingValues(end = 8.dp, top = 8.dp, bottom = 8.dp)
 
-val SectionCardShape = RoundedCornerShape(11.dp, 11.dp, 9.dp, 9.dp)
+val SectionCardShape = RoundedCornerShape(8.dp)
