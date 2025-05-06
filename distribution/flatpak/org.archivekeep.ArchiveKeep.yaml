@@ -51,8 +51,8 @@ modules:
           - .idea
           - .kotlin
       - type: file
-        url: "https://services.gradle.org/distributions/gradle-8.11.1-bin.zip"
-        sha256: "f397b287023acdba1e9f6fc5ea72d22dd63669d59ed4a289a29b1a76eee151c6"
+        url: "https://services.gradle.org/distributions/gradle-8.14-bin.zip"
+        sha256: "61ad310d3c7d3e5da131b76bbf22b5a4c0786e9d892dae8c1658d4b484de3caa"
         dest: "gradle/wrapper"
         dest-filename: "gradle-bin.zip"
       - "gradle-sources.json"
