@@ -24,9 +24,7 @@ plugins {
 subprojects {
     group = "org.archivekeep"
 
-    version =
-        rootProject.libs.versions.archivekeep
-            .get()
+    version = (rootProject.properties["version"]!! as String)
 
     repositories {
         mavenCentral()

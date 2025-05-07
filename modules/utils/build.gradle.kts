@@ -6,9 +6,6 @@ plugins {
     alias(libs.plugins.ktlint)
 }
 
-group = "org.archivekeep"
-version = libs.versions.archivekeep.get()
-
 dependencies {
     implementation(libs.kotlinx.coroutines.core)
     implementation(libs.kotlinx.serialization.json)

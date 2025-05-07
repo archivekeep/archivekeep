@@ -35,12 +35,8 @@ android {
         minSdk = 30
         targetSdk = 35
 
-        versionCode =
-            libs.versions.archivekeepAndroidVersionCode
-                .get()
-                .toInt()
-
-        versionName = libs.versions.archivekeep.get()
+        versionCode = (project.properties["versionCode"]!! as String).toInt()
+        versionName = (project.properties["version"]!! as String)
     }
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_17

@@ -9,9 +9,6 @@ plugins {
     alias(libs.plugins.ktlint)
 }
 
-group = "org.archivekeep"
-version = libs.versions.archivekeep.get()
-
 dependencies {
     api(project(":utils"))
 

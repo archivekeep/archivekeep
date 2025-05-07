@@ -43,7 +43,7 @@ tasks.named<ProcessResources>("processResources") {
     filesMatching("org/archivekeep/app/desktop/application.properties") {
         expand(
             mapOf(
-                "version" to libs.versions.archivekeep.get(),
+                "version" to (project.properties["version"]!! as String),
             ),
         )
     }
@@ -72,7 +72,7 @@ compose.desktop {
             targetFormats(TargetFormat.Deb, TargetFormat.Rpm)
 
             packageName = "archivekeep-desktop"
-            packageVersion = libs.versions.archivekeep.get()
+            packageVersion = (project.properties["version"]!! as String)
 
             linux.rpmPackageVersion = createRPMPackageVersion()
 
@@ -97,10 +97,7 @@ compose.desktop {
     }
 }
 
-fun createRPMPackageVersion() =
-    libs.versions.archivekeep
-        .get()
-        .replace('-', '_')
+fun createRPMPackageVersion() = (project.properties["version"]!! as String).replace('-', '_')
 
 publishing {
     publications.named<MavenPublication>("maven") {
