@@ -15,6 +15,7 @@
 -dontwarn com.oracle.svm.core.annotate.**
 
 -dontwarn okio.AsyncTimeout$Watchdog
+-keep class okio.** { *; }
 
 -dontskipnonpubliclibraryclasses
 

@@ -2,9 +2,13 @@
 
 ## Unreleased
 
-### Changed:
+### Changed
 
 - UI: make style more lighter by removing shadows, and adjust dimensions
+
+### Other
+
+- upgrade dependencies, libraries and build plugins
 
 ## 0.4.0 - 2025-04-29 - Initial Android application, and UI improvements
 

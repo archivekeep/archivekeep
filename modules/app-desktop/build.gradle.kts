@@ -31,8 +31,8 @@ dependencies {
     testImplementation("org.jetbrains.kotlin:kotlin-test")
     testImplementation(compose.desktop.uiTestJUnit4)
 
-    gradleOfflineBuildExtra("com.guardsquare:proguard-gradle:7.2.2")
-    gradleOfflineBuildExtra("org.jetbrains.compose:gradle-plugin-internal-jdk-version-probe:1.7.3")
+    gradleOfflineBuildExtra("com.guardsquare:proguard-gradle:7.7.0")
+    gradleOfflineBuildExtra("org.jetbrains.compose:gradle-plugin-internal-jdk-version-probe:1.8.0")
 }
 
 kotlin {
@@ -107,5 +107,54 @@ publishing {
             name = "ArchiveKeep Desktop Application"
             description = "Desktop application for archive management."
         }
+    }
+}
+
+// inspired from: https://github.com/JetBrains/compose-multiplatform/issues/1174#issuecomment-2480503879
+
+val proguardOutputFile =
+    project.layout.buildDirectory
+        .file("generated/proguard/collected-rules.pro")
+        .get()
+
+val proguardCollectionTask =
+    tasks.register("generateProGuardMergedConfig") {
+        val cp: FileCollection = configurations["runtimeClasspath"]
+
+        inputs
+            .files(cp)
+            .withPropertyName("classpath")
+            .withPathSensitivity(PathSensitivity.RELATIVE)
+
+        outputs.file(proguardOutputFile)
+
+        doLast {
+            proguardOutputFile.asFile.bufferedWriter().use { proguardFileWriter ->
+                sourceSets.main
+                    .get()
+                    .runtimeClasspath
+                    .filter { it.extension == "jar" }
+                    .forEach { jar ->
+                        val zip = zipTree(jar)
+                        zip.matching { include("META-INF/**/proguard/*.pro") }.forEach {
+                            proguardFileWriter.appendLine("########   ${jar.name} ${it.name}")
+                            proguardFileWriter.appendLine(it.readText())
+                        }
+                        zip.matching { include("META-INF/services/*") }.forEach {
+                            it.readLines().forEach { cls ->
+                                val rule = "-keep class $cls"
+                                proguardFileWriter.appendLine(rule)
+                            }
+                        }
+                    }
+            }
+        }
+    }
+
+tasks.withType(org.jetbrains.compose.desktop.application.tasks.AbstractProguardTask::class.java) {
+    dependsOn(proguardCollectionTask)
+
+    compose.desktop.application.buildTypes.release.proguard {
+        configurationFiles.from(proguardOutputFile)
     }
 }

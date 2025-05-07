@@ -1,9 +1,9 @@
 [versions]
-kotlin = "2.0.20"
+kotlin = "2.1.20"
 
 kotlinx-coroutines = "1.10.1"
+kotlinx-serialization = "1.8.1"
 
-compose = "1.7.3"
 grpc = "1.70.0"
 grpc-kotlin = "1.4.1"
 oshi = "6.8.0"
@@ -12,12 +12,18 @@ protobuf = "0.9.4"
 protobuf-kotlin = "3.25.5"
 svg2ico = "2.6"
 
+compose = "1.8.0"
+
+android-plugin = "8.9.2"
+
+androidx-datastore = "1.1.5"
+
 ktlint = "12.1.2"
 
 [libraries]
 kotlinx-coroutines-core = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-core", version.ref = "kotlinx-coroutines" }
 kotlinx-coroutines-test = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-test", version.ref = "kotlinx-coroutines" }
-kotlinx-serialization-json = { group = "org.jetbrains.kotlinx", name = "kotlinx-serialization-json", version = "1.6.3" }
+kotlinx-serialization-json = { group = "org.jetbrains.kotlinx", name = "kotlinx-serialization-json", version.ref = "kotlinx-serialization" }
 
 compose-material3-windowsizeclass = { group = "org.jetbrains.compose.material3", name = "material3-window-size-class", version.ref = "compose" }
 compose-grid = { group = "com.cheonjaeung.compose.grid", name = "grid", version = "2.0.0" }
@@ -38,8 +44,8 @@ picocli-codegen = { group = "info.picocli", name = "picocli-codegen", version.re
 
 oshi-core = { group = "com.github.oshi", name = "oshi-core", version.ref = "oshi" }
 
-androidx-datastore = { group = "androidx.datastore", name = "datastore", version = "1.1.1" }
-androidx-datastore-preferences = { group = "androidx.datastore", name = "datastore-preferences", version = "1.1.1" }
+androidx-datastore = { group = "androidx.datastore", name = "datastore", version.ref = "androidx-datastore" }
+androidx-datastore-preferences = { group = "androidx.datastore", name = "datastore-preferences", version.ref = "androidx-datastore" }
 
 guava = { group = "com.google.guava", name = "guava", version = "33.3.1-jre" }
 
@@ -57,7 +63,8 @@ kotlin-multiplatform = { id = "org.jetbrains.kotlin.multiplatform", version.ref 
 kotlin-kapt = { id = "org.jetbrains.kotlin.kapt", version.ref = "kotlin" }
 kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
 
-android-application = { id = "com.android.application", version = "8.5.2" }
+android-application = { id = "com.android.application", version.ref = "android-plugin" }
+android-library = { id = "com.android.library", version.ref = "android-plugin" }
 
 asciidoctor = { id = "org.asciidoctor.jvm.convert", version = "4.0.2" }
 
