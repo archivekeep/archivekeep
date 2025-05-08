@@ -6,6 +6,10 @@
 
 - UI: make style more lighter by removing shadows, and adjust dimensions
 
+### Technical
+
+- added PNG icon for F-Droid ([issue](https://gitlab.com/fdroid/fdroidserver/-/issues/885))
+
 ## 0.4.0 - 2025-04-29 - Initial Android application, and UI improvements
 
 ### Added
