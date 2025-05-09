@@ -14,15 +14,14 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.LifecycleEventEffect
 import io.github.vinceglb.filekit.compose.rememberDirectoryPickerLauncher
 import io.github.vinceglb.filekit.core.FileKitPlatformSettings
+import kotlinx.coroutines.runBlocking
 import org.archivekeep.app.core.persistence.drivers.filesystem.MountedFileSystem
 import org.archivekeep.app.ui.domain.wiring.LocalFileStores
-import org.archivekeep.app.ui.utils.collectLoadableFlow
-import org.archivekeep.utils.loading.mapIfLoadedOrDefault
 import java.io.File
 
 @Composable
 actual fun filesystemRepositoryDirectoryPicker(onResult: (result: PickResult) -> Unit): () -> Unit {
-    val mountPoints = LocalFileStores.current.mountPoints.collectLoadableFlow()
+    val fileStores = LocalFileStores.current
 
     val pickerLauncher =
         rememberDirectoryPickerLauncher(
@@ -40,7 +39,8 @@ actual fun filesystemRepositoryDirectoryPicker(onResult: (result: PickResult) ->
                     onResult(
                         PickResult.Success(
                             getPathFromURI(
-                                mountPoints.mapIfLoadedOrDefault(emptyList()) { it },
+                                // TODO - refactor to be executed in appropriate suspend execution context
+                                runBlocking { fileStores.loadFreshMountPoints() },
                                 directory.uri,
                             ),
                         ),
@@ -61,15 +61,31 @@ fun storageManagerGuard(): PlatformSpecificPermissionFulfilment {
         mutableStateOf(Environment.isExternalStorageManager())
     }
 
+    val context = LocalContext.current
+
     LifecycleEventEffect(Lifecycle.Event.ON_START) {
-        isExternalStorageManager = Environment.isExternalStorageManager()
+        val previous = isExternalStorageManager
+        val new = Environment.isExternalStorageManager()
+
+        if (!previous && new) {
+            // TODO: find less intrusive way to apply effect, or at least inform user
+            // https://issuetracker.google.com/issues/203692313
+
+            context.startActivity(
+                Intent.makeRestartActivityTask(
+                    context.packageManager.getLaunchIntentForPackage(context.packageName)!!.component,
+                ),
+            )
+
+            Runtime.getRuntime().exit(0)
+        } else {
+            isExternalStorageManager = new
+        }
     }
 
     if (isExternalStorageManager) {
         return PlatformSpecificPermissionFulfilment.IsFine
     } else {
-        val context = LocalContext.current
-
         return PlatformSpecificPermissionFulfilment.NeedsGrant(
             listOf(
                 "Filesystem repository functionality requires permission to manage all files on device for efficient access.",
@@ -87,46 +103,57 @@ fun storageManagerGuard(): PlatformSpecificPermissionFulfilment {
 fun getPathFromURI(
     mountPoints: List<MountedFileSystem.MountPoint>,
     uri: Uri,
-): String {
+): String =
     if (isExternalStorageDocument(uri)) {
-        if (uri.pathSegments.size == 2) {
-            if (uri.pathSegments[0] == "tree") {
-                val (storageID, path) =
-                    uri.pathSegments[1]
-                        .split(":".toRegex())
-                        .dropLastWhile { it.isEmpty() }
-                        .toTypedArray()
-
-                val mountedPathFromPointPoints =
-                    mountPoints.firstNotNullOfOrNull {
-                        if (it.fsUUID == storageID) {
-                            val f = File(it.mountPath).resolve(path)
-
-                            if (f.exists()) {
-                                f
-                            } else {
-                                null
-                            }
-                        } else {
-                            null
-                        }
-                    }
-
-                if (mountedPathFromPointPoints != null) {
-                    return mountedPathFromPointPoints.absolutePath
-                } else if ("primary".equals(storageID, ignoreCase = true)) {
-                    return "${Environment.getExternalStorageDirectory()}/$path"
-                } else {
-                    val storageFile = File("/storage/$storageID")
-                    if (storageFile.exists() && storageFile.isDirectory) {
-                        return "$storageFile/$path"
-                    }
-                }
-            }
-        }
+        getFromExternalStorage(mountPoints, uri)
+    } else {
+        throw RuntimeException("URI $uri not supported")
     }
 
-    throw RuntimeException("URI $uri not supported")
-}
+fun getFromExternalStorage(
+    mountPoints: List<MountedFileSystem.MountPoint>,
+    uri: Uri,
+): String =
+    if (uri.pathSegments.size == 2) {
+        if (uri.pathSegments[0] == "tree") {
+            val (storageID, path) =
+                uri.pathSegments[1]
+                    .split(":".toRegex())
+                    .dropLastWhile { it.isEmpty() }
+                    .toTypedArray()
+
+            val mountedPathFromPointPoints =
+                mountPoints.firstNotNullOfOrNull {
+                    if (it.fsUUID == storageID) {
+                        val f = File(it.mountPath).resolve(path)
+
+                        if (f.exists()) {
+                            f
+                        } else {
+                            throw RuntimeException("No access to path $f in corresponding storage $it: $uri")
+                        }
+                    } else {
+                        null
+                    }
+                }
+
+            if (mountedPathFromPointPoints != null) {
+                mountedPathFromPointPoints.absolutePath
+            } else if ("primary".equals(storageID, ignoreCase = true)) {
+                "${Environment.getExternalStorageDirectory()}/$path"
+            } else {
+                val storageFile = File("/storage/$storageID")
+                if (storageFile.exists() && storageFile.isDirectory) {
+                    "$storageFile/$path"
+                } else {
+                    throw RuntimeException("Path $storageFile doesn't exist: $uri")
+                }
+            }
+        } else {
+            throw RuntimeException("Invalid external storage URI: $uri")
+        }
+    } else {
+        throw RuntimeException("Invalid external storage URI: $uri")
+    }
 
 fun isExternalStorageDocument(uri: Uri): Boolean = "com.android.externalstorage.documents" == uri.authority

@@ -6,6 +6,12 @@
 
 - UI: make style more lighter by removing shadows, and adjust dimensions
 
+### Mitigations
+
+- restart app after MANAGE_ALL_FILES_ACCESS_PERMISSION grant:
+  - mitigates: adding external repository on USB drive fails if app is not restarted after permission grant,
+  - cause: https://issuetracker.google.com/issues/203692313
+
 ### Technical
 
 - added PNG icon for F-Droid ([issue](https://gitlab.com/fdroid/fdroidserver/-/issues/885))

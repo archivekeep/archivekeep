@@ -27,6 +27,7 @@ class AndroidFileStores(
     private val storageManager: StorageManager
         get() = context.getSystemService(Context.STORAGE_SERVICE) as StorageManager
 
+    // TODO: trigger on permission grant
     private val changes = Channel<Date>(capacity = 1)
 
     private val autoRefreshMountPoints =
