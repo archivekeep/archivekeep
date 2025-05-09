@@ -1,6 +1,7 @@
 package org.archivekeep.app.desktop
 
 import androidx.compose.material3.windowsizeclass.ExperimentalMaterial3WindowSizeClassApi
+import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
 import androidx.compose.material3.windowsizeclass.calculateWindowSizeClass
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
@@ -12,14 +13,14 @@ import androidx.compose.ui.window.WindowPlacement
 import androidx.compose.ui.window.WindowState
 import androidx.compose.ui.window.rememberWindowState
 import org.archivekeep.app.ui.MainWindowContent
+import org.archivekeep.app.ui.components.designsystem.theme.AppTheme
 import org.archivekeep.app.ui.domain.wiring.LocalComposeWindow
 import org.archivekeep.app.ui.domain.wiring.LocalOptionalComposeWindow
+import org.archivekeep.app.ui.utils.DefaultMainWindowHeight
+import org.archivekeep.app.ui.utils.DefaultMainWindowWidth
 import org.archivekeep.ui.resources.Res
 import org.archivekeep.ui.resources.ic_app
 import org.jetbrains.compose.resources.painterResource
-
-val DefaultMainWindowWidth = 1050.dp
-val DefaultMainWindowHeight = 800.dp
 
 @OptIn(ExperimentalMaterial3WindowSizeClassApi::class)
 @Composable
@@ -47,11 +48,17 @@ fun (ApplicationScope).MainWindow() {
             LocalComposeWindow provides window,
             LocalOptionalComposeWindow provides window,
         ) {
-            MainWindowContent(
-                isFloating = windowState.placement == WindowPlacement.Floating,
-                windowSizeClass = calculateWindowSizeClass(),
-                ::exitApplication,
-            )
+            val windowSizeClass = calculateWindowSizeClass()
+
+            AppTheme(
+                small = windowSizeClass.widthSizeClass < WindowWidthSizeClass.Expanded,
+            ) {
+                MainWindowContent(
+                    isFloating = windowState.placement == WindowPlacement.Floating,
+                    windowSizeClass = windowSizeClass,
+                    ::exitApplication,
+                )
+            }
         }
     }
 }

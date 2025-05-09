@@ -21,7 +21,7 @@
             </div>
         </div>
         <div class="other">
-        <img src="/generated_screenshots/main-window.png" />
+        <img src="/generated_screenshots/desktop/main-window.png" />
         </div>
     </div>
 
@@ -100,9 +100,26 @@ Encryption options:
 </div>
 </div>
 
+<div class="sub-display-container">
+<div class="sub-display-inner-container">
+<div class="text">
 
+## Android platform
+
+<p>Carry a copy of data in mobile.</p>
+<p><a class="other-link" href="https://github.com/archivekeep/archivekeep/releases/">Download from releases</a></p>
+
+</div>
+<div class="other small">
+<img src="/generated_screenshots/mobile/main-window.png" />
+</div>
+</div>
+</div>
+
+<div class="three-col-section-wrapper">
 <div class="three-col-section">
 <div><div>
+
 
 ## Pricing
 
@@ -128,6 +145,6 @@ This is open-source software, and it is made **available for free, and comes wit
 The project is licensed under **AGPL v3**.
 
 </div></div>
-</div>
+</div></div>
 
 [LUKS]: https://en.wikipedia.org/wiki/Linux_Unified_Key_Setup

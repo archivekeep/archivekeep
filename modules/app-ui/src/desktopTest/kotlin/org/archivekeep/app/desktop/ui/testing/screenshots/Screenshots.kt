@@ -1,7 +1,6 @@
 package org.archivekeep.app.desktop.ui.testing.screenshots
 
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawWithContent
@@ -19,10 +18,8 @@ import androidx.compose.ui.test.SemanticsMatcher
 import androidx.compose.ui.test.SkikoComposeUiTest
 import androidx.compose.ui.test.runSkikoComposeUiTest
 import androidx.compose.ui.unit.Density
-import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.runBlocking
 import org.archivekeep.app.desktop.ui.testing.save
-import org.archivekeep.app.ui.components.designsystem.theme.AppTheme
 import kotlin.io.path.Path
 import kotlin.io.path.createParentDirectories
 
@@ -31,26 +28,25 @@ private val semanticsKey = SemanticsPropertyKey<GraphicsLayer>("ScreenshotContai
 @Composable
 fun ScreenshotContainer(
     modifier: Modifier = Modifier,
+    innerModifier: Modifier = Modifier,
     content: @Composable () -> Unit,
 ) {
     val graphicsLayer = rememberGraphicsLayer()
 
-    AppTheme {
-        Box {
-            Box(
-                modifier =
-                    modifier
-                        .semantics {
-                            set(semanticsKey, graphicsLayer)
-                        }.drawWithContent {
-                            graphicsLayer.record {
-                                this@drawWithContent.drawContent()
-                            }
-                            drawLayer(graphicsLayer)
-                        }.padding(20.dp),
-            ) {
-                content()
-            }
+    Box {
+        Box(
+            modifier =
+                modifier
+                    .semantics {
+                        set(semanticsKey, graphicsLayer)
+                    }.drawWithContent {
+                        graphicsLayer.record {
+                            this@drawWithContent.drawContent()
+                        }
+                        drawLayer(graphicsLayer)
+                    }.then(innerModifier),
+        ) {
+            content()
         }
     }
 }
@@ -73,7 +69,17 @@ fun (ComposeUiTest).setContentScreenshotContainer(
     content: @Composable () -> Unit,
 ) {
     this.setContent {
-        ScreenshotContainer(modifier = modifier, content = content)
+        DesktopScreenshotContainer(modifier = modifier, content = content)
+    }
+}
+
+@OptIn(ExperimentalTestApi::class)
+fun (ComposeUiTest).setContentInMobileScreenshotContainer(
+    modifier: Modifier = Modifier,
+    content: @Composable () -> Unit,
+) {
+    this.setContent {
+        MobileScreenshotContainer(modifier = modifier, content = content)
     }
 }
 

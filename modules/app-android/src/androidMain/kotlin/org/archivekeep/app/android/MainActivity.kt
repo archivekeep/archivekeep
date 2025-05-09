@@ -7,9 +7,11 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.material3.windowsizeclass.ExperimentalMaterial3WindowSizeClassApi
+import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
 import androidx.compose.material3.windowsizeclass.calculateWindowSizeClass
 import org.archivekeep.app.android.components.StatusBarProtection
 import org.archivekeep.app.ui.MainWindowContent
+import org.archivekeep.app.ui.components.designsystem.theme.AppTheme
 import org.archivekeep.app.ui.domain.wiring.ApplicationProviders
 
 class MainActivity : AppCompatActivity() {
@@ -29,11 +31,17 @@ class MainActivity : AppCompatActivity() {
                 (this.application as MainApplication).services,
                 applicationMetadata,
             ) {
-                MainWindowContent(
-                    isFloating = false,
-                    windowSizeClass = calculateWindowSizeClass(this@MainActivity),
-                    onCloseRequest = null,
-                )
+                val windowSizeClass = calculateWindowSizeClass(this@MainActivity)
+
+                AppTheme(
+                    small = windowSizeClass.widthSizeClass < WindowWidthSizeClass.Expanded,
+                ) {
+                    MainWindowContent(
+                        isFloating = false,
+                        windowSizeClass = windowSizeClass,
+                        onCloseRequest = null,
+                    )
+                }
             }
 
             StatusBarProtection()

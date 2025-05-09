@@ -7,7 +7,7 @@ val Documents = DemoEnvironment.DemoRepository("Documents").withContents(documen
 val Photos = DemoEnvironment.DemoRepository("Photos").withContents(photosBaseContents)
 val Music = DemoEnvironment.DemoRepository("Music").withContents(musicBaseContents)
 val Private = DemoEnvironment.DemoRepository("Private").withContents(privateBaseContents)
-val Books = DemoEnvironment.DemoRepository("Books").withContents(booksBaseContents)
+val Books = DemoEnvironment.DemoRepository("E-Books").withContents(booksBaseContents)
 val Productions =
     DemoEnvironment.DemoRepository("Productions").withContents(productionsBaseContents)
 
@@ -26,7 +26,7 @@ val LaptopSSD =
         physicalID = "TODO",
         driveType = DriveType.SSD,
         displayName = "Laptop / SSD",
-        logicalLocation = "localhost.ssd.home_partition",
+        isLocal = true,
         connectionStatus = Storage.ConnectionStatus.CONNECTED,
         repositories =
             listOf(
@@ -42,7 +42,7 @@ val hddB =
         physicalID = "TODO",
         driveType = DriveType.HDD,
         displayName = "HDD B",
-        logicalLocation = "ip-address.archivekeep-server",
+        isLocal = false,
         connectionStatus = Storage.ConnectionStatus.CONNECTED,
         repositories =
             listOf(
@@ -65,7 +65,7 @@ val LaptopHDD =
         physicalID = "TODO",
         driveType = DriveType.HDD,
         displayName = "Laptop / HDD",
-        logicalLocation = "localhost.ssd2.partition_a",
+        isLocal = true,
         connectionStatus = Storage.ConnectionStatus.CONNECTED,
         repositories =
             listOf(
@@ -82,7 +82,7 @@ val hddC =
         physicalID = "TODO",
         driveType = DriveType.HDD,
         displayName = "HDD C",
-        logicalLocation = "ip-address.archivekeep-server",
+        isLocal = false,
         connectionStatus = Storage.ConnectionStatus.DISCONNECTED,
         repositories =
             listOf(
@@ -103,7 +103,7 @@ val hddA =
         physicalID = "TODO",
         driveType = DriveType.HDD,
         displayName = "HDD A",
-        logicalLocation = "ip-address.archivekeep-server",
+        isLocal = false,
         connectionStatus = Storage.ConnectionStatus.CONNECTED,
         repositories =
             listOf(
@@ -123,7 +123,7 @@ val ssdKeyChain =
         physicalID = "TODO",
         driveType = DriveType.HDD,
         displayName = "KeyChain SSD",
-        logicalLocation = "ip-address.archivekeep-server",
+        isLocal = false,
         connectionStatus = Storage.ConnectionStatus.CONNECTED,
         repositories =
             listOf(
@@ -143,21 +143,67 @@ val phone =
         physicalID = "TODO",
         driveType = DriveType.Other,
         displayName = "Phone",
-        logicalLocation = "ip-address.archivekeep-server",
+        isLocal = true,
         connectionStatus = Storage.ConnectionStatus.DISCONNECTED,
+        repositories =
+            listOf(
+                Documents.localInMemoryFactory(),
+                Music
+                    .withContents {
+                        deletePattern(".*/1[0-9].ogg".toRegex())
+                    }.localInMemoryFactory(),
+                Books.localInMemoryFactory(),
+            ),
+    )
+
+val flashAll =
+    DemoEnvironment.DemoPhysicalMedium(
+        physicalID = "TODO",
+        driveType = DriveType.HDD,
+        displayName = "Flash - All",
+        isLocal = false,
+        connectionStatus = Storage.ConnectionStatus.CONNECTED,
+        repositories =
+            listOf(
+                Documents,
+                Music,
+                Books,
+            ),
+    )
+
+val flashDocuments =
+    DemoEnvironment.DemoPhysicalMedium(
+        physicalID = "TODO",
+        driveType = DriveType.HDD,
+        displayName = "Flash - Documents",
+        isLocal = false,
+        connectionStatus = Storage.ConnectionStatus.CONNECTED,
         repositories =
             listOf(
                 Documents,
                 Books,
+            ),
+    )
+
+val flashMusic =
+    DemoEnvironment.DemoPhysicalMedium(
+        physicalID = "TODO",
+        driveType = DriveType.HDD,
+        displayName = "Flash - Music",
+        isLocal = false,
+        connectionStatus = Storage.ConnectionStatus.CONNECTED,
+        repositories =
+            listOf(
                 Music,
             ),
     )
+
 val eBook =
     DemoEnvironment.DemoPhysicalMedium(
         physicalID = "TODO",
         driveType = DriveType.Other,
         displayName = "EBook",
-        logicalLocation = "ip-address.archivekeep-server",
+        isLocal = false,
         connectionStatus = Storage.ConnectionStatus.DISCONNECTED,
         repositories =
             listOf(

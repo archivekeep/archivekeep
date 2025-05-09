@@ -3,13 +3,13 @@ package org.archivekeep.app.desktop.ui.dialogs.testing
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.test.ComposeUiTest
 import androidx.compose.ui.test.ExperimentalTestApi
-import org.archivekeep.app.desktop.ui.testing.screenshots.ScreenshotContainer
+import org.archivekeep.app.desktop.ui.testing.screenshots.DesktopScreenshotContainer
 import org.archivekeep.app.desktop.ui.testing.screenshots.runHighDensityComposeUiTest
 import org.archivekeep.app.desktop.ui.testing.screenshots.saveTestingContainerBitmap
 
 @Composable
 fun DialogScreenshotContainer(content: @Composable () -> Unit) {
-    ScreenshotContainer(content = content)
+    DesktopScreenshotContainer(content = content)
 }
 
 @OptIn(ExperimentalTestApi::class)

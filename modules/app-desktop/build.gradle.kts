@@ -28,31 +28,12 @@ dependencies {
     implementation(compose.components.resources)
     implementation(compose.desktop.currentOs)
 
-    testImplementation("org.jetbrains.kotlin:kotlin-test")
-    testImplementation(compose.desktop.uiTestJUnit4)
-
     gradleOfflineBuildExtra("com.guardsquare:proguard-gradle:7.2.2")
     gradleOfflineBuildExtra("org.jetbrains.compose:gradle-plugin-internal-jdk-version-probe:1.7.3")
 }
 
 kotlin {
     jvmToolchain(17)
-}
-
-tasks.named<ProcessResources>("processResources") {
-    filesMatching("org/archivekeep/app/desktop/application.properties") {
-        expand(
-            mapOf(
-                "version" to (project.properties["version"]!! as String),
-            ),
-        )
-    }
-}
-
-tasks.named<Test>("test") {
-    useJUnit()
-
-    environment["SCREENSHOTS_BUILD_OUTPUT"] = "${project.layout.buildDirectory.get()}/generated-ui-screenshots"
 }
 
 val pngIconTask =

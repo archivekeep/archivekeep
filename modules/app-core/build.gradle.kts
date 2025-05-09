@@ -55,6 +55,16 @@ kotlin {
     }
 }
 
+tasks.withType<ProcessResources> {
+    filesMatching("org/archivekeep/app/core/application.properties") {
+        expand(
+            mapOf(
+                "version" to (project.properties["version"]!! as String),
+            ),
+        )
+    }
+}
+
 android {
     compileSdk = 35
     namespace = "org.archivekeep.app.core"

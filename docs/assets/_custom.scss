@@ -140,6 +140,7 @@ div.home-page {
 
       .other.small img {
         max-width: 330px;
+        max-height: 330px;
       }
 
       h2 {
@@ -272,7 +273,17 @@ div.home-page {
       }
     }
 
+    .three-col-section-wrapper {
+      background: white;
+      margin-left: 0;
+      margin-right: 0;
+      max-width: 100%;
+    }
+
     .three-col-section {
+      max-width: $home-page-container-max-width;
+      margin-left: auto;
+      margin-right: auto;
       display: flex;
       flex-direction: row;
       flex-wrap: wrap;
@@ -299,7 +310,7 @@ div.home-page {
         }
 
         @media screen and (max-width: $home-page-mobile-breakpoint) {
-          padding: 1rem 1rem;
+          padding: 1rem 0;
           flex: 100% 0 0;
         }
       }

@@ -99,7 +99,7 @@ class DemoEnvironment(
                                     RegisteredStorage(
                                         uri = it.uri,
                                         label = it.displayName,
-                                        isLocal = it.logicalLocation.startsWith("localhost"),
+                                        isLocal = it.isLocal,
                                     ),
                                 repos = MutableStateFlow(repositories),
                             ),
@@ -311,7 +311,7 @@ class DemoEnvironment(
         val physicalID: String,
         val driveType: StorageInformation.Partition.DriveType,
         val displayName: String,
-        val logicalLocation: String,
+        val isLocal: Boolean,
         val connectionStatus: Storage.ConnectionStatus,
         val id: String = displayName.toSlug(),
         val repositories: List<DemoRepository>,

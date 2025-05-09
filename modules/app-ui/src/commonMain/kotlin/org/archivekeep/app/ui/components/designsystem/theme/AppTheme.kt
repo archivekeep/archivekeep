@@ -8,7 +8,7 @@ import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.unit.dp
 
-private val LocalAppDimens =
+val LocalAppDimens =
     staticCompositionLocalOf {
         largeDimensions
     }

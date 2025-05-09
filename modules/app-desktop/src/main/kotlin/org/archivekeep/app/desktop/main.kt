@@ -8,6 +8,7 @@ import kotlinx.coroutines.plus
 import org.archivekeep.app.core.persistence.platform.Environment
 import org.archivekeep.app.core.persistence.platform.demo.DemoEnvironment
 import org.archivekeep.app.ui.domain.wiring.ApplicationProviders
+import org.archivekeep.app.ui.utils.PropertiesApplicationMetadata
 
 fun main(args: Array<String>) {
     application {
@@ -26,7 +27,7 @@ fun main(args: Array<String>) {
                 }
             }
 
-        val applicationMetadata = remember { DesktopApplicationMetadata() }
+        val applicationMetadata = remember { PropertiesApplicationMetadata() }
 
         ApplicationProviders(environment, applicationMetadata) {
             MainWindow()

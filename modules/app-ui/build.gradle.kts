@@ -52,7 +52,19 @@ kotlin {
                 implementation(compose.desktop.currentOs)
             }
         }
+        val desktopTest by getting {
+            dependencies {
+                implementation(compose.desktop.currentOs)
+
+                implementation("org.jetbrains.kotlin:kotlin-test")
+                implementation(compose.desktop.uiTestJUnit4)
+            }
+        }
     }
+}
+
+tasks.withType<Test> {
+    environment["SCREENSHOTS_BUILD_OUTPUT"] = "${project.layout.buildDirectory.get()}/generated-ui-screenshots"
 }
 
 compose.resources {

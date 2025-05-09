@@ -14,12 +14,12 @@ rm -rf docs/static/generated_screenshots
 mkdir -p docs/static/generated_screenshots
 
 ./gradlew asciidoctor
-./gradlew app-desktop:test # TODO: should run only screenshots rendering
+./gradlew app-ui:desktopTest # TODO: should run only screenshots rendering
 
 echo -e '---\ntitle: CLI man\nweight: 40\nbookCollapseSection: true\n---' >> docs/content/reference/cli/_index.md
 
 cp ./modules/cli/build/generated-picocli-docs/* docs/content/reference/cli
 
-cp -R ./modules/app-desktop/build/generated-ui-screenshots/* docs/static/generated_screenshots/
+cp -R ./modules/app-ui/build/generated-ui-screenshots/* docs/static/generated_screenshots/
 
 sed -i '1s;^;:relfileprefix: ../\n:relfilesuffix: /\n;' docs/content/reference/cli/archivekeep.adoc
