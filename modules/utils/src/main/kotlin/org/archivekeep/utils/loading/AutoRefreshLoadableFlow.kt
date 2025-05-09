@@ -19,6 +19,7 @@ class AutoRefreshLoadableFlow<T>(
     val dispatcher: CoroutineDispatcher,
     sharingStarted: SharingStarted = SharingStarted.WhileSubscribed(100),
     val updateTriggerFlow: Flow<Any>,
+    val observe: (Flow<Loadable<T>>) -> Flow<Loadable<T>> = { it },
     val loadFn: suspend () -> T,
 ) {
     private val loadingMutex = Mutex()
@@ -52,6 +53,7 @@ class AutoRefreshLoadableFlow<T>(
             it
                 .onStart { updateCollector.start() }
                 .onCompletion { updateCollector.cancel() }
+                .let { flowWithData -> observe(flowWithData) }
                 .stateIn(scope, sharingStarted)
         }
 }

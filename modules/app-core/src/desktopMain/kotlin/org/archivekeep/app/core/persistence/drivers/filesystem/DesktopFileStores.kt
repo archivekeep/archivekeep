@@ -15,6 +15,7 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.transformLatest
+import org.archivekeep.utils.flows.logCollectionLoadableFlow
 import org.archivekeep.utils.io.debounceAndRepeatAfterDelay
 import org.archivekeep.utils.io.listFilesFlow
 import org.archivekeep.utils.loading.AutoRefreshLoadableFlow
@@ -87,13 +88,16 @@ class DesktopFileStores(
 
                 fileStores
                     .forEach { fs ->
-                        println("mount: " + fs.mount)
-                        println("name: " + fs.name)
-                        println("type: " + fs.type)
-                        println("description: " + fs.description)
-                        println("uuid: " + fs.uuid)
-                        println("str: $fs")
-                        println("...")
+                        println(
+                            listOf(
+                                "mount: " + fs.mount,
+                                "name: " + fs.name,
+                                "type: " + fs.type,
+                                "description: " + fs.description,
+                                "uuid: " + fs.uuid,
+                                "str: $fs",
+                            ).joinToString(", "),
+                        )
                     }
 
                 val mountinfo =
@@ -120,14 +124,12 @@ class DesktopFileStores(
                         }.filter {
                             // TODO: use more complex location identifier (primary UUID, fallback to other methods)
                             it.fsUUID.isNotBlank()
-                        }.onEach {
-                            println("mountPath: " + it.mountPath)
-                            println("fsUUID: " + it.fsUUID)
-                            println("fsSubPath: " + it.fsSubPath)
-                            println("...")
                         }
 
                 return@AutoRefreshLoadableFlow mountPoints
+            },
+            observe = {
+                it.logCollectionLoadableFlow("Loaded mount points")
             },
             updateTriggerFlow =
                 changeEventsFlow

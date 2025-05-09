@@ -34,6 +34,8 @@ data class RepositoryURI(
         }
     }
 
+    override fun toString(): String = "$driver:$data"
+
     class Serializer : KSerializer<RepositoryURI> {
         val prefix = "archivekeep:repo:"
 
@@ -54,7 +56,7 @@ data class RepositoryURI(
             encoder: Encoder,
             value: RepositoryURI,
         ) {
-            encoder.encodeString("${prefix}${value.driver}:${value.data}")
+            encoder.encodeString("${prefix}$value")
         }
     }
 }

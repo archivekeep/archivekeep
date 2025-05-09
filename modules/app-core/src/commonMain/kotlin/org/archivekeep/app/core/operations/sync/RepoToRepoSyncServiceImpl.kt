@@ -148,14 +148,11 @@ class RepoToRepoSyncServiceImpl(
                             it.cause.printStackTrace()
                         }
 
-                        is OptionalLoadable.LoadedAvailable -> {
-                            println("Sync status loaded: $fromURI -> $otherURI")
-                        }
-
                         is OptionalLoadable.NotAvailable -> {
                             println("Sync status not available: $fromURI -> $otherURI: ${it.cause}")
                         }
 
+                        is OptionalLoadable.LoadedAvailable -> {}
                         OptionalLoadable.Loading -> {}
                     }
                 }.flowOn(computeDispatcher)

@@ -6,11 +6,12 @@ import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringSetPreferencesKey
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.onEach
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import org.archivekeep.app.core.utils.identifiers.StorageURI
 import org.archivekeep.utils.coroutines.shareResourceIn
+import org.archivekeep.utils.flows.logCollectionFlow
+import org.archivekeep.utils.flows.logCollectionLoadableFlow
 import org.archivekeep.utils.loading.mapToLoadable
 import java.io.File
 
@@ -31,16 +32,14 @@ class PreferenceDataStoreRegistryData(
     override val registeredRepositories =
         datastore.data
             .map(::getRepositoriesFromPreferences)
-            .onEach {
-                println("Loaded repositories: $it")
-            }.shareResourceIn(scope)
+            .logCollectionFlow("Loaded registered repositories")
+            .shareResourceIn(scope)
 
     override val registeredStorages =
         datastore.data
             .mapToLoadable(transform = ::getStoragesFromPreferences)
-            .onEach {
-                println("Loaded file system storages: $it")
-            }.shareResourceIn(scope)
+            .logCollectionLoadableFlow("Loaded registered storages")
+            .shareResourceIn(scope)
 
     override suspend fun updateStorage(
         uri: StorageURI,

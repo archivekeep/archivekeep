@@ -4,11 +4,11 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flatMapLatest
-import kotlinx.coroutines.flow.onEach
 import org.archivekeep.app.core.persistence.drivers.filesystem.FileStores
 import org.archivekeep.app.core.persistence.registry.RegisteredStorage
 import org.archivekeep.app.core.persistence.registry.RegistryDataStore
 import org.archivekeep.app.core.utils.identifiers.StorageURI
+import org.archivekeep.utils.flows.logCollectionLoadableFlow
 import org.archivekeep.utils.loading.Loadable
 import org.archivekeep.utils.loading.firstLoadedOrFailure
 import org.archivekeep.utils.loading.mapLoadedData
@@ -21,15 +21,15 @@ class KnownStorageService(
 ) : StorageRegistry {
     @OptIn(ExperimentalCoroutinesApi::class)
     val knownStorages: Flow<Loadable<List<KnownStorage>>> =
-        dataStore.registeredRepositories
+        dataStore
+            .registeredRepositories
             .flatMapLatest { repositories ->
-                println("Repositories: $repositories")
-
-                dataStore.registeredStorages
+                dataStore
+                    .registeredStorages
                     .mapLoadedData { registeredStorages ->
                         listOf(
-                            repositories.map { it.storageURI }.onEach { println("Repo URI: $it") },
-                            registeredStorages.map { it.uri }.onEach { println("Registered URI: $it") },
+                            repositories.map { it.storageURI },
+                            registeredStorages.map { it.uri },
                         ).flatten()
                             .toSet()
                             .map { storageURI ->
@@ -39,10 +39,9 @@ class KnownStorageService(
                                     registeredRepositories = repositories.filter { it.storageURI == storageURI },
                                 )
                             }
-                    }.onEach {
-                        println("Storages: $it")
                     }
-            }
+            }.logCollectionLoadableFlow("Loaded known storages")
+            .stateIn(scope)
 
     val knownStorageURIs =
         knownStorages

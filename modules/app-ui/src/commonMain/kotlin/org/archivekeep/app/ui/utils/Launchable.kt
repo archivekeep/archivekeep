@@ -48,9 +48,7 @@ inline fun <P> Launchable<P>.asAction(
         onLaunch = { with(this) { onLaunch() } },
         canLaunch = canLaunch(),
         isRunning = isRunning.value,
-    ).also {
-        println("Updated: ${it.canLaunch}")
-    }
+    )
 }
 
 fun <P> mockLaunchable(

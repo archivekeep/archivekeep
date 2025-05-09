@@ -2,15 +2,18 @@
 
 ## Unreleased
 
-### Changed:
-
-- UI: make style more lighter by removing shadows, and adjust dimensions
-
 ### Mitigations
+
+Android:
 
 - restart app after MANAGE_ALL_FILES_ACCESS_PERMISSION grant:
   - mitigates: adding external repository on USB drive fails if app is not restarted after permission grant,
   - cause: https://issuetracker.google.com/issues/203692313
+
+### Changed
+
+- UI: make style more lighter by removing shadows, and adjust dimensions
+- logging: a bit cleaner logs 
 
 ### Technical
 
