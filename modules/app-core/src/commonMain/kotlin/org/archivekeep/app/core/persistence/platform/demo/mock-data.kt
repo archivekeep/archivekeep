@@ -156,11 +156,11 @@ val phone =
             ),
     )
 
-val flashAll =
+val usbStickAll =
     DemoEnvironment.DemoPhysicalMedium(
         physicalID = "TODO",
         driveType = DriveType.HDD,
-        displayName = "Flash - All",
+        displayName = "USB Stick - All",
         isLocal = false,
         connectionStatus = Storage.ConnectionStatus.CONNECTED,
         repositories =
@@ -171,25 +171,24 @@ val flashAll =
             ),
     )
 
-val flashDocuments =
+val usbStickDocuments =
     DemoEnvironment.DemoPhysicalMedium(
         physicalID = "TODO",
         driveType = DriveType.HDD,
-        displayName = "Flash - Documents",
+        displayName = "USB Stick - Documents",
         isLocal = false,
         connectionStatus = Storage.ConnectionStatus.CONNECTED,
         repositories =
             listOf(
                 Documents,
-                Books,
             ),
     )
 
-val flashMusic =
+val usbStickMusic =
     DemoEnvironment.DemoPhysicalMedium(
         physicalID = "TODO",
         driveType = DriveType.HDD,
-        displayName = "Flash - Music",
+        displayName = "USB Stick - Music",
         isLocal = false,
         connectionStatus = Storage.ConnectionStatus.CONNECTED,
         repositories =

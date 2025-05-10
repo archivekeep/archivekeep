@@ -17,7 +17,8 @@ Android:
 
 ### Technical
 
-- added PNG icon for F-Droid ([issue](https://gitlab.com/fdroid/fdroidserver/-/issues/885))
+- add committed PNG icon for F-Droid ([issue](https://gitlab.com/fdroid/fdroidserver/-/issues/885))
+- add committed screenshot of home view for F-Droid
 
 ## 0.4.0 - 2025-04-29 - Initial Android application, and UI improvements
 

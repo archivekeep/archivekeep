@@ -8,10 +8,10 @@ import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
 import org.archivekeep.app.core.persistence.platform.demo.DemoEnvironment
-import org.archivekeep.app.core.persistence.platform.demo.flashAll
-import org.archivekeep.app.core.persistence.platform.demo.flashDocuments
-import org.archivekeep.app.core.persistence.platform.demo.flashMusic
 import org.archivekeep.app.core.persistence.platform.demo.phone
+import org.archivekeep.app.core.persistence.platform.demo.usbStickAll
+import org.archivekeep.app.core.persistence.platform.demo.usbStickDocuments
+import org.archivekeep.app.core.persistence.platform.demo.usbStickMusic
 import org.archivekeep.app.desktop.ui.testing.screenshots.runHighDensityComposeUiTest
 import org.archivekeep.app.desktop.ui.testing.screenshots.saveTestingContainerBitmap
 import org.archivekeep.app.desktop.ui.testing.screenshots.setContentInMobileScreenshotContainer
@@ -38,7 +38,7 @@ class MainWindowMobileScreenshotTest {
                     environmentFactory = { scope ->
                         DemoEnvironment(
                             scope,
-                            physicalMediaData = listOf(phone, flashAll, flashDocuments, flashMusic),
+                            physicalMediaData = listOf(phone, usbStickAll, usbStickDocuments, usbStickMusic),
                             enableSpeedLimit = false,
                         )
                     },
