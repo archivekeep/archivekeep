@@ -37,7 +37,6 @@ class MemorizingRepositoryReader(
                     onNotAvailable = { memorizedIndexFlow },
                 ) {
                     it.observable.indexFlow
-                        .conflate()
                         .onEach { accessedIndexLoadable ->
                             val accessedIndex = (accessedIndexLoadable as? Loadable.Loaded)?.value ?: return@onEach
 

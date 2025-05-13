@@ -133,7 +133,7 @@ class AddTest : CommandTestBase() {
                         *tc.args.toTypedArray(),
                     )
                 assertEquals(tc.out, out)
-                assertEquals(tc.resultingIndex, fileRepo().storedFiles())
+                assertEquals(tc.resultingIndex, fileRepo().indexedFilenames())
             }
         }
 
@@ -213,7 +213,7 @@ class AddTest : CommandTestBase() {
                         `in` = tc.`in`,
                     )
                 assertEquals(tc.out, out)
-                assertEquals(tc.resultingIndex, fileRepo().storedFiles())
+                assertEquals(tc.resultingIndex, fileRepo().indexedFilenames())
             }
         }
 }

@@ -1,13 +1,17 @@
 package org.archivekeep
 
+import kotlinx.coroutines.test.TestCoroutineScheduler
+import kotlinx.coroutines.test.TestScope
 import org.archivekeep.testing.fixtures.FixtureRepoBuilder
 import org.archivekeep.testing.storage.InMemoryRepo
+import org.archivekeep.utils.loading.Loadable
 import org.archivekeep.utils.sha256
 import org.junit.jupiter.api.assertAll
 import java.io.File
 import kotlin.io.path.createParentDirectories
 import kotlin.io.path.writeText
 import kotlin.test.fail
+import kotlin.time.Duration
 
 fun createArchiveWithContents(
     archiveTempDir: File,
@@ -78,4 +82,18 @@ fun assertRepositoryContents(
             )
         },
     )
+}
+
+fun TestCoroutineScheduler.advanceTimeByAndWaitForIdle(delayTime: Duration) {
+    advanceTimeBy(delayTime)
+    advanceUntilIdle()
+}
+
+fun TestScope.advanceTimeByAndWaitForIdle(delayTime: Duration) {
+    this.testScheduler.advanceTimeByAndWaitForIdle(delayTime)
+}
+
+fun <T> (Loadable<T>).assertLoaded(contentsAssert: (value: T) -> Unit) {
+    assert(this is Loadable.Loaded) { "Not loaded" }
+    contentsAssert((this as Loadable.Loaded).value)
 }

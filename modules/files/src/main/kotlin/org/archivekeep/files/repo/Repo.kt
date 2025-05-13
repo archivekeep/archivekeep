@@ -69,7 +69,7 @@ interface LocalRepo : Repo {
 
     suspend fun findAllFiles(globs: List<String>): List<Path>
 
-    suspend fun storedFiles(): List<String>
+    suspend fun indexedFilenames(): List<String>
 
     suspend fun verifyFileExists(path: String): Boolean
 

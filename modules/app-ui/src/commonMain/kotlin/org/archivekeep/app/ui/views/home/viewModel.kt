@@ -83,7 +83,7 @@ class HomeArchiveEntryViewModel(
                 indexStatusText =
                     indexStatus
                         .mapLoadedData {
-                            "${it.storedFiles.size} files${it.newFiles.size.let { if (it > 0) ", $it uncommitted" else "" }}"
+                            "${it.indexedFiles.size} files${it.newFiles.size.let { if (it > 0) ", $it uncommitted" else "" }}"
                         }.mapToLoadable {
                             Loadable.Failed(it.cause ?: RuntimeException("Expected status data"))
                         },

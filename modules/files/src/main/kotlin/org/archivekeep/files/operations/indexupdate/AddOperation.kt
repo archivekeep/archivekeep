@@ -72,7 +72,7 @@ class AddOperation(
             updateProgress { it.copy(errorFiles = filesWithWrongFilenames) }
 
             if (!disableMovesCheck) {
-                val storedFiles = localRepo.storedFiles().sorted()
+                val storedFiles = localRepo.indexedFilenames().sorted()
 
                 val missingIndexedFilesByChecksum =
                     storedFiles

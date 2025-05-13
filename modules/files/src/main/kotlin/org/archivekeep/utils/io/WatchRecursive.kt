@@ -3,27 +3,26 @@ package org.archivekeep.utils.io
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.NonCancellable
-import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.emitAll
 import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.isActive
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.runInterruptible
 import kotlinx.coroutines.withContext
 import java.nio.file.Path
 import java.nio.file.StandardWatchEventKinds
 import java.nio.file.WatchEvent
-import java.nio.file.WatchKey
 import java.nio.file.WatchService
 import java.nio.file.Watchable
 import kotlin.io.path.isDirectory
 
 fun (Path).watchRecursively(
     ioDispatcher: CoroutineDispatcher = Dispatchers.IO,
+    pollDispatcher: CoroutineDispatcher = Dispatchers.IO,
     log: Boolean = false,
 ): Flow<List<RecursiveWatchEvent>> =
     flow {
@@ -63,7 +62,7 @@ fun (Path).watchRecursively(
 
             val selfUpdatingFlow =
                 watchService
-                    .eventFlow(ioDispatcher)
+                    .eventFlow(pollDispatcher)
                     .onEach { (watchable, events) ->
                         val basePath =
                             (watchable as? Path) ?: run {
@@ -133,23 +132,17 @@ fun (Path).watchRecursively(
 /**
  * Creates a flow WatchEvent from a watchService
  */
-fun WatchService.eventFlow(ioDispatcher: CoroutineDispatcher = Dispatchers.IO): Flow<Pair<Watchable, List<WatchEvent<out Any>>>> =
+fun WatchService.eventFlow(pollDispatcher: CoroutineDispatcher = Dispatchers.IO): Flow<Pair<Watchable, List<WatchEvent<out Any>>>> =
     flow {
         while (currentCoroutineContext().isActive) {
-            coroutineScope {
-                var key: WatchKey? = null
-                val job =
-                    launch {
-                        runInterruptible(ioDispatcher) {
-                            key = take()
-                        }
-                    }
-                job.join()
-                val currentKey = key
-                if (currentKey != null) {
-                    emit(Pair(currentKey.watchable(), currentKey.pollEvents()))
-                    currentKey.reset()
+            val currentKey =
+                runInterruptible {
+                    take()
                 }
+
+            if (currentKey != null) {
+                emit(Pair(currentKey.watchable(), currentKey.pollEvents()))
+                currentKey.reset()
             }
         }
-    }
+    }.flowOn(pollDispatcher)

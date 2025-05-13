@@ -13,6 +13,7 @@ class StatusOperation(
         val localRepo = repo as? LocalRepo ?: throw NotLocalRepoException()
 
         val matchedFiles = localRepo.findAllFiles(subsetGlobs)
+        val storedFilesInRepo = localRepo.indexedFilenames()
 
         class FileStatus(
             val filename: String,
@@ -25,22 +26,22 @@ class StatusOperation(
 
                 FileStatus(
                     filename = invariantFilename,
-                    indexed = localRepo.contains(invariantFilename),
+                    indexed = storedFilesInRepo.contains(invariantFilename),
                 )
             }
 
         val newFiles = matchedFilesStatus.filter { !it.indexed }.map { it.filename }
-        val storedFiles = matchedFilesStatus.filter { it.indexed }.map { it.filename }
+        val indexedFiles = matchedFilesStatus.filter { it.indexed }.map { it.filename }
 
         return Result(
             newFiles = newFiles,
-            storedFiles = storedFiles,
+            indexedFiles = indexedFiles,
         )
     }
 
     class Result(
         val newFiles: List<String>,
-        val storedFiles: List<String>,
+        val indexedFiles: List<String>,
     ) {
         val hasChanges: Boolean
             get() = newFiles.isNotEmpty()

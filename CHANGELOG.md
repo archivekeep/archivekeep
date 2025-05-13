@@ -2,6 +2,16 @@
 
 ## Unreleased
 
+### Changes
+
+Performance:
+
+- index contents auto-refresh monitors only checksums dir (not all contents)
+
+### Technical
+
+- refactoring & tests
+
 ## 0.4.1 - 2025-05-10
 
 ### Mitigations

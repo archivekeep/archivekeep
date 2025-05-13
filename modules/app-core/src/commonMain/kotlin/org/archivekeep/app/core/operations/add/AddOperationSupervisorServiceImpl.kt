@@ -7,7 +7,6 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.conflate
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
 import org.archivekeep.app.core.domain.repositories.RepositoryService
@@ -47,7 +46,6 @@ class AddOperationSupervisorServiceImpl(
                 .accessorFlow
                 .flatMapLoadableFlow { repositoryAccess ->
                     repositoryAccess.observable.indexFlow
-                        .conflate()
                         .flatMapLoadableFlow {
                             AddOperation(
                                 subsetGlobs = listOf("."),

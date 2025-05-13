@@ -56,7 +56,7 @@ kotlin {
             dependencies {
                 implementation(compose.desktop.currentOs)
 
-                implementation("org.jetbrains.kotlin:kotlin-test")
+                implementation(libs.kotlin.test)
                 implementation(compose.desktop.uiTestJUnit4)
             }
         }

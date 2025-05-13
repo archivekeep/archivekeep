@@ -28,7 +28,9 @@ dependencies {
 
     compileOnly(libs.apache.tomcat.annotations)
 
-    testImplementation("org.jetbrains.kotlin:kotlin-test")
+    testImplementation(libs.kotlin.test)
+    testImplementation(libs.kotlinx.coroutines.test)
+    testImplementation(libs.junit.jupiter)
 }
 
 tasks.named<Test>("test") {

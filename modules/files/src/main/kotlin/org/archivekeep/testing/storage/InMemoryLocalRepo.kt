@@ -2,13 +2,14 @@ package org.archivekeep.testing.storage
 
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.transform
 import kotlinx.coroutines.flow.update
 import org.archivekeep.files.exceptions.FileDoesntExist
 import org.archivekeep.files.operations.StatusOperation
 import org.archivekeep.files.repo.LocalRepo
 import org.archivekeep.files.repo.ObservableWorkingRepo
 import org.archivekeep.files.repo.RepositoryMetadata
+import org.archivekeep.utils.loading.Loadable
+import org.archivekeep.utils.loading.mapToLoadable
 import org.archivekeep.utils.sha256
 import java.nio.file.Path
 import kotlin.io.path.invariantSeparatorsPathString
@@ -30,7 +31,7 @@ open class InMemoryLocalRepo(
         return (contents.keys + unindexedFiles.value.keys).map { Path.of(it) }
     }
 
-    override suspend fun storedFiles(): List<String> =
+    override suspend fun indexedFilenames(): List<String> =
         this.contents.keys
             .toList()
             .sorted()
@@ -67,9 +68,9 @@ open class InMemoryLocalRepo(
     override val observable: ObservableWorkingRepo
         get() = this
 
-    override val localIndex: Flow<StatusOperation.Result> =
+    override val localIndex: Flow<Loadable<StatusOperation.Result>> =
         unindexedFiles
-            .transform {
-                emit(StatusOperation(listOf("*")).execute(this@InMemoryLocalRepo))
+            .mapToLoadable {
+                StatusOperation(listOf("*")).execute(this@InMemoryLocalRepo)
             }
 }

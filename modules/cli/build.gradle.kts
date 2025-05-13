@@ -19,7 +19,7 @@ dependencies {
 
     implementation(libs.kotlinx.coroutines.core)
 
-    testImplementation("org.jetbrains.kotlin:kotlin-test")
+    testImplementation(libs.kotlin.test)
     testImplementation(libs.kotlinx.coroutines.test)
 }
 

@@ -22,7 +22,7 @@ import org.archivekeep.app.core.utils.generics.firstFinished
 import org.archivekeep.app.core.utils.generics.flatMapLatestLoadedData
 import org.archivekeep.app.core.utils.generics.mapIfLoadedOrNull
 import org.archivekeep.app.core.utils.generics.mapLoaded
-import org.archivekeep.app.core.utils.generics.mapToOptionalLoadable
+import org.archivekeep.app.core.utils.generics.mapLoadedDataAsOptional
 import org.archivekeep.app.core.utils.generics.stateIn
 import org.archivekeep.app.core.utils.identifiers.RepositoryURI
 import org.archivekeep.app.core.utils.mapAsLoadable
@@ -154,7 +154,7 @@ class Repository(
     @OptIn(ExperimentalCoroutinesApi::class)
     val localRepoStatus =
         localRepoAccessorFlow
-            .flatMapLatestLoadedData { repo -> repo.observable.localIndex.mapToOptionalLoadable { it } }
+            .flatMapLatestLoadedData { repo -> repo.observable.localIndex.mapLoadedDataAsOptional { it } }
             .stateIn(scope)
 
     suspend fun unlock(

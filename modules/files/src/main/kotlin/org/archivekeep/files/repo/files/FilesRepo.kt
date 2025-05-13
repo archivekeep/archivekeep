@@ -1,21 +1,42 @@
 package org.archivekeep.files.repo.files
 
 import computeChecksum
+import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.NonCancellable
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.conflate
+import kotlinx.coroutines.flow.debounce
+import kotlinx.coroutines.flow.flowOn
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.onStart
+import kotlinx.coroutines.flow.transform
 import kotlinx.coroutines.withContext
 import kotlinx.coroutines.yield
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.decodeFromStream
-import org.archivekeep.files.exceptions.FileDoesntExist
+import org.archivekeep.files.exceptions.DestinationExists
 import org.archivekeep.files.exceptions.NotRegularFilePath
+import org.archivekeep.files.operations.StatusOperation
 import org.archivekeep.files.repo.ArchiveFileInfo
 import org.archivekeep.files.repo.LocalRepo
 import org.archivekeep.files.repo.ObservableWorkingRepo
 import org.archivekeep.files.repo.RepoIndex
 import org.archivekeep.files.repo.RepositoryMetadata
+import org.archivekeep.utils.coroutines.shareResourceIn
+import org.archivekeep.utils.coroutines.sharedResourceInGlobalScope
+import org.archivekeep.utils.flows.logResourceLoad
+import org.archivekeep.utils.io.watchRecursively
+import org.archivekeep.utils.loading.Loadable
+import org.archivekeep.utils.loading.flatMapLoadableFlow
+import org.archivekeep.utils.loading.mapToLoadable
 import org.archivekeep.utils.safeFileReadWrite
 import safeSubPath
 import java.io.InputStream
@@ -31,9 +52,7 @@ import kotlin.io.path.Path
 import kotlin.io.path.createDirectory
 import kotlin.io.path.createParentDirectories
 import kotlin.io.path.deleteExisting
-import kotlin.io.path.deleteIfExists
 import kotlin.io.path.exists
-import kotlin.io.path.extension
 import kotlin.io.path.fileSize
 import kotlin.io.path.inputStream
 import kotlin.io.path.invariantSeparatorsPathString
@@ -42,17 +61,26 @@ import kotlin.io.path.isRegularFile
 import kotlin.io.path.moveTo
 import kotlin.io.path.readText
 import kotlin.io.path.relativeTo
-import kotlin.io.path.writeText
 import kotlin.streams.asSequence
+import kotlin.time.Duration
+import kotlin.time.Duration.Companion.milliseconds
 
 const val ignorePatternsFileName = ".archivekeepignore"
+
+const val checksumsSubDir = "checksums"
 
 class FilesRepo(
     val root: Path,
     internal val archiveRoot: Path = root.resolve(".archive"),
-    internal val checksumsRoot: Path = archiveRoot.resolve("checksums"),
-) : LocalRepo {
-    internal val metadataPath = root.resolve(".archive").resolve("metadata.json")
+    checksumsRoot: Path = archiveRoot.resolve(checksumsSubDir),
+    stateDispatcher: CoroutineDispatcher = Dispatchers.Default,
+    ioDispatcher: CoroutineDispatcher = Dispatchers.IO,
+) : LocalRepo, ObservableWorkingRepo {
+    private val metadataPath = root.resolve(".archive").resolve("metadata.json")
+
+    private val indexStore = FilesystemIndexStore(checksumsRoot, ioDispatcher = ioDispatcher)
+
+    private val scope = CoroutineScope(SupervisorJob() + stateDispatcher)
 
     override suspend fun findAllFiles(globs: List<String>): List<Path> {
         val matchers =
@@ -94,14 +122,7 @@ class FilesRepo(
             }.toList()
     }
 
-    override suspend fun storedFiles(): List<String> =
-        Files
-            .walk(checksumsRoot)
-            .asSequence()
-            .filter { it.isRegularFile() && it.extension == "sha256" }
-            .map { it.relativeTo(checksumsRoot).invariantSeparatorsPathString.removeSuffix(".sha256") }
-            .toList()
-            .sorted()
+    override suspend fun indexedFilenames(): List<String> = indexStore.all()
 
     override suspend fun verifyFileExists(path: String): Boolean {
         val fullPath = root.resolve(safeSubPath(path))
@@ -109,12 +130,7 @@ class FilesRepo(
         return fullPath.exists() && fullPath.isRegularFile()
     }
 
-    override suspend fun fileChecksum(path: String): String {
-        val fullChecksumPath = checksumsRoot.resolve("${safeSubPath(path)}.sha256")
-        val checksumContents = fullChecksumPath.readText()
-
-        return checksumContents.split(" ", limit = 2)[0]
-    }
+    override suspend fun fileChecksum(path: String): String = indexStore.fileChecksum(path)
 
     override suspend fun computeFileChecksum(path: Path): String {
         val fullPath = root.resolve(safeSubPath(path))
@@ -126,51 +142,41 @@ class FilesRepo(
         val fullPath = root.resolve(safeSubPath(path))
         val checksum = computeChecksum(fullPath)
 
-        storeFileChecksum(path, checksum)
+        indexStore.storeFileChecksum(path, checksum)
     }
 
     override suspend fun delete(filename: String) {
         val fullPath = root.resolve(safeSubPath(filename))
-        val checksumPath = getChecksumPath(filename)
 
         if (!fullPath.isRegularFile()) {
             throw NotRegularFilePath(fullPath.toString())
         }
-        if (!checksumPath.isRegularFile()) {
-            throw NotRegularFilePath(checksumPath.toString())
-        }
 
         fullPath.deleteExisting()
-        checksumPath.deleteExisting()
+        indexStore.remove(filename)
     }
 
     override suspend fun remove(path: String) {
-        val checksumPath = getChecksumPath(path)
-
-        if (!checksumPath.isRegularFile()) {
-            throw NotRegularFilePath(checksumPath.toString())
-        }
-
-        checksumPath.deleteIfExists()
+        indexStore.remove(path)
     }
 
     override suspend fun move(
         from: String,
         to: String,
     ) {
-        val dstPath = root.resolve(safeSubPath(to))
-        if (dstPath.exists()) {
-            throw FileDoesntExist(to)
+        withContext(Dispatchers.IO) {
+            val dstPath = root.resolve(safeSubPath(to))
+            if (dstPath.exists()) {
+                throw DestinationExists(to)
+            }
+
+            val move = indexStore.beginMove(from, to)
+
+            dstPath.createParentDirectories()
+            root.resolve(from).moveTo(dstPath)
+
+            move.completed()
         }
-
-        val checksum = this.fileChecksum(from)
-        this.storeFileChecksum(to, checksum)
-
-        dstPath.createParentDirectories()
-
-        root.resolve(from).moveTo(dstPath)
-
-        getChecksumPath(from).deleteExisting()
     }
 
     override suspend fun open(filename: String): Pair<ArchiveFileInfo, InputStream> {
@@ -233,8 +239,7 @@ class FilesRepo(
                     throw RuntimeException("copied file has wrong checksum: got=$realChecksum, expected=${info.checksumSha256}")
                 }
 
-                cleanup.files.add(0, getChecksumPath(filename))
-                storeFileChecksum(filename, info.checksumSha256)
+                indexStore.storeChecksumForSave(cleanup, filename, info.checksumSha256)
 
                 cleanup.cancel()
             } finally {
@@ -274,47 +279,15 @@ class FilesRepo(
         }
     }
 
-    private fun storeFileChecksum(
-        path: String,
-        checksum: String,
-    ) {
-        val checksumPath = getChecksumPath(path)
+    override suspend fun contains(path: String): Boolean =
+        withContext(Dispatchers.IO) {
+            val fullPath = root.resolve(safeSubPath(path))
 
-        checksumPath.createParentDirectories()
-
-        checksumPath.writeText(
-            "$checksum ${Path(path).invariantSeparatorsPathString}\n",
-            options =
-                arrayOf(
-                    StandardOpenOption.CREATE_NEW,
-                    StandardOpenOption.SYNC,
-                ),
-        )
-    }
-
-    override suspend fun contains(path: String): Boolean {
-        val checksumPath = getChecksumPath(path)
-        val fullPath = root.resolve(safeSubPath(path))
-
-        return checksumPath.isRegularFile() && fullPath.isRegularFile()
-    }
-
-    private fun getChecksumPath(path: String) = Path("${checksumsRoot.resolve(safeSubPath(path))}.sha256")
+            indexStore.contains(path) && fullPath.isRegularFile()
+        }
 
     override suspend fun index(): RepoIndex {
-        val files =
-            Files
-                .walk(checksumsRoot)
-                .asSequence()
-                .filter { it.isRegularFile() && it.extension == "sha256" }
-                .map {
-                    RepoIndex.File(
-                        path = it.relativeTo(checksumsRoot).invariantSeparatorsPathString.removeSuffix(".sha256"),
-                        checksumSha256 = it.readText().split(" ", limit = 2)[0],
-                    )
-                }.toList()
-
-        return RepoIndex(files)
+        return indexStore.index()
     }
 
     private fun loadIgnorePatterns(): List<PathMatcher> {
@@ -332,13 +305,76 @@ class FilesRepo(
             .map { FileSystems.getDefault().getPathMatcher("glob:$it") }
     }
 
-    override val observable: ObservableWorkingRepo by lazy {
-        ObservableFilesRepo(this)
-    }
+    override val observable: ObservableWorkingRepo = this
+
+    val throttlePauseDuration: Duration = 500.milliseconds
+
+    private val calculationCause =
+        root
+            .watchRecursively(ioDispatcher)
+            .debounce(100.milliseconds)
+            .map { "update" }
+            .sharedResourceInGlobalScope()
+            .onStart { emit("start") }
+
+    @OptIn(ExperimentalCoroutinesApi::class)
+    override val localIndex: Flow<Loadable<StatusOperation.Result>> =
+        indexStore
+            .indexFlow
+            .flatMapLoadableFlow { index ->
+                val indexFiles = index.files.map { it.path }.toSet()
+
+                calculationCause
+                    .conflate()
+                    .mapToLoadable {
+                        val allFiles =
+                            findAllFiles(listOf("*")).map {
+                                it.invariantSeparatorsPathString
+                            }
+
+                        StatusOperation.Result(
+                            newFiles = allFiles.filter { !indexFiles.contains(it) },
+                            indexedFiles = allFiles.filter { indexFiles.contains(it) },
+                        )
+                    }
+            }
+            .logResourceLoad("Local status:  $root")
+            .flowOn(ioDispatcher)
+            .shareResourceIn(scope)
+
+    override val indexFlow = indexStore.indexFlow
+
+    override val metadataFlow: Flow<Loadable<RepositoryMetadata>> =
+        archiveRoot
+            .watchRecursively(ioDispatcher)
+            .map { "update" }
+            .onStart { emit("start") }
+            .conflate()
+            .map {
+                if (metadataPath.exists()) {
+                    Loadable.Loaded(Json.decodeFromString<RepositoryMetadata>(metadataPath.readText())) as Loadable<RepositoryMetadata>
+                } else {
+                    if (archiveRoot.exists()) {
+                        Loadable.Loaded(RepositoryMetadata())
+                    } else {
+                        throw RuntimeException("Something went wrong")
+                    }
+                }
+            }.catch { e: Throwable ->
+                emit(Loadable.Failed(e))
+            }.transform {
+                emit(it)
+
+                // throttle
+                delay(throttlePauseDuration)
+            }.catch { emit(Loadable.Failed(it)) }
+            .logResourceLoad("Metadata:  $root")
+            .flowOn(Dispatchers.IO)
+            .shareResourceIn(scope)
 }
 
 fun openFilesRepoOrNull(path: Path): FilesRepo? {
-    val checksumDir = path.resolve(".archive").resolve("checksums")
+    val checksumDir = path.resolve(".archive").resolve(checksumsSubDir)
 
     if (checksumDir.isDirectory()) {
         return FilesRepo(

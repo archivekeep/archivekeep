@@ -1,6 +1,9 @@
 package org.archivekeep.testing.storage
 
-import kotlinx.coroutines.DelicateCoroutinesApi
+import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.first
@@ -14,18 +17,21 @@ import org.archivekeep.files.repo.Repo
 import org.archivekeep.files.repo.RepoIndex
 import org.archivekeep.files.repo.RepositoryMetadata
 import org.archivekeep.testing.fixtures.FixtureRepo
-import org.archivekeep.utils.coroutines.sharedResourceInGlobalScope
 import org.archivekeep.utils.loading.Loadable
 import org.archivekeep.utils.loading.firstLoadedOrFailure
 import org.archivekeep.utils.loading.mapToLoadable
+import org.archivekeep.utils.loading.stateIn
 import org.archivekeep.utils.sha256
 import java.io.InputStream
 
 open class InMemoryRepo(
     initialContents: Map<String, ByteArray> = mapOf(),
     metadata: RepositoryMetadata = RepositoryMetadata(),
+    stateDispatcher: CoroutineDispatcher = Dispatchers.Default,
 ) : Repo,
     ObservableRepo {
+    private val scope = CoroutineScope(SupervisorJob() + stateDispatcher)
+
     val contentsFlow = MutableStateFlow(initialContents)
 
     val contents: Map<String, ByteArray>
@@ -33,7 +39,6 @@ open class InMemoryRepo(
 
     suspend fun contains(path: String): Boolean = contents.containsKey(path)
 
-    @OptIn(DelicateCoroutinesApi::class)
     override val indexFlow =
         contentsFlow
             .mapToLoadable { contents ->
@@ -45,7 +50,8 @@ open class InMemoryRepo(
                         )
                     },
                 )
-            }.sharedResourceInGlobalScope()
+            }
+            .stateIn(scope)
 
     private val _metadataFlow = MutableStateFlow(metadata)
 

@@ -68,9 +68,9 @@ class Status : Callable<Int> {
             }
 
             if (globs.isNotEmpty()) {
-                out.println("Files indexed in archive matching globs: ${result.storedFiles.size}")
+                out.println("Files indexed in archive matching globs: ${result.indexedFiles.size}")
             } else {
-                out.println("Total indexed files in archive: ${result.storedFiles.size}")
+                out.println("Total indexed files in archive: ${result.indexedFiles.size}")
             }
 
             return@runBlocking 0

@@ -63,8 +63,8 @@ class SpeedLimitedLocalRepoWrapper(
             delay(lessThanLinearlyIncreasing(it.size))
         }
 
-    override suspend fun storedFiles(): List<String> =
-        base.storedFiles().also {
+    override suspend fun indexedFilenames(): List<String> =
+        base.indexedFilenames().also {
             delay(lessThanLinearlyIncreasing(it.size))
         }
 
