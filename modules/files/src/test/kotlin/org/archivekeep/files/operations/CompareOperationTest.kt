@@ -1,7 +1,7 @@
 package org.archivekeep.files.operations
 
 import kotlinx.coroutines.runBlocking
-import org.archivekeep.createArchiveWithContents
+import org.archivekeep.files.createArchiveWithContents
 import org.archivekeep.files.repo.files.FilesRepo
 import org.junit.jupiter.api.Assertions.assertIterableEquals
 import org.junit.jupiter.api.Test

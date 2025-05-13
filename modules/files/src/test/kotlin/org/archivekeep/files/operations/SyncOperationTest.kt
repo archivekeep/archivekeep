@@ -1,7 +1,7 @@
 package org.archivekeep.files.operations
 
 import kotlinx.coroutines.runBlocking
-import org.archivekeep.assertRepositoryContents
+import org.archivekeep.files.assertRepositoryContents
 import org.archivekeep.files.operations.sync.NewFilesSyncStep.CopyNewFileSubOperation
 import org.archivekeep.files.operations.sync.RelocationSyncMode
 import org.archivekeep.files.operations.sync.RelocationsMoveApplySyncStep.RelocationApplySubOperation

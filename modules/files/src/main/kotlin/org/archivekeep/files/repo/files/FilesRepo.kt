@@ -369,7 +369,7 @@ class FilesRepo(
                 delay(throttlePauseDuration)
             }.catch { emit(Loadable.Failed(it)) }
             .logResourceLoad("Metadata:  $root")
-            .flowOn(Dispatchers.IO)
+            .flowOn(ioDispatcher)
             .shareResourceIn(scope)
 }
 

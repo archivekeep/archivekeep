@@ -25,14 +25,18 @@ import org.archivekeep.utils.sha256
 import java.io.InputStream
 
 open class InMemoryRepo(
-    initialContents: Map<String, ByteArray> = mapOf(),
-    metadata: RepositoryMetadata = RepositoryMetadata(),
     stateDispatcher: CoroutineDispatcher = Dispatchers.Default,
+    protected val _metadataFlow: MutableStateFlow<RepositoryMetadata>,
+    protected val contentsFlow: MutableStateFlow<Map<String, ByteArray>>,
 ) : Repo,
     ObservableRepo {
-    private val scope = CoroutineScope(SupervisorJob() + stateDispatcher)
+    constructor(
+        initialContents: Map<String, ByteArray> = mapOf(),
+        metadata: RepositoryMetadata = RepositoryMetadata(),
+        stateDispatcher: CoroutineDispatcher = Dispatchers.Default,
+    ) : this(stateDispatcher, MutableStateFlow(metadata), MutableStateFlow(initialContents))
 
-    val contentsFlow = MutableStateFlow(initialContents)
+    private val scope = CoroutineScope(SupervisorJob() + stateDispatcher)
 
     val contents: Map<String, ByteArray>
         get() = contentsFlow.value
@@ -52,8 +56,6 @@ open class InMemoryRepo(
                 )
             }
             .stateIn(scope)
-
-    private val _metadataFlow = MutableStateFlow(metadata)
 
     override val metadataFlow: Flow<Loadable<RepositoryMetadata>> =
         _metadataFlow.map { Loadable.Loaded(it) }

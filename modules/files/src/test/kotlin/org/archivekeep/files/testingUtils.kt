@@ -1,4 +1,4 @@
-package org.archivekeep
+package org.archivekeep.files
 
 import kotlinx.coroutines.test.TestCoroutineScheduler
 import kotlinx.coroutines.test.TestScope

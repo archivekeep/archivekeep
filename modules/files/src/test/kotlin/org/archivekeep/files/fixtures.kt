@@ -1,4 +1,4 @@
-package org.archivekeep
+package org.archivekeep.files
 
 import org.archivekeep.files.repo.Repo
 
