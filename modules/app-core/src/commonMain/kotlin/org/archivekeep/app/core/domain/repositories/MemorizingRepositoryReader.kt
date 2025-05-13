@@ -36,7 +36,7 @@ class MemorizingRepositoryReader(
                 .flatMapLatestLoadedData(
                     onNotAvailable = { memorizedIndexFlow },
                 ) {
-                    it.observable.indexFlow
+                    it.indexFlow
                         .onEach { accessedIndexLoadable ->
                             val accessedIndex = (accessedIndexLoadable as? Loadable.Loaded)?.value ?: return@onEach
 
@@ -64,7 +64,7 @@ class MemorizingRepositoryReader(
                 .flatMapLatestLoadedData(
                     onNotAvailable = { memorizedMetadataFlow },
                 ) {
-                    it.observable.metadataFlow
+                    it.metadataFlow
                         .conflate()
                         .flatMapLatest { metadataLoadable ->
                             when (metadataLoadable) {

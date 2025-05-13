@@ -45,7 +45,7 @@ class AddOperationSupervisorServiceImpl(
                 .getRepository(repositoryURI)
                 .accessorFlow
                 .flatMapLoadableFlow { repositoryAccess ->
-                    repositoryAccess.observable.indexFlow
+                    repositoryAccess.indexFlow
                         .flatMapLoadableFlow {
                             AddOperation(
                                 subsetGlobs = listOf("."),

@@ -6,7 +6,6 @@ import kotlinx.coroutines.flow.update
 import org.archivekeep.files.exceptions.FileDoesntExist
 import org.archivekeep.files.operations.StatusOperation
 import org.archivekeep.files.repo.LocalRepo
-import org.archivekeep.files.repo.ObservableWorkingRepo
 import org.archivekeep.files.repo.RepositoryMetadata
 import org.archivekeep.utils.loading.Loadable
 import org.archivekeep.utils.loading.mapToLoadable
@@ -19,8 +18,7 @@ open class InMemoryLocalRepo(
     initialUnindexedContents: Map<String, ByteArray> = mapOf(),
     metadata: RepositoryMetadata = RepositoryMetadata(),
 ) : InMemoryRepo(initialContents, metadata),
-    LocalRepo,
-    ObservableWorkingRepo {
+    LocalRepo {
     val unindexedFiles = MutableStateFlow(initialUnindexedContents)
 
     override suspend fun findAllFiles(globs: List<String>): List<Path> {
@@ -64,9 +62,6 @@ open class InMemoryLocalRepo(
     override suspend fun remove(path: String) {
         TODO("Not yet implemented")
     }
-
-    override val observable: ObservableWorkingRepo
-        get() = this
 
     override val localIndex: Flow<Loadable<StatusOperation.Result>> =
         unindexedFiles

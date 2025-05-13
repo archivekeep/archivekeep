@@ -154,7 +154,7 @@ class Repository(
     @OptIn(ExperimentalCoroutinesApi::class)
     val localRepoStatus =
         localRepoAccessorFlow
-            .flatMapLatestLoadedData { repo -> repo.observable.localIndex.mapLoadedDataAsOptional { it } }
+            .flatMapLatestLoadedData { repo -> repo.localIndex.mapLoadedDataAsOptional { it } }
             .stateIn(scope)
 
     suspend fun unlock(

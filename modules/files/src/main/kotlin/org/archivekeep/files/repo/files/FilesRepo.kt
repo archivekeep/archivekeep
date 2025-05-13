@@ -27,7 +27,6 @@ import org.archivekeep.files.exceptions.NotRegularFilePath
 import org.archivekeep.files.operations.StatusOperation
 import org.archivekeep.files.repo.ArchiveFileInfo
 import org.archivekeep.files.repo.LocalRepo
-import org.archivekeep.files.repo.ObservableWorkingRepo
 import org.archivekeep.files.repo.RepoIndex
 import org.archivekeep.files.repo.RepositoryMetadata
 import org.archivekeep.utils.coroutines.shareResourceIn
@@ -75,7 +74,7 @@ class FilesRepo(
     checksumsRoot: Path = archiveRoot.resolve(checksumsSubDir),
     stateDispatcher: CoroutineDispatcher = Dispatchers.Default,
     ioDispatcher: CoroutineDispatcher = Dispatchers.IO,
-) : LocalRepo, ObservableWorkingRepo {
+) : LocalRepo {
     private val metadataPath = root.resolve(".archive").resolve("metadata.json")
 
     private val indexStore = FilesystemIndexStore(checksumsRoot, ioDispatcher = ioDispatcher)
@@ -304,8 +303,6 @@ class FilesRepo(
             .filter { it.isNotEmpty() && !it.startsWith("#") }
             .map { FileSystems.getDefault().getPathMatcher("glob:$it") }
     }
-
-    override val observable: ObservableWorkingRepo = this
 
     val throttlePauseDuration: Duration = 500.milliseconds
 

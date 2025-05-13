@@ -25,7 +25,6 @@ import org.archivekeep.files.internal.grpc.headOrNull
 import org.archivekeep.files.internal.grpc.listArchiveFilesRequest
 import org.archivekeep.files.internal.grpc.uploadArchiveFileRequest
 import org.archivekeep.files.repo.ArchiveFileInfo
-import org.archivekeep.files.repo.ObservableRepo
 import org.archivekeep.files.repo.Repo
 import org.archivekeep.files.repo.RepoIndex
 import org.archivekeep.files.repo.RepositoryMetadata
@@ -48,9 +47,7 @@ class RemoteGrpcRepository(
     private val scope: CoroutineScope = CoroutineScope(Dispatchers.IO),
     // TODO: subscription to remote
     private val modifChannel: MutableSharedFlow<Date> = MutableStateFlow(Date()),
-) : Repo,
-    Closeable,
-    ObservableRepo {
+) : Repo, Closeable {
     private val remoteService = ArchiveServiceGrpcKt.ArchiveServiceCoroutineStub(channel)
 
     override fun close() {
@@ -218,8 +215,6 @@ class RemoteGrpcRepository(
         throw UnsupportedFeatureException("Update GRPC repository metadata")
 
     fun fileReferenceName(filename: String): String = "$archiveName/files/$filename"
-
-    override val observable: ObservableRepo = this
 
     override val indexFlow =
         modifChannel

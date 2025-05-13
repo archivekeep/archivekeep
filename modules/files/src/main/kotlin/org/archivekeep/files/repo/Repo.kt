@@ -1,8 +1,12 @@
 package org.archivekeep.files.repo
 
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.Transient
 import org.archivekeep.files.RepositoryAssociationGroupId
+import org.archivekeep.files.operations.StatusOperation
+import org.archivekeep.utils.loading.Loadable
 import java.io.InputStream
 import java.nio.file.Path
 
@@ -40,6 +44,9 @@ data class RepositoryMetadata(
 )
 
 interface Repo {
+    val indexFlow: StateFlow<Loadable<RepoIndex>>
+    val metadataFlow: Flow<Loadable<RepositoryMetadata>>
+
     suspend fun index(): RepoIndex
 
     suspend fun move(
@@ -60,11 +67,11 @@ interface Repo {
     suspend fun getMetadata(): RepositoryMetadata
 
     suspend fun updateMetadata(transform: (old: RepositoryMetadata) -> RepositoryMetadata)
-
-    val observable: ObservableRepo
 }
 
 interface LocalRepo : Repo {
+    val localIndex: Flow<Loadable<StatusOperation.Result>>
+
     suspend fun contains(path: String): Boolean
 
     suspend fun findAllFiles(globs: List<String>): List<Path>
@@ -80,6 +87,4 @@ interface LocalRepo : Repo {
     suspend fun add(path: String)
 
     suspend fun remove(path: String)
-
-    override val observable: ObservableWorkingRepo
 }

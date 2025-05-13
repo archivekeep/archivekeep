@@ -36,7 +36,6 @@ abstract class RepoContractTest<T : Repo> {
 
             val indexFlowState =
                 repoAccessor
-                    .observable
                     .indexFlow
                     .stateIn(backgroundScope, SharingStarted.Eagerly)
 
@@ -86,7 +85,6 @@ abstract class RepoContractTest<T : Repo> {
 
                 val metadataFlowState =
                     repoAccessor
-                        .observable
                         .metadataFlow
                         .stateIn(backgroundScope, SharingStarted.Eagerly)
 
@@ -112,7 +110,6 @@ abstract class RepoContractTest<T : Repo> {
 
                 val metadataFlowState =
                     repoAccessor
-                        .observable
                         .metadataFlow
                         .stateIn(backgroundScope, SharingStarted.Eagerly)
 

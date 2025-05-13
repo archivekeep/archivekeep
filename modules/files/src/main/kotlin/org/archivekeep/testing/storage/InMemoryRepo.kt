@@ -12,7 +12,6 @@ import kotlinx.coroutines.flow.update
 import org.archivekeep.files.exceptions.DestinationExists
 import org.archivekeep.files.exceptions.FileDoesntExist
 import org.archivekeep.files.repo.ArchiveFileInfo
-import org.archivekeep.files.repo.ObservableRepo
 import org.archivekeep.files.repo.Repo
 import org.archivekeep.files.repo.RepoIndex
 import org.archivekeep.files.repo.RepositoryMetadata
@@ -28,8 +27,7 @@ open class InMemoryRepo(
     stateDispatcher: CoroutineDispatcher = Dispatchers.Default,
     protected val _metadataFlow: MutableStateFlow<RepositoryMetadata>,
     protected val contentsFlow: MutableStateFlow<Map<String, ByteArray>>,
-) : Repo,
-    ObservableRepo {
+) : Repo {
     constructor(
         initialContents: Map<String, ByteArray> = mapOf(),
         metadata: RepositoryMetadata = RepositoryMetadata(),
@@ -125,8 +123,6 @@ open class InMemoryRepo(
     override suspend fun updateMetadata(transform: (old: RepositoryMetadata) -> RepositoryMetadata) {
         _metadataFlow.update { transform(it) }
     }
-
-    override val observable: ObservableRepo = this
 }
 
 fun FixtureRepo.toInMemoryRepo(): InMemoryRepo = InMemoryRepo(this.contents.mapValues { (_, v) -> v.toByteArray() })

@@ -11,7 +11,7 @@ import kotlin.math.nextUp
 
 class SpeedLimitedRepoWrapper(
     val base: Repo,
-) : Repo {
+) : Repo by base {
     override suspend fun index(): RepoIndex {
         val result = base.index()
 
@@ -68,7 +68,4 @@ class SpeedLimitedRepoWrapper(
     }
 
     private fun logDescending(v: Int): Long = v / log10((v * 1000).toDouble()).nextUp().toLong()
-
-    override val observable
-        get() = base.observable
 }

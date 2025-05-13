@@ -4,7 +4,6 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.flow
 import org.archivekeep.files.repo.ArchiveFileInfo
-import org.archivekeep.files.repo.ObservableRepo
 import org.archivekeep.files.repo.Repo
 import org.archivekeep.files.repo.RepoIndex
 import org.archivekeep.files.repo.RepositoryMetadata
@@ -15,8 +14,7 @@ import java.io.InputStream
 class FixtureRepo(
     val contents: Map<String, String>,
     val uncommittedContents: Map<String, String> = emptyMap(),
-) : Repo,
-    ObservableRepo {
+) : Repo {
     val _index by lazy {
         RepoIndex(
             contents.entries.map {
@@ -66,8 +64,6 @@ class FixtureRepo(
         builder.modifications()
         return builder.build()
     }
-
-    override val observable: ObservableRepo = this
 
     override val indexFlow = MutableStateFlow(Loadable.Loaded(_index))
 

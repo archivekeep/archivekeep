@@ -12,7 +12,7 @@ import kotlin.math.nextUp
 
 class SpeedLimitedLocalRepoWrapper(
     val base: LocalRepo,
-) : LocalRepo {
+) : LocalRepo by base {
     override suspend fun index(): RepoIndex =
         base.index().also {
             delay(lessThanLinearlyIncreasing(it.files.size))
@@ -105,7 +105,4 @@ class SpeedLimitedLocalRepoWrapper(
     }
 
     private fun lessThanLinearlyIncreasing(v: Int): Long = v / log10((v * 1000).toDouble()).nextUp().toLong()
-
-    override val observable
-        get() = base.observable
 }
