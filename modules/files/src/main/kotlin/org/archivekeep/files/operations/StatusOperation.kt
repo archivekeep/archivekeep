@@ -39,7 +39,7 @@ class StatusOperation(
         )
     }
 
-    class Result(
+    data class Result(
         val newFiles: List<String>,
         val indexedFiles: List<String>,
     ) {

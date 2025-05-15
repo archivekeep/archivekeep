@@ -2,10 +2,15 @@
 
 ## Unreleased
 
+### Fixes
+
+- blinking or showing "1 uncommitted file" during copy operations
+
 ### Changes
 
 Performance:
 
+- pause checking of local index status (uncommitted files) during save (copy) operation 
 - index contents auto-refresh monitors only checksums dir (not all contents)
 
 ### Technical

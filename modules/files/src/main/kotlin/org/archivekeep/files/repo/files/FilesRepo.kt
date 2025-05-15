@@ -1,20 +1,25 @@
 package org.archivekeep.files.repo.files
 
-import computeChecksum
 import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.CoroutineName
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.conflate
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onStart
+import kotlinx.coroutines.flow.shareIn
 import kotlinx.coroutines.flow.transform
 import kotlinx.coroutines.withContext
 import kotlinx.coroutines.yield
@@ -29,15 +34,16 @@ import org.archivekeep.files.repo.ArchiveFileInfo
 import org.archivekeep.files.repo.LocalRepo
 import org.archivekeep.files.repo.RepoIndex
 import org.archivekeep.files.repo.RepositoryMetadata
+import org.archivekeep.utils.coroutines.flowScopedToThisJob
 import org.archivekeep.utils.coroutines.shareResourceIn
-import org.archivekeep.utils.coroutines.sharedResourceInGlobalScope
+import org.archivekeep.utils.flows.logLoadableResourceLoad
 import org.archivekeep.utils.flows.logResourceLoad
 import org.archivekeep.utils.io.watchRecursively
 import org.archivekeep.utils.loading.Loadable
 import org.archivekeep.utils.loading.flatMapLoadableFlow
 import org.archivekeep.utils.loading.mapToLoadable
+import org.archivekeep.utils.loading.stateIn
 import org.archivekeep.utils.safeFileReadWrite
-import safeSubPath
 import java.io.InputStream
 import java.nio.ByteBuffer
 import java.nio.channels.FileChannel
@@ -75,11 +81,18 @@ class FilesRepo(
     stateDispatcher: CoroutineDispatcher = Dispatchers.Default,
     ioDispatcher: CoroutineDispatcher = Dispatchers.IO,
 ) : LocalRepo {
+    private val scope = CoroutineScope(SupervisorJob() + CoroutineName("AAA") + stateDispatcher)
+
     private val metadataPath = root.resolve(".archive").resolve("metadata.json")
 
-    private val indexStore = FilesystemIndexStore(checksumsRoot, ioDispatcher = ioDispatcher)
+    private val inProgressHandler = InProgressHandler(scope)
 
-    private val scope = CoroutineScope(SupervisorJob() + stateDispatcher)
+    private val indexStore =
+        FilesystemIndexStore(
+            checksumsRoot,
+            activeJobFlow = inProgressHandler.jobActiveOnIdleDelayedStart,
+            ioDispatcher = ioDispatcher,
+        )
 
     override suspend fun findAllFiles(globs: List<String>): List<Path> {
         val matchers =
@@ -212,8 +225,9 @@ class FilesRepo(
             val cleanup = UnfinishedStoreCleanup()
 
             try {
-                println("copy to start: $dstPath")
+                inProgressHandler.onStart(dstPath)
                 cleanup.files.add(dstPath)
+                println("copy to start: $dstPath")
                 fc.use { output ->
                     val buffer = ByteArray(2 * 1024 * 1024)
                     var read: Int = stream.read(buffer)
@@ -247,6 +261,7 @@ class FilesRepo(
                         println("Not completed successfully, cleaning up: ${cleanup.files}")
                         cleanup.runPremature()
                     }
+                    inProgressHandler.onEnd(dstPath)
                 }
             }
         }
@@ -306,13 +321,14 @@ class FilesRepo(
 
     val throttlePauseDuration: Duration = 500.milliseconds
 
+    @OptIn(FlowPreview::class)
     private val calculationCause =
         root
             .watchRecursively(ioDispatcher)
             .debounce(100.milliseconds)
             .map { "update" }
-            .sharedResourceInGlobalScope()
-            .onStart { emit("start") }
+            .shareIn(scope, SharingStarted.WhileSubscribed(), 0)
+            .onStart { emit("start on index change") }
 
     @OptIn(ExperimentalCoroutinesApi::class)
     override val localIndex: Flow<Loadable<StatusOperation.Result>> =
@@ -321,23 +337,29 @@ class FilesRepo(
             .flatMapLoadableFlow { index ->
                 val indexFiles = index.files.map { it.path }.toSet()
 
-                calculationCause
-                    .conflate()
-                    .mapToLoadable {
-                        val allFiles =
-                            findAllFiles(listOf("*")).map {
-                                it.invariantSeparatorsPathString
-                            }
+                inProgressHandler
+                    .jobActiveOnIdleDelayedStart
+                    .flowScopedToThisJob {
+                        calculationCause
+                            .conflate()
+                            .mapToLoadable {
+                                val allFiles =
+                                    findAllFiles(listOf("*")).map {
+                                        it.invariantSeparatorsPathString
+                                    }.sorted()
 
-                        StatusOperation.Result(
-                            newFiles = allFiles.filter { !indexFiles.contains(it) },
-                            indexedFiles = allFiles.filter { indexFiles.contains(it) },
-                        )
+                                currentCoroutineContext().ensureActive()
+
+                                StatusOperation.Result(
+                                    newFiles = allFiles.filter { !indexFiles.contains(it) },
+                                    indexedFiles = allFiles.filter { indexFiles.contains(it) },
+                                )
+                            }
                     }
             }
-            .logResourceLoad("Local status:  $root")
+            .logLoadableResourceLoad("Local status: $root")
             .flowOn(ioDispatcher)
-            .shareResourceIn(scope)
+            .stateIn(scope)
 
     override val indexFlow = indexStore.indexFlow
 

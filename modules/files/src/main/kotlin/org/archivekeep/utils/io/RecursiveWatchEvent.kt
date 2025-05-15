@@ -4,11 +4,11 @@ import java.nio.file.Path
 import java.nio.file.WatchEvent
 
 sealed interface RecursiveWatchEvent {
-    class Overflow(
+    data class Overflow(
         val baseDir: Path,
     ) : RecursiveWatchEvent
 
-    class Change(
+    data class Change(
         val watchEventKind: WatchEvent.Kind<out Path>,
         val subject: Path,
     ) : RecursiveWatchEvent
