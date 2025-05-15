@@ -6,22 +6,18 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.cancellable
 import kotlinx.coroutines.flow.conflate
 import kotlinx.coroutines.flow.debounce
-import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onStart
-import kotlinx.coroutines.flow.transform
 import org.archivekeep.files.exceptions.NotRegularFilePath
 import org.archivekeep.files.repo.RepoIndex
 import org.archivekeep.utils.coroutines.flowScopedToThisJob
 import org.archivekeep.utils.coroutines.shareResourceIn
 import org.archivekeep.utils.flows.logLoadableResourceLoad
 import org.archivekeep.utils.io.watchRecursively
-import org.archivekeep.utils.loading.mapToLoadable
+import org.archivekeep.utils.loading.produceLoadable
 import org.archivekeep.utils.loading.stateIn
 import org.jetbrains.annotations.Blocking
 import java.nio.file.Files
@@ -61,19 +57,19 @@ class FilesystemIndexStore(
             .onStart { emit("start") }
 
     val indexFlow =
-        activeJobFlow.flowScopedToThisJob {
-            calculationCause
-                .conflate()
-                .transform {
-                    emit(index())
-
-                    // throttle
-                    delay(throttlePauseDuration)
-                }.flowOn(ioDispatcher)
-                .cancellable()
-                .mapToLoadable()
-                .logLoadableResourceLoad("Repository index: $checksumsRoot")
-        }
+        activeJobFlow
+            .flowScopedToThisJob {
+                calculationCause
+                    .conflate()
+                    .produceLoadable(
+                        ioDispatcher,
+                        "Repository index: $checksumsRoot",
+                        throttle = throttlePauseDuration,
+                    ) {
+                        index()
+                    }
+            }
+            .logLoadableResourceLoad("Repository index: $checksumsRoot")
             .stateIn(scope)
 
     @Blocking

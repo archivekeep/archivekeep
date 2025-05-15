@@ -9,18 +9,15 @@ import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.currentCoroutineContext
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.SharingStarted
-import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.conflate
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.shareIn
-import kotlinx.coroutines.flow.transform
 import kotlinx.coroutines.withContext
 import kotlinx.coroutines.yield
 import kotlinx.serialization.ExperimentalSerializationApi
@@ -35,13 +32,13 @@ import org.archivekeep.files.repo.LocalRepo
 import org.archivekeep.files.repo.RepoIndex
 import org.archivekeep.files.repo.RepositoryMetadata
 import org.archivekeep.utils.coroutines.flowScopedToThisJob
-import org.archivekeep.utils.coroutines.shareResourceIn
 import org.archivekeep.utils.flows.logLoadableResourceLoad
-import org.archivekeep.utils.flows.logResourceLoad
+import org.archivekeep.utils.io.watchForSingleFile
 import org.archivekeep.utils.io.watchRecursively
 import org.archivekeep.utils.loading.Loadable
 import org.archivekeep.utils.loading.flatMapLoadableFlow
-import org.archivekeep.utils.loading.mapToLoadable
+import org.archivekeep.utils.loading.produceLoadable
+import org.archivekeep.utils.loading.produceLoadableStateIn
 import org.archivekeep.utils.loading.stateIn
 import org.archivekeep.utils.safeFileReadWrite
 import java.io.InputStream
@@ -342,7 +339,10 @@ class FilesRepo(
                     .flowScopedToThisJob {
                         calculationCause
                             .conflate()
-                            .mapToLoadable {
+                            .produceLoadable(
+                                ioDispatcher,
+                                "Local status: $root",
+                            ) {
                                 val allFiles =
                                     findAllFiles(listOf("*")).map {
                                         it.invariantSeparatorsPathString
@@ -364,32 +364,27 @@ class FilesRepo(
     override val indexFlow = indexStore.indexFlow
 
     override val metadataFlow: Flow<Loadable<RepositoryMetadata>> =
-        archiveRoot
-            .watchRecursively(ioDispatcher)
+        metadataPath
+            .watchForSingleFile(ioDispatcher)
             .map { "update" }
             .onStart { emit("start") }
             .conflate()
-            .map {
+            .produceLoadableStateIn(
+                scope,
+                ioDispatcher,
+                "Repository metadata: $root",
+                throttlePauseDuration,
+            ) {
                 if (metadataPath.exists()) {
-                    Loadable.Loaded(Json.decodeFromString<RepositoryMetadata>(metadataPath.readText())) as Loadable<RepositoryMetadata>
+                    Json.decodeFromString<RepositoryMetadata>(metadataPath.readText())
                 } else {
                     if (archiveRoot.exists()) {
-                        Loadable.Loaded(RepositoryMetadata())
+                        RepositoryMetadata()
                     } else {
                         throw RuntimeException("Something went wrong")
                     }
                 }
-            }.catch { e: Throwable ->
-                emit(Loadable.Failed(e))
-            }.transform {
-                emit(it)
-
-                // throttle
-                delay(throttlePauseDuration)
-            }.catch { emit(Loadable.Failed(it)) }
-            .logResourceLoad("Metadata:  $root")
-            .flowOn(ioDispatcher)
-            .shareResourceIn(scope)
+            }
 }
 
 fun openFilesRepoOrNull(path: Path): FilesRepo? {

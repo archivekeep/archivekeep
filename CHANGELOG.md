@@ -10,8 +10,9 @@
 
 Performance:
 
-- pause checking of local index status (uncommitted files) during save (copy) operation 
+- pause checking of local index status (uncommitted files) during save (copy) operation
 - index contents auto-refresh monitors only checksums dir (not all contents)
+- metadata information auto-refresh monitors only the file itself (not all - checksums and other things)
 
 ### Technical
 

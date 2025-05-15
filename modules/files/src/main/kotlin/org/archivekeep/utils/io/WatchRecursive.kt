@@ -8,7 +8,6 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.emitAll
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOn
-import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.runInterruptible
@@ -24,7 +23,7 @@ fun (Path).watchRecursively(
     ioDispatcher: CoroutineDispatcher = Dispatchers.IO,
     pollDispatcher: CoroutineDispatcher = Dispatchers.IO,
     log: Boolean = false,
-): Flow<List<RecursiveWatchEvent>> =
+): Flow<List<CustomWatchEvent>> =
     flow {
         val watchService =
             withContext(ioDispatcher) {
@@ -90,36 +89,8 @@ fun (Path).watchRecursively(
                                 basePath.registerRecursive()
                             }
                         }
-                    }.map { (watchable, events) ->
-                        val basePath =
-                            (watchable as? Path) ?: run {
-                                println("Watchable isn't Path: $watchable")
-                                return@map emptyList()
-                            }
-
-                        events.mapNotNull { event ->
-                            val kind = event.kind()
-
-                            when (kind) {
-                                StandardWatchEventKinds.OVERFLOW -> RecursiveWatchEvent.Overflow(basePath)
-
-                                StandardWatchEventKinds.ENTRY_CREATE,
-                                StandardWatchEventKinds.ENTRY_DELETE,
-                                StandardWatchEventKinds.ENTRY_MODIFY,
-                                -> {
-                                    @Suppress("UNCHECKED_CAST")
-                                    val kindTyped = kind as WatchEvent.Kind<out Path>
-
-                                    RecursiveWatchEvent.Change(kindTyped, event.context() as Path)
-                                }
-
-                                else -> {
-                                    println("WARNING: event $kind not supported")
-                                    null
-                                }
-                            }
-                        }
                     }
+                    .mapToCustomWatchEvents()
 
             emitAll(selfUpdatingFlow)
         } finally {
