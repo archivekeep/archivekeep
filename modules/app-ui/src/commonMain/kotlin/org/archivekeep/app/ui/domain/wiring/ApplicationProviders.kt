@@ -68,7 +68,7 @@ fun ApplicationProviders(
         LocalRepoService provides applicationServices.repoService,
         LocalRepoToRepoSyncService provides applicationServices.syncService,
         LocalAddPushService provides applicationServices.addPushService,
-        LocalAddOperationSupervisorService provides applicationServices.addOperationSupervisorService,
+        LocalIndexUpdateProcedureSupervisorService provides applicationServices.addOperationSupervisorService,
         LocalRegistry provides applicationServices.environment.registry,
         LocalFileStores provides applicationServices.environment.fileStores,
         LocalStorageRegistry provides applicationServices.knownStorageService,

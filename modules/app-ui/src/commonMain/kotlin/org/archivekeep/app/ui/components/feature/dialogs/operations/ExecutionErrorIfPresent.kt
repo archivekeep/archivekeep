@@ -6,14 +6,14 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import org.archivekeep.app.core.utils.generics.ExecutionOutcome
-import org.archivekeep.app.core.utils.operations.OperationExecutionState
+import org.archivekeep.app.core.procedures.utils.ProcedureExecutionState
 import org.archivekeep.app.ui.components.feature.errors.AutomaticErrorMessage
 import org.archivekeep.app.ui.utils.Launchable
 import java.util.concurrent.CancellationException
 
 @Composable
-fun ExecutionErrorIfPresent(executionState: OperationExecutionState) {
-    (executionState as? OperationExecutionState.Finished)
+fun ExecutionErrorIfPresent(executionState: ProcedureExecutionState) {
+    (executionState as? ProcedureExecutionState.Finished)
         ?.error
         ?.let { error ->
             if (error !is CancellationException) {

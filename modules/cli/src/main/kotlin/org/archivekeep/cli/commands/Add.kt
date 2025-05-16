@@ -4,8 +4,8 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.transform
 import kotlinx.coroutines.runBlocking
 import org.archivekeep.cli.MainCommand
-import org.archivekeep.files.operations.indexupdate.AddOperation
-import org.archivekeep.files.operations.indexupdate.IndexUpdateTextualProgressTracker
+import org.archivekeep.files.procedures.indexupdate.IndexUpdateProcedure
+import org.archivekeep.files.procedures.indexupdate.IndexUpdateTextualProgressTracker
 import org.archivekeep.utils.loading.LoadableWithProgress
 import picocli.CommandLine.Command
 import picocli.CommandLine.Model.CommandSpec
@@ -68,7 +68,7 @@ class Add : Callable<Int> {
                 }
 
             val result =
-                AddOperation(
+                IndexUpdateProcedure(
                     subsetGlobs = rootRelativeGlobs,
                     disableFilenameCheck = false,
                     disableMovesCheck = disableMovesCheck,

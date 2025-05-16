@@ -13,8 +13,8 @@ import org.archivekeep.app.core.domain.archives.AssociatedArchive
 import org.archivekeep.app.core.domain.repositories.Repository
 import org.archivekeep.app.core.domain.storages.StorageNamedReference
 import org.archivekeep.app.core.domain.storages.StoragePartiallyResolved
-import org.archivekeep.app.core.operations.addpush.AddAndPushOperationService
-import org.archivekeep.app.core.operations.sync.RepoToRepoSyncService
+import org.archivekeep.app.core.procedures.addpush.AddAndPushProcedureService
+import org.archivekeep.app.core.procedures.sync.RepoToRepoSyncService
 import org.archivekeep.app.core.utils.generics.isLoading
 import org.archivekeep.app.core.utils.generics.mapIfLoadedOrNull
 import org.archivekeep.app.core.utils.generics.mapLoadedData
@@ -30,7 +30,7 @@ import org.archivekeep.utils.safeCombine
 
 class HomeArchiveEntryViewModel(
     scope: CoroutineScope,
-    addAndPushOperationService: AddAndPushOperationService,
+    addAndPushProcedureService: AddAndPushProcedureService,
     repoToRepoSyncService: RepoToRepoSyncService,
     val repository: Repository,
     val archive: AssociatedArchive,
@@ -49,7 +49,7 @@ class HomeArchiveEntryViewModel(
         val canAddPush = if (addPushOperationRunning) Loadable.Loaded(true) else (canAdd.mapLoadedData { it && anySecondaryAvailable })
     }
 
-    val addPushOperation = addAndPushOperationService.getAddPushOperation(primaryRepository.reference.uri)
+    val addPushOperation = addAndPushProcedureService.getAddAndPushProcedure(primaryRepository.reference.uri)
 
     val secondaryRepositories: StateFlow<List<Pair<StoragePartiallyResolved, SecondaryArchiveRepository.State>>> =
         safeCombine(

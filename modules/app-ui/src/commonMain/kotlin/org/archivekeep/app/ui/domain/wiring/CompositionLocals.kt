@@ -5,9 +5,9 @@ import org.archivekeep.app.core.domain.archives.ArchiveService
 import org.archivekeep.app.core.domain.repositories.RepositoryService
 import org.archivekeep.app.core.domain.storages.StorageRegistry
 import org.archivekeep.app.core.domain.storages.StorageService
-import org.archivekeep.app.core.operations.add.AddOperationSupervisorService
-import org.archivekeep.app.core.operations.addpush.AddAndPushOperationService
-import org.archivekeep.app.core.operations.sync.RepoToRepoSyncService
+import org.archivekeep.app.core.procedures.add.IndexUpdateProcedureSupervisorService
+import org.archivekeep.app.core.procedures.addpush.AddAndPushProcedureService
+import org.archivekeep.app.core.procedures.sync.RepoToRepoSyncService
 import org.archivekeep.app.core.persistence.credentials.Credentials
 import org.archivekeep.app.core.persistence.credentials.JoseStorage
 import org.archivekeep.app.core.persistence.drivers.filesystem.FileStores
@@ -21,8 +21,8 @@ val LocalArchiveService = staticCompositionLocalOfNotProvided<ArchiveService>()
 val LocalWalletDataStore = staticCompositionLocalOfNotProvided<JoseStorage<Credentials>>()
 
 val LocalRepoToRepoSyncService = staticCompositionLocalOfNotProvided<RepoToRepoSyncService>()
-val LocalAddPushService = staticCompositionLocalOfNotProvided<AddAndPushOperationService>()
-val LocalAddOperationSupervisorService = staticCompositionLocalOfNotProvided<AddOperationSupervisorService>()
+val LocalAddPushService = staticCompositionLocalOfNotProvided<AddAndPushProcedureService>()
+val LocalIndexUpdateProcedureSupervisorService = staticCompositionLocalOfNotProvided<IndexUpdateProcedureSupervisorService>()
 
 val LocalRegistry = staticCompositionLocalOfNotProvided<RegistryDataStore>()
 

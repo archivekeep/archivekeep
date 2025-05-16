@@ -10,8 +10,8 @@ import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.stateIn
 import org.archivekeep.app.core.domain.repositories.Repository
 import org.archivekeep.app.core.domain.repositories.ResolvedRepositoryState
-import org.archivekeep.app.core.operations.sync.RepoToRepoSync
-import org.archivekeep.app.core.operations.sync.RepoToRepoSyncService
+import org.archivekeep.app.core.procedures.sync.RepoToRepoSync
+import org.archivekeep.app.core.procedures.sync.RepoToRepoSyncService
 import org.archivekeep.app.core.utils.generics.OptionalLoadable
 import org.archivekeep.app.core.utils.generics.isLoading
 import org.archivekeep.app.core.utils.generics.mapIfLoadedOrNull

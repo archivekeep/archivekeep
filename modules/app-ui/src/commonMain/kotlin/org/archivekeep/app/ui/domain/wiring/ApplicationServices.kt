@@ -7,9 +7,9 @@ import org.archivekeep.app.core.domain.archives.DefaultArchiveService
 import org.archivekeep.app.core.domain.repositories.DefaultRepositoryService
 import org.archivekeep.app.core.domain.storages.KnownStorageService
 import org.archivekeep.app.core.domain.storages.StorageService
-import org.archivekeep.app.core.operations.add.AddOperationSupervisorServiceImpl
-import org.archivekeep.app.core.operations.addpush.AddAndPushOperationServiceImpl
-import org.archivekeep.app.core.operations.sync.RepoToRepoSyncServiceImpl
+import org.archivekeep.app.core.procedures.add.IndexUpdateProcedureSupervisorServiceImpl
+import org.archivekeep.app.core.procedures.addpush.AddAndPushProcedureServiceImpl
+import org.archivekeep.app.core.procedures.sync.RepoToRepoSyncServiceImpl
 import org.archivekeep.app.core.persistence.platform.Environment
 
 class ApplicationServices(
@@ -40,8 +40,8 @@ class ApplicationServices(
 
     val archiveService = DefaultArchiveService(scope, storageService)
     val syncService = RepoToRepoSyncServiceImpl(scope, repoService)
-    val addPushService = AddAndPushOperationServiceImpl(scope, repoService)
-    val addOperationSupervisorService = AddOperationSupervisorServiceImpl(scope, repoService)
+    val addPushService = AddAndPushProcedureServiceImpl(scope, repoService)
+    val addOperationSupervisorService = IndexUpdateProcedureSupervisorServiceImpl(scope, repoService)
 
     val operationFactory =
         OperationFactory(

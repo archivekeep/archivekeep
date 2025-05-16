@@ -4,11 +4,11 @@ import org.archivekeep.app.ui.dialogs.other.UnsupportedFeatureDialog
 import org.archivekeep.app.ui.dialogs.repository.access.RepositoryUnlockDialog
 import org.archivekeep.app.ui.dialogs.repository.management.AssociateRepositoryDialog
 import org.archivekeep.app.ui.dialogs.repository.management.UnassociateRepositoryDialog
-import org.archivekeep.app.ui.dialogs.repository.operations.addpush.AddAndPushRepoDialog
-import org.archivekeep.app.ui.dialogs.repository.operations.indexupdate.UpdateIndexOperationDialog
-import org.archivekeep.app.ui.dialogs.repository.operations.pushrepo.PushRepoDialog
-import org.archivekeep.app.ui.dialogs.repository.operations.sync.DownloadFromRepoDialog
-import org.archivekeep.app.ui.dialogs.repository.operations.sync.UploadToRepoDialog
+import org.archivekeep.app.ui.dialogs.repository.procedures.addpush.AddAndPushRepoDialog
+import org.archivekeep.app.ui.dialogs.repository.procedures.indexupdate.IndexUpdateProcedureDialog
+import org.archivekeep.app.ui.dialogs.repository.procedures.pushrepo.PushRepoDialog
+import org.archivekeep.app.ui.dialogs.repository.procedures.sync.DownloadFromRepoDialog
+import org.archivekeep.app.ui.dialogs.repository.procedures.sync.UploadToRepoDialog
 import org.archivekeep.app.ui.dialogs.repository.registry.AddFileSystemRepositoryDialog
 import org.archivekeep.app.ui.dialogs.repository.registry.AddRemoteRepositoryDialog
 import org.archivekeep.app.ui.dialogs.repository.registry.ForgetRepositoryDialog
@@ -16,7 +16,7 @@ import org.archivekeep.app.ui.dialogs.repository.registry.ForgetRepositoryDialog
 fun archiveOperationLaunchersAsDialogs(dialogRenderer: OverlayDialogRenderer) =
     ArchiveOperationLaunchers(
         openAddAndPushOperation = dialogRenderer.openFn(::AddAndPushRepoDialog),
-        openIndexUpdateOperation = dialogRenderer.openFn(::UpdateIndexOperationDialog),
+        openIndexUpdateOperation = dialogRenderer.openFn(::IndexUpdateProcedureDialog),
         openAssociateRepository = dialogRenderer.openFn(::AssociateRepositoryDialog),
         openUnassociateRepository = dialogRenderer.openFn(::UnassociateRepositoryDialog),
         openForgetRepository = dialogRenderer.openFn(::ForgetRepositoryDialog),

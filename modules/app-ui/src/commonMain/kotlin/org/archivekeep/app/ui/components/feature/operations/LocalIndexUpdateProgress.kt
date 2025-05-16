@@ -4,14 +4,14 @@ import androidx.compose.runtime.Composable
 import org.archivekeep.app.ui.components.designsystem.dialog.LabelText
 import org.archivekeep.app.ui.components.designsystem.progress.ProgressRow
 import org.archivekeep.app.ui.components.designsystem.progress.ProgressRowList
-import org.archivekeep.files.operations.indexupdate.AddOperation
-import org.archivekeep.files.operations.indexupdate.IndexUpdateAddProgress
-import org.archivekeep.files.operations.indexupdate.IndexUpdateMoveProgress
+import org.archivekeep.files.procedures.indexupdate.IndexUpdateProcedure
+import org.archivekeep.files.procedures.indexupdate.IndexUpdateAddProgress
+import org.archivekeep.files.procedures.indexupdate.IndexUpdateMoveProgress
 import org.archivekeep.utils.filesAutoPlural
 
 @Composable
 fun LocalIndexUpdateProgress(
-    selectedMoves: Set<AddOperation.PreparationResult.Move>,
+    selectedMoves: Set<IndexUpdateProcedure.PreparationResult.Move>,
     selectedFilesToAdd: Set<String>,
     moveProgress: IndexUpdateMoveProgress,
     addProgress: IndexUpdateAddProgress,

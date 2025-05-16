@@ -3,19 +3,19 @@ package org.archivekeep.app.ui.components.feature.operations
 import androidx.compose.runtime.Composable
 import org.archivekeep.app.ui.components.designsystem.progress.ProgressRow
 import org.archivekeep.app.ui.components.designsystem.progress.ProgressRowList
-import org.archivekeep.files.operations.tasks.CopyProgressOperation
-import org.archivekeep.files.operations.tasks.InProgressOperationStats
+import org.archivekeep.files.procedures.progress.CopyOperationProgress
+import org.archivekeep.files.procedures.progress.OperationProgress
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.minutes
 
 @Composable
-fun InProgressOperationsList(progress: List<InProgressOperationStats>) {
+fun InProgressOperationsList(progress: List<OperationProgress>) {
     ProgressRowList {
         progress.forEach { atom ->
             ProgressRow(
                 progress = { atom.completion },
                 text = when (atom) {
-                    is CopyProgressOperation ->
+                    is CopyOperationProgress ->
                         "${(atom.completion * 100).toInt()}% ${atom.filename} [${atom.velocity}${atom.timeEstimated?.let { ", ${it.toUiString()}" }}]"
 
                     else ->

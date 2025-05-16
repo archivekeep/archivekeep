@@ -4,12 +4,12 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import org.archivekeep.cli.MainCommand
 import org.archivekeep.cli.commands.mixins.SyncOptions
 import org.archivekeep.files.operations.CompareOperation
-import org.archivekeep.files.operations.sync.AdditiveRelocationsSyncStep
-import org.archivekeep.files.operations.sync.NewFilesSyncStep
-import org.archivekeep.files.operations.sync.RelocationSyncMode
-import org.archivekeep.files.operations.sync.RelocationsMoveApplySyncStep
-import org.archivekeep.files.operations.sync.SyncLogger
-import org.archivekeep.files.operations.sync.SyncOperation
+import org.archivekeep.files.procedures.sync.AdditiveRelocationsSyncStep
+import org.archivekeep.files.procedures.sync.NewFilesSyncStep
+import org.archivekeep.files.procedures.sync.RelocationSyncMode
+import org.archivekeep.files.procedures.sync.RelocationsMoveApplySyncStep
+import org.archivekeep.files.procedures.sync.SyncLogger
+import org.archivekeep.files.procedures.sync.SyncProcedure
 import org.archivekeep.files.repo.Repo
 import java.io.PrintWriter
 
@@ -27,7 +27,7 @@ suspend fun executeSync(
 
     comparisonResult.printAll(out, baseName, otherName)
 
-    val preparedSync = SyncOperation(syncOptions.syncMode).prepareFromComparison(comparisonResult)
+    val preparedSync = SyncProcedure(syncOptions.syncMode).prepareFromComparison(comparisonResult)
 
     preparedSync.steps.filterIsInstance<RelocationsMoveApplySyncStep>().forEach { relocationStep ->
         if (relocationStep.toIgnore.isNotEmpty()) {

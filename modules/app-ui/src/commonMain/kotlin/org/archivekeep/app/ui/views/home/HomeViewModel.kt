@@ -7,8 +7,8 @@ import kotlinx.coroutines.flow.map
 import org.archivekeep.app.core.domain.archives.ArchiveService
 import org.archivekeep.app.core.domain.repositories.RepositoryService
 import org.archivekeep.app.core.domain.storages.StorageService
-import org.archivekeep.app.core.operations.addpush.AddAndPushOperationService
-import org.archivekeep.app.core.operations.sync.RepoToRepoSyncService
+import org.archivekeep.app.core.procedures.addpush.AddAndPushProcedureService
+import org.archivekeep.app.core.procedures.sync.RepoToRepoSyncService
 import org.archivekeep.utils.combineToObject
 import org.archivekeep.utils.loading.Loadable
 import org.archivekeep.utils.loading.flatMapLatestLoadedData
@@ -24,7 +24,7 @@ class HomeViewModel(
     val repositoryService: RepositoryService,
     val storageService: StorageService,
     val repoToRepoSyncService: RepoToRepoSyncService,
-    val addAndPushOperationService: AddAndPushOperationService,
+    val addAndPushProcedureService: AddAndPushProcedureService,
 ) {
     val allLocalArchivesFlow =
         archiveService.allArchives
@@ -36,7 +36,7 @@ class HomeViewModel(
 
                         HomeArchiveEntryViewModel(
                             scope,
-                            addAndPushOperationService,
+                            addAndPushProcedureService,
                             repoToRepoSyncService,
                             repositoryService.getRepository(primaryRepository.uri),
                             archive = a,
