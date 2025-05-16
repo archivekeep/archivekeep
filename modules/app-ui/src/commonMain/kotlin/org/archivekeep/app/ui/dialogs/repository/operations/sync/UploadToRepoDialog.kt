@@ -250,6 +250,7 @@ internal fun UploadToRepoDialogPreview2Contents() {
                                             "Something went wrong ...",
                                         ),
                                 ),
+                            inProgressOperationsStats = MutableStateFlow(emptyList())
                         ),
                 ),
                 mutableStateOf(selectedNewFiles.toSet()),
@@ -312,6 +313,7 @@ internal fun UploadToRepoDialogPreview3Contents() {
                                             "Something went wrong ...",
                                         ),
                                 ),
+                            inProgressOperationsStats = MutableStateFlow(emptyList())
                         ),
                 ),
                 mutableStateOf(selectedNewFiles.toSet()),

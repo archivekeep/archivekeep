@@ -165,6 +165,7 @@ class RemoteGrpcRepository(
         filename: String,
         info: ArchiveFileInfo,
         stream: InputStream,
+        monitor: (copiedBytes: Long) -> Unit,
     ) {
         reportOnCompletion {
             remoteService.uploadArchiveFile(

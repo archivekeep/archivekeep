@@ -1,5 +1,6 @@
 package org.archivekeep.cli.commands.shared
 
+import kotlinx.coroutines.flow.MutableStateFlow
 import org.archivekeep.cli.MainCommand
 import org.archivekeep.cli.commands.mixins.SyncOptions
 import org.archivekeep.files.operations.CompareOperation
@@ -83,6 +84,7 @@ suspend fun executeSync(
                     out.println("file deleted: $filename")
                 }
             },
+        inProgressOperationsStats = MutableStateFlow(emptyList()),
     )
 
     return 0

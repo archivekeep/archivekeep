@@ -1,5 +1,6 @@
 package org.archivekeep.files.operations
 
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.runBlocking
 import org.archivekeep.files.assertRepositoryContents
 import org.archivekeep.files.operations.sync.NewFilesSyncStep.CopyNewFileSubOperation
@@ -43,7 +44,7 @@ class SyncOperationTest {
         runBlocking {
             val prepared = SyncOperation(relocateAll).prepare(baseRepo, otherRepo)
 
-            prepared.execute(baseRepo, otherRepo, { true }, NoOpLogger(), {}, selections)
+            prepared.execute(baseRepo, otherRepo, { true }, NoOpLogger(), MutableStateFlow(emptyList()), {}, selections)
 
             assertRepositoryContents(otherRepo, expectedContents)
         }

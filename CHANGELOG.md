@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+### Added
+
+- progress info about currently copied file in repo to repo sync dialogs
+
 ### Fixes
 
 - blinking or showing "1 uncommitted file" during copy operations

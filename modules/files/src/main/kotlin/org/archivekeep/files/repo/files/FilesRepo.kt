@@ -19,7 +19,6 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.shareIn
 import kotlinx.coroutines.withContext
-import kotlinx.coroutines.yield
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
@@ -205,6 +204,7 @@ class FilesRepo(
         filename: String,
         info: ArchiveFileInfo,
         stream: InputStream,
+        monitor: (copiedBytes: Long) -> Unit,
     ) {
         val dstPath = root.resolve(safeSubPath(filename))
 
@@ -228,12 +228,17 @@ class FilesRepo(
                 fc.use { output ->
                     val buffer = ByteArray(2 * 1024 * 1024)
                     var read: Int = stream.read(buffer)
+                    var total: Long = 0
 
                     while (read != -1) {
                         // check the job is active
-                        yield()
+                        currentCoroutineContext().ensureActive()
 
                         output.write(ByteBuffer.wrap(buffer, 0, read))
+
+                        total += read
+                        monitor(total)
+
                         read = stream.read(buffer)
 
                         // TODO - each 128MB: output.force(false)

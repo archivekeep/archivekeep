@@ -19,6 +19,7 @@ import org.archivekeep.app.ui.components.feature.manyselect.ManySelectForRender
 import org.archivekeep.app.ui.components.feature.manyselect.rememberManySelectForRenderFromState
 import org.archivekeep.app.ui.components.feature.manyselect.rememberManySelectForRenderFromStateAnnotated
 import org.archivekeep.app.ui.components.feature.manyselect.rememberManySelectWithMergedState
+import org.archivekeep.app.ui.components.feature.operations.InProgressOperationsList
 import org.archivekeep.app.ui.components.feature.operations.ScrollableLogTextInDialog
 import org.archivekeep.app.ui.components.feature.operations.SyncProgress
 import org.archivekeep.app.ui.dialogs.repository.operations.sync.RepoToRepoSyncUserFlow
@@ -100,6 +101,8 @@ fun (ColumnScope).RepoToRepoSyncMainContents(userFlowState: RepoToRepoSyncUserFl
                 )
 
                 SyncProgress(operation.progress.collectAsState().value)
+                Spacer(Modifier.height(8.dp))
+                InProgressOperationsList(operation.inProgressOperationsStats.collectAsState().value)
                 Spacer(Modifier.height(8.dp))
                 ScrollableLogTextInDialog(operation.progressLog.collectAsState("").value)
                 ExecutionErrorIfPresent(operation.executionState)

@@ -34,6 +34,7 @@ class SpeedLimitedLocalRepoWrapper(
         filename: String,
         info: ArchiveFileInfo,
         stream: InputStream,
+        monitor: (copiedBytes: Long) -> Unit,
     ) = delayed(200) {
         base.save(filename, info, stream)
     }

@@ -43,6 +43,7 @@ class FixtureRepo(
         filename: String,
         info: ArchiveFileInfo,
         stream: InputStream,
+        monitor: (copiedBytes: Long) -> Unit,
     ) {
         TODO("Not yet implemented")
     }

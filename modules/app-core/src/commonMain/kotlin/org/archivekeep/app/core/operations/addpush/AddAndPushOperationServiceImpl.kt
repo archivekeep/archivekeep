@@ -121,6 +121,7 @@ class AddAndPushOperationServiceImpl(
                                     dst = destinationRepo,
                                     base = repo,
                                     filename = fileToPush,
+                                    progressReport = { /* TODO */ },
                                 )
 
                                 println("copied: $destinationRepoID - $fileToPush")

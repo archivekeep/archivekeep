@@ -35,6 +35,7 @@ import org.archivekeep.files.operations.sync.SyncOperation
 import org.archivekeep.files.operations.sync.SyncSubOperation
 import org.archivekeep.files.operations.sync.SyncSubOperationGroup
 import org.archivekeep.files.operations.sync.WritterSyncLogger
+import org.archivekeep.files.operations.tasks.InProgressOperationStats
 import org.archivekeep.files.repo.Repo
 import org.archivekeep.utils.loading.Loadable
 import org.archivekeep.utils.loading.mapToLoadable
@@ -269,7 +270,9 @@ class RepoToRepoSyncServiceImpl(
     ) : AbstractOperationJob(),
         RepoToRepoSync.Job {
         private val executionLog = SyncFlowStringWriter()
+
         private val progress = MutableStateFlow(emptyList<SyncSubOperationGroup.Progress>())
+        private val inProgressOperationsStatsMutableFlow = MutableStateFlow(emptyList<InProgressOperationStats>())
 
         override val currentState: Flow<JobState> =
             executionState
@@ -278,6 +281,7 @@ class RepoToRepoSyncServiceImpl(
                         comparisonLoadable,
                         preparedSyncOperation,
                         progress,
+                        inProgressOperationsStatsMutableFlow.asStateFlow(),
                         executionLog.string,
                         it,
                     )
@@ -291,6 +295,7 @@ class RepoToRepoSyncServiceImpl(
                 limitToSubset = limitToSubset,
                 logger = WritterSyncLogger(executionLog.writer),
                 progressReport = { progress.value = it },
+                inProgressOperationsStats = inProgressOperationsStatsMutableFlow,
             )
         }
     }

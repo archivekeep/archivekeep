@@ -1,14 +1,20 @@
 package org.archivekeep.files.operations.sync
 
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.withContext
 import org.archivekeep.files.operations.CompareOperation
 import org.archivekeep.files.operations.sync.AdditiveRelocationsSyncStep.AdditiveReplicationSubOperation
 import org.archivekeep.files.operations.sync.NewFilesSyncStep.CopyNewFileSubOperation
 import org.archivekeep.files.operations.sync.RelocationsMoveApplySyncStep.RelocationApplySubOperation
+import org.archivekeep.files.operations.tasks.CopyProgressOperation
+import org.archivekeep.files.operations.tasks.InProgressOperationStats
 import org.archivekeep.files.repo.Repo
 import org.archivekeep.utils.filesAutoPlural
+import java.time.Duration
+import java.time.LocalDateTime
 import kotlin.math.min
+import kotlin.time.toKotlinDuration
 
 sealed interface RelocationSyncMode {
     data object Disabled : RelocationSyncMode
@@ -94,9 +100,11 @@ class AdditiveRelocationsSyncStep internal constructor(
             base: Repo,
             dst: Repo,
             logger: SyncLogger,
+            inProgressOperationStatsMutableFlow: MutableStateFlow<List<InProgressOperationStats>>,
         ) {
             relocation.extraBaseLocations.forEach { extraBaseLocation ->
-                copyFileAndLog(dst, base, extraBaseLocation, logger)
+                copyFileAndLog(dst, base, extraBaseLocation, { inProgressOperationStatsMutableFlow.value = listOf(it) }, logger)
+                inProgressOperationStatsMutableFlow.value = emptyList()
             }
         }
     }
@@ -127,6 +135,7 @@ class RelocationsMoveApplySyncStep internal constructor(
             base: Repo,
             dst: Repo,
             logger: SyncLogger,
+            inProgressOperationStatsMutableFlow: MutableStateFlow<List<InProgressOperationStats>>,
         ) {
             if (relocation.isIncreasingDuplicates) {
                 relocation.extraBaseLocations
@@ -134,7 +143,8 @@ class RelocationsMoveApplySyncStep internal constructor(
                         relocation.extraOtherLocations.size,
                         relocation.extraBaseLocations.size,
                     ).forEach { extraBaseLocation ->
-                        copyFileAndLog(dst, base, extraBaseLocation, logger)
+                        copyFileAndLog(dst, base, extraBaseLocation, { inProgressOperationStatsMutableFlow.value = listOf(it) }, logger)
+                        inProgressOperationStatsMutableFlow.value = emptyList()
                     }
             }
             if (relocation.isDecreasingDuplicates) {
@@ -182,9 +192,11 @@ class NewFilesSyncStep internal constructor(
             base: Repo,
             dst: Repo,
             logger: SyncLogger,
+            inProgressOperationStatsMutableFlow: MutableStateFlow<List<InProgressOperationStats>>,
         ) {
             unmatchedBaseExtra.filenames.forEach { filename ->
-                copyFileAndLog(dst, base, filename, logger)
+                copyFileAndLog(dst, base, filename, { inProgressOperationStatsMutableFlow.value = listOf(it) }, logger)
+                inProgressOperationStatsMutableFlow.value = emptyList()
             }
         }
     }
@@ -223,6 +235,7 @@ class PreparedSyncOperation internal constructor(
         dst: Repo,
         prompter: suspend (step: SyncSubOperationGroup<*>) -> Boolean,
         logger: SyncLogger,
+        inProgressOperationsStats: MutableStateFlow<List<InProgressOperationStats>>,
         progressReport: (progress: List<SyncSubOperationGroup.Progress>) -> Unit = {},
         limitToSubset: Set<SyncSubOperation>? = null,
     ) {
@@ -236,7 +249,7 @@ class PreparedSyncOperation internal constructor(
             }
 
             val resultProgress =
-                step.execute(base, dst, logger, progressReport = {
+                step.execute(base, dst, logger, inProgressOperationsStats, progressReport = {
                     progressReport(finishedStepProgress + listOf(it))
                 }, limitToSubset)
 
@@ -253,12 +266,29 @@ suspend fun copyFile(
     base: Repo,
     filename: String,
     dst: Repo,
+    progressReport: (progress: CopyProgressOperation) -> Unit,
 ) {
     withContext(Dispatchers.IO) {
+        val timeStarted = LocalDateTime.now()
+
         val (info, stream) = base.open(filename)
 
         stream.use {
-            dst.save(filename, info, stream)
+            dst.save(
+                filename,
+                info,
+                stream,
+                monitor = {
+                    progressReport(
+                        CopyProgressOperation(
+                            filename,
+                            timeConsumed = Duration.between(timeStarted, LocalDateTime.now()).toKotlinDuration(),
+                            copied = it,
+                            total = info.length,
+                        ),
+                    )
+                },
+            )
         }
     }
 }
@@ -267,9 +297,10 @@ private suspend fun copyFileAndLog(
     dst: Repo,
     base: Repo,
     filename: String,
+    progressReport: (progress: CopyProgressOperation) -> Unit,
     logger: SyncLogger,
 ) {
-    copyFile(base, filename, dst)
+    copyFile(base, filename, dst, progressReport)
 
     logger.onFileStored(filename)
 }

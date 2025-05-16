@@ -102,6 +102,7 @@ open class InMemoryRepo(
         filename: String,
         info: ArchiveFileInfo,
         stream: InputStream,
+        monitor: (copiedBytes: Long) -> Unit,
     ) {
         if (contents.containsKey(filename)) {
             throw DestinationExists(filename)

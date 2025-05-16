@@ -60,6 +60,7 @@ interface Repo {
         filename: String,
         info: ArchiveFileInfo,
         stream: InputStream,
+        monitor: (copiedBytes: Long) -> Unit = {},
     )
 
     suspend fun delete(filename: String)

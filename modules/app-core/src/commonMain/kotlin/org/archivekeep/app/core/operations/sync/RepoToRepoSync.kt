@@ -9,6 +9,7 @@ import org.archivekeep.files.operations.sync.PreparedSyncOperation
 import org.archivekeep.files.operations.sync.RelocationSyncMode
 import org.archivekeep.files.operations.sync.SyncSubOperation
 import org.archivekeep.files.operations.sync.SyncSubOperationGroup
+import org.archivekeep.files.operations.tasks.InProgressOperationStats
 import org.archivekeep.utils.loading.Loadable
 
 interface RepoToRepoSync {
@@ -51,6 +52,7 @@ interface RepoToRepoSync {
         override val comparisonResult: OptionalLoadable.LoadedAvailable<CompareOperation.Result>,
         val preparedSyncOperation: PreparedSyncOperation,
         val progress: StateFlow<List<SyncSubOperationGroup.Progress>>,
+        val inProgressOperationsStats: StateFlow<List<InProgressOperationStats>>,
         val progressLog: StateFlow<String>,
         val executionState: OperationExecutionState,
     ) : State
