@@ -15,17 +15,16 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.onEach
 import org.archivekeep.app.core.domain.repositories.Repository
+import org.archivekeep.app.core.persistence.platform.demo.DocumentsInBackBlaze
+import org.archivekeep.app.core.persistence.platform.demo.DocumentsInHDDA
+import org.archivekeep.app.core.persistence.platform.demo.DocumentsInLaptopSSD
+import org.archivekeep.app.core.persistence.platform.demo.DocumentsInSSDKeyChain
 import org.archivekeep.app.core.procedures.addpush.AddAndPushProcedure
 import org.archivekeep.app.core.procedures.addpush.AddAndPushProcedure.JobState
 import org.archivekeep.app.core.procedures.addpush.AddAndPushProcedure.NotReadyAddPushProcess
 import org.archivekeep.app.core.procedures.addpush.AddAndPushProcedure.PreparingAddPushProcess
 import org.archivekeep.app.core.procedures.addpush.AddAndPushProcedure.ReadyAddPushProcess
-import org.archivekeep.app.core.persistence.platform.demo.DocumentsInBackBlaze
-import org.archivekeep.app.core.persistence.platform.demo.DocumentsInHDDA
-import org.archivekeep.app.core.persistence.platform.demo.DocumentsInLaptopSSD
-import org.archivekeep.app.core.persistence.platform.demo.DocumentsInSSDKeyChain
 import org.archivekeep.app.core.utils.identifiers.RepositoryURI
-import org.archivekeep.app.core.procedures.utils.ProcedureExecutionState
 import org.archivekeep.app.ui.components.base.layout.IntrinsicSizeWrapperLayout
 import org.archivekeep.app.ui.components.base.layout.ScrollableColumn
 import org.archivekeep.app.ui.components.base.layout.ScrollableLazyColumn
@@ -38,6 +37,7 @@ import org.archivekeep.app.ui.components.feature.dialogs.operations.DialogOperat
 import org.archivekeep.app.ui.components.feature.dialogs.operations.ExecutionErrorIfPresent
 import org.archivekeep.app.ui.components.feature.manyselect.DestinationManySelect
 import org.archivekeep.app.ui.components.feature.manyselect.rememberManySelectForRender
+import org.archivekeep.app.ui.components.feature.operations.InProgressOperationsList
 import org.archivekeep.app.ui.components.feature.operations.IndexUpdatePreparationProgress
 import org.archivekeep.app.ui.components.feature.operations.LocalIndexUpdateProgress
 import org.archivekeep.app.ui.dialogs.repository.AbstractRepositoryDialog
@@ -45,9 +45,10 @@ import org.archivekeep.app.ui.dialogs.repository.procedures.addpush.AddAndPushRe
 import org.archivekeep.app.ui.utils.asMutableState
 import org.archivekeep.app.ui.utils.collectAsLoadable
 import org.archivekeep.app.ui.utils.contextualStorageReference
-import org.archivekeep.files.procedures.indexupdate.IndexUpdateProcedure
 import org.archivekeep.files.procedures.indexupdate.IndexUpdateAddProgress
 import org.archivekeep.files.procedures.indexupdate.IndexUpdateMoveProgress
+import org.archivekeep.files.procedures.indexupdate.IndexUpdateProcedure
+import org.archivekeep.utils.procedures.ProcedureExecutionState
 import org.archivekeep.utils.collections.ifNotEmpty
 import org.archivekeep.utils.filesAutoPlural
 import org.archivekeep.utils.loading.Loadable
@@ -206,6 +207,8 @@ class AddAndPushRepoDialog(
                             ExecutionErrorIfPresent(status.executionState)
                         }
                     }
+
+                    InProgressOperationsList(status.inProgressOperationsProgress)
                 }
             }
         }
@@ -277,17 +280,12 @@ private fun AddAndPushDialogContentsCompletedPreview2() {
             VMState(
                 repoName = "Documents",
                 JobState(
-                    IndexUpdateProcedure.PreparationResult(
-                        newFiles = allNewFiles,
-                        moves = emptyList(),
-                        missingFiles = emptyList(),
-                        errorFiles = emptyMap(),
-                    ),
                     options = AddAndPushProcedure.LaunchOptions(allNewFiles.toSet(), emptySet(), selectedDestinations.toSet()),
                     addProgress = IndexUpdateAddProgress(emptySet(), emptyMap(), false),
                     moveProgress = IndexUpdateMoveProgress(emptySet(), emptyMap(), false),
                     pushProgress = selectedDestinations.associateWith { AddAndPushProcedure.PushProgress(emptySet(), emptySet(), emptyMap(), false) },
                     executionState = ProcedureExecutionState.Running,
+                    inProgressOperationsProgress = emptyList()
                 ),
                 selectedFilenames = mutableStateOf(allNewFiles.toSet()),
                 selectedMoves = mutableStateOf(emptySet()),
@@ -314,17 +312,12 @@ private fun AddAndPushDialogContentsCompletedPreview3() {
             VMState(
                 repoName = "Documents",
                 JobState(
-                    IndexUpdateProcedure.PreparationResult(
-                        newFiles = allNewFiles,
-                        moves = allTestMoves,
-                        missingFiles = emptyList(),
-                        errorFiles = emptyMap(),
-                    ),
                     options = AddAndPushProcedure.LaunchOptions(allNewFiles.toSet(), allTestMoves.toSet(), selectedDestinations.toSet()),
                     addProgress = IndexUpdateAddProgress(setOf(allNewFiles[0]), emptyMap(), false),
                     moveProgress = IndexUpdateMoveProgress(allTestMoves.subList(0, 3).toSet(), emptyMap(), false),
                     pushProgress = selectedDestinations.associateWith { AddAndPushProcedure.PushProgress(emptySet(), emptySet(), emptyMap(), false) },
                     executionState = ProcedureExecutionState.Running,
+                    inProgressOperationsProgress = emptyList()
                 ),
                 selectedFilenames = mutableStateOf(allNewFiles.toSet()),
                 selectedMoves = mutableStateOf(allTestMoves.toSet()),

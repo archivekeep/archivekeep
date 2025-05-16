@@ -4,7 +4,9 @@
 
 ### Added
 
-- progress info about currently copied file in repo to repo sync dialogs
+- progress info (percentage, name, speed, and estimate) about currently copied file:
+  - in repo to repo sync dialogs,
+  - in add & push dialog.
 
 ### Fixes
 

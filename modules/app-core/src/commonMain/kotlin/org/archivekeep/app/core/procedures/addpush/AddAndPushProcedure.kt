@@ -2,19 +2,20 @@ package org.archivekeep.app.core.procedures.addpush
 
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.StateFlow
-import org.archivekeep.app.core.procedures.utils.ProcedureExecutionState
 import org.archivekeep.app.core.utils.identifiers.RepositoryURI
 import org.archivekeep.files.procedures.indexupdate.IndexUpdateAddProgress
 import org.archivekeep.files.procedures.indexupdate.IndexUpdateMoveProgress
 import org.archivekeep.files.procedures.indexupdate.IndexUpdateProcedure
 import org.archivekeep.files.procedures.indexupdate.IndexUpdateProcedure.PreparationResult.Move
+import org.archivekeep.utils.procedures.OperationProgress
+import org.archivekeep.utils.procedures.ProcedureExecutionState
 
 interface AddAndPushProcedure {
-    val currentJobFlow: StateFlow<Job?>
+    val currentJobFlow: StateFlow<JobWrapper?>
 
     fun prepare(): Flow<State>
 
-    interface Job {
+    interface JobWrapper {
         val addPreparationResult: IndexUpdateProcedure.PreparationResult
         val state: Flow<State>
 
@@ -41,12 +42,12 @@ interface AddAndPushProcedure {
     )
 
     data class JobState(
-        val addPreparationResult: IndexUpdateProcedure.PreparationResult,
         val options: LaunchOptions,
         val addProgress: IndexUpdateAddProgress,
         val moveProgress: IndexUpdateMoveProgress,
         val pushProgress: Map<RepositoryURI, PushProgress>,
         val executionState: ProcedureExecutionState,
+        val inProgressOperationsProgress: List<OperationProgress>,
     ) : State
 
     data class PushProgress(

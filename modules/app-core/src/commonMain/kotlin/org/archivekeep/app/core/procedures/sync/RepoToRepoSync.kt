@@ -2,18 +2,18 @@ package org.archivekeep.app.core.procedures.sync
 
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.StateFlow
-import org.archivekeep.app.core.procedures.utils.ProcedureExecutionState
 import org.archivekeep.app.core.utils.generics.OptionalLoadable
 import org.archivekeep.files.operations.CompareOperation
-import org.archivekeep.files.procedures.progress.OperationProgress
 import org.archivekeep.files.procedures.sync.PreparedSyncProcedure
 import org.archivekeep.files.procedures.sync.RelocationSyncMode
 import org.archivekeep.files.procedures.sync.SyncOperation
 import org.archivekeep.files.procedures.sync.SyncOperationGroup
 import org.archivekeep.utils.loading.Loadable
+import org.archivekeep.utils.procedures.OperationProgress
+import org.archivekeep.utils.procedures.ProcedureExecutionState
 
 interface RepoToRepoSync {
-    val currentJobFlow: StateFlow<Job?>
+    val currentJobFlow: StateFlow<JobWrapper?>
 
     val compareStateFlow: Flow<OptionalLoadable<CompareState>>
 
@@ -32,7 +32,7 @@ interface RepoToRepoSync {
             get() = missingBaseInOther == 0 && missingOtherInBase == 0
     }
 
-    interface Job {
+    interface JobWrapper {
         val currentState: Flow<JobState>
 
         fun cancel()
@@ -44,7 +44,7 @@ interface RepoToRepoSync {
         data class Prepared(
             override val comparisonResult: OptionalLoadable.LoadedAvailable<CompareOperation.Result>,
             val preparedSyncProcedure: PreparedSyncProcedure,
-            val startExecution: (limitToSubset: Set<SyncOperation>) -> Job,
+            val startExecution: (limitToSubset: Set<SyncOperation>) -> JobWrapper,
         ) : State
     }
 
@@ -52,7 +52,7 @@ interface RepoToRepoSync {
         override val comparisonResult: OptionalLoadable.LoadedAvailable<CompareOperation.Result>,
         val preparedSyncProcedure: PreparedSyncProcedure,
         val progress: StateFlow<List<SyncOperationGroup.Progress>>,
-        val inProgressOperationsStats: StateFlow<List<OperationProgress>>,
+        val inProgressOperationsProgress: StateFlow<List<OperationProgress>>,
         val progressLog: StateFlow<String>,
         val executionState: ProcedureExecutionState,
     ) : State

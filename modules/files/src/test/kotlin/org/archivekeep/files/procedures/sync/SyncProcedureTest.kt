@@ -1,6 +1,5 @@
 package org.archivekeep.files.procedures.sync
 
-import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.runBlocking
 import org.archivekeep.files.assertRepositoryContents
 import org.archivekeep.files.operations.CompareOperation
@@ -41,7 +40,9 @@ class SyncProcedureTest {
         runBlocking {
             val prepared = SyncProcedure(relocateAll).prepare(baseRepo, otherRepo)
 
-            prepared.execute(baseRepo, otherRepo, { true }, NoOpLogger(), MutableStateFlow(emptyList()), {}, selections)
+            val job = prepared.createJob(baseRepo, otherRepo, { true }, NoOpLogger(), selections)
+
+            job.run()
 
             assertRepositoryContents(otherRepo, expectedContents)
         }

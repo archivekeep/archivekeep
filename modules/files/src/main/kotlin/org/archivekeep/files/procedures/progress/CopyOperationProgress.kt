@@ -1,5 +1,6 @@
 package org.archivekeep.files.procedures.progress
 
+import org.archivekeep.utils.procedures.OperationProgress
 import kotlin.time.Duration
 
 data class CopyOperationProgress(

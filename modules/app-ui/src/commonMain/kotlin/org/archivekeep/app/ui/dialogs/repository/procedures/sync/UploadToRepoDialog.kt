@@ -23,7 +23,7 @@ import org.archivekeep.app.core.persistence.platform.photosAdjustmentA
 import org.archivekeep.app.core.persistence.platform.photosAdjustmentB
 import org.archivekeep.app.core.utils.generics.OptionalLoadable
 import org.archivekeep.app.core.utils.identifiers.RepositoryURI
-import org.archivekeep.app.core.procedures.utils.ProcedureExecutionState
+import org.archivekeep.utils.procedures.ProcedureExecutionState
 import org.archivekeep.app.ui.components.designsystem.dialog.DialogPreviewColumn
 import org.archivekeep.app.ui.components.designsystem.dialog.fullWidthDialogWidthModifier
 import org.archivekeep.app.ui.components.feature.dialogs.operations.DialogOperationControlButtons
@@ -250,7 +250,7 @@ internal fun UploadToRepoDialogPreview2Contents() {
                                             "Something went wrong ...",
                                         ),
                                 ),
-                            inProgressOperationsStats = MutableStateFlow(emptyList())
+                            inProgressOperationsProgress = MutableStateFlow(emptyList())
                         ),
                 ),
                 mutableStateOf(selectedNewFiles.toSet()),
@@ -313,7 +313,7 @@ internal fun UploadToRepoDialogPreview3Contents() {
                                             "Something went wrong ...",
                                         ),
                                 ),
-                            inProgressOperationsStats = MutableStateFlow(emptyList())
+                            inProgressOperationsProgress = MutableStateFlow(emptyList())
                         ),
                 ),
                 mutableStateOf(selectedNewFiles.toSet()),

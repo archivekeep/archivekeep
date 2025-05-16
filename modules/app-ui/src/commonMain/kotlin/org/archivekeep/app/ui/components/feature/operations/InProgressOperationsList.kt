@@ -4,7 +4,7 @@ import androidx.compose.runtime.Composable
 import org.archivekeep.app.ui.components.designsystem.progress.ProgressRow
 import org.archivekeep.app.ui.components.designsystem.progress.ProgressRowList
 import org.archivekeep.files.procedures.progress.CopyOperationProgress
-import org.archivekeep.files.procedures.progress.OperationProgress
+import org.archivekeep.utils.procedures.OperationProgress
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.minutes
 

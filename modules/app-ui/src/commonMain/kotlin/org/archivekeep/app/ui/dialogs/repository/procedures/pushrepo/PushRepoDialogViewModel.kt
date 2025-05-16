@@ -14,7 +14,7 @@ import org.archivekeep.app.core.procedures.sync.RepoToRepoSync.JobState
 import org.archivekeep.app.core.procedures.sync.RepoToRepoSync.State
 import org.archivekeep.app.core.procedures.sync.RepoToRepoSyncService
 import org.archivekeep.app.core.utils.identifiers.RepositoryURI
-import org.archivekeep.app.core.procedures.utils.ProcedureExecutionState
+import org.archivekeep.utils.procedures.ProcedureExecutionState
 import org.archivekeep.app.ui.dialogs.AbstractDialog
 import org.archivekeep.app.ui.dialogs.repository.procedures.sync.describePreparedSyncOperation
 import org.archivekeep.app.ui.domain.data.getSyncCandidates

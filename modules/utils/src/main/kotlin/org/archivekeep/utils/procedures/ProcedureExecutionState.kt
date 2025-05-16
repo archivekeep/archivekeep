@@ -1,4 +1,4 @@
-package org.archivekeep.app.core.procedures.utils
+package org.archivekeep.utils.procedures
 
 import kotlinx.coroutines.CancellationException
 

@@ -1,16 +1,16 @@
 package org.archivekeep.files.procedures.sync
 
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.withContext
 import org.archivekeep.files.operations.CompareOperation
 import org.archivekeep.files.procedures.progress.CopyOperationProgress
-import org.archivekeep.files.procedures.progress.OperationProgress
 import org.archivekeep.files.procedures.sync.AdditiveRelocationsSyncStep.AdditiveReplicationOperation
 import org.archivekeep.files.procedures.sync.NewFilesSyncStep.CopyNewFileOperation
 import org.archivekeep.files.procedures.sync.RelocationsMoveApplySyncStep.RelocationApplyOperation
 import org.archivekeep.files.repo.Repo
 import org.archivekeep.utils.filesAutoPlural
+import org.archivekeep.utils.procedures.OperationContext
+import org.archivekeep.utils.procedures.ProcedureExecutionContext
 import java.time.Duration
 import java.time.LocalDateTime
 import kotlin.math.min
@@ -97,14 +97,15 @@ class AdditiveRelocationsSyncStep internal constructor(
         val relocation: CompareOperation.Result.Relocation,
     ) : SyncOperation {
         override suspend fun apply(
+            context: ProcedureExecutionContext,
             base: Repo,
             dst: Repo,
             logger: SyncLogger,
-            operationProgressMutableFlow: MutableStateFlow<List<OperationProgress>>,
         ) {
             relocation.extraBaseLocations.forEach { extraBaseLocation ->
-                copyFileAndLog(dst, base, extraBaseLocation, { operationProgressMutableFlow.value = listOf(it) }, logger)
-                operationProgressMutableFlow.value = emptyList()
+                context.runOperation { context ->
+                    copyFileAndLog(context, dst, base, extraBaseLocation, logger)
+                }
             }
         }
     }
@@ -132,10 +133,10 @@ class RelocationsMoveApplySyncStep internal constructor(
         val relocation: CompareOperation.Result.Relocation,
     ) : SyncOperation {
         override suspend fun apply(
+            context: ProcedureExecutionContext,
             base: Repo,
             dst: Repo,
             logger: SyncLogger,
-            operationProgressMutableFlow: MutableStateFlow<List<OperationProgress>>,
         ) {
             if (relocation.isIncreasingDuplicates) {
                 relocation.extraBaseLocations
@@ -143,8 +144,9 @@ class RelocationsMoveApplySyncStep internal constructor(
                         relocation.extraOtherLocations.size,
                         relocation.extraBaseLocations.size,
                     ).forEach { extraBaseLocation ->
-                        copyFileAndLog(dst, base, extraBaseLocation, { operationProgressMutableFlow.value = listOf(it) }, logger)
-                        operationProgressMutableFlow.value = emptyList()
+                        context.runOperation { operationContext ->
+                            copyFileAndLog(operationContext, dst, base, extraBaseLocation, logger)
+                        }
                     }
             }
             if (relocation.isDecreasingDuplicates) {
@@ -189,14 +191,15 @@ class NewFilesSyncStep internal constructor(
         val unmatchedBaseExtra: CompareOperation.Result.ExtraGroup,
     ) : SyncOperation {
         override suspend fun apply(
+            context: ProcedureExecutionContext,
             base: Repo,
             dst: Repo,
             logger: SyncLogger,
-            operationProgressMutableFlow: MutableStateFlow<List<OperationProgress>>,
         ) {
             unmatchedBaseExtra.filenames.forEach { filename ->
-                copyFileAndLog(dst, base, filename, { operationProgressMutableFlow.value = listOf(it) }, logger)
-                operationProgressMutableFlow.value = emptyList()
+                context.runOperation { operationContext ->
+                    copyFileAndLog(operationContext, dst, base, filename, logger)
+                }
             }
         }
     }
@@ -230,34 +233,20 @@ interface SyncLogger {
 class PreparedSyncProcedure internal constructor(
     val steps: List<SyncOperationGroup<*>>,
 ) {
-    suspend fun execute(
+    fun createJob(
         base: Repo,
         dst: Repo,
         prompter: suspend (step: SyncOperationGroup<*>) -> Boolean,
         logger: SyncLogger,
-        inProgressOperationsStats: MutableStateFlow<List<OperationProgress>>,
-        progressReport: (progress: List<SyncOperationGroup.Progress>) -> Unit = {},
         limitToSubset: Set<SyncOperation>? = null,
-    ) {
-        var finishedStepProgress = listOf<SyncOperationGroup.Progress>()
-
-        steps.forEach { step ->
-            val confirmed = prompter(step)
-
-            if (!confirmed) {
-                throw RuntimeException("abandoned")
-            }
-
-            val resultProgress =
-                step.execute(base, dst, logger, inProgressOperationsStats, progressReport = {
-                    progressReport(finishedStepProgress + listOf(it))
-                }, limitToSubset)
-
-            finishedStepProgress = finishedStepProgress + listOf(resultProgress)
-        }
-
-        progressReport(finishedStepProgress)
-    }
+    ) = SyncProcedureJob(
+        steps,
+        base,
+        dst,
+        prompter,
+        logger,
+        limitToSubset,
+    )
 
     fun isNoOp(): Boolean = steps.isEmpty() || steps.all { it.isNoOp() }
 }
@@ -294,13 +283,13 @@ suspend fun copyFile(
 }
 
 private suspend fun copyFileAndLog(
+    context: OperationContext,
     dst: Repo,
     base: Repo,
     filename: String,
-    progressReport: (progress: CopyOperationProgress) -> Unit,
     logger: SyncLogger,
 ) {
-    copyFile(base, filename, dst, progressReport)
+    copyFile(base, filename, dst, context::progressReport)
 
     logger.onFileStored(filename)
 }

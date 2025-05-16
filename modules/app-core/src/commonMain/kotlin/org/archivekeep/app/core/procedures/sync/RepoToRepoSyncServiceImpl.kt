@@ -6,7 +6,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.conflate
@@ -20,7 +19,7 @@ import kotlinx.coroutines.flow.transform
 import org.archivekeep.app.core.domain.repositories.RepositoryService
 import org.archivekeep.app.core.procedures.sync.RepoToRepoSync.JobState
 import org.archivekeep.app.core.procedures.sync.RepoToRepoSync.State
-import org.archivekeep.app.core.procedures.utils.AbstractProcedureJob
+import org.archivekeep.app.core.utils.AbstractJobGuardRunnable
 import org.archivekeep.app.core.utils.UniqueJobGuard
 import org.archivekeep.app.core.utils.generics.OptionalLoadable
 import org.archivekeep.app.core.utils.generics.SyncFlowStringWriter
@@ -32,7 +31,6 @@ import org.archivekeep.files.operations.CompareOperation
 import org.archivekeep.files.procedures.sync.PreparedSyncProcedure
 import org.archivekeep.files.procedures.sync.RelocationSyncMode
 import org.archivekeep.files.procedures.sync.SyncOperation
-import org.archivekeep.files.procedures.sync.SyncOperationGroup
 import org.archivekeep.files.procedures.sync.SyncProcedure
 import org.archivekeep.files.procedures.sync.WritterSyncLogger
 import org.archivekeep.files.repo.Repo
@@ -53,7 +51,7 @@ class RepoToRepoSyncServiceImpl(
 ) : RepoToRepoSyncService {
     private val repoToRepoSyncs = singleInstanceWeakValueMap(::RepoToRepoSyncImpl)
 
-    val jobGuards = UniqueJobGuard<RepositoryIDPair, JobImpl>()
+    val jobGuards = UniqueJobGuard<RepositoryIDPair, JobWrapperImpl>()
 
     override fun getRepoToRepoSync(
         baseURI: RepositoryURI,
@@ -66,7 +64,10 @@ class RepoToRepoSyncServiceImpl(
         val fromURI = key.first
         val otherURI = key.second
 
-        override val currentJobFlow = jobGuards.stateHoldersWeakReference[key].asStateFlow()
+        override val currentJobFlow =
+            jobGuards
+                .stateHoldersWeakReference[key]
+                .asStateFlow()
 
         val compareStatusFlow =
             combine(
@@ -232,7 +233,7 @@ class RepoToRepoSyncServiceImpl(
                                 comparisonLoadable,
                                 startExecution = { limitToSubset ->
                                     val newJob =
-                                        JobImpl(
+                                        JobWrapperImpl(
                                             comparisonLoadable = comparisonLoadable,
                                             preparedSyncProcedure = prepared,
                                             base = base,
@@ -260,41 +261,40 @@ class RepoToRepoSyncServiceImpl(
         }
     }
 
-    inner class JobImpl(
+    class JobWrapperImpl(
         val comparisonLoadable: OptionalLoadable.LoadedAvailable<CompareOperation.Result>,
         val preparedSyncProcedure: PreparedSyncProcedure,
         val base: Repo,
         val other: Repo,
         val limitToSubset: Set<SyncOperation>,
-    ) : AbstractProcedureJob(),
-        RepoToRepoSync.Job {
+    ) : AbstractJobGuardRunnable(),
+        RepoToRepoSync.JobWrapper {
         private val executionLog = SyncFlowStringWriter()
 
-        private val progress = MutableStateFlow(emptyList<SyncOperationGroup.Progress>())
+        val job =
+            preparedSyncProcedure.createJob(
+                base,
+                other,
+                prompter = { true },
+                limitToSubset = limitToSubset,
+                logger = WritterSyncLogger(executionLog.writer),
+            )
 
         override val currentState: Flow<JobState> =
-            executionState
+            job.executionState
                 .map {
                     JobState(
                         comparisonLoadable,
                         preparedSyncProcedure,
-                        progress,
-                        inProgressOperationsStatsMutableFlow.asStateFlow(),
+                        job.progress,
+                        job.inProgressOperationsProgressFlow,
                         executionLog.string,
                         it,
                     )
                 }
 
         override suspend fun execute() {
-            preparedSyncProcedure.execute(
-                base,
-                other,
-                prompter = { true },
-                limitToSubset = limitToSubset,
-                logger = WritterSyncLogger(executionLog.writer),
-                progressReport = { progress.value = it },
-                inProgressOperationsStats = inProgressOperationsStatsMutableFlow,
-            )
+            job.run()
         }
     }
 }

@@ -1,14 +1,13 @@
 package org.archivekeep.files.procedures.sync
 
-import kotlinx.coroutines.flow.MutableStateFlow
-import org.archivekeep.files.procedures.progress.OperationProgress
 import org.archivekeep.files.repo.Repo
+import org.archivekeep.utils.procedures.ProcedureExecutionContext
 
 sealed interface SyncOperation {
     suspend fun apply(
+        context: ProcedureExecutionContext,
         base: Repo,
         dst: Repo,
         logger: SyncLogger,
-        operationProgressMutableFlow: MutableStateFlow<List<OperationProgress>>,
     )
 }

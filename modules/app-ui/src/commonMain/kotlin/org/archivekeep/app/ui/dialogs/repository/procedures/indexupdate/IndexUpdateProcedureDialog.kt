@@ -25,7 +25,7 @@ import org.archivekeep.app.core.procedures.add.IndexUpdateProcedureSupervisorSer
 import org.archivekeep.app.core.persistence.platform.demo.Documents
 import org.archivekeep.app.core.persistence.platform.demo.LaptopSSD
 import org.archivekeep.app.core.utils.identifiers.RepositoryURI
-import org.archivekeep.app.core.procedures.utils.ProcedureExecutionState
+import org.archivekeep.utils.procedures.ProcedureExecutionState
 import org.archivekeep.app.ui.components.base.layout.IntrinsicSizeWrapperLayout
 import org.archivekeep.app.ui.components.base.layout.ScrollableLazyColumn
 import org.archivekeep.app.ui.components.designsystem.dialog.DialogPreviewColumn

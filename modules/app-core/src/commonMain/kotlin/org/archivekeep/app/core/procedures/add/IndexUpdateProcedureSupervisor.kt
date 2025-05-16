@@ -2,12 +2,12 @@ package org.archivekeep.app.core.procedures.add
 
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.StateFlow
-import org.archivekeep.app.core.procedures.utils.ProcedureExecutionState
 import org.archivekeep.files.procedures.indexupdate.IndexUpdateAddProgress
 import org.archivekeep.files.procedures.indexupdate.IndexUpdateMoveProgress
 import org.archivekeep.files.procedures.indexupdate.IndexUpdateProcedure
 import org.archivekeep.files.procedures.indexupdate.IndexUpdateProcedure.PreparationResult
 import org.archivekeep.utils.loading.Loadable
+import org.archivekeep.utils.procedures.ProcedureExecutionState
 
 interface IndexUpdateProcedureSupervisor {
     val currentJobFlow: StateFlow<Job?>

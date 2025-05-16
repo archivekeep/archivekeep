@@ -1,4 +1,4 @@
-package org.archivekeep.files.procedures.progress
+package org.archivekeep.utils.procedures
 
 import kotlin.time.Duration
 

@@ -10,7 +10,7 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
 import org.archivekeep.app.core.domain.repositories.RepositoryService
-import org.archivekeep.app.core.procedures.utils.AbstractProcedureJob
+import org.archivekeep.app.core.utils.AbstractJobGuardRunnable
 import org.archivekeep.app.core.utils.UniqueJobGuard
 import org.archivekeep.app.core.utils.generics.SyncFlowStringWriter
 import org.archivekeep.app.core.utils.generics.singleInstanceWeakValueMap
@@ -22,6 +22,8 @@ import org.archivekeep.files.repo.Repo
 import org.archivekeep.utils.loading.Loadable
 import org.archivekeep.utils.loading.LoadableWithProgress
 import org.archivekeep.utils.loading.flatMapLoadableFlow
+import org.archivekeep.utils.procedures.AbstractProcedureJob
+import org.archivekeep.utils.procedures.ProcedureExecutionContext
 import java.io.PrintWriter
 
 class IndexUpdateProcedureSupervisorServiceImpl(
@@ -98,7 +100,7 @@ class IndexUpdateProcedureSupervisorServiceImpl(
         private val repositoryAccess: Repo,
         override val preparationResult: IndexUpdateProcedure.PreparationResult,
         override val launchOptions: IndexUpdateProcedure.LaunchOptions,
-    ) : AbstractProcedureJob(),
+    ) : AbstractJobGuardRunnable(),
         IndexUpdateProcedureSupervisor.Job {
         private val executionLog = SyncFlowStringWriter()
         private val writter = IndexUpdateTextualProgressTracker(PrintWriter(executionLog.writer, true))
@@ -108,12 +110,25 @@ class IndexUpdateProcedureSupervisorServiceImpl(
         private val movesToExecute = (launchOptions.movesSubsetLimit?.intersect(preparationResult.moves.toSet()) ?: preparationResult.moves).toSet()
         private val filesToAdd = (launchOptions.addFilesSubsetLimit?.intersect(preparationResult.newFiles.toSet()) ?: preparationResult.newFiles).toSet()
 
+        val job =
+            object : AbstractProcedureJob() {
+                override suspend fun execute(context: ProcedureExecutionContext) {
+                    preparationResult.execute(
+                        repositoryAccess,
+                        launchOptions.movesSubsetLimit,
+                        launchOptions.addFilesSubsetLimit,
+                        writter,
+                        indexUpdateProgressTracker,
+                    )
+                }
+            }
+
         override val executionStateFlow: Flow<IndexUpdateProcedureSupervisor.JobState> =
             combine(
                 indexUpdateProgressTracker.addProgressFlow,
                 indexUpdateProgressTracker.moveProgressFlow,
                 executionLog.string,
-                executionState,
+                job.executionState,
             ) { addProgress, moveProgress, log, jobState ->
                 IndexUpdateProcedureSupervisor.JobState(
                     movesToExecute,
@@ -126,13 +141,7 @@ class IndexUpdateProcedureSupervisorServiceImpl(
             }
 
         override suspend fun execute() {
-            preparationResult.execute(
-                repositoryAccess,
-                launchOptions.movesSubsetLimit,
-                launchOptions.addFilesSubsetLimit,
-                writter,
-                indexUpdateProgressTracker,
-            )
+            job.run()
         }
     }
 }

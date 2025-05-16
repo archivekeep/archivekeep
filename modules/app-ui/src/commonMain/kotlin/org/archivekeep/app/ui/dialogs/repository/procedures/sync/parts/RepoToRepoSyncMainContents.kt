@@ -9,7 +9,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import org.archivekeep.app.core.procedures.sync.RepoToRepoSync.JobState
 import org.archivekeep.app.core.procedures.sync.RepoToRepoSync.State
-import org.archivekeep.app.core.procedures.utils.ProcedureExecutionState
+import org.archivekeep.utils.procedures.ProcedureExecutionState
 import org.archivekeep.app.ui.components.base.layout.IntrinsicSizeWrapperLayout
 import org.archivekeep.app.ui.components.base.layout.ScrollableLazyColumn
 import org.archivekeep.app.ui.components.designsystem.dialog.LabelText
@@ -102,7 +102,7 @@ fun (ColumnScope).RepoToRepoSyncMainContents(userFlowState: RepoToRepoSyncUserFl
 
                 SyncProgress(operation.progress.collectAsState().value)
                 Spacer(Modifier.height(8.dp))
-                InProgressOperationsList(operation.inProgressOperationsStats.collectAsState().value)
+                InProgressOperationsList(operation.inProgressOperationsProgress.collectAsState().value)
                 Spacer(Modifier.height(8.dp))
                 ScrollableLogTextInDialog(operation.progressLog.collectAsState("").value)
                 ExecutionErrorIfPresent(operation.executionState)

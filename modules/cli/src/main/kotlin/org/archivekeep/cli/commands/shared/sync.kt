@@ -1,6 +1,5 @@
 package org.archivekeep.cli.commands.shared
 
-import kotlinx.coroutines.flow.MutableStateFlow
 import org.archivekeep.cli.MainCommand
 import org.archivekeep.cli.commands.mixins.SyncOptions
 import org.archivekeep.files.operations.CompareOperation
@@ -52,40 +51,42 @@ suspend fun executeSync(
         out.println("No changes to $operationName")
     }
 
-    preparedSync.execute(
-        from,
-        to,
-        prompter = { step ->
-            when (step) {
-                is AdditiveRelocationsSyncStep ->
-                    mainCommand.askForConfirmation("Do you want to $operationName in additive duplicating mode?")
+    val job =
+        preparedSync.createJob(
+            from,
+            to,
+            prompter = { step ->
+                when (step) {
+                    is AdditiveRelocationsSyncStep ->
+                        mainCommand.askForConfirmation("Do you want to $operationName in additive duplicating mode?")
 
-                is RelocationsMoveApplySyncStep ->
-                    mainCommand.askForConfirmation("Do you want to $operationName moves?")
+                    is RelocationsMoveApplySyncStep ->
+                        mainCommand.askForConfirmation("Do you want to $operationName moves?")
 
-                is NewFilesSyncStep ->
-                    mainCommand.askForConfirmation("Do you want to $operationName new files?")
-            }
-        },
-        logger =
-            object : SyncLogger {
-                override fun onFileStored(filename: String) {
-                    out.println("file stored: $filename")
-                }
-
-                override fun onFileMoved(
-                    from: String,
-                    to: String,
-                ) {
-                    out.println("file moved: $from -> $to")
-                }
-
-                override fun onFileDeleted(filename: String) {
-                    out.println("file deleted: $filename")
+                    is NewFilesSyncStep ->
+                        mainCommand.askForConfirmation("Do you want to $operationName new files?")
                 }
             },
-        inProgressOperationsStats = MutableStateFlow(emptyList()),
-    )
+            logger =
+                object : SyncLogger {
+                    override fun onFileStored(filename: String) {
+                        out.println("file stored: $filename")
+                    }
+
+                    override fun onFileMoved(
+                        from: String,
+                        to: String,
+                    ) {
+                        out.println("file moved: $from -> $to")
+                    }
+
+                    override fun onFileDeleted(filename: String) {
+                        out.println("file deleted: $filename")
+                    }
+                },
+        )
+
+    job.run()
 
     return 0
 }

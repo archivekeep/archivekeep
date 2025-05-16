@@ -1,18 +1,17 @@
 package org.archivekeep.files.procedures.sync
 
-import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.yield
-import org.archivekeep.files.procedures.progress.OperationProgress
 import org.archivekeep.files.repo.Repo
+import org.archivekeep.utils.procedures.ProcedureExecutionContext
 
 sealed class SyncOperationGroup<T : SyncOperation>(
     val operations: List<T>,
 ) {
     suspend fun execute(
+        context: ProcedureExecutionContext,
         base: Repo,
         dst: Repo,
         logger: SyncLogger,
-        operationProgressMutableFlow: MutableStateFlow<List<OperationProgress>>,
         progressReport: (progress: Progress) -> Unit,
         limitToSubset: Set<SyncOperation>?,
     ): Progress {
@@ -26,7 +25,7 @@ sealed class SyncOperationGroup<T : SyncOperation>(
             }
 
         operationsToExecute.forEach { operation ->
-            operation.apply(base, dst, logger, operationProgressMutableFlow)
+            operation.apply(context, base, dst, logger)
 
             completedSteps = completedSteps + listOf(operation)
             progressReport(
