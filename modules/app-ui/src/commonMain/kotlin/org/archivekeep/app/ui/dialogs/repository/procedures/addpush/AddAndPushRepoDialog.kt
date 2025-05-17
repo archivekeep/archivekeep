@@ -165,10 +165,10 @@ class AddAndPushRepoDialog(
                 ScrollableColumn(Modifier.weight(1f, fill = false)) {
                     Spacer(Modifier.height(4.dp))
 
-                    val mte = status.options.movesToExecute
-                    val fta = status.options.filesToAdd
+                    val mte = status.moveProgress.movesToExecute
+                    val fta = status.addProgress.filesToAdd
 
-                    LocalIndexUpdateProgress(mte, fta, status.moveProgress, status.addProgress)
+                    LocalIndexUpdateProgress(status.moveProgress, status.addProgress)
 
                     Spacer(Modifier.height(4.dp))
 
@@ -184,11 +184,11 @@ class AddAndPushRepoDialog(
                             ProgressRow(
                                 progress = { (pp.moved.size + pp.added.size) / (mte.size.toFloat() + fta.size.toFloat()) },
                                 text =
-                                    if (storageRepository != null) {
-                                        "Push to ${contextualStorageReference(state.repoName, storageRepository)}"
-                                    } else {
-                                        "Push to $repo"
-                                    },
+                                if (storageRepository != null) {
+                                    "Push to ${contextualStorageReference(state.repoName, storageRepository)}"
+                                } else {
+                                    "Push to $repo"
+                                },
                             ) {
                                 if (mte.isNotEmpty()) {
                                     ProgressRow(
@@ -259,13 +259,13 @@ private fun AddAndPushDialogContentsCompletedPreview() {
                 selectedMoves = mutableStateOf(allTestMoves.toSet()),
                 selectedDestinationRepositories = mutableStateOf(selectedDestinations),
                 otherRepositoryCandidates =
-                    Loadable.Loaded(
-                        listOf(
-                            DocumentsInBackBlaze.storageRepository,
-                            DocumentsInSSDKeyChain.storageRepository,
-                            DocumentsInHDDA.storageRepository,
-                        ),
+                Loadable.Loaded(
+                    listOf(
+                        DocumentsInBackBlaze.storageRepository,
+                        DocumentsInSSDKeyChain.storageRepository,
+                        DocumentsInHDDA.storageRepository,
                     ),
+                ),
                 onCancel = {},
                 onClose = {},
             ),
@@ -280,9 +280,8 @@ private fun AddAndPushDialogContentsCompletedPreview2() {
             VMState(
                 repoName = "Documents",
                 JobState(
-                    options = AddAndPushProcedure.LaunchOptions(allNewFiles.toSet(), emptySet(), selectedDestinations.toSet()),
-                    addProgress = IndexUpdateAddProgress(emptySet(), emptyMap(), false),
-                    moveProgress = IndexUpdateMoveProgress(emptySet(), emptyMap(), false),
+                    addProgress = IndexUpdateAddProgress(allNewFiles.toSet(), emptySet(), emptyMap(), false),
+                    moveProgress = IndexUpdateMoveProgress(emptySet(), emptySet(), emptyMap(), false),
                     pushProgress = selectedDestinations.associateWith { AddAndPushProcedure.PushProgress(emptySet(), emptySet(), emptyMap(), false) },
                     executionState = ProcedureExecutionState.Running,
                     inProgressOperationsProgress = emptyList()
@@ -291,13 +290,13 @@ private fun AddAndPushDialogContentsCompletedPreview2() {
                 selectedMoves = mutableStateOf(emptySet()),
                 selectedDestinationRepositories = mutableStateOf(selectedDestinations),
                 otherRepositoryCandidates =
-                    Loadable.Loaded(
-                        listOf(
-                            DocumentsInBackBlaze.storageRepository,
-                            DocumentsInSSDKeyChain.storageRepository,
-                            DocumentsInHDDA.storageRepository,
-                        ),
+                Loadable.Loaded(
+                    listOf(
+                        DocumentsInBackBlaze.storageRepository,
+                        DocumentsInSSDKeyChain.storageRepository,
+                        DocumentsInHDDA.storageRepository,
                     ),
+                ),
                 onCancel = {},
                 onClose = {},
             ),
@@ -312,9 +311,8 @@ private fun AddAndPushDialogContentsCompletedPreview3() {
             VMState(
                 repoName = "Documents",
                 JobState(
-                    options = AddAndPushProcedure.LaunchOptions(allNewFiles.toSet(), allTestMoves.toSet(), selectedDestinations.toSet()),
-                    addProgress = IndexUpdateAddProgress(setOf(allNewFiles[0]), emptyMap(), false),
-                    moveProgress = IndexUpdateMoveProgress(allTestMoves.subList(0, 3).toSet(), emptyMap(), false),
+                    addProgress = IndexUpdateAddProgress(allNewFiles.toSet(), setOf(allNewFiles[0]), emptyMap(), false),
+                    moveProgress = IndexUpdateMoveProgress(allTestMoves.toSet(), allTestMoves.subList(0, 3).toSet(), emptyMap(), false),
                     pushProgress = selectedDestinations.associateWith { AddAndPushProcedure.PushProgress(emptySet(), emptySet(), emptyMap(), false) },
                     executionState = ProcedureExecutionState.Running,
                     inProgressOperationsProgress = emptyList()
@@ -323,13 +321,13 @@ private fun AddAndPushDialogContentsCompletedPreview3() {
                 selectedMoves = mutableStateOf(allTestMoves.toSet()),
                 selectedDestinationRepositories = mutableStateOf(selectedDestinations),
                 otherRepositoryCandidates =
-                    Loadable.Loaded(
-                        listOf(
-                            DocumentsInBackBlaze.storageRepository,
-                            DocumentsInSSDKeyChain.storageRepository,
-                            DocumentsInHDDA.storageRepository,
-                        ),
+                Loadable.Loaded(
+                    listOf(
+                        DocumentsInBackBlaze.storageRepository,
+                        DocumentsInSSDKeyChain.storageRepository,
+                        DocumentsInHDDA.storageRepository,
                     ),
+                ),
                 onCancel = {},
                 onClose = {},
             ),

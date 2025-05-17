@@ -19,6 +19,7 @@ import kotlinx.coroutines.flow.transform
 import org.archivekeep.app.core.domain.repositories.RepositoryService
 import org.archivekeep.app.core.procedures.sync.RepoToRepoSync.JobState
 import org.archivekeep.app.core.procedures.sync.RepoToRepoSync.State
+import org.archivekeep.app.core.procedures.utils.JobWrapper
 import org.archivekeep.app.core.utils.AbstractJobGuardRunnable
 import org.archivekeep.app.core.utils.UniqueJobGuard
 import org.archivekeep.app.core.utils.generics.OptionalLoadable
@@ -234,7 +235,6 @@ class RepoToRepoSyncServiceImpl(
                                 startExecution = { limitToSubset ->
                                     val newJob =
                                         JobWrapperImpl(
-                                            comparisonLoadable = comparisonLoadable,
                                             preparedSyncProcedure = prepared,
                                             base = base,
                                             other = other,
@@ -262,13 +262,12 @@ class RepoToRepoSyncServiceImpl(
     }
 
     class JobWrapperImpl(
-        val comparisonLoadable: OptionalLoadable.LoadedAvailable<CompareOperation.Result>,
         val preparedSyncProcedure: PreparedSyncProcedure,
         val base: Repo,
         val other: Repo,
         val limitToSubset: Set<SyncOperation>,
     ) : AbstractJobGuardRunnable(),
-        RepoToRepoSync.JobWrapper {
+        JobWrapper<JobState> {
         private val executionLog = SyncFlowStringWriter()
 
         val job =
@@ -280,12 +279,10 @@ class RepoToRepoSyncServiceImpl(
                 logger = WritterSyncLogger(executionLog.writer),
             )
 
-        override val currentState: Flow<JobState> =
+        override val state: Flow<JobState> =
             job.executionState
                 .map {
                     JobState(
-                        comparisonLoadable,
-                        preparedSyncProcedure,
                         job.progress,
                         job.inProgressOperationsProgressFlow,
                         executionLog.string,

@@ -231,8 +231,6 @@ internal fun UploadToRepoDialogPreview2Contents() {
                 Loadable.Loaded(
                     value =
                         RepoToRepoSync.JobState(
-                            comparisonResult = OptionalLoadable.LoadedAvailable(compareResult),
-                            preparedSyncProcedure = preparedSync,
                             progressLog = MutableStateFlow("copied: 2024/6/1.JPG\ncopied: 2024/6/2.JPG"),
                             progress =
                                 MutableStateFlow(
@@ -294,8 +292,6 @@ internal fun UploadToRepoDialogPreview3Contents() {
                 Loadable.Loaded(
                     value =
                         RepoToRepoSync.JobState(
-                            comparisonResult = OptionalLoadable.LoadedAvailable(compareResult),
-                            preparedSyncProcedure = preparedSync,
                             progressLog = MutableStateFlow("copied: 2024/6/1.JPG\ncopied: 2024/6/2.JPG"),
                             progress =
                                 MutableStateFlow(

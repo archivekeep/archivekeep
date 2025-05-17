@@ -10,6 +10,7 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
 import org.archivekeep.app.core.domain.repositories.RepositoryService
+import org.archivekeep.app.core.procedures.utils.JobWrapper
 import org.archivekeep.app.core.utils.AbstractJobGuardRunnable
 import org.archivekeep.app.core.utils.UniqueJobGuard
 import org.archivekeep.app.core.utils.generics.SyncFlowStringWriter
@@ -98,17 +99,22 @@ class IndexUpdateProcedureSupervisorServiceImpl(
 
     inner class JobImpl(
         private val repositoryAccess: Repo,
-        override val preparationResult: IndexUpdateProcedure.PreparationResult,
-        override val launchOptions: IndexUpdateProcedure.LaunchOptions,
+        val preparationResult: IndexUpdateProcedure.PreparationResult,
+        val launchOptions: IndexUpdateProcedure.LaunchOptions,
     ) : AbstractJobGuardRunnable(),
-        IndexUpdateProcedureSupervisor.Job {
+        JobWrapper<IndexUpdateProcedureSupervisor.JobState> {
         private val executionLog = SyncFlowStringWriter()
         private val writter = IndexUpdateTextualProgressTracker(PrintWriter(executionLog.writer, true))
 
-        private val indexUpdateProgressTracker = IndexUpdateStructuredProgressTracker()
-
+        // TODO - this should be encapsulated into procedure's logic, not supervisor
         private val movesToExecute = (launchOptions.movesSubsetLimit?.intersect(preparationResult.moves.toSet()) ?: preparationResult.moves).toSet()
         private val filesToAdd = (launchOptions.addFilesSubsetLimit?.intersect(preparationResult.newFiles.toSet()) ?: preparationResult.newFiles).toSet()
+
+        private val indexUpdateProgressTracker =
+            IndexUpdateStructuredProgressTracker(
+                filesToAdd,
+                movesToExecute,
+            )
 
         val job =
             object : AbstractProcedureJob() {
@@ -123,7 +129,7 @@ class IndexUpdateProcedureSupervisorServiceImpl(
                 }
             }
 
-        override val executionStateFlow: Flow<IndexUpdateProcedureSupervisor.JobState> =
+        override val state: Flow<IndexUpdateProcedureSupervisor.JobState> =
             combine(
                 indexUpdateProgressTracker.addProgressFlow,
                 indexUpdateProgressTracker.moveProgressFlow,
@@ -131,8 +137,6 @@ class IndexUpdateProcedureSupervisorServiceImpl(
                 job.executionState,
             ) { addProgress, moveProgress, log, jobState ->
                 IndexUpdateProcedureSupervisor.JobState(
-                    movesToExecute,
-                    filesToAdd,
                     addProgress,
                     moveProgress,
                     log,

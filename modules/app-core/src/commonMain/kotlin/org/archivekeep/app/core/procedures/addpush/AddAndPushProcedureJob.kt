@@ -22,7 +22,11 @@ class AddAndPushProcedureJob(
     val addPreparationResult: IndexUpdateProcedure.PreparationResult,
     private val launchOptions: AddAndPushProcedure.LaunchOptions,
 ) : AbstractProcedureJob() {
-    private val structuredProgressTracker = IndexUpdateStructuredProgressTracker()
+    private val structuredProgressTracker =
+        IndexUpdateStructuredProgressTracker(
+            launchOptions.filesToAdd,
+            launchOptions.movesToExecute,
+        )
 
     val repositoryPushStatus =
         MutableStateFlow(
@@ -41,7 +45,6 @@ class AddAndPushProcedureJob(
             inProgressOperationsProgressFlow,
         ) { addProgress, moveProgress, repositoryPushStatus, executionState, inProgressOperationsProgress ->
             AddAndPushProcedure.JobState(
-                launchOptions,
                 addProgress,
                 moveProgress,
                 repositoryPushStatus,

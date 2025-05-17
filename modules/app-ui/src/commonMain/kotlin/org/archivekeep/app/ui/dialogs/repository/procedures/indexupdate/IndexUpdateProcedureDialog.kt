@@ -113,7 +113,7 @@ class IndexUpdateProcedureDialog(
                 .stickToFirstNotNull()
                 .distinctUntilChanged()
                 .flatMapLatest { job ->
-                    job?.executionStateFlow?.mapToLoadable() ?: operation.prepare()
+                    job?.state?.mapToLoadable() ?: operation.prepare()
                 }
 
         override fun onClose() {
@@ -207,8 +207,6 @@ class IndexUpdateProcedureDialog(
 
             is IndexUpdateProcedureSupervisor.JobState -> {
                 LocalIndexUpdateProgress(
-                    operationState.movesToExecute,
-                    operationState.filesToAdd,
                     operationState.moveProgress,
                     operationState.addProgress,
                 )
@@ -295,10 +293,8 @@ private fun UpdateIndexOperationViewPreview() {
             archiveName = "Family Stuff",
             state =
                 IndexUpdateProcedureSupervisor.JobState(
-                    emptySet(),
-                    setOf("Documents/Something/There.pdf"),
-                    IndexUpdateAddProgress(setOf("Documents/Something/There.pdf"), emptyMap(), false),
-                    IndexUpdateMoveProgress(emptySet(), emptyMap(), false),
+                    IndexUpdateAddProgress(setOf("Documents/Something/There.pdf"), setOf("Documents/Something/There.pdf"), emptyMap(), false),
+                    IndexUpdateMoveProgress(emptySet(),  emptySet(), emptyMap(), false),
                     "added: Documents/Something/There.pdf",
                     ProcedureExecutionState.Running,
                 ),
@@ -309,10 +305,8 @@ private fun UpdateIndexOperationViewPreview() {
         renderPreview(
             archiveName = "Family Stuff",
             IndexUpdateProcedureSupervisor.JobState(
-                emptySet(),
-                setOf("Documents/Something/There.pdf", "Photos/2024/04/photo_09.JPG"),
-                IndexUpdateAddProgress(setOf("Documents/Something/There.pdf", "Photos/2024/04/photo_09.JPG"), emptyMap(), false),
-                IndexUpdateMoveProgress(emptySet(), emptyMap(), false),
+                IndexUpdateAddProgress(setOf("Documents/Something/There.pdf", "Photos/2024/04/photo_09.JPG"), setOf("Documents/Something/There.pdf", "Photos/2024/04/photo_09.JPG"), emptyMap(), false),
+                IndexUpdateMoveProgress(emptySet(),  emptySet(), emptyMap(), false),
                 "added: Documents/Something/There.pdf\nadded: Photos/2024/04/photo_09.JPG",
                 ProcedureExecutionState.Running,
             ),
@@ -329,10 +323,8 @@ private fun UpdateIndexOperationViewPreview2() {
         renderPreview(
             archiveName = "Family Stuff",
             IndexUpdateProcedureSupervisor.JobState(
-                emptySet(),
-                setOf("Documents/Something/There.pdf", "Photos/2024/04/photo_09.JPG", "Photos/2024/04/photo_10.JPG"),
-                IndexUpdateAddProgress(setOf("Documents/Something/There.pdf", "Photos/2024/04/photo_09.JPG"), emptyMap(), true),
-                IndexUpdateMoveProgress(emptySet(), emptyMap(), false),
+                IndexUpdateAddProgress(setOf("Documents/Something/There.pdf", "Photos/2024/04/photo_09.JPG", "Photos/2024/04/photo_10.JPG"), setOf("Documents/Something/There.pdf", "Photos/2024/04/photo_09.JPG"), emptyMap(), true),
+                IndexUpdateMoveProgress(emptySet(), emptySet(), emptyMap(), false),
                 "added: Documents/Something/There.pdf\nadded: Photos/2024/04/photo_09.JPG",
                 ProcedureExecutionState.Running,
             ),

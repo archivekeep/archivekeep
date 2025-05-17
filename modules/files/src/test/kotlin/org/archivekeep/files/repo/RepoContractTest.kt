@@ -13,7 +13,7 @@ import org.archivekeep.utils.sha256
 import org.junit.jupiter.api.Test
 import java.util.UUID
 import kotlin.test.assertEquals
-import kotlin.time.Duration.Companion.milliseconds
+import kotlin.time.Duration.Companion.seconds
 
 abstract class RepoContractTest<T : Repo> {
     interface TestRepo<T : Repo> {
@@ -39,7 +39,7 @@ abstract class RepoContractTest<T : Repo> {
                     .indexFlow
                     .stateIn(backgroundScope, SharingStarted.Eagerly)
 
-            advanceTimeByAndWaitForIdle(100.milliseconds)
+            advanceTimeByAndWaitForIdle(2.seconds)
 
             indexFlowState.value.assertLoaded {
                 assertEquals(
@@ -54,7 +54,7 @@ abstract class RepoContractTest<T : Repo> {
 
             repoAccessor.quickSave("C/04.txt")
 
-            advanceTimeByAndWaitForIdle(100.milliseconds)
+            advanceTimeByAndWaitForIdle(2.seconds)
 
             indexFlowState.value.assertLoaded {
                 assertEquals(
@@ -88,7 +88,7 @@ abstract class RepoContractTest<T : Repo> {
                         .metadataFlow
                         .stateIn(backgroundScope, SharingStarted.Eagerly)
 
-                advanceTimeByAndWaitForIdle(100.milliseconds)
+                advanceTimeByAndWaitForIdle(2.seconds)
 
                 metadataFlowState.value.assertLoaded {
                     assertEquals(null, it.associationGroupId)
@@ -98,7 +98,7 @@ abstract class RepoContractTest<T : Repo> {
                     it.copy(associationGroupId = newID)
                 }
 
-                advanceTimeByAndWaitForIdle(100.milliseconds)
+                advanceTimeByAndWaitForIdle(2.seconds)
 
                 metadataFlowState.value.assertLoaded {
                     assertEquals(newID, it.associationGroupId)
@@ -113,7 +113,7 @@ abstract class RepoContractTest<T : Repo> {
                         .metadataFlow
                         .stateIn(backgroundScope, SharingStarted.Eagerly)
 
-                advanceTimeByAndWaitForIdle(100.milliseconds)
+                advanceTimeByAndWaitForIdle(2.seconds)
 
                 metadataFlowState.value.assertLoaded {
                     assertEquals(newID, it.associationGroupId)

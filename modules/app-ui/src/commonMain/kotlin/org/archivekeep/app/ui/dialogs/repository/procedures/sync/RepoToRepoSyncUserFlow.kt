@@ -67,7 +67,7 @@ class RepoToRepoSyncUserFlow(
                 if (it == null) {
                     sync.prepare(relocationSyncMode)
                 } else {
-                    it.currentState.mapToLoadable()
+                    it.state.mapToLoadable()
                 }
             }.stateIn(scope, SharingStarted.WhileSubscribed(), Loadable.Loading)
 

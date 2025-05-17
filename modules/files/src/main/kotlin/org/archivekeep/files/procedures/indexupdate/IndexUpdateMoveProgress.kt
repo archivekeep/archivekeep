@@ -1,7 +1,10 @@
 package org.archivekeep.files.procedures.indexupdate
 
+import org.archivekeep.files.procedures.indexupdate.IndexUpdateProcedure.PreparationResult.Move
+
 data class IndexUpdateMoveProgress(
-    val moved: Set<IndexUpdateProcedure.PreparationResult.Move>,
-    val error: Map<IndexUpdateProcedure.PreparationResult.Move, Any>,
+    val movesToExecute: Set<Move>,
+    val moved: Set<Move>,
+    val error: Map<Move, Any>,
     val finished: Boolean,
 )

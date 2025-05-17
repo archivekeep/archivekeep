@@ -11,19 +11,19 @@ import org.archivekeep.utils.filesAutoPlural
 
 @Composable
 fun LocalIndexUpdateProgress(
-    selectedMoves: Set<IndexUpdateProcedure.PreparationResult.Move>,
-    selectedFilesToAdd: Set<String>,
     moveProgress: IndexUpdateMoveProgress,
     addProgress: IndexUpdateAddProgress,
 ) {
     LabelText("Local index update")
 
     ProgressRowList {
+        val selectedMoves = moveProgress.movesToExecute
         if (selectedMoves.isNotEmpty()) {
             ProgressRow(progress = {
                 moveProgress.moved.size / selectedMoves.size.toFloat()
             }, "Moved ${moveProgress.moved.size} of ${selectedMoves.size} ${filesAutoPlural(selectedMoves)}")
         }
+        val selectedFilesToAdd = addProgress.filesToAdd
         if (selectedFilesToAdd.isNotEmpty()) {
             ProgressRow(
                 progress = { addProgress.added.size / selectedFilesToAdd.size.toFloat() },

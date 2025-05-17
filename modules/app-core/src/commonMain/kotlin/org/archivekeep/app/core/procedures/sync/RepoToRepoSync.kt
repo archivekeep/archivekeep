@@ -2,6 +2,7 @@ package org.archivekeep.app.core.procedures.sync
 
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.StateFlow
+import org.archivekeep.app.core.procedures.utils.JobWrapper
 import org.archivekeep.app.core.utils.generics.OptionalLoadable
 import org.archivekeep.files.operations.CompareOperation
 import org.archivekeep.files.procedures.sync.PreparedSyncProcedure
@@ -13,7 +14,7 @@ import org.archivekeep.utils.procedures.OperationProgress
 import org.archivekeep.utils.procedures.ProcedureExecutionState
 
 interface RepoToRepoSync {
-    val currentJobFlow: StateFlow<JobWrapper?>
+    val currentJobFlow: StateFlow<JobWrapper<JobState>?>
 
     val compareStateFlow: Flow<OptionalLoadable<CompareState>>
 
@@ -32,25 +33,15 @@ interface RepoToRepoSync {
             get() = missingBaseInOther == 0 && missingOtherInBase == 0
     }
 
-    interface JobWrapper {
-        val currentState: Flow<JobState>
-
-        fun cancel()
-    }
-
     sealed interface State {
-        val comparisonResult: OptionalLoadable.LoadedAvailable<CompareOperation.Result>
-
         data class Prepared(
-            override val comparisonResult: OptionalLoadable.LoadedAvailable<CompareOperation.Result>,
+            val comparisonResult: OptionalLoadable.LoadedAvailable<CompareOperation.Result>,
             val preparedSyncProcedure: PreparedSyncProcedure,
-            val startExecution: (limitToSubset: Set<SyncOperation>) -> JobWrapper,
+            val startExecution: (limitToSubset: Set<SyncOperation>) -> JobWrapper<JobState>,
         ) : State
     }
 
     data class JobState(
-        override val comparisonResult: OptionalLoadable.LoadedAvailable<CompareOperation.Result>,
-        val preparedSyncProcedure: PreparedSyncProcedure,
         val progress: StateFlow<List<SyncOperationGroup.Progress>>,
         val inProgressOperationsProgress: StateFlow<List<OperationProgress>>,
         val progressLog: StateFlow<String>,

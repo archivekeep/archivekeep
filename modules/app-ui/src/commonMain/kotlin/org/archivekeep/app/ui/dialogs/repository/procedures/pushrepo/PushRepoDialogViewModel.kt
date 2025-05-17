@@ -73,7 +73,7 @@ class PushRepoDialogViewModel(
             rememberedOPFlow
                 .flatMapLatest { rememberedOP ->
                     if (rememberedOP != null) {
-                        return@flatMapLatest rememberedOP.currentState.mapToLoadable().mapLoadedData {
+                        return@flatMapLatest rememberedOP.state.mapToLoadable().mapLoadedData {
                             it as State
                         }
                     }

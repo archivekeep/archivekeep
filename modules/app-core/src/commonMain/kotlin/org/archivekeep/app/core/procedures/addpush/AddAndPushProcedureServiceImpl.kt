@@ -9,6 +9,7 @@ import kotlinx.coroutines.flow.emitAll
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.transform
 import org.archivekeep.app.core.domain.repositories.RepositoryService
+import org.archivekeep.app.core.procedures.utils.JobWrapper
 import org.archivekeep.app.core.utils.AbstractJobGuardRunnable
 import org.archivekeep.app.core.utils.UniqueJobGuard
 import org.archivekeep.app.core.utils.generics.singleInstanceWeakValueMap
@@ -29,10 +30,10 @@ class AddAndPushProcedureServiceImpl(
     class JobWrapperImpl(
         repositoryService: RepositoryService,
         repositoryURI: RepositoryURI,
-        override val addPreparationResult: IndexUpdateProcedure.PreparationResult,
+        addPreparationResult: IndexUpdateProcedure.PreparationResult,
         launchOptions: AddAndPushProcedure.LaunchOptions,
     ) : AbstractJobGuardRunnable(),
-        AddAndPushProcedure.JobWrapper {
+        JobWrapper<AddAndPushProcedure.JobState> {
         private val procedureJob =
             AddAndPushProcedureJob(
                 repositoryService,
@@ -87,6 +88,7 @@ class AddAndPushProcedureServiceImpl(
                                             ),
                                         )
                                     }
+
                                     LoadableWithProgress.Loading -> {}
                                     is LoadableWithProgress.LoadingProgress -> {
                                         emit(AddAndPushProcedure.PreparingAddPushProcess(it.progress))
