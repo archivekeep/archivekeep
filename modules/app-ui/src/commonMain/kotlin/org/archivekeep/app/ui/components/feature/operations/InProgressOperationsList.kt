@@ -1,6 +1,7 @@
 package org.archivekeep.app.ui.components.feature.operations
 
 import androidx.compose.runtime.Composable
+import org.archivekeep.app.ui.components.base.layout.HeightKeepingBox
 import org.archivekeep.app.ui.components.designsystem.progress.ProgressRow
 import org.archivekeep.app.ui.components.designsystem.progress.ProgressRowList
 import org.archivekeep.files.procedures.progress.CopyOperationProgress
@@ -10,6 +11,13 @@ import kotlin.time.Duration.Companion.minutes
 
 @Composable
 fun InProgressOperationsList(progress: List<OperationProgress>) {
+    HeightKeepingBox {
+        InProgressOperationsListInner(progress)
+    }
+}
+
+@Composable
+private fun InProgressOperationsListInner(progress: List<OperationProgress>) {
     ProgressRowList {
         progress.forEach { atom ->
             ProgressRow(
