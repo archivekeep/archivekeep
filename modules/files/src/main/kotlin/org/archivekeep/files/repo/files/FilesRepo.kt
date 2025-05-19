@@ -229,6 +229,7 @@ class FilesRepo(
                     val buffer = ByteArray(2 * 1024 * 1024)
                     var read: Int = stream.read(buffer)
                     var total: Long = 0
+                    var lastSync: Long = 0
 
                     while (read != -1) {
                         // check the job is active
@@ -237,14 +238,18 @@ class FilesRepo(
                         output.write(ByteBuffer.wrap(buffer, 0, read))
 
                         total += read
-                        monitor(total)
 
                         read = stream.read(buffer)
 
-                        // TODO - each 128MB: output.force(false)
+                        if (total - lastSync > 25 * 1024 * 1024) {
+                            output.force(false)
+                            lastSync = total
+                            monitor(total)
+                        }
                     }
 
                     output.force(true)
+                    monitor(total)
                 }
                 println("copy to end: $dstPath")
 

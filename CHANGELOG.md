@@ -20,6 +20,10 @@ Performance:
 - index contents auto-refresh monitors only checksums dir (not all contents)
 - metadata information auto-refresh monitors only the file itself (not all - checksums and other things)
 
+Other:
+
+- sync to filesystem (force data write to medium) for writes to repo every 25MB to get real values for write speed
+
 ### Technical
 
 - refactoring & tests
