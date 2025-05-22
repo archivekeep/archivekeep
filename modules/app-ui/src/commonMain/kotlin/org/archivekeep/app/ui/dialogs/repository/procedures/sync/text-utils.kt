@@ -4,20 +4,22 @@ import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.buildAnnotatedString
 import org.archivekeep.app.ui.utils.appendBoldSpan
 import org.archivekeep.app.ui.utils.appendBoldStrikeThroughSpan
-import org.archivekeep.files.procedures.sync.AdditiveRelocationsSyncStep
-import org.archivekeep.files.procedures.sync.NewFilesSyncStep
-import org.archivekeep.files.procedures.sync.PreparedSyncProcedure
-import org.archivekeep.files.procedures.sync.RelocationsMoveApplySyncStep
+import org.archivekeep.files.procedures.sync.DiscoveredAdditiveRelocationsGroup
+import org.archivekeep.files.procedures.sync.DiscoveredSync
+import org.archivekeep.files.procedures.sync.DiscoveredNewFilesGroup
+import org.archivekeep.files.procedures.sync.DiscoveredRelocationsMoveApplyGroup
+import org.archivekeep.files.procedures.sync.operations.AdditiveReplicationOperation
+import org.archivekeep.files.procedures.sync.operations.RelocationApplyOperation
 
-fun describePreparedSyncOperation(a: PreparedSyncProcedure) =
-    if (a.steps.isEmpty()) {
+fun describePreparedSyncOperation(a: DiscoveredSync) =
+    if (a.groups.isEmpty()) {
         "Nothing to do"
     } else {
-        a.steps.joinToString("\n") {
+        a.groups.joinToString("\n") {
             when (it) {
-                is AdditiveRelocationsSyncStep -> "Duplicate ${it.operations.size} files."
+                is DiscoveredAdditiveRelocationsGroup -> "Duplicate ${it.operations.size} files."
 
-                is RelocationsMoveApplySyncStep -> {
+                is DiscoveredRelocationsMoveApplyGroup -> {
                     var text = "Move ${it.operations.size} files."
 
                     if (it.toIgnore.isNotEmpty()) {
@@ -27,17 +29,17 @@ fun describePreparedSyncOperation(a: PreparedSyncProcedure) =
                     text
                 }
 
-                is NewFilesSyncStep -> "Upload ${it.operations.size} files."
+                is DiscoveredNewFilesGroup -> "Upload ${it.operations.size} files."
             }
         }
     }
 
-fun AdditiveRelocationsSyncStep.AdditiveReplicationOperation.describe() =
+fun AdditiveReplicationOperation.describe() =
     with(relocation) {
-        "duplicate ${relocation.baseFilenames} to ${relocation.extraBaseLocations}"
+        "duplicate $baseFilenames to $extraBaseLocations"
     }
 
-fun RelocationsMoveApplySyncStep.RelocationApplyOperation.describe() =
+fun RelocationApplyOperation.describe() =
     buildAnnotatedString {
         with(relocation) {
             if (isIncreasingDuplicates) {

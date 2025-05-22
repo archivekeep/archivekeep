@@ -1,10 +1,16 @@
 package org.archivekeep.utils
 
-fun filesAutoPlural(items: Collection<*>): String = filesAutoPlural(items.size)
+fun filesAutoPlural(
+    items: Collection<*>,
+    prefix: String = "",
+): String = filesAutoPlural(items.size, prefix)
 
-fun filesAutoPlural(count: Int): String =
+fun filesAutoPlural(
+    count: Int,
+    prefix: String = "",
+): String =
     if (count == 1) {
-        "file"
+        "1 ${prefix}file"
     } else {
-        "files"
+        "$count ${prefix}files"
     }

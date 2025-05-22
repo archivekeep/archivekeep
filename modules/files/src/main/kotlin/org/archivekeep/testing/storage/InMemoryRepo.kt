@@ -48,6 +48,7 @@ open class InMemoryRepo(
                     contents.entries.map {
                         RepoIndex.File(
                             path = it.key,
+                            size = it.value.size.toLong(),
                             checksumSha256 = it.value.sha256(),
                         )
                     },

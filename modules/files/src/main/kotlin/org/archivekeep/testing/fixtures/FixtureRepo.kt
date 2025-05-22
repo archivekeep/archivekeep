@@ -20,6 +20,7 @@ class FixtureRepo(
             contents.entries.map {
                 RepoIndex.File(
                     path = it.key,
+                    size = it.value.length.toLong(),
                     checksumSha256 = it.value.sha256(),
                 )
             },

@@ -14,7 +14,7 @@ import org.archivekeep.app.ui.components.feature.dialogs.operations.DialogOperat
 import org.archivekeep.app.ui.components.feature.dialogs.operations.toDialogOperationControlState
 import org.archivekeep.app.ui.utils.stickToFirstNotNullAsState
 import org.archivekeep.files.procedures.sync.RelocationSyncMode
-import org.archivekeep.files.procedures.sync.SyncOperation
+import org.archivekeep.files.procedures.sync.operations.SyncOperation
 import org.archivekeep.utils.loading.Loadable
 import org.archivekeep.utils.loading.mapIfLoadedOrDefault
 import org.archivekeep.utils.loading.mapToLoadable
@@ -44,7 +44,7 @@ class RepoToRepoSyncUserFlow(
                         DialogOperationControlState.NotRunning(
                             onLaunch,
                             onClose,
-                            canLaunch = !operationState.preparedSyncProcedure.isNoOp(),
+                            canLaunch = !operationState.discoveredSync.isNoOp(),
                         )
                     is JobState ->
                         operationState.executionState.toDialogOperationControlState(

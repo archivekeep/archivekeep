@@ -13,11 +13,11 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.combine
 import org.archivekeep.app.core.domain.storages.StorageRepository
 import org.archivekeep.app.core.domain.storages.StorageService
-import org.archivekeep.app.core.procedures.sync.RepoToRepoSync
-import org.archivekeep.app.core.procedures.sync.RepoToRepoSyncService
 import org.archivekeep.app.core.persistence.platform.demo.Photos
 import org.archivekeep.app.core.persistence.platform.demo.PhotosInHDDB
 import org.archivekeep.app.core.persistence.platform.demo.PhotosInLaptopSSD
+import org.archivekeep.app.core.procedures.sync.RepoToRepoSync
+import org.archivekeep.app.core.procedures.sync.RepoToRepoSyncService
 import org.archivekeep.app.core.utils.generics.OptionalLoadable
 import org.archivekeep.app.core.utils.identifiers.RepositoryURI
 import org.archivekeep.app.ui.components.designsystem.dialog.DialogPreviewColumn
@@ -172,11 +172,11 @@ fun DownloadFromRepoDialogPreview1Contents() {
                     value =
                         RepoToRepoSync.State.Prepared(
                             comparisonResult = OptionalLoadable.LoadedAvailable(compareResult),
-                            preparedSyncProcedure = preparedSync,
+                            discoveredSync = preparedSync,
                             startExecution = { error("should not be called in preview") },
                         ),
                 ),
-                mutableStateOf(preparedSync.steps[0].operations.toSet()),
+                mutableStateOf(preparedSync.groups[0].operations.toSet()),
             ),
             onLaunch = {},
             onCancel = {},

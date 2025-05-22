@@ -5,13 +5,13 @@ import org.archivekeep.app.core.domain.archives.ArchiveService
 import org.archivekeep.app.core.domain.repositories.RepositoryService
 import org.archivekeep.app.core.domain.storages.StorageRegistry
 import org.archivekeep.app.core.domain.storages.StorageService
-import org.archivekeep.app.core.procedures.add.IndexUpdateProcedureSupervisorService
-import org.archivekeep.app.core.procedures.addpush.AddAndPushProcedureService
-import org.archivekeep.app.core.procedures.sync.RepoToRepoSyncService
 import org.archivekeep.app.core.persistence.credentials.Credentials
 import org.archivekeep.app.core.persistence.credentials.JoseStorage
 import org.archivekeep.app.core.persistence.drivers.filesystem.FileStores
 import org.archivekeep.app.core.persistence.registry.RegistryDataStore
+import org.archivekeep.app.core.procedures.add.IndexUpdateProcedureSupervisorService
+import org.archivekeep.app.core.procedures.addpush.AddAndPushProcedureService
+import org.archivekeep.app.core.procedures.sync.RepoToRepoSyncService
 import org.archivekeep.app.ui.domain.services.RepositoryOpenService
 
 val LocalStorageService = staticCompositionLocalOfNotProvided<StorageService>()

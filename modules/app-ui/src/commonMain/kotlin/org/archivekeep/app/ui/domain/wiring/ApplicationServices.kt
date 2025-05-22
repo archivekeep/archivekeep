@@ -7,10 +7,10 @@ import org.archivekeep.app.core.domain.archives.DefaultArchiveService
 import org.archivekeep.app.core.domain.repositories.DefaultRepositoryService
 import org.archivekeep.app.core.domain.storages.KnownStorageService
 import org.archivekeep.app.core.domain.storages.StorageService
+import org.archivekeep.app.core.persistence.platform.Environment
 import org.archivekeep.app.core.procedures.add.IndexUpdateProcedureSupervisorServiceImpl
 import org.archivekeep.app.core.procedures.addpush.AddAndPushProcedureServiceImpl
 import org.archivekeep.app.core.procedures.sync.RepoToRepoSyncServiceImpl
-import org.archivekeep.app.core.persistence.platform.Environment
 
 class ApplicationServices(
     val serviceWorkDispatcher: CoroutineDispatcher,

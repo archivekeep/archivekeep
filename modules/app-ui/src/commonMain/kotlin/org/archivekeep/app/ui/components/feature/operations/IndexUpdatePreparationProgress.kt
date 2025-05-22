@@ -12,13 +12,13 @@ fun IndexUpdatePreparationProgress(progress: IndexUpdateProcedure.PreparationPro
     ProgressRowList {
         ProgressRow(
             progress = { progress.checkedFiles.size / progress.filesToCheck.size.toFloat() },
-            "Checked ${progress.checkedFiles.size} of ${progress.filesToCheck.size} unindexed ${filesAutoPlural(progress.filesToCheck)}",
+            "Checked ${progress.checkedFiles.size} of ${filesAutoPlural(progress.filesToCheck, "unindexed ")}",
         ) {
             if (progress.newFiles.isNotEmpty()) {
-                Text("Found ${progress.newFiles.size} new ${filesAutoPlural(progress.newFiles)}")
+                Text("Found ${filesAutoPlural(progress.newFiles, "new ")}")
             }
             if (progress.moves.isNotEmpty()) {
-                Text("Found ${progress.moves} moved ${filesAutoPlural(progress.newFiles)}")
+                Text("Found ${filesAutoPlural(progress.moves, "moved ")}")
             }
         }
     }

@@ -8,8 +8,8 @@ import org.archivekeep.files.procedures.indexupdate.IndexUpdateAddProgress
 import org.archivekeep.files.procedures.indexupdate.IndexUpdateMoveProgress
 import org.archivekeep.files.procedures.indexupdate.IndexUpdateProcedure
 import org.archivekeep.files.procedures.indexupdate.IndexUpdateProcedure.PreparationResult.Move
-import org.archivekeep.utils.procedures.OperationProgress
 import org.archivekeep.utils.procedures.ProcedureExecutionState
+import org.archivekeep.utils.procedures.operations.OperationProgress
 
 interface AddAndPushProcedure {
     val currentJobFlow: StateFlow<JobWrapper<JobState>?>

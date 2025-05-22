@@ -67,6 +67,7 @@ class RemoteGrpcRepository(
                 result.filesList.map {
                     RepoIndex.File(
                         path = it.name.removePrefix(archiveName).removePrefix("/files/"),
+                        size = it.length,
                         checksumSha256 = it.digestsMap["SHA256"] ?: throw RuntimeException("No SHA256"),
                     )
                 },

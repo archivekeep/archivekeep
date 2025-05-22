@@ -3,10 +3,10 @@ package org.archivekeep.cli.commands.shared
 import org.archivekeep.cli.MainCommand
 import org.archivekeep.cli.commands.mixins.SyncOptions
 import org.archivekeep.files.operations.CompareOperation
-import org.archivekeep.files.procedures.sync.AdditiveRelocationsSyncStep
-import org.archivekeep.files.procedures.sync.NewFilesSyncStep
+import org.archivekeep.files.procedures.sync.DiscoveredAdditiveRelocationsGroup
+import org.archivekeep.files.procedures.sync.DiscoveredNewFilesGroup
+import org.archivekeep.files.procedures.sync.DiscoveredRelocationsMoveApplyGroup
 import org.archivekeep.files.procedures.sync.RelocationSyncMode
-import org.archivekeep.files.procedures.sync.RelocationsMoveApplySyncStep
 import org.archivekeep.files.procedures.sync.SyncLogger
 import org.archivekeep.files.procedures.sync.SyncProcedure
 import org.archivekeep.files.repo.Repo
@@ -28,7 +28,7 @@ suspend fun executeSync(
 
     val preparedSync = SyncProcedure(syncOptions.syncMode).prepareFromComparison(comparisonResult)
 
-    preparedSync.steps.filterIsInstance<RelocationsMoveApplySyncStep>().forEach { relocationStep ->
+    preparedSync.groups.filterIsInstance<DiscoveredRelocationsMoveApplyGroup>().forEach { relocationStep ->
         if (relocationStep.toIgnore.isNotEmpty()) {
             if (syncOptions.syncMode == RelocationSyncMode.Disabled) {
                 out.println("Relocations disabled but present.")
@@ -57,13 +57,13 @@ suspend fun executeSync(
             to,
             prompter = { step ->
                 when (step) {
-                    is AdditiveRelocationsSyncStep ->
+                    is DiscoveredAdditiveRelocationsGroup ->
                         mainCommand.askForConfirmation("Do you want to $operationName in additive duplicating mode?")
 
-                    is RelocationsMoveApplySyncStep ->
+                    is DiscoveredRelocationsMoveApplyGroup ->
                         mainCommand.askForConfirmation("Do you want to $operationName moves?")
 
-                    is NewFilesSyncStep ->
+                    is DiscoveredNewFilesGroup ->
                         mainCommand.askForConfirmation("Do you want to $operationName new files?")
                 }
             },

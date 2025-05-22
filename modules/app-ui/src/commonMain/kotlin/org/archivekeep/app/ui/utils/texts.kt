@@ -3,6 +3,8 @@ package org.archivekeep.app.ui.utils
 import org.archivekeep.app.core.domain.storages.StorageRepository
 import org.archivekeep.app.core.utils.generics.OptionalLoadable
 import org.archivekeep.app.core.utils.generics.mapIfLoadedOrNull
+import kotlin.time.Duration
+import kotlin.time.Duration.Companion.minutes
 
 fun contextualStorageReference(
     baseRepositoryName: String,
@@ -23,3 +25,10 @@ fun combineTexts(vararg texts: OptionalLoadable<List<String>>): OptionalLoadable
 
     return OptionalLoadable.LoadedAvailable(texts.map { it.mapIfLoadedOrNull { it } ?: emptyList() }.flatten())
 }
+
+fun (Duration).toUiString(): String =
+    if (this < 1.minutes) {
+        "${this.inWholeSeconds}s"
+    } else {
+        "${this.inWholeMinutes}m ${this.inWholeSeconds - this.inWholeMinutes * 60}s"
+    }

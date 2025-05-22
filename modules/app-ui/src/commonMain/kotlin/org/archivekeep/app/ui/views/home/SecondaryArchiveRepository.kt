@@ -44,7 +44,7 @@ class SecondaryArchiveRepository(
         val addTexts =
             localRepoStatus.mapLoadedData {
                 if (it.totalNewFiles > 0) {
-                    listOf("Uncommitted ${it.totalNewFiles} ${filesAutoPlural(it.totalNewFiles)}")
+                    listOf("Uncommitted ${filesAutoPlural(it.totalNewFiles)}")
                 } else {
                     emptyList()
                 }

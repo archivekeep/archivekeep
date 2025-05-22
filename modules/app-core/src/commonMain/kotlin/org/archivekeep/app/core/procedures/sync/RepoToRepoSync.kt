@@ -5,13 +5,13 @@ import kotlinx.coroutines.flow.StateFlow
 import org.archivekeep.app.core.procedures.utils.JobWrapper
 import org.archivekeep.app.core.utils.generics.OptionalLoadable
 import org.archivekeep.files.operations.CompareOperation
-import org.archivekeep.files.procedures.sync.PreparedSyncProcedure
+import org.archivekeep.files.procedures.sync.DiscoveredSync
 import org.archivekeep.files.procedures.sync.RelocationSyncMode
-import org.archivekeep.files.procedures.sync.SyncOperation
-import org.archivekeep.files.procedures.sync.SyncOperationGroup
+import org.archivekeep.files.procedures.sync.operations.SyncOperation
 import org.archivekeep.utils.loading.Loadable
-import org.archivekeep.utils.procedures.OperationProgress
 import org.archivekeep.utils.procedures.ProcedureExecutionState
+import org.archivekeep.utils.procedures.operations.OperationProgress
+import org.archivekeep.utils.procedures.tasks.TaskExecutionProgressSummary
 
 interface RepoToRepoSync {
     val currentJobFlow: StateFlow<JobWrapper<JobState>?>
@@ -36,13 +36,13 @@ interface RepoToRepoSync {
     sealed interface State {
         data class Prepared(
             val comparisonResult: OptionalLoadable.LoadedAvailable<CompareOperation.Result>,
-            val preparedSyncProcedure: PreparedSyncProcedure,
+            val discoveredSync: DiscoveredSync,
             val startExecution: (limitToSubset: Set<SyncOperation>) -> JobWrapper<JobState>,
         ) : State
     }
 
     data class JobState(
-        val progress: StateFlow<List<SyncOperationGroup.Progress>>,
+        val progress: StateFlow<TaskExecutionProgressSummary.Group>,
         val inProgressOperationsProgress: StateFlow<List<OperationProgress>>,
         val progressLog: StateFlow<String>,
         val executionState: ProcedureExecutionState,

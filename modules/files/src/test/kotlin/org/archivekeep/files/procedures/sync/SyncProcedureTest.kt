@@ -3,8 +3,9 @@ package org.archivekeep.files.procedures.sync
 import kotlinx.coroutines.runBlocking
 import org.archivekeep.files.assertRepositoryContents
 import org.archivekeep.files.operations.CompareOperation
-import org.archivekeep.files.procedures.sync.NewFilesSyncStep.CopyNewFileOperation
-import org.archivekeep.files.procedures.sync.RelocationsMoveApplySyncStep.RelocationApplyOperation
+import org.archivekeep.files.procedures.sync.operations.CopyNewFileOperation
+import org.archivekeep.files.procedures.sync.operations.RelocationApplyOperation
+import org.archivekeep.files.procedures.sync.operations.SyncOperation
 import org.archivekeep.testing.fixtures.FixtureRepoBuilder
 import org.archivekeep.testing.storage.toInMemoryRepo
 import org.archivekeep.utils.sha256
@@ -66,6 +67,7 @@ class SyncProcedureTest {
                 CopyNewFileOperation(
                     CompareOperation.Result.ExtraGroup(
                         "2022/02/02.JPG".sha256(),
+                        "2022/02/02.JPG".length.toLong(),
                         listOf("2022/02/02.JPG"),
                     ),
                 ),
@@ -83,6 +85,7 @@ class SyncProcedureTest {
                 RelocationApplyOperation(
                     CompareOperation.Result.Relocation(
                         "old.txt".sha256(),
+                        "old.txt".length.toLong(),
                         baseFilenames = listOf("new.txt"),
                         otherFilenames = listOf("old.txt"),
                     ),

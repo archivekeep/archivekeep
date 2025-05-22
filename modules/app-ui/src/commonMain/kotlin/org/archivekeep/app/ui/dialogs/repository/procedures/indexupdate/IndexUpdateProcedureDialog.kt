@@ -20,12 +20,11 @@ import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flatMapLatest
 import org.archivekeep.app.core.domain.repositories.Repository
 import org.archivekeep.app.core.domain.repositories.RepositoryInformation
-import org.archivekeep.app.core.procedures.add.IndexUpdateProcedureSupervisor
-import org.archivekeep.app.core.procedures.add.IndexUpdateProcedureSupervisorService
 import org.archivekeep.app.core.persistence.platform.demo.Documents
 import org.archivekeep.app.core.persistence.platform.demo.LaptopSSD
+import org.archivekeep.app.core.procedures.add.IndexUpdateProcedureSupervisor
+import org.archivekeep.app.core.procedures.add.IndexUpdateProcedureSupervisorService
 import org.archivekeep.app.core.utils.identifiers.RepositoryURI
-import org.archivekeep.utils.procedures.ProcedureExecutionState
 import org.archivekeep.app.ui.components.base.layout.IntrinsicSizeWrapperLayout
 import org.archivekeep.app.ui.components.base.layout.ScrollableLazyColumn
 import org.archivekeep.app.ui.components.designsystem.dialog.DialogPreviewColumn
@@ -44,13 +43,14 @@ import org.archivekeep.app.ui.domain.wiring.LocalIndexUpdateProcedureSupervisorS
 import org.archivekeep.app.ui.utils.appendBoldSpan
 import org.archivekeep.app.ui.utils.collectAsLoadable
 import org.archivekeep.app.ui.utils.stickToFirstNotNull
-import org.archivekeep.files.procedures.indexupdate.IndexUpdateProcedure
-import org.archivekeep.files.procedures.indexupdate.IndexUpdateProcedure.PreparationResult.Move
 import org.archivekeep.files.procedures.indexupdate.IndexUpdateAddProgress
 import org.archivekeep.files.procedures.indexupdate.IndexUpdateMoveProgress
+import org.archivekeep.files.procedures.indexupdate.IndexUpdateProcedure
+import org.archivekeep.files.procedures.indexupdate.IndexUpdateProcedure.PreparationResult.Move
 import org.archivekeep.utils.loading.Loadable
 import org.archivekeep.utils.loading.mapToLoadable
 import org.archivekeep.utils.loading.waitLoadedValue
+import org.archivekeep.utils.procedures.ProcedureExecutionState
 import org.jetbrains.compose.ui.tooling.preview.Preview
 
 class IndexUpdateProcedureDialog(

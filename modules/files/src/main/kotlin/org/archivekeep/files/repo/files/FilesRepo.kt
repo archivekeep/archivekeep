@@ -87,8 +87,15 @@ class FilesRepo(
         FilesystemIndexStore(
             checksumsRoot,
             activeJobFlow = inProgressHandler.jobActiveOnIdleDelayedStart,
+            fileSizeProvider = ::getFileSize,
             ioDispatcher = ioDispatcher,
         )
+
+    private fun getFileSize(filename: String): Long? {
+        val path = root.resolve(safeSubPath(filename))
+
+        return if (path.exists()) path.fileSize() else null
+    }
 
     override suspend fun findAllFiles(globs: List<String>): List<Path> {
         val matchers =
@@ -307,9 +314,7 @@ class FilesRepo(
             indexStore.contains(path) && fullPath.isRegularFile()
         }
 
-    override suspend fun index(): RepoIndex {
-        return indexStore.index()
-    }
+    override suspend fun index(): RepoIndex = indexStore.index()
 
     private fun loadIgnorePatterns(): List<PathMatcher> {
         val ignorePatternsFile = root.resolve(ignorePatternsFileName)
@@ -354,9 +359,10 @@ class FilesRepo(
                                 "Local status: $root",
                             ) {
                                 val allFiles =
-                                    findAllFiles(listOf("*")).map {
-                                        it.invariantSeparatorsPathString
-                                    }.sorted()
+                                    findAllFiles(listOf("*"))
+                                        .map {
+                                            it.invariantSeparatorsPathString
+                                        }.sorted()
 
                                 currentCoroutineContext().ensureActive()
 
@@ -366,8 +372,7 @@ class FilesRepo(
                                 )
                             }
                     }
-            }
-            .logLoadableResourceLoad("Local status: $root")
+            }.logLoadableResourceLoad("Local status: $root")
             .flowOn(ioDispatcher)
             .stateIn(scope)
 

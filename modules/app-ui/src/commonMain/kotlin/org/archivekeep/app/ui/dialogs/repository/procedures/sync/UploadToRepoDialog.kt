@@ -14,16 +14,15 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.combine
 import org.archivekeep.app.core.domain.storages.StorageRepository
 import org.archivekeep.app.core.domain.storages.StorageService
-import org.archivekeep.app.core.procedures.sync.RepoToRepoSync
-import org.archivekeep.app.core.procedures.sync.RepoToRepoSyncService
 import org.archivekeep.app.core.persistence.platform.demo.Photos
 import org.archivekeep.app.core.persistence.platform.demo.PhotosInHDDA
 import org.archivekeep.app.core.persistence.platform.demo.PhotosInLaptopSSD
 import org.archivekeep.app.core.persistence.platform.photosAdjustmentA
 import org.archivekeep.app.core.persistence.platform.photosAdjustmentB
+import org.archivekeep.app.core.procedures.sync.RepoToRepoSync
+import org.archivekeep.app.core.procedures.sync.RepoToRepoSyncService
 import org.archivekeep.app.core.utils.generics.OptionalLoadable
 import org.archivekeep.app.core.utils.identifiers.RepositoryURI
-import org.archivekeep.utils.procedures.ProcedureExecutionState
 import org.archivekeep.app.ui.components.designsystem.dialog.DialogPreviewColumn
 import org.archivekeep.app.ui.components.designsystem.dialog.fullWidthDialogWidthModifier
 import org.archivekeep.app.ui.components.feature.dialogs.operations.DialogOperationControlButtons
@@ -34,10 +33,12 @@ import org.archivekeep.app.ui.domain.wiring.LocalStorageService
 import org.archivekeep.app.ui.utils.appendBoldSpan
 import org.archivekeep.app.ui.utils.collectAsLoadable
 import org.archivekeep.files.operations.CompareOperation
-import org.archivekeep.files.procedures.sync.NewFilesSyncStep
+import org.archivekeep.files.procedures.sync.DiscoveredNewFilesGroup
 import org.archivekeep.files.procedures.sync.SyncProcedure
 import org.archivekeep.testing.fixtures.FixtureRepoBuilder
 import org.archivekeep.utils.loading.Loadable
+import org.archivekeep.utils.procedures.ProcedureExecutionState
+import org.archivekeep.utils.procedures.tasks.TaskExecutionProgressSummary
 import org.jetbrains.compose.ui.tooling.preview.Preview
 
 data class UploadToRepoDialog(
@@ -171,7 +172,7 @@ fun UploadToRepoDialogPreview1Contents() {
         )
 
     val preparedSync = SyncProcedure(RepoToRepoSyncUserFlow.relocationSyncMode).prepareFromComparison(compareResult)
-    val selectedNewFiles = (preparedSync.steps[1] as NewFilesSyncStep).operations.subList(0, 4)
+    val selectedNewFiles = (preparedSync.groups[1] as DiscoveredNewFilesGroup).operations.subList(0, 4)
 
     dialog.renderDialogCard(
         UploadToRepoDialog.State(
@@ -182,7 +183,7 @@ fun UploadToRepoDialogPreview1Contents() {
                     value =
                         RepoToRepoSync.State.Prepared(
                             comparisonResult = OptionalLoadable.LoadedAvailable(compareResult),
-                            preparedSyncProcedure = preparedSync,
+                            discoveredSync = preparedSync,
                             startExecution = { error("should not be called in preview") },
                         ),
                 ),
@@ -221,7 +222,7 @@ internal fun UploadToRepoDialogPreview2Contents() {
         )
 
     val preparedSync = SyncProcedure(RepoToRepoSyncUserFlow.relocationSyncMode).prepareFromComparison(compareResult)
-    val selectedNewFiles = (preparedSync.steps[1] as NewFilesSyncStep).operations.subList(0, 4)
+    val selectedNewFiles = (preparedSync.groups[1] as DiscoveredNewFilesGroup).operations.subList(0, 4)
 
     dialog.renderDialogCard(
         UploadToRepoDialog.State(
@@ -234,10 +235,11 @@ internal fun UploadToRepoDialogPreview2Contents() {
                             progressLog = MutableStateFlow("copied: 2024/6/1.JPG\ncopied: 2024/6/2.JPG"),
                             progress =
                                 MutableStateFlow(
-                                    listOf(
-                                        NewFilesSyncStep.Progress(
-                                            selectedNewFiles,
-                                            selectedNewFiles.subList(0, 2),
+                                    TaskExecutionProgressSummary.Group(
+                                        listOf(
+                                            DiscoveredNewFilesGroup(selectedNewFiles).createJobTask(null).createProgress(
+                                                selectedNewFiles.subList(0, 2),
+                                            ),
                                         ),
                                     ),
                                 ),
@@ -248,7 +250,7 @@ internal fun UploadToRepoDialogPreview2Contents() {
                                             "Something went wrong ...",
                                         ),
                                 ),
-                            inProgressOperationsProgress = MutableStateFlow(emptyList())
+                            inProgressOperationsProgress = MutableStateFlow(emptyList()),
                         ),
                 ),
                 mutableStateOf(selectedNewFiles.toSet()),
@@ -282,7 +284,7 @@ internal fun UploadToRepoDialogPreview3Contents() {
         )
 
     val preparedSync = SyncProcedure(RepoToRepoSyncUserFlow.relocationSyncMode).prepareFromComparison(compareResult)
-    val selectedNewFiles = (preparedSync.steps[1] as NewFilesSyncStep).operations.subList(0, 4)
+    val selectedNewFiles = (preparedSync.groups[1] as DiscoveredNewFilesGroup).operations.subList(0, 4)
 
     dialog.renderDialogCard(
         UploadToRepoDialog.State(
@@ -295,10 +297,11 @@ internal fun UploadToRepoDialogPreview3Contents() {
                             progressLog = MutableStateFlow("copied: 2024/6/1.JPG\ncopied: 2024/6/2.JPG"),
                             progress =
                                 MutableStateFlow(
-                                    listOf(
-                                        NewFilesSyncStep.Progress(
-                                            selectedNewFiles,
-                                            selectedNewFiles.subList(0, 2),
+                                    TaskExecutionProgressSummary.Group(
+                                        listOf(
+                                            DiscoveredNewFilesGroup(selectedNewFiles).createJobTask(null).createProgress(
+                                                selectedNewFiles.subList(0, 2),
+                                            ),
                                         ),
                                     ),
                                 ),
@@ -309,7 +312,7 @@ internal fun UploadToRepoDialogPreview3Contents() {
                                             "Something went wrong ...",
                                         ),
                                 ),
-                            inProgressOperationsProgress = MutableStateFlow(emptyList())
+                            inProgressOperationsProgress = MutableStateFlow(emptyList()),
                         ),
                 ),
                 mutableStateOf(selectedNewFiles.toSet()),

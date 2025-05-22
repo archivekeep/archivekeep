@@ -48,11 +48,11 @@ import org.archivekeep.app.ui.utils.contextualStorageReference
 import org.archivekeep.files.procedures.indexupdate.IndexUpdateAddProgress
 import org.archivekeep.files.procedures.indexupdate.IndexUpdateMoveProgress
 import org.archivekeep.files.procedures.indexupdate.IndexUpdateProcedure
-import org.archivekeep.utils.procedures.ProcedureExecutionState
 import org.archivekeep.utils.collections.ifNotEmpty
 import org.archivekeep.utils.filesAutoPlural
 import org.archivekeep.utils.loading.Loadable
 import org.archivekeep.utils.loading.mapIfLoadedOrDefault
+import org.archivekeep.utils.procedures.ProcedureExecutionState
 import org.jetbrains.compose.ui.tooling.preview.Preview
 
 class AddAndPushRepoDialog(
@@ -193,13 +193,13 @@ class AddAndPushRepoDialog(
                                 if (mte.isNotEmpty()) {
                                     ProgressRow(
                                         progress = { pp.moved.size / mte.size.toFloat() },
-                                        "Moved ${pp.moved.size} of ${mte.size} ${filesAutoPlural(mte)}",
+                                        "Moved ${pp.moved.size} of ${filesAutoPlural(mte)}",
                                     )
                                 }
                                 if (fta.isNotEmpty()) {
                                     ProgressRow(
                                         progress = { pp.added.size / fta.size.toFloat() },
-                                        "Added ${pp.added.size} of ${fta.size} ${filesAutoPlural(fta)}",
+                                        "Added ${pp.added.size} of ${filesAutoPlural(fta)}",
                                     )
                                 }
                             }

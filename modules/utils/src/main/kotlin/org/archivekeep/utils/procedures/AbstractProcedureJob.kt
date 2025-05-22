@@ -3,24 +3,17 @@ package org.archivekeep.utils.procedures
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.SharingStarted
-import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.stateIn
-import kotlinx.coroutines.flow.update
+import org.archivekeep.utils.procedures.operations.OperationContext
+import org.archivekeep.utils.procedures.operations.OperationProgress
+import org.archivekeep.utils.procedures.operations.ProgressTracker
 import java.util.concurrent.CancellationException
-
-private class Key
 
 abstract class AbstractProcedureJob {
     val scope = CoroutineScope(SupervisorJob())
 
-    private val inProgressOperationsStatsMutable =
-        MutableStateFlow(emptyMap<Key, OperationProgress>())
+    private val progressTracker = ProgressTracker(scope)
 
-    val inProgressOperationsProgressFlow =
-        inProgressOperationsStatsMutable
-            .map { it.values.toList() }
-            .stateIn(scope, SharingStarted.Lazily, emptyList())
+    val inProgressOperationsProgressFlow = progressTracker.inProgressOperationsProgressFlow
 
     val executionState =
         MutableStateFlow<ProcedureExecutionState>(ProcedureExecutionState.NotStarted)
@@ -36,22 +29,15 @@ abstract class AbstractProcedureJob {
             val context =
                 object : ProcedureExecutionContext {
                     override suspend fun runOperation(block: suspend (operationContext: OperationContext) -> Unit) {
-                        val key = Key()
-                        try {
+                        progressTracker.runWithTracker { mainReport ->
                             val operationContext =
                                 object : OperationContext {
                                     override fun progressReport(progress: OperationProgress) {
-                                        inProgressOperationsStatsMutable.update {
-                                            it.toMutableMap().apply { set(key, progress) }.toMap()
-                                        }
+                                        mainReport(progress)
                                     }
                                 }
 
                             block(operationContext)
-                        } finally {
-                            inProgressOperationsStatsMutable.update {
-                                it.toMutableMap().apply { remove(key) }.toMap()
-                            }
                         }
                     }
                 }

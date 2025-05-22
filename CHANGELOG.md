@@ -7,6 +7,7 @@
 - progress info (percentage, name, speed, and estimate) about currently copied file:
   - in repo to repo sync dialogs,
   - in add & push dialog.
+- estimate of time remaining to execute all sync operations
 
 ### Fixes
 

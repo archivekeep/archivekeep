@@ -40,6 +40,7 @@ import kotlin.time.Duration.Companion.milliseconds
 class FilesystemIndexStore(
     internal val checksumsRoot: Path,
     val activeJobFlow: Flow<Job?>,
+    val fileSizeProvider: (filename: String) -> Long?,
     val ioDispatcher: CoroutineDispatcher = Dispatchers.IO,
     val pollDispatcher: CoroutineDispatcher = Dispatchers.IO,
 ) {
@@ -68,8 +69,7 @@ class FilesystemIndexStore(
                     ) {
                         index()
                     }
-            }
-            .logLoadableResourceLoad("Repository index: $checksumsRoot")
+            }.logLoadableResourceLoad("Repository index: $checksumsRoot")
             .stateIn(scope)
 
     @Blocking
@@ -87,11 +87,15 @@ class FilesystemIndexStore(
                 .asSequence()
                 .filter { it.isRegularFile() && it.extension == "sha256" }
                 .map {
+                    val path = it.relativeTo(checksumsRoot).invariantSeparatorsPathString.removeSuffix(".sha256")
+
                     RepoIndex.File(
-                        path = it.relativeTo(checksumsRoot).invariantSeparatorsPathString.removeSuffix(".sha256"),
+                        path = path,
+                        size = fileSizeProvider(path),
                         checksumSha256 = it.readText().split(" ", limit = 2)[0],
                     )
-                }.sortedBy { it.path }.toList()
+                }.sortedBy { it.path }
+                .toList()
 
         return RepoIndex(files)
     }
@@ -136,7 +140,10 @@ class FilesystemIndexStore(
         return PendingMove(from, to)
     }
 
-    inner class PendingMove(val from: String, to: String) {
+    inner class PendingMove(
+        val from: String,
+        to: String,
+    ) {
         @Blocking
         fun completed() {
             getChecksumPath(from).deleteExisting()

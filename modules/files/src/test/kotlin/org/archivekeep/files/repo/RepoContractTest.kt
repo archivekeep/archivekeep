@@ -44,9 +44,9 @@ abstract class RepoContractTest<T : Repo> {
             indexFlowState.value.assertLoaded {
                 assertEquals(
                     listOf(
-                        RepoIndex.File(path = "A/01.txt", checksumSha256 = "A/01.txt".sha256()),
-                        RepoIndex.File(path = "A/02.txt", checksumSha256 = "A/02.txt".sha256()),
-                        RepoIndex.File(path = "B/03.txt", checksumSha256 = "B/03.txt".sha256()),
+                        RepoIndex.File.forStringContents(path = "A/01.txt"),
+                        RepoIndex.File.forStringContents(path = "A/02.txt"),
+                        RepoIndex.File.forStringContents(path = "B/03.txt"),
                     ),
                     it.files,
                 )
@@ -59,10 +59,10 @@ abstract class RepoContractTest<T : Repo> {
             indexFlowState.value.assertLoaded {
                 assertEquals(
                     listOf(
-                        RepoIndex.File(path = "A/01.txt", checksumSha256 = "A/01.txt".sha256()),
-                        RepoIndex.File(path = "A/02.txt", checksumSha256 = "A/02.txt".sha256()),
-                        RepoIndex.File(path = "B/03.txt", checksumSha256 = "B/03.txt".sha256()),
-                        RepoIndex.File(path = "C/04.txt", checksumSha256 = "C/04.txt".sha256()),
+                        RepoIndex.File.forStringContents(path = "A/01.txt"),
+                        RepoIndex.File.forStringContents(path = "A/02.txt"),
+                        RepoIndex.File.forStringContents(path = "B/03.txt"),
+                        RepoIndex.File.forStringContents(path = "C/04.txt"),
                     ),
                     it.files,
                 )
@@ -121,3 +121,13 @@ abstract class RepoContractTest<T : Repo> {
             }
         }
 }
+
+private fun RepoIndex.File.Companion.forStringContents(
+    path: String,
+    stringContents: String = path,
+): RepoIndex.File =
+    RepoIndex.File(
+        path = path,
+        size = stringContents.length.toLong(),
+        checksumSha256 = stringContents.sha256(),
+    )

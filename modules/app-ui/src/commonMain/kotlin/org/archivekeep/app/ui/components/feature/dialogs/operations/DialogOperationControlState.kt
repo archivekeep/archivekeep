@@ -1,8 +1,8 @@
 package org.archivekeep.app.ui.components.feature.dialogs.operations
 
-import org.archivekeep.utils.procedures.ProcedureExecutionState
 import org.archivekeep.app.ui.components.feature.dialogs.operations.DialogOperationControlState.Completed
 import org.archivekeep.app.ui.components.feature.dialogs.operations.DialogOperationControlState.Running
+import org.archivekeep.utils.procedures.ProcedureExecutionState
 import java.util.concurrent.CancellationException
 
 sealed interface DialogOperationControlState {

@@ -9,7 +9,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import org.archivekeep.app.core.procedures.sync.RepoToRepoSync.JobState
 import org.archivekeep.app.core.procedures.sync.RepoToRepoSync.State
-import org.archivekeep.utils.procedures.ProcedureExecutionState
 import org.archivekeep.app.ui.components.base.layout.IntrinsicSizeWrapperLayout
 import org.archivekeep.app.ui.components.base.layout.ScrollableLazyColumn
 import org.archivekeep.app.ui.components.designsystem.dialog.LabelText
@@ -24,10 +23,11 @@ import org.archivekeep.app.ui.components.feature.operations.ScrollableLogTextInD
 import org.archivekeep.app.ui.components.feature.operations.SyncProgress
 import org.archivekeep.app.ui.dialogs.repository.procedures.sync.RepoToRepoSyncUserFlow
 import org.archivekeep.app.ui.dialogs.repository.procedures.sync.describe
-import org.archivekeep.files.procedures.sync.AdditiveRelocationsSyncStep
-import org.archivekeep.files.procedures.sync.NewFilesSyncStep
-import org.archivekeep.files.procedures.sync.RelocationsMoveApplySyncStep
-import org.archivekeep.files.procedures.sync.SyncOperationGroup
+import org.archivekeep.files.procedures.sync.DiscoveredAdditiveRelocationsGroup
+import org.archivekeep.files.procedures.sync.DiscoveredSyncOperationsGroup
+import org.archivekeep.files.procedures.sync.DiscoveredNewFilesGroup
+import org.archivekeep.files.procedures.sync.DiscoveredRelocationsMoveApplyGroup
+import org.archivekeep.utils.procedures.ProcedureExecutionState
 
 @Composable
 fun (ColumnScope).RepoToRepoSyncMainContents(userFlowState: RepoToRepoSyncUserFlow.State) {
@@ -35,10 +35,10 @@ fun (ColumnScope).RepoToRepoSyncMainContents(userFlowState: RepoToRepoSyncUserFl
         when (operation) {
             is State.Prepared -> {
                 val blocks =
-                    operation.preparedSyncProcedure.steps
-                        .map<SyncOperationGroup<*>, ManySelectForRender<*, *, *>> { step ->
+                    operation.discoveredSync.groups
+                        .map<DiscoveredSyncOperationsGroup<*>, ManySelectForRender<*, *, *>> { step ->
                             when (step) {
-                                is AdditiveRelocationsSyncStep -> {
+                                is DiscoveredAdditiveRelocationsGroup -> {
                                     val state = rememberManySelectWithMergedState(step.operations, userFlowState.selectedOperations)
 
                                     rememberManySelectForRenderFromState(
@@ -48,7 +48,7 @@ fun (ColumnScope).RepoToRepoSyncMainContents(userFlowState: RepoToRepoSyncUserFl
                                         itemLabelText = { it.describe() },
                                     )
                                 }
-                                is NewFilesSyncStep -> {
+                                is DiscoveredNewFilesGroup -> {
                                     val state = rememberManySelectWithMergedState(step.operations, userFlowState.selectedOperations)
 
                                     rememberManySelectForRenderFromState(
@@ -58,7 +58,7 @@ fun (ColumnScope).RepoToRepoSyncMainContents(userFlowState: RepoToRepoSyncUserFl
                                         itemLabelText = { it.unmatchedBaseExtra.filenames.let { if (it.size == 1) it[0] else it.toString() } },
                                     )
                                 }
-                                is RelocationsMoveApplySyncStep -> {
+                                is DiscoveredRelocationsMoveApplyGroup -> {
                                     val state = rememberManySelectWithMergedState(step.operations, userFlowState.selectedOperations)
 
                                     rememberManySelectForRenderFromStateAnnotated(

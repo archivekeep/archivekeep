@@ -14,7 +14,6 @@ import org.archivekeep.app.core.procedures.sync.RepoToRepoSync.JobState
 import org.archivekeep.app.core.procedures.sync.RepoToRepoSync.State
 import org.archivekeep.app.core.procedures.sync.RepoToRepoSyncService
 import org.archivekeep.app.core.utils.identifiers.RepositoryURI
-import org.archivekeep.utils.procedures.ProcedureExecutionState
 import org.archivekeep.app.ui.dialogs.AbstractDialog
 import org.archivekeep.app.ui.dialogs.repository.procedures.sync.describePreparedSyncOperation
 import org.archivekeep.app.ui.domain.data.getSyncCandidates
@@ -23,6 +22,7 @@ import org.archivekeep.files.procedures.sync.RelocationSyncMode
 import org.archivekeep.utils.loading.Loadable
 import org.archivekeep.utils.loading.mapLoadedData
 import org.archivekeep.utils.loading.mapToLoadable
+import org.archivekeep.utils.procedures.ProcedureExecutionState
 
 class PushRepoDialogViewModel(
     val scope: CoroutineScope,
@@ -89,7 +89,7 @@ class PushRepoDialogViewModel(
                 .mapLoadedData {
                     when (it) {
                         is State.Prepared ->
-                            describePreparedSyncOperation(it.preparedSyncProcedure)
+                            describePreparedSyncOperation(it.discoveredSync)
 
                         is JobState ->
                             when (it.executionState) {

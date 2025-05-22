@@ -3,16 +3,41 @@ package org.archivekeep.app.ui.components.feature.operations
 import androidx.compose.runtime.Composable
 import org.archivekeep.app.ui.components.designsystem.progress.ProgressRow
 import org.archivekeep.app.ui.components.designsystem.progress.ProgressRowList
-import org.archivekeep.files.procedures.sync.SyncOperationGroup
+import org.archivekeep.app.ui.utils.toUiString
+import org.archivekeep.files.procedures.sync.SyncProcedureJobTask.ProgressSummary
+import org.archivekeep.files.procedures.sync.operations.SyncOperation
+import org.archivekeep.utils.procedures.tasks.TaskExecutionProgressSummary
 
 @Composable
-fun SyncProgress(progress: List<SyncOperationGroup.Progress>) {
+fun SyncProgress(progress: TaskExecutionProgressSummary.Group) {
     ProgressRowList {
-        progress.forEach { group ->
-            ProgressRow(
-                progress = group::progress,
-                group.summaryText(),
-            )
+        progress.subTasks.forEach { subProgress ->
+            when (subProgress) {
+                is ProgressSummary<*> ->
+                    SyncProcedureJobTaskProgress(subProgress)
+
+                is TaskExecutionProgressSummary.Group ->
+                    SyncProgress(subProgress)
+
+                is TaskExecutionProgressSummary.Simple ->
+                    ProgressRow(
+                        progress = { subProgress.completion },
+                        "Unknown",
+                    )
+            }
         }
     }
+}
+
+@Composable
+fun <T : SyncOperation> SyncProcedureJobTaskProgress(progress: ProgressSummary<T>) {
+    val group = progress.discoveryOperationGroup
+
+    var text = group.summaryText(progress)
+
+    progress.timeEstimated?.let { timeEstimated ->
+        text = "$text [remaining ${timeEstimated.toUiString()}]"
+    }
+
+    ProgressRow(progress = { progress.completion }, text)
 }

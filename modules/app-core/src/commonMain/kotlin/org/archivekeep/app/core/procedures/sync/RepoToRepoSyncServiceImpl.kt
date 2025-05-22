@@ -29,11 +29,11 @@ import org.archivekeep.app.core.utils.generics.singleInstanceWeakValueMap
 import org.archivekeep.app.core.utils.generics.stateIn
 import org.archivekeep.app.core.utils.identifiers.RepositoryURI
 import org.archivekeep.files.operations.CompareOperation
-import org.archivekeep.files.procedures.sync.PreparedSyncProcedure
+import org.archivekeep.files.procedures.sync.DiscoveredSync
 import org.archivekeep.files.procedures.sync.RelocationSyncMode
-import org.archivekeep.files.procedures.sync.SyncOperation
 import org.archivekeep.files.procedures.sync.SyncProcedure
 import org.archivekeep.files.procedures.sync.WritterSyncLogger
+import org.archivekeep.files.procedures.sync.operations.SyncOperation
 import org.archivekeep.files.repo.Repo
 import org.archivekeep.utils.loading.Loadable
 import org.archivekeep.utils.loading.mapToLoadable
@@ -235,7 +235,7 @@ class RepoToRepoSyncServiceImpl(
                                 startExecution = { limitToSubset ->
                                     val newJob =
                                         JobWrapperImpl(
-                                            preparedSyncProcedure = prepared,
+                                            discoveredSync = prepared,
                                             base = base,
                                             other = other,
                                             limitToSubset = limitToSubset,
@@ -243,7 +243,7 @@ class RepoToRepoSyncServiceImpl(
                                     jobGuards.launch(scope, Dispatchers.IO, this@RepoToRepoSyncImpl.key, newJob)
                                     newJob
                                 },
-                                preparedSyncProcedure = prepared,
+                                discoveredSync = prepared,
                             ),
                         )
                     }.flowOn(ioDispatcher)
@@ -262,7 +262,7 @@ class RepoToRepoSyncServiceImpl(
     }
 
     class JobWrapperImpl(
-        val preparedSyncProcedure: PreparedSyncProcedure,
+        val discoveredSync: DiscoveredSync,
         val base: Repo,
         val other: Repo,
         val limitToSubset: Set<SyncOperation>,
@@ -271,7 +271,7 @@ class RepoToRepoSyncServiceImpl(
         private val executionLog = SyncFlowStringWriter()
 
         val job =
-            preparedSyncProcedure.createJob(
+            discoveredSync.createJob(
                 base,
                 other,
                 prompter = { true },
@@ -283,7 +283,7 @@ class RepoToRepoSyncServiceImpl(
             job.executionState
                 .map {
                     JobState(
-                        job.progress,
+                        job.task.executionProgressSummaryStateFlow,
                         job.inProgressOperationsProgressFlow,
                         executionLog.string,
                         it,

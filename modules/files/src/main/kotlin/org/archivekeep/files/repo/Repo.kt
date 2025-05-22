@@ -23,6 +23,7 @@ data class RepoIndex(
     @Serializable
     data class File(
         val path: String,
+        val size: Long?,
         val checksumSha256: String,
     )
 }

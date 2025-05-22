@@ -28,11 +28,13 @@ class CompareOperation {
                     val checksum = checksum
                     val baseInstances = baseIndex.byChecksumSha256[checksum]
                     val otherInstances = otherIndex.byChecksumSha256[checksum]
+                    val fileSize: Long? = ((baseInstances ?: emptyList()) + (otherInstances ?: emptyList())).firstNotNullOfOrNull { it.size }
 
                     fun asRelocationOrNull(): Result.Relocation? =
                         if (baseInstances != null && otherInstances != null) {
                             Result.Relocation(
                                 checksum = checksum,
+                                fileSize = fileSize,
                                 baseFilenames = baseInstances.map { it.path }.sorted(),
                                 otherFilenames = otherInstances.map { it.path }.sorted(),
                             )
@@ -42,14 +44,14 @@ class CompareOperation {
 
                     fun asBaseExtraOrNull(): Result.ExtraGroup? =
                         if (baseInstances != null && otherInstances == null) {
-                            Result.ExtraGroup(this.checksum, baseInstances.map { it.path }.sorted())
+                            Result.ExtraGroup(this.checksum, fileSize, baseInstances.map { it.path }.sorted())
                         } else {
                             null
                         }
 
                     fun asOtherExtraOrNull(): Result.ExtraGroup? =
                         if (otherInstances != null && baseInstances == null) {
-                            Result.ExtraGroup(this.checksum, otherInstances.map { it.path }.sorted())
+                            Result.ExtraGroup(this.checksum, fileSize, otherInstances.map { it.path }.sorted())
                         } else {
                             null
                         }
@@ -111,6 +113,7 @@ class CompareOperation {
 
         data class Relocation(
             val checksum: String,
+            val fileSize: Long?,
             val baseFilenames: List<String>,
             val otherFilenames: List<String>,
         ) {
@@ -122,12 +125,17 @@ class CompareOperation {
 
             val isDecreasingDuplicates: Boolean
                 get() = extraOtherLocations.size > extraBaseLocations.size
+
+            companion object
         }
 
         data class ExtraGroup(
             val checksum: String,
+            val fileSize: Long?,
             val filenames: List<String>,
-        )
+        ) {
+            companion object
+        }
 
         fun printAll(
             out: PrintWriter,

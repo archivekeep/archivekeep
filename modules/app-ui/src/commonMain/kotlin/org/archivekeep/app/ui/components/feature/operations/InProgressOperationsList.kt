@@ -4,10 +4,10 @@ import androidx.compose.runtime.Composable
 import org.archivekeep.app.ui.components.base.layout.HeightKeepingBox
 import org.archivekeep.app.ui.components.designsystem.progress.ProgressRow
 import org.archivekeep.app.ui.components.designsystem.progress.ProgressRowList
+import org.archivekeep.app.ui.utils.toUiString
 import org.archivekeep.files.procedures.progress.CopyOperationProgress
-import org.archivekeep.utils.procedures.OperationProgress
-import kotlin.time.Duration
-import kotlin.time.Duration.Companion.minutes
+import org.archivekeep.utils.procedures.operations.OperationProgress
+import kotlin.math.floor
 
 @Composable
 fun InProgressOperationsList(progress: List<OperationProgress>) {
@@ -20,23 +20,30 @@ fun InProgressOperationsList(progress: List<OperationProgress>) {
 private fun InProgressOperationsListInner(progress: List<OperationProgress>) {
     ProgressRowList {
         progress.forEach { atom ->
+            val tags =
+                listOfNotNull(
+                    "${floor((atom.completion * 100)).toInt()}%",
+                    atom.velocity?.toString(),
+                    atom.timeEstimated?.toUiString(),
+                )
+
+            val tagsString =
+                if (tags.isNotEmpty()) {
+                    " [${tags.joinToString(", ")}]"
+                } else {
+                    null
+                }
+
+            val name =
+                when (atom) {
+                    is CopyOperationProgress -> atom.filename
+                    else -> atom.javaClass.name
+                }
+
             ProgressRow(
                 progress = { atom.completion },
-                text = when (atom) {
-                    is CopyOperationProgress ->
-                        "${(atom.completion * 100).toInt()}% ${atom.filename} [${atom.velocity}${atom.timeEstimated?.let { ", ${it.toUiString()}" }}]"
-
-                    else ->
-                        atom.javaClass.name
-                }
+                text = "$name$tagsString",
             )
         }
     }
 }
-
-private fun (Duration).toUiString(): String =
-    if (this < 1.minutes) {
-        "${this.inWholeSeconds}s"
-    } else {
-        "${this.inWholeMinutes}m ${this.inWholeSeconds - this.inWholeMinutes * 60}s"
-    }
