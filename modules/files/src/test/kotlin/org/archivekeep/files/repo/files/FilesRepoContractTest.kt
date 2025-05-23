@@ -12,12 +12,12 @@ class FilesRepoContractTest : RepoContractTest<FilesRepo>() {
     lateinit var tempPath: Path
 
     override fun createNew(): TestRepo<FilesRepo> {
-        return object : TestRepo<FilesRepo> {
-            val path = tempPath.resolve(UUID.randomUUID().toString()).createDirectory()
+        val path = tempPath.resolve(UUID.randomUUID().toString()).createDirectory()
 
-            override fun open(testDispatcher: TestDispatcher): FilesRepo {
-                return FilesRepo(path, stateDispatcher = testDispatcher, ioDispatcher = testDispatcher)
-            }
+        createFilesRepo(path)
+
+        return object : TestRepo<FilesRepo> {
+            override fun open(testDispatcher: TestDispatcher): FilesRepo = FilesRepo(path, stateDispatcher = testDispatcher, ioDispatcher = testDispatcher)
         }
     }
 }

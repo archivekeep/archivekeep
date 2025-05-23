@@ -33,6 +33,10 @@ abstract class WorkingRepoContractTest<T : LocalRepo> {
 
     abstract fun createNew(): TestRepo<T>
 
+    // TODO: `save should not overwrite existing UNCOMMITTED file`
+
+    // TODO: `move should not overwrite existing UNCOMMITTED file`
+
     @Test
     fun `local index loads and updates after save`() =
         runTest {

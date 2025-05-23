@@ -9,6 +9,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.update
+import org.archivekeep.files.exceptions.ChecksumMismatch
 import org.archivekeep.files.exceptions.DestinationExists
 import org.archivekeep.files.exceptions.FileDoesntExist
 import org.archivekeep.files.repo.ArchiveFileInfo
@@ -53,8 +54,7 @@ open class InMemoryRepo(
                         )
                     },
                 )
-            }
-            .stateIn(scope)
+            }.stateIn(scope)
 
     override val metadataFlow: Flow<Loadable<RepositoryMetadata>> =
         _metadataFlow.map { Loadable.Loaded(it) }
@@ -66,7 +66,7 @@ open class InMemoryRepo(
         to: String,
     ) {
         if (contains(to)) {
-            throw FileDoesntExist(to)
+            throw DestinationExists(to)
         }
 
         contentsFlow.update {
@@ -110,9 +110,10 @@ open class InMemoryRepo(
         }
 
         val c = stream.readAllBytes()
+        val actualChecksum = c.sha256()
 
-        if (c.sha256() != info.checksumSha256) {
-            throw RuntimeException("Invalid data")
+        if (actualChecksum != info.checksumSha256) {
+            throw ChecksumMismatch(expected = info.checksumSha256, actual = actualChecksum)
         }
 
         contentsFlow.update {

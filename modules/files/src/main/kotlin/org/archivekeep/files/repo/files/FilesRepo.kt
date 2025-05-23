@@ -23,6 +23,7 @@ import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.decodeFromStream
+import org.archivekeep.files.exceptions.ChecksumMismatch
 import org.archivekeep.files.exceptions.DestinationExists
 import org.archivekeep.files.exceptions.NotRegularFilePath
 import org.archivekeep.files.operations.StatusOperation
@@ -43,6 +44,7 @@ import org.archivekeep.utils.safeFileReadWrite
 import java.io.InputStream
 import java.nio.ByteBuffer
 import java.nio.channels.FileChannel
+import java.nio.file.FileAlreadyExistsException
 import java.nio.file.FileSystems
 import java.nio.file.Files
 import java.nio.file.Path
@@ -219,12 +221,16 @@ class FilesRepo(
             dstPath.createParentDirectories()
 
             val fc =
-                FileChannel.open(
-                    dstPath,
-                    StandardOpenOption.CREATE_NEW,
+                try {
+                    FileChannel.open(
+                        dstPath,
+                        StandardOpenOption.CREATE_NEW,
 //                    StandardOpenOption.SYNC,
-                    StandardOpenOption.WRITE,
-                )
+                        StandardOpenOption.WRITE,
+                    )
+                } catch (e: FileAlreadyExistsException) {
+                    throw DestinationExists(filename, cause = e)
+                }
 
             val cleanup = UnfinishedStoreCleanup()
 
@@ -263,7 +269,7 @@ class FilesRepo(
                 val realChecksum = computeChecksum(dstPath)
 
                 if (realChecksum != info.checksumSha256) {
-                    throw RuntimeException("copied file has wrong checksum: got=$realChecksum, expected=${info.checksumSha256}")
+                    throw ChecksumMismatch(expected = info.checksumSha256, actual = realChecksum)
                 }
 
                 indexStore.storeChecksumForSave(cleanup, filename, info.checksumSha256)

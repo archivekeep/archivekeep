@@ -31,7 +31,9 @@ data class RepoIndex(
 data class ArchiveFileInfo(
     val length: Long,
     val checksumSha256: String,
-)
+) {
+    companion object
+}
 
 @Serializable
 data class RepositoryAssociationGroup(
