@@ -18,7 +18,7 @@ import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.IntSize
 
-val LocalEnableScrollbar = staticCompositionLocalOf { false }
+val LocalEnableScrollbar = staticCompositionLocalOf { true }
 
 @Composable
 fun ScrollableContainer(

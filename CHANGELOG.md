@@ -12,6 +12,7 @@
 ### Fixes
 
 - blinking or showing "1 uncommitted file" during copy operations
+- scrollbar missing in Desktop App
 
 ### Changes
 
