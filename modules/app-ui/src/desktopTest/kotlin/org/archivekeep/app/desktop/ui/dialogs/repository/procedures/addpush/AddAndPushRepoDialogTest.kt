@@ -24,14 +24,33 @@ class AddAndPushRepoDialogScreenshotTest {
             setContentInDialogScreenshotContainer {
                 val allMoves =
                     listOf(
-                        IndexUpdateProcedure.PreparationResult.Move("Invoices/2024/01.PDF", "Contracting/Invoices/2024/01.PDF"),
-                        IndexUpdateProcedure.PreparationResult.Move("Invoices/2024/02.PDF", "Contracting/Invoices/2024/02.PDF"),
+                        IndexUpdateProcedure.PreparationResult.Move(
+                            "TODO",
+                            10,
+                            "Invoices/2024/01.PDF",
+                            "Contracting/Invoices/2024/01.PDF",
+                        ),
+                        IndexUpdateProcedure.PreparationResult.Move(
+                            "TODO",
+                            10,
+                            "Invoices/2024/02.PDF",
+                            "Contracting/Invoices/2024/02.PDF",
+                        ),
                     )
                 val allNewFiles =
                     listOf(
-                        "2024/08/01.JPG",
-                        "2024/08/02.JPG",
-                        "something-unwanted.txt",
+                        IndexUpdateProcedure.PreparationResult.NewFile(
+                            "2024/08/01.JPG",
+                            null,
+                        ),
+                        IndexUpdateProcedure.PreparationResult.NewFile(
+                            "2024/08/02.JPG",
+                            null,
+                        ),
+                        IndexUpdateProcedure.PreparationResult.NewFile(
+                            "something-unwanted.txt",
+                            null,
+                        ),
                     )
                 val allDestinations = setOf(DocumentsInSSDKeyChain.uri)
 
@@ -54,7 +73,9 @@ class AddAndPushRepoDialogScreenshotTest {
                                 setOf(
                                     "2024/08/01.JPG",
                                     "2024/08/02.JPG",
-                                ),
+                                ).let { selected ->
+                                    allNewFiles.filter { it.fileName in selected }.toSet()
+                                },
                             ),
                         selectedMoves = mutableStateOf(allMoves.toSet()),
                         selectedDestinationRepositories = mutableStateOf(allDestinations),

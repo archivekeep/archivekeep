@@ -47,7 +47,7 @@ class AddAndPushRepoDialogViewModel(
     val _onClose: () -> Unit,
 ) : AbstractDialog.IVM {
     val selectedDestinationRepositories: MutableStateFlow<Set<RepositoryURI>> = MutableStateFlow(emptySet())
-    val selectedFilenames: MutableStateFlow<Set<String>> = MutableStateFlow(emptySet())
+    val selectedFilenames: MutableStateFlow<Set<IndexUpdateProcedure.PreparationResult.NewFile>> = MutableStateFlow(emptySet())
     val selectedMoves: MutableStateFlow<Set<IndexUpdateProcedure.PreparationResult.Move>> = MutableStateFlow(emptySet())
 
     val repoName = repositoryService.getRepository(repositoryURI).informationFlow.map { it.displayName }
@@ -67,7 +67,7 @@ class AddAndPushRepoDialogViewModel(
         val repoName: String,
         val state: AddAndPushProcedure.State,
         val selectedDestinationRepositories: MutableState<Set<RepositoryURI>>,
-        val selectedFilenames: MutableState<Set<String>>,
+        val selectedFilenames: MutableState<Set<IndexUpdateProcedure.PreparationResult.NewFile>>,
         val selectedMoves: MutableState<Set<IndexUpdateProcedure.PreparationResult.Move>>,
         val otherRepositoryCandidates: Loadable<List<StorageRepository>>,
         val onCancel: () -> Unit,
@@ -83,7 +83,7 @@ class AddAndPushRepoDialogViewModel(
         val controlState: DialogOperationControlState by derivedStateOf {
             when (state) {
                 is JobState ->
-                    state.executionState.toDialogOperationControlState(
+                    state.jobState.executionState.toDialogOperationControlState(
                         onCancel = onCancel,
                         onHide = onClose,
                         onClose = onClose,

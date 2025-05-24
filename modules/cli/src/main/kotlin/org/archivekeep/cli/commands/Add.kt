@@ -108,7 +108,7 @@ class Add : Callable<Int> {
                 }
             }
 
-            if (result.newFiles.isNotEmpty()) {
+            if (result.newFileNames.isNotEmpty()) {
                 result.executeAddNewFiles(
                     currentArchive.repo,
                     progressTrackers = arrayOf(writter),

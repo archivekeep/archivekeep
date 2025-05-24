@@ -91,4 +91,6 @@ interface LocalRepo : Repo {
     suspend fun add(path: String)
 
     suspend fun remove(path: String)
+
+    fun getFileSize(filename: String): Long?
 }

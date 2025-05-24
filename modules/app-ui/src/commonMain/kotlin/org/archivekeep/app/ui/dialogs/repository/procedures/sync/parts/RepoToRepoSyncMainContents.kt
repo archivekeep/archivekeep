@@ -24,9 +24,9 @@ import org.archivekeep.app.ui.components.feature.operations.SyncProgress
 import org.archivekeep.app.ui.dialogs.repository.procedures.sync.RepoToRepoSyncUserFlow
 import org.archivekeep.app.ui.dialogs.repository.procedures.sync.describe
 import org.archivekeep.files.procedures.sync.DiscoveredAdditiveRelocationsGroup
-import org.archivekeep.files.procedures.sync.DiscoveredSyncOperationsGroup
 import org.archivekeep.files.procedures.sync.DiscoveredNewFilesGroup
 import org.archivekeep.files.procedures.sync.DiscoveredRelocationsMoveApplyGroup
+import org.archivekeep.files.procedures.sync.DiscoveredSyncOperationsGroup
 import org.archivekeep.utils.procedures.ProcedureExecutionState
 
 @Composable
@@ -100,7 +100,11 @@ fun (ColumnScope).RepoToRepoSyncMainContents(userFlowState: RepoToRepoSyncUserFl
                     },
                 )
 
-                SyncProgress(operation.progress.collectAsState().value)
+                SyncProgress(
+                    operation.progress
+                        .collectAsState()
+                        .value.subTasks,
+                )
                 Spacer(Modifier.height(8.dp))
                 InProgressOperationsList(operation.inProgressOperationsProgress.collectAsState().value)
                 Spacer(Modifier.height(8.dp))

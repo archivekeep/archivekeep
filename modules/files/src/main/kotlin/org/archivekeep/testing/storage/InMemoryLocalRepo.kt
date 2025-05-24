@@ -7,6 +7,7 @@ import org.archivekeep.files.exceptions.FileDoesntExist
 import org.archivekeep.files.operations.StatusOperation
 import org.archivekeep.files.repo.LocalRepo
 import org.archivekeep.files.repo.RepositoryMetadata
+import org.archivekeep.testing.fixtures.FixtureRepo
 import org.archivekeep.utils.loading.Loadable
 import org.archivekeep.utils.loading.mapToLoadable
 import org.archivekeep.utils.sha256
@@ -16,8 +17,9 @@ import kotlin.io.path.invariantSeparatorsPathString
 open class InMemoryLocalRepo(
     initialContents: Map<String, ByteArray> = mapOf(),
     initialUnindexedContents: Map<String, ByteArray> = mapOf(),
+    initialMissingContents: Map<String, ByteArray> = mapOf(),
     metadata: RepositoryMetadata = RepositoryMetadata(),
-) : InMemoryRepo(initialContents, metadata),
+) : InMemoryRepo(initialContents, initialMissingContents, metadata),
     LocalRepo {
     val unindexedFiles = MutableStateFlow(initialUnindexedContents)
 
@@ -60,8 +62,35 @@ open class InMemoryLocalRepo(
     }
 
     override suspend fun remove(path: String) {
-        TODO("Not yet implemented")
+        val c = this.contentsFlow.value[path]
+
+        if (c != null) {
+            unindexedFiles.update {
+                it + mapOf(path to c)
+            }
+            contentsFlow.update {
+                it
+                    .toMutableMap()
+                    .apply { remove(path) }
+                    .toMap()
+            }
+        } else {
+            if (missingContentsFlow.value[path] == null) {
+                throw FileDoesntExist(path)
+            }
+
+            missingContentsFlow.update {
+                it
+                    .toMutableMap()
+                    .apply { remove(path) }
+                    .toMap()
+            }
+        }
     }
+
+    override fun getFileSize(filename: String): Long? =
+        contentsFlow.value[filename]?.size?.toLong()
+            ?: unindexedFiles.value[filename]?.size?.toLong()
 
     override val localIndex: Flow<Loadable<StatusOperation.Result>> =
         unindexedFiles
@@ -69,3 +98,10 @@ open class InMemoryLocalRepo(
                 StatusOperation(listOf("*")).execute(this@InMemoryLocalRepo)
             }
 }
+
+fun FixtureRepo.toInMemoryLocalRepo(): InMemoryLocalRepo =
+    InMemoryLocalRepo(
+        this.contents.mapValues { (_, v) -> v.toByteArray() },
+        this.uncommittedContents.mapValues { (_, v) -> v.toByteArray() },
+        this.missingContents.mapValues { (_, v) -> v.toByteArray() },
+    )

@@ -108,7 +108,12 @@ class IndexUpdateProcedureSupervisorServiceImpl(
 
         // TODO - this should be encapsulated into procedure's logic, not supervisor
         private val movesToExecute = (launchOptions.movesSubsetLimit?.intersect(preparationResult.moves.toSet()) ?: preparationResult.moves).toSet()
-        private val filesToAdd = (launchOptions.addFilesSubsetLimit?.intersect(preparationResult.newFiles.toSet()) ?: preparationResult.newFiles).toSet()
+        private val filesToAdd =
+            (
+                launchOptions.addFilesSubsetLimit?.intersect(
+                    preparationResult.newFileNames.toSet(),
+                ) ?: preparationResult.newFileNames
+            ).toSet()
 
         private val indexUpdateProgressTracker =
             IndexUpdateStructuredProgressTracker(

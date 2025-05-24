@@ -2,6 +2,9 @@ package org.archivekeep.files
 
 import kotlinx.coroutines.test.TestCoroutineScheduler
 import kotlinx.coroutines.test.TestScope
+import org.archivekeep.files.repo.Repo
+import org.archivekeep.files.repo.assertFileHasStringContents
+import org.archivekeep.testing.fixtures.FixtureRepo
 import org.archivekeep.testing.fixtures.FixtureRepoBuilder
 import org.archivekeep.testing.storage.InMemoryRepo
 import org.archivekeep.utils.loading.Loadable
@@ -10,6 +13,7 @@ import org.junit.jupiter.api.assertAll
 import java.io.File
 import kotlin.io.path.createParentDirectories
 import kotlin.io.path.writeText
+import kotlin.test.assertEquals
 import kotlin.test.fail
 import kotlin.time.Duration
 
@@ -96,4 +100,12 @@ fun TestScope.advanceTimeByAndWaitForIdle(delayTime: Duration) {
 fun <T> (Loadable<T>).assertLoaded(contentsAssert: (value: T) -> Unit) {
     assert(this is Loadable.Loaded) { "Not loaded" }
     contentsAssert((this as Loadable.Loaded).value)
+}
+
+suspend infix fun Repo.shouldHaveCommittedContentsOf(example: FixtureRepo) {
+    assertEquals(example.index(), index())
+
+    example.contents.forEach { (k, v) ->
+        this.assertFileHasStringContents(k, v)
+    }
 }

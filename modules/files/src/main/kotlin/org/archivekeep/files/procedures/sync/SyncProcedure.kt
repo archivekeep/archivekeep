@@ -89,19 +89,19 @@ class SyncProcedure(
     }
 }
 
-class DiscoveredAdditiveRelocationsGroup internal constructor(
+class DiscoveredAdditiveRelocationsGroup(
     steps: List<AdditiveReplicationOperation>,
 ) : DiscoveredSyncOperationsGroup<AdditiveReplicationOperation>(steps) {
     override fun summaryText(progress: ProgressSummary<AdditiveReplicationOperation>): String =
-        "replicated ${progress.completedOperations} of ${progress.allOperations}"
+        "replicated ${progress.completedOperations.size} of ${filesAutoPlural(progress.allOperations)}"
 }
 
-class DiscoveredRelocationsMoveApplyGroup internal constructor(
+class DiscoveredRelocationsMoveApplyGroup(
     toApply: List<RelocationApplyOperation>,
     val toIgnore: List<CompareOperation.Result.Relocation>,
 ) : DiscoveredSyncOperationsGroup<RelocationApplyOperation>(toApply) {
     override fun summaryText(progress: ProgressSummary<RelocationApplyOperation>): String =
-        "relocated ${progress.completedOperations} of ${progress.allOperations}"
+        "relocated ${progress.completedOperations.size} of ${filesAutoPlural(progress.allOperations)}"
 }
 
 class DiscoveredNewFilesGroup(

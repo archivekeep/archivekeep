@@ -93,6 +93,8 @@ class IndexUpdateProcedure(
                     if (missingFilePath != null) {
                         moves.add(
                             PreparationResult.Move(
+                                checksum = checksum,
+                                fileSize = localRepo.getFileSize(newUnindexedFile.toString()),
                                 from = missingFilePath,
                                 to = newUnindexedFile.invariantSeparatorsPathString,
                             ),
@@ -110,7 +112,10 @@ class IndexUpdateProcedure(
                 emit(
                     LoadableWithProgress.Loaded(
                         PreparationResult(
-                            newFiles = unmatchedNewFiles.sorted(),
+                            newFiles =
+                                unmatchedNewFiles.sorted().map {
+                                    PreparationResult.NewFile(it, repo.getFileSize(it))
+                                },
                             moves = moves,
                             missingFiles = remainingMissingIndexedFilesByChecksum.values.toList().sorted(),
                             errorFiles = filesWithWrongFilenames,
@@ -121,7 +126,9 @@ class IndexUpdateProcedure(
                 emit(
                     LoadableWithProgress.Loaded(
                         PreparationResult(
-                            unindexedFilesMatchingPattern.map { it.invariantSeparatorsPathString }.sorted(),
+                            unindexedFilesMatchingPattern.map { it.invariantSeparatorsPathString }.sorted().map {
+                                PreparationResult.NewFile(it, repo.getFileSize(it))
+                            },
                             emptyList(),
                             emptyList(),
                             filesWithWrongFilenames,
@@ -143,12 +150,23 @@ class IndexUpdateProcedure(
     }
 
     data class PreparationResult(
-        val newFiles: List<String>,
+        val newFiles: List<NewFile>,
         val moves: List<Move>,
         val missingFiles: List<String>,
         val errorFiles: Map<String, Any>,
     ) : Preparation {
+        val newFileNames: List<String> = newFiles.map { it.fileName }
+
+        data class NewFile(
+            val fileName: String,
+            val fileSize: Long?,
+        ) {
+            companion object
+        }
+
         data class Move(
+            val checksum: String,
+            val fileSize: Long?,
             val from: String,
             val to: String,
         )
@@ -191,7 +209,7 @@ class IndexUpdateProcedure(
         ) {
             val localRepo = repo as? LocalRepo ?: throw RuntimeException("not local repo")
 
-            newFiles.forEach { newFile ->
+            newFileNames.forEach { newFile ->
                 if (addFilesSubsetLimit != null && !addFilesSubsetLimit.contains(newFile)) {
                     return@forEach
                 }
@@ -216,7 +234,7 @@ class IndexUpdateProcedure(
             }
 
             out.println("New files to be indexed:")
-            newFiles.forEach { out.println("${indent}${transformPath(it)}") }
+            newFileNames.forEach { out.println("${indent}${transformPath(it)}") }
 
             if (moves.isNotEmpty()) {
                 out.println()

@@ -9,15 +9,15 @@ import org.archivekeep.files.procedures.sync.operations.SyncOperation
 import org.archivekeep.utils.procedures.tasks.TaskExecutionProgressSummary
 
 @Composable
-fun SyncProgress(progress: TaskExecutionProgressSummary.Group) {
+fun SyncProgress(subProgressList: List<TaskExecutionProgressSummary>) {
     ProgressRowList {
-        progress.subTasks.forEach { subProgress ->
+        subProgressList.forEach { subProgress ->
             when (subProgress) {
                 is ProgressSummary<*> ->
                     SyncProcedureJobTaskProgress(subProgress)
 
                 is TaskExecutionProgressSummary.Group ->
-                    SyncProgress(subProgress)
+                    SyncProgress(subProgress.subTasks)
 
                 is TaskExecutionProgressSummary.Simple ->
                     ProgressRow(

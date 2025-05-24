@@ -9,7 +9,7 @@ import org.archivekeep.utils.safeCombine
 
 open class SequentialProcedureJobTaskGroup<C, IC>(
     val subTasks: List<ProcedureJobTask<IC>>,
-    val produceInnerContext: (context: C) -> IC,
+    val produceInnerContext: suspend (context: C) -> IC,
 ) : ProcedureJobTask<C> {
     val scope = CoroutineScope(SupervisorJob())
 

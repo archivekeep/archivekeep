@@ -20,14 +20,11 @@ import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flatMapLatest
 import org.archivekeep.app.core.domain.repositories.Repository
 import org.archivekeep.app.core.domain.repositories.RepositoryInformation
-import org.archivekeep.app.core.persistence.platform.demo.Documents
-import org.archivekeep.app.core.persistence.platform.demo.LaptopSSD
 import org.archivekeep.app.core.procedures.add.IndexUpdateProcedureSupervisor
 import org.archivekeep.app.core.procedures.add.IndexUpdateProcedureSupervisorService
 import org.archivekeep.app.core.utils.identifiers.RepositoryURI
 import org.archivekeep.app.ui.components.base.layout.IntrinsicSizeWrapperLayout
 import org.archivekeep.app.ui.components.base.layout.ScrollableLazyColumn
-import org.archivekeep.app.ui.components.designsystem.dialog.DialogPreviewColumn
 import org.archivekeep.app.ui.components.designsystem.dialog.LabelText
 import org.archivekeep.app.ui.components.designsystem.dialog.fullWidthDialogWidthModifier
 import org.archivekeep.app.ui.components.feature.dialogs.operations.DialogOperationControlButtons
@@ -43,15 +40,11 @@ import org.archivekeep.app.ui.domain.wiring.LocalIndexUpdateProcedureSupervisorS
 import org.archivekeep.app.ui.utils.appendBoldSpan
 import org.archivekeep.app.ui.utils.collectAsLoadable
 import org.archivekeep.app.ui.utils.stickToFirstNotNull
-import org.archivekeep.files.procedures.indexupdate.IndexUpdateAddProgress
-import org.archivekeep.files.procedures.indexupdate.IndexUpdateMoveProgress
 import org.archivekeep.files.procedures.indexupdate.IndexUpdateProcedure
 import org.archivekeep.files.procedures.indexupdate.IndexUpdateProcedure.PreparationResult.Move
 import org.archivekeep.utils.loading.Loadable
 import org.archivekeep.utils.loading.mapToLoadable
 import org.archivekeep.utils.loading.waitLoadedValue
-import org.archivekeep.utils.procedures.ProcedureExecutionState
-import org.jetbrains.compose.ui.tooling.preview.Preview
 
 class IndexUpdateProcedureDialog(
     repositoryURI: RepositoryURI,
@@ -177,7 +170,7 @@ class IndexUpdateProcedureDialog(
                             )
                         val filesManySelect =
                             rememberManySelectForRender(
-                                preparationState.newFiles,
+                                preparationState.newFileNames,
                                 state.selectedFilesToAdd,
                                 "New files",
                                 allItemsLabel = { "All new files ($it)" },
@@ -196,7 +189,7 @@ class IndexUpdateProcedureDialog(
                                     item { Spacer(Modifier.height(12.dp)) }
                                 }
 
-                                if (preparationState.newFiles.isNotEmpty()) {
+                                if (preparationState.newFileNames.isNotEmpty()) {
                                     filesManySelect.render(this)
                                 }
                             }
@@ -222,114 +215,6 @@ class IndexUpdateProcedureDialog(
         DialogOperationControlButtons(
             state.controlState,
             launchText = "Execute index update",
-        )
-    }
-}
-
-@Composable
-private fun renderPreview(
-    archiveName: String,
-    state: IndexUpdateProcedureSupervisor.State,
-    selectedFilesToAdd: MutableState<Set<String>>,
-    selectedMovesToExecute: MutableState<Set<Move>>,
-) {
-    val DocumentsInLaptop = Documents.inStorage(LaptopSSD.reference).storageRepository
-
-    val dialog = IndexUpdateProcedureDialog(DocumentsInLaptop.uri)
-
-    dialog.renderDialogCard(
-        IndexUpdateProcedureDialog.State(
-            archiveName,
-            state,
-            selectedFilesToAdd,
-            selectedMovesToExecute,
-            onClose = {},
-        ),
-    )
-}
-
-private val demo_preparation_result =
-    IndexUpdateProcedure.PreparationResult(
-        newFiles =
-            listOf(
-                "Documents/Something/There.pdf",
-                "Photos/2024/04/photo_09.JPG",
-            ),
-        moves =
-            listOf(
-                Move("Document/bad-name.pdf", "Document/corrected-name.pdf"),
-            ),
-        missingFiles = emptyList(),
-        errorFiles = emptyMap(),
-    )
-
-@Preview
-@Composable
-private fun UpdateIndexOperationViewPreview() {
-    DialogPreviewColumn {
-        renderPreview(
-            archiveName = "Family Stuff",
-            state =
-                IndexUpdateProcedureSupervisor.Preparation(
-                    demo_preparation_result,
-                    launch = {},
-                ),
-            selectedFilesToAdd = mutableStateOf(emptySet()),
-            selectedMovesToExecute = mutableStateOf(emptySet()),
-        )
-
-        renderPreview(
-            archiveName = "Family Stuff",
-            state =
-                IndexUpdateProcedureSupervisor.Preparation(
-                    demo_preparation_result,
-                    launch = {},
-                ),
-            selectedFilesToAdd = mutableStateOf(emptySet()),
-            selectedMovesToExecute = mutableStateOf(emptySet()),
-        )
-
-        renderPreview(
-            archiveName = "Family Stuff",
-            state =
-                IndexUpdateProcedureSupervisor.JobState(
-                    IndexUpdateAddProgress(setOf("Documents/Something/There.pdf"), setOf("Documents/Something/There.pdf"), emptyMap(), false),
-                    IndexUpdateMoveProgress(emptySet(),  emptySet(), emptyMap(), false),
-                    "added: Documents/Something/There.pdf",
-                    ProcedureExecutionState.Running,
-                ),
-            selectedFilesToAdd = mutableStateOf(emptySet()),
-            selectedMovesToExecute = mutableStateOf(emptySet()),
-        )
-
-        renderPreview(
-            archiveName = "Family Stuff",
-            IndexUpdateProcedureSupervisor.JobState(
-                IndexUpdateAddProgress(setOf("Documents/Something/There.pdf", "Photos/2024/04/photo_09.JPG"), setOf("Documents/Something/There.pdf", "Photos/2024/04/photo_09.JPG"), emptyMap(), false),
-                IndexUpdateMoveProgress(emptySet(),  emptySet(), emptyMap(), false),
-                "added: Documents/Something/There.pdf\nadded: Photos/2024/04/photo_09.JPG",
-                ProcedureExecutionState.Running,
-            ),
-            selectedFilesToAdd = mutableStateOf(emptySet()),
-            selectedMovesToExecute = mutableStateOf(emptySet()),
-        )
-    }
-}
-
-@Preview
-@Composable
-private fun UpdateIndexOperationViewPreview2() {
-    DialogPreviewColumn {
-        renderPreview(
-            archiveName = "Family Stuff",
-            IndexUpdateProcedureSupervisor.JobState(
-                IndexUpdateAddProgress(setOf("Documents/Something/There.pdf", "Photos/2024/04/photo_09.JPG", "Photos/2024/04/photo_10.JPG"), setOf("Documents/Something/There.pdf", "Photos/2024/04/photo_09.JPG"), emptyMap(), true),
-                IndexUpdateMoveProgress(emptySet(), emptySet(), emptyMap(), false),
-                "added: Documents/Something/There.pdf\nadded: Photos/2024/04/photo_09.JPG",
-                ProcedureExecutionState.Running,
-            ),
-            selectedFilesToAdd = mutableStateOf(emptySet()),
-            selectedMovesToExecute = mutableStateOf(emptySet()),
         )
     }
 }

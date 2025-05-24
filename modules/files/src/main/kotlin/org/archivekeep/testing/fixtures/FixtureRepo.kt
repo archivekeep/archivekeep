@@ -14,6 +14,7 @@ import java.io.InputStream
 class FixtureRepo(
     val contents: Map<String, String>,
     val uncommittedContents: Map<String, String> = emptyMap(),
+    val missingContents: Map<String, String> = emptyMap(),
 ) : Repo {
     val _index by lazy {
         RepoIndex(
@@ -23,7 +24,14 @@ class FixtureRepo(
                     size = it.value.length.toLong(),
                     checksumSha256 = it.value.sha256(),
                 )
-            },
+            } +
+                missingContents.entries.map {
+                    RepoIndex.File(
+                        path = it.key,
+                        size = it.value.length.toLong(),
+                        checksumSha256 = it.value.sha256(),
+                    )
+                },
         )
     }
 

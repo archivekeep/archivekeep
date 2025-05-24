@@ -7,6 +7,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combineTransform
 import kotlinx.coroutines.flow.emitAll
 import kotlinx.coroutines.flow.flowOn
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.transform
 import org.archivekeep.app.core.domain.repositories.RepositoryService
 import org.archivekeep.app.core.procedures.utils.JobWrapper
@@ -14,9 +15,11 @@ import org.archivekeep.app.core.utils.AbstractJobGuardRunnable
 import org.archivekeep.app.core.utils.UniqueJobGuard
 import org.archivekeep.app.core.utils.generics.singleInstanceWeakValueMap
 import org.archivekeep.app.core.utils.identifiers.RepositoryURI
+import org.archivekeep.files.procedures.addpush.AddAndPushProcedureJob
 import org.archivekeep.files.procedures.indexupdate.IndexUpdateProcedure
 import org.archivekeep.utils.loading.Loadable
 import org.archivekeep.utils.loading.LoadableWithProgress
+import org.archivekeep.utils.loading.firstLoadedOrFailure
 
 class AddAndPushProcedureServiceImpl(
     private val scope: CoroutineScope,
@@ -36,13 +39,20 @@ class AddAndPushProcedureServiceImpl(
         JobWrapper<AddAndPushProcedure.JobState> {
         private val procedureJob =
             AddAndPushProcedureJob(
-                repositoryService,
+                {
+                    repositoryService
+                        .getRepository(it)
+                        .accessorFlow
+                        .firstLoadedOrFailure()
+                },
                 repositoryURI,
                 addPreparationResult,
-                launchOptions,
+                launchOptions.filesToAdd,
+                launchOptions.movesToExecute,
+                launchOptions.selectedDestinationRepositories,
             )
 
-        override val state = procedureJob.state
+        override val state = procedureJob.state.map { AddAndPushProcedure.JobState(it) }
 
         override suspend fun execute() {
             procedureJob.run()

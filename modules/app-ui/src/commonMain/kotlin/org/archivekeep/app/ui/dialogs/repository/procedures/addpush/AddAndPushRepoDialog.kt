@@ -6,7 +6,6 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
@@ -15,11 +14,6 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.onEach
 import org.archivekeep.app.core.domain.repositories.Repository
-import org.archivekeep.app.core.persistence.platform.demo.DocumentsInBackBlaze
-import org.archivekeep.app.core.persistence.platform.demo.DocumentsInHDDA
-import org.archivekeep.app.core.persistence.platform.demo.DocumentsInLaptopSSD
-import org.archivekeep.app.core.persistence.platform.demo.DocumentsInSSDKeyChain
-import org.archivekeep.app.core.procedures.addpush.AddAndPushProcedure
 import org.archivekeep.app.core.procedures.addpush.AddAndPushProcedure.JobState
 import org.archivekeep.app.core.procedures.addpush.AddAndPushProcedure.NotReadyAddPushProcess
 import org.archivekeep.app.core.procedures.addpush.AddAndPushProcedure.PreparingAddPushProcess
@@ -29,9 +23,6 @@ import org.archivekeep.app.ui.components.base.layout.IntrinsicSizeWrapperLayout
 import org.archivekeep.app.ui.components.base.layout.ScrollableColumn
 import org.archivekeep.app.ui.components.base.layout.ScrollableLazyColumn
 import org.archivekeep.app.ui.components.designsystem.dialog.LabelText
-import org.archivekeep.app.ui.components.designsystem.dialog.previewWith
-import org.archivekeep.app.ui.components.designsystem.progress.ProgressRow
-import org.archivekeep.app.ui.components.designsystem.progress.ProgressRowList
 import org.archivekeep.app.ui.components.feature.LoadableGuard
 import org.archivekeep.app.ui.components.feature.dialogs.operations.DialogOperationControlButtons
 import org.archivekeep.app.ui.components.feature.dialogs.operations.ExecutionErrorIfPresent
@@ -40,20 +31,15 @@ import org.archivekeep.app.ui.components.feature.manyselect.rememberManySelectFo
 import org.archivekeep.app.ui.components.feature.operations.InProgressOperationsList
 import org.archivekeep.app.ui.components.feature.operations.IndexUpdatePreparationProgress
 import org.archivekeep.app.ui.components.feature.operations.LocalIndexUpdateProgress
+import org.archivekeep.app.ui.components.feature.operations.SyncProgress
 import org.archivekeep.app.ui.dialogs.repository.AbstractRepositoryDialog
 import org.archivekeep.app.ui.dialogs.repository.procedures.addpush.AddAndPushRepoDialogViewModel.VMState
 import org.archivekeep.app.ui.utils.asMutableState
 import org.archivekeep.app.ui.utils.collectAsLoadable
 import org.archivekeep.app.ui.utils.contextualStorageReference
-import org.archivekeep.files.procedures.indexupdate.IndexUpdateAddProgress
-import org.archivekeep.files.procedures.indexupdate.IndexUpdateMoveProgress
-import org.archivekeep.files.procedures.indexupdate.IndexUpdateProcedure
 import org.archivekeep.utils.collections.ifNotEmpty
-import org.archivekeep.utils.filesAutoPlural
 import org.archivekeep.utils.loading.Loadable
 import org.archivekeep.utils.loading.mapIfLoadedOrDefault
-import org.archivekeep.utils.procedures.ProcedureExecutionState
-import org.jetbrains.compose.ui.tooling.preview.Preview
 
 class AddAndPushRepoDialog(
     uri: RepositoryURI,
@@ -125,7 +111,7 @@ class AddAndPushRepoDialog(
                         state.selectedFilenames,
                         "Files to add and push",
                         allItemsLabel = { "All new files ($it)" },
-                        itemLabelText = { it },
+                        itemLabelText = { it.fileName },
                     )
 
                 val guessedWidth = max(filesManySelect.guessedWidth, movesManySelect.guessedWidth)
@@ -154,7 +140,7 @@ class AddAndPushRepoDialog(
                             }
                         }
 
-                        status.addPreprationResult.newFiles.ifNotEmpty {
+                        status.addPreprationResult.newFileNames.ifNotEmpty {
                             filesManySelect.render(this)
                         }
                     }
@@ -165,50 +151,35 @@ class AddAndPushRepoDialog(
                 ScrollableColumn(Modifier.weight(1f, fill = false)) {
                     Spacer(Modifier.height(4.dp))
 
-                    val mte = status.moveProgress.movesToExecute
-                    val fta = status.addProgress.filesToAdd
-
-                    LocalIndexUpdateProgress(status.moveProgress, status.addProgress)
+                    LocalIndexUpdateProgress(status.jobState.moveProgress, status.jobState.addProgress)
 
                     Spacer(Modifier.height(4.dp))
 
                     LabelText("Push progress")
 
-                    ProgressRowList {
-                        status.pushProgress.forEach { (repo, pp) ->
-                            val storageRepository =
-                                state.otherRepositoryCandidates.mapIfLoadedOrDefault(null) {
-                                    it.firstOrNull { it.uri == repo }
-                                }
+                    Spacer(Modifier.height(12.dp))
 
-                            ProgressRow(
-                                progress = { (pp.moved.size + pp.added.size) / (mte.size.toFloat() + fta.size.toFloat()) },
-                                text =
-                                if (storageRepository != null) {
-                                    "Push to ${contextualStorageReference(state.repoName, storageRepository)}"
-                                } else {
-                                    "Push to $repo"
-                                },
-                            ) {
-                                if (mte.isNotEmpty()) {
-                                    ProgressRow(
-                                        progress = { pp.moved.size / mte.size.toFloat() },
-                                        "Moved ${pp.moved.size} of ${filesAutoPlural(mte)}",
-                                    )
-                                }
-                                if (fta.isNotEmpty()) {
-                                    ProgressRow(
-                                        progress = { pp.added.size / fta.size.toFloat() },
-                                        "Added ${pp.added.size} of ${filesAutoPlural(fta)}",
-                                    )
-                                }
+                    status.jobState.pushProgress.forEach { (task, progress) ->
+                        val repo = task.destinationRepoID
+
+                        val storageRepository =
+                            state.otherRepositoryCandidates.mapIfLoadedOrDefault(null) {
+                                it.firstOrNull { it.uri == repo }
                             }
 
-                            ExecutionErrorIfPresent(status.executionState)
-                        }
+                        Text(
+                            if (storageRepository != null) {
+                                "Push to ${contextualStorageReference(state.repoName, storageRepository)}"
+                            } else {
+                                "Push to $repo"
+                            },
+                        )
+                        SyncProgress(progress.subTasks)
+
+                        ExecutionErrorIfPresent(status.jobState.executionState)
                     }
 
-                    InProgressOperationsList(status.inProgressOperationsProgress)
+                    InProgressOperationsList(status.jobState.inProgressOperationsProgress)
                 }
             }
         }
@@ -218,118 +189,4 @@ class AddAndPushRepoDialog(
     override fun RowScope.renderButtons(state: VMState) {
         DialogOperationControlButtons(state.controlState)
     }
-}
-
-val allTestMoves =
-    listOf(
-        IndexUpdateProcedure.PreparationResult.Move("Invoices/2024/01.PDF", "Contracting/Invoices/2024/01.PDF"),
-        IndexUpdateProcedure.PreparationResult.Move("Invoices/2024/02.PDF", "Contracting/Invoices/2024/02.PDF"),
-        IndexUpdateProcedure.PreparationResult.Move("Invoices/2024/03.PDF", "Contracting/Invoices/2024/03.PDF"),
-        IndexUpdateProcedure.PreparationResult.Move("Invoices/2024/04.PDF", "Contracting/Invoices/2024/04.PDF"),
-    )
-
-val allNewFiles =
-    listOf(
-        "2024/08/01.JPG",
-        "2024/08/02.JPG",
-        "2024/08/03.JPG",
-        "2024/08/04.JPG",
-        "2024/08/05.JPG",
-    )
-
-val selectedDestinations = setOf(DocumentsInBackBlaze.uri, DocumentsInSSDKeyChain.uri)
-
-@Preview
-@Composable
-private fun AddAndPushDialogContentsCompletedPreview() {
-    AddAndPushRepoDialog(DocumentsInLaptopSSD.uri)
-        .previewWith(
-            VMState(
-                repoName = "Documents",
-                ReadyAddPushProcess(
-                    IndexUpdateProcedure.PreparationResult(
-                        newFiles = allNewFiles,
-                        moves = allTestMoves,
-                        missingFiles = emptyList(),
-                        errorFiles = emptyMap(),
-                    ),
-                    launch = {},
-                ),
-                selectedFilenames = mutableStateOf(allNewFiles.toSet()),
-                selectedMoves = mutableStateOf(allTestMoves.toSet()),
-                selectedDestinationRepositories = mutableStateOf(selectedDestinations),
-                otherRepositoryCandidates =
-                Loadable.Loaded(
-                    listOf(
-                        DocumentsInBackBlaze.storageRepository,
-                        DocumentsInSSDKeyChain.storageRepository,
-                        DocumentsInHDDA.storageRepository,
-                    ),
-                ),
-                onCancel = {},
-                onClose = {},
-            ),
-        )
-}
-
-@Preview
-@Composable
-private fun AddAndPushDialogContentsCompletedPreview2() {
-    AddAndPushRepoDialog(DocumentsInLaptopSSD.uri)
-        .previewWith(
-            VMState(
-                repoName = "Documents",
-                JobState(
-                    addProgress = IndexUpdateAddProgress(allNewFiles.toSet(), emptySet(), emptyMap(), false),
-                    moveProgress = IndexUpdateMoveProgress(emptySet(), emptySet(), emptyMap(), false),
-                    pushProgress = selectedDestinations.associateWith { AddAndPushProcedure.PushProgress(emptySet(), emptySet(), emptyMap(), false) },
-                    executionState = ProcedureExecutionState.Running,
-                    inProgressOperationsProgress = emptyList()
-                ),
-                selectedFilenames = mutableStateOf(allNewFiles.toSet()),
-                selectedMoves = mutableStateOf(emptySet()),
-                selectedDestinationRepositories = mutableStateOf(selectedDestinations),
-                otherRepositoryCandidates =
-                Loadable.Loaded(
-                    listOf(
-                        DocumentsInBackBlaze.storageRepository,
-                        DocumentsInSSDKeyChain.storageRepository,
-                        DocumentsInHDDA.storageRepository,
-                    ),
-                ),
-                onCancel = {},
-                onClose = {},
-            ),
-        )
-}
-
-@Preview
-@Composable
-private fun AddAndPushDialogContentsCompletedPreview3() {
-    AddAndPushRepoDialog(DocumentsInLaptopSSD.uri)
-        .previewWith(
-            VMState(
-                repoName = "Documents",
-                JobState(
-                    addProgress = IndexUpdateAddProgress(allNewFiles.toSet(), setOf(allNewFiles[0]), emptyMap(), false),
-                    moveProgress = IndexUpdateMoveProgress(allTestMoves.toSet(), allTestMoves.subList(0, 3).toSet(), emptyMap(), false),
-                    pushProgress = selectedDestinations.associateWith { AddAndPushProcedure.PushProgress(emptySet(), emptySet(), emptyMap(), false) },
-                    executionState = ProcedureExecutionState.Running,
-                    inProgressOperationsProgress = emptyList()
-                ),
-                selectedFilenames = mutableStateOf(allNewFiles.toSet()),
-                selectedMoves = mutableStateOf(allTestMoves.toSet()),
-                selectedDestinationRepositories = mutableStateOf(selectedDestinations),
-                otherRepositoryCandidates =
-                Loadable.Loaded(
-                    listOf(
-                        DocumentsInBackBlaze.storageRepository,
-                        DocumentsInSSDKeyChain.storageRepository,
-                        DocumentsInHDDA.storageRepository,
-                    ),
-                ),
-                onCancel = {},
-                onClose = {},
-            ),
-        )
 }

@@ -93,7 +93,7 @@ class FilesRepo(
             ioDispatcher = ioDispatcher,
         )
 
-    private fun getFileSize(filename: String): Long? {
+    override fun getFileSize(filename: String): Long? {
         val path = root.resolve(safeSubPath(filename))
 
         return if (path.exists()) path.fileSize() else null

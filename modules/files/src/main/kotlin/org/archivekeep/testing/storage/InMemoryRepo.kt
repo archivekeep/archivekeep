@@ -6,6 +6,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.update
@@ -28,12 +29,14 @@ open class InMemoryRepo(
     stateDispatcher: CoroutineDispatcher = Dispatchers.Default,
     protected val _metadataFlow: MutableStateFlow<RepositoryMetadata>,
     protected val contentsFlow: MutableStateFlow<Map<String, ByteArray>>,
+    protected val missingContentsFlow: MutableStateFlow<Map<String, ByteArray>>,
 ) : Repo {
     constructor(
         initialContents: Map<String, ByteArray> = mapOf(),
+        missingContents: Map<String, ByteArray> = mapOf(),
         metadata: RepositoryMetadata = RepositoryMetadata(),
         stateDispatcher: CoroutineDispatcher = Dispatchers.Default,
-    ) : this(stateDispatcher, MutableStateFlow(metadata), MutableStateFlow(initialContents))
+    ) : this(stateDispatcher, MutableStateFlow(metadata), MutableStateFlow(initialContents), MutableStateFlow(missingContents))
 
     private val scope = CoroutineScope(SupervisorJob() + stateDispatcher)
 
@@ -43,18 +46,22 @@ open class InMemoryRepo(
     suspend fun contains(path: String): Boolean = contents.containsKey(path)
 
     override val indexFlow =
-        contentsFlow
-            .mapToLoadable { contents ->
-                RepoIndex(
-                    contents.entries.map {
-                        RepoIndex.File(
-                            path = it.key,
-                            size = it.value.size.toLong(),
-                            checksumSha256 = it.value.sha256(),
-                        )
-                    },
-                )
-            }.stateIn(scope)
+        combine(
+            contentsFlow,
+            missingContentsFlow,
+        ) { a, b ->
+            a + b
+        }.mapToLoadable { contents ->
+            RepoIndex(
+                contents.entries.map {
+                    RepoIndex.File(
+                        path = it.key,
+                        size = it.value.size.toLong(),
+                        checksumSha256 = it.value.sha256(),
+                    )
+                },
+            )
+        }.stateIn(scope)
 
     override val metadataFlow: Flow<Loadable<RepositoryMetadata>> =
         _metadataFlow.map { Loadable.Loaded(it) }
