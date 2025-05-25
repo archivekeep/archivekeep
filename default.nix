@@ -30,10 +30,6 @@ in pkgs.mkShell {
     # gradle will detect other JDK(s) to compile classes
     graalvmCEPackages.graalvm-ce-musl
     musl
-
-    # docs stuff
-    asciidoctor
-    hugo
   ];
 
   shellHook = ''

@@ -23,3 +23,7 @@ ktlint_standard_property-naming = disabled
 generated_code = true
 ij_formatter_enabled = false
 ktlint = disabled
+
+[*.nix]
+indent_size = 2
+indent_style = space
