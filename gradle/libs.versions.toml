@@ -35,6 +35,12 @@ grpc-kotlin-stub = { group = "io.grpc", name = "grpc-kotlin-stub", version.ref =
 
 protobuf-kotlin-lite = { group = "com.google.protobuf", name = "protobuf-kotlin-lite", version.ref = "protobuf-kotlin" }
 
+s3-sdk = { group = "software.amazon.awssdk", name = "s3", version = "2.31.50" }
+s3-mock = { group = "com.adobe.testing", name = "s3mock", version = "4.3.0" }
+s3-mock-testcontainers = { group = "com.adobe.testing", name = "s3mock-testcontainers", version = "4.3.0" }
+
+testcontainers-junit-jupiter = { group = "org.testcontainers", name = "junit-jupiter", version = "1.21.0" }
+
 picocli = { group = "info.picocli", name = "picocli", version.ref = "picocli" }
 picocli-codegen = { group = "info.picocli", name = "picocli-codegen", version.ref = "picocli" }
 

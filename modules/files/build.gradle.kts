@@ -28,6 +28,7 @@ dependencies {
 
     compileOnly(libs.apache.tomcat.annotations)
 
+    testImplementation(project(":files-test"))
     testImplementation(libs.kotlin.test)
     testImplementation(libs.kotlinx.coroutines.test)
     testImplementation(libs.junit.jupiter)

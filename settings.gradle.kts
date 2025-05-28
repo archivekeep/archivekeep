@@ -13,6 +13,8 @@ rootProject.name = "archivekeep"
 include(
     ":utils",
     ":files",
+    ":files-driver-s3",
+    ":files-test",
     ":cli",
     ":app-android",
     ":app-core",
@@ -22,6 +24,8 @@ include(
 
 project(":utils").projectDir = file("modules/utils")
 project(":files").projectDir = file("modules/files")
+project(":files-driver-s3").projectDir = file("modules/files-driver-s3")
+project(":files-test").projectDir = file("modules/files-test")
 project(":cli").projectDir = file("modules/cli")
 project(":app-android").projectDir = file("modules/app-android")
 project(":app-core").projectDir = file("modules/app-core")
