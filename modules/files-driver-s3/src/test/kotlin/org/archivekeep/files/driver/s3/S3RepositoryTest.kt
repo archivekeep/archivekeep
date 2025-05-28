@@ -3,7 +3,6 @@ package org.archivekeep.files.driver.s3
 import com.adobe.testing.s3mock.testcontainers.S3MockContainer
 import kotlinx.coroutines.test.TestDispatcher
 import org.archivekeep.files.repo.RepoContractTest
-import org.junit.jupiter.api.Disabled
 import org.testcontainers.junit.jupiter.Container
 import org.testcontainers.junit.jupiter.Testcontainers
 import org.testcontainers.utility.DockerImageName
@@ -11,7 +10,6 @@ import software.amazon.awssdk.auth.credentials.AwsBasicCredentials
 import software.amazon.awssdk.auth.credentials.StaticCredentialsProvider
 import java.net.URI
 
-@Disabled("Not implemented yet")
 @Testcontainers
 class S3RepositoryTest : RepoContractTest<S3Repository>() {
     private val bucketName = "test-bucket"
@@ -31,6 +29,8 @@ class S3RepositoryTest : RepoContractTest<S3Repository>() {
                         AwsBasicCredentials.create("accessKey", "secretKey"),
                     ),
                     bucketName,
+                    sharingDispatcher = testDispatcher,
+                    ioDispatcher = testDispatcher,
                 )
         }
 }
