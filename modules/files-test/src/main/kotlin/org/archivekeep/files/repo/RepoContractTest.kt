@@ -10,8 +10,10 @@ import org.archivekeep.files.advanceTimeByAndWaitForIdle
 import org.archivekeep.files.assertLoaded
 import org.archivekeep.files.exceptions.ChecksumMismatch
 import org.archivekeep.files.exceptions.DestinationExists
-import org.archivekeep.files.populateTestContents01
 import org.archivekeep.files.quickSave
+import org.archivekeep.files.shouldHaveCommittedContentsOf
+import org.archivekeep.files.testContents01
+import org.archivekeep.files.withContentsFrom
 import org.archivekeep.utils.loading.stateIn
 import org.archivekeep.utils.sha256
 import org.junit.jupiter.api.Test
@@ -134,7 +136,7 @@ abstract class RepoContractTest<T : Repo> {
             val repoAccessor =
                 testRepo
                     .open(dispatcher)
-                    .apply { populateTestContents01() }
+                    .withContentsFrom(testContents01)
 
             repoAccessor.move(
                 from = "A/01.txt",
@@ -162,7 +164,7 @@ abstract class RepoContractTest<T : Repo> {
             val repoAccessor =
                 testRepo
                     .open(dispatcher)
-                    .apply { populateTestContents01() }
+                    .withContentsFrom(testContents01)
 
             assertThrows<DestinationExists> {
                 repoAccessor.move(
@@ -193,7 +195,7 @@ abstract class RepoContractTest<T : Repo> {
             val repoAccessor =
                 testRepo
                     .open(dispatcher)
-                    .apply { populateTestContents01() }
+                    .withContentsFrom(testContents01)
 
             val indexFlowState =
                 repoAccessor
@@ -242,7 +244,7 @@ abstract class RepoContractTest<T : Repo> {
                 val repoAccessor =
                     testRepo
                         .open(dispatcher)
-                        .apply { populateTestContents01() }
+                        .withContentsFrom(testContents01)
 
                 val metadataFlowState =
                     repoAccessor
@@ -280,5 +282,32 @@ abstract class RepoContractTest<T : Repo> {
                     assertEquals(newID, it.associationGroupId)
                 }
             }
+        }
+
+    @Test
+    fun `metadata change should not affect contents`() =
+        runTest {
+            val dispatcher = StandardTestDispatcher(testScheduler)
+
+            val testRepo = createNew()
+            val newID = UUID.randomUUID().toString()
+
+            val repoAccessor =
+                testRepo
+                    .open(dispatcher)
+                    .withContentsFrom(testContents01)
+
+            repoAccessor.updateMetadata {
+                it.copy(
+                    associationGroupId = newID,
+                )
+            }
+
+            assertEquals(
+                repoAccessor.getMetadata().associationGroupId,
+                newID,
+            )
+
+            repoAccessor shouldHaveCommittedContentsOf testContents01
         }
 }

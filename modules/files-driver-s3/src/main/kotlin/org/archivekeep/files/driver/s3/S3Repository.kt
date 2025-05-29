@@ -72,6 +72,7 @@ class S3Repository(
                     s3Client
                         .listObjects { request ->
                             request.bucket(bucketName)
+                            request.prefix(FILES_PREFIX)
                         }.contents()
                         .map {
                             async {
@@ -237,8 +238,10 @@ class S3Repository(
         }
 
     companion object {
-        fun String.toKey() = "files/$this"
+        private const val FILES_PREFIX = "files/"
 
-        fun String.toFilename() = this.removePrefix("files/")
+        fun String.toKey() = "$FILES_PREFIX$this"
+
+        fun String.toFilename() = this.removePrefix(FILES_PREFIX)
     }
 }

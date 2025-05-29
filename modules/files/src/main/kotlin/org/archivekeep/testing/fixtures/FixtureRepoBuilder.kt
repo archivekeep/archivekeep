@@ -46,5 +46,5 @@ class FixtureRepoBuilder(
         repoMissingContents.putAll(fixtureRepo.missingContents)
     }
 
-    fun build() = FixtureRepo(repoContents, repoUncommittedContents, repoMissingContents)
+    fun build() = FixtureRepo(this)
 }

@@ -16,6 +16,10 @@ class FixtureRepo(
     val uncommittedContents: Map<String, String> = emptyMap(),
     val missingContents: Map<String, String> = emptyMap(),
 ) : Repo {
+    constructor(builder: FixtureRepoBuilder) : this(builder.repoContents, builder.repoUncommittedContents, builder.repoMissingContents)
+
+    constructor(fn: (FixtureRepoBuilder).() -> Unit) : this(FixtureRepoBuilder().also(fn))
+
     val _index by lazy {
         RepoIndex(
             contents.entries.map {

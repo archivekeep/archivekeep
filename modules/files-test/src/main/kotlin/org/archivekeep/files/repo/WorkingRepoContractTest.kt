@@ -12,7 +12,8 @@ import org.archivekeep.files.advanceTimeByAndWaitForIdle
 import org.archivekeep.files.assertLoaded
 import org.archivekeep.files.flowToInputStream
 import org.archivekeep.files.operations.StatusOperation
-import org.archivekeep.files.populateTestContents01
+import org.archivekeep.files.testContents01
+import org.archivekeep.files.withContentsFrom
 import org.archivekeep.utils.loading.Loadable
 import org.archivekeep.utils.loading.stateIn
 import org.junit.jupiter.api.Test
@@ -47,7 +48,7 @@ abstract class WorkingRepoContractTest<T : LocalRepo> {
             val repoAccessor =
                 testRepo
                     .open(dispatcher)
-                    .apply { populateTestContents01() }
+                    .withContentsFrom(testContents01)
 
             val indexFlowState =
                 repoAccessor
@@ -128,7 +129,7 @@ abstract class WorkingRepoContractTest<T : LocalRepo> {
             val repoAccessor =
                 testRepo
                     .open(dispatcher)
-                    .apply { populateTestContents01() }
+                    .withContentsFrom(testContents01)
 
             val indexFlowState =
                 repoAccessor
