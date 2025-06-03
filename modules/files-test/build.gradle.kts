@@ -13,6 +13,8 @@ dependencies {
     implementation(libs.kotlin.test)
     implementation(libs.kotlinx.coroutines.test)
     implementation(libs.junit.jupiter)
+
+    implementation(libs.kotest.assertions.core)
 }
 
 tasks.named<Test>("test") {

@@ -131,29 +131,28 @@ suspend fun copyFile(
     withContext(Dispatchers.IO) {
         val timeStarted = LocalDateTime.now()
 
-        val (info, stream) = base.open(filename)
+        base.open(filename) { info, stream ->
 
-        val monitor = { progress: Long ->
+            val monitor = { progress: Long ->
+                progressReport(
+                    CopyOperationProgress(
+                        filename,
+                        timeConsumed = Duration.between(timeStarted, LocalDateTime.now()).toKotlinDuration(),
+                        copied = progress,
+                        total = info.length,
+                    ),
+                )
+            }
+
             progressReport(
                 CopyOperationProgress(
                     filename,
                     timeConsumed = Duration.between(timeStarted, LocalDateTime.now()).toKotlinDuration(),
-                    copied = progress,
+                    copied = 0,
                     total = info.length,
                 ),
             )
-        }
 
-        progressReport(
-            CopyOperationProgress(
-                filename,
-                timeConsumed = Duration.between(timeStarted, LocalDateTime.now()).toKotlinDuration(),
-                copied = 0,
-                total = info.length,
-            ),
-        )
-
-        stream.use {
             dst.save(
                 filename,
                 info,

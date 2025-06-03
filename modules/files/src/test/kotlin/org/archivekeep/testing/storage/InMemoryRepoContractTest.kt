@@ -12,7 +12,7 @@ class InMemoryRepoContractTest : RepoContractTest<InMemoryRepo>() {
             val contentsMutableStateFlow = MutableStateFlow<Map<String, ByteArray>>(emptyMap())
             val missingContentsMutableStateFlow = MutableStateFlow<Map<String, ByteArray>>(emptyMap())
 
-            override fun open(testDispatcher: TestDispatcher): InMemoryRepo =
+            override suspend fun open(testDispatcher: TestDispatcher): InMemoryRepo =
                 InMemoryRepo(testDispatcher, metadataMutableStateFlow, contentsMutableStateFlow, missingContentsMutableStateFlow)
         }
 }

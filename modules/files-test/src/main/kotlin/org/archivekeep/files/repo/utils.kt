@@ -26,12 +26,10 @@ suspend fun (Repo).assertFileHasStringContents(
     filename: String,
     expectedContents: String = filename,
 ) {
-    val (info, stream) = open(filename)
-    val contents =
-        stream.use {
-            String(it.readAllBytes())
-        }
+    open(filename) { info, stream ->
+        val contents = String(stream.readAllBytes())
 
-    assertEquals(ArchiveFileInfo.forStringContents(expectedContents), info)
-    assertEquals(contents, expectedContents)
+        assertEquals(ArchiveFileInfo.forStringContents(expectedContents), info)
+        assertEquals(contents, expectedContents)
+    }
 }

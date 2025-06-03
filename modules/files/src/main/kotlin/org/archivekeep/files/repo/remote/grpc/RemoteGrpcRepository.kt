@@ -47,7 +47,8 @@ class RemoteGrpcRepository(
     private val scope: CoroutineScope = CoroutineScope(Dispatchers.IO),
     // TODO: subscription to remote
     private val modifChannel: MutableSharedFlow<Date> = MutableStateFlow(Date()),
-) : Repo, Closeable {
+) : Repo,
+    Closeable {
     private val remoteService = ArchiveServiceGrpcKt.ArchiveServiceCoroutineStub(channel)
 
     override fun close() {
@@ -90,7 +91,10 @@ class RemoteGrpcRepository(
         }
     }
 
-    override suspend fun open(filename: String): Pair<ArchiveFileInfo, InputStream> {
+    override suspend fun <T> open(
+        filename: String,
+        block: suspend (ArchiveFileInfo, InputStream) -> T,
+    ): T {
         val supervisor = SupervisorJob()
         val supervisorScope = CoroutineScope(Dispatchers.IO + coroutineContext + supervisor)
 
@@ -151,10 +155,12 @@ class RemoteGrpcRepository(
                 }
             }
 
-            return Pair(
-                fi,
-                pipedInputStream,
-            )
+            return pipedInputStream.use { inputStream ->
+                block(
+                    fi,
+                    inputStream,
+                )
+            }
         } catch (e: Exception) {
             supervisor.cancel()
 

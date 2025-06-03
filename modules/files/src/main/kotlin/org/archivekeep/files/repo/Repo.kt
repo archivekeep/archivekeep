@@ -57,7 +57,10 @@ interface Repo {
         to: String,
     )
 
-    suspend fun open(filename: String): Pair<ArchiveFileInfo, InputStream>
+    suspend fun <T> open(
+        filename: String,
+        block: suspend (ArchiveFileInfo, InputStream) -> T,
+    ): T
 
     suspend fun save(
         filename: String,

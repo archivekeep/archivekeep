@@ -94,10 +94,13 @@ open class InMemoryRepo(
         contentsFlow.update { it - filename }
     }
 
-    override suspend fun open(filename: String): Pair<ArchiveFileInfo, InputStream> {
+    override suspend fun <T> open(
+        filename: String,
+        block: suspend (ArchiveFileInfo, InputStream) -> T,
+    ): T {
         val c = contents[filename] ?: throw FileDoesntExist(filename)
 
-        return Pair(
+        return block(
             ArchiveFileInfo(
                 length = c.size.toLong(),
                 checksumSha256 = c.sha256(),

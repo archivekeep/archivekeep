@@ -48,7 +48,10 @@ class FixtureRepo(
         TODO("Not yet implemented")
     }
 
-    override suspend fun open(filename: String): Pair<ArchiveFileInfo, InputStream> {
+    override suspend fun <T> open(
+        filename: String,
+        block: suspend (ArchiveFileInfo, InputStream) -> T,
+    ): T {
         TODO("Not yet implemented")
     }
 

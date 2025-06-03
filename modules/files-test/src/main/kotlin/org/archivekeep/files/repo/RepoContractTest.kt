@@ -1,12 +1,12 @@
 package org.archivekeep.files.repo
 
+import io.kotest.assertions.nondeterministic.eventually
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.TestDispatcher
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
-import org.archivekeep.files.advanceTimeByAndWaitForIdle
 import org.archivekeep.files.assertLoaded
 import org.archivekeep.files.exceptions.ChecksumMismatch
 import org.archivekeep.files.exceptions.DestinationExists
@@ -25,7 +25,7 @@ import kotlin.time.Duration.Companion.seconds
 @OptIn(ExperimentalCoroutinesApi::class)
 abstract class RepoContractTest<T : Repo> {
     interface TestRepo<T : Repo> {
-        fun open(testDispatcher: TestDispatcher): T
+        suspend fun open(testDispatcher: TestDispatcher): T
     }
 
     abstract fun createNew(): TestRepo<T>
@@ -202,33 +202,33 @@ abstract class RepoContractTest<T : Repo> {
                     .indexFlow
                     .stateIn(backgroundScope, SharingStarted.Eagerly)
 
-            advanceTimeByAndWaitForIdle(2.seconds)
-
-            indexFlowState.value.assertLoaded {
-                assertEquals(
-                    listOf(
-                        RepoIndex.File.forStringContents(path = "A/01.txt"),
-                        RepoIndex.File.forStringContents(path = "A/02.txt"),
-                        RepoIndex.File.forStringContents(path = "B/03.txt"),
-                    ),
-                    it.files,
-                )
+            eventually(2.seconds) {
+                indexFlowState.value.assertLoaded {
+                    assertEquals(
+                        listOf(
+                            RepoIndex.File.forStringContents(path = "A/01.txt"),
+                            RepoIndex.File.forStringContents(path = "A/02.txt"),
+                            RepoIndex.File.forStringContents(path = "B/03.txt"),
+                        ),
+                        it.files,
+                    )
+                }
             }
 
             repoAccessor.quickSave("C/04.txt")
 
-            advanceTimeByAndWaitForIdle(2.seconds)
-
-            indexFlowState.value.assertLoaded {
-                assertEquals(
-                    listOf(
-                        RepoIndex.File.forStringContents(path = "A/01.txt"),
-                        RepoIndex.File.forStringContents(path = "A/02.txt"),
-                        RepoIndex.File.forStringContents(path = "B/03.txt"),
-                        RepoIndex.File.forStringContents(path = "C/04.txt"),
-                    ),
-                    it.files,
-                )
+            eventually(2.seconds) {
+                indexFlowState.value.assertLoaded {
+                    assertEquals(
+                        listOf(
+                            RepoIndex.File.forStringContents(path = "A/01.txt"),
+                            RepoIndex.File.forStringContents(path = "A/02.txt"),
+                            RepoIndex.File.forStringContents(path = "B/03.txt"),
+                            RepoIndex.File.forStringContents(path = "C/04.txt"),
+                        ),
+                        it.files,
+                    )
+                }
             }
         }
 
@@ -251,20 +251,20 @@ abstract class RepoContractTest<T : Repo> {
                         .metadataFlow
                         .stateIn(backgroundScope, SharingStarted.Eagerly)
 
-                advanceTimeByAndWaitForIdle(2.seconds)
-
-                metadataFlowState.value.assertLoaded {
-                    assertEquals(null, it.associationGroupId)
+                eventually(2.seconds) {
+                    metadataFlowState.value.assertLoaded {
+                        assertEquals(null, it.associationGroupId)
+                    }
                 }
 
                 repoAccessor.updateMetadata {
                     it.copy(associationGroupId = newID)
                 }
 
-                advanceTimeByAndWaitForIdle(2.seconds)
-
-                metadataFlowState.value.assertLoaded {
-                    assertEquals(newID, it.associationGroupId)
+                eventually(2.seconds) {
+                    metadataFlowState.value.assertLoaded {
+                        assertEquals(newID, it.associationGroupId)
+                    }
                 }
             }
 
@@ -276,10 +276,10 @@ abstract class RepoContractTest<T : Repo> {
                         .metadataFlow
                         .stateIn(backgroundScope, SharingStarted.Eagerly)
 
-                advanceTimeByAndWaitForIdle(2.seconds)
-
-                metadataFlowState.value.assertLoaded {
-                    assertEquals(newID, it.associationGroupId)
+                eventually(2.seconds) {
+                    metadataFlowState.value.assertLoaded {
+                        assertEquals(newID, it.associationGroupId)
+                    }
                 }
             }
         }

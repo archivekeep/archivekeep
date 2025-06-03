@@ -19,7 +19,8 @@ class FilesRepoContractTest : RepoContractTest<FilesRepo>() {
         createFilesRepo(path)
 
         return object : TestRepo<FilesRepo> {
-            override fun open(testDispatcher: TestDispatcher): FilesRepo = FilesRepo(path, stateDispatcher = testDispatcher, ioDispatcher = testDispatcher)
+            override suspend fun open(testDispatcher: TestDispatcher): FilesRepo =
+                FilesRepo(path, stateDispatcher = testDispatcher, ioDispatcher = testDispatcher)
         }
     }
 

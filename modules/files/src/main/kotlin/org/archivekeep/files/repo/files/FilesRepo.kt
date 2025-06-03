@@ -196,17 +196,22 @@ class FilesRepo(
         }
     }
 
-    override suspend fun open(filename: String): Pair<ArchiveFileInfo, InputStream> {
+    override suspend fun <T> open(
+        filename: String,
+        block: suspend (ArchiveFileInfo, InputStream) -> T,
+    ): T {
         val checksum = fileChecksum(filename)
         val realPath = root.resolve(safeSubPath(filename))
 
-        return Pair(
-            ArchiveFileInfo(
-                length = realPath.fileSize(),
-                checksumSha256 = checksum,
-            ),
-            realPath.inputStream(),
-        )
+        return realPath.inputStream().use { inputStream ->
+            block(
+                ArchiveFileInfo(
+                    length = realPath.fileSize(),
+                    checksumSha256 = checksum,
+                ),
+                inputStream,
+            )
+        }
     }
 
     override suspend fun save(

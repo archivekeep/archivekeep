@@ -1,5 +1,20 @@
 package org.archivekeep.files.driver.s3
 
+import aws.sdk.kotlin.services.s3.S3Client
+import aws.sdk.kotlin.services.s3.copyObject
+import aws.sdk.kotlin.services.s3.deleteObject
+import aws.sdk.kotlin.services.s3.headObject
+import aws.sdk.kotlin.services.s3.listObjects
+import aws.sdk.kotlin.services.s3.model.ChecksumMode
+import aws.sdk.kotlin.services.s3.model.GetObjectRequest
+import aws.sdk.kotlin.services.s3.model.NoSuchKey
+import aws.sdk.kotlin.services.s3.model.NotFound
+import aws.sdk.kotlin.services.s3.model.S3Exception
+import aws.sdk.kotlin.services.s3.putObject
+import aws.smithy.kotlin.runtime.auth.awscredentials.CredentialsProvider
+import aws.smithy.kotlin.runtime.content.asByteStream
+import aws.smithy.kotlin.runtime.content.toInputStream
+import aws.smithy.kotlin.runtime.net.url.Url
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -24,15 +39,11 @@ import org.archivekeep.utils.fromBase64ToHex
 import org.archivekeep.utils.fromHexToBase64
 import org.archivekeep.utils.loading.AutoRefreshLoadableFlow
 import org.archivekeep.utils.loading.Loadable
-import software.amazon.awssdk.auth.credentials.AwsCredentialsProvider
-import software.amazon.awssdk.core.sync.RequestBody
-import software.amazon.awssdk.regions.Region
-import software.amazon.awssdk.services.s3.S3Client
-import software.amazon.awssdk.services.s3.model.ChecksumMode
-import software.amazon.awssdk.services.s3.model.NoSuchKeyException
-import software.amazon.awssdk.services.s3.model.S3Exception
+import org.archivekeep.utils.sha256
 import java.io.InputStream
 import java.net.URI
+import java.net.URLEncoder
+import java.nio.charset.StandardCharsets
 import java.security.DigestInputStream
 import java.security.MessageDigest
 import java.util.Date
@@ -40,26 +51,29 @@ import java.util.Date
 private const val METADATA_JSON_KEY = "metadata.json"
 
 class S3Repository(
-    endpoint: URI,
-    region: String,
-    credentialsProvider: AwsCredentialsProvider,
+    val endpoint: URI,
+    val region: String,
+    val credentialsProvider: CredentialsProvider,
     val bucketName: String,
     val sharingDispatcher: CoroutineDispatcher = Dispatchers.Default,
     val ioDispatcher: CoroutineDispatcher = Dispatchers.IO,
 ) : Repo {
-    private val s3Client =
-        S3Client
-            .builder()
-            .endpointOverride(endpoint)
-            .region(Region.of(region))
-            .credentialsProvider(credentialsProvider)
-            .forcePathStyle(true)
-            .build()
+    private lateinit var s3Client: S3Client
 
     private val scope = CoroutineScope(sharingDispatcher + SupervisorJob())
 
     private val contentsLastChangeFlow = MutableStateFlow(Date())
     private val metadataLastChangeFlow = MutableStateFlow(Date())
+
+    suspend fun init() {
+        s3Client =
+            S3Client.fromEnvironment {
+                endpointUrl = Url.parse(endpoint.toString())
+                region = this@S3Repository.region
+                credentialsProvider = this@S3Repository.credentialsProvider
+                forcePathStyle = true
+            }
+    }
 
     private val indexResource =
         AutoRefreshLoadableFlow(
@@ -69,33 +83,35 @@ class S3Repository(
         ) {
             val files =
                 coroutineScope {
-                    s3Client
-                        .listObjects { request ->
-                            request.bucket(bucketName)
-                            request.prefix(FILES_PREFIX)
-                        }.contents()
-                        .map {
-                            async {
-                                val checksumSha256 =
-                                    run {
-                                        // TODO: add caching
+                    (
+                        s3Client
+                            .listObjects {
+                                bucket = bucketName
+                                prefix = FILES_PREFIX
+                            }.contents ?: emptyList()
+                    ).map {
+                        async {
+                            val checksumSha256 =
+                                run {
+                                    // TODO: add caching
 
-                                        val head =
-                                            s3Client.headObject { request ->
-                                                request.bucket(bucketName)
-                                                request.key(it.key())
-                                            }
+                                    val head =
+                                        s3Client.headObject {
+                                            bucket = bucketName
+                                            key = it.key
+                                            checksumMode = ChecksumMode.Enabled
+                                        }
 
-                                        head.checksumSHA256().fromBase64ToHex()
-                                    }
+                                    head.checksumSha256!!.fromBase64ToHex()
+                                }
 
-                                RepoIndex.File(
-                                    it.key().toFilename(),
-                                    it.size().toLong(),
-                                    checksumSha256,
-                                )
-                            }
-                        }.map { it.await() }
+                            RepoIndex.File(
+                                it.key!!.toFilename(),
+                                it.size!!.toLong(),
+                                checksumSha256,
+                            )
+                        }
+                    }.map { it.await() }
                 }
 
             RepoIndex(files)
@@ -123,37 +139,38 @@ class S3Repository(
         try {
             checkNotExists(to)
 
-            s3Client.copyObject { request ->
-                request.sourceBucket(bucketName)
-                request.sourceKey(from.toKey())
-                request.destinationBucket(bucketName)
-                request.destinationKey(to.toKey())
+            s3Client.copyObject {
+                copySource = URLEncoder.encode("$bucketName/${from.toKey()}", StandardCharsets.UTF_8.toString())
+
+                bucket = bucketName
+                key = to.toKey()
             }
 
-            s3Client.deleteObject { request ->
-                request.bucket(bucketName)
-                request.key(from.toKey())
+            s3Client.deleteObject {
+                bucket = bucketName
+                key = from.toKey()
             }
         } finally {
             contentsLastChangeFlow.update { Date() }
         }
     }
 
-    override suspend fun open(filename: String): Pair<ArchiveFileInfo, InputStream> {
-        val responseInputStream =
-            s3Client.getObject { request ->
-                request.bucket(bucketName)
-                request.key(filename.toKey())
-                request.checksumMode(ChecksumMode.ENABLED)
-            }
-
-        val response = responseInputStream.response()
-
-        return Pair(
-            ArchiveFileInfo(response.contentLength(), response.checksumSHA256().fromBase64ToHex()),
-            responseInputStream,
-        )
-    }
+    override suspend fun <T> open(
+        filename: String,
+        block: suspend (ArchiveFileInfo, InputStream) -> T,
+    ): T =
+        s3Client.getObject(
+            GetObjectRequest {
+                bucket = bucketName
+                key = filename.toKey()
+                checksumMode = ChecksumMode.Enabled
+            },
+        ) { response ->
+            block(
+                ArchiveFileInfo(response.contentLength!!, response.checksumSha256!!.fromBase64ToHex()),
+                response.body!!.toInputStream(),
+            )
+        }
 
     @OptIn(ExperimentalStdlibApi::class)
     override suspend fun save(
@@ -168,32 +185,33 @@ class S3Repository(
         try {
             checkNotExists(filename)
 
-            s3Client.putObject(
-                { request ->
-                    request.bucket(bucketName)
-                    request.key(filename.toKey())
-                    request.checksumSHA256(info.checksumSha256.fromHexToBase64())
-                },
-                RequestBody.fromInputStream(digestInputStream, info.length),
-            )
+            s3Client.putObject {
+                bucket = bucketName
+                key = filename.toKey()
+                checksumSha256 = info.checksumSha256.fromHexToBase64()
+
+                body = digestInputStream.asByteStream(contentLength = info.length)
+            }
         } catch (e: S3Exception) {
-            if (e.awsErrorDetails().errorMessage() == "Value for x-amz-checksum-sha256 header is invalid.") {
+            if (e.message == "Value for x-amz-checksum-sha256 header is invalid.") {
                 throw ChecksumMismatch(info.checksumSha256, digest.digest().toHexString())
+            } else {
+                throw e
             }
         } finally {
             contentsLastChangeFlow.update { Date() }
         }
     }
 
-    private fun checkNotExists(filename: String) {
+    private suspend fun checkNotExists(filename: String) {
         try {
-            s3Client.headObject { request ->
-                request.bucket(bucketName)
-                request.key(filename.toKey())
+            s3Client.headObject {
+                bucket = bucketName
+                key = filename.toKey()
             }
 
             throw DestinationExists(filename)
-        } catch (e: NoSuchKeyException) {
+        } catch (e: NotFound) {
             return
         }
     }
@@ -209,31 +227,33 @@ class S3Repository(
 
         try {
             val old = readMetadataFromS3()
-            val newMetadataString = Json.encodeToString(transform(old))
+            val newMetadataBytes = Json.encodeToString(transform(old)).toByteArray()
 
-            s3Client.putObject(
-                { request ->
-                    request.bucket(bucketName)
-                    request.key(METADATA_JSON_KEY)
-                },
-                RequestBody.fromString(newMetadataString),
-            )
+            s3Client.putObject {
+                bucket = bucketName
+                key = METADATA_JSON_KEY
+                checksumSha256 = newMetadataBytes.sha256().fromHexToBase64()
+
+                body = newMetadataBytes.inputStream().asByteStream(newMetadataBytes.size.toLong())
+            }
         } finally {
             metadataLastChangeFlow.update { Date() }
         }
     }
 
     @OptIn(ExperimentalSerializationApi::class)
-    private fun readMetadataFromS3() =
+    private suspend fun readMetadataFromS3() =
         try {
             s3Client
-                .getObject { request ->
-                    request.bucket(bucketName)
-                    request.key(METADATA_JSON_KEY)
-                }.use {
-                    Json.decodeFromStream(it)
+                .getObject(
+                    GetObjectRequest {
+                        bucket = bucketName
+                        key = METADATA_JSON_KEY
+                    },
+                ) {
+                    Json.decodeFromStream(it.body!!.toInputStream())
                 }
-        } catch (e: NoSuchKeyException) {
+        } catch (e: NoSuchKey) {
             RepositoryMetadata()
         }
 
@@ -244,4 +264,22 @@ class S3Repository(
 
         fun String.toFilename() = this.removePrefix(FILES_PREFIX)
     }
+}
+
+suspend fun openS3Repository(
+    endpoint: URI,
+    region: String,
+    credentialsProvider: CredentialsProvider,
+    bucketName: String,
+    sharingDispatcher: CoroutineDispatcher = Dispatchers.Default,
+    ioDispatcher: CoroutineDispatcher = Dispatchers.IO,
+) = S3Repository(
+    endpoint,
+    region,
+    credentialsProvider,
+    bucketName,
+    sharingDispatcher,
+    ioDispatcher,
+).also {
+    it.init()
 }

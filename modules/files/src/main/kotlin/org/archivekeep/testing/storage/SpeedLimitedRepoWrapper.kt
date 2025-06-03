@@ -28,9 +28,12 @@ class SpeedLimitedRepoWrapper(
         base.move(from, to)
     }
 
-    override suspend fun open(filename: String): Pair<ArchiveFileInfo, InputStream> =
+    override suspend fun <T> open(
+        filename: String,
+        block: suspend (ArchiveFileInfo, InputStream) -> T,
+    ): T =
         delayed(50) {
-            base.open(filename)
+            base.open(filename, block)
         }
 
     override suspend fun save(
