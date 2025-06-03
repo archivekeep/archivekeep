@@ -84,7 +84,10 @@ fun (ComposeUiTest).setContentInMobileScreenshotContainer(
 }
 
 @OptIn(ExperimentalTestApi::class)
-fun (ComposeUiTest).saveTestingContainerBitmap(filename: String) {
+fun (ComposeUiTest).saveTestingContainerBitmap(
+    filename: String,
+    key: SemanticsPropertyKey<GraphicsLayer> = semanticsKey,
+) {
     val path = Path(System.getenv("SCREENSHOTS_BUILD_OUTPUT")).resolve(filename)
 
     path.createParentDirectories()
@@ -92,10 +95,10 @@ fun (ComposeUiTest).saveTestingContainerBitmap(filename: String) {
     this.runOnIdle {
         val graphicsLayer =
             this
-                .onNode(SemanticsMatcher.keyIsDefined(semanticsKey))
+                .onNode(SemanticsMatcher.keyIsDefined(key))
                 .fetchSemanticsNode()
                 .config
-                .getOrNull(semanticsKey)
+                .getOrNull(key)
                 ?: throw RuntimeException("Not found container created with ScreenshotContainer or saveTestingContainerBitmap")
 
         runBlocking {

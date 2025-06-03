@@ -9,6 +9,7 @@ import kotlinx.serialization.encoding.Decoder
 import kotlinx.serialization.encoding.Encoder
 import org.archivekeep.app.core.persistence.drivers.filesystem.FileSystemRepositoryURIData
 import org.archivekeep.app.core.persistence.drivers.grpc.GRPCRepositoryURIData
+import org.archivekeep.app.core.persistence.drivers.s3.S3RepositoryURIData
 import org.archivekeep.app.core.persistence.platform.demo.DemoRepositoryURIData
 
 @Serializable(
@@ -22,6 +23,7 @@ data class RepositoryURI(
         when (driver) {
             "filesystem" -> FileSystemRepositoryURIData.fromSerialized(data)
             "grpc" -> GRPCRepositoryURIData.fromSerialized(data)
+            "s3" -> S3RepositoryURIData.fromSerialized(data)
             "demo" -> DemoRepositoryURIData.fromSerialized(data)
             else -> throw RuntimeException("Not supported $driver")
         }

@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+mkdir -p ~/opt/flatpak/repo/org.archivekeep
+
 flatpak-builder \
   --force-clean \
   --user \

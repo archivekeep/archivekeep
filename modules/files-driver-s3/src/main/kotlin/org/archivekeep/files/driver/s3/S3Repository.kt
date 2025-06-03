@@ -73,6 +73,11 @@ class S3Repository(
                 credentialsProvider = this@S3Repository.credentialsProvider
                 forcePathStyle = true
             }
+
+        s3Client.listObjects {
+            bucket = bucketName
+            maxKeys = 1
+        }
     }
 
     private val indexResource =

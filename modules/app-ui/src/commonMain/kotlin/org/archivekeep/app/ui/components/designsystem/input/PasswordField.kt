@@ -1,6 +1,8 @@
 package org.archivekeep.app.ui.components.designsystem.input
 
 import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.MaterialTheme
@@ -10,6 +12,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 
@@ -22,6 +25,12 @@ fun PasswordField(
     enabled: Boolean = true,
     readOnly: Boolean = false,
     textStyle: TextStyle = LocalTextStyle.current,
+    keyboardOptions: KeyboardOptions =
+        KeyboardOptions(
+            autoCorrectEnabled = false,
+            keyboardType = KeyboardType.Password,
+        ),
+    keyboardActions: KeyboardActions = KeyboardActions.Default,
     label: @Composable (() -> Unit)? = null,
     placeholder: @Composable (() -> Unit)? = null,
     prefix: @Composable (() -> Unit)? = null,
@@ -40,6 +49,8 @@ fun PasswordField(
         enabled,
         readOnly,
         textStyle,
+        keyboardOptions,
+        keyboardActions,
         label,
         placeholder,
         prefix,

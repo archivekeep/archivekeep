@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+### Added
+
+- S3 integration:
+  - support S3 bucket as repository storage
+
 ## 0.4.2 - 2025-05-25
 
 ### Added

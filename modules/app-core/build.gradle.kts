@@ -18,6 +18,7 @@ kotlin {
         val commonMain by getting {
             dependencies {
                 api(project(":files"))
+                api(project(":files-driver-s3"))
 
                 implementation(libs.kotlinx.coroutines.core)
                 implementation(libs.kotlinx.serialization.json)

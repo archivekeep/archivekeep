@@ -1,5 +1,20 @@
 # TODO: cleanup this and document why which rules are added
 
+# ########################################### #
+#                   AWS SDK                   #
+# ########################################### #
+
+# https://github.com/square/okhttp/blob/5fe3cc2d089810032671d6135ad137af6f491d28/README.md#proguard
+
+-dontwarn okhttp3.**
+-dontwarn okio.**
+-dontwarn javax.annotation.**
+-dontwarn org.conscrypt.**
+# A resource is loaded with a relative path so the package of this class must be preserved.
+-keepnames class okhttp3.internal.publicsuffix.PublicSuffixDatabase
+
+# ########################################### #
+
 # needed for io.github.vinceglb.filekit.core.platform.xdg.XdgFilePickerPortal.isAvailable
 -keep class org.freedesktop.** { *; }
 -keep class io.github.vinceglb.filekit.** { *; }

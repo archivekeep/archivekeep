@@ -17,6 +17,8 @@ in pkgs.mkShell {
   TEMURIN_21_HOME = "${pkgs.temurin-bin-21}";
   GRAALVM_HOME = "${pkgs.graalvm-ce}";
 
+  JAVA_HOME = "${pkgs.openjdk17}/lib/openjdk";
+
   buildInputs = with pkgs; [
     openjdk17
     openjdk21
@@ -26,10 +28,12 @@ in pkgs.mkShell {
   ] ++ libs;
 
   packages = with pkgs; [
-    # add GraalVM - must be default JDK to work properly
-    # gradle will detect other JDK(s) to compile classes
-    graalvmCEPackages.graalvm-ce-musl
-    musl
+    temurin-bin-17
+
+    jq
+
+    flatpak-builder
+    appstream
   ];
 
   shellHook = ''

@@ -12,6 +12,7 @@ import org.archivekeep.app.core.persistence.drivers.filesystem.AndroidFileStores
 import org.archivekeep.app.core.persistence.drivers.filesystem.FileStores
 import org.archivekeep.app.core.persistence.drivers.filesystem.FileSystemStorageDriver
 import org.archivekeep.app.core.persistence.drivers.grpc.GRPCStorageDriver
+import org.archivekeep.app.core.persistence.drivers.s3.S3StorageDriver
 import org.archivekeep.app.core.persistence.platform.Environment
 import org.archivekeep.app.core.persistence.registry.PreferenceDataStoreRegistryData
 import org.archivekeep.app.core.persistence.repository.MemorizedRepositoryIndexRepositoryInDataStore
@@ -44,5 +45,6 @@ class AndroidEnvironment(
         mapOf(
             "filesystem" to FileSystemStorageDriver(scope, fileStores),
             "grpc" to GRPCStorageDriver(scope, credentialsStore),
+            "s3" to S3StorageDriver(scope, credentialsStore),
         )
 }

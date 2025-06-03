@@ -13,7 +13,7 @@ dependencies {
     implementation(libs.kotlinx.coroutines.core)
     implementation(libs.kotlinx.serialization.json)
 
-    implementation(libs.s3.sdk)
+    api(libs.s3.sdk)
 
     testImplementation(project(":files-test"))
 

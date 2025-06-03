@@ -49,6 +49,11 @@ android {
         resources {
             pickFirsts.add("META-INF/AL2.0")
             pickFirsts.add("META-INF/LGPL2.1")
+
+            pickFirsts.add("META-INF/io.netty.versions.properties")
+
+            excludes.add("META-INF/DEPENDENCIES")
+            excludes.add("META-INF/INDEX.LIST")
         }
     }
     buildFeatures {
