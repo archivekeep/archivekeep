@@ -59,6 +59,8 @@ kotlin {
 
                 implementation(libs.kotlin.test)
                 implementation(compose.desktop.uiTestJUnit4)
+
+                implementation(libs.kotest.assertions.core)
             }
         }
     }

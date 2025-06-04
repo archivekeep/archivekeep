@@ -171,6 +171,27 @@ val usbStickAll =
             ),
     )
 
+val usbStickAllUnassociated =
+    DemoEnvironment.DemoPhysicalMedium(
+        physicalID = "TODO",
+        driveType = DriveType.HDD,
+        displayName = "USB Stick - All (unassociated)",
+        isLocal = false,
+        connectionStatus = Storage.ConnectionStatus.CONNECTED,
+        repositories =
+            listOf(
+                Documents.copy(
+                    correlationId = null,
+                ),
+                Music.copy(
+                    correlationId = null,
+                ),
+                Books.copy(
+                    correlationId = null,
+                ),
+            ),
+    )
+
 val usbStickDocuments =
     DemoEnvironment.DemoPhysicalMedium(
         physicalID = "TODO",

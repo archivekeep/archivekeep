@@ -344,17 +344,15 @@ class DemoEnvironment(
 
     data class DemoRepository(
         val displayName: String,
-        val correlationId: RepositoryAssociationGroupId = "a-${displayName.toSlug()}",
+        val id: String = "a-${displayName.toSlug()}",
+        val correlationId: RepositoryAssociationGroupId? = "a-${displayName.toSlug()}",
         val physicalLocation: String = "unknown",
         // TODO: factory maybe?
         val contentsFixture: FixtureRepo = FixtureRepo(emptyMap()),
-        val repoFactory: (fixture: FixtureRepo) -> Repo = { fixture ->
+        val repoFactory: (fixture: FixtureRepo, metadata: RepositoryMetadata) -> Repo = { fixture, metadata ->
             InMemoryRepo(
                 fixture.contents.mapValues { (_, v) -> v.toByteArray() },
-                metadata =
-                    RepositoryMetadata(
-                        "a-${displayName.toSlug()}",
-                    ),
+                metadata = metadata,
             )
         },
     ) {
@@ -364,25 +362,22 @@ class DemoEnvironment(
         ): MockedRepository =
             MockedRepository(
                 storageID = storage.uri.data,
-                name = correlationId,
+                name = id,
                 storage = storage,
                 associationId = correlationId,
                 displayName = displayName,
                 encryptionType = encryptionType,
                 physicalLocation = physicalLocation,
-                repo = repoFactory(contentsFixture),
+                repo = repoFactory(contentsFixture, RepositoryMetadata(correlationId)),
             )
 
         fun localInMemoryFactory(): DemoRepository =
             this.copy(
-                repoFactory = { fixture ->
+                repoFactory = { fixture, metadata ->
                     InMemoryLocalRepo(
                         initialContents = fixture.contents.mapValues { (_, v) -> v.toByteArray() },
                         initialUnindexedContents = fixture.uncommittedContents.mapValues { (_, v) -> v.toByteArray() },
-                        metadata =
-                            RepositoryMetadata(
-                                "a-${displayName.toSlug()}",
-                            ),
+                        metadata = metadata,
                     )
                 },
             )
@@ -397,7 +392,7 @@ class DemoEnvironment(
         val storageID: String,
         val name: String,
         val storage: StorageNamedReference,
-        val associationId: RepositoryAssociationGroupId,
+        val associationId: RepositoryAssociationGroupId?,
         val displayName: String,
         val encryptionType: RepositoryEncryptionType,
         val physicalLocation: String,

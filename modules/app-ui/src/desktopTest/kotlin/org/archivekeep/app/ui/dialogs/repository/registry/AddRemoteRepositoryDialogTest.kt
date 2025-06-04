@@ -2,10 +2,8 @@ package org.archivekeep.app.ui.dialogs.repository.registry
 
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.test.ExperimentalTestApi
-import androidx.compose.ui.test.SemanticsNodeInteraction
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
-import androidx.compose.ui.test.performTextInput
 import org.archivekeep.app.core.operations.AddRemoteRepositoryUseCase
 import org.archivekeep.app.core.persistence.platform.demo.DemoEnvironment
 import org.archivekeep.app.core.persistence.platform.demo.phone
@@ -18,6 +16,7 @@ import org.archivekeep.app.desktop.ui.dialogs.testing.setContentInDialogScreensh
 import org.archivekeep.app.desktop.ui.testing.screenshots.runHighDensityComposeUiTest
 import org.archivekeep.app.ui.domain.wiring.ApplicationProviders
 import org.archivekeep.app.ui.domain.wiring.LocalOperationFactory
+import org.archivekeep.app.ui.performClickTextInput
 import org.archivekeep.app.ui.utils.PropertiesApplicationMetadata
 import org.archivekeep.files.repo.remote.grpc.BasicAuthCredentials
 import org.junit.Test
@@ -117,9 +116,4 @@ class NoOpAddRemoteRepositoryUseCase : AddRemoteRepositoryUseCase {
         uri: RepositoryURI,
         credentials: BasicAuthCredentials?,
     ) {}
-}
-
-private fun SemanticsNodeInteraction.performClickTextInput(text: String) {
-    performClick()
-    performTextInput(text)
 }
