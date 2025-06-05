@@ -7,6 +7,10 @@
 - S3 integration:
   - support S3 bucket as repository storage
 
+### Changed
+
+- UI: add dialog for filesystem repository shows only close button on completion
+
 ## 0.4.2 - 2025-05-25
 
 ### Added

@@ -49,8 +49,8 @@ import org.archivekeep.testing.storage.InMemoryLocalRepo
 import org.archivekeep.testing.storage.InMemoryRepo
 import org.archivekeep.testing.storage.SpeedLimitedLocalRepoWrapper
 import org.archivekeep.testing.storage.SpeedLimitedRepoWrapper
-import org.archivekeep.utils.coroutines.shareResourceIn
 import org.archivekeep.utils.loading.Loadable
+import org.archivekeep.utils.loading.mapLoadedData
 import org.archivekeep.utils.loading.mapToLoadable
 import org.archivekeep.utils.loading.stateIn
 
@@ -59,6 +59,7 @@ class DemoEnvironment(
     enableSpeedLimit: Boolean = true,
     physicalMediaData: List<DemoPhysicalMedium> = listOf(LaptopSSD, LaptopHDD, hddB, hddC),
     onlineStoragesData: List<DemoOnlineStorage> = emptyList(),
+    mountPoints: List<MountedFileSystem.MountPoint> = emptyList(),
 ) : Environment {
     data class InMemoryStorage(
         val registeredStorage: RegisteredStorage,
@@ -68,13 +69,28 @@ class DemoEnvironment(
     override val fileStores: FileStores =
         object : FileStores {
             override val mountPoints: StateFlow<Loadable<List<MountedFileSystem.MountPoint>>> =
-                flowOf(emptyList<MountedFileSystem.MountPoint>())
+                flowOf(mountPoints)
                     .mapToLoadable()
                     .stateIn(scope)
 
-            override val mountedFileSystems: Flow<Loadable<List<MountedFileSystem>>> = flowOf(Loadable.Loaded(emptyList()))
+            override val mountedFileSystems =
+                this.mountPoints.mapLoadedData { mountPoints ->
+                    mountPoints
+                        .map { it.fsUUID }
+                        .toSet()
+                        .map { fsUUID ->
+                            val mp = mountPoints.filter { it.fsUUID == fsUUID }
+                            val label = mp.map { it.fsLabel }.maxBy { label -> mp.count { it.fsLabel == label } }
 
-            override suspend fun loadFreshMountPoints(): List<MountedFileSystem.MountPoint> = emptyList()
+                            MountedFileSystem(
+                                fsUUID = fsUUID,
+                                fsLabel = label.ifBlank { fsUUID },
+                                mountPoints = mp,
+                            )
+                        }
+                }
+
+            override suspend fun loadFreshMountPoints(): List<MountedFileSystem.MountPoint> = mountPoints
         }
 
     private val demoTempDirectory = kotlin.io.path.createTempDirectory("archivekeep-demo-env")
@@ -110,24 +126,22 @@ class DemoEnvironment(
 
     override val registry =
         object : RegistryDataStore {
-            override val registeredRepositories: SharedFlow<Set<RegisteredRepository>> =
-                mediaMapped
-                    .map {
-                        it
-                            .flatMap { (_, e) ->
-                                e.second.map { repo ->
-                                    val a =
-                                        RegisteredRepository(
-                                            uri = repo.uri,
-                                            label = repo.displayName,
-                                        )
+            override val registeredRepositories: MutableStateFlow<Set<RegisteredRepository>> =
+                MutableStateFlow(
+                    mediaMapped
+                        .value
+                        .flatMap { (_, e) ->
+                            e.second.map { repo ->
+                                val a =
+                                    RegisteredRepository(
+                                        uri = repo.uri,
+                                        label = repo.displayName,
+                                    )
 
-                                    println("Created: $a -> ${a.uri.typedRepoURIData.storageURI}")
-
-                                    a
-                                }
-                            }.toSet()
-                    }.shareResourceIn(scope)
+                                a
+                            }
+                        }.toSet(),
+                )
 
             override val registeredStorages: SharedFlow<Loadable<Set<RegisteredStorage>>> =
                 mediaMapped
@@ -142,7 +156,7 @@ class DemoEnvironment(
                     .stateIn(scope)
 
             override suspend fun updateRepositories(fn: (old: Set<RegisteredRepository>) -> Set<RegisteredRepository>) {
-                TODO("Not yet implemented")
+                registeredRepositories.update(fn)
             }
 
             override suspend fun updateStorage(

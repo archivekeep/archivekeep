@@ -209,8 +209,10 @@ class AddFileSystemRepositoryOperationImpl(
             scope.launch {
                 try {
                     val largest =
-                        fileStores.loadFreshMountPoints().getFileSystemForPath(path)
-                            ?: throw RuntimeException("Mount point for `$path` not found")
+                        fileStores.loadFreshMountPoints().let {
+                            it.getFileSystemForPath(path)
+                                ?: throw RuntimeException("Mount point for `$path` not found in $it")
+                        }
 
                     println("PATH: $path")
                     println("Largest: $largest")

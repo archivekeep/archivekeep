@@ -10,9 +10,8 @@ import org.archivekeep.app.core.operations.AddRemoteRepositoryUseCaseImpl
 import org.archivekeep.app.core.operations.AssociateRepositoryOperation
 import org.archivekeep.app.core.operations.AssociateRepositoryOperationImpl
 import org.archivekeep.app.core.persistence.drivers.filesystem.FileStores
-import org.archivekeep.app.core.persistence.drivers.filesystem.FileSystemStorageType
-import org.archivekeep.app.core.persistence.drivers.filesystem.operations.AddFileSystemRepositoryOperation
-import org.archivekeep.app.core.persistence.drivers.filesystem.operations.AddFileSystemRepositoryOperationImpl
+import org.archivekeep.app.core.persistence.drivers.filesystem.operations.AddFileSystemRepositoryUseCase
+import org.archivekeep.app.core.persistence.drivers.filesystem.operations.AddFileSystemRepositoryUseCaseImpl
 import org.archivekeep.app.core.persistence.registry.RegistryDataStore
 import org.archivekeep.app.core.utils.identifiers.RepositoryURI
 
@@ -28,22 +27,12 @@ class OperationFactory private constructor(
         ImmutableClassToInstanceMap
             .builder<Any>()
             .put(
-                AddFileSystemRepositoryOperation.Factory::class.java,
-                object : AddFileSystemRepositoryOperation.Factory {
-                    override fun create(
-                        scope: CoroutineScope,
-                        path: String,
-                        intendedStorageType: FileSystemStorageType?,
-                    ): AddFileSystemRepositoryOperation =
-                        AddFileSystemRepositoryOperationImpl(
-                            scope,
-                            registry,
-                            fileStores,
-                            storageRegistry,
-                            path,
-                            intendedStorageType,
-                        )
-                },
+                AddFileSystemRepositoryUseCase::class.java,
+                AddFileSystemRepositoryUseCaseImpl(
+                    registry,
+                    fileStores,
+                    storageRegistry,
+                ),
             ).put(
                 AddRemoteRepositoryUseCase::class.java,
                 AddRemoteRepositoryUseCaseImpl(

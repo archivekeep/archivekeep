@@ -26,6 +26,7 @@ import org.archivekeep.app.core.persistence.drivers.filesystem.operations.AddFil
 import org.archivekeep.app.core.persistence.drivers.filesystem.operations.AddFileSystemRepositoryOperation.InitStatus
 import org.archivekeep.app.core.persistence.drivers.filesystem.operations.AddFileSystemRepositoryOperation.PreparationStatus
 import org.archivekeep.app.core.persistence.drivers.filesystem.operations.AddFileSystemRepositoryOperation.StorageMarking
+import org.archivekeep.app.core.persistence.drivers.filesystem.operations.AddFileSystemRepositoryUseCase
 import org.archivekeep.app.ui.components.base.layout.ScrollableColumn
 import org.archivekeep.app.ui.components.designsystem.dialog.DialogButtonContainer
 import org.archivekeep.app.ui.components.designsystem.dialog.DialogCard
@@ -36,10 +37,13 @@ import org.archivekeep.app.ui.components.designsystem.dialog.DialogOverlay
 import org.archivekeep.app.ui.components.designsystem.dialog.DialogPreviewColumn
 import org.archivekeep.app.ui.components.designsystem.input.CheckboxWithText
 import org.archivekeep.app.ui.components.feature.dialogs.SimpleActionDialogControlButtons
+import org.archivekeep.app.ui.components.feature.dialogs.SimpleActionDialogDoneButtons
 import org.archivekeep.app.ui.components.feature.errors.AutomaticErrorMessage
 import org.archivekeep.app.ui.dialogs.Dialog
 import org.archivekeep.app.ui.domain.wiring.LocalOperationFactory
 import org.archivekeep.app.ui.domain.wiring.OperationFactory
+import org.archivekeep.app.ui.utils.filesystem.LocalFilesystemDirectoryPicker
+import org.archivekeep.app.ui.utils.filesystem.PickResult
 import org.jetbrains.compose.ui.tooling.preview.Preview
 
 class AddFileSystemRepositoryDialog(
@@ -67,8 +71,8 @@ class AddFileSystemRepositoryDialog(
                 is PickResult.Success -> {
                     val newOperation =
                         operationFactory
-                            .get(AddFileSystemRepositoryOperation.Factory::class.java)
-                            .create(
+                            .get(AddFileSystemRepositoryUseCase::class.java)
+                            .begin(
                                 coroutineScope,
                                 result.path,
                                 intendedStorageType,
@@ -115,7 +119,7 @@ class AddFileSystemRepositoryDialog(
 
         val permissionGrant = platformSpecificFileSystemRepositoryGuard()
 
-        val onLaunch = filesystemRepositoryDirectoryPicker(vm::setPick)
+        val onLaunch = LocalFilesystemDirectoryPicker.current(vm::setPick)
 
         LaunchedEffect(permissionGrant) {
             if (permissionGrant == PlatformSpecificPermissionFulfilment.IsFine) {
@@ -158,19 +162,6 @@ sealed interface PlatformSpecificPermissionFulfilment {
 
 @Composable
 expect fun platformSpecificFileSystemRepositoryGuard(): PlatformSpecificPermissionFulfilment
-
-sealed interface PickResult {
-    data class Success(
-        val path: String,
-    ) : PickResult
-
-    data class Failure(
-        val error: Throwable,
-    ) : PickResult
-}
-
-@Composable
-expect fun filesystemRepositoryDirectoryPicker(onResult: (result: PickResult) -> Unit): () -> Unit
 
 @Composable
 private fun AddRepositoryDialogContents(
@@ -239,7 +230,13 @@ private fun AddRepositoryDialogContents(
                 }
 
                 ScrollableColumn {
-                    if (preparationStatus is PreparationStatus.ReadyForAdd || preparationStatus is PreparationStatus.ReadyForInit) {
+                    PreparationStatus(preparationStatus, addStatus, initStatus)
+
+                    if (
+                        (preparationStatus is PreparationStatus.ReadyForAdd || preparationStatus is PreparationStatus.ReadyForInit) &&
+                        initStatus == null &&
+                        addStatus == null
+                    ) {
                         when (storageMarkMatch) {
                             StorageMarking.ALRIGHT -> {
                                 PreparationStatus(
@@ -250,11 +247,11 @@ private fun AddRepositoryDialogContents(
                             }
 
                             StorageMarking.NEEDS_MARK_AS_LOCAL -> {
-                                Text("Storage will be marked as local")
+                                ProgressText("Storage is used for the first time, and it will be marked as local.")
                             }
 
                             StorageMarking.NEEDS_MARK_AS_EXTERNAL -> {
-                                Text("Storage will be marked as external")
+                                ProgressText("Storage is used for the first time, and it will be marked as external.")
                             }
 
                             StorageMarking.NEEDS_REMARK_AS_LOCAL -> {
@@ -267,7 +264,7 @@ private fun AddRepositoryDialogContents(
                             }
 
                             StorageMarking.NEEDS_REMARK_AS_EXTERNAL -> {
-                                Text("Storage is currently local, re-mark it as external?")
+                                ProgressText("Storage is currently local, re-mark it as external?")
                                 CheckboxWithText(
                                     markConfirmed == true,
                                     text = "Yes, re-mark storage as external",
@@ -279,8 +276,6 @@ private fun AddRepositoryDialogContents(
                                 ProgressText("Preparing ...")
                             }
                         }
-                    } else {
-                        PreparationStatus(preparationStatus, addStatus, initStatus)
                     }
                     InitStatus(initStatus)
                     AddStatus(addStatus)
@@ -311,12 +306,16 @@ private fun AddRepositoryDialogContents(
                             }
                         }
 
-                    SimpleActionDialogControlButtons(
-                        name,
-                        onLaunch = onLaunch,
-                        onClose = onClose,
-                        canLaunch = canLaunch,
-                    )
+                    if (addStatus == null && initStatus == null) {
+                        SimpleActionDialogControlButtons(
+                            name,
+                            onLaunch = onLaunch,
+                            onClose = onClose,
+                            canLaunch = canLaunch,
+                        )
+                    } else {
+                        SimpleActionDialogDoneButtons(onClose)
+                    }
                 }
             },
         )
@@ -358,7 +357,7 @@ private fun InitStatus(initStatus: InitStatus?) {
         is InitStatus.InitFailed -> {
             AutomaticErrorMessage(initStatus.cause, onResolve = {})
         }
-        InitStatus.InitSuccessful -> ProgressText("Initialized successfully.")
+        InitStatus.InitSuccessful -> ProgressText("Directory initialized successfully as repository.")
         InitStatus.Initializing -> ProgressText("Initializing...")
         null -> {}
     }

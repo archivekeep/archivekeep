@@ -1,8 +1,6 @@
 package org.archivekeep.app.core.persistence.drivers.filesystem.operations
 
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.StateFlow
-import org.archivekeep.app.core.persistence.drivers.filesystem.FileSystemStorageType
 
 interface AddFileSystemRepositoryOperation {
     val preparationStatus: StateFlow<PreparationStatus>
@@ -10,14 +8,6 @@ interface AddFileSystemRepositoryOperation {
     val addStatus: StateFlow<AddStatus?>
     val storageMarkStatus: StateFlow<StorageMarkStatus?>
     val completed: StateFlow<Boolean>
-
-    interface Factory {
-        fun create(
-            scope: CoroutineScope,
-            path: String,
-            intendedStorageType: FileSystemStorageType?,
-        ): AddFileSystemRepositoryOperation
-    }
 
     enum class StorageMarking(
         val isMark: Boolean = false,
