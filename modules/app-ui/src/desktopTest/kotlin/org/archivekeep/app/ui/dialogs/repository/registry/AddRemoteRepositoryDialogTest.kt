@@ -71,6 +71,45 @@ class AddRemoteRepositoryDialogTest {
 
     @OptIn(ExperimentalTestApi::class)
     @Test
+    fun testS3ShowsWarningOnInsecureProtocol() {
+        runHighDensityComposeUiTest {
+            setContentInDialogScreenshotContainer {
+                ApplicationProviders(
+                    environmentFactory = { scope ->
+                        DemoEnvironment(
+                            scope,
+                            physicalMediaData = listOf(phone, usbStickAll, usbStickDocuments, usbStickMusic),
+                            enableSpeedLimit = false,
+                        )
+                    },
+                    applicationMetadata = PropertiesApplicationMetadata(),
+                ) {
+                    CompositionLocalProvider(
+                        LocalOperationFactory provides
+                            LocalOperationFactory.current.override(
+                                AddRemoteRepositoryUseCase::class.java,
+                                NoOpAddRemoteRepositoryUseCase(),
+                            ),
+                    ) {
+                        AddRemoteRepositoryDialog().render(onClose = {})
+                    }
+                }
+            }
+
+            onNodeWithText("S3").performClick()
+            onNodeWithText("Endpoint URL").performClickTextInput("http://s3.insecure.endpoint.nas.lan")
+
+            saveTestingDialogContainerBitmap("dialogs/add-remote-repository/input-s3-insecure-01.png")
+
+            onNodeWithText(
+                "Insecure protocol is used for endpoint. This results in plain data being sent over network, that is readable by anyone.",
+            ).assertExists()
+            onNodeWithText("It is strongly recommended to connect to this server using a VPN you absolutely trust.").assertExists("documents")
+        }
+    }
+
+    @OptIn(ExperimentalTestApi::class)
+    @Test
     fun testOther() {
         runHighDensityComposeUiTest {
             setContentInDialogScreenshotContainer {

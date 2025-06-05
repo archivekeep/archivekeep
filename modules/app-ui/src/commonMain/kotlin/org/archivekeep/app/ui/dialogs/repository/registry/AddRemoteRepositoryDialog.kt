@@ -1,5 +1,6 @@
 package org.archivekeep.app.ui.dialogs.repository.registry
 
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -32,9 +33,11 @@ import org.archivekeep.app.core.operations.WrongCredentialsException
 import org.archivekeep.app.core.persistence.drivers.s3.S3RepositoryURIData
 import org.archivekeep.app.core.utils.generics.ExecutionOutcome
 import org.archivekeep.app.core.utils.identifiers.RepositoryURI
+import org.archivekeep.app.ui.components.base.layout.ScrollableColumn
 import org.archivekeep.app.ui.components.designsystem.dialog.DialogButtonContainer
 import org.archivekeep.app.ui.components.designsystem.dialog.DialogInnerContainer
 import org.archivekeep.app.ui.components.designsystem.dialog.DialogOverlayCard
+import org.archivekeep.app.ui.components.designsystem.elements.WarningAlert
 import org.archivekeep.app.ui.components.designsystem.input.PasswordField
 import org.archivekeep.app.ui.components.designsystem.input.TextField
 import org.archivekeep.app.ui.components.feature.dialogs.SimpleActionDialogControlButtons
@@ -164,116 +167,145 @@ class AddRemoteRepositoryDialog : Dialog {
                     }
                     Spacer(Modifier.height(20.dp))
 
-                    when (selectedTab) {
-                        Input.RemoteType.S3 -> {
-                            Text(
-                                "Connection details for S3 bucket:",
-                            )
-                            Spacer(Modifier.height(4.dp))
-                            TextField(
-                                vm.input.s3input.endpoint.value,
-                                onValueChange = { vm.input.s3input.endpoint.value = it },
-                                label = { Text("Endpoint URL") },
-                                placeholder = { Text("Endpoint URL") },
-                                singleLine = true,
-                                enabled = isEditable,
-                                modifier = Modifier.fillMaxWidth(),
-                                keyboardOptions =
-                                    KeyboardOptions(
-                                        capitalization = KeyboardCapitalization.None,
-                                        keyboardType = KeyboardType.Uri,
-                                    ),
-                            )
-                            TextField(
-                                vm.input.s3input.bucket.value,
-                                onValueChange = { vm.input.s3input.bucket.value = it },
-                                label = { Text("Bucket name") },
-                                placeholder = { Text("Bucket name") },
-                                singleLine = true,
-                                enabled = isEditable,
-                                modifier = Modifier.fillMaxWidth(),
-                            )
-                            TextField(
-                                vm.input.s3input.accessKey.value,
-                                onValueChange = { vm.input.s3input.accessKey.value = it },
-                                label = { Text("Access key") },
-                                placeholder = { Text("Access key") },
-                                singleLine = true,
-                                enabled = isEditable,
-                                modifier = Modifier.fillMaxWidth(),
-                            )
-                            PasswordField(
-                                vm.input.s3input.secretKey.value,
-                                onValueChange = { vm.input.s3input.secretKey.value = it },
-                                label = { Text("Secret key") },
-                                placeholder = { Text("Secret key") },
-                                enabled = isEditable,
-                                modifier = Modifier.fillMaxWidth(),
-                            )
-                        }
+                    ScrollableColumn {
+                        when (selectedTab) {
+                            Input.RemoteType.S3 -> {
+                                Text(
+                                    "Connection details for S3 bucket:",
+                                )
+                                Spacer(Modifier.height(4.dp))
+                                TextField(
+                                    vm.input.s3input.endpoint.value,
+                                    onValueChange = { vm.input.s3input.endpoint.value = it },
+                                    label = { Text("Endpoint URL") },
+                                    placeholder = { Text("Endpoint URL") },
+                                    singleLine = true,
+                                    enabled = isEditable,
+                                    modifier = Modifier.fillMaxWidth(),
+                                    keyboardOptions =
+                                        KeyboardOptions(
+                                            capitalization = KeyboardCapitalization.None,
+                                            keyboardType = KeyboardType.Uri,
+                                        ),
+                                )
+                                if (vm.input.s3input.endpoint.value
+                                        .trim()
+                                        .startsWith("http://")
+                                ) {
+                                    Spacer(Modifier.height(8.dp))
+                                    WarningAlert {
+                                        Column {
+                                            Text(
+                                                "Insecure protocol is used for endpoint. " +
+                                                    "This results in plain data being sent over network, that is readable by anyone.",
+                                            )
+                                            Spacer(Modifier.height(8.dp))
+                                            Text("It is strongly recommended to connect to this server using a VPN you absolutely trust.")
+                                        }
+                                    }
+                                }
+                                TextField(
+                                    vm.input.s3input.bucket.value,
+                                    onValueChange = { vm.input.s3input.bucket.value = it },
+                                    label = { Text("Bucket name") },
+                                    placeholder = { Text("Bucket name") },
+                                    singleLine = true,
+                                    enabled = isEditable,
+                                    modifier = Modifier.fillMaxWidth(),
+                                )
+                                TextField(
+                                    vm.input.s3input.accessKey.value,
+                                    onValueChange = { vm.input.s3input.accessKey.value = it },
+                                    label = { Text("Access key") },
+                                    placeholder = { Text("Access key") },
+                                    singleLine = true,
+                                    enabled = isEditable,
+                                    modifier = Modifier.fillMaxWidth(),
+                                )
+                                PasswordField(
+                                    vm.input.s3input.secretKey.value,
+                                    onValueChange = { vm.input.s3input.secretKey.value = it },
+                                    label = { Text("Secret key") },
+                                    placeholder = { Text("Secret key") },
+                                    enabled = isEditable,
+                                    modifier = Modifier.fillMaxWidth(),
+                                )
 
-                        Input.RemoteType.OTHER -> {
-                            val authNeededOrWasNeeded =
-                                error?.cause is RequiresCredentialsException ||
-                                    error?.cause is WrongCredentialsException ||
-                                    basicAuthCredentials != null
-
-                            Text(
-                                "Self-hostable server is work in progress (there's an old discontinued server implementation written in Go)...",
-                            )
-                            Spacer(Modifier.height(4.dp))
-                            TextField(
-                                uriText,
-                                onValueChange = { uriText = it },
-                                label = { Text("Remote repository URL") },
-                                placeholder = { Text("Enter URI of repository to add ...") },
-                                singleLine = true,
-                                enabled = isEditable,
-                                modifier = Modifier.fillMaxWidth(),
-                            )
-                            if (authNeededOrWasNeeded) {
                                 Spacer(Modifier.height(12.dp))
-                                Text("Authentication needed")
-                                OutlinedTextField(
-                                    basicAuthCredentials?.username ?: "",
-                                    onValueChange = {
-                                        basicAuthCredentials =
-                                            BasicAuthCredentials(
-                                                username = it,
-                                                password = basicAuthCredentials?.password ?: "",
-                                            )
-                                    },
-                                    placeholder = {
-                                        Text("Enter username ...")
-                                    },
-                                    singleLine = true,
+                                WarningAlert {
+                                    Column {
+                                        Text(
+                                            "There's no E2E encryption yet. Your data could be accessed be server owner (service provider).",
+                                        )
+                                        Spacer(Modifier.height(8.dp))
+                                        Text("Do not use for sensitive data with servers (service providers) you don't trust.")
+                                    }
+                                }
+                            }
+
+                            Input.RemoteType.OTHER -> {
+                                val authNeededOrWasNeeded =
+                                    error?.cause is RequiresCredentialsException ||
+                                        error?.cause is WrongCredentialsException ||
+                                        basicAuthCredentials != null
+
+                                Text(
+                                    "Self-hostable server is work in progress (there's an old discontinued server implementation written in Go)...",
                                 )
-                                OutlinedTextField(
-                                    basicAuthCredentials?.password ?: "",
-                                    onValueChange = {
-                                        basicAuthCredentials =
-                                            BasicAuthCredentials(
-                                                password = it,
-                                                username = basicAuthCredentials?.username ?: "",
-                                            )
-                                    },
-                                    visualTransformation = PasswordVisualTransformation(),
-                                    placeholder = {
-                                        Text("Enter password ...")
-                                    },
+                                Spacer(Modifier.height(4.dp))
+                                TextField(
+                                    uriText,
+                                    onValueChange = { uriText = it },
+                                    label = { Text("Remote repository URL") },
+                                    placeholder = { Text("Enter URI of repository to add ...") },
                                     singleLine = true,
+                                    enabled = isEditable,
+                                    modifier = Modifier.fillMaxWidth(),
                                 )
+                                if (authNeededOrWasNeeded) {
+                                    Spacer(Modifier.height(12.dp))
+                                    Text("Authentication needed")
+                                    OutlinedTextField(
+                                        basicAuthCredentials?.username ?: "",
+                                        onValueChange = {
+                                            basicAuthCredentials =
+                                                BasicAuthCredentials(
+                                                    username = it,
+                                                    password = basicAuthCredentials?.password ?: "",
+                                                )
+                                        },
+                                        placeholder = {
+                                            Text("Enter username ...")
+                                        },
+                                        singleLine = true,
+                                    )
+                                    OutlinedTextField(
+                                        basicAuthCredentials?.password ?: "",
+                                        onValueChange = {
+                                            basicAuthCredentials =
+                                                BasicAuthCredentials(
+                                                    password = it,
+                                                    username = basicAuthCredentials?.username ?: "",
+                                                )
+                                        },
+                                        visualTransformation = PasswordVisualTransformation(),
+                                        placeholder = {
+                                            Text("Enter password ...")
+                                        },
+                                        singleLine = true,
+                                    )
+                                }
                             }
                         }
-                    }
 
-                    if (error != null) {
-                        AutomaticErrorMessage(error.cause, onResolve = { TODO() })
-                    }
+                        if (error != null) {
+                            AutomaticErrorMessage(error.cause, onResolve = { vm.launchGuard.reset() })
+                        }
 
-                    if (isSuccess) {
-                        Spacer(Modifier.height(12.dp))
-                        Text("Remote repository successfully added")
+                        if (isSuccess) {
+                            Spacer(Modifier.height(12.dp))
+                            Text("Remote repository successfully added")
+                        }
                     }
                 },
                 bottomContent = {
