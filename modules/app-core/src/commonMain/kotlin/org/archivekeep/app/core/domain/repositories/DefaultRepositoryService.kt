@@ -4,6 +4,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.onStart
 import org.archivekeep.app.core.domain.storages.StorageDriver
 import org.archivekeep.app.core.persistence.registry.RegisteredRepository
 import org.archivekeep.app.core.persistence.registry.RegistryDataStore
@@ -53,6 +54,8 @@ class DefaultRepositoryService(
             storageDrivers[repositoryURI.driver]
                 ?: return flowOf(ProtectedLoadableResource.Failed(RuntimeException("Driver ${repositoryURI.driver} not supported")))
 
-        return driver.openRepoFlow(repositoryURI)
+        return driver
+            .openRepoFlow(repositoryURI)
+            .onStart { emit(ProtectedLoadableResource.Loading) }
     }
 }

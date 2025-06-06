@@ -23,7 +23,7 @@ fun <T> Flow<T>.sharedResourceInGlobalScope(): SharedFlow<T> =
 
 fun <T> Flow<T>.shareResourceIn(
     scope: CoroutineScope,
-    started: SharingStarted = SharingStarted.WhileSubscribed(100),
+    started: SharingStarted = SharingStarted.WhileSubscribed(100, 0),
 ): SharedFlow<T> =
     this
         .conflate()

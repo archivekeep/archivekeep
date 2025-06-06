@@ -22,6 +22,7 @@ dependencies {
     testImplementation(libs.junit.jupiter)
 
     testImplementation(libs.s3.mock)
+    testImplementation("org.testcontainers:minio:1.21.1")
     testImplementation(libs.s3.mock.testcontainers)
     testImplementation(libs.testcontainers.junit.jupiter)
 }

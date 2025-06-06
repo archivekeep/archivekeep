@@ -34,11 +34,6 @@ kotlin {
                 implementation(libs.kfswatch)
             }
         }
-        val commonTest by getting {
-            dependencies {
-                implementation(libs.kotlin.test)
-            }
-        }
         val androidMain by getting {
             dependencies {
                 api("androidx.activity:activity-compose:1.7.2")
@@ -53,6 +48,19 @@ kotlin {
                 implementation(libs.oshi.core)
             }
         }
+        val desktopTest by getting {
+            dependencies {
+                implementation(libs.kotlin.test)
+                implementation(libs.kotlinx.coroutines.test)
+                implementation(libs.junit.jupiter)
+
+                implementation(libs.kotest.assertions.core)
+
+                implementation(libs.s3.mock)
+                implementation("org.testcontainers:minio:1.21.1")
+                implementation(libs.testcontainers.junit.jupiter)
+            }
+        }
     }
 }
 
@@ -64,6 +72,10 @@ tasks.withType<ProcessResources> {
             ),
         )
     }
+}
+
+tasks.withType<Test> {
+    useJUnitPlatform()
 }
 
 android {
@@ -83,10 +95,6 @@ android {
         jvmToolchain(17)
     }
 }
-
-// tasks.named<Test>("test") {
-//    useJUnitPlatform()
-// }
 
 // publishing {
 //    publications.named<MavenPublication>("maven") {

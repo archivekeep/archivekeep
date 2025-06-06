@@ -12,7 +12,7 @@ import org.archivekeep.utils.coroutines.shareResourceIn
 class UniqueSharedFlowInstanceManager<T : Any, V>(
     val scope: CoroutineScope,
     val factory: (key: T) -> Flow<V>,
-    val started: SharingStarted = SharingStarted.WhileSubscribed(100),
+    val started: SharingStarted = SharingStarted.WhileSubscribed(100, 0),
 ) {
     private val values: LoadingCache<T, SharedFlow<V>> =
         CacheBuilder

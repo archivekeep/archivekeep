@@ -15,5 +15,5 @@ class S3RepositoryContractTest : RepoContractTest<S3Repository>() {
         S3MockContainer(DockerImageName.parse("adobe/s3mock:4.3.0"))
             .withEnv("initialBuckets", bucketName)
 
-    override fun createNew(): TestRepo<S3Repository> = S3RepositoryTestRepo(s3Mock, bucketName)
+    override fun createNew(): TestRepo<S3Repository> = S3RepositoryTestRepo(s3Mock.httpEndpoint, bucketName)
 }

@@ -30,7 +30,7 @@ import kotlinx.coroutines.CoroutineScope
 import org.archivekeep.app.core.operations.AddRemoteRepositoryUseCase
 import org.archivekeep.app.core.operations.RequiresCredentialsException
 import org.archivekeep.app.core.operations.WrongCredentialsException
-import org.archivekeep.app.core.persistence.drivers.s3.S3RepositoryURIData
+import org.archivekeep.app.core.operations.addS3
 import org.archivekeep.app.core.utils.generics.ExecutionOutcome
 import org.archivekeep.app.core.utils.identifiers.RepositoryURI
 import org.archivekeep.app.ui.components.base.layout.ScrollableColumn
@@ -74,9 +74,11 @@ class AddRemoteRepositoryDialog : Dialog {
             override fun canLaunch(): Boolean = endpoint.value.isNotBlank()
 
             override suspend fun execute(addRemoteRepositoryUseCase: AddRemoteRepositoryUseCase) {
-                addRemoteRepositoryUseCase(
-                    RepositoryURI("s3", S3RepositoryURIData(endpoint.value, bucket.value).serialized()),
-                    BasicAuthCredentials(accessKey.value, secretKey.value),
+                addRemoteRepositoryUseCase.addS3(
+                    endpoint.value,
+                    bucket.value,
+                    accessKey.value,
+                    secretKey.value,
                 )
             }
         }

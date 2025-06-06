@@ -1,16 +1,20 @@
 package org.archivekeep.app.core.persistence.drivers.s3
 
 import aws.sdk.kotlin.runtime.auth.credentials.StaticCredentialsProvider
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CompletableDeferred
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.job
 import org.archivekeep.app.core.domain.repositories.RepoAuthRequest
 import org.archivekeep.app.core.domain.repositories.UnlockOptions
@@ -34,6 +38,7 @@ import java.net.URI
 class S3StorageDriver(
     val scope: CoroutineScope,
     val credentialsStore: CredentialsStore,
+    val ioDispatcher: CoroutineDispatcher = Dispatchers.IO,
 ) : StorageDriver {
     override fun getStorageAccessor(storageURI: StorageURI): StorageConnection =
         StorageConnection(
@@ -44,6 +49,8 @@ class S3StorageDriver(
                 Loadable.Loaded(Storage.ConnectionStatus.ONLINE),
             ).stateIn(scope),
         )
+
+    val credentialsForUnlock = MutableStateFlow(emptyMap<RepositoryURI, BasicAuthCredentials>())
 
     override fun openRepoFlow(uri: RepositoryURI) =
         flow {
@@ -63,7 +70,14 @@ class S3StorageDriver(
                             secretAccessKey = basicAuthCredentials.password
                         },
                     repoData.bucket,
-                )
+                ).also {
+                    credentialsForUnlock.update { map ->
+                        map
+                            .toMutableMap()
+                            .also { it[uri] = basicAuthCredentials }
+                            .toMap()
+                    }
+                }
 
             suspend fun tryAutoOpen(storedCredentials: BasicAuthCredentials?) {
                 if (storedCredentials != null) {
@@ -72,10 +86,15 @@ class S3StorageDriver(
                     successfulOpen.complete(result)
                 }
             }
+
             try {
+                tryAutoOpen(credentialsForUnlock.value[uri])
                 tryAutoOpen(credentialsFlow.firstLoadedOrNullOnErrorOrLocked())
+            } catch (e: CancellationException) {
+                throw e
             } catch (e: Throwable) {
                 println("Auto-open failed: $e")
+                e.printStackTrace()
             }
 
             suspend fun tryOpen(
@@ -104,9 +123,9 @@ class S3StorageDriver(
                         if (it.value != null) {
                             tryAutoOpen(it.value)
                         }
-                    }.launchIn(CoroutineScope(SupervisorJob(coroutineContext.job)))
+                    }.launchIn(CoroutineScope(coroutineContext + SupervisorJob(coroutineContext.job)))
 
                 emit(ProtectedLoadableResource.Loaded(successfulOpen.await()))
             }
-        }.flowOn(Dispatchers.IO)
+        }.flowOn(ioDispatcher)
 }
