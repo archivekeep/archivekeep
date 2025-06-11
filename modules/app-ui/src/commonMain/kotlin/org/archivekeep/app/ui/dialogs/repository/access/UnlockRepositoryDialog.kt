@@ -30,12 +30,13 @@ import org.archivekeep.app.core.domain.repositories.RepositoryInformation
 import org.archivekeep.app.core.domain.repositories.UnlockOptions
 import org.archivekeep.app.core.persistence.credentials.Credentials
 import org.archivekeep.app.core.persistence.credentials.JoseStorage
+import org.archivekeep.app.core.utils.generics.ExecutionOutcome
 import org.archivekeep.app.core.utils.identifiers.RepositoryURI
-import org.archivekeep.app.ui.components.designsystem.dialog.DialogPreviewColumn
 import org.archivekeep.app.ui.components.designsystem.input.CheckboxWithText
 import org.archivekeep.app.ui.components.designsystem.input.PasswordField
 import org.archivekeep.app.ui.components.designsystem.input.TextField
 import org.archivekeep.app.ui.components.feature.dialogs.SimpleActionDialogControlButtons
+import org.archivekeep.app.ui.components.feature.dialogs.SimpleActionDialogDoneButtons
 import org.archivekeep.app.ui.components.feature.dialogs.operations.LaunchableExecutionErrorIfPresent
 import org.archivekeep.app.ui.dialogs.repository.AbstractRepositoryDialog
 import org.archivekeep.app.ui.domain.data.canUnlockFlow
@@ -46,16 +47,14 @@ import org.archivekeep.app.ui.utils.Launchable
 import org.archivekeep.app.ui.utils.appendBoldSpan
 import org.archivekeep.app.ui.utils.asAction
 import org.archivekeep.app.ui.utils.collectAsLoadable
-import org.archivekeep.app.ui.utils.mockLaunchable
 import org.archivekeep.app.ui.utils.simpleLaunchable
 import org.archivekeep.files.repo.remote.grpc.BasicAuthCredentials
 import org.archivekeep.utils.loading.Loadable
-import org.jetbrains.compose.ui.tooling.preview.Preview
 
-class RepositoryUnlockDialog(
+class UnlockRepositoryDialog(
     uri: RepositoryURI,
     val onUnlock: (() -> Unit)? = null,
-) : AbstractRepositoryDialog<RepositoryUnlockDialog.State, RepositoryUnlockDialog.VM>(uri) {
+) : AbstractRepositoryDialog<UnlockRepositoryDialog.State, UnlockRepositoryDialog.VM>(uri) {
     data class State(
         val repositoryInfo: RepositoryInformation,
         val needsUnlock: Boolean,
@@ -155,8 +154,25 @@ class RepositoryUnlockDialog(
 
     @Composable
     override fun ColumnScope.renderContent(state: State) {
+        if (state.launchable.executionOutcome.value is ExecutionOutcome.Success) {
+            Text(
+                buildAnnotatedString {
+                    append("Repository ")
+                    appendBoldSpan(state.repositoryInfo.displayName)
+                    append(" is now unlocked.")
+                },
+            )
+            return
+        }
+
         if (!state.needsUnlock) {
-            Text("Unlocked")
+            Text(
+                buildAnnotatedString {
+                    append("Repository ")
+                    appendBoldSpan(state.repositoryInfo.displayName)
+                    append(" is not locked. No Action needed.")
+                },
+            )
             return
         }
         val walletOperationLaunchers = LocalWalletOperationLaunchers.current
@@ -244,31 +260,14 @@ class RepositoryUnlockDialog(
 
     @Composable
     override fun RowScope.renderButtons(state: State) {
-        SimpleActionDialogControlButtons(
-            "Authenticate",
-            actionState = state.action,
-            onClose = state.onClose,
-        )
-    }
-}
-
-@Composable
-@Preview
-private fun Preview() {
-    DialogPreviewColumn {
-        val dialog =
-            RepositoryUnlockDialog(RepositoryURI.fromFull("grpc://my-nas:24202/archives/1"))
-
-        dialog.renderDialogCard(
-            RepositoryUnlockDialog.State(
-                repositoryInfo = RepositoryInformation(null, "Documents"),
-                needsUnlock = true,
-                canUnlockCredentials = false,
-                launchable = mockLaunchable(false, null),
-                basicAuthCredentialsState = mutableStateOf(null),
-                unlockOptionsState = mutableStateOf(UnlockOptions(rememberSession = false)),
-                onClose = {},
-            ),
-        )
+        if (state.launchable.executionOutcome.value is ExecutionOutcome.Success || !state.needsUnlock) {
+            SimpleActionDialogDoneButtons(onClose = state.onClose)
+        } else {
+            SimpleActionDialogControlButtons(
+                "Authenticate",
+                actionState = state.action,
+                onClose = state.onClose,
+            )
+        }
     }
 }

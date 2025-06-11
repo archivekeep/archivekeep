@@ -1,7 +1,7 @@
 package org.archivekeep.app.ui.domain.wiring
 
 import org.archivekeep.app.ui.dialogs.other.UnsupportedFeatureDialog
-import org.archivekeep.app.ui.dialogs.repository.access.RepositoryUnlockDialog
+import org.archivekeep.app.ui.dialogs.repository.access.UnlockRepositoryDialog
 import org.archivekeep.app.ui.dialogs.repository.management.AssociateRepositoryDialog
 import org.archivekeep.app.ui.dialogs.repository.management.UnassociateRepositoryDialog
 import org.archivekeep.app.ui.dialogs.repository.procedures.addpush.AddAndPushRepoDialog
@@ -20,7 +20,7 @@ fun archiveOperationLaunchersAsDialogs(dialogRenderer: OverlayDialogRenderer) =
         openAssociateRepository = dialogRenderer.openFn(::AssociateRepositoryDialog),
         openUnassociateRepository = dialogRenderer.openFn(::UnassociateRepositoryDialog),
         openForgetRepository = dialogRenderer.openFn(::ForgetRepositoryDialog),
-        unlockRepository = dialogRenderer.openFn(::RepositoryUnlockDialog),
+        unlockRepository = dialogRenderer.openFn(::UnlockRepositoryDialog),
         pushRepoToAll = dialogRenderer.openFn(::PushRepoDialog),
         openAddFileSystemRepository = dialogRenderer.openFn(::AddFileSystemRepositoryDialog),
         openAddRemoteRepository = dialogRenderer.openFn(::AddRemoteRepositoryDialog),

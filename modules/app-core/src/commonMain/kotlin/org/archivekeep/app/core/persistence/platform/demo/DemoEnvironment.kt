@@ -24,9 +24,12 @@ import org.archivekeep.app.core.domain.storages.StorageInformation
 import org.archivekeep.app.core.domain.storages.StorageNamedReference
 import org.archivekeep.app.core.domain.storages.StorageRepository
 import org.archivekeep.app.core.persistence.credentials.Credentials
+import org.archivekeep.app.core.persistence.credentials.CredentialsInProtectedDataStore
+import org.archivekeep.app.core.persistence.credentials.CredentialsStore
 import org.archivekeep.app.core.persistence.credentials.JoseStorage
 import org.archivekeep.app.core.persistence.drivers.filesystem.FileStores
 import org.archivekeep.app.core.persistence.drivers.filesystem.MountedFileSystem
+import org.archivekeep.app.core.persistence.drivers.s3.S3StorageDriver
 import org.archivekeep.app.core.persistence.platform.Environment
 import org.archivekeep.app.core.persistence.registry.RegisteredRepository
 import org.archivekeep.app.core.persistence.registry.RegisteredStorage
@@ -101,6 +104,8 @@ class DemoEnvironment(
             Json.serializersModule.serializer(),
             defaultValueProducer = { Credentials(emptySet()) },
         )
+
+    val credentialsStore: CredentialsStore = CredentialsInProtectedDataStore(walletDataStore)
 
     val mediaMapped =
         MutableStateFlow(
@@ -317,6 +322,11 @@ class DemoEnvironment(
                             }
                         }
                 },
+            "s3" to
+                S3StorageDriver(
+                    scope = scope,
+                    credentialsStore = credentialsStore,
+                ),
         )
 
     data class DemoPhysicalMedium(

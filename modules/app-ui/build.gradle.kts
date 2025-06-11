@@ -61,6 +61,10 @@ kotlin {
                 implementation(compose.desktop.uiTestJUnit4)
 
                 implementation(libs.kotest.assertions.core)
+
+                implementation(libs.s3.mock)
+                implementation("org.testcontainers:minio:1.21.1")
+                implementation(libs.s3.mock.testcontainers)
             }
         }
     }
