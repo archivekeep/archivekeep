@@ -34,11 +34,9 @@ import org.archivekeep.app.core.domain.repositories.RepositoryService
 import org.archivekeep.app.core.domain.storages.KnownStorage
 import org.archivekeep.app.core.operations.AssociateRepositoryOperation
 import org.archivekeep.app.core.operations.AssociateRepositoryOperation.Target
-import org.archivekeep.app.core.persistence.platform.demo.DocumentsInLaptopSSD
 import org.archivekeep.app.core.utils.generics.ExecutionOutcome
 import org.archivekeep.app.core.utils.identifiers.RepositoryURI
 import org.archivekeep.app.ui.components.base.layout.ScrollableColumn
-import org.archivekeep.app.ui.components.designsystem.dialog.DialogPreviewColumn
 import org.archivekeep.app.ui.components.feature.dialogs.SimpleActionDialogControlButtons
 import org.archivekeep.app.ui.components.feature.dialogs.operations.LaunchableExecutionErrorIfPresent
 import org.archivekeep.app.ui.dialogs.repository.AbstractRepositoryDialog
@@ -51,12 +49,10 @@ import org.archivekeep.app.ui.domain.wiring.OperationFactory
 import org.archivekeep.app.ui.utils.Launchable
 import org.archivekeep.app.ui.utils.asAction
 import org.archivekeep.app.ui.utils.collectLoadableFlow
-import org.archivekeep.app.ui.utils.mockLaunchable
 import org.archivekeep.app.ui.utils.simpleLaunchable
 import org.archivekeep.files.RepositoryAssociationGroupId
 import org.archivekeep.utils.loading.Loadable
 import org.archivekeep.utils.loading.mapLoadedData
-import org.jetbrains.compose.ui.tooling.preview.Preview
 
 class AssociateRepositoryDialog(
     uri: RepositoryURI,
@@ -324,26 +320,6 @@ class AssociateRepositoryDialog(
             "Associate",
             actionState = state.action,
             onClose = state.onClose,
-        )
-    }
-}
-
-@Composable
-@Preview
-private fun Preview() {
-    DialogPreviewColumn {
-        val dialog = AssociateRepositoryDialog(DocumentsInLaptopSSD.uri)
-
-        dialog.renderDialogCard(
-            VM.State(
-                emptyList(),
-                null,
-                KnownStorage(DocumentsInLaptopSSD.storage.uri, null, emptyList()),
-                RepositoryInformation(null, "A Repo"),
-                mutableStateOf(null),
-                launchable = mockLaunchable(false, null),
-                onClose = {},
-            ),
         )
     }
 }

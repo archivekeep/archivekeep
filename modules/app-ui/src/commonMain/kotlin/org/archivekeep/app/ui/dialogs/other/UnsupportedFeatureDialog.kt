@@ -7,45 +7,26 @@ import org.archivekeep.app.ui.components.designsystem.dialog.DialogButtonContain
 import org.archivekeep.app.ui.components.designsystem.dialog.DialogCardWithDialogInnerContainer
 import org.archivekeep.app.ui.components.designsystem.dialog.DialogDismissButton
 import org.archivekeep.app.ui.components.designsystem.dialog.DialogOverlay
-import org.archivekeep.app.ui.components.designsystem.dialog.DialogPreviewColumn
 import org.archivekeep.app.ui.dialogs.Dialog
-import org.jetbrains.compose.ui.tooling.preview.Preview
 
 class UnsupportedFeatureDialog : Dialog {
     @Composable
-    fun renderDialogCard(onClose: () -> Unit) {
-        DialogCardWithDialogInnerContainer(
-            title = buildAnnotatedString { append("Feature not implemented") },
-            content = {
-                Text("This feature is not implemented")
-            },
-            bottomContent = {
-                DialogButtonContainer {
-                    DialogDismissButton(
-                        "Close",
-                        onClick = onClose,
-                    )
-                }
-            },
-        )
-    }
-
-    @Composable
     override fun render(onClose: () -> Unit) {
         DialogOverlay(onDismissRequest = onClose) {
-            renderDialogCard(onClose)
+            DialogCardWithDialogInnerContainer(
+                title = buildAnnotatedString { append("Feature not implemented") },
+                content = {
+                    Text("This feature is not implemented")
+                },
+                bottomContent = {
+                    DialogButtonContainer {
+                        DialogDismissButton(
+                            "Close",
+                            onClick = onClose,
+                        )
+                    }
+                },
+            )
         }
-    }
-}
-
-@Preview
-@Composable
-private fun preview1() {
-    DialogPreviewColumn {
-        val dialog = UnsupportedFeatureDialog()
-
-        dialog.renderDialogCard(
-            onClose = {},
-        )
     }
 }

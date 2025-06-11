@@ -19,14 +19,11 @@ kotlin {
                 implementation(compose.foundation)
 
                 implementation(compose.components.resources)
-                implementation(compose.components.uiToolingPreview)
                 implementation(compose.runtime)
 
                 implementation(compose.material)
                 implementation(compose.material3)
                 implementation(compose.materialIconsExtended)
-
-                implementation(compose.preview)
 
                 implementation(libs.kotlinx.serialization.json)
 
@@ -55,7 +52,6 @@ kotlin {
         val desktopTest by getting {
             dependencies {
                 implementation(compose.desktop.currentOs)
-                implementation(compose.preview)
 
                 implementation(libs.kotlin.test)
                 implementation(compose.desktop.uiTestJUnit4)

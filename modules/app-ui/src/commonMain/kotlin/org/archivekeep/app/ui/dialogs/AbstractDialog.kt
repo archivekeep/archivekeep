@@ -40,22 +40,6 @@ abstract class AbstractDialog<T_State : AbstractDialog.IState, T_VM : AbstractDi
     protected abstract fun RowScope.renderButtons(state: T_State)
 
     @Composable
-    fun renderDialogCard(state: T_State) {
-        DialogCardWithDialogInnerContainer(
-            state.title,
-            widthModifier = state.dialogWidthModifier(),
-            content = {
-                renderContent(state)
-            },
-            bottomContent = {
-                DialogButtonContainer {
-                    renderButtons(state)
-                }
-            },
-        )
-    }
-
-    @Composable
     override fun render(onClose: () -> Unit) {
         val coroutineScope = rememberCoroutineScope()
 
@@ -65,7 +49,18 @@ abstract class AbstractDialog<T_State : AbstractDialog.IState, T_VM : AbstractDi
             rememberState(vm),
             onDismissRequest = vm::onClose,
         ) { state ->
-            renderDialogCard(state)
+            DialogCardWithDialogInnerContainer(
+                state.title,
+                widthModifier = state.dialogWidthModifier(),
+                content = {
+                    renderContent(state)
+                },
+                bottomContent = {
+                    DialogButtonContainer {
+                        renderButtons(state)
+                    }
+                },
+            )
         }
     }
 }

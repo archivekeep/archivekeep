@@ -10,7 +10,6 @@ import kotlinx.coroutines.CoroutineScope
 import org.archivekeep.app.core.domain.storages.Storage
 import org.archivekeep.app.core.utils.identifiers.StorageURI
 import org.archivekeep.app.ui.components.designsystem.dialog.DialogButtonContainer
-import org.archivekeep.app.ui.components.designsystem.dialog.DialogCard
 import org.archivekeep.app.ui.components.designsystem.dialog.DialogInnerContainer
 import org.archivekeep.app.ui.components.designsystem.dialog.DialogOverlayCard
 import org.archivekeep.app.ui.components.feature.LoadableGuard
@@ -45,31 +44,6 @@ abstract class AbstractStorageDialog<T_State : AbstractStorageDialog.IState, T_V
     )
 
     @Composable
-    fun renderDialogContents(
-        state: T_State,
-        onClose: () -> Unit,
-    ) {
-        DialogInnerContainer(
-            remember {
-                buildAnnotatedString {
-                    append(state.title)
-                }
-            },
-            content = { renderContent(state) },
-            bottomContent = {
-                DialogButtonContainer {
-                    renderButtons(onClose, state)
-                }
-            },
-        )
-    }
-
-    @Composable
-    internal fun renderDialogCardForPreview(state: T_State) {
-        DialogCard { renderDialogContents(state, onClose = {}) }
-    }
-
-    @Composable
     override fun render(onClose: () -> Unit) {
         val storageService = LocalStorageService.current
 
@@ -82,7 +56,19 @@ abstract class AbstractStorageDialog<T_State : AbstractStorageDialog.IState, T_V
             val vm = rememberVM(rememberCoroutineScope(), storage, onClose)
 
             LoadableGuard(rememberState(vm)) { state ->
-                renderDialogContents(state, onClose)
+                DialogInnerContainer(
+                    remember {
+                        buildAnnotatedString {
+                            append(state.title)
+                        }
+                    },
+                    content = { renderContent(state) },
+                    bottomContent = {
+                        DialogButtonContainer {
+                            renderButtons(onClose, state)
+                        }
+                    },
+                )
             }
         }
     }

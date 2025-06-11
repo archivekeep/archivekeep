@@ -15,10 +15,8 @@ import kotlinx.coroutines.CoroutineScope
 import org.archivekeep.app.core.domain.repositories.Repository
 import org.archivekeep.app.core.domain.storages.StorageRepository
 import org.archivekeep.app.core.domain.storages.StorageService
-import org.archivekeep.app.core.persistence.platform.demo.DocumentsInHDDA
 import org.archivekeep.app.core.persistence.registry.RegistryDataStore
 import org.archivekeep.app.core.utils.identifiers.RepositoryURI
-import org.archivekeep.app.ui.components.designsystem.dialog.DialogPreviewColumn
 import org.archivekeep.app.ui.components.feature.dialogs.SimpleActionDialogControlButtons
 import org.archivekeep.app.ui.components.feature.dialogs.operations.LaunchableExecutionErrorIfPresent
 import org.archivekeep.app.ui.dialogs.repository.AbstractRepositoryDialog
@@ -28,11 +26,9 @@ import org.archivekeep.app.ui.utils.Launchable
 import org.archivekeep.app.ui.utils.appendBoldSpan
 import org.archivekeep.app.ui.utils.asTrivialAction
 import org.archivekeep.app.ui.utils.collectLoadableFlow
-import org.archivekeep.app.ui.utils.mockLaunchable
 import org.archivekeep.app.ui.utils.simpleLaunchable
 import org.archivekeep.utils.loading.Loadable
 import org.archivekeep.utils.loading.mapToLoadable
-import org.jetbrains.compose.ui.tooling.preview.Preview
 
 class ForgetRepositoryDialog(
     uri: RepositoryURI,
@@ -124,22 +120,6 @@ class ForgetRepositoryDialog(
             "Forget",
             actionState = state.action,
             onClose = state.onClose,
-        )
-    }
-}
-
-@Preview
-@Composable
-private fun preview1() {
-    DialogPreviewColumn {
-        val dialog = ForgetRepositoryDialog(DocumentsInHDDA.uri)
-
-        dialog.renderDialogCard(
-            ForgetRepositoryDialog.State(
-                DocumentsInHDDA.storageRepository,
-                mockLaunchable(false, null),
-                onClose = {},
-            ),
         )
     }
 }

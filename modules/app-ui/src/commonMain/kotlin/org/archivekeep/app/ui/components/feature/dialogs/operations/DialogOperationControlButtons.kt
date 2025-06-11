@@ -1,27 +1,15 @@
 package org.archivekeep.app.ui.components.feature.dialogs.operations
 
-import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.widthIn
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
-import org.archivekeep.app.ui.components.designsystem.dialog.DialogButtonContainer
 import org.archivekeep.app.ui.components.designsystem.dialog.DialogButtonsStatusText
-import org.archivekeep.app.ui.components.designsystem.dialog.DialogContentButtonsSpacing
 import org.archivekeep.app.ui.components.designsystem.dialog.DialogDismissButton
 import org.archivekeep.app.ui.components.designsystem.dialog.DialogPrimaryButton
 import org.archivekeep.app.ui.components.designsystem.dialog.DialogSecondaryButton
-import org.archivekeep.app.ui.components.designsystem.theme.AppTheme
-import org.jetbrains.compose.ui.tooling.preview.Preview
 
 @Composable
 fun (RowScope).DialogOperationControlButtons(
@@ -83,85 +71,6 @@ fun (RowScope).DialogOperationControlButtons(
                 "Dismiss",
                 onClick = state.onClose,
             )
-        }
-    }
-}
-
-@Preview
-@Composable
-private fun preview() {
-    AppTheme {
-        Box(
-            modifier =
-                Modifier
-                    .fillMaxSize()
-                    .background(Color.Black.copy(alpha = 0.6f)),
-            contentAlignment = Alignment.TopCenter,
-        ) {
-            Column(
-                Modifier
-                    .padding(24.dp)
-                    .widthIn(max = 480.dp)
-                    .background(Color.White)
-                    .padding(
-                        start = DialogContentButtonsSpacing + 8.dp,
-                        end = DialogContentButtonsSpacing + 8.dp,
-                        top = 12.dp,
-                        bottom = DialogContentButtonsSpacing + 12.dp,
-                    ),
-            ) {
-                @Composable
-                fun render(controlState: DialogOperationControlState) {
-                    DialogButtonContainer {
-                        DialogOperationControlButtons(controlState)
-                    }
-                }
-
-                @Composable
-                fun previewDivider() {
-                    HorizontalDivider(Modifier.padding(top = DialogContentButtonsSpacing))
-                }
-
-                render(
-                    DialogOperationControlState.NotRunning(
-                        onLaunch = {},
-                        onClose = {},
-                        canLaunch = false,
-                    ),
-                )
-                previewDivider()
-                render(
-                    DialogOperationControlState.NotRunning(
-                        onLaunch = {},
-                        onClose = {},
-                        canLaunch = true,
-                    ),
-                )
-                previewDivider()
-                render(
-                    DialogOperationControlState.Running(onCancel = null, onHide = null),
-                )
-                previewDivider()
-                render(
-                    DialogOperationControlState.Running(onCancel = {}, onHide = null),
-                )
-                previewDivider()
-                render(
-                    DialogOperationControlState.Running(onCancel = null, onHide = {}),
-                )
-                previewDivider()
-                render(
-                    DialogOperationControlState.Running(onCancel = {}, onHide = {}),
-                )
-                previewDivider()
-                render(
-                    DialogOperationControlState.Completed(onClose = {}),
-                )
-                previewDivider()
-                render(
-                    DialogOperationControlState.Completed(outcome = "Cancelled", onClose = {}),
-                )
-            }
         }
     }
 }

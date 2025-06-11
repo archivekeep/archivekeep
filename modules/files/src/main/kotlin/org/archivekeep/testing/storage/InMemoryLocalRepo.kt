@@ -32,13 +32,13 @@ open class InMemoryLocalRepo(
     }
 
     override suspend fun indexedFilenames(): List<String> =
-        this.contents.keys
+        (this.contents.keys + this.missingContentsFlow.value.keys)
             .toList()
             .sorted()
 
     override suspend fun verifyFileExists(path: String): Boolean = contents.containsKey(path)
 
-    override suspend fun fileChecksum(path: String): String = (contents[path] ?: throw FileDoesntExist(path)).sha256()
+    override suspend fun fileChecksum(path: String): String = (contents[path] ?: missingContentsFlow.value[path] ?: throw FileDoesntExist(path)).sha256()
 
     override suspend fun computeFileChecksum(path: Path): String =
         (

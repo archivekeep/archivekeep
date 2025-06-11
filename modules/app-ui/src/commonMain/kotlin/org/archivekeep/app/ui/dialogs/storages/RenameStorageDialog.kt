@@ -15,12 +15,8 @@ import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.CoroutineScope
 import org.archivekeep.app.core.domain.storages.KnownStorage
 import org.archivekeep.app.core.domain.storages.Storage
-import org.archivekeep.app.core.persistence.platform.demo.asKnownRegisteredStorage
-import org.archivekeep.app.core.persistence.platform.demo.asKnownStorage
-import org.archivekeep.app.core.persistence.platform.demo.hddA
 import org.archivekeep.app.core.persistence.registry.RegistryDataStore
 import org.archivekeep.app.core.utils.identifiers.StorageURI
-import org.archivekeep.app.ui.components.designsystem.dialog.DialogPreviewColumn
 import org.archivekeep.app.ui.components.designsystem.input.TextField
 import org.archivekeep.app.ui.components.feature.dialogs.SimpleActionDialogControlButtons
 import org.archivekeep.app.ui.components.feature.dialogs.operations.LaunchableExecutionErrorIfPresent
@@ -29,11 +25,9 @@ import org.archivekeep.app.ui.utils.Launchable
 import org.archivekeep.app.ui.utils.appendBoldSpan
 import org.archivekeep.app.ui.utils.asAction
 import org.archivekeep.app.ui.utils.collectLoadableFlow
-import org.archivekeep.app.ui.utils.mockLaunchable
 import org.archivekeep.app.ui.utils.simpleLaunchable
 import org.archivekeep.utils.loading.Loadable
 import org.archivekeep.utils.loading.mapLoadedData
-import org.jetbrains.compose.ui.tooling.preview.Preview
 
 class RenameStorageDialog(
     uri: StorageURI,
@@ -149,36 +143,6 @@ class RenameStorageDialog(
             "Submit",
             actionState = state.action,
             onClose = onClose,
-        )
-    }
-}
-
-@Preview
-@Composable
-private fun preview1() {
-    DialogPreviewColumn {
-        val dialog = RenameStorageDialog(hddA.uri)
-
-        dialog.renderDialogCardForPreview(
-            RenameStorageDialog.State(
-                hddA.asKnownStorage(),
-                mockLaunchable(false, null),
-            ),
-        )
-    }
-}
-
-@Preview
-@Composable
-private fun preview2() {
-    DialogPreviewColumn {
-        val dialog = RenameStorageDialog(hddA.uri)
-
-        dialog.renderDialogCardForPreview(
-            RenameStorageDialog.State(
-                hddA.asKnownRegisteredStorage(),
-                mockLaunchable(false, null),
-            ),
         )
     }
 }

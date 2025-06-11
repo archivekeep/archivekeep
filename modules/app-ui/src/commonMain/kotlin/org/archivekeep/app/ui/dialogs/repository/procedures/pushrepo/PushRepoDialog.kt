@@ -8,7 +8,6 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.AnnotatedString
@@ -16,11 +15,9 @@ import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.CoroutineScope
 import org.archivekeep.app.core.domain.repositories.Repository
-import org.archivekeep.app.core.persistence.platform.demo.DocumentsInHDDA
 import org.archivekeep.app.core.utils.identifiers.RepositoryURI
 import org.archivekeep.app.ui.components.base.layout.SplitRow
 import org.archivekeep.app.ui.components.designsystem.dialog.DialogDismissButton
-import org.archivekeep.app.ui.components.designsystem.dialog.DialogPreviewColumn
 import org.archivekeep.app.ui.components.designsystem.dialog.DialogPrimaryButton
 import org.archivekeep.app.ui.components.designsystem.dialog.LabelText
 import org.archivekeep.app.ui.components.designsystem.sections.SectionCardItemStateText
@@ -34,7 +31,6 @@ import org.archivekeep.app.ui.utils.collectLoadableFlow
 import org.archivekeep.files.procedures.sync.RelocationSyncMode
 import org.archivekeep.utils.loading.Loadable
 import org.archivekeep.utils.loading.mapToLoadable
-import org.jetbrains.compose.ui.tooling.preview.Preview
 
 class PushRepoDialog(
     uri: RepositoryURI,
@@ -130,27 +126,6 @@ class PushRepoDialog(
             "Dismiss",
             onClick = state.onClose,
             enabled = true,
-        )
-    }
-}
-
-@Preview
-@Composable
-private fun preview1() {
-    DialogPreviewColumn {
-        val dialog =
-            PushRepoDialog(
-                DocumentsInHDDA.uri,
-            )
-
-        dialog.renderDialogCard(
-            PushRepoDialog.State(
-                DocumentsInHDDA.displayName,
-                mutableStateOf(RelocationSyncMode.Move(false, false)),
-                mutableStateOf(emptyList()),
-                startAllSync = {},
-                onClose = {},
-            ),
         )
     }
 }

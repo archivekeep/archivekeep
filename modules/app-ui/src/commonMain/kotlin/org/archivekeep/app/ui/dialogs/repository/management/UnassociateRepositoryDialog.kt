@@ -14,9 +14,7 @@ import org.archivekeep.app.core.domain.repositories.Repository
 import org.archivekeep.app.core.domain.repositories.RepositoryInformation
 import org.archivekeep.app.core.domain.repositories.RepositoryService
 import org.archivekeep.app.core.domain.storages.KnownStorage
-import org.archivekeep.app.core.persistence.platform.demo.DocumentsInLaptopSSD
 import org.archivekeep.app.core.utils.identifiers.RepositoryURI
-import org.archivekeep.app.ui.components.designsystem.dialog.DialogPreviewColumn
 import org.archivekeep.app.ui.components.feature.dialogs.SimpleActionDialogControlButtons
 import org.archivekeep.app.ui.components.feature.dialogs.operations.LaunchableExecutionErrorIfPresent
 import org.archivekeep.app.ui.dialogs.repository.AbstractRepositoryDialog
@@ -26,11 +24,9 @@ import org.archivekeep.app.ui.utils.Launchable
 import org.archivekeep.app.ui.utils.appendBoldSpan
 import org.archivekeep.app.ui.utils.asTrivialAction
 import org.archivekeep.app.ui.utils.collectLoadableFlow
-import org.archivekeep.app.ui.utils.mockLaunchable
 import org.archivekeep.app.ui.utils.simpleLaunchable
 import org.archivekeep.utils.loading.Loadable
 import org.archivekeep.utils.loading.mapLoadedData
-import org.jetbrains.compose.ui.tooling.preview.Preview
 
 class UnassociateRepositoryDialog(
     uri: RepositoryURI,
@@ -140,23 +136,6 @@ class UnassociateRepositoryDialog(
             "Unassociate",
             actionState = state.action,
             onClose = state.onClose,
-        )
-    }
-}
-
-@Composable
-@Preview
-private fun Preview() {
-    DialogPreviewColumn {
-        val dialog = UnassociateRepositoryDialog(DocumentsInLaptopSSD.uri)
-
-        dialog.renderDialogCard(
-            UnassociateRepositoryDialog.State(
-                KnownStorage(DocumentsInLaptopSSD.storage.uri, null, emptyList()),
-                RepositoryInformation(null, "A Repo"),
-                launchable = mockLaunchable(false, null),
-                onClose = {},
-            ),
         )
     }
 }

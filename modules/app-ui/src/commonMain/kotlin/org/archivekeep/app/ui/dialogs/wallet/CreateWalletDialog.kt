@@ -13,7 +13,6 @@ import androidx.compose.ui.text.buildAnnotatedString
 import kotlinx.coroutines.CoroutineScope
 import org.archivekeep.app.core.persistence.credentials.Credentials
 import org.archivekeep.app.core.persistence.credentials.JoseStorage
-import org.archivekeep.app.ui.components.designsystem.dialog.DialogPreviewColumn
 import org.archivekeep.app.ui.components.designsystem.input.PasswordField
 import org.archivekeep.app.ui.components.feature.dialogs.SimpleActionDialogControlButtons
 import org.archivekeep.app.ui.components.feature.dialogs.operations.LaunchableExecutionErrorIfPresent
@@ -21,10 +20,8 @@ import org.archivekeep.app.ui.dialogs.AbstractDialog
 import org.archivekeep.app.ui.domain.wiring.LocalWalletDataStore
 import org.archivekeep.app.ui.utils.Launchable
 import org.archivekeep.app.ui.utils.asAction
-import org.archivekeep.app.ui.utils.mockLaunchable
 import org.archivekeep.app.ui.utils.simpleLaunchable
 import org.archivekeep.utils.loading.Loadable
-import org.jetbrains.compose.ui.tooling.preview.Preview
 
 class CreateWalletDialog : AbstractDialog<CreateWalletDialog.State, CreateWalletDialog.VM>() {
     class VM(
@@ -120,71 +117,6 @@ class CreateWalletDialog : AbstractDialog<CreateWalletDialog.State, CreateWallet
             "Authenticate",
             actionState = state.action.value,
             onClose = state.onClose,
-        )
-    }
-}
-
-@Preview
-@Composable
-private fun preview1() {
-    DialogPreviewColumn {
-        val dialog = CreateWalletDialog()
-
-        dialog.renderDialogCard(
-            CreateWalletDialog.State(
-                mockLaunchable(false, null),
-                onClose = {},
-            ),
-        )
-    }
-}
-
-@Preview
-@Composable
-private fun preview2() {
-    DialogPreviewColumn {
-        val dialog = CreateWalletDialog()
-
-        dialog.renderDialogCard(
-            CreateWalletDialog.State(
-                mockLaunchable(false, null),
-                onClose = {},
-                passwordState = mutableStateOf("The first password"),
-            ),
-        )
-    }
-}
-
-@Preview
-@Composable
-private fun preview3() {
-    DialogPreviewColumn {
-        val dialog = CreateWalletDialog()
-
-        dialog.renderDialogCard(
-            CreateWalletDialog.State(
-                mockLaunchable(false, null),
-                onClose = {},
-                passwordState = mutableStateOf("The first password"),
-                passwordState2 = mutableStateOf("The first"),
-            ),
-        )
-    }
-}
-
-@Preview
-@Composable
-private fun preview4() {
-    DialogPreviewColumn {
-        val dialog = CreateWalletDialog()
-
-        dialog.renderDialogCard(
-            CreateWalletDialog.State(
-                mockLaunchable(false, null),
-                onClose = {},
-                passwordState = mutableStateOf("The same password"),
-                passwordState2 = mutableStateOf("The same password"),
-            ),
         )
     }
 }

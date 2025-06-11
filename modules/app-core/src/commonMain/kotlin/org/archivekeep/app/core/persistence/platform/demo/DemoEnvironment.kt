@@ -129,6 +129,14 @@ class DemoEnvironment(
                 },
         )
 
+    val onlineMapped =
+        onlineStoragesData
+            .associate {
+                val repositories = it.repositories.map { r -> r.inStorage(it.reference) }
+
+                it.id to repositories
+            }
+
     override val registry =
         object : RegistryDataStore {
             override val registeredRepositories: MutableStateFlow<Set<RegisteredRepository>> =
@@ -145,7 +153,19 @@ class DemoEnvironment(
 
                                 a
                             }
-                        }.toSet(),
+                        }.toSet() +
+                        onlineMapped
+                            .flatMap { (_, e) ->
+                                e.map { repo ->
+                                    val a =
+                                        RegisteredRepository(
+                                            uri = repo.uri,
+                                            label = repo.displayName,
+                                        )
+
+                                    a
+                                }
+                            }.toSet(),
                 )
 
             override val registeredStorages: SharedFlow<Loadable<Set<RegisteredStorage>>> =
@@ -156,7 +176,15 @@ class DemoEnvironment(
                                 val (storage, _) = pair
 
                                 storage.registeredStorage
-                            }.toSet()
+                            }.toSet() +
+                            onlineStoragesData
+                                .map {
+                                    RegisteredStorage(
+                                        uri = it.uri,
+                                        label = it.displayName,
+                                        isLocal = false,
+                                    )
+                                }.toSet()
                     }.mapToLoadable()
                     .stateIn(scope)
 
@@ -185,14 +213,6 @@ class DemoEnvironment(
                 }
             }
         }
-
-    val onlineMapped =
-        onlineStoragesData
-            .associate {
-                val repositories = it.repositories.map { r -> r.inStorage(it.reference) }
-
-                it.id to repositories
-            }
 
     fun repo(uri: RepositoryURI): MockedRepository? {
         mediaMapped
@@ -401,6 +421,7 @@ class DemoEnvironment(
                     InMemoryLocalRepo(
                         initialContents = fixture.contents.mapValues { (_, v) -> v.toByteArray() },
                         initialUnindexedContents = fixture.uncommittedContents.mapValues { (_, v) -> v.toByteArray() },
+                        initialMissingContents = fixture.missingContents.mapValues { (_, v) -> v.toByteArray() },
                         metadata = metadata,
                     )
                 },
@@ -409,6 +430,11 @@ class DemoEnvironment(
         fun withContents(modifications: FixtureRepoBuilder.() -> Unit): DemoRepository =
             this.copy(
                 contentsFixture = contentsFixture.derive(modifications),
+            )
+
+        fun withNewContents(modifications: FixtureRepoBuilder.() -> Unit): DemoRepository =
+            this.copy(
+                contentsFixture = FixtureRepoBuilder().also(modifications).build(),
             )
     }
 

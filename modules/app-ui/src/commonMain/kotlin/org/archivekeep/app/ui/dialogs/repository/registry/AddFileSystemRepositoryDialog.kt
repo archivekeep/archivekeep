@@ -34,7 +34,6 @@ import org.archivekeep.app.ui.components.designsystem.dialog.DialogFilePicker
 import org.archivekeep.app.ui.components.designsystem.dialog.DialogInnerContainer
 import org.archivekeep.app.ui.components.designsystem.dialog.DialogInputLabel
 import org.archivekeep.app.ui.components.designsystem.dialog.DialogOverlay
-import org.archivekeep.app.ui.components.designsystem.dialog.DialogPreviewColumn
 import org.archivekeep.app.ui.components.designsystem.input.CheckboxWithText
 import org.archivekeep.app.ui.components.feature.dialogs.SimpleActionDialogControlButtons
 import org.archivekeep.app.ui.components.feature.dialogs.SimpleActionDialogDoneButtons
@@ -44,7 +43,6 @@ import org.archivekeep.app.ui.domain.wiring.LocalOperationFactory
 import org.archivekeep.app.ui.domain.wiring.OperationFactory
 import org.archivekeep.app.ui.utils.filesystem.LocalFilesystemDirectoryPicker
 import org.archivekeep.app.ui.utils.filesystem.PickResult
-import org.jetbrains.compose.ui.tooling.preview.Preview
 
 class AddFileSystemRepositoryDialog(
     val intendedStorageType: FileSystemStorageType?,
@@ -379,148 +377,5 @@ private fun AddStatus(addStatus: AddStatus?) {
 private fun ProgressText(text: String?) {
     if (text != null) {
         Text(text, modifier = Modifier.padding(top = 16.dp))
-    }
-}
-
-@Composable
-@Preview
-private fun AddRepositoryDialogPreview1() {
-    DialogPreviewColumn {
-        AddRepositoryDialogContents(
-            null,
-            PlatformSpecificPermissionFulfilment.IsFine,
-            null,
-            onTriggerChange = {},
-            markConfirmed = false,
-            setMarkConfirmed = {},
-            preparationStatus = null,
-            initStatus = null,
-            addStatus = null,
-            onClose = {},
-        )
-        AddRepositoryDialogContents(
-            null,
-            PlatformSpecificPermissionFulfilment.IsFine,
-            PickResult.Success("/home/you/Archive/PersonalStuff"),
-            onTriggerChange = {},
-            markConfirmed = false,
-            setMarkConfirmed = {},
-            preparationStatus = PreparationStatus.Preparing,
-            initStatus = null,
-            addStatus = null,
-            onClose = {},
-        )
-    }
-}
-
-@Composable
-@Preview
-private fun AddRepositoryDialogPreview2() {
-    DialogPreviewColumn {
-        AddRepositoryDialogContents(
-            null,
-            PlatformSpecificPermissionFulfilment.IsFine,
-            PickResult.Success("/home/you/Archive/PersonalStuff"),
-            onTriggerChange = {},
-            markConfirmed = false,
-            setMarkConfirmed = {},
-            preparationStatus = PreparationStatus.ReadyForAdd(startAddExecution = {}, StorageMarking.ALRIGHT),
-            initStatus = null,
-            addStatus = null,
-            onClose = {},
-        )
-        AddRepositoryDialogContents(
-            null,
-            PlatformSpecificPermissionFulfilment.IsFine,
-            PickResult.Success("/home/you/Archive/PersonalStuff"),
-            onTriggerChange = {},
-            markConfirmed = false,
-            setMarkConfirmed = {},
-            preparationStatus = PreparationStatus.ReadyForInit(startInit = {}, StorageMarking.ALRIGHT),
-            initStatus = null,
-            addStatus = null,
-            onClose = {},
-        )
-    }
-}
-
-@Composable
-@Preview
-private fun AddRepositoryDialogPreview3() {
-    DialogPreviewColumn {
-        AddRepositoryDialogContents(
-            null,
-            PlatformSpecificPermissionFulfilment.IsFine,
-            PickResult.Success("/home/you/Archive/PersonalStuff"),
-            onTriggerChange = {},
-            markConfirmed = false,
-            setMarkConfirmed = {},
-            preparationStatus = PreparationStatus.ReadyForAdd(startAddExecution = {}, StorageMarking.ALRIGHT),
-            initStatus = null,
-            addStatus = AddStatus.Adding,
-            onClose = {},
-        )
-        AddRepositoryDialogContents(
-            null,
-            PlatformSpecificPermissionFulfilment.IsFine,
-            PickResult.Success("/home/you/Archive/PersonalStuff"),
-            onTriggerChange = {},
-            markConfirmed = false,
-            setMarkConfirmed = {},
-            preparationStatus = PreparationStatus.ReadyForAdd(startAddExecution = {}, StorageMarking.ALRIGHT),
-            initStatus = null,
-            addStatus = AddStatus.AddSuccessful,
-            onClose = {},
-        )
-    }
-}
-
-@Composable
-@Preview
-private fun AddRepositoryDialogPreview4() {
-    DialogPreviewColumn {
-        AddRepositoryDialogContents(
-            null,
-            PlatformSpecificPermissionFulfilment.IsFine,
-            PickResult.Success("/home/you/Archive/PersonalStuff"),
-            onTriggerChange = {},
-            markConfirmed = false,
-            setMarkConfirmed = {},
-            preparationStatus = PreparationStatus.ReadyForInit(startInit = {}, StorageMarking.ALRIGHT),
-            initStatus = InitStatus.Initializing,
-            addStatus = null,
-            onClose = {},
-        )
-        AddRepositoryDialogContents(
-            null,
-            PlatformSpecificPermissionFulfilment.IsFine,
-            PickResult.Success("/home/you/Archive/PersonalStuff"),
-            onTriggerChange = {},
-            markConfirmed = false,
-            setMarkConfirmed = {},
-            preparationStatus = PreparationStatus.ReadyForInit(startInit = {}, StorageMarking.ALRIGHT),
-            initStatus = InitStatus.InitSuccessful,
-            addStatus = AddStatus.Adding,
-            onClose = {},
-        )
-    }
-}
-
-@Composable
-@Preview
-private fun AddRepositoryDialogPreview5() {
-    DialogPreviewColumn {
-        AddRepositoryDialogContents(
-            null,
-            PlatformSpecificPermissionFulfilment.IsFine,
-            PickResult.Success("/home/you/Archive/PersonalStuff"),
-            onTriggerChange = {},
-            markConfirmed = false,
-            setMarkConfirmed = {},
-            preparationStatus = PreparationStatus.ReadyForInit(startInit = {}, StorageMarking.ALRIGHT),
-            initStatus = InitStatus.InitSuccessful,
-            addStatus = AddStatus.AddSuccessful,
-            onClose = {},
-        )
     }
 }

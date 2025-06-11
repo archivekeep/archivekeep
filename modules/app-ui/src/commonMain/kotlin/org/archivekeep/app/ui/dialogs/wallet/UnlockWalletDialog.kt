@@ -13,7 +13,6 @@ import androidx.compose.ui.text.buildAnnotatedString
 import kotlinx.coroutines.CoroutineScope
 import org.archivekeep.app.core.persistence.credentials.Credentials
 import org.archivekeep.app.core.persistence.credentials.JoseStorage
-import org.archivekeep.app.ui.components.designsystem.dialog.DialogPreviewColumn
 import org.archivekeep.app.ui.components.designsystem.input.PasswordField
 import org.archivekeep.app.ui.components.feature.dialogs.SimpleActionDialogControlButtons
 import org.archivekeep.app.ui.components.feature.dialogs.operations.LaunchableExecutionErrorIfPresent
@@ -21,10 +20,8 @@ import org.archivekeep.app.ui.dialogs.AbstractDialog
 import org.archivekeep.app.ui.domain.wiring.LocalWalletDataStore
 import org.archivekeep.app.ui.utils.Launchable
 import org.archivekeep.app.ui.utils.asAction
-import org.archivekeep.app.ui.utils.mockLaunchable
 import org.archivekeep.app.ui.utils.simpleLaunchable
 import org.archivekeep.utils.loading.Loadable
-import org.jetbrains.compose.ui.tooling.preview.Preview
 
 class UnlockWalletDialog(
     val onUnlock: (() -> Unit)?,
@@ -118,21 +115,6 @@ class UnlockWalletDialog(
             "Authenticate",
             actionState = state.action.value,
             onClose = state.onClose,
-        )
-    }
-}
-
-@Preview
-@Composable
-private fun preview1() {
-    DialogPreviewColumn {
-        val dialog = UnlockWalletDialog(onUnlock = {})
-
-        dialog.renderDialogCard(
-            UnlockWalletDialog.State(
-                mockLaunchable(false, null),
-                onClose = {},
-            ),
         )
     }
 }

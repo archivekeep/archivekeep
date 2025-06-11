@@ -18,16 +18,6 @@ import androidx.compose.ui.unit.dp
 import org.archivekeep.app.ui.components.designsystem.dialog.LabelText
 import org.archivekeep.app.ui.components.designsystem.input.CheckboxWithText
 import org.archivekeep.files.procedures.sync.RelocationSyncMode
-import org.jetbrains.compose.ui.tooling.preview.Preview
-
-@Preview
-@Composable
-fun RelocationSyncModeOptionsPreview() {
-    RelocationSyncModeOptions(
-        RelocationSyncMode.Move(false, false),
-        onRelocationSyncModeChange = {},
-    )
-}
 
 @Composable
 fun RelocationSyncModeOptions(
