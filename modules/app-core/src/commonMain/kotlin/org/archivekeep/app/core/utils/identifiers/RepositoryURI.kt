@@ -21,10 +21,10 @@ data class RepositoryURI(
 ) {
     val typedRepoURIData: TypedRepoURIData =
         when (driver) {
-            "filesystem" -> FileSystemRepositoryURIData.fromSerialized(data)
-            "grpc" -> GRPCRepositoryURIData.fromSerialized(data)
-            "s3" -> S3RepositoryURIData.fromSerialized(data)
-            "demo" -> DemoRepositoryURIData.fromSerialized(data)
+            FileSystemRepositoryURIData.ID -> FileSystemRepositoryURIData.fromSerialized(data)
+            GRPCRepositoryURIData.ID -> GRPCRepositoryURIData.fromSerialized(data)
+            S3RepositoryURIData.ID -> S3RepositoryURIData.fromSerialized(data)
+            DemoRepositoryURIData.ID -> DemoRepositoryURIData.fromSerialized(data)
             else -> throw RuntimeException("Not supported $driver")
         }
 

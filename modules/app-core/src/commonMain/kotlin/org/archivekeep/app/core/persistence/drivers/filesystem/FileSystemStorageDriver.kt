@@ -31,7 +31,7 @@ import kotlin.io.path.Path
 class FileSystemStorageDriver(
     val scope: CoroutineScope,
     val fileStores: FileStores,
-) : StorageDriver {
+) : StorageDriver(FileSystemRepositoryURIData.ID) {
     val liveStatusFlowManager =
         UniqueSharedFlowInstanceManager(
             scope,

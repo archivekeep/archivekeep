@@ -34,7 +34,7 @@ import org.archivekeep.utils.loading.stateIn
 class GRPCStorageDriver(
     val scope: CoroutineScope,
     val credentialsStore: CredentialsStore,
-) : StorageDriver {
+) : StorageDriver(GRPCRepositoryURIData.ID) {
     override fun getStorageAccessor(storageURI: StorageURI): StorageConnection =
         StorageConnection(
             storageURI,

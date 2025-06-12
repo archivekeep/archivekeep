@@ -71,11 +71,11 @@ class AddRemoteRepositoryUseCaseImplTest {
         val repositoryService =
             DefaultRepositoryService(
                 scope,
-                mapOf(
-                    "filesystem" to FileSystemStorageDriver(scope, env.fileStores),
-                    "grpc" to GRPCStorageDriver(scope, credentialsStore),
-                    "s3" to S3StorageDriver(scope, credentialsStore, ioDispatcher = dispatcher),
-                ),
+                listOf(
+                    FileSystemStorageDriver(scope, env.fileStores),
+                    GRPCStorageDriver(scope, credentialsStore),
+                    S3StorageDriver(scope, credentialsStore, ioDispatcher = dispatcher),
+                ).associateBy { it.ID },
                 env.registry,
                 env.repositoryIndexMemory,
                 env.repositoryMetadataMemory,

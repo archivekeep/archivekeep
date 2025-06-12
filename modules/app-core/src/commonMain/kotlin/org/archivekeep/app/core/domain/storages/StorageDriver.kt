@@ -9,10 +9,12 @@ import org.archivekeep.app.core.utils.identifiers.StorageURI
 import org.archivekeep.files.repo.Repo
 import org.archivekeep.utils.loading.Loadable
 
-interface StorageDriver {
-    fun getStorageAccessor(storageURI: StorageURI): StorageConnection
+abstract class StorageDriver(
+    val ID: String,
+) {
+    abstract fun getStorageAccessor(storageURI: StorageURI): StorageConnection
 
-    fun openRepoFlow(uri: RepositoryURI): Flow<ProtectedLoadableResource<Repo, RepoAuthRequest>>
+    abstract fun openRepoFlow(uri: RepositoryURI): Flow<ProtectedLoadableResource<Repo, RepoAuthRequest>>
 }
 
 data class StorageConnection(

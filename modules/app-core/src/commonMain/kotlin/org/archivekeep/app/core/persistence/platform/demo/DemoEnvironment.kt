@@ -24,12 +24,9 @@ import org.archivekeep.app.core.domain.storages.StorageInformation
 import org.archivekeep.app.core.domain.storages.StorageNamedReference
 import org.archivekeep.app.core.domain.storages.StorageRepository
 import org.archivekeep.app.core.persistence.credentials.Credentials
-import org.archivekeep.app.core.persistence.credentials.CredentialsInProtectedDataStore
-import org.archivekeep.app.core.persistence.credentials.CredentialsStore
 import org.archivekeep.app.core.persistence.credentials.JoseStorage
 import org.archivekeep.app.core.persistence.drivers.filesystem.FileStores
 import org.archivekeep.app.core.persistence.drivers.filesystem.MountedFileSystem
-import org.archivekeep.app.core.persistence.drivers.s3.S3StorageDriver
 import org.archivekeep.app.core.persistence.platform.Environment
 import org.archivekeep.app.core.persistence.registry.RegisteredRepository
 import org.archivekeep.app.core.persistence.registry.RegisteredStorage
@@ -104,8 +101,6 @@ class DemoEnvironment(
             Json.serializersModule.serializer(),
             defaultValueProducer = { Credentials(emptySet()) },
         )
-
-    val credentialsStore: CredentialsStore = CredentialsInProtectedDataStore(walletDataStore)
 
     val mediaMapped =
         MutableStateFlow(
@@ -282,71 +277,65 @@ class DemoEnvironment(
             },
         )
 
-    override val storageDrivers: Map<String, StorageDriver> =
-        mapOf(
-            "demo" to
-                object : StorageDriver {
-                    override fun getStorageAccessor(storageURI: StorageURI): StorageConnection =
-                        StorageConnection(
-                            storageURI,
-                            run {
-                                val physicalStorage =
-                                    physicalMediaData.firstOrNull {
-                                        it.id == storageURI.data
-                                    }
-                                if (physicalStorage != null) {
-                                    return@run StorageInformation.Partition(
-                                        flowOf(
-                                            OptionalLoadable.LoadedAvailable(
-                                                StorageInformation.Partition.Details(
-                                                    physicalID = physicalStorage.physicalID,
-                                                    // TODO - implement real
-                                                    driveType = StorageInformation.Partition.DriveType.Other,
-                                                ),
+    override val storageDrivers: List<StorageDriver> =
+        listOf(
+            object : StorageDriver(DemoRepositoryURIData.ID) {
+                override fun getStorageAccessor(storageURI: StorageURI): StorageConnection =
+                    StorageConnection(
+                        storageURI,
+                        run {
+                            val physicalStorage =
+                                physicalMediaData.firstOrNull {
+                                    it.id == storageURI.data
+                                }
+                            if (physicalStorage != null) {
+                                return@run StorageInformation.Partition(
+                                    flowOf(
+                                        OptionalLoadable.LoadedAvailable(
+                                            StorageInformation.Partition.Details(
+                                                physicalID = physicalStorage.physicalID,
+                                                // TODO - implement real
+                                                driveType = StorageInformation.Partition.DriveType.Other,
                                             ),
                                         ),
-                                    )
-                                }
-
-                                val onlineStorage =
-                                    onlineStoragesData.firstOrNull {
-                                        it.id == storageURI.data
-                                    }
-                                if (onlineStorage != null) {
-                                    return@run StorageInformation.OnlineStorage
-                                }
-
-                                return@run StorageInformation.Error(RuntimeException("Storage with $storageURI not found"))
-                            },
-                            liveStatusFlowManager[storageURI],
-                        )
-
-                    override fun openRepoFlow(uri: RepositoryURI): Flow<ProtectedLoadableResource<Repo, RepoAuthRequest>> =
-                        flow {
-                            val repo =
-                                repo(uri)?.repo?.let { base ->
-                                    if (enableSpeedLimit) {
-                                        when (base) {
-                                            is LocalRepo -> SpeedLimitedLocalRepoWrapper(base)
-                                            else -> SpeedLimitedRepoWrapper(base)
-                                        }
-                                    } else {
-                                        base
-                                    }
-                                }
-
-                            if (repo == null) {
-                                emit(ProtectedLoadableResource.Failed(RuntimeException("Not repo")))
-                            } else {
-                                emit((ProtectedLoadableResource.Loaded(repo)))
+                                    ),
+                                )
                             }
+
+                            val onlineStorage =
+                                onlineStoragesData.firstOrNull {
+                                    it.id == storageURI.data
+                                }
+                            if (onlineStorage != null) {
+                                return@run StorageInformation.OnlineStorage
+                            }
+
+                            return@run StorageInformation.Error(RuntimeException("Storage with $storageURI not found"))
+                        },
+                        liveStatusFlowManager[storageURI],
+                    )
+
+                override fun openRepoFlow(uri: RepositoryURI): Flow<ProtectedLoadableResource<Repo, RepoAuthRequest>> =
+                    flow {
+                        val repo =
+                            repo(uri)?.repo?.let { base ->
+                                if (enableSpeedLimit) {
+                                    when (base) {
+                                        is LocalRepo -> SpeedLimitedLocalRepoWrapper(base)
+                                        else -> SpeedLimitedRepoWrapper(base)
+                                    }
+                                } else {
+                                    base
+                                }
+                            }
+
+                        if (repo == null) {
+                            emit(ProtectedLoadableResource.Failed(RuntimeException("Not repo")))
+                        } else {
+                            emit((ProtectedLoadableResource.Loaded(repo)))
                         }
-                },
-            "s3" to
-                S3StorageDriver(
-                    scope = scope,
-                    credentialsStore = credentialsStore,
-                ),
+                    }
+            },
         )
 
     data class DemoPhysicalMedium(
@@ -361,11 +350,7 @@ class DemoEnvironment(
         val repositories: List<DemoRepository>,
     ) {
         val uri: StorageURI
-            get() =
-                StorageURI(
-                    "demo",
-                    id,
-                )
+            get() = StorageURI(DemoRepositoryURIData.ID, id)
 
         val reference = StorageNamedReference(uri, displayName)
     }
@@ -377,11 +362,7 @@ class DemoEnvironment(
         val repositories: List<DemoRepository>,
     ) {
         val uri: StorageURI
-            get() =
-                StorageURI(
-                    "demo",
-                    id,
-                )
+            get() = StorageURI(DemoRepositoryURIData.ID, id)
 
         val reference = StorageNamedReference(uri, displayName)
     }
@@ -448,11 +429,8 @@ class DemoEnvironment(
         val physicalLocation: String,
         val repo: Repo,
     ) {
-        val uri: RepositoryURI =
-            RepositoryURI(
-                "demo",
-                DemoRepositoryURIData(storageID, name).serialized(),
-            )
+        val uri: RepositoryURI = DemoRepositoryURIData(storageID, name).toURI()
+
         val storageRepository: StorageRepository =
             StorageRepository(
                 storage,

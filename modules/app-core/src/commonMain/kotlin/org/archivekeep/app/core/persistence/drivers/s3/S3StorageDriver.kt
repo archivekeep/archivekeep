@@ -39,7 +39,7 @@ class S3StorageDriver(
     val scope: CoroutineScope,
     val credentialsStore: CredentialsStore,
     val ioDispatcher: CoroutineDispatcher = Dispatchers.IO,
-) : StorageDriver {
+) : StorageDriver(S3RepositoryURIData.ID) {
     override fun getStorageAccessor(storageURI: StorageURI): StorageConnection =
         StorageConnection(
             storageURI,

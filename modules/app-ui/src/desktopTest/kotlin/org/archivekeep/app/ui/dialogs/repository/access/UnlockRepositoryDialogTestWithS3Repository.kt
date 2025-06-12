@@ -14,7 +14,6 @@ import kotlinx.coroutines.runBlocking
 import org.archivekeep.app.core.persistence.drivers.s3.S3RepositoryURIData
 import org.archivekeep.app.core.persistence.platform.demo.DemoEnvironment
 import org.archivekeep.app.core.persistence.registry.RegisteredRepository
-import org.archivekeep.app.core.utils.identifiers.RepositoryURI
 import org.archivekeep.app.desktop.ui.dialogs.testing.saveTestingDialogContainerBitmap
 import org.archivekeep.app.desktop.ui.dialogs.testing.setContentInDialogScreenshotContainer
 import org.archivekeep.app.desktop.ui.testing.screenshots.runHighDensityComposeUiTest
@@ -55,7 +54,7 @@ class UnlockRepositoryDialogTestWithS3Repository {
 
             val testRepo = S3RepositoryTestRepo(minio.s3URL, "test-bucket", "testuser", "testpassword")
 
-            val subjectAtTestURI = RepositoryURI("s3", S3RepositoryURIData(testRepo.s3URL, testRepo.bucketName).serialized())
+            val subjectAtTestURI = S3RepositoryURIData(testRepo.s3URL, testRepo.bucketName).toURI()
 
             runBlocking {
                 testRepo.createBucket()

@@ -13,7 +13,7 @@ interface Environment {
     val registry: RegistryDataStore
     val repositoryIndexMemory: MemorizedRepositoryIndexRepository
     val repositoryMetadataMemory: MemorizedRepositoryMetadataRepository
-    val storageDrivers: Map<String, StorageDriver>
+    val storageDrivers: List<StorageDriver>
 
     val fileStores: FileStores
 }

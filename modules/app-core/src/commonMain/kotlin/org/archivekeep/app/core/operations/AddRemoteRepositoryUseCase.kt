@@ -18,7 +18,7 @@ suspend fun AddRemoteRepositoryUseCase.addS3(
     secretKey: String,
 ) {
     this(
-        RepositoryURI("s3", S3RepositoryURIData(endpoint, bucket).serialized()),
+        S3RepositoryURIData(endpoint, bucket).toURI(),
         BasicAuthCredentials(accessKey, secretKey),
     )
 }

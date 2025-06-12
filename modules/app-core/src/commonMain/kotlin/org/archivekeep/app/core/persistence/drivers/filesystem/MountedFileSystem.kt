@@ -13,6 +13,6 @@ data class MountedFileSystem(
         val fsUUID: String,
         val fsSubPath: String,
     ) {
-        val storageURI by lazy { StorageURI("filesystem", fsUUID) }
+        val storageURI by lazy { StorageURI(FileSystemRepositoryURIData.ID, fsUUID) }
     }
 }

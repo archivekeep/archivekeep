@@ -8,13 +8,15 @@ data class GRPCRepositoryURIData(
     val port: Short,
     val resourceName: String,
 ) : TypedRepoURIData {
-    override val storageURI = StorageURI("grpc", "//$hostname:$port")
+    override val storageURI = StorageURI(ID, "//$hostname:$port")
 
     override val defaultLabel = resourceName
 
     fun serialized(): String = "//$hostname:$port/$resourceName"
 
     companion object {
+        const val ID = "grpc"
+
         fun fromSerialized(rawString: String): GRPCRepositoryURIData {
             val parts = rawString.trimStart('/').split("/", limit = 2)
 

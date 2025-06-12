@@ -17,7 +17,6 @@ import org.archivekeep.app.core.persistence.drivers.filesystem.operations.AddFil
 import org.archivekeep.app.core.persistence.drivers.filesystem.operations.AddFileSystemRepositoryOperation.StorageMarking
 import org.archivekeep.app.core.persistence.registry.RegisteredRepository
 import org.archivekeep.app.core.persistence.registry.RegistryDataStore
-import org.archivekeep.app.core.utils.identifiers.RepositoryURI
 import org.archivekeep.app.core.utils.identifiers.StorageURI
 import org.archivekeep.files.repo.files.createFilesRepo
 import org.archivekeep.files.repo.files.openFilesRepoOrNull
@@ -231,7 +230,7 @@ class AddFileSystemRepositoryOperationImpl(
                     println("Add: $newRepo")
                     println()
 
-                    val newRepoURI = RepositoryURI("filesystem", newRepo.serialized())
+                    val newRepoURI = newRepo.toURI()
 
                     registry.updateRepositories { old ->
                         old + setOf(RegisteredRepository(uri = newRepoURI))
