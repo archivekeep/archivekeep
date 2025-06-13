@@ -20,7 +20,7 @@ import org.archivekeep.app.core.domain.storages.KnownStorageService
 import org.archivekeep.app.core.persistence.credentials.Credentials
 import org.archivekeep.app.core.persistence.credentials.CredentialsInProtectedDataStore
 import org.archivekeep.app.core.persistence.credentials.CredentialsStore
-import org.archivekeep.app.core.persistence.credentials.JoseStorage
+import org.archivekeep.app.core.persistence.credentials.PasswordProtectedJoseStorage
 import org.archivekeep.app.core.persistence.drivers.filesystem.FileSystemStorageDriver
 import org.archivekeep.app.core.persistence.drivers.grpc.GRPCStorageDriver
 import org.archivekeep.app.core.persistence.drivers.s3.S3StorageDriver
@@ -60,7 +60,7 @@ class AddRemoteRepositoryUseCaseImplTest {
         val env = DemoEnvironment(scope, false, emptyList())
 
         val walletDataStore =
-            JoseStorage(
+            PasswordProtectedJoseStorage(
                 t.resolve("wallet-datastore").toPath(),
                 Json.serializersModule.serializer(),
                 defaultValueProducer = { Credentials(emptySet()) },

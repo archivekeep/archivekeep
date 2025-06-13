@@ -12,12 +12,12 @@ import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.buildAnnotatedString
 import kotlinx.coroutines.CoroutineScope
 import org.archivekeep.app.core.persistence.credentials.Credentials
-import org.archivekeep.app.core.persistence.credentials.JoseStorage
+import org.archivekeep.app.core.persistence.credentials.PasswordProtectedDataStore
 import org.archivekeep.app.ui.components.designsystem.input.PasswordField
 import org.archivekeep.app.ui.components.feature.dialogs.SimpleActionDialogControlButtons
 import org.archivekeep.app.ui.components.feature.dialogs.operations.LaunchableExecutionErrorIfPresent
 import org.archivekeep.app.ui.dialogs.AbstractDialog
-import org.archivekeep.app.ui.domain.wiring.LocalWalletDataStore
+import org.archivekeep.app.ui.domain.wiring.LocalApplicationServices
 import org.archivekeep.app.ui.utils.Launchable
 import org.archivekeep.app.ui.utils.asAction
 import org.archivekeep.app.ui.utils.simpleLaunchable
@@ -28,7 +28,7 @@ class UnlockWalletDialog(
 ) : AbstractDialog<UnlockWalletDialog.State, UnlockWalletDialog.VM>() {
     inner class VM(
         scope: CoroutineScope,
-        val joseStorage: JoseStorage<Credentials>,
+        val joseStorage: PasswordProtectedDataStore<Credentials>,
         val _onClose: () -> Unit,
     ) : IVM {
         val launchable =
@@ -72,7 +72,7 @@ class UnlockWalletDialog(
         scope: CoroutineScope,
         onClose: () -> Unit,
     ): VM {
-        val joseStorage = LocalWalletDataStore.current
+        val joseStorage = LocalApplicationServices.current.environment.walletDataStore as PasswordProtectedDataStore
 
         return remember(scope, joseStorage, onClose) { VM(scope, joseStorage, onClose) }
     }

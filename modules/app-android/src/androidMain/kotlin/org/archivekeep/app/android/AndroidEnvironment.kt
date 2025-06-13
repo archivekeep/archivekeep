@@ -5,7 +5,6 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.serializer
 import org.archivekeep.app.core.persistence.credentials.Credentials
-import org.archivekeep.app.core.persistence.credentials.JoseStorage
 import org.archivekeep.app.core.persistence.drivers.filesystem.AndroidFileStores
 import org.archivekeep.app.core.persistence.drivers.filesystem.FileStores
 import org.archivekeep.app.core.persistence.drivers.filesystem.FileSystemStorageDriver
@@ -26,9 +25,10 @@ class AndroidEnvironment(
     override val registry: PreferenceDataStoreRegistryData = PreferenceDataStoreRegistryData(scope, paths.getRegistryDatastoreFile())
 
     override val walletDataStore =
-        JoseStorage(
+        SecretKeyProtectedDataStore(
             paths.getWalletDatastoreFile().toPath(),
             Json.serializersModule.serializer(),
+            keyAlias = "Credentials Wallet Key",
             defaultValueProducer = { Credentials(emptySet()) },
         )
 

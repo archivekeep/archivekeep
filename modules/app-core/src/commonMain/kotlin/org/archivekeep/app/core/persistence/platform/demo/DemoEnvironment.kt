@@ -24,7 +24,7 @@ import org.archivekeep.app.core.domain.storages.StorageInformation
 import org.archivekeep.app.core.domain.storages.StorageNamedReference
 import org.archivekeep.app.core.domain.storages.StorageRepository
 import org.archivekeep.app.core.persistence.credentials.Credentials
-import org.archivekeep.app.core.persistence.credentials.JoseStorage
+import org.archivekeep.app.core.persistence.credentials.PasswordProtectedJoseStorage
 import org.archivekeep.app.core.persistence.drivers.filesystem.FileStores
 import org.archivekeep.app.core.persistence.drivers.filesystem.MountedFileSystem
 import org.archivekeep.app.core.persistence.platform.Environment
@@ -95,8 +95,8 @@ class DemoEnvironment(
 
     private val demoTempDirectory = kotlin.io.path.createTempDirectory("archivekeep-demo-env")
 
-    override val walletDataStore: JoseStorage<Credentials> =
-        JoseStorage(
+    override val walletDataStore: PasswordProtectedJoseStorage<Credentials> =
+        PasswordProtectedJoseStorage(
             demoTempDirectory.resolve("credentials.jwe"),
             Json.serializersModule.serializer(),
             defaultValueProducer = { Credentials(emptySet()) },

@@ -4,27 +4,32 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.first
-import org.archivekeep.app.core.persistence.credentials.JoseStorage
+import org.archivekeep.app.core.persistence.credentials.PasswordProtectedJoseStorage
 import org.archivekeep.app.ui.dialogs.wallet.CreateWalletDialog
 import org.archivekeep.app.ui.dialogs.wallet.UnlockWalletDialog
 
 @Composable
 fun rememberWalletOperationLaunchersAsDialogs(dialogRenderer: OverlayDialogRenderer): WalletOperationLaunchers {
-    val joseStorage = LocalWalletDataStore.current
+    val walletDataStore = LocalApplicationServices.current.environment.walletDataStore
 
     val walletOperationLaunchers =
-        remember(joseStorage) {
+        remember(walletDataStore) {
             WalletOperationLaunchers(
                 ensureWalletForWrite = {
+                    if (!walletDataStore.needsUnlock()) {
+                        return@WalletOperationLaunchers true
+                    }
+
                     val state =
-                        joseStorage.autoloadFlow
-                            .filter { it !is JoseStorage.State.NotInitialized }
+                        (walletDataStore as PasswordProtectedJoseStorage)
+                            .autoloadFlow
+                            .filter { it !is PasswordProtectedJoseStorage.State.NotInitialized }
                             .first()
 
-                    if (state is JoseStorage.State.NotExisting) {
+                    if (state is PasswordProtectedJoseStorage.State.NotExisting) {
                         dialogRenderer.openDialog(CreateWalletDialog())
                         false
-                    } else if (state is JoseStorage.State.Locked) {
+                    } else if (state is PasswordProtectedJoseStorage.State.Locked) {
                         dialogRenderer.openDialog(UnlockWalletDialog(onUnlock = {}))
                         false
                     } else {

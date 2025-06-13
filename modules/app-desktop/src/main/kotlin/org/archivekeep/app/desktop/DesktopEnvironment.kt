@@ -4,7 +4,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.serializer
 import org.archivekeep.app.core.persistence.credentials.Credentials
-import org.archivekeep.app.core.persistence.credentials.JoseStorage
+import org.archivekeep.app.core.persistence.credentials.PasswordProtectedJoseStorage
 import org.archivekeep.app.core.persistence.drivers.filesystem.DesktopFileStores
 import org.archivekeep.app.core.persistence.drivers.filesystem.FileStores
 import org.archivekeep.app.core.persistence.drivers.filesystem.FileSystemStorageDriver
@@ -25,7 +25,7 @@ class DesktopEnvironment(
         )
 
     override val walletDataStore =
-        JoseStorage(
+        PasswordProtectedJoseStorage(
             getWalletDatastorePath(),
             Json.serializersModule.serializer(),
             defaultValueProducer = { Credentials(emptySet()) },

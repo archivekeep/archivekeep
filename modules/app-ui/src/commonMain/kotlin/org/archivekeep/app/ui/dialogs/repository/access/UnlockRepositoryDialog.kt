@@ -29,7 +29,7 @@ import org.archivekeep.app.core.domain.repositories.Repository
 import org.archivekeep.app.core.domain.repositories.RepositoryInformation
 import org.archivekeep.app.core.domain.repositories.UnlockOptions
 import org.archivekeep.app.core.persistence.credentials.Credentials
-import org.archivekeep.app.core.persistence.credentials.JoseStorage
+import org.archivekeep.app.core.persistence.credentials.PasswordProtectedDataStore
 import org.archivekeep.app.core.utils.generics.ExecutionOutcome
 import org.archivekeep.app.core.utils.identifiers.RepositoryURI
 import org.archivekeep.app.ui.components.designsystem.input.CheckboxWithText
@@ -40,7 +40,7 @@ import org.archivekeep.app.ui.components.feature.dialogs.SimpleActionDialogDoneB
 import org.archivekeep.app.ui.components.feature.dialogs.operations.LaunchableExecutionErrorIfPresent
 import org.archivekeep.app.ui.dialogs.repository.AbstractRepositoryDialog
 import org.archivekeep.app.ui.domain.data.canUnlockFlow
-import org.archivekeep.app.ui.domain.wiring.LocalWalletDataStore
+import org.archivekeep.app.ui.domain.wiring.LocalApplicationServices
 import org.archivekeep.app.ui.domain.wiring.LocalWalletOperationLaunchers
 import org.archivekeep.app.ui.domain.wiring.WalletOperationLaunchers
 import org.archivekeep.app.ui.utils.Launchable
@@ -82,7 +82,7 @@ class UnlockRepositoryDialog(
         val coroutineScope: CoroutineScope,
         val repository: Repository,
         val walletOperationLaunchers: WalletOperationLaunchers,
-        val credentialStorage: JoseStorage<Credentials>,
+        val credentialStorage: PasswordProtectedDataStore<Credentials>?,
         val _onClose: () -> Unit,
     ) : IVM {
         val basicAuthCredentialsState = mutableStateOf<BasicAuthCredentials?>(null)
@@ -119,14 +119,14 @@ class UnlockRepositoryDialog(
         onClose: () -> Unit,
     ): VM {
         val walletOperationLaunchers = LocalWalletOperationLaunchers.current
-        val credentialStorage = LocalWalletDataStore.current
+        val credentialStorage = LocalApplicationServices.current.environment.walletDataStore
 
         return remember {
             VM(
                 scope,
                 repository,
                 walletOperationLaunchers,
-                credentialStorage,
+                credentialStorage as? PasswordProtectedDataStore,
                 onClose,
             )
         }

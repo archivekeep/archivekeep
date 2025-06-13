@@ -6,6 +6,8 @@
 
 - S3 integration:
   - support S3 bucket as repository storage
+- Android:
+  - remember remote repository credentials in application-private encrypted file with keys stored in Android Keystore system
 
 ### Changed
 

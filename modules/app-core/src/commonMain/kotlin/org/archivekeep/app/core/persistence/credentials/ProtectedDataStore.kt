@@ -3,8 +3,10 @@ package org.archivekeep.app.core.persistence.credentials
 import kotlinx.coroutines.flow.Flow
 import org.archivekeep.app.core.utils.ProtectedLoadableResource
 
-interface ProtectedDataStore<T> {
-    val data: Flow<ProtectedLoadableResource<T, Any>>
+interface ProtectedDataStore<E> {
+    val data: Flow<ProtectedLoadableResource<E, Any>>
 
-    suspend fun updateData(transform: suspend (t: T) -> T): T
+    suspend fun needsUnlock(): Boolean
+
+    suspend fun updateData(transform: suspend (t: E) -> E): E
 }

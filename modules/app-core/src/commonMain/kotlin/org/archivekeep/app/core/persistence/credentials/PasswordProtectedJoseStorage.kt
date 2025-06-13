@@ -12,13 +12,16 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.flow.transform
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.json.Json
+import org.archivekeep.app.core.persistence.credentials.PasswordProtectedJoseStorage.State
 import org.archivekeep.app.core.utils.ProtectedLoadableResource
 import org.archivekeep.utils.coroutines.shareResourceIn
 import org.archivekeep.utils.safeFileRead
@@ -36,12 +39,12 @@ import java.nio.file.Path
  *
  * - unlocked but errored - password changed by other process, or other I/O error
  */
-class JoseStorage<T>(
+class PasswordProtectedJoseStorage<T>(
     val file: Path,
     val serializer: KSerializer<T>,
     val defaultValueProducer: () -> T,
     private val scope: CoroutineScope = CoroutineScope(Dispatchers.IO + SupervisorJob()),
-) : ProtectedDataStore<T> {
+) : PasswordProtectedDataStore<T> {
     private val mutex = Mutex()
 
     private val currentStateFlow = MutableStateFlow<State<T>>(State.NotInitialized)
@@ -54,18 +57,20 @@ class JoseStorage<T>(
 
     override val data =
         autoloadFlow
-            .map {
+            .map { it.toProtectedLoadableResource() }
+            .shareResourceIn(scope)
+
+    override suspend fun needsUnlock(): Boolean =
+        this
+            .autoloadFlow
+            .transform {
                 when (it) {
-                    is State.NotInitialized ->
-                        ProtectedLoadableResource.Loading
-                    is State.NotExisting ->
-                        ProtectedLoadableResource.Loaded(it.defaultData)
-                    is State.Locked ->
-                        ProtectedLoadableResource.PendingAuthentication("TODO")
-                    is State.Unlocked ->
-                        ProtectedLoadableResource.Loaded(it.data)
+                    State.Locked -> emit(true)
+                    is State.NotExisting -> emit(true)
+                    State.NotInitialized -> {}
+                    is State.Unlocked -> emit(false)
                 }
-            }.shareResourceIn(scope)
+            }.first()
 
     suspend fun tryInitialize() {
         mutex.withLock {
@@ -84,7 +89,7 @@ class JoseStorage<T>(
         }
     }
 
-    suspend fun create(password: String) {
+    override suspend fun create(password: String) {
         mutex.withLock {
             var newCreated: T? = null
 
@@ -105,7 +110,7 @@ class JoseStorage<T>(
         }
     }
 
-    suspend fun unlock(password: String) {
+    override suspend fun unlock(password: String) {
         mutex.withLock {
             val contents = safeFileRead(file) ?: throw RuntimeException("File doesn't exist")
 
@@ -192,3 +197,18 @@ class JoseStorage<T>(
         data object Locked : State<Nothing>
     }
 }
+
+private fun <T> State<T>.toProtectedLoadableResource() =
+    when (this) {
+        is State.NotInitialized ->
+            ProtectedLoadableResource.Loading
+
+        is State.NotExisting ->
+            ProtectedLoadableResource.Loaded(defaultData)
+
+        is State.Locked ->
+            ProtectedLoadableResource.PendingAuthentication("TODO")
+
+        is State.Unlocked ->
+            ProtectedLoadableResource.Loaded(data)
+    }

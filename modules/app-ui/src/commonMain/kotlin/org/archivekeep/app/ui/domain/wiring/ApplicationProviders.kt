@@ -64,7 +64,6 @@ fun ApplicationProviders(
         LocalApplicationMetadata provides applicationMetadata,
         LocalArchiveService provides applicationServices.archiveService,
         LocalStorageService provides applicationServices.storageService,
-        LocalWalletDataStore provides applicationServices.environment.walletDataStore,
         LocalRepoService provides applicationServices.repoService,
         LocalRepoToRepoSyncService provides applicationServices.syncService,
         LocalAddPushService provides applicationServices.addPushService,
@@ -75,6 +74,7 @@ fun ApplicationProviders(
         LocalOperationFactory provides applicationServices.operationFactory,
         LocalRepositoryOpenService provides repositoryOpenService,
         LocalSharingCoroutineDispatcher provides applicationServices.serviceWorkDispatcher,
+        LocalApplicationServices provides applicationServices,
     ) {
         content()
     }
