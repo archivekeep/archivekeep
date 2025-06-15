@@ -55,6 +55,11 @@ class SecretKeyProtectedDataStore<E>(
                 try {
                     ProtectedLoadableResource.Loaded(it.encryptedData.decrypt())
                 } catch (e: Throwable) {
+                    // TODO: don't purge automatically
+                    rawDataStore.updateData {
+                        DataAtRestStructure(null, defaultValueProducer().encrypt())
+                    }
+
                     ProtectedLoadableResource.Failed(e)
                 }
             }.shareResourceIn(scope)

@@ -16,6 +16,8 @@ import org.archivekeep.app.desktop.ui.dialogs.testing.setContentInDialogScreensh
 import org.archivekeep.app.desktop.ui.testing.screenshots.runHighDensityComposeUiTest
 import org.archivekeep.app.ui.domain.wiring.ApplicationProviders
 import org.archivekeep.app.ui.domain.wiring.LocalOperationFactory
+import org.archivekeep.app.ui.domain.wiring.LocalWalletOperationLaunchers
+import org.archivekeep.app.ui.domain.wiring.WalletOperationLaunchers
 import org.archivekeep.app.ui.performClickTextInput
 import org.archivekeep.app.ui.utils.PropertiesApplicationMetadata
 import org.archivekeep.files.repo.remote.grpc.BasicAuthCredentials
@@ -90,6 +92,11 @@ class AddRemoteRepositoryDialogTest {
                                 AddRemoteRepositoryUseCase::class.java,
                                 NoOpAddRemoteRepositoryUseCase(),
                             ),
+                        LocalWalletOperationLaunchers provides
+                            WalletOperationLaunchers(
+                                ensureWalletForWrite = { false },
+                                openUnlockWallet = { error("Shouldn't be called") },
+                            ),
                     ) {
                         AddRemoteRepositoryDialog().render(onClose = {})
                     }
@@ -129,6 +136,11 @@ class AddRemoteRepositoryDialogTest {
                                 AddRemoteRepositoryUseCase::class.java,
                                 NoOpAddRemoteRepositoryUseCase(),
                             ),
+                        LocalWalletOperationLaunchers provides
+                            WalletOperationLaunchers(
+                                ensureWalletForWrite = { false },
+                                openUnlockWallet = { error("Shouldn't be called") },
+                            ),
                     ) {
                         AddRemoteRepositoryDialog().render(onClose = {})
                     }
@@ -154,5 +166,6 @@ class NoOpAddRemoteRepositoryUseCase : AddRemoteRepositoryUseCase {
     override suspend fun invoke(
         uri: RepositoryURI,
         credentials: BasicAuthCredentials?,
+        rememberCredentials: Boolean,
     ) {}
 }

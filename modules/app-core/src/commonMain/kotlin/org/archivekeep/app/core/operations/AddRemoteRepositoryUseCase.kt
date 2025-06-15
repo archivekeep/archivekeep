@@ -8,6 +8,7 @@ interface AddRemoteRepositoryUseCase {
     suspend operator fun invoke(
         uri: RepositoryURI,
         credentials: BasicAuthCredentials?,
+        rememberCredentials: Boolean,
     )
 }
 
@@ -16,9 +17,11 @@ suspend fun AddRemoteRepositoryUseCase.addS3(
     bucket: String,
     accessKey: String,
     secretKey: String,
+    rememberCredentials: Boolean,
 ) {
     this(
         S3RepositoryURIData(endpoint, bucket).toURI(),
         BasicAuthCredentials(accessKey, secretKey),
+        rememberCredentials,
     )
 }

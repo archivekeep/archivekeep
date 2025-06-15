@@ -38,6 +38,7 @@ import org.archivekeep.app.ui.components.designsystem.dialog.DialogButtonContain
 import org.archivekeep.app.ui.components.designsystem.dialog.DialogInnerContainer
 import org.archivekeep.app.ui.components.designsystem.dialog.DialogOverlayCard
 import org.archivekeep.app.ui.components.designsystem.elements.WarningAlert
+import org.archivekeep.app.ui.components.designsystem.input.CheckboxWithText
 import org.archivekeep.app.ui.components.designsystem.input.PasswordField
 import org.archivekeep.app.ui.components.designsystem.input.TextField
 import org.archivekeep.app.ui.components.feature.dialogs.SimpleActionDialogControlButtons
@@ -45,6 +46,8 @@ import org.archivekeep.app.ui.components.feature.dialogs.SimpleActionDialogDoneB
 import org.archivekeep.app.ui.components.feature.errors.AutomaticErrorMessage
 import org.archivekeep.app.ui.dialogs.Dialog
 import org.archivekeep.app.ui.domain.wiring.LocalOperationFactory
+import org.archivekeep.app.ui.domain.wiring.LocalWalletOperationLaunchers
+import org.archivekeep.app.ui.domain.wiring.WalletOperationLaunchers
 import org.archivekeep.app.ui.utils.SingleLaunchGuard
 import org.archivekeep.files.repo.remote.grpc.BasicAuthCredentials
 
@@ -59,10 +62,12 @@ class AddRemoteRepositoryDialog : Dialog {
             OTHER,
         }
 
-        sealed interface RemoteInput {
-            fun canLaunch(): Boolean
+        sealed class RemoteInput(
+            val rememberCredentials: MutableState<Boolean> = mutableStateOf(false),
+        ) {
+            abstract fun canLaunch(): Boolean
 
-            suspend fun execute(useCase: AddRemoteRepositoryUseCase)
+            abstract suspend fun execute(useCase: AddRemoteRepositoryUseCase)
         }
 
         class S3(
@@ -70,15 +75,16 @@ class AddRemoteRepositoryDialog : Dialog {
             val bucket: MutableState<String> = mutableStateOf(""),
             val accessKey: MutableState<String> = mutableStateOf(""),
             val secretKey: MutableState<String> = mutableStateOf(""),
-        ) : RemoteInput {
+        ) : RemoteInput() {
             override fun canLaunch(): Boolean = endpoint.value.isNotBlank()
 
-            override suspend fun execute(addRemoteRepositoryUseCase: AddRemoteRepositoryUseCase) {
-                addRemoteRepositoryUseCase.addS3(
+            override suspend fun execute(useCase: AddRemoteRepositoryUseCase) {
+                useCase.addS3(
                     endpoint.value,
                     bucket.value,
                     accessKey.value,
                     secretKey.value,
+                    rememberCredentials.value,
                 )
             }
         }
@@ -86,11 +92,11 @@ class AddRemoteRepositoryDialog : Dialog {
         class Other(
             val uri: MutableState<String> = mutableStateOf(""),
             val basicAuthCredentialsState: MutableState<BasicAuthCredentials?> = mutableStateOf(null),
-        ) : RemoteInput {
+        ) : RemoteInput() {
             override fun canLaunch(): Boolean = uri.value.isNotBlank()
 
             override suspend fun execute(useCase: AddRemoteRepositoryUseCase) {
-                useCase(RepositoryURI.fromFull(uri.value.trim()), basicAuthCredentialsState.value)
+                useCase(RepositoryURI.fromFull(uri.value.trim()), basicAuthCredentialsState.value, rememberCredentials.value)
             }
         }
 
@@ -106,6 +112,7 @@ class AddRemoteRepositoryDialog : Dialog {
     class VM(
         coroutineScope: CoroutineScope,
         val useCase: AddRemoteRepositoryUseCase,
+        val walletOperationLaunchers: WalletOperationLaunchers,
     ) {
         val input = Input()
 
@@ -113,6 +120,12 @@ class AddRemoteRepositoryDialog : Dialog {
 
         fun launchAdd() {
             launchGuard.launch {
+                if (input.currentInput.value.rememberCredentials.value) {
+                    if (!walletOperationLaunchers.ensureWalletForWrite()) {
+                        throw RuntimeException("Wallet not available")
+                    }
+                }
+
                 input.currentInput.value.execute(useCase)
             }
         }
@@ -122,9 +135,13 @@ class AddRemoteRepositoryDialog : Dialog {
     @Composable
     override fun render(onClose: () -> Unit) {
         val operationFactory = LocalOperationFactory.current
+        val walletOperationLaunchers = LocalWalletOperationLaunchers.current
 
         val coroutineScope = rememberCoroutineScope()
-        val vm = remember(coroutineScope, operationFactory) { VM(coroutineScope, operationFactory.get(AddRemoteRepositoryUseCase::class.java)) }
+        val vm =
+            remember(coroutineScope, operationFactory, walletOperationLaunchers) {
+                VM(coroutineScope, operationFactory.get(AddRemoteRepositoryUseCase::class.java), walletOperationLaunchers)
+            }
 
         val executionState = vm.launchGuard.state
 
@@ -232,6 +249,13 @@ class AddRemoteRepositoryDialog : Dialog {
                                     enabled = isEditable,
                                     modifier = Modifier.fillMaxWidth(),
                                 )
+                                CheckboxWithText(
+                                    vm.input.s3input.rememberCredentials.value,
+                                    onValueChange = {
+                                        vm.input.s3input.rememberCredentials.value = it
+                                    },
+                                    text = "Remember credentials",
+                                )
 
                                 Spacer(Modifier.height(12.dp))
                                 WarningAlert {
@@ -295,6 +319,13 @@ class AddRemoteRepositoryDialog : Dialog {
                                             Text("Enter password ...")
                                         },
                                         singleLine = true,
+                                    )
+                                    CheckboxWithText(
+                                        vm.input.otherInput.rememberCredentials.value,
+                                        onValueChange = {
+                                            vm.input.otherInput.rememberCredentials.value = it
+                                        },
+                                        text = "Remember credentials",
                                     )
                                 }
                             }

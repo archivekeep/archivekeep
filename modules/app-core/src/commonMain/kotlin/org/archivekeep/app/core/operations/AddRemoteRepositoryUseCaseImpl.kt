@@ -22,6 +22,7 @@ class AddRemoteRepositoryUseCaseImpl(
     override suspend fun invoke(
         uri: RepositoryURI,
         credentials: BasicAuthCredentials?,
+        rememberCredentials: Boolean,
     ) {
         val result =
             repositoryService
@@ -42,7 +43,7 @@ class AddRemoteRepositoryUseCaseImpl(
                         try {
                             result.authenticationRequest.tryOpen(
                                 credentials,
-                                UnlockOptions(false),
+                                UnlockOptions(rememberCredentials),
                             )
                         } catch (e: Throwable) {
                             throw WrongCredentialsException(cause = e)

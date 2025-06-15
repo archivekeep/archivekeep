@@ -42,17 +42,15 @@ object SecurityUtil {
         encryptedData: ByteArray,
     ): String {
         val cipher = Cipher.getInstance("AES/GCM/NoPadding")
-        val secretKey = getSecretKey(keyAlias)
+        val secretKey = getSecretKey(keyAlias) ?: throw RuntimeException("Key not found")
         val gcmParameterSpec = GCMParameterSpec(128, iv)
         cipher.init(Cipher.DECRYPT_MODE, secretKey, gcmParameterSpec)
         return cipher.doFinal(encryptedData).toString(charset("UTF-8"))
     }
 
-    private fun generateSecretKey(keyAlias: String): SecretKey {
-        val keyentry = keyStore.getEntry(keyAlias, null)
-
-        if (keyentry == null) {
-            return keyGenerator
+    private fun generateSecretKey(keyAlias: String): SecretKey =
+        getSecretKey(keyAlias) ?: run {
+            keyGenerator
                 .apply {
                     init(
                         KeyGenParameterSpec
@@ -62,10 +60,7 @@ object SecurityUtil {
                             .build(),
                     )
                 }.generateKey()
-        } else {
-            return getSecretKey(keyAlias)
         }
-    }
 
-    private fun getSecretKey(keyAlias: String) = (keyStore.getEntry(keyAlias, null) as KeyStore.SecretKeyEntry).secretKey
+    private fun getSecretKey(keyAlias: String) = (keyStore.getEntry(keyAlias, null) as? KeyStore.SecretKeyEntry)?.secretKey
 }

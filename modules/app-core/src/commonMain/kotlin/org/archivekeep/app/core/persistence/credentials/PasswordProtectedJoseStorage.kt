@@ -155,7 +155,7 @@ class PasswordProtectedJoseStorage<T>(
                 new
             } else {
                 // TODO: out of order could work
-                throw RuntimeException("Not unlocked")
+                throw RuntimeException("Not unlocked: ${v.javaClass}")
             }
         }
 
