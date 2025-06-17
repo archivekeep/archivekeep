@@ -39,7 +39,9 @@ This software is still under development.
 
 ## Plain files
 
-Access your archived files directly without any external tool.
+Access files directly as ordinary files.
+
+Devices can read your files without having to install any extra software.
 
 The archivekeep only facilitates archivation process to help you replicate your data for preservation.
 </div>
@@ -55,8 +57,11 @@ The archivekeep only facilitates archivation process to help you replicate your 
 
 ## Offline first
 
-<p>Offline storages are not always online, because they are offline. And, drives aren't a computer.</p>
-<p>The archivekeep is designed for such asynchronous approach of synchronization in repositories with archive replicas.</p>
+Incrementally synchronize data to other media, when it is connected.
+
+Store copies on your SSD, HDD, USB flash or other media of your choice. No cloud required.
+
+_**Note:** encrypt your drives if you want to [ensure privacy of your data at rest](https://en.wikipedia.org/wiki/Data_at_rest#Encryption)._
 
 </div>
 </div>
@@ -75,27 +80,46 @@ The contents of files stored in repositories are verifiable using digistal check
 </div>
 </div>
 
-
 <div class="sub-display-container" style="background: white">
 <div class="sub-display-inner-container">
-<div class="text" style="flex: 3 0 0">
+<div class="text">
 
-## Features
+## Cloud supported
 
-Supported storages:
+Keeping a replica of data in remote storage(s) is essential for confidence in data preservation.
 
-- Internal or external SSD, HDD, USB flash or other file-systems,
-- _(planned)_ Phone,
-- _(planned)_ Amazon S3-compatible API, 
-- _(planned)_ self-hosting.
+_**Note:** E2E encryption is not yet implemented, but planned._
 
-Encryption options:
+_**Notice:** not recommended to use (with a vendor you don't trust) for data you strictly want to keep private._
 
-- No encryption,
-- Transparent filesystem level encryption (i.e. [LUKS]),
-- _(planned)_ E2E.
 </div>
-<div class="other">
+<div class="other small">
+</div>
+</div>
+<div class="sub-display-inner-container">
+<div class="other small">
+</div>
+<div class="text">
+
+## Standard API
+
+Choose vendor(s) you like. No lock-in.
+
+Currently, there's support for S3 API only.
+
+</div>
+</div>
+<div class="sub-display-inner-container">
+<div class="text">
+
+## Self-hosting friendly
+
+If you like to have it all in your own hands. You can self-host the storages and access them using standard API(s).
+
+_**Note:** there's no dedicated application for self-hosting._ 
+
+</div>
+<div class="other small">
 </div>
 </div>
 </div>
@@ -107,7 +131,9 @@ Encryption options:
 ## Android platform
 
 <p>Carry a copy of data in mobile.</p>
-<p><a class="other-link" href="https://github.com/archivekeep/archivekeep/releases/">Download from releases</a></p>
+<p><a class="other-link" href="https://f-droid.org/packages/org.archivekeep.ArchiveKeep">Get it on F-Droid.</a></p>
+<p><a class="other-link" href="https://github.com/archivekeep/archivekeep/releases/">Or, download from releases.</a></p>
+
 
 </div>
 <div class="other small">
