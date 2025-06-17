@@ -9,6 +9,7 @@ import aws.sdk.kotlin.services.s3.model.ChecksumMode
 import aws.sdk.kotlin.services.s3.model.GetObjectRequest
 import aws.sdk.kotlin.services.s3.model.NoSuchKey
 import aws.sdk.kotlin.services.s3.model.NotFound
+import aws.sdk.kotlin.services.s3.model.Object
 import aws.sdk.kotlin.services.s3.model.S3Exception
 import aws.sdk.kotlin.services.s3.putObject
 import aws.smithy.kotlin.runtime.auth.awscredentials.CredentialsProvider
@@ -88,35 +89,52 @@ class S3Repository(
         ) {
             val files =
                 coroutineScope {
-                    (
-                        s3Client
-                            .listObjects {
-                                bucket = bucketName
-                                prefix = FILES_PREFIX
-                            }.contents ?: emptyList()
-                    ).map {
-                        async {
-                            val checksumSha256 =
-                                run {
-                                    // TODO: add caching
+                    var allItems = emptyList<Object>()
+                    var nextMarker: String? = null
 
-                                    val head =
-                                        s3Client.headObject {
-                                            bucket = bucketName
-                                            key = it.key
-                                            checksumMode = ChecksumMode.Enabled
-                                        }
-
-                                    head.checksumSha256!!.fromBase64ToHex()
+                    do {
+                        val response =
+                            s3Client
+                                .listObjects {
+                                    bucket = bucketName
+                                    prefix = FILES_PREFIX
+                                    marker = nextMarker
                                 }
 
-                            RepoIndex.File(
-                                it.key!!.toFilename(),
-                                it.size!!.toLong(),
-                                checksumSha256,
-                            )
-                        }
-                    }.map { it.await() }
+                        allItems = allItems + (response.contents ?: emptyList())
+
+                        nextMarker =
+                            if (response.isTruncated == true) {
+                                allItems.last().key
+                            } else {
+                                null
+                            }
+                    } while (nextMarker != null)
+
+                    allItems
+                        .map {
+                            async {
+                                val checksumSha256 =
+                                    run {
+                                        // TODO: add caching
+
+                                        val head =
+                                            s3Client.headObject {
+                                                bucket = bucketName
+                                                key = it.key
+                                                checksumMode = ChecksumMode.Enabled
+                                            }
+
+                                        head.checksumSha256!!.fromBase64ToHex()
+                                    }
+
+                                RepoIndex.File(
+                                    it.key!!.toFilename(),
+                                    it.size!!.toLong(),
+                                    checksumSha256,
+                                )
+                            }
+                        }.map { it.await() }
                 }
 
             RepoIndex(files)
