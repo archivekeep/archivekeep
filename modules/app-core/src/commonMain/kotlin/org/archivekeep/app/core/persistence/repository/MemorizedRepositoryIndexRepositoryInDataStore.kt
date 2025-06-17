@@ -6,6 +6,7 @@ import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringSetPreferencesKey
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
@@ -41,6 +42,7 @@ class MemorizedRepositoryIndexRepositoryInDataStore(
     override fun repositoryMemorizedIndexFlow(uri: RepositoryURI): Flow<OptionalLoadable<RepoIndex>> =
         rememberedRepositoriesIndexes
             .mapToOptionalLoadable("Get memorized index for URI: $uri") { it[uri] }
+            .distinctUntilChanged()
 
     override suspend fun updateRepositoryMemorizedIndexIfDiffers(
         uri: RepositoryURI,
