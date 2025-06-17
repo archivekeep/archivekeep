@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 0.4.3 = 2025-06-17
 
 ### Added
 
