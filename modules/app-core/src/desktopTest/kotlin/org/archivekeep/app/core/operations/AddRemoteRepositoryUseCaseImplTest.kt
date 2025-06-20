@@ -25,8 +25,8 @@ import org.archivekeep.app.core.persistence.drivers.grpc.GRPCStorageDriver
 import org.archivekeep.app.core.persistence.drivers.s3.S3StorageDriver
 import org.archivekeep.app.core.persistence.platform.demo.DemoEnvironment
 import org.archivekeep.app.core.persistence.registry.RegisteredRepository
-import org.archivekeep.app.core.utils.ProtectedLoadableResource
 import org.archivekeep.app.core.utils.firstLoadedOrNullOnErrorOrLocked
+import org.archivekeep.app.core.utils.generics.OptionalLoadable
 import org.archivekeep.app.core.utils.identifiers.RepositoryURI
 import org.archivekeep.files.repo.remote.grpc.BasicAuthCredentials
 import org.junit.jupiter.api.Test
@@ -104,17 +104,17 @@ class AddRemoteRepositoryUseCaseImplTest {
         val openState =
             repositoryService
                 .getRepository(expectedResultURI)
-                .rawAccessor
+                .optionalAccessorFlow
                 .map { listOf(it) }
                 .runningReduce { accumulator, value -> accumulator + value }
                 .stateIn(scope)
 
         // expect to start loading again as nothing consumes the shared flow now
-        openState.value.first().javaClass shouldBe ProtectedLoadableResource.Loading.javaClass
+        openState.value.first().javaClass shouldBe OptionalLoadable.Loading.javaClass
 
         eventually(3.seconds) {
             // should auto-open with in-memory remembered credentials
-            openState.value.last().javaClass shouldBe ProtectedLoadableResource.Loaded::class.java
+            openState.value.last().javaClass shouldBe OptionalLoadable.LoadedAvailable::class.java
         }
     }
 

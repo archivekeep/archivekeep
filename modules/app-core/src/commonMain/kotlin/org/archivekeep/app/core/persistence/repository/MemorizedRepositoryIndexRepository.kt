@@ -1,9 +1,15 @@
 package org.archivekeep.app.core.persistence.repository
 
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.onEach
 import org.archivekeep.app.core.utils.generics.OptionalLoadable
+import org.archivekeep.app.core.utils.generics.flatMapLatestLoadedData
+import org.archivekeep.app.core.utils.generics.mapToOptionalLoadable
 import org.archivekeep.app.core.utils.identifiers.RepositoryURI
+import org.archivekeep.files.repo.Repo
 import org.archivekeep.files.repo.RepoIndex
+import org.archivekeep.utils.loading.Loadable
 
 /**
  * This is a bit more than merely a cache.
@@ -17,4 +23,34 @@ interface MemorizedRepositoryIndexRepository {
         uri: RepositoryURI,
         accessedIndex: RepoIndex?,
     )
+
+    companion object {
+        @OptIn(ExperimentalCoroutinesApi::class)
+        fun MemorizedRepositoryIndexRepository.memorizingCachingIndexFlow(
+            uri: RepositoryURI,
+            optionalAccessorFlow: Flow<OptionalLoadable<Repo>>,
+        ): Flow<OptionalLoadable<RepoIndex>> {
+            val memorizedIndexFlow = repositoryMemorizedIndexFlow(uri)
+
+            return optionalAccessorFlow
+                .flatMapLatestLoadedData(
+                    onNotAvailable = { memorizedIndexFlow },
+                ) {
+                    it.indexFlow
+                        .onEach { accessedIndexLoadable ->
+                            val accessedIndex = (accessedIndexLoadable as? Loadable.Loaded)?.value ?: return@onEach
+
+                            try {
+                                updateRepositoryMemorizedIndexIfDiffers(
+                                    uri,
+                                    accessedIndex,
+                                )
+                            } catch (e: Throwable) {
+                                println("ERROR: memorized index update failed: $e")
+                                e.printStackTrace()
+                            }
+                        }.mapToOptionalLoadable()
+                }
+        }
+    }
 }

@@ -72,7 +72,7 @@ class AddAndPushProcedureServiceImpl(
             combineTransform(
                 repository.accessorFlow,
                 repository.localRepoStatus,
-                repository.indexFlow,
+                repository.indexFlowWithCaching,
             ) { accessor, _, _ ->
                 // TODO: reuse already computed index and local repo status
 

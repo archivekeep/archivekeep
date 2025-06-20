@@ -9,6 +9,7 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.stateIn
 import org.archivekeep.app.core.domain.repositories.Repository
+import org.archivekeep.app.core.domain.repositories.RepositoryConnectionState
 import org.archivekeep.app.core.domain.repositories.ResolvedRepositoryState
 import org.archivekeep.app.core.procedures.sync.RepoToRepoSync
 import org.archivekeep.app.core.procedures.sync.RepoToRepoSyncService
@@ -33,13 +34,13 @@ class SecondaryArchiveRepository(
     data class State(
         val repo: SecondaryArchiveRepository,
         val localRepoStatus: OptionalLoadable<StatusOperation.Result.Summary>,
-        val connectionStatus: Repository.ConnectionState,
+        val connectionStatus: RepositoryConnectionState,
         val syncRunning: Boolean,
         val canPushLoadable: OptionalLoadable<Boolean>,
         val canPull: Boolean,
         val syncTexts: OptionalLoadable<List<String>>,
     ) {
-        val needsUnlock = connectionStatus is Repository.ConnectionState.ConnectedLocked
+        val needsUnlock = connectionStatus is RepositoryConnectionState.ConnectedLocked
 
         val addTexts =
             localRepoStatus.mapLoadedData {

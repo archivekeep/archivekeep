@@ -9,7 +9,7 @@ import org.archivekeep.app.core.domain.repositories.UnlockOptions
 import org.archivekeep.app.core.domain.storages.StorageRegistry
 import org.archivekeep.app.core.persistence.drivers.filesystem.FileStores
 import org.archivekeep.app.core.persistence.registry.RegistryDataStore
-import org.archivekeep.app.core.utils.ProtectedLoadableResource
+import org.archivekeep.app.core.utils.generics.OptionalLoadable
 import org.archivekeep.app.core.utils.identifiers.RepositoryURI
 import org.archivekeep.files.repo.remote.grpc.BasicAuthCredentials
 
@@ -24,24 +24,24 @@ class AddRemoteRepositoryUseCaseImpl(
         credentials: BasicAuthCredentials?,
         rememberCredentials: Boolean,
     ) {
+        val repository = repositoryService.getRepository(uri)
+
         val result =
-            repositoryService
-                .getRepository(
-                    uri,
-                ).rawAccessor
-                .dropWhile { it is ProtectedLoadableResource.Loading }
+            repository
+                .optionalAccessorFlow
+                .dropWhile { it is OptionalLoadable.Loading }
                 .first()
 
         withContext(Dispatchers.IO) {
             when (result) {
-                is ProtectedLoadableResource.Failed -> throw result.throwable
-                ProtectedLoadableResource.Loading -> TODO("Shouldn't happen")
-                is ProtectedLoadableResource.PendingAuthentication -> {
+                is OptionalLoadable.Failed -> throw result.cause
+                OptionalLoadable.Loading -> TODO("Shouldn't happen")
+                is OptionalLoadable.NotAvailable -> {
                     if (credentials == null) {
                         throw RequiresCredentialsException()
                     } else {
                         try {
-                            result.authenticationRequest.tryOpen(
+                            repository.unlock(
                                 credentials,
                                 UnlockOptions(rememberCredentials),
                             )
@@ -51,7 +51,7 @@ class AddRemoteRepositoryUseCaseImpl(
                     }
                 }
 
-                is ProtectedLoadableResource.Loaded -> {
+                is OptionalLoadable.LoadedAvailable -> {
                     println("Success - result: $result")
                 }
             }

@@ -12,7 +12,7 @@ import kotlinx.coroutines.flow.update
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.serializer
 import org.archivekeep.app.core.domain.repositories.RepoAuthRequest
-import org.archivekeep.app.core.domain.repositories.Repository
+import org.archivekeep.app.core.domain.repositories.RepositoryConnectionState
 import org.archivekeep.app.core.domain.repositories.RepositoryEncryptionType
 import org.archivekeep.app.core.domain.repositories.RepositoryInformation
 import org.archivekeep.app.core.domain.repositories.ResolvedRepositoryState
@@ -441,7 +441,7 @@ class DemoEnvironment(
                         associationId,
                         displayName,
                     ),
-                    Repository.ConnectionState.Connected,
+                    RepositoryConnectionState.Connected,
                 ),
             )
     }

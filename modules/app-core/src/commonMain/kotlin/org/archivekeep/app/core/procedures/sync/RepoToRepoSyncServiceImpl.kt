@@ -74,10 +74,10 @@ class RepoToRepoSyncServiceImpl(
             combine(
                 repositoryService
                     .getRepository(fromURI)
-                    .indexFlow,
+                    .indexFlowWithCaching,
                 repositoryService
                     .getRepository(otherURI)
-                    .indexFlow,
+                    .indexFlowWithCaching,
             ) { base, other ->
                 Pair(base, other)
             }.conflate()

@@ -7,7 +7,7 @@ import org.archivekeep.files.RepositoryAssociationGroupId
 data class ResolvedRepositoryState(
     val uri: RepositoryURI,
     val information: RepositoryInformation,
-    val connectionState: Repository.ConnectionState,
+    val connectionState: RepositoryConnectionState,
 ) {
     val namedReference: NamedRepositoryReference = NamedRepositoryReference(uri, information.displayName)
 
