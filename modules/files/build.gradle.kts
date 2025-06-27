@@ -20,6 +20,8 @@ dependencies {
     implementation(libs.grpc.stub)
     implementation(libs.grpc.okhttp)
 
+    implementation(libs.jose.jwt)
+
     api(libs.grpc.kotlin.stub)
 
     implementation(libs.protobuf.kotlin.lite)
