@@ -13,7 +13,7 @@ class FilesRepoContractTest : RepoContractTest<FilesRepo>() {
     @field:TempDir
     lateinit var tempPath: Path
 
-    override fun createNew(): TestRepo<FilesRepo> {
+    override suspend fun createNew(): TestRepo<FilesRepo> {
         val path = tempPath.resolve(UUID.randomUUID().toString()).createDirectory()
 
         createFilesRepo(path)
