@@ -1,4 +1,4 @@
-package org.archivekeep.files.repo.files
+package org.archivekeep.utils
 
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
@@ -10,18 +10,24 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.flow.updateAndGet
-import java.nio.file.Path
 import java.util.concurrent.locks.Lock
 import java.util.concurrent.locks.ReentrantLock
 import kotlin.concurrent.withLock
-import kotlin.io.path.absolutePathString
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.milliseconds
 
-class InProgressHandler(
+class InProgressHandler<T>(
     scope: CoroutineScope,
     val startDelayDuration: Duration = 100.milliseconds,
+    val transform: (value: T) -> String,
 ) {
+    companion object {
+        operator fun invoke(
+            scope: CoroutineScope,
+            startDelayDuration: Duration = 100.milliseconds,
+        ) = InProgressHandler<String>(scope, startDelayDuration, transform = { it })
+    }
+
     private val lock: Lock = ReentrantLock(true)
 
     private val inProgressFiles = MutableStateFlow(emptySet<String>())
@@ -38,16 +44,16 @@ class InProgressHandler(
                 }
             }
 
-    fun onStart(dstPath: Path) {
+    fun onStart(dstPath: T) {
         lock.withLock {
-            inProgressFiles.update { it + setOf(dstPath.absolutePathString()) }
+            inProgressFiles.update { it + setOf(transform(dstPath)) }
             jobActiveOnIdle.updateAndGet { null }?.cancel()
         }
     }
 
-    fun onEnd(dstPath: Path) {
+    fun onEnd(dstPath: T) {
         lock.withLock {
-            val newValues = inProgressFiles.updateAndGet { it - setOf(dstPath.absolutePathString()) }
+            val newValues = inProgressFiles.updateAndGet { it - setOf(transform(dstPath)) }
 
             if (newValues.isEmpty()) {
                 jobActiveOnIdle.value = SupervisorJob()

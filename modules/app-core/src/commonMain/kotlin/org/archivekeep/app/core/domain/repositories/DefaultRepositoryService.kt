@@ -9,10 +9,10 @@ import org.archivekeep.app.core.persistence.registry.RegisteredRepository
 import org.archivekeep.app.core.persistence.registry.RegistryDataStore
 import org.archivekeep.app.core.persistence.repository.MemorizedRepositoryIndexRepository
 import org.archivekeep.app.core.persistence.repository.MemorizedRepositoryMetadataRepository
-import org.archivekeep.app.core.utils.ProtectedLoadableResource
 import org.archivekeep.app.core.utils.generics.UniqueInstanceManager
 import org.archivekeep.app.core.utils.identifiers.RepositoryURI
 import org.archivekeep.utils.coroutines.shareResourceIn
+import org.archivekeep.utils.loading.ProtectedLoadableResource
 
 class DefaultRepositoryService(
     private val scope: CoroutineScope,

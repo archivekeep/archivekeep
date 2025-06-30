@@ -8,12 +8,12 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.transform
 import kotlinx.coroutines.flow.transformWhile
-import org.archivekeep.app.core.utils.ProtectedLoadableResource
 import org.archivekeep.app.core.utils.exceptions.RepositoryLockedException
 import org.archivekeep.app.core.utils.identifiers.RepositoryURI
-import org.archivekeep.app.core.utils.mapAsLoadable
 import org.archivekeep.files.repo.Repo
 import org.archivekeep.files.repo.remote.grpc.BasicAuthCredentials
+import org.archivekeep.utils.loading.ProtectedLoadableResource
+import org.archivekeep.utils.loading.mapAsLoadable
 
 class ProtectedProviderOfRepositoryAccessor(
     private val uri: RepositoryURI,

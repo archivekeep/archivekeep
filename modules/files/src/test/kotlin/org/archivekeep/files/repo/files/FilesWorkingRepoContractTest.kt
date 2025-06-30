@@ -12,13 +12,11 @@ class FilesWorkingRepoContractTest : WorkingRepoContractTest<FilesRepo>() {
     @field:TempDir
     lateinit var tempPath: Path
 
-    override fun createNew(): TestRepo<FilesRepo> {
-        return object : TestRepo<FilesRepo> {
+    override fun createNew(): TestRepo<FilesRepo> =
+        object : TestRepo<FilesRepo> {
             val path = tempPath.resolve(UUID.randomUUID().toString()).createDirectory()
 
-            override fun open(testDispatcher: TestDispatcher): FilesRepo {
-                return FilesRepo(path, stateDispatcher = testDispatcher, ioDispatcher = testDispatcher)
-            }
+            override fun open(testDispatcher: TestDispatcher): FilesRepo = FilesRepo(path, stateDispatcher = testDispatcher, ioDispatcher = testDispatcher)
 
             override fun createUncommittedFile(
                 filename: String,
@@ -30,5 +28,4 @@ class FilesWorkingRepoContractTest : WorkingRepoContractTest<FilesRepo>() {
                     .use { it.write(bytes) }
             }
         }
-    }
 }

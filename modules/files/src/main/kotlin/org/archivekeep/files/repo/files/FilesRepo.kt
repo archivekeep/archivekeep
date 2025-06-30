@@ -31,9 +31,9 @@ import org.archivekeep.files.repo.ArchiveFileInfo
 import org.archivekeep.files.repo.LocalRepo
 import org.archivekeep.files.repo.RepoIndex
 import org.archivekeep.files.repo.RepositoryMetadata
+import org.archivekeep.utils.InProgressHandler
 import org.archivekeep.utils.coroutines.flowScopedToThisJob
 import org.archivekeep.utils.flows.logLoadableResourceLoad
-import org.archivekeep.utils.io.watchForSingleFile
 import org.archivekeep.utils.io.watchRecursively
 import org.archivekeep.utils.loading.Loadable
 import org.archivekeep.utils.loading.flatMapLoadableFlow
@@ -52,6 +52,7 @@ import java.nio.file.PathMatcher
 import java.nio.file.StandardOpenOption
 import java.util.Collections.singletonList
 import kotlin.io.path.Path
+import kotlin.io.path.absolutePathString
 import kotlin.io.path.createDirectory
 import kotlin.io.path.createParentDirectories
 import kotlin.io.path.deleteExisting
@@ -83,7 +84,7 @@ class FilesRepo(
 
     private val metadataPath = root.resolve(".archive").resolve("metadata.json")
 
-    private val inProgressHandler = InProgressHandler(scope)
+    private val inProgressHandler = InProgressHandler<Path>(scope, transform = { it.absolutePathString() })
 
     private val indexStore =
         FilesystemIndexStore(
@@ -391,15 +392,12 @@ class FilesRepo(
 
     override val metadataFlow: Flow<Loadable<RepositoryMetadata>> =
         metadataPath
-            .watchForSingleFile(ioDispatcher)
-            .map { "update" }
-            .onStart { emit("start") }
-            .conflate()
             .produceLoadableStateIn(
                 scope,
-                ioDispatcher,
-                "Repository metadata: $root",
-                throttlePauseDuration,
+                watchDispatcher = ioDispatcher,
+                workDispatcher = ioDispatcher,
+                message = "Repository metadata: $root",
+                throttle = throttlePauseDuration,
             ) {
                 if (metadataPath.exists()) {
                     Json.decodeFromString<RepositoryMetadata>(metadataPath.readText())

@@ -10,7 +10,6 @@ import org.archivekeep.app.core.domain.storages.Storage
 import org.archivekeep.app.core.domain.storages.StorageConnection
 import org.archivekeep.app.core.domain.storages.StorageDriver
 import org.archivekeep.app.core.domain.storages.StorageInformation
-import org.archivekeep.app.core.utils.ProtectedLoadableResource
 import org.archivekeep.app.core.utils.generics.OptionalLoadable
 import org.archivekeep.app.core.utils.generics.OptionalLoadable.LoadedAvailable
 import org.archivekeep.app.core.utils.generics.OptionalLoadable.NotAvailable
@@ -24,6 +23,7 @@ import org.archivekeep.app.core.utils.identifiers.RepositoryURI
 import org.archivekeep.app.core.utils.identifiers.StorageURI
 import org.archivekeep.files.repo.Repo
 import org.archivekeep.files.repo.files.openFilesRepoOrNull
+import org.archivekeep.utils.loading.ProtectedLoadableResource
 import org.archivekeep.utils.loading.mapLoadedData
 import java.nio.file.Path
 import kotlin.io.path.Path

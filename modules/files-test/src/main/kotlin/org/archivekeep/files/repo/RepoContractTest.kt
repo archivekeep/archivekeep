@@ -28,7 +28,7 @@ abstract class RepoContractTest<T : Repo> {
         suspend fun open(testDispatcher: TestDispatcher): T
     }
 
-    abstract fun createNew(): TestRepo<T>
+    abstract suspend fun createNew(): TestRepo<T>
 
     @Test
     fun `save should store file`() =

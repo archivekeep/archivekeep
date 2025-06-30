@@ -23,7 +23,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
-import org.archivekeep.app.core.persistence.credentials.PasswordProtectedDataStore
 import org.archivekeep.app.ui.components.base.interactivity.DraggableAreaIfWindowPresent
 import org.archivekeep.app.ui.components.designsystem.navigation.AppBarIconButton
 import org.archivekeep.app.ui.components.designsystem.theme.CColors
@@ -31,6 +30,7 @@ import org.archivekeep.app.ui.components.feature.buttons.drawerIconButton
 import org.archivekeep.app.ui.domain.data.canUnlock
 import org.archivekeep.app.ui.domain.wiring.LocalApplicationServices
 import org.archivekeep.app.ui.domain.wiring.LocalWalletOperationLaunchers
+import org.archivekeep.utils.datastore.passwordprotected.PasswordProtectedDataStore
 
 @Composable
 fun AppBar(

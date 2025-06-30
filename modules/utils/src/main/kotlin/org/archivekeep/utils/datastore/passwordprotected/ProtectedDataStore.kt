@@ -1,7 +1,7 @@
-package org.archivekeep.app.core.persistence.credentials
+package org.archivekeep.utils.datastore.passwordprotected
 
 import kotlinx.coroutines.flow.Flow
-import org.archivekeep.app.core.utils.ProtectedLoadableResource
+import org.archivekeep.utils.loading.ProtectedLoadableResource
 
 interface ProtectedDataStore<E> {
     val data: Flow<ProtectedLoadableResource<E, Any>>

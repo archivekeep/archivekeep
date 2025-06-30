@@ -25,10 +25,10 @@ import org.archivekeep.app.core.persistence.drivers.grpc.GRPCStorageDriver
 import org.archivekeep.app.core.persistence.drivers.s3.S3StorageDriver
 import org.archivekeep.app.core.persistence.platform.demo.DemoEnvironment
 import org.archivekeep.app.core.persistence.registry.RegisteredRepository
-import org.archivekeep.app.core.utils.firstLoadedOrNullOnErrorOrLocked
 import org.archivekeep.app.core.utils.generics.OptionalLoadable
 import org.archivekeep.app.core.utils.identifiers.RepositoryURI
 import org.archivekeep.files.repo.remote.grpc.BasicAuthCredentials
+import org.archivekeep.utils.loading.firstLoadedOrNullOnErrorOrLocked
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.io.TempDir
 import org.testcontainers.containers.MinIOContainer

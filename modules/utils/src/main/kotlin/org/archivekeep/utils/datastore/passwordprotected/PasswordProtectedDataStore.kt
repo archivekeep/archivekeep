@@ -1,4 +1,4 @@
-package org.archivekeep.app.core.persistence.credentials
+package org.archivekeep.utils.datastore.passwordprotected
 
 interface PasswordProtectedDataStore<T> : ProtectedDataStore<T> {
     suspend fun create(password: String)

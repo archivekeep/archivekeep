@@ -14,12 +14,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import compose.icons.TablerIcons
 import compose.icons.tablericons.Lock
-import org.archivekeep.app.core.persistence.credentials.PasswordProtectedDataStore
 import org.archivekeep.app.core.utils.exceptions.RepositoryLockedException
 import org.archivekeep.app.ui.domain.data.canUnlock
 import org.archivekeep.app.ui.domain.wiring.LocalApplicationServices
 import org.archivekeep.app.ui.domain.wiring.LocalArchiveOperationLaunchers
 import org.archivekeep.app.ui.domain.wiring.LocalWalletOperationLaunchers
+import org.archivekeep.utils.datastore.passwordprotected.PasswordProtectedDataStore
 
 @Composable
 fun RepositoryLockedError(

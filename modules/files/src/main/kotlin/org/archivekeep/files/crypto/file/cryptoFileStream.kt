@@ -68,11 +68,11 @@ fun writeCryptoStream(
     cipherOutputStream.close()
 }
 
-fun <T> readCryptoStream(
+suspend fun <T> readCryptoStream(
     inputStream: InputStream,
     signatureVerifier: JWSVerifier,
     decrypter: JWEDecrypter,
-    handler: (plainMetadata: CryptoMetadata.Plain, decryptedStream: InputStream) -> T,
+    handler: suspend (plainMetadata: CryptoMetadata.Plain, decryptedStream: InputStream) -> T,
 ): T {
     val buffered = inputStream.buffered()
 
@@ -102,10 +102,10 @@ fun <T> readCryptoStream(
     return decryptCryptoStreamContents(buffered, metadata, handler)
 }
 
-fun <T> decryptCryptoStreamContents(
+suspend fun <T> decryptCryptoStreamContents(
     input: InputStream,
     metadata: CryptoMetadata,
-    handler: (plainMetadata: CryptoMetadata.Plain, decryptedStream: InputStream) -> T,
+    handler: suspend (plainMetadata: CryptoMetadata.Plain, decryptedStream: InputStream) -> T,
 ): T {
     if (metadata.private.cipher != "AES-128-CFB") {
         throw RuntimeException("Unsupported cipher ${metadata.private.cipher}")

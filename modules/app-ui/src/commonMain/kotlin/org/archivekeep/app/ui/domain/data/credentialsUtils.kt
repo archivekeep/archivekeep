@@ -5,9 +5,9 @@ import androidx.compose.runtime.collectAsState
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 import org.archivekeep.app.core.persistence.credentials.Credentials
-import org.archivekeep.app.core.persistence.credentials.PasswordProtectedDataStore
-import org.archivekeep.app.core.persistence.credentials.PasswordProtectedJoseStorage
-import org.archivekeep.app.core.utils.ProtectedLoadableResource
+import org.archivekeep.utils.datastore.passwordprotected.PasswordProtectedDataStore
+import org.archivekeep.utils.datastore.passwordprotected.PasswordProtectedJoseStorage
+import org.archivekeep.utils.loading.ProtectedLoadableResource
 
 fun(PasswordProtectedDataStore<Credentials>?).canUnlockFlow() =
     (this as? PasswordProtectedJoseStorage)?.data?.map {

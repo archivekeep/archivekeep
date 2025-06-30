@@ -4,7 +4,6 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.serializer
 import org.archivekeep.app.core.persistence.credentials.Credentials
-import org.archivekeep.app.core.persistence.credentials.PasswordProtectedJoseStorage
 import org.archivekeep.app.core.persistence.drivers.filesystem.DesktopFileStores
 import org.archivekeep.app.core.persistence.drivers.filesystem.FileStores
 import org.archivekeep.app.core.persistence.drivers.filesystem.FileSystemStorageDriver
@@ -12,6 +11,7 @@ import org.archivekeep.app.core.persistence.platform.Environment
 import org.archivekeep.app.core.persistence.registry.PreferenceDataStoreRegistryData
 import org.archivekeep.app.core.persistence.repository.MemorizedRepositoryIndexRepositoryInDataStore
 import org.archivekeep.app.core.persistence.repository.MemorizedRepositoryMetadataRepositoryInDataStore
+import org.archivekeep.utils.datastore.passwordprotected.PasswordProtectedJoseStorage
 
 class DesktopEnvironment(
     val scope: CoroutineScope,

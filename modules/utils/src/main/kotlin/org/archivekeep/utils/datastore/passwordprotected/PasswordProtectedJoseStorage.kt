@@ -1,4 +1,4 @@
-package org.archivekeep.app.core.persistence.credentials
+package org.archivekeep.utils.datastore.passwordprotected
 
 import com.nimbusds.jose.EncryptionMethod
 import com.nimbusds.jose.JWEAlgorithm
@@ -21,9 +21,9 @@ import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.json.Json
-import org.archivekeep.app.core.persistence.credentials.PasswordProtectedJoseStorage.State
-import org.archivekeep.app.core.utils.ProtectedLoadableResource
 import org.archivekeep.utils.coroutines.shareResourceIn
+import org.archivekeep.utils.datastore.passwordprotected.PasswordProtectedJoseStorage.State
+import org.archivekeep.utils.loading.ProtectedLoadableResource
 import org.archivekeep.utils.safeFileRead
 import org.archivekeep.utils.safeFileReadWrite
 import java.nio.file.Path

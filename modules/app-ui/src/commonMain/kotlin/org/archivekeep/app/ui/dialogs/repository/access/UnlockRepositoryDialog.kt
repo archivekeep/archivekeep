@@ -29,7 +29,6 @@ import org.archivekeep.app.core.domain.repositories.Repository
 import org.archivekeep.app.core.domain.repositories.RepositoryInformation
 import org.archivekeep.app.core.domain.repositories.UnlockOptions
 import org.archivekeep.app.core.persistence.credentials.Credentials
-import org.archivekeep.app.core.persistence.credentials.PasswordProtectedDataStore
 import org.archivekeep.app.core.utils.generics.ExecutionOutcome
 import org.archivekeep.app.core.utils.identifiers.RepositoryURI
 import org.archivekeep.app.ui.components.designsystem.input.CheckboxWithText
@@ -49,6 +48,7 @@ import org.archivekeep.app.ui.utils.asAction
 import org.archivekeep.app.ui.utils.collectAsLoadable
 import org.archivekeep.app.ui.utils.simpleLaunchable
 import org.archivekeep.files.repo.remote.grpc.BasicAuthCredentials
+import org.archivekeep.utils.datastore.passwordprotected.PasswordProtectedDataStore
 import org.archivekeep.utils.loading.Loadable
 
 class UnlockRepositoryDialog(

@@ -12,10 +12,10 @@ import kotlinx.serialization.KSerializer
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonElement
-import org.archivekeep.app.core.persistence.credentials.ProtectedDataStore
-import org.archivekeep.app.core.utils.ProtectedLoadableResource
 import org.archivekeep.app.core.utils.datastore.DataStoreKSerializer
 import org.archivekeep.utils.coroutines.shareResourceIn
+import org.archivekeep.utils.datastore.passwordprotected.ProtectedDataStore
+import org.archivekeep.utils.loading.ProtectedLoadableResource
 import java.nio.file.Path
 
 class SecretKeyProtectedDataStore<E>(

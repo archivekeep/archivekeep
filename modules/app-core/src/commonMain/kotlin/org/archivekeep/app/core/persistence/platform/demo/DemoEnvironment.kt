@@ -24,7 +24,6 @@ import org.archivekeep.app.core.domain.storages.StorageInformation
 import org.archivekeep.app.core.domain.storages.StorageNamedReference
 import org.archivekeep.app.core.domain.storages.StorageRepository
 import org.archivekeep.app.core.persistence.credentials.Credentials
-import org.archivekeep.app.core.persistence.credentials.PasswordProtectedJoseStorage
 import org.archivekeep.app.core.persistence.drivers.filesystem.FileStores
 import org.archivekeep.app.core.persistence.drivers.filesystem.MountedFileSystem
 import org.archivekeep.app.core.persistence.platform.Environment
@@ -33,7 +32,6 @@ import org.archivekeep.app.core.persistence.registry.RegisteredStorage
 import org.archivekeep.app.core.persistence.registry.RegistryDataStore
 import org.archivekeep.app.core.persistence.repository.MemorizedRepositoryIndexRepository
 import org.archivekeep.app.core.persistence.repository.MemorizedRepositoryMetadataRepository
-import org.archivekeep.app.core.utils.ProtectedLoadableResource
 import org.archivekeep.app.core.utils.generics.OptionalLoadable
 import org.archivekeep.app.core.utils.generics.UniqueSharedFlowInstanceManager
 import org.archivekeep.app.core.utils.identifiers.RepositoryURI
@@ -49,7 +47,9 @@ import org.archivekeep.testing.storage.InMemoryLocalRepo
 import org.archivekeep.testing.storage.InMemoryRepo
 import org.archivekeep.testing.storage.SpeedLimitedLocalRepoWrapper
 import org.archivekeep.testing.storage.SpeedLimitedRepoWrapper
+import org.archivekeep.utils.datastore.passwordprotected.PasswordProtectedJoseStorage
 import org.archivekeep.utils.loading.Loadable
+import org.archivekeep.utils.loading.ProtectedLoadableResource
 import org.archivekeep.utils.loading.mapLoadedData
 import org.archivekeep.utils.loading.mapToLoadable
 import org.archivekeep.utils.loading.stateIn

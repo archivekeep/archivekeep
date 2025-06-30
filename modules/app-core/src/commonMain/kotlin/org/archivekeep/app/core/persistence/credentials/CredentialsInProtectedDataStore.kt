@@ -5,9 +5,10 @@ import kotlinx.coroutines.flow.map
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
-import org.archivekeep.app.core.utils.ProtectedLoadableResource
 import org.archivekeep.app.core.utils.identifiers.RepositoryURI
 import org.archivekeep.files.repo.remote.grpc.BasicAuthCredentials
+import org.archivekeep.utils.datastore.passwordprotected.ProtectedDataStore
+import org.archivekeep.utils.loading.ProtectedLoadableResource
 
 class CredentialsInProtectedDataStore(
     val datastore: ProtectedDataStore<Credentials>,

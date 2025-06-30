@@ -4,9 +4,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.first
-import org.archivekeep.app.core.persistence.credentials.PasswordProtectedJoseStorage
 import org.archivekeep.app.ui.dialogs.wallet.CreateWalletDialog
 import org.archivekeep.app.ui.dialogs.wallet.UnlockWalletDialog
+import org.archivekeep.utils.datastore.passwordprotected.PasswordProtectedJoseStorage
 
 @Composable
 fun rememberWalletOperationLaunchersAsDialogs(dialogRenderer: OverlayDialogRenderer): WalletOperationLaunchers {
