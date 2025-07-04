@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Button
 import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -20,14 +21,17 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.cancel
+import kotlinx.coroutines.ensureActive
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.plus
 import org.archivekeep.app.core.persistence.drivers.filesystem.FileSystemStorageType
 import org.archivekeep.app.core.persistence.drivers.filesystem.operations.AddFileSystemRepositoryOperation
-import org.archivekeep.app.core.persistence.drivers.filesystem.operations.AddFileSystemRepositoryOperation.AddStatus
-import org.archivekeep.app.core.persistence.drivers.filesystem.operations.AddFileSystemRepositoryOperation.InitStatus
-import org.archivekeep.app.core.persistence.drivers.filesystem.operations.AddFileSystemRepositoryOperation.PreparationStatus
 import org.archivekeep.app.core.persistence.drivers.filesystem.operations.AddFileSystemRepositoryOperation.StorageMarking
 import org.archivekeep.app.core.persistence.drivers.filesystem.operations.AddFileSystemRepositoryUseCase
-import org.archivekeep.app.ui.components.base.layout.ScrollableColumn
+import org.archivekeep.app.core.utils.generics.Execution
+import org.archivekeep.app.core.utils.generics.ExecutionOutcome
 import org.archivekeep.app.ui.components.designsystem.dialog.DialogButtonContainer
 import org.archivekeep.app.ui.components.designsystem.dialog.DialogCard
 import org.archivekeep.app.ui.components.designsystem.dialog.DialogFilePicker
@@ -35,14 +39,18 @@ import org.archivekeep.app.ui.components.designsystem.dialog.DialogInnerContaine
 import org.archivekeep.app.ui.components.designsystem.dialog.DialogInputLabel
 import org.archivekeep.app.ui.components.designsystem.dialog.DialogOverlay
 import org.archivekeep.app.ui.components.designsystem.input.CheckboxWithText
+import org.archivekeep.app.ui.components.designsystem.input.PasswordField
+import org.archivekeep.app.ui.components.feature.LoadableGuard
 import org.archivekeep.app.ui.components.feature.dialogs.SimpleActionDialogControlButtons
 import org.archivekeep.app.ui.components.feature.dialogs.SimpleActionDialogDoneButtons
 import org.archivekeep.app.ui.components.feature.errors.AutomaticErrorMessage
 import org.archivekeep.app.ui.dialogs.Dialog
 import org.archivekeep.app.ui.domain.wiring.LocalOperationFactory
 import org.archivekeep.app.ui.domain.wiring.OperationFactory
+import org.archivekeep.app.ui.utils.SingleLaunchGuard
 import org.archivekeep.app.ui.utils.filesystem.LocalFilesystemDirectoryPicker
 import org.archivekeep.app.ui.utils.filesystem.PickResult
+import org.archivekeep.utils.loading.Loadable
 
 class AddFileSystemRepositoryDialog(
     val intendedStorageType: FileSystemStorageType?,
@@ -56,28 +64,42 @@ class AddFileSystemRepositoryDialog(
 
         var markConfirmed by mutableStateOf<Boolean?>(false)
 
-        var addOperation by mutableStateOf<AddFileSystemRepositoryOperation?>(null)
+        private var operationScope: CoroutineScope = coroutineScope + SupervisorJob()
+
+        var addOperation by mutableStateOf<Loadable<AddFileSystemRepositoryOperation>?>(null)
             private set
 
         fun setPick(result: PickResult) {
             pickResult = result
             markConfirmed = null
 
-            addOperation?.run { cancel() }
+            operationScope.cancel()
+            operationScope = coroutineScope + SupervisorJob()
 
             when (result) {
                 is PickResult.Success -> {
-                    val newOperation =
-                        operationFactory
-                            .get(AddFileSystemRepositoryUseCase::class.java)
-                            .begin(
-                                coroutineScope,
-                                result.path,
-                                intendedStorageType,
-                            )
+                    addOperation = Loadable.Loading
 
-                    addOperation = newOperation
+                    operationScope.launch {
+                        try {
+                            val newOperation =
+                                operationFactory
+                                    .get(AddFileSystemRepositoryUseCase::class.java)
+                                    .begin(
+                                        operationScope,
+                                        result.path,
+                                        intendedStorageType,
+                                    )
+
+                            ensureActive()
+                            addOperation = Loadable.Loaded(newOperation)
+                        } catch (e: Throwable) {
+                            ensureActive()
+                            addOperation = Loadable.Failed(e)
+                        }
+                    }
                 }
+
                 is PickResult.Failure -> {
                     addOperation = null
                 }
@@ -85,11 +107,11 @@ class AddFileSystemRepositoryDialog(
         }
 
         override fun onAbandoned() {
-            addOperation?.run { cancel() }
+            operationScope.cancel()
         }
 
         override fun onForgotten() {
-            addOperation?.run { cancel() }
+            operationScope.cancel()
         }
 
         override fun onRemembered() {}
@@ -111,10 +133,6 @@ class AddFileSystemRepositoryDialog(
 
         val addOperation = vm.addOperation
 
-        val preparationStatus = addOperation?.preparationStatus?.collectAsState()?.value
-        val initStatus = addOperation?.initStatus?.collectAsState()?.value
-        val addStatus = addOperation?.addStatus?.collectAsState()?.value
-
         val permissionGrant = platformSpecificFileSystemRepositoryGuard()
 
         val onLaunch = LocalFilesystemDirectoryPicker.current(vm::setPick)
@@ -125,10 +143,6 @@ class AddFileSystemRepositoryDialog(
             }
         }
 
-        if (addStatus is AddStatus.AddSuccessful) {
-            // TODO: init storage as local or so
-            // TODO: auto close: onClose()
-        }
         val selectedPath = vm.pickResult
 
         DialogOverlay(onDismissRequest = onClose) {
@@ -139,9 +153,7 @@ class AddFileSystemRepositoryDialog(
                 onLaunch,
                 vm.markConfirmed,
                 { vm.markConfirmed = it },
-                preparationStatus,
-                initStatus,
-                addStatus,
+                vm.addOperation,
                 onClose,
             )
         }
@@ -169,19 +181,13 @@ private fun AddRepositoryDialogContents(
     onTriggerChange: () -> Unit,
     markConfirmed: Boolean?,
     setMarkConfirmed: (newValue: Boolean?) -> Unit,
-    preparationStatus: PreparationStatus?,
-    initStatus: InitStatus?,
-    addStatus: AddStatus?,
+    optionLoadable: Loadable<AddFileSystemRepositoryOperation>?,
     onClose: () -> Unit,
 ) {
-    val storageMarkMatch =
-        preparationStatus?.let {
-            when (it) {
-                is PreparationStatus.ReadyForAdd -> it.storageMarking
-                is PreparationStatus.ReadyForInit -> it.storageMarking
-                else -> null
-            }
-        }
+    var password by mutableStateOf("")
+    val coroutineScope = rememberCoroutineScope()
+    val passwordLaunchGuard = remember(coroutineScope) { SingleLaunchGuard(coroutineScope) }
+    val singleLaunchGuard = remember(coroutineScope) { SingleLaunchGuard(coroutineScope) }
 
     DialogCard {
         DialogInnerContainer(
@@ -209,9 +215,10 @@ private fun AddRepositoryDialogContents(
                                 }
                             },
                             onTriggerChange = onTriggerChange,
-                            changeEnabled = initStatus == null && addStatus == null,
+                            // TODO: changeEnabled = initStatus == null && addStatus == null,
                         )
                     }
+
                     is PlatformSpecificPermissionFulfilment.NeedsGrant -> {
                         HorizontalDivider()
                         Spacer(Modifier)
@@ -227,92 +234,166 @@ private fun AddRepositoryDialogContents(
                     }
                 }
 
-                ScrollableColumn {
-                    PreparationStatus(preparationStatus, addStatus, initStatus)
-
-                    if (
-                        (preparationStatus is PreparationStatus.ReadyForAdd || preparationStatus is PreparationStatus.ReadyForInit) &&
-                        initStatus == null &&
-                        addStatus == null
-                    ) {
-                        when (storageMarkMatch) {
-                            StorageMarking.ALRIGHT -> {
-                                PreparationStatus(
-                                    preparationStatus,
-                                    addStatus,
-                                    initStatus,
-                                )
+                if (optionLoadable != null) {
+                    LoadableGuard(
+                        optionLoadable,
+                        loadingContent = {
+                            ProgressText("Preparing...")
+                        },
+                    ) { option ->
+                        when (option) {
+                            is AddFileSystemRepositoryOperation.Invalid -> {
+                                ProgressText("Error $option")
                             }
 
-                            StorageMarking.NEEDS_MARK_AS_LOCAL -> {
-                                ProgressText("Storage is used for the first time, and it will be marked as local.")
+                            is AddFileSystemRepositoryOperation.DirectoryNotRepository -> {
+                                val initStatus = option.initStatus.collectAsState().value
+                                val addStatus = option.addStatus.collectAsState().value
+
+                                InitStatus(option.initStatus.value)
+                                AddStatus(option.addStatus.value)
+
+                                if (initStatus == Execution.NotRunning && addStatus == Execution.NotRunning) {
+                                    StorageMark(option.storageMarking, markConfirmed, setMarkConfirmed)
+                                }
                             }
 
-                            StorageMarking.NEEDS_MARK_AS_EXTERNAL -> {
-                                ProgressText("Storage is used for the first time, and it will be marked as external.")
+                            is AddFileSystemRepositoryOperation.PlainFileSystemRepository -> {
+                                val addStatus = option.addStatus.collectAsState().value
+
+                                AddStatus(option.addStatus.value, notRunningStatus = { ProgressText("Repository can be added.") })
+
+                                if (addStatus == Execution.NotRunning) {
+                                    StorageMark(option.storageMarking, markConfirmed, setMarkConfirmed)
+                                }
                             }
 
-                            StorageMarking.NEEDS_REMARK_AS_LOCAL -> {
-                                Text("Storage is currently external, re-mark it to local?")
-                                CheckboxWithText(
-                                    markConfirmed == true,
-                                    text = "Yes, re-mark storage as local",
-                                    onValueChange = { setMarkConfirmed(it) },
-                                )
-                            }
+                            is AddFileSystemRepositoryOperation.EncryptedFileSystemRepository -> {
+                                ProgressText("The repository is encrypted, and password protected.")
 
-                            StorageMarking.NEEDS_REMARK_AS_EXTERNAL -> {
-                                ProgressText("Storage is currently local, re-mark it as external?")
-                                CheckboxWithText(
-                                    markConfirmed == true,
-                                    text = "Yes, re-mark storage as external",
-                                    onValueChange = { setMarkConfirmed(it) },
-                                )
-                            }
+                                option.unlockStatus.collectAsState().value.let {
+                                    if (it is Execution.InProgress) {
+                                        ProgressText("Unlocking...")
+                                    } else if (it is Execution.Finished && it.outcome is ExecutionOutcome.Success) {
+                                        ProgressText("Successfully unlocked.")
+                                    } else {
+                                        Text(
+                                            "Enter password to access it:",
+                                            modifier = Modifier.padding(top = 16.dp, bottom = 8.dp),
+                                        )
+                                        PasswordField(
+                                            password,
+                                            onValueChange = { password = it },
+                                            placeholder = { Text("Enter password ...") },
+                                            modifier = Modifier.padding(bottom = 8.dp),
+                                        )
+                                        Button(
+                                            onClick = { singleLaunchGuard.launch { option.unlock(password) } },
+                                            enabled = password.isNotEmpty(),
+                                            shape = MaterialTheme.shapes.small,
+                                            modifier = Modifier.padding(bottom = 8.dp),
+                                        ) {
+                                            Text("Unlock")
+                                        }
 
-                            null -> {
-                                ProgressText("Preparing ...")
+                                        passwordLaunchGuard.executionOutcome.value.let {
+                                            if (it is ExecutionOutcome.Failed) {
+                                                AutomaticErrorMessage(it.cause, onResolve = { singleLaunchGuard.reset() })
+                                            }
+                                        }
+                                    }
+                                }
+
+                                AddStatus(option.addStatus.collectAsState().value)
                             }
                         }
                     }
-                    InitStatus(initStatus)
-                    AddStatus(addStatus)
+                } else {
+                    Text("Please, select directory.")
                 }
             },
             bottomContent = {
                 DialogButtonContainer {
-                    val (name, canLaunch, onLaunch) =
-                        when (preparationStatus) {
-                            null, is PreparationStatus.PreparationNoContinue, PreparationStatus.Preparing -> {
-                                Triple("Add", false, {})
-                            }
-
-                            is PreparationStatus.ReadyForAdd -> {
-                                Triple(
-                                    "Add",
-                                    addStatus == null && (storageMarkMatch?.isRemark == false || markConfirmed == true),
-                                    { preparationStatus.startAddExecution(markConfirmed) },
-                                )
-                            }
-
-                            is PreparationStatus.ReadyForInit -> {
-                                Triple(
-                                    "Init",
-                                    initStatus == null && (storageMarkMatch?.isRemark == false || markConfirmed == true),
-                                    { preparationStatus.startInit(markConfirmed) },
-                                )
-                            }
+                    when (optionLoadable) {
+                        is Loadable.Failed, null, Loadable.Loading -> {
+                            SimpleActionDialogControlButtons(
+                                "Add",
+                                onLaunch = {},
+                                onClose = onClose,
+                                canLaunch = false,
+                            )
                         }
 
-                    if (addStatus == null && initStatus == null) {
-                        SimpleActionDialogControlButtons(
-                            name,
-                            onLaunch = onLaunch,
-                            onClose = onClose,
-                            canLaunch = canLaunch,
-                        )
-                    } else {
-                        SimpleActionDialogDoneButtons(onClose)
+                        is Loadable.Loaded<*> -> {
+                            when (val option = optionLoadable.value) {
+                                is AddFileSystemRepositoryOperation.Invalid -> {
+                                    SimpleActionDialogControlButtons(
+                                        "Add",
+                                        onLaunch = {},
+                                        onClose = onClose,
+                                        canLaunch = false,
+                                    )
+                                }
+
+                                is AddFileSystemRepositoryOperation.DirectoryNotRepository -> {
+                                    val state = option.addStatus.collectAsState().value
+
+                                    if (state is Execution.Finished) {
+                                        SimpleActionDialogDoneButtons(onClose)
+                                    } else {
+                                        SimpleActionDialogControlButtons(
+                                            "Init",
+                                            onLaunch = {
+                                                singleLaunchGuard.launch { option.startInitAsPlain(markConfirmed) }
+                                            },
+                                            onClose = onClose,
+                                            canLaunch = state == Execution.NotRunning && (!option.storageMarking.isRemark || markConfirmed == true),
+                                        )
+                                    }
+                                }
+
+                                is AddFileSystemRepositoryOperation.PlainFileSystemRepository -> {
+                                    val state = option.addStatus.collectAsState().value
+
+                                    if (state is Execution.Finished) {
+                                        SimpleActionDialogDoneButtons(onClose)
+                                    } else {
+                                        SimpleActionDialogControlButtons(
+                                            "Add",
+                                            onLaunch = {
+                                                singleLaunchGuard.launch { option.runAddExecution(markConfirmed) }
+                                            },
+                                            onClose = onClose,
+                                            canLaunch = state == Execution.NotRunning && (!option.storageMarking.isRemark || markConfirmed == true),
+                                        )
+                                    }
+                                }
+
+                                is AddFileSystemRepositoryOperation.EncryptedFileSystemRepository -> {
+                                    val state = option.addStatus.collectAsState().value
+
+                                    if (state is Execution.Finished) {
+                                        SimpleActionDialogDoneButtons(onClose)
+                                    } else {
+                                        val isUnlocked =
+                                            option.unlockStatus.collectAsState().value.let {
+                                                it is Execution.Finished &&
+                                                    it.outcome is ExecutionOutcome.Success
+                                            }
+
+                                        SimpleActionDialogControlButtons(
+                                            "Add",
+                                            onLaunch = {
+                                                singleLaunchGuard.launch { option.runAddExecution(markConfirmed) }
+                                            },
+                                            onClose = onClose,
+                                            canLaunch =
+                                                state == Execution.NotRunning && isUnlocked && (!option.storageMarking.isRemark || markConfirmed == true),
+                                        )
+                                    }
+                                }
+                            }
+                        }
                     }
                 }
             },
@@ -321,55 +402,74 @@ private fun AddRepositoryDialogContents(
 }
 
 @Composable
-private fun PreparationStatus(
-    preparationStatus: PreparationStatus?,
-    addStatus: AddStatus?,
-    initStatus: InitStatus?,
+private fun StorageMark(
+    storageMarkMatch: StorageMarking?,
+    markConfirmed: Boolean?,
+    setMarkConfirmed: (newValue: Boolean?) -> Unit,
 ) {
-    when (preparationStatus) {
-        is PreparationStatus.PreparationException ->
-            AutomaticErrorMessage(preparationStatus.cause, onResolve = {})
+    when (storageMarkMatch) {
+        StorageMarking.ALRIGHT -> {}
 
-        is PreparationStatus.PreparationNoContinue -> ProgressText("Error $preparationStatus")
-
-        PreparationStatus.Preparing -> ProgressText("Preparing...")
-
-        is PreparationStatus.ReadyForAdd -> {
-            if (addStatus == null) {
-                ProgressText("Repository can be added.")
-            }
+        StorageMarking.NEEDS_MARK_AS_LOCAL -> {
+            ProgressText("Storage is used for the first time, and it will be marked as local.")
         }
 
-        is PreparationStatus.ReadyForInit ->
-            if (initStatus == null) {
-                ProgressText("The directory is not a repository, yet. Continue to initialize it as an archive repository.")
-            }
+        StorageMarking.NEEDS_MARK_AS_EXTERNAL -> {
+            ProgressText("Storage is used for the first time, and it will be marked as external.")
+        }
 
-        null -> {}
+        StorageMarking.NEEDS_REMARK_AS_LOCAL -> {
+            Text("Storage is currently external, re-mark it to local?")
+            CheckboxWithText(
+                markConfirmed == true,
+                text = "Yes, re-mark storage as local",
+                onValueChange = { setMarkConfirmed(it) },
+            )
+        }
+
+        StorageMarking.NEEDS_REMARK_AS_EXTERNAL -> {
+            ProgressText("Storage is currently local, re-mark it as external?")
+            CheckboxWithText(
+                markConfirmed == true,
+                text = "Yes, re-mark storage as external",
+                onValueChange = { setMarkConfirmed(it) },
+            )
+        }
+
+        null -> {
+            ProgressText("Preparing ...")
+        }
     }
 }
 
 @Composable
-private fun InitStatus(initStatus: InitStatus?) {
+private fun InitStatus(initStatus: Execution) {
     when (initStatus) {
-        is InitStatus.InitFailed -> {
-            AutomaticErrorMessage(initStatus.cause, onResolve = {})
+        is Execution.Finished -> {
+            when (val outcome = initStatus.outcome) {
+                is ExecutionOutcome.Failed -> AutomaticErrorMessage(outcome, onResolve = {})
+                is ExecutionOutcome.Success -> ProgressText("Directory initialized successfully as repository.")
+            }
         }
-        InitStatus.InitSuccessful -> ProgressText("Directory initialized successfully as repository.")
-        InitStatus.Initializing -> ProgressText("Initializing...")
-        null -> {}
+        is Execution.InProgress -> ProgressText("Initializing...")
+        Execution.NotRunning -> ProgressText("The directory is not a repository, yet. Continue to initialize it as an archive repository.")
     }
 }
 
 @Composable
-private fun AddStatus(addStatus: AddStatus?) {
+private fun AddStatus(
+    addStatus: Execution,
+    notRunningStatus: @Composable () -> Unit = {},
+) {
     when (addStatus) {
-        is AddStatus.AddFailed -> {
-            AutomaticErrorMessage(addStatus.cause, onResolve = {})
+        is Execution.Finished -> {
+            when (val outcome = addStatus.outcome) {
+                is ExecutionOutcome.Failed -> AutomaticErrorMessage(outcome, onResolve = {})
+                is ExecutionOutcome.Success -> ProgressText("Added successfully.")
+            }
         }
-        AddStatus.AddSuccessful -> ProgressText("Added successfully.")
-        AddStatus.Adding -> ProgressText("Adding...")
-        null -> {}
+        is Execution.InProgress -> ProgressText("Adding...")
+        Execution.NotRunning -> notRunningStatus()
     }
 }
 

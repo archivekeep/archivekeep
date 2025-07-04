@@ -16,6 +16,8 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.conflate
 import kotlinx.coroutines.flow.debounce
+import kotlinx.coroutines.flow.dropWhile
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.runInterruptible
@@ -353,5 +355,13 @@ class EncryptedFileSystemRepository private constructor(
                     }
                 }
         }
+
+        suspend fun isRepository(path: Path): Boolean =
+            EncryptedFileSystemRepository(path)
+                .vault
+                .autoloadFlow
+                .dropWhile { it is PasswordProtectedJoseStorage.State.NotInitialized }
+                .map { it !is PasswordProtectedJoseStorage.State.NotExisting }
+                .first()
     }
 }
