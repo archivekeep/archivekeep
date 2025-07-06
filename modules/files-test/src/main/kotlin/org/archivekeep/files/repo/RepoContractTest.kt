@@ -1,7 +1,10 @@
 package org.archivekeep.files.repo
 
 import io.kotest.assertions.nondeterministic.eventually
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.TestDispatcher
@@ -233,7 +236,7 @@ abstract class RepoContractTest<T : Repo> {
         }
 
     @Test
-    open fun `metadata initial load (empty), update and load (new-value), and re-open inital load (new-value)`() =
+    fun `metadata initial load (empty), update and load (new-value), and re-open inital load (new-value)`() =
         runTest {
             val dispatcher = StandardTestDispatcher(testScheduler)
 
@@ -246,10 +249,12 @@ abstract class RepoContractTest<T : Repo> {
                         .open(dispatcher)
                         .withContentsFrom(testContents01)
 
+                val collectScope = CoroutineScope(SupervisorJob())
+
                 val metadataFlowState =
                     repoAccessor
                         .metadataFlow
-                        .stateIn(backgroundScope, SharingStarted.Eagerly)
+                        .stateIn(collectScope, SharingStarted.Eagerly)
 
                 eventually(2.seconds) {
                     metadataFlowState.value.assertLoaded {
@@ -266,21 +271,27 @@ abstract class RepoContractTest<T : Repo> {
                         assertEquals(newID, it.associationGroupId)
                     }
                 }
+
+                collectScope.cancel()
             }
 
             run {
                 val repoAccessor = testRepo.open(dispatcher)
 
+                val collectScope = CoroutineScope(SupervisorJob())
+
                 val metadataFlowState =
                     repoAccessor
                         .metadataFlow
-                        .stateIn(backgroundScope, SharingStarted.Eagerly)
+                        .stateIn(collectScope, SharingStarted.Eagerly)
 
                 eventually(2.seconds) {
                     metadataFlowState.value.assertLoaded {
                         assertEquals(newID, it.associationGroupId)
                     }
                 }
+
+                collectScope.cancel()
             }
         }
 

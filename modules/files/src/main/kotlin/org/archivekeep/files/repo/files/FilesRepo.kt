@@ -409,30 +409,32 @@ class FilesRepo(
                     }
                 }
             }
-}
 
-fun openFilesRepoOrNull(path: Path): FilesRepo? {
-    val checksumDir = path.resolve(".archive").resolve(checksumsSubDir)
+    companion object {
+        fun openOrNull(path: Path): FilesRepo? {
+            val checksumDir = path.resolve(".archive").resolve(checksumsSubDir)
 
-    if (checksumDir.isDirectory()) {
-        return FilesRepo(
-            path,
-        )
+            if (checksumDir.isDirectory()) {
+                return FilesRepo(
+                    path,
+                )
+            }
+
+            return null
+        }
+
+        fun create(path: Path): FilesRepo {
+            val archiveDir = path.resolve(".archive")
+            val checksumDir = archiveDir.resolve("checksums")
+
+            if (checksumDir.isDirectory()) {
+                throw RuntimeException("Already exists")
+            }
+
+            archiveDir.createDirectory()
+            checksumDir.createDirectory()
+
+            return FilesRepo(path)
+        }
     }
-
-    return null
-}
-
-fun createFilesRepo(path: Path): FilesRepo {
-    val archiveDir = path.resolve(".archive")
-    val checksumDir = archiveDir.resolve("checksums")
-
-    if (checksumDir.isDirectory()) {
-        throw RuntimeException("Already exists")
-    }
-
-    archiveDir.createDirectory()
-    checksumDir.createDirectory()
-
-    return FilesRepo(path)
 }

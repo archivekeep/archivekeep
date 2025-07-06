@@ -20,5 +20,5 @@ class EncryptedFileSystemRepositoryTestRepo(
     }
 
     override suspend fun open(testDispatcher: TestDispatcher): EncryptedFileSystemRepository =
-        EncryptedFileSystemRepository(path, password, stateDispatcher = testDispatcher)
+        EncryptedFileSystemRepository.openAndUnlock(path, password, stateDispatcher = testDispatcher)
 }

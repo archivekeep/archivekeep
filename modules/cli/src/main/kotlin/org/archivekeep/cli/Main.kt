@@ -17,7 +17,7 @@ import org.archivekeep.cli.utils.SignalInterruptCancellationException
 import org.archivekeep.cli.workingarchive.WorkingArchive
 import org.archivekeep.cli.workingarchive.openWorkingArchive
 import org.archivekeep.files.repo.Repo
-import org.archivekeep.files.repo.files.openFilesRepoOrNull
+import org.archivekeep.files.repo.files.FilesRepo
 import org.archivekeep.files.repo.remote.grpc.BasicAuthCredentials
 import org.archivekeep.files.repo.remote.grpc.Options
 import org.archivekeep.files.repo.remote.grpc.grpcPrefix
@@ -99,7 +99,7 @@ class MainCommand(
             }
         }
 
-        return openFilesRepoOrNull(workingDirectory.resolve(otherArchiveLocation))
+        return FilesRepo.openOrNull(workingDirectory.resolve(otherArchiveLocation))
             ?: throw RuntimeException("not an archive")
     }
 

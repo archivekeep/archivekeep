@@ -12,7 +12,7 @@ import org.archivekeep.app.core.utils.generics.Execution
 import org.archivekeep.app.core.utils.generics.perform
 import org.archivekeep.app.core.utils.identifiers.StorageURI
 import org.archivekeep.files.repo.encryptedfiles.EncryptedFileSystemRepository
-import org.archivekeep.files.repo.files.createFilesRepo
+import org.archivekeep.files.repo.files.FilesRepo
 import kotlin.io.path.Path
 
 abstract class AddFileSystemRepositoryOperationImpl(
@@ -30,7 +30,7 @@ abstract class AddFileSystemRepositoryOperationImpl(
         storageMarkMutableStateFlow: MutableStateFlow<Execution?>,
     ) {
         initMutableStateFlow.perform {
-            createFilesRepo(pathPath)
+            FilesRepo.create(pathPath)
         }
 
         runAdd(

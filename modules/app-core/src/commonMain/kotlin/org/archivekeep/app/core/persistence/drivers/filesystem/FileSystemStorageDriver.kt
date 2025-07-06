@@ -22,7 +22,7 @@ import org.archivekeep.app.core.utils.generics.stateIn
 import org.archivekeep.app.core.utils.identifiers.RepositoryURI
 import org.archivekeep.app.core.utils.identifiers.StorageURI
 import org.archivekeep.files.repo.Repo
-import org.archivekeep.files.repo.files.openFilesRepoOrNull
+import org.archivekeep.files.repo.files.FilesRepo
 import org.archivekeep.utils.loading.ProtectedLoadableResource
 import org.archivekeep.utils.loading.mapLoadedData
 import java.nio.file.Path
@@ -93,7 +93,7 @@ class FileSystemStorageDriver(
                     is LoadedAvailable -> {
                         println("Open $uriDATA")
 
-                        val openedRepo = openFilesRepoOrNull(it.value)
+                        val openedRepo = FilesRepo.openOrNull(it.value)
 
                         if (openedRepo == null) {
                             ProtectedLoadableResource.Failed(RuntimeException("Not repo"))

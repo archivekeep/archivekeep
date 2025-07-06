@@ -37,6 +37,7 @@ sealed interface AddFileSystemRepositoryOperation {
 
     interface DirectoryNotRepository : AddFileSystemRepositoryOperation {
         val storageMarking: StorageMarking
+        val encryptedNotPossibleDueToNotEmpty: Boolean
 
         val initStatus: StateFlow<Execution>
         val addStatus: StateFlow<Execution>

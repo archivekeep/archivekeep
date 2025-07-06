@@ -308,7 +308,7 @@ class EncryptedFileSystemRepository private constructor(
     }
 
     companion object {
-        suspend operator fun invoke(
+        suspend fun openAndUnlock(
             path: Path,
             password: String,
             stateDispatcher: CoroutineDispatcher = Dispatchers.Default,

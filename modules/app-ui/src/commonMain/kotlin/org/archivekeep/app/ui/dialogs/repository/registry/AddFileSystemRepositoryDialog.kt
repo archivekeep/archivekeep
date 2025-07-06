@@ -3,6 +3,7 @@ package org.archivekeep.app.ui.dialogs.repository.registry
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Button
 import androidx.compose.material3.HorizontalDivider
@@ -18,6 +19,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.CoroutineScope
@@ -40,6 +42,8 @@ import org.archivekeep.app.ui.components.designsystem.dialog.DialogInputLabel
 import org.archivekeep.app.ui.components.designsystem.dialog.DialogOverlay
 import org.archivekeep.app.ui.components.designsystem.input.CheckboxWithText
 import org.archivekeep.app.ui.components.designsystem.input.PasswordField
+import org.archivekeep.app.ui.components.designsystem.input.RadioWithText
+import org.archivekeep.app.ui.components.designsystem.input.RadioWithTextAndExtra
 import org.archivekeep.app.ui.components.feature.LoadableGuard
 import org.archivekeep.app.ui.components.feature.dialogs.SimpleActionDialogControlButtons
 import org.archivekeep.app.ui.components.feature.dialogs.SimpleActionDialogDoneButtons
@@ -131,8 +135,6 @@ class AddFileSystemRepositoryDialog(
                 )
             }
 
-        val addOperation = vm.addOperation
-
         val permissionGrant = platformSpecificFileSystemRepositoryGuard()
 
         val onLaunch = LocalFilesystemDirectoryPicker.current(vm::setPick)
@@ -184,6 +186,10 @@ private fun AddRepositoryDialogContents(
     optionLoadable: Loadable<AddFileSystemRepositoryOperation>?,
     onClose: () -> Unit,
 ) {
+    var createEncrypted by mutableStateOf(false)
+    var createPassword by mutableStateOf("")
+    var createPassword2 by mutableStateOf("")
+
     var password by mutableStateOf("")
     val coroutineScope = rememberCoroutineScope()
     val passwordLaunchGuard = remember(coroutineScope) { SingleLaunchGuard(coroutineScope) }
@@ -249,6 +255,45 @@ private fun AddRepositoryDialogContents(
                             is AddFileSystemRepositoryOperation.DirectoryNotRepository -> {
                                 val initStatus = option.initStatus.collectAsState().value
                                 val addStatus = option.addStatus.collectAsState().value
+
+                                val canEdit = option.initStatus.collectAsState().value == Execution.NotRunning
+
+                                ProgressText("The directory is not a repository, yet. Continue to initialize it as an archive repository.")
+
+                                Spacer(Modifier.height(12.dp))
+                                RadioWithText(
+                                    selected = !createEncrypted,
+                                    onClick = { createEncrypted = false },
+                                    text = "Plain files (unencrypted, normal access)",
+                                    enabled = canEdit,
+                                )
+                                RadioWithTextAndExtra(
+                                    selected = createEncrypted,
+                                    onClick = { createEncrypted = true },
+                                    text = "Encrypted (custom format)",
+                                    enabled = canEdit,
+                                    extra = {
+                                        if (createEncrypted) {
+                                            Column {
+                                                PasswordField(
+                                                    createPassword,
+                                                    onValueChange = { createPassword = it },
+                                                    placeholder = { Text("Enter password ...") },
+                                                    modifier = Modifier.padding(bottom = 8.dp).testTag("Enter password ..."),
+                                                    enabled = canEdit,
+                                                )
+
+                                                PasswordField(
+                                                    createPassword2,
+                                                    onValueChange = { createPassword2 = it },
+                                                    placeholder = { Text("Verify password ...") },
+                                                    modifier = Modifier.padding(bottom = 8.dp).testTag("Verify password ..."),
+                                                    enabled = canEdit,
+                                                )
+                                            }
+                                        }
+                                    },
+                                )
 
                                 InitStatus(option.initStatus.value)
                                 AddStatus(option.addStatus.value)
@@ -344,10 +389,23 @@ private fun AddRepositoryDialogContents(
                                         SimpleActionDialogControlButtons(
                                             "Init",
                                             onLaunch = {
-                                                singleLaunchGuard.launch { option.startInitAsPlain(markConfirmed) }
+                                                if (!createEncrypted) {
+                                                    singleLaunchGuard.launch { option.startInitAsPlain(markConfirmed) }
+                                                } else {
+                                                    singleLaunchGuard.launch { option.startInitAsEncrypted(markConfirmed, createPassword) }
+                                                }
                                             },
                                             onClose = onClose,
-                                            canLaunch = state == Execution.NotRunning && (!option.storageMarking.isRemark || markConfirmed == true),
+                                            canLaunch =
+                                                state == Execution.NotRunning &&
+                                                    (!option.storageMarking.isRemark || markConfirmed == true) &&
+
+                                                    (
+                                                        !createEncrypted ||
+                                                            (
+                                                                createPassword.isNotBlank() && createPassword == createPassword2
+                                                            )
+                                                    ),
                                         )
                                     }
                                 }
@@ -452,7 +510,7 @@ private fun InitStatus(initStatus: Execution) {
             }
         }
         is Execution.InProgress -> ProgressText("Initializing...")
-        Execution.NotRunning -> ProgressText("The directory is not a repository, yet. Continue to initialize it as an archive repository.")
+        Execution.NotRunning -> {}
     }
 }
 

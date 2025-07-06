@@ -2,7 +2,6 @@ package org.archivekeep.app.core.persistence.drivers.filesystem.operations
 
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import org.archivekeep.app.core.domain.storages.StorageRegistry
 import org.archivekeep.app.core.persistence.drivers.filesystem.FileStores
@@ -14,7 +13,7 @@ import org.archivekeep.app.core.utils.generics.Execution
 import org.archivekeep.app.core.utils.generics.ExecutionOutcome
 import org.archivekeep.app.core.utils.generics.perform
 import org.archivekeep.files.repo.encryptedfiles.EncryptedFileSystemRepository
-import org.archivekeep.files.repo.files.openFilesRepoOrNull
+import org.archivekeep.files.repo.files.FilesRepo
 import java.nio.file.Path
 import kotlin.io.path.Path
 import kotlin.io.path.exists
@@ -54,17 +53,17 @@ class AddFileSystemRepositoryUseCaseImpl(
                     AddFileSystemRepositoryOperation.EncryptedFileSystemRepository {
                     override val storageMarking: StorageMarking = storageMarking
 
-                    private val unlockMutableStateFlow: MutableStateFlow<Execution> = MutableStateFlow(Execution.NotRunning)
-                    private val addMutableStateFlow: MutableStateFlow<Execution> = MutableStateFlow(Execution.NotRunning)
-                    private val storageMarkMutableStateFlow: MutableStateFlow<Execution?> = MutableStateFlow(null)
+                    private val unlockMutableStateFlow = MutableStateFlow<Execution>(Execution.NotRunning)
+                    private val addMutableStateFlow = MutableStateFlow<Execution>(Execution.NotRunning)
+                    private val storageMarkMutableStateFlow = MutableStateFlow<Execution?>(null)
 
-                    override val unlockStatus: StateFlow<Execution> = unlockMutableStateFlow.asStateFlow()
-                    override val addStatus: StateFlow<Execution> = addMutableStateFlow.asStateFlow()
-                    override val storageMarkStatus: StateFlow<Execution?> = storageMarkMutableStateFlow.asStateFlow()
+                    override val unlockStatus = unlockMutableStateFlow.asStateFlow()
+                    override val addStatus = addMutableStateFlow.asStateFlow()
+                    override val storageMarkStatus = storageMarkMutableStateFlow.asStateFlow()
 
                     override suspend fun unlock(password: String) {
                         unlockMutableStateFlow.perform {
-                            EncryptedFileSystemRepository(pathPath, password)
+                            EncryptedFileSystemRepository.openAndUnlock(pathPath, password)
                         }
                     }
 
@@ -83,7 +82,7 @@ class AddFileSystemRepositoryUseCaseImpl(
             )
         }
 
-        val filesRepo = openFilesRepoOrNull(pathPath)
+        val filesRepo = FilesRepo.openOrNull(pathPath)
 
         if (filesRepo != null) {
             // TODO: check for and emit Status.AlreadyRegistered if the case
@@ -102,11 +101,11 @@ class AddFileSystemRepositoryUseCaseImpl(
                     AddFileSystemRepositoryOperation.PlainFileSystemRepository {
                     override val storageMarking: StorageMarking = storageMarking
 
-                    private val addMutableStateFlow: MutableStateFlow<Execution> = MutableStateFlow(Execution.NotRunning)
-                    private val storageMarkMutableStateFlow: MutableStateFlow<Execution?> = MutableStateFlow(null)
+                    private val addMutableStateFlow = MutableStateFlow<Execution>(Execution.NotRunning)
+                    private val storageMarkMutableStateFlow = MutableStateFlow<Execution?>(null)
 
-                    override val addStatus: StateFlow<Execution> = addMutableStateFlow.asStateFlow()
-                    override val storageMarkStatus: StateFlow<Execution?> = storageMarkMutableStateFlow.asStateFlow()
+                    override val addStatus = addMutableStateFlow.asStateFlow()
+                    override val storageMarkStatus = storageMarkMutableStateFlow.asStateFlow()
 
                     override suspend fun runAddExecution(applyMarking: Boolean?) {
                         checkMarking(storageMarking, applyMarking)
@@ -121,7 +120,7 @@ class AddFileSystemRepositoryUseCaseImpl(
                     var tryPath: Path? = pathPath.parent
 
                     while (tryPath != null) {
-                        val archive = openFilesRepoOrNull(tryPath)
+                        val archive = FilesRepo.openOrNull(tryPath)
 
                         if (archive != null) {
                             return@run tryPath
@@ -144,6 +143,8 @@ class AddFileSystemRepositoryUseCaseImpl(
                     } else {
                         val storageMarking = getStorageMarking(path, intendedStorageType)
 
+                        val encryptedNotPossibleDueToNotEmpty = pathPath.toFile().list().isNotEmpty()
+
                         object :
                             AddFileSystemRepositoryOperationImpl(
                                 scope,
@@ -153,15 +154,16 @@ class AddFileSystemRepositoryUseCaseImpl(
                                 intendedStorageType,
                             ),
                             AddFileSystemRepositoryOperation.DirectoryNotRepository {
-                            override val storageMarking: StorageMarking = storageMarking
+                            override val storageMarking = storageMarking
+                            override val encryptedNotPossibleDueToNotEmpty = encryptedNotPossibleDueToNotEmpty
 
-                            private val initMutableStateFlow: MutableStateFlow<Execution> = MutableStateFlow(Execution.NotRunning)
-                            private val addMutableStateFlow: MutableStateFlow<Execution> = MutableStateFlow(Execution.NotRunning)
-                            private val storageMarkMutableStateFlow: MutableStateFlow<Execution?> = MutableStateFlow(null)
+                            private val initMutableStateFlow = MutableStateFlow<Execution>(Execution.NotRunning)
+                            private val addMutableStateFlow = MutableStateFlow<Execution>(Execution.NotRunning)
+                            private val storageMarkMutableStateFlow = MutableStateFlow<Execution?>(null)
 
-                            override val initStatus: StateFlow<Execution> = addMutableStateFlow.asStateFlow()
-                            override val addStatus: StateFlow<Execution> = addMutableStateFlow.asStateFlow()
-                            override val storageMarkStatus: StateFlow<Execution?> = storageMarkMutableStateFlow.asStateFlow()
+                            override val initStatus = addMutableStateFlow.asStateFlow()
+                            override val addStatus = addMutableStateFlow.asStateFlow()
+                            override val storageMarkStatus = storageMarkMutableStateFlow.asStateFlow()
 
                             override suspend fun startInitAsPlain(applyMarking: Boolean?) {
                                 checkMarking(storageMarking, applyMarking)
@@ -178,6 +180,9 @@ class AddFileSystemRepositoryUseCaseImpl(
                                 password: String,
                             ) {
                                 checkMarking(storageMarking, applyMarking)
+                                if (encryptedNotPossibleDueToNotEmpty) {
+                                    throw IllegalStateException("Can't be initialized as encrypted, because it's not empty")
+                                }
 
                                 runInitAsEncrypted(
                                     password,
