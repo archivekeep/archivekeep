@@ -24,6 +24,8 @@ import com.cheonjaeung.compose.grid.VerticalGrid
 import compose.icons.TablerIcons
 import compose.icons.tablericons.ArrowsDownUp
 import compose.icons.tablericons.Lock
+import kotlinx.coroutines.flow.map
+import org.archivekeep.app.core.domain.storages.needsUnlock
 import org.archivekeep.app.ui.components.designsystem.sections.SectionCard
 import org.archivekeep.app.ui.components.designsystem.sections.SectionCardBottomList
 import org.archivekeep.app.ui.components.designsystem.sections.SectionCardTitle
@@ -68,7 +70,9 @@ fun HomeNonLocalArchivesList(otherArchivesLoadable: Loadable<List<HomeArchiveNon
                                         horizontal = sectionCardHorizontalPadding,
                                     ),
                         ) {
-                            if (repo.repository.needsUnlock
+                            if (repo.repository
+                                    .optionalAccessorFlow
+                                    .map { it.needsUnlock() }
                                     .collectAsState(false)
                                     .value
                             ) {

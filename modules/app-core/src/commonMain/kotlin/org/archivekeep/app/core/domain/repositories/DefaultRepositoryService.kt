@@ -1,18 +1,19 @@
 package org.archivekeep.app.core.domain.repositories
 
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.onStart
+import org.archivekeep.app.core.domain.storages.RepositoryAccessorProvider
 import org.archivekeep.app.core.domain.storages.StorageDriver
 import org.archivekeep.app.core.persistence.registry.RegisteredRepository
 import org.archivekeep.app.core.persistence.registry.RegistryDataStore
 import org.archivekeep.app.core.persistence.repository.MemorizedRepositoryIndexRepository
 import org.archivekeep.app.core.persistence.repository.MemorizedRepositoryMetadataRepository
+import org.archivekeep.app.core.utils.generics.OptionalLoadable
 import org.archivekeep.app.core.utils.generics.UniqueInstanceManager
 import org.archivekeep.app.core.utils.identifiers.RepositoryURI
-import org.archivekeep.utils.coroutines.shareResourceIn
-import org.archivekeep.utils.loading.ProtectedLoadableResource
+import org.archivekeep.files.repo.Repo
 
 class DefaultRepositoryService(
     private val scope: CoroutineScope,
@@ -30,7 +31,7 @@ class DefaultRepositoryService(
                     registry.registeredRepositories.map { registeredRepositories ->
                         registeredRepositories.firstOrNull { it.uri == uri }
                     },
-                protectedProviderOfRepositoryAccessor = repositoryAccessor[uri],
+                repositoryAccessorProvider = repositoryAccessor[uri],
                 memorizedRepositoryIndexRepository = memorizedRepositoryIndexRepository,
                 memorizedRepositoryMetadataRepository = memorizedRepositoryMetadataRepository,
             )
@@ -46,21 +47,18 @@ class DefaultRepositoryService(
         }
     }
 
-    private fun createBase(repositoryURI: RepositoryURI): ProtectedProviderOfRepositoryAccessor {
+    private fun createBase(repositoryURI: RepositoryURI): RepositoryAccessorProvider {
         println("GET REPO FOR: $repositoryURI")
 
-        val baseFlow =
-            run {
-                val driver =
-                    storageDrivers[repositoryURI.driver]
-                        ?: return@run flowOf(ProtectedLoadableResource.Failed(RuntimeException("Driver ${repositoryURI.driver} not supported")))
+        val driver =
+            storageDrivers[repositoryURI.driver]
+                ?: return object : RepositoryAccessorProvider {
+                    override val repositoryAccessor: Flow<OptionalLoadable<Repo>> =
+                        flowOf(
+                            OptionalLoadable.Failed(RuntimeException("Driver ${repositoryURI.driver} not supported")),
+                        )
+                }
 
-                driver
-                    .openRepoFlow(repositoryURI)
-                    .onStart { emit(ProtectedLoadableResource.Loading) }
-                    .shareResourceIn(scope)
-            }
-
-        return ProtectedProviderOfRepositoryAccessor(repositoryURI, baseFlow)
+        return driver.getProvider(repositoryURI)
     }
 }

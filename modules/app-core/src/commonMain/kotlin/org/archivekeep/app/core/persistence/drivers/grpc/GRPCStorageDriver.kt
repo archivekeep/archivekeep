@@ -4,19 +4,25 @@ import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.FlowCollector
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.job
 import org.archivekeep.app.core.domain.repositories.RepoAuthRequest
 import org.archivekeep.app.core.domain.repositories.UnlockOptions
+import org.archivekeep.app.core.domain.repositories.asOptionalLoadable
+import org.archivekeep.app.core.domain.storages.RepositoryAccessState
+import org.archivekeep.app.core.domain.storages.RepositoryAccessorProvider
 import org.archivekeep.app.core.domain.storages.Storage
 import org.archivekeep.app.core.domain.storages.StorageConnection
 import org.archivekeep.app.core.domain.storages.StorageDriver
 import org.archivekeep.app.core.domain.storages.StorageInformation
 import org.archivekeep.app.core.persistence.credentials.CredentialsStore
+import org.archivekeep.app.core.utils.generics.stateIn
 import org.archivekeep.app.core.utils.identifiers.RepositoryURI
 import org.archivekeep.app.core.utils.identifiers.StorageURI
 import org.archivekeep.files.repo.Repo
@@ -45,7 +51,18 @@ class GRPCStorageDriver(
             ).stateIn(scope),
         )
 
-    override fun openRepoFlow(uri: RepositoryURI) = flow { accessor(uri) }
+    override fun getProvider(uri: RepositoryURI): RepositoryAccessorProvider = RepositoryProvider(uri)
+
+    inner class RepositoryProvider(
+        uri: RepositoryURI,
+    ) : RepositoryAccessorProvider {
+        private val innerState = openRepoFlow(uri)
+
+        override val repositoryAccessor: Flow<RepositoryAccessState> =
+            innerState.map { it.asOptionalLoadable() }.stateIn(scope)
+    }
+
+    fun openRepoFlow(uri: RepositoryURI) = flow { accessor(uri) }
 
     suspend fun FlowCollector<ProtectedLoadableResource<Repo, RepoAuthRequest>>.accessor(uri: RepositoryURI) {
         // TODO: map parallel, partial loadable - some filesystems might be slow or unresponsive

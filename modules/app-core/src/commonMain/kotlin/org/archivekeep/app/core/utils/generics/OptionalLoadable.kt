@@ -3,8 +3,8 @@ package org.archivekeep.app.core.utils.generics
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flatMapLatest
@@ -21,7 +21,7 @@ sealed interface OptionalLoadable<out T> {
         val value: T,
     ) : LoadingFinished<T>
 
-    data class NotAvailable(
+    open class NotAvailable(
         val cause: Throwable? = null,
     ) : LoadingFinished<Nothing>
 
@@ -171,8 +171,8 @@ fun <T> OptionalLoadable<T>.mapToLoadable(defaultValue: (OptionalLoadable.NotAva
 
 fun <T> Flow<OptionalLoadable<T>>.stateIn(
     scope: CoroutineScope,
-    started: SharingStarted = SharingStarted.WhileSubscribed(100),
-): SharedFlow<OptionalLoadable<T>> =
+    started: SharingStarted = SharingStarted.WhileSubscribed(100, 0),
+): StateFlow<OptionalLoadable<T>> =
     this
         .stateIn(
             scope,

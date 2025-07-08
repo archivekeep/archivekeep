@@ -39,6 +39,7 @@ class HomeArchiveEntryViewModel(
     val otherRepositories: List<Pair<StoragePartiallyResolved, SecondaryArchiveRepository>>,
 ) {
     data class VMState(
+        val canUnlock: Loadable<Boolean>,
         val canAdd: Loadable<Boolean>,
         val canPush: Loadable<Boolean>,
         val anySecondaryAvailable: Boolean,
@@ -63,10 +64,12 @@ class HomeArchiveEntryViewModel(
     val state: StateFlow<VMState> =
         combine(
             repository.localRepoStatus,
+            repository.optionalAccessorFlow,
             secondaryRepositories,
             addPushOperation.currentJobFlow.map { it != null },
-        ) { indexStatus, nonLocalRepositories, addPushOperationRunning ->
+        ) { indexStatus, accessor, nonLocalRepositories, addPushOperationRunning ->
             VMState(
+                canUnlock = accessor.mapLoadedData { false }.mapToLoadable(true),
                 canAdd = indexStatus.mapLoadedData { it.hasChanges }.mapToLoadable(false),
                 canPush =
                     if (nonLocalRepositories.any { it.second.canPushLoadable.mapIfLoadedOrNull { it } ?: false }) {
@@ -95,6 +98,7 @@ class HomeArchiveEntryViewModel(
             scope,
             SharingStarted.WhileSubscribed(),
             VMState(
+                canUnlock = Loadable.Loading,
                 canAdd = Loadable.Loading,
                 canPush = Loadable.Loading,
                 anySecondaryAvailable = false,
@@ -171,6 +175,16 @@ fun HomeArchiveEntryViewModel.VMState.actions(
     localArchive: HomeArchiveEntryViewModel,
 ): List<Loadable<Action>> =
     listOf(
+        this.canUnlock.mapLoadedData {
+            Action(
+                onLaunch = {
+                    archiveOperationLaunchers.unlockRepository(localArchive.primaryRepository.reference.uri, null)
+                },
+                text = "Unlock",
+                isAvailable = it,
+                running = false,
+            )
+        },
         this.canAddPush.mapLoadedData {
             Action(
                 onLaunch = {

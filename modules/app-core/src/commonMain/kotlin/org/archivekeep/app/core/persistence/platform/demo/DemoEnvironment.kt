@@ -11,12 +11,13 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.update
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.serializer
-import org.archivekeep.app.core.domain.repositories.RepoAuthRequest
 import org.archivekeep.app.core.domain.repositories.RepositoryConnectionState
 import org.archivekeep.app.core.domain.repositories.RepositoryEncryptionType
 import org.archivekeep.app.core.domain.repositories.RepositoryInformation
 import org.archivekeep.app.core.domain.repositories.ResolvedRepositoryState
 import org.archivekeep.app.core.domain.storages.KnownStorage
+import org.archivekeep.app.core.domain.storages.RepositoryAccessState
+import org.archivekeep.app.core.domain.storages.RepositoryAccessorProvider
 import org.archivekeep.app.core.domain.storages.Storage
 import org.archivekeep.app.core.domain.storages.StorageConnection
 import org.archivekeep.app.core.domain.storages.StorageDriver
@@ -34,6 +35,7 @@ import org.archivekeep.app.core.persistence.repository.MemorizedRepositoryIndexR
 import org.archivekeep.app.core.persistence.repository.MemorizedRepositoryMetadataRepository
 import org.archivekeep.app.core.utils.generics.OptionalLoadable
 import org.archivekeep.app.core.utils.generics.UniqueSharedFlowInstanceManager
+import org.archivekeep.app.core.utils.generics.stateIn
 import org.archivekeep.app.core.utils.identifiers.RepositoryURI
 import org.archivekeep.app.core.utils.identifiers.StorageURI
 import org.archivekeep.files.RepositoryAssociationGroupId
@@ -49,12 +51,11 @@ import org.archivekeep.testing.storage.SpeedLimitedLocalRepoWrapper
 import org.archivekeep.testing.storage.SpeedLimitedRepoWrapper
 import org.archivekeep.utils.datastore.passwordprotected.PasswordProtectedJoseStorage
 import org.archivekeep.utils.loading.Loadable
-import org.archivekeep.utils.loading.ProtectedLoadableResource
 import org.archivekeep.utils.loading.mapLoadedData
 import org.archivekeep.utils.loading.mapToLoadable
 import org.archivekeep.utils.loading.stateIn
 
-class DemoEnvironment(
+open class DemoEnvironment(
     scope: CoroutineScope,
     enableSpeedLimit: Boolean = true,
     physicalMediaData: List<DemoPhysicalMedium> = listOf(LaptopSSD, LaptopHDD, hddB, hddC),
@@ -315,25 +316,28 @@ class DemoEnvironment(
                         liveStatusFlowManager[storageURI],
                     )
 
-                override fun openRepoFlow(uri: RepositoryURI): Flow<ProtectedLoadableResource<Repo, RepoAuthRequest>> =
-                    flow {
-                        val repo =
-                            repo(uri)?.repo?.let { base ->
-                                if (enableSpeedLimit) {
-                                    when (base) {
-                                        is LocalRepo -> SpeedLimitedLocalRepoWrapper(base)
-                                        else -> SpeedLimitedRepoWrapper(base)
+                override fun getProvider(uri: RepositoryURI): RepositoryAccessorProvider =
+                    object : RepositoryAccessorProvider {
+                        override val repositoryAccessor: Flow<RepositoryAccessState> =
+                            flow {
+                                val repo =
+                                    repo(uri)?.repo?.let { base ->
+                                        if (enableSpeedLimit) {
+                                            when (base) {
+                                                is LocalRepo -> SpeedLimitedLocalRepoWrapper(base)
+                                                else -> SpeedLimitedRepoWrapper(base)
+                                            }
+                                        } else {
+                                            base
+                                        }
                                     }
-                                } else {
-                                    base
-                                }
-                            }
 
-                        if (repo == null) {
-                            emit(ProtectedLoadableResource.Failed(RuntimeException("Not repo")))
-                        } else {
-                            emit((ProtectedLoadableResource.Loaded(repo)))
-                        }
+                                if (repo == null) {
+                                    emit(OptionalLoadable.Failed(RuntimeException("Not repo")))
+                                } else {
+                                    emit((OptionalLoadable.LoadedAvailable(repo)))
+                                }
+                            }.stateIn(scope)
                     }
             },
         )

@@ -25,15 +25,23 @@ import compose.icons.TablerIcons
 import compose.icons.tablericons.Lock
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.first
+import org.archivekeep.app.core.domain.repositories.RepoAuthRequest
 import org.archivekeep.app.core.domain.repositories.Repository
 import org.archivekeep.app.core.domain.repositories.RepositoryInformation
 import org.archivekeep.app.core.domain.repositories.UnlockOptions
+import org.archivekeep.app.core.domain.storages.RepositoryAccessState
+import org.archivekeep.app.core.domain.storages.asLoadableUnlockRequest
+import org.archivekeep.app.core.domain.storages.asUnlockRequest
 import org.archivekeep.app.core.persistence.credentials.Credentials
+import org.archivekeep.app.core.persistence.drivers.filesystem.FileSystemStorageDriver
 import org.archivekeep.app.core.utils.generics.ExecutionOutcome
+import org.archivekeep.app.core.utils.generics.OptionalLoadable
 import org.archivekeep.app.core.utils.identifiers.RepositoryURI
 import org.archivekeep.app.ui.components.designsystem.input.CheckboxWithText
 import org.archivekeep.app.ui.components.designsystem.input.PasswordField
 import org.archivekeep.app.ui.components.designsystem.input.TextField
+import org.archivekeep.app.ui.components.feature.LoadableGuard
 import org.archivekeep.app.ui.components.feature.dialogs.SimpleActionDialogControlButtons
 import org.archivekeep.app.ui.components.feature.dialogs.SimpleActionDialogDoneButtons
 import org.archivekeep.app.ui.components.feature.dialogs.operations.LaunchableExecutionErrorIfPresent
@@ -50,6 +58,7 @@ import org.archivekeep.app.ui.utils.simpleLaunchable
 import org.archivekeep.files.repo.remote.grpc.BasicAuthCredentials
 import org.archivekeep.utils.datastore.passwordprotected.PasswordProtectedDataStore
 import org.archivekeep.utils.loading.Loadable
+import org.archivekeep.utils.loading.mapIfLoadedOrDefault
 
 class UnlockRepositoryDialog(
     uri: RepositoryURI,
@@ -57,19 +66,35 @@ class UnlockRepositoryDialog(
 ) : AbstractRepositoryDialog<UnlockRepositoryDialog.State, UnlockRepositoryDialog.VM>(uri) {
     data class State(
         val repositoryInfo: RepositoryInformation,
-        val needsUnlock: Boolean,
+        val accessState: RepositoryAccessState,
         val canUnlockCredentials: Boolean,
         val launchable: Launchable<Unit>,
+        val passwordState: MutableState<String>,
         val basicAuthCredentialsState: MutableState<BasicAuthCredentials?>,
         val unlockOptionsState: MutableState<UnlockOptions>,
         val onClose: () -> Unit,
     ) : IState {
+        val unlockRequest = accessState.asLoadableUnlockRequest()
+
+        val needsUnlock = unlockRequest.mapIfLoadedOrDefault(false) { it != null }
+
+        var password by passwordState
         var basicAuthCredentials by basicAuthCredentialsState
         var unlockOptions by unlockOptionsState
 
         val action by launchable.asAction(
             onLaunch = { onLaunch(Unit) },
-            canLaunch = { basicAuthCredentials?.let { it.username.isNotBlank() && it.password.isNotBlank() } ?: false },
+            canLaunch = {
+                when (accessState.asUnlockRequest()) {
+                    is RepoAuthRequest -> {
+                        basicAuthCredentials?.let { it.username.isNotBlank() && it.password.isNotBlank() } ?: false
+                    }
+                    is FileSystemStorageDriver.PasswordRequest -> {
+                        password.isNotBlank()
+                    }
+                    else -> false
+                }
+            },
         )
 
         override val title: AnnotatedString =
@@ -85,25 +110,33 @@ class UnlockRepositoryDialog(
         val credentialStorage: PasswordProtectedDataStore<Credentials>?,
         val _onClose: () -> Unit,
     ) : IVM {
+        val accessState = repository.optionalAccessorFlow
+
+        val passwordState = mutableStateOf<String>("")
         val basicAuthCredentialsState = mutableStateOf<BasicAuthCredentials?>(null)
-        var basicAuthCredentials by basicAuthCredentialsState
 
         val unlockOptionsState = mutableStateOf(UnlockOptions(rememberSession = false))
         var unlockOptions by unlockOptionsState
 
         val unlockAction =
             simpleLaunchable(coroutineScope) { _: Unit ->
-                basicAuthCredentials?.let { presentBasicCredentials ->
-                    if (unlockOptions.rememberSession) {
-                        if (!walletOperationLaunchers.ensureWalletForWrite()) {
-                            return@simpleLaunchable
-                        }
+                if (unlockOptions.rememberSession) {
+                    if (!walletOperationLaunchers.ensureWalletForWrite()) {
+                        return@simpleLaunchable
                     }
+                }
 
-                    repository.unlock(
-                        presentBasicCredentials,
-                        unlockOptions,
-                    )
+                when (val request = accessState.first().asUnlockRequest()) {
+                    null -> TODO()
+                    is RepoAuthRequest ->
+                        request.tryOpen(
+                            basicAuthCredentialsState.value!!,
+                            unlockOptions,
+                        )
+
+                    is FileSystemStorageDriver.PasswordRequest -> {
+                        request.providePassword(passwordState.value)
+                    }
                 }
             }
 
@@ -137,14 +170,15 @@ class UnlockRepositoryDialog(
         remember(vm) {
             combine(
                 vm.repository.resolvedState,
-                vm.repository.needsUnlock,
+                vm.accessState,
                 vm.credentialStorage.canUnlockFlow(),
-            ) { resolvedState, needsUnlock, canUnlockCredentials ->
+            ) { resolvedState, accessState, canUnlockCredentials ->
                 State(
                     repositoryInfo = resolvedState.information,
-                    needsUnlock = needsUnlock,
+                    accessState = accessState,
                     canUnlockCredentials = canUnlockCredentials,
                     launchable = vm.unlockAction,
+                    passwordState = vm.passwordState,
                     basicAuthCredentialsState = vm.basicAuthCredentialsState,
                     unlockOptionsState = vm.unlockOptionsState,
                     onClose = vm::onClose,
@@ -165,96 +199,124 @@ class UnlockRepositoryDialog(
             return
         }
 
-        if (!state.needsUnlock) {
-            Text(
-                buildAnnotatedString {
-                    append("Repository ")
-                    appendBoldSpan(state.repositoryInfo.displayName)
-                    append(" is not locked. No Action needed.")
-                },
-            )
-            return
-        }
         val walletOperationLaunchers = LocalWalletOperationLaunchers.current
 
-        Text(
-            buildAnnotatedString {
-                append("Authentication is needed to access ")
-                appendBoldSpan(state.repositoryInfo.displayName)
-                append(" repository.")
-            },
-        )
-        Spacer(Modifier.height(12.dp))
+        LoadableGuard(state.unlockRequest) { unlockRequest ->
+            println(state.accessState)
+            println((state.accessState as? OptionalLoadable.NotAvailable)?.cause)
 
-        if (state.canUnlockCredentials) {
-            HorizontalDivider(Modifier.padding(bottom = 12.dp), thickness = 1.dp)
-            Text(
-                "Wallet with stored credentials is locked.",
-                modifier = Modifier.padding(bottom = 8.dp),
-            )
-            OutlinedButton(
-                onClick = {
-                    walletOperationLaunchers.openUnlockWallet({
-                        state.onClose()
-                        onUnlock?.let { it() }
-                    })
-                },
-            ) {
-                Icon(
-                    TablerIcons.Lock,
-                    contentDescription = "Locked wallet",
-                    Modifier.size(20.dp),
-                )
-                Spacer(Modifier.width(12.dp))
+            when (unlockRequest) {
+                null -> {
+                    Text(
+                        buildAnnotatedString {
+                            append("Repository ")
+                            appendBoldSpan(state.repositoryInfo.displayName)
+                            append(" is not locked. No Action needed.")
+                        },
+                    )
+                }
 
-                Text("Open wallet")
+                is RepoAuthRequest -> {
+                    Text(
+                        buildAnnotatedString {
+                            append("Authentication is needed to access ")
+                            appendBoldSpan(state.repositoryInfo.displayName)
+                            append(" repository.")
+                        },
+                    )
+                    Spacer(Modifier.height(12.dp))
+
+                    if (state.canUnlockCredentials) {
+                        HorizontalDivider(Modifier.padding(bottom = 12.dp), thickness = 1.dp)
+                        Text(
+                            "Wallet with stored credentials is locked.",
+                            modifier = Modifier.padding(bottom = 8.dp),
+                        )
+                        OutlinedButton(
+                            onClick = {
+                                walletOperationLaunchers.openUnlockWallet({
+                                    state.onClose()
+                                    onUnlock?.let { it() }
+                                })
+                            },
+                        ) {
+                            Icon(
+                                TablerIcons.Lock,
+                                contentDescription = "Locked wallet",
+                                Modifier.size(20.dp),
+                            )
+                            Spacer(Modifier.width(12.dp))
+
+                            Text("Open wallet")
+                        }
+                        HorizontalDivider(Modifier.padding(vertical = 12.dp), thickness = 1.dp)
+                    }
+
+                    Text(
+                        "Enter credentials to authenticate with:",
+                        modifier = Modifier.padding(bottom = 8.dp),
+                    )
+                    TextField(
+                        state.basicAuthCredentials?.username ?: "",
+                        onValueChange = {
+                            state.basicAuthCredentials =
+                                BasicAuthCredentials(
+                                    username = it,
+                                    password = state.basicAuthCredentials?.password ?: "",
+                                )
+                        },
+                        placeholder = {
+                            Text("Enter username ...")
+                        },
+                        singleLine = true,
+                    )
+                    Spacer(Modifier.height(12.dp))
+                    PasswordField(
+                        state.basicAuthCredentials?.password ?: "",
+                        onValueChange = {
+                            state.basicAuthCredentials =
+                                BasicAuthCredentials(
+                                    password = it,
+                                    username = state.basicAuthCredentials?.username ?: "",
+                                )
+                        },
+                        placeholder = {
+                            Text("Enter password ...")
+                        },
+                    )
+                    Spacer(Modifier.height(12.dp))
+                    CheckboxWithText(
+                        state.unlockOptions.rememberSession,
+                        onValueChange = {
+                            state.unlockOptions =
+                                state.unlockOptions.copy(
+                                    rememberSession = it,
+                                )
+                        },
+                        text = "Remember session",
+                    )
+                }
+
+                is FileSystemStorageDriver.PasswordRequest -> {
+                    Text(
+                        buildAnnotatedString {
+                            append("Password is needed to access ")
+                            appendBoldSpan(state.repositoryInfo.displayName)
+                            append(" repository.")
+                        },
+                    )
+                    Spacer(Modifier.height(12.dp))
+                    PasswordField(
+                        state.password,
+                        onValueChange = { state.password = it },
+                        placeholder = {
+                            Text("Enter password ...")
+                        },
+                    )
+                }
             }
-            HorizontalDivider(Modifier.padding(vertical = 12.dp), thickness = 1.dp)
         }
 
-        Text(
-            "Enter credentials to authenticate with:",
-            modifier = Modifier.padding(bottom = 8.dp),
-        )
-        TextField(
-            state.basicAuthCredentials?.username ?: "",
-            onValueChange = {
-                state.basicAuthCredentials =
-                    BasicAuthCredentials(
-                        username = it,
-                        password = state.basicAuthCredentials?.password ?: "",
-                    )
-            },
-            placeholder = {
-                Text("Enter username ...")
-            },
-            singleLine = true,
-        )
-        Spacer(Modifier.height(12.dp))
-        PasswordField(
-            state.basicAuthCredentials?.password ?: "",
-            onValueChange = {
-                state.basicAuthCredentials =
-                    BasicAuthCredentials(
-                        password = it,
-                        username = state.basicAuthCredentials?.username ?: "",
-                    )
-            },
-            placeholder = {
-                Text("Enter password ...")
-            },
-        )
-        Spacer(Modifier.height(12.dp))
-        CheckboxWithText(
-            state.unlockOptions.rememberSession,
-            onValueChange = {
-                state.unlockOptions =
-                    state.unlockOptions.copy(
-                        rememberSession = it,
-                    )
-            },
-            text = "Remember session",
-        )
         LaunchableExecutionErrorIfPresent(state.launchable)
     }
 

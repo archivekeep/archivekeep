@@ -13,7 +13,9 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import compose.icons.TablerIcons
 import compose.icons.tablericons.DotsVertical
+import kotlinx.coroutines.flow.map
 import org.archivekeep.app.core.domain.repositories.Repository
+import org.archivekeep.app.core.domain.storages.needsUnlock
 import org.archivekeep.app.ui.components.designsystem.sections.SectionCardBottomListItemIconButton
 import org.archivekeep.app.ui.components.feature.repository.WithRepositoryOpener
 import org.archivekeep.app.ui.domain.wiring.LocalArchiveOperationLaunchers
@@ -68,7 +70,11 @@ fun InArchiveRepositoryDropdownIconLaunched(
                 })
             }
 
-            if (repository.needsUnlock.collectAsState(false).value) {
+            if (repository.optionalAccessorFlow
+                    .map { it.needsUnlock() }
+                    .collectAsState(false)
+                    .value
+            ) {
                 DropdownMenuItem(onClick = {
                     operationsLaunchers.unlockRepository(repositoryURI, null)
                     closeDropdown()

@@ -1,5 +1,6 @@
 package org.archivekeep.app.core.domain.repositories
 
+import org.archivekeep.app.core.domain.storages.NeedsUnlock
 import org.archivekeep.app.core.utils.exceptions.DisconnectedStorageException
 import org.archivekeep.app.core.utils.generics.OptionalLoadable
 import org.archivekeep.files.repo.Repo
@@ -17,20 +18,5 @@ fun (ProtectedLoadableResource<Repo, RepoAuthRequest>).asOptionalLoadable() =
 
         is ProtectedLoadableResource.Loaded -> OptionalLoadable.LoadedAvailable(this.value)
         ProtectedLoadableResource.Loading -> OptionalLoadable.Loading
-        is ProtectedLoadableResource.PendingAuthentication -> OptionalLoadable.NotAvailable()
-    }
-
-fun (ProtectedLoadableResource<Repo, RepoAuthRequest>).asStatus(): RepositoryConnectionState =
-    when (this) {
-        is ProtectedLoadableResource.Failed -> {
-            if (this.throwable is DisconnectedStorageException) {
-                RepositoryConnectionState.Disconnected
-            } else {
-                RepositoryConnectionState.Error(this.throwable)
-            }
-        }
-
-        is ProtectedLoadableResource.Loaded -> RepositoryConnectionState.Connected
-        ProtectedLoadableResource.Loading -> RepositoryConnectionState.Disconnected
-        is ProtectedLoadableResource.PendingAuthentication -> RepositoryConnectionState.ConnectedLocked
+        is ProtectedLoadableResource.PendingAuthentication -> NeedsUnlock(authenticationRequest)
     }
