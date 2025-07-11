@@ -124,4 +124,72 @@ class UnlockRepositoryDialogTestWithEncryptedFileSystemRepository {
             }
         }
     }
+
+    @OptIn(ExperimentalTestApi::class)
+    @Test
+    fun testWrongPassword() {
+        runHighDensityComposeUiTest {
+            val scope = CoroutineScope(SupervisorJob())
+            val serviceWorkDispatcher = newServiceWorkExecutorDispatcher()
+            val demoEnvironment =
+                object : DemoEnvironment(
+                    scope,
+                    physicalMediaData = emptyList(),
+                    enableSpeedLimit = false,
+                    mountPoints = mountPoints(),
+                ) {
+                    override val storageDrivers: List<StorageDriver> = listOf(FileSystemStorageDriver(scope, fileStores))
+                }
+            val services = ApplicationServices(serviceWorkDispatcher, scope, demoEnvironment)
+
+            val tempRepoPath = testTempDir.newFolder("encrypted-repo")
+
+            val subjectAtTestURI = FileSystemRepositoryURIData(fsUUID = "TEST-TMP-DIR", pathInFS = "encrypted-repo").toURI()
+
+            runBlocking {
+                EncryptedFileSystemRepository.create(tempRepoPath.toPath(), "test-password-123")
+
+                demoEnvironment.registry.updateRepositories {
+                    it + setOf(RegisteredRepository(uri = subjectAtTestURI))
+                }
+            }
+
+            setContentInDialogScreenshotContainer {
+                ApplicationProviders(
+                    applicationServices = services,
+                    applicationMetadata = PropertiesApplicationMetadata(),
+                ) {
+                    UnlockRepositoryDialog(subjectAtTestURI, onUnlock = {}).render(onClose = { })
+                }
+            }
+
+            fun onSubmitNode() = onNodeWithText("Authenticate")
+
+            run {
+                saveTestingDialogContainerBitmap("dialogs/unlock-repository/provide-incorrect-password-01-initial.png")
+
+                onNodeWithText("Password is needed to access encrypted-repo repository.").assertExists()
+                onSubmitNode().assertIsNotEnabled()
+            }
+
+            run {
+                onNodeWithText("Enter password ...").performClickTextInput("test-password-wrong")
+
+                saveTestingDialogContainerBitmap("dialogs/unlock-repository/provide-incorrect-password-02-input-provided.png")
+
+                onSubmitNode().assertIsEnabled()
+            }
+
+            runBlocking {
+                onSubmitNode().performClick()
+
+                eventually(2.seconds) {
+                    saveTestingDialogContainerBitmap("dialogs/unlock-repository/provide-incorrect-password-03-final.png")
+
+                    onNodeWithText("Entered password isn't correct.").assertExists()
+                    onSubmitNode().assertIsEnabled()
+                }
+            }
+        }
+    }
 }

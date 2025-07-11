@@ -1,13 +1,14 @@
 package org.archivekeep.app.core.operations
 
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.dropWhile
+import kotlinx.coroutines.flow.filterIsInstance
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.withContext
 import org.archivekeep.app.core.domain.repositories.RepoAuthRequest
 import org.archivekeep.app.core.domain.repositories.RepositoryService
 import org.archivekeep.app.core.domain.repositories.UnlockOptions
 import org.archivekeep.app.core.domain.storages.NeedsUnlock
+import org.archivekeep.app.core.domain.storages.RepositoryAccessState
 import org.archivekeep.app.core.domain.storages.StorageRegistry
 import org.archivekeep.app.core.persistence.drivers.filesystem.FileStores
 import org.archivekeep.app.core.persistence.registry.RegistryDataStore
@@ -31,13 +32,12 @@ class AddRemoteRepositoryUseCaseImpl(
         val result =
             repository
                 .optionalAccessorFlow
-                .dropWhile { it is OptionalLoadable.Loading }
+                .filterIsInstance<OptionalLoadable.LoadingFinished<RepositoryAccessState>>()
                 .first()
 
         withContext(Dispatchers.IO) {
             when (result) {
                 is OptionalLoadable.Failed -> throw result.cause
-                OptionalLoadable.Loading -> TODO("Shouldn't happen")
                 is NeedsUnlock -> {
                     if (credentials == null) {
                         throw RequiresCredentialsException()
@@ -53,7 +53,7 @@ class AddRemoteRepositoryUseCaseImpl(
                     }
                 }
                 is OptionalLoadable.NotAvailable -> {
-                    throw RuntimeException("Not available: ${result.javaClass.name}", result.cause)
+                    throw RuntimeException("Not available for a different reason: ${result.javaClass.name}", result.cause)
                 }
 
                 is OptionalLoadable.LoadedAvailable -> {

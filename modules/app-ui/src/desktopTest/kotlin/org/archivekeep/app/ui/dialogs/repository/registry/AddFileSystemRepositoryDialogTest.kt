@@ -325,4 +325,68 @@ class AddFileSystemRepositoryDialogTest {
             }
         }
     }
+
+    @OptIn(ExperimentalTestApi::class)
+    @Test
+    fun testIncorrectPasswordAddFlowForEncryptedRepository() {
+        runHighDensityComposeUiTest {
+            val repoPath = testTempDir.newFolder("local-archives/test-encrypted-repo").path
+            runBlocking {
+                EncryptedFileSystemRepository.create(Path(repoPath), "test-add-password")
+            }
+
+            setContentInDialogScreenshotContainer {
+                ApplicationProviders(
+                    environmentFactory = { scope ->
+                        DemoEnvironment(
+                            scope,
+                            physicalMediaData = listOf(phone, usbStickAll, usbStickDocuments, usbStickMusic),
+                            enableSpeedLimit = false,
+                            mountPoints = mountPoints(),
+                        )
+                    },
+                    applicationMetadata = PropertiesApplicationMetadata(),
+                ) {
+                    CompositionLocalProvider(
+                        LocalFilesystemDirectoryPicker provides fixedFilesystemDirectoryPicker(repoPath),
+                    ) {
+                        AddFileSystemRepositoryDialog(
+                            intendedStorageType = FileSystemStorageType.LOCAL,
+                        ).render(onClose = {})
+                    }
+                }
+            }
+
+            run {
+                saveTestingDialogContainerBitmap("dialogs/add-filesystem-repository/add-wrong-password-encrypted-01-after-selection.png")
+
+                onNodeWithText("local-archives/test-encrypted-repo", true).assertExists()
+                onNodeWithText("The repository is encrypted, and password protected.").assertExists()
+                onNodeWithText("Enter password to access it:").assertExists()
+                onNodeWithText("Unlock").assertIsNotEnabled()
+                onNodeWithText("Add").assertIsNotEnabled()
+            }
+
+            run {
+                onNodeWithText("Enter password ...").performClickTextInput("some-wrong-password")
+
+                saveTestingDialogContainerBitmap("dialogs/add-filesystem-repository/add-wrong-password-encrypted-02-input-password.png")
+
+                onNodeWithText("Unlock").assertIsEnabled()
+                onNodeWithText("Add").assertIsNotEnabled()
+            }
+
+            runBlocking {
+                onNodeWithText("Unlock").performClick()
+
+                eventually(2.seconds) {
+                    saveTestingDialogContainerBitmap("dialogs/add-filesystem-repository/add-wrong-password-encrypted-03-failed.png")
+
+                    onNodeWithText("Entered password isn't correct.").assertExists()
+                    onNodeWithText("Unlock").assertIsEnabled()
+                    onNodeWithText("Add").assertIsNotEnabled()
+                }
+            }
+        }
+    }
 }

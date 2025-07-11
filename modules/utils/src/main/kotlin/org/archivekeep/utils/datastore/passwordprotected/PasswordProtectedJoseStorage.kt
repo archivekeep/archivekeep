@@ -1,6 +1,7 @@
 package org.archivekeep.utils.datastore.passwordprotected
 
 import com.nimbusds.jose.EncryptionMethod
+import com.nimbusds.jose.JOSEException
 import com.nimbusds.jose.JWEAlgorithm
 import com.nimbusds.jose.JWEHeader
 import com.nimbusds.jose.JWEObject
@@ -23,10 +24,12 @@ import kotlinx.serialization.KSerializer
 import kotlinx.serialization.json.Json
 import org.archivekeep.utils.coroutines.shareResourceIn
 import org.archivekeep.utils.datastore.passwordprotected.PasswordProtectedJoseStorage.State
+import org.archivekeep.utils.exceptions.IncorrectPasswordException
 import org.archivekeep.utils.loading.ProtectedLoadableResource
 import org.archivekeep.utils.safeFileRead
 import org.archivekeep.utils.safeFileReadWrite
 import java.nio.file.Path
+import java.security.InvalidKeyException
 
 /**
  * It can be in three states:
@@ -114,7 +117,16 @@ class PasswordProtectedJoseStorage<T>(
         mutex.withLock {
             val contents = safeFileRead(file) ?: throw RuntimeException("File doesn't exist")
 
-            val data = decryptDecode(contents, password)
+            val data =
+                try {
+                    decryptDecode(contents, password)
+                } catch (e: JOSEException) {
+                    if (e.cause is InvalidKeyException) {
+                        throw IncorrectPasswordException(e)
+                    } else {
+                        throw e
+                    }
+                }
 
             currentStateFlow.value = State.Unlocked(password, data)
         }

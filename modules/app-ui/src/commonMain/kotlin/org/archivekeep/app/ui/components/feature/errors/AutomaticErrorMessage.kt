@@ -2,6 +2,7 @@ package org.archivekeep.app.ui.components.feature.errors
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Modifier
@@ -9,6 +10,7 @@ import androidx.compose.ui.unit.dp
 import org.archivekeep.app.core.utils.exceptions.RepositoryLockedException
 import org.archivekeep.app.core.utils.generics.ExecutionOutcome
 import org.archivekeep.app.ui.components.designsystem.elements.ErrorAlert
+import org.archivekeep.utils.exceptions.IncorrectPasswordException
 
 @Composable
 fun AutomaticErrorMessage(
@@ -32,10 +34,10 @@ fun AutomaticErrorMessage(
         Column(
             Modifier.padding(12.dp),
         ) {
-            if (cause is RepositoryLockedException) {
-                RepositoryLockedError(cause, onResolve)
-            } else {
-                GeneralErrorMessage(cause)
+            when (cause) {
+                is RepositoryLockedException -> RepositoryLockedError(cause, onResolve)
+                is IncorrectPasswordException -> Text("Entered password isn't correct.")
+                else -> GeneralErrorMessage(cause)
             }
         }
     }

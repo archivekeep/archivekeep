@@ -27,7 +27,7 @@ sealed interface OptionalLoadable<out T> {
 
     data class Failed(
         val cause: Throwable,
-    ) : OptionalLoadable<Nothing>
+    ) : LoadingFinished<Nothing>
 
     data object Loading : OptionalLoadable<Nothing>
 }

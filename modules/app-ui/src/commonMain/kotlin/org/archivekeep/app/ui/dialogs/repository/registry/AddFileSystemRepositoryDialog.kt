@@ -333,7 +333,7 @@ private fun AddRepositoryDialogContents(
                                             modifier = Modifier.padding(bottom = 8.dp),
                                         )
                                         Button(
-                                            onClick = { singleLaunchGuard.launch { option.unlock(password) } },
+                                            onClick = { passwordLaunchGuard.launch { option.unlock(password) } },
                                             enabled = password.isNotEmpty(),
                                             shape = MaterialTheme.shapes.small,
                                             modifier = Modifier.padding(bottom = 8.dp),
