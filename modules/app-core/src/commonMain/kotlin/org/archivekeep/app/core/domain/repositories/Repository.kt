@@ -104,7 +104,7 @@ class Repository(
                 if (it is LocalRepo) {
                     OptionalLoadable.LoadedAvailable(it)
                 } else {
-                    OptionalLoadable.NotAvailable(RuntimeException("Not a local repo: ${it.javaClass.simpleName}"))
+                    OptionalLoadable.NotAvailable(RuntimeException("not working repository: ${it.javaClass.simpleName}"))
                 }
             }.flatMapLatestLoadedData { repo -> repo.localIndex.mapLoadedDataAsOptional { it } }
             .stateIn(scope)

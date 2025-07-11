@@ -40,9 +40,9 @@ fun <T, R> OptionalLoadable<T>.mapLoadedData(function: (data: T) -> R): Optional
         is OptionalLoadable.LoadedAvailable ->
             OptionalLoadable.LoadedAvailable(function(this.value))
 
-        is OptionalLoadable.Failed -> OptionalLoadable.Failed(this.cause)
+        is OptionalLoadable.Failed -> this
         OptionalLoadable.Loading -> OptionalLoadable.Loading
-        is OptionalLoadable.NotAvailable -> OptionalLoadable.NotAvailable(this.cause)
+        is OptionalLoadable.NotAvailable -> this
     }
 
 fun <T, R> Flow<OptionalLoadable<T>>.mapLoadedData(function: suspend (data: T) -> R): Flow<OptionalLoadable<R>> =
@@ -63,9 +63,9 @@ fun <T, R> Flow<OptionalLoadable<T>>.mapLoaded(transform: suspend (data: T) -> O
         .map {
             when (it) {
                 is OptionalLoadable.LoadedAvailable -> transform(it.value)
-                is OptionalLoadable.Failed -> OptionalLoadable.Failed(it.cause)
+                is OptionalLoadable.Failed -> it
                 OptionalLoadable.Loading -> OptionalLoadable.Loading
-                is OptionalLoadable.NotAvailable -> OptionalLoadable.NotAvailable(it.cause)
+                is OptionalLoadable.NotAvailable -> it
             }
         }.autoCatch()
 

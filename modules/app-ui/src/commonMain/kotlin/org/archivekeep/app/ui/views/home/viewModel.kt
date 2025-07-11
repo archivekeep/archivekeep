@@ -15,6 +15,7 @@ import org.archivekeep.app.core.domain.storages.StorageNamedReference
 import org.archivekeep.app.core.domain.storages.StoragePartiallyResolved
 import org.archivekeep.app.core.procedures.addpush.AddAndPushProcedureService
 import org.archivekeep.app.core.procedures.sync.RepoToRepoSyncService
+import org.archivekeep.app.core.utils.generics.OptionalLoadable
 import org.archivekeep.app.core.utils.generics.isLoading
 import org.archivekeep.app.core.utils.generics.mapIfLoadedOrNull
 import org.archivekeep.app.core.utils.generics.mapLoadedData
@@ -44,7 +45,7 @@ class HomeArchiveEntryViewModel(
         val canPush: Loadable<Boolean>,
         val anySecondaryAvailable: Boolean,
         val loading: Boolean,
-        val indexStatusText: Loadable<String>,
+        val indexStatusText: OptionalLoadable<String>,
         val addPushOperationRunning: Boolean,
     ) {
         val canAddPush = if (addPushOperationRunning) Loadable.Loaded(true) else (canAdd.mapLoadedData { it && anySecondaryAvailable })
@@ -87,8 +88,6 @@ class HomeArchiveEntryViewModel(
                     indexStatus
                         .mapLoadedData {
                             "${it.indexedFiles.size} files${it.newFiles.size.let { if (it > 0) ", $it uncommitted" else "" }}"
-                        }.mapToLoadable {
-                            Loadable.Failed(it.cause ?: RuntimeException("Expected status data"))
                         },
                 addPushOperationRunning = addPushOperationRunning,
             )
@@ -103,7 +102,7 @@ class HomeArchiveEntryViewModel(
                 canPush = Loadable.Loading,
                 anySecondaryAvailable = false,
                 loading = true,
-                indexStatusText = Loadable.Loading,
+                indexStatusText = OptionalLoadable.Loading,
                 addPushOperationRunning = false,
             ),
         )
