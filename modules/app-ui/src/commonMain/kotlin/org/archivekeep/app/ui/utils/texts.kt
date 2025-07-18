@@ -1,8 +1,8 @@
 package org.archivekeep.app.ui.utils
 
 import org.archivekeep.app.core.domain.storages.StorageRepository
-import org.archivekeep.app.core.utils.generics.OptionalLoadable
-import org.archivekeep.app.core.utils.generics.mapIfLoadedOrNull
+import org.archivekeep.utils.loading.optional.OptionalLoadable
+import org.archivekeep.utils.loading.optional.mapIfLoadedOrNull
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.minutes
 

@@ -14,8 +14,6 @@ import kotlinx.coroutines.runBlocking
 import org.archivekeep.app.core.persistence.drivers.s3.S3RepositoryURIData
 import org.archivekeep.app.core.persistence.platform.demo.DemoEnvironment
 import org.archivekeep.app.core.persistence.registry.RegisteredRepository
-import org.archivekeep.app.core.utils.generics.OptionalLoadable
-import org.archivekeep.app.core.utils.generics.stateIn
 import org.archivekeep.app.desktop.ui.dialogs.testing.saveTestingDialogContainerBitmap
 import org.archivekeep.app.desktop.ui.dialogs.testing.setContentInDialogScreenshotContainer
 import org.archivekeep.app.desktop.ui.testing.screenshots.runHighDensityComposeUiTest
@@ -25,7 +23,8 @@ import org.archivekeep.app.ui.domain.wiring.newServiceWorkExecutorDispatcher
 import org.archivekeep.app.ui.performClickTextInput
 import org.archivekeep.app.ui.utils.PropertiesApplicationMetadata
 import org.archivekeep.app.ui.utils.S3RepositoryTestRepo
-import org.archivekeep.utils.loading.stateIn
+import org.archivekeep.utils.loading.optional.OptionalLoadable
+import org.archivekeep.utils.loading.optional.stateIn
 import org.junit.Rule
 import org.junit.Test
 import org.testcontainers.containers.MinIOContainer

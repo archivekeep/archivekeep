@@ -33,10 +33,9 @@ import org.archivekeep.app.core.domain.repositories.UnlockOptions
 import org.archivekeep.app.core.domain.storages.RepositoryAccessState
 import org.archivekeep.app.core.domain.storages.asLoadableUnlockRequest
 import org.archivekeep.app.core.domain.storages.asUnlockRequest
-import org.archivekeep.app.core.persistence.credentials.Credentials
+import org.archivekeep.app.core.persistence.credentials.WalletPO
 import org.archivekeep.app.core.persistence.drivers.filesystem.FileSystemStorageDriver
 import org.archivekeep.app.core.utils.generics.ExecutionOutcome
-import org.archivekeep.app.core.utils.generics.OptionalLoadable
 import org.archivekeep.app.core.utils.identifiers.RepositoryURI
 import org.archivekeep.app.ui.components.designsystem.input.CheckboxWithText
 import org.archivekeep.app.ui.components.designsystem.input.PasswordField
@@ -59,6 +58,7 @@ import org.archivekeep.files.repo.remote.grpc.BasicAuthCredentials
 import org.archivekeep.utils.datastore.passwordprotected.PasswordProtectedDataStore
 import org.archivekeep.utils.loading.Loadable
 import org.archivekeep.utils.loading.mapIfLoadedOrDefault
+import org.archivekeep.utils.loading.optional.OptionalLoadable
 
 class UnlockRepositoryDialog(
     uri: RepositoryURI,
@@ -70,6 +70,7 @@ class UnlockRepositoryDialog(
         val canUnlockCredentials: Boolean,
         val launchable: Launchable<Unit>,
         val passwordState: MutableState<String>,
+        val rememberPasswordState: MutableState<Boolean>,
         val basicAuthCredentialsState: MutableState<BasicAuthCredentials?>,
         val unlockOptionsState: MutableState<UnlockOptions>,
         val onClose: () -> Unit,
@@ -79,6 +80,8 @@ class UnlockRepositoryDialog(
         val needsUnlock = unlockRequest.mapIfLoadedOrDefault(false) { it != null }
 
         var password by passwordState
+        var rememberPassword by rememberPasswordState
+
         var basicAuthCredentials by basicAuthCredentialsState
         var unlockOptions by unlockOptionsState
 
@@ -107,12 +110,14 @@ class UnlockRepositoryDialog(
         val coroutineScope: CoroutineScope,
         val repository: Repository,
         val walletOperationLaunchers: WalletOperationLaunchers,
-        val credentialStorage: PasswordProtectedDataStore<Credentials>?,
+        val credentialStorage: PasswordProtectedDataStore<WalletPO>?,
         val _onClose: () -> Unit,
     ) : IVM {
         val accessState = repository.optionalAccessorFlow
 
-        val passwordState = mutableStateOf<String>("")
+        val passwordState = mutableStateOf("")
+        val rememberPasswordState = mutableStateOf(false)
+
         val basicAuthCredentialsState = mutableStateOf<BasicAuthCredentials?>(null)
 
         val unlockOptionsState = mutableStateOf(UnlockOptions(rememberSession = false))
@@ -120,9 +125,9 @@ class UnlockRepositoryDialog(
 
         val unlockAction =
             simpleLaunchable(coroutineScope) { _: Unit ->
-                if (unlockOptions.rememberSession) {
+                if (unlockOptions.rememberSession || rememberPasswordState.value) {
                     if (!walletOperationLaunchers.ensureWalletForWrite()) {
-                        return@simpleLaunchable
+                        throw RuntimeException("Wallet not available")
                     }
                 }
 
@@ -135,7 +140,7 @@ class UnlockRepositoryDialog(
                         )
 
                     is FileSystemStorageDriver.PasswordRequest -> {
-                        request.providePassword(passwordState.value)
+                        request.providePassword(passwordState.value, rememberPasswordState.value)
                     }
                 }
             }
@@ -179,6 +184,7 @@ class UnlockRepositoryDialog(
                     canUnlockCredentials = canUnlockCredentials,
                     launchable = vm.unlockAction,
                     passwordState = vm.passwordState,
+                    rememberPasswordState = vm.rememberPasswordState,
                     basicAuthCredentialsState = vm.basicAuthCredentialsState,
                     unlockOptionsState = vm.unlockOptionsState,
                     onClose = vm::onClose,
@@ -200,6 +206,35 @@ class UnlockRepositoryDialog(
         }
 
         val walletOperationLaunchers = LocalWalletOperationLaunchers.current
+
+        @Composable
+        fun WalletOpenBlock() {
+            if (state.canUnlockCredentials) {
+                HorizontalDivider(Modifier.padding(bottom = 12.dp), thickness = 1.dp)
+                Text(
+                    "Wallet with stored credentials is locked.",
+                    modifier = Modifier.padding(bottom = 8.dp),
+                )
+                OutlinedButton(
+                    onClick = {
+                        walletOperationLaunchers.openUnlockWallet({
+                            state.onClose()
+                            onUnlock?.let { it() }
+                        })
+                    },
+                ) {
+                    Icon(
+                        TablerIcons.Lock,
+                        contentDescription = "Locked wallet",
+                        Modifier.size(20.dp),
+                    )
+                    Spacer(Modifier.width(12.dp))
+
+                    Text("Open wallet")
+                }
+                HorizontalDivider(Modifier.padding(vertical = 12.dp), thickness = 1.dp)
+            }
+        }
 
         LoadableGuard(state.unlockRequest) { unlockRequest ->
             println(state.accessState)
@@ -225,33 +260,7 @@ class UnlockRepositoryDialog(
                         },
                     )
                     Spacer(Modifier.height(12.dp))
-
-                    if (state.canUnlockCredentials) {
-                        HorizontalDivider(Modifier.padding(bottom = 12.dp), thickness = 1.dp)
-                        Text(
-                            "Wallet with stored credentials is locked.",
-                            modifier = Modifier.padding(bottom = 8.dp),
-                        )
-                        OutlinedButton(
-                            onClick = {
-                                walletOperationLaunchers.openUnlockWallet({
-                                    state.onClose()
-                                    onUnlock?.let { it() }
-                                })
-                            },
-                        ) {
-                            Icon(
-                                TablerIcons.Lock,
-                                contentDescription = "Locked wallet",
-                                Modifier.size(20.dp),
-                            )
-                            Spacer(Modifier.width(12.dp))
-
-                            Text("Open wallet")
-                        }
-                        HorizontalDivider(Modifier.padding(vertical = 12.dp), thickness = 1.dp)
-                    }
-
+                    WalletOpenBlock()
                     Text(
                         "Enter credentials to authenticate with:",
                         modifier = Modifier.padding(bottom = 8.dp),
@@ -306,12 +315,21 @@ class UnlockRepositoryDialog(
                         },
                     )
                     Spacer(Modifier.height(12.dp))
+                    WalletOpenBlock()
                     PasswordField(
                         state.password,
                         onValueChange = { state.password = it },
                         placeholder = {
                             Text("Enter password ...")
                         },
+                    )
+                    Spacer(Modifier.height(12.dp))
+                    CheckboxWithText(
+                        state.rememberPassword,
+                        onValueChange = {
+                            state.rememberPassword = !state.rememberPassword
+                        },
+                        text = "Remember password",
                     )
                 }
             }

@@ -11,11 +11,11 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
-import org.archivekeep.app.core.utils.generics.OptionalLoadable
-import org.archivekeep.app.core.utils.generics.mapToOptionalLoadable
 import org.archivekeep.app.core.utils.identifiers.RepositoryURI
 import org.archivekeep.files.repo.RepositoryMetadata
 import org.archivekeep.utils.coroutines.shareResourceIn
+import org.archivekeep.utils.loading.optional.OptionalLoadable
+import org.archivekeep.utils.loading.optional.mapToOptionalLoadable
 import java.io.File
 
 private val REMEMBERED_REPOSITORY_METADATA_KEY = stringSetPreferencesKey("remembered_repository_metadata")

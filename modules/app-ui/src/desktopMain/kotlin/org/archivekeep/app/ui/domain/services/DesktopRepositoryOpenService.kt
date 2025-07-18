@@ -4,9 +4,9 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flowOf
 import org.archivekeep.app.core.persistence.drivers.filesystem.FileSystemRepositoryURIData
 import org.archivekeep.app.core.persistence.drivers.filesystem.FileSystemStorageDriver
-import org.archivekeep.app.core.utils.generics.OptionalLoadable
-import org.archivekeep.app.core.utils.generics.mapLoadedData
 import org.archivekeep.app.core.utils.identifiers.RepositoryURI
+import org.archivekeep.utils.loading.optional.OptionalLoadable
+import org.archivekeep.utils.loading.optional.mapLoadedData
 import java.awt.Desktop
 
 class DesktopRepositoryOpenService(

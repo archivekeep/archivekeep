@@ -17,14 +17,6 @@ import org.archivekeep.app.core.persistence.repository.MemorizedRepositoryIndexR
 import org.archivekeep.app.core.persistence.repository.MemorizedRepositoryMetadataRepository
 import org.archivekeep.app.core.persistence.repository.MemorizedRepositoryMetadataRepository.Companion.memorizingCachingMetadataFlow
 import org.archivekeep.app.core.utils.exceptions.RepositoryLockedException
-import org.archivekeep.app.core.utils.generics.OptionalLoadable
-import org.archivekeep.app.core.utils.generics.firstFinished
-import org.archivekeep.app.core.utils.generics.flatMapLatestLoadedData
-import org.archivekeep.app.core.utils.generics.mapIfLoadedOrNull
-import org.archivekeep.app.core.utils.generics.mapLoaded
-import org.archivekeep.app.core.utils.generics.mapLoadedDataAsOptional
-import org.archivekeep.app.core.utils.generics.mapToLoadable
-import org.archivekeep.app.core.utils.generics.stateIn
 import org.archivekeep.app.core.utils.identifiers.RepositoryURI
 import org.archivekeep.files.exceptions.UnsupportedFeatureException
 import org.archivekeep.files.repo.LocalRepo
@@ -32,6 +24,14 @@ import org.archivekeep.files.repo.RepositoryMetadata
 import org.archivekeep.utils.coroutines.InstanceProtector
 import org.archivekeep.utils.coroutines.shareResourceIn
 import org.archivekeep.utils.loading.Loadable
+import org.archivekeep.utils.loading.optional.OptionalLoadable
+import org.archivekeep.utils.loading.optional.firstFinished
+import org.archivekeep.utils.loading.optional.flatMapLatestLoadedData
+import org.archivekeep.utils.loading.optional.mapIfLoadedOrNull
+import org.archivekeep.utils.loading.optional.mapLoaded
+import org.archivekeep.utils.loading.optional.mapLoadedDataAsOptional
+import org.archivekeep.utils.loading.optional.mapToLoadable
+import org.archivekeep.utils.loading.optional.stateIn
 
 private val InstanceProtector = InstanceProtector<Repository>()
 

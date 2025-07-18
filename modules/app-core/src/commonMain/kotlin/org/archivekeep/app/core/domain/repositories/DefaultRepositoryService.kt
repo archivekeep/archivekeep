@@ -10,10 +10,10 @@ import org.archivekeep.app.core.persistence.registry.RegisteredRepository
 import org.archivekeep.app.core.persistence.registry.RegistryDataStore
 import org.archivekeep.app.core.persistence.repository.MemorizedRepositoryIndexRepository
 import org.archivekeep.app.core.persistence.repository.MemorizedRepositoryMetadataRepository
-import org.archivekeep.app.core.utils.generics.OptionalLoadable
 import org.archivekeep.app.core.utils.generics.UniqueInstanceManager
 import org.archivekeep.app.core.utils.identifiers.RepositoryURI
 import org.archivekeep.files.repo.Repo
+import org.archivekeep.utils.loading.optional.OptionalLoadable
 
 class DefaultRepositoryService(
     private val scope: CoroutineScope,

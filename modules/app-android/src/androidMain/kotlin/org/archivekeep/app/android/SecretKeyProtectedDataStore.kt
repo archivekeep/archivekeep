@@ -48,6 +48,7 @@ class SecretKeyProtectedDataStore<E>(
 
     override suspend fun needsUnlock(): Boolean = false
 
+    @Deprecated("Drop ProtectedLoadableResource", replaceWith = ReplaceWith("dataOptional"))
     override val data: Flow<ProtectedLoadableResource<E, Any>> =
         rawDataStore
             .data

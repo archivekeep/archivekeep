@@ -2,10 +2,10 @@ package org.archivekeep.app.core.domain.storages
 
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.SharedFlow
-import org.archivekeep.app.core.utils.generics.OptionalLoadable
 import org.archivekeep.app.core.utils.identifiers.RepositoryURI
 import org.archivekeep.app.core.utils.identifiers.StorageURI
 import org.archivekeep.utils.loading.Loadable
+import org.archivekeep.utils.loading.optional.OptionalLoadable
 
 abstract class StorageDriver(
     val ID: String,

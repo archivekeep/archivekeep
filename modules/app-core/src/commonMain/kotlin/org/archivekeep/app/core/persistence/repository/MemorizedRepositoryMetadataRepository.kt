@@ -6,13 +6,13 @@ import kotlinx.coroutines.flow.conflate
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.onEach
-import org.archivekeep.app.core.utils.generics.OptionalLoadable
-import org.archivekeep.app.core.utils.generics.flatMapLatestLoadedData
 import org.archivekeep.app.core.utils.identifiers.RepositoryURI
 import org.archivekeep.files.exceptions.UnsupportedFeatureException
 import org.archivekeep.files.repo.Repo
 import org.archivekeep.files.repo.RepositoryMetadata
 import org.archivekeep.utils.loading.Loadable
+import org.archivekeep.utils.loading.optional.OptionalLoadable
+import org.archivekeep.utils.loading.optional.flatMapLatestLoadedData
 
 /**
  * This is a bit more than merely a cache.

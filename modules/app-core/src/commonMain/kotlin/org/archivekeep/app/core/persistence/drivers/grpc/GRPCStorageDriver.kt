@@ -22,7 +22,6 @@ import org.archivekeep.app.core.domain.storages.StorageConnection
 import org.archivekeep.app.core.domain.storages.StorageDriver
 import org.archivekeep.app.core.domain.storages.StorageInformation
 import org.archivekeep.app.core.persistence.credentials.CredentialsStore
-import org.archivekeep.app.core.utils.generics.stateIn
 import org.archivekeep.app.core.utils.identifiers.RepositoryURI
 import org.archivekeep.app.core.utils.identifiers.StorageURI
 import org.archivekeep.files.repo.Repo
@@ -35,6 +34,7 @@ import org.archivekeep.utils.loading.Loadable
 import org.archivekeep.utils.loading.ProtectedLoadableResource
 import org.archivekeep.utils.loading.filterLoaded
 import org.archivekeep.utils.loading.firstLoadedOrNullOnErrorOrLocked
+import org.archivekeep.utils.loading.optional.stateIn
 import org.archivekeep.utils.loading.stateIn
 
 class GRPCStorageDriver(
@@ -136,7 +136,7 @@ class GRPCStorageDriver(
                                 ),
                             )
 
-                        credentialsStore.rememberRepositoryCredentials(uri, newCredentials)
+                        credentialsStore.saveRepositoryCredentials(uri, newCredentials)
                     }
 
                     successfulOpen.complete(opened)

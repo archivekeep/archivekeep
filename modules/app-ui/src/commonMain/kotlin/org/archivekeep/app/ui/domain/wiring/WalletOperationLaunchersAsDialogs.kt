@@ -27,9 +27,13 @@ fun rememberWalletOperationLaunchersAsDialogs(dialogRenderer: OverlayDialogRende
                             .first()
 
                     if (state is PasswordProtectedJoseStorage.State.NotExisting) {
+                        // TODO: implement open dialog for result, or something like that, and await,...
+                        // or, rework to assert check and "open or create launcher" with separate UI button
                         dialogRenderer.openDialog(CreateWalletDialog())
                         false
                     } else if (state is PasswordProtectedJoseStorage.State.Locked) {
+                        // TODO: implement open dialog for result, or something like that, and await
+                        // or, rework to assert check and "open or create launcher" with separate UI button
                         dialogRenderer.openDialog(UnlockWalletDialog(onUnlock = {}))
                         false
                     } else {

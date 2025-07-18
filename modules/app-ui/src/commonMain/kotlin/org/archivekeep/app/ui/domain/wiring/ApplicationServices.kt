@@ -7,8 +7,6 @@ import org.archivekeep.app.core.domain.archives.DefaultArchiveService
 import org.archivekeep.app.core.domain.repositories.DefaultRepositoryService
 import org.archivekeep.app.core.domain.storages.KnownStorageService
 import org.archivekeep.app.core.domain.storages.StorageService
-import org.archivekeep.app.core.persistence.credentials.CredentialsInProtectedDataStore
-import org.archivekeep.app.core.persistence.credentials.CredentialsStore
 import org.archivekeep.app.core.persistence.drivers.grpc.GRPCStorageDriver
 import org.archivekeep.app.core.persistence.drivers.s3.S3StorageDriver
 import org.archivekeep.app.core.persistence.platform.Environment
@@ -23,13 +21,11 @@ class ApplicationServices(
 ) {
     val scope = basescope + serviceWorkDispatcher
 
-    val credentialsStore: CredentialsStore = CredentialsInProtectedDataStore(environment.walletDataStore)
-
     val storageDrivers =
         (
             listOf(
-                GRPCStorageDriver(scope, credentialsStore),
-                S3StorageDriver(scope, credentialsStore),
+                GRPCStorageDriver(scope, environment.credentialsStore),
+                S3StorageDriver(scope, environment.credentialsStore),
             ) + environment.storageDrivers
         ).associateBy { it.ID }
 

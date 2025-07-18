@@ -3,12 +3,12 @@ package org.archivekeep.app.core.procedures.sync
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.StateFlow
 import org.archivekeep.app.core.procedures.utils.JobWrapper
-import org.archivekeep.app.core.utils.generics.OptionalLoadable
 import org.archivekeep.files.operations.CompareOperation
 import org.archivekeep.files.procedures.sync.DiscoveredSync
 import org.archivekeep.files.procedures.sync.RelocationSyncMode
 import org.archivekeep.files.procedures.sync.operations.SyncOperation
 import org.archivekeep.utils.loading.Loadable
+import org.archivekeep.utils.loading.optional.OptionalLoadable
 import org.archivekeep.utils.procedures.ProcedureExecutionState
 import org.archivekeep.utils.procedures.operations.OperationProgress
 import org.archivekeep.utils.procedures.tasks.TaskExecutionProgressSummary

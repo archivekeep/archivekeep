@@ -12,9 +12,9 @@ import org.archivekeep.app.core.domain.storages.RepositoryAccessState
 import org.archivekeep.app.core.domain.storages.StorageRegistry
 import org.archivekeep.app.core.persistence.drivers.filesystem.FileStores
 import org.archivekeep.app.core.persistence.registry.RegistryDataStore
-import org.archivekeep.app.core.utils.generics.OptionalLoadable
 import org.archivekeep.app.core.utils.identifiers.RepositoryURI
 import org.archivekeep.files.repo.remote.grpc.BasicAuthCredentials
+import org.archivekeep.utils.loading.optional.OptionalLoadable
 
 class AddRemoteRepositoryUseCaseImpl(
     val repositoryService: RepositoryService,

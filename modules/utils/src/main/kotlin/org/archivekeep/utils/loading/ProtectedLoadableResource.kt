@@ -5,6 +5,9 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.transform
 
+@Deprecated(
+    "Replace with, and/or break down to multiple, Loadable(s) or OptionalLoadable(s), and reduce number of similar generic interfaces.",
+)
 sealed interface ProtectedLoadableResource<out T, out A> {
     fun asLoadable(): Loadable<T>
 

@@ -11,7 +11,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.text.buildAnnotatedString
 import kotlinx.coroutines.CoroutineScope
-import org.archivekeep.app.core.persistence.credentials.Credentials
+import org.archivekeep.app.core.persistence.credentials.WalletPO
 import org.archivekeep.app.ui.components.designsystem.input.PasswordField
 import org.archivekeep.app.ui.components.feature.dialogs.SimpleActionDialogControlButtons
 import org.archivekeep.app.ui.components.feature.dialogs.operations.LaunchableExecutionErrorIfPresent
@@ -26,7 +26,7 @@ import org.archivekeep.utils.loading.Loadable
 class CreateWalletDialog : AbstractDialog<CreateWalletDialog.State, CreateWalletDialog.VM>() {
     class VM(
         scope: CoroutineScope,
-        val passwordProtectedDataStore: PasswordProtectedDataStore<Credentials>,
+        val passwordProtectedDataStore: PasswordProtectedDataStore<WalletPO>,
         val _onClose: () -> Unit,
     ) : IVM {
         val launchable =

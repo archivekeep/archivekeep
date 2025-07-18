@@ -18,17 +18,17 @@ import kotlinx.serialization.json.Json
 import org.archivekeep.app.core.createTestBucket
 import org.archivekeep.app.core.domain.repositories.DefaultRepositoryService
 import org.archivekeep.app.core.domain.storages.KnownStorageService
-import org.archivekeep.app.core.persistence.credentials.CredentialsInProtectedDataStore
+import org.archivekeep.app.core.persistence.credentials.CredentialsInProtectedWalletDataStore
 import org.archivekeep.app.core.persistence.credentials.CredentialsStore
 import org.archivekeep.app.core.persistence.drivers.filesystem.FileSystemStorageDriver
 import org.archivekeep.app.core.persistence.drivers.grpc.GRPCStorageDriver
 import org.archivekeep.app.core.persistence.drivers.s3.S3StorageDriver
 import org.archivekeep.app.core.persistence.platform.demo.DemoEnvironment
 import org.archivekeep.app.core.persistence.registry.RegisteredRepository
-import org.archivekeep.app.core.utils.generics.OptionalLoadable
 import org.archivekeep.app.core.utils.identifiers.RepositoryURI
 import org.archivekeep.files.repo.remote.grpc.BasicAuthCredentials
 import org.archivekeep.utils.loading.firstLoadedOrNullOnErrorOrLocked
+import org.archivekeep.utils.loading.optional.OptionalLoadable
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.io.TempDir
 import org.testcontainers.containers.MinIOContainer
@@ -60,13 +60,13 @@ class AddRemoteRepositoryUseCaseImplTest {
 
         val env = DemoEnvironment(scope, false, emptyList())
 
-        val credentialsStore: CredentialsStore = CredentialsInProtectedDataStore(env.walletDataStore)
+        val credentialsStore: CredentialsStore = CredentialsInProtectedWalletDataStore(env.walletDataStore)
 
         val repositoryService =
             DefaultRepositoryService(
                 scope,
                 listOf(
-                    FileSystemStorageDriver(scope, env.fileStores),
+                    FileSystemStorageDriver(scope, env.fileStores, credentialsStore),
                     GRPCStorageDriver(scope, credentialsStore),
                     S3StorageDriver(scope, credentialsStore, ioDispatcher = dispatcher),
                 ).associateBy { it.ID },
@@ -129,13 +129,13 @@ class AddRemoteRepositoryUseCaseImplTest {
 
         val env = DemoEnvironment(scope, false, emptyList())
 
-        val credentialsStore: CredentialsStore = CredentialsInProtectedDataStore(env.walletDataStore)
+        val credentialsStore: CredentialsStore = CredentialsInProtectedWalletDataStore(env.walletDataStore)
 
         val repositoryService =
             DefaultRepositoryService(
                 scope,
                 listOf(
-                    FileSystemStorageDriver(scope, env.fileStores),
+                    FileSystemStorageDriver(scope, env.fileStores, credentialsStore),
                     GRPCStorageDriver(scope, credentialsStore),
                     S3StorageDriver(scope, credentialsStore, ioDispatcher = dispatcher),
                 ).associateBy { it.ID },
@@ -171,7 +171,7 @@ class AddRemoteRepositoryUseCaseImplTest {
             .shouldNotBeNull {
                 this.repositoryCredentials shouldContainExactly
                     setOf(
-                        CredentialsInProtectedDataStore.PersistedRepositoryCredentials(
+                        CredentialsInProtectedWalletDataStore.PersistedRepositoryCredentials(
                             expectedResultURI,
                             Json.encodeToString(
                                 BasicAuthCredentials(

@@ -4,7 +4,9 @@ import android.content.Context
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.serializer
-import org.archivekeep.app.core.persistence.credentials.Credentials
+import org.archivekeep.app.core.persistence.credentials.CredentialsInProtectedWalletDataStore
+import org.archivekeep.app.core.persistence.credentials.CredentialsStore
+import org.archivekeep.app.core.persistence.credentials.WalletPO
 import org.archivekeep.app.core.persistence.drivers.filesystem.AndroidFileStores
 import org.archivekeep.app.core.persistence.drivers.filesystem.FileStores
 import org.archivekeep.app.core.persistence.drivers.filesystem.FileSystemStorageDriver
@@ -29,11 +31,13 @@ class AndroidEnvironment(
             paths.getWalletDatastoreFile().toPath(),
             Json.serializersModule.serializer(),
             keyAlias = "Credentials Wallet Key",
-            defaultValueProducer = { Credentials(emptySet()) },
+            defaultValueProducer = { WalletPO(emptySet()) },
         )
+
+    override val credentialsStore: CredentialsStore = CredentialsInProtectedWalletDataStore(walletDataStore)
 
     override val repositoryIndexMemory = MemorizedRepositoryIndexRepositoryInDataStore(scope, paths.getRepositoryIndexMemoryDatastoreFile())
     override val repositoryMetadataMemory = MemorizedRepositoryMetadataRepositoryInDataStore(scope, paths.getRepositoryMetadataMemoryDatastoreFile())
 
-    override val storageDrivers = listOf(FileSystemStorageDriver(scope, fileStores))
+    override val storageDrivers = listOf(FileSystemStorageDriver(scope, fileStores, credentialsStore))
 }

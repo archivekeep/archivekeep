@@ -6,9 +6,9 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.remember
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.onEach
-import org.archivekeep.app.core.utils.generics.OptionalLoadable
 import org.archivekeep.utils.loading.Loadable
 import org.archivekeep.utils.loading.mapToLoadable
+import org.archivekeep.utils.loading.optional.OptionalLoadable
 
 @Composable
 fun <T> Flow<T>.collectAsLoadable(): Loadable<T> = collectAsLoadableState().value

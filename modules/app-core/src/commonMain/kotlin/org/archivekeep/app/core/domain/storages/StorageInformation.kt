@@ -1,7 +1,7 @@
 package org.archivekeep.app.core.domain.storages
 
 import kotlinx.coroutines.flow.Flow
-import org.archivekeep.app.core.utils.generics.OptionalLoadable
+import org.archivekeep.utils.loading.optional.OptionalLoadable
 
 sealed interface StorageInformation {
     /**

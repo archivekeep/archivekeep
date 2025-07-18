@@ -15,11 +15,6 @@ import org.archivekeep.app.core.domain.storages.StorageNamedReference
 import org.archivekeep.app.core.domain.storages.StoragePartiallyResolved
 import org.archivekeep.app.core.procedures.addpush.AddAndPushProcedureService
 import org.archivekeep.app.core.procedures.sync.RepoToRepoSyncService
-import org.archivekeep.app.core.utils.generics.OptionalLoadable
-import org.archivekeep.app.core.utils.generics.isLoading
-import org.archivekeep.app.core.utils.generics.mapIfLoadedOrNull
-import org.archivekeep.app.core.utils.generics.mapLoadedData
-import org.archivekeep.app.core.utils.generics.mapToLoadable
 import org.archivekeep.app.core.utils.identifiers.NamedRepositoryReference
 import org.archivekeep.app.ui.domain.wiring.ArchiveOperationLaunchers
 import org.archivekeep.app.ui.enableUnfinishedFeatures
@@ -27,6 +22,11 @@ import org.archivekeep.app.ui.utils.Action
 import org.archivekeep.utils.loading.Loadable
 import org.archivekeep.utils.loading.mapIfLoadedOrDefault
 import org.archivekeep.utils.loading.mapLoadedData
+import org.archivekeep.utils.loading.optional.OptionalLoadable
+import org.archivekeep.utils.loading.optional.isLoading
+import org.archivekeep.utils.loading.optional.mapIfLoadedOrNull
+import org.archivekeep.utils.loading.optional.mapLoadedData
+import org.archivekeep.utils.loading.optional.mapToLoadable
 import org.archivekeep.utils.safeCombine
 
 class HomeArchiveEntryViewModel(

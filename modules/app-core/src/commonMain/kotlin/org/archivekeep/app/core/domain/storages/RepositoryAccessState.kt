@@ -2,9 +2,9 @@ package org.archivekeep.app.core.domain.storages
 
 import org.archivekeep.app.core.domain.repositories.RepositoryConnectionState
 import org.archivekeep.app.core.utils.exceptions.DisconnectedStorageException
-import org.archivekeep.app.core.utils.generics.OptionalLoadable
 import org.archivekeep.files.repo.Repo
 import org.archivekeep.utils.loading.Loadable
+import org.archivekeep.utils.loading.optional.OptionalLoadable
 
 typealias RepositoryAccessState = OptionalLoadable<Repo>
 

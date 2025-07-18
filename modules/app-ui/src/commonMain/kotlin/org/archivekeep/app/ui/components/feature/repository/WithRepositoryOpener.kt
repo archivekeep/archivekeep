@@ -2,10 +2,10 @@ package org.archivekeep.app.ui.components.feature.repository
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
-import org.archivekeep.app.core.utils.generics.OptionalLoadable
 import org.archivekeep.app.core.utils.identifiers.RepositoryURI
 import org.archivekeep.app.ui.domain.wiring.LocalRepositoryOpenService
 import org.archivekeep.app.ui.utils.collectAsState
+import org.archivekeep.utils.loading.optional.OptionalLoadable
 
 data class RepositoryOpenerScope(
     val openRepository: () -> Unit,

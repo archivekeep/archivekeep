@@ -24,7 +24,9 @@ import org.archivekeep.app.core.domain.storages.StorageDriver
 import org.archivekeep.app.core.domain.storages.StorageInformation
 import org.archivekeep.app.core.domain.storages.StorageNamedReference
 import org.archivekeep.app.core.domain.storages.StorageRepository
-import org.archivekeep.app.core.persistence.credentials.Credentials
+import org.archivekeep.app.core.persistence.credentials.CredentialsInProtectedWalletDataStore
+import org.archivekeep.app.core.persistence.credentials.CredentialsStore
+import org.archivekeep.app.core.persistence.credentials.WalletPO
 import org.archivekeep.app.core.persistence.drivers.filesystem.FileStores
 import org.archivekeep.app.core.persistence.drivers.filesystem.MountedFileSystem
 import org.archivekeep.app.core.persistence.platform.Environment
@@ -33,9 +35,7 @@ import org.archivekeep.app.core.persistence.registry.RegisteredStorage
 import org.archivekeep.app.core.persistence.registry.RegistryDataStore
 import org.archivekeep.app.core.persistence.repository.MemorizedRepositoryIndexRepository
 import org.archivekeep.app.core.persistence.repository.MemorizedRepositoryMetadataRepository
-import org.archivekeep.app.core.utils.generics.OptionalLoadable
 import org.archivekeep.app.core.utils.generics.UniqueSharedFlowInstanceManager
-import org.archivekeep.app.core.utils.generics.stateIn
 import org.archivekeep.app.core.utils.identifiers.RepositoryURI
 import org.archivekeep.app.core.utils.identifiers.StorageURI
 import org.archivekeep.files.RepositoryAssociationGroupId
@@ -53,6 +53,8 @@ import org.archivekeep.utils.datastore.passwordprotected.PasswordProtectedJoseSt
 import org.archivekeep.utils.loading.Loadable
 import org.archivekeep.utils.loading.mapLoadedData
 import org.archivekeep.utils.loading.mapToLoadable
+import org.archivekeep.utils.loading.optional.OptionalLoadable
+import org.archivekeep.utils.loading.optional.stateIn
 import org.archivekeep.utils.loading.stateIn
 
 open class DemoEnvironment(
@@ -96,12 +98,14 @@ open class DemoEnvironment(
 
     private val demoTempDirectory = kotlin.io.path.createTempDirectory("archivekeep-demo-env")
 
-    override val walletDataStore: PasswordProtectedJoseStorage<Credentials> =
+    override val walletDataStore: PasswordProtectedJoseStorage<WalletPO> =
         PasswordProtectedJoseStorage(
             demoTempDirectory.resolve("credentials.jwe"),
             Json.serializersModule.serializer(),
-            defaultValueProducer = { Credentials(emptySet()) },
+            defaultValueProducer = { WalletPO(emptySet()) },
         )
+
+    override val credentialsStore: CredentialsStore = CredentialsInProtectedWalletDataStore(walletDataStore)
 
     val mediaMapped =
         MutableStateFlow(
