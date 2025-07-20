@@ -8,7 +8,6 @@ import aws.smithy.kotlin.runtime.content.asByteStream
 import aws.smithy.kotlin.runtime.net.url.Url
 import kotlinx.coroutines.test.TestDispatcher
 import org.archivekeep.files.driver.s3.S3Repository
-import org.archivekeep.files.driver.s3.openS3Repository
 import org.archivekeep.utils.fromHexToBase64
 import org.archivekeep.utils.sha256
 import java.net.URI
@@ -26,7 +25,7 @@ class S3RepositoryTestRepo(
         }
 
     suspend fun open(testDispatcher: TestDispatcher): S3Repository =
-        openS3Repository(
+        S3Repository.open(
             URI.create(s3URL),
             "aa",
             credentialsProvider,

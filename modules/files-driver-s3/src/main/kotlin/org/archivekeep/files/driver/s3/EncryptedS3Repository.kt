@@ -5,17 +5,20 @@ import aws.sdk.kotlin.services.s3.copyObject
 import aws.sdk.kotlin.services.s3.deleteObject
 import aws.sdk.kotlin.services.s3.headObject
 import aws.sdk.kotlin.services.s3.listObjects
-import aws.sdk.kotlin.services.s3.model.ChecksumMode
 import aws.sdk.kotlin.services.s3.model.GetObjectRequest
 import aws.sdk.kotlin.services.s3.model.NoSuchKey
 import aws.sdk.kotlin.services.s3.model.NotFound
 import aws.sdk.kotlin.services.s3.model.Object
-import aws.sdk.kotlin.services.s3.model.S3Exception
 import aws.sdk.kotlin.services.s3.putObject
 import aws.smithy.kotlin.runtime.auth.awscredentials.CredentialsProvider
+import aws.smithy.kotlin.runtime.content.ByteStream
 import aws.smithy.kotlin.runtime.content.asByteStream
+import aws.smithy.kotlin.runtime.content.toByteArray
 import aws.smithy.kotlin.runtime.content.toInputStream
 import aws.smithy.kotlin.runtime.net.url.Url
+import com.nimbusds.jose.crypto.ECDHDecrypter
+import com.nimbusds.jose.crypto.ECDHEncrypter
+import com.nimbusds.jose.crypto.ECDSAVerifier
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -26,37 +29,44 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.decodeFromStream
-import org.archivekeep.files.exceptions.ChecksumMismatch
+import kotlinx.serialization.serializer
+import org.archivekeep.files.crypto.file.CryptoMetadata
+import org.archivekeep.files.crypto.file.readCryptoStream
+import org.archivekeep.files.crypto.file.writeCryptoStream
 import org.archivekeep.files.exceptions.DestinationExists
 import org.archivekeep.files.repo.ArchiveFileInfo
 import org.archivekeep.files.repo.Repo
 import org.archivekeep.files.repo.RepoIndex
 import org.archivekeep.files.repo.RepositoryMetadata
-import org.archivekeep.utils.fromBase64ToHex
-import org.archivekeep.utils.fromHexToBase64
+import org.archivekeep.files.repo.encryptedfiles.EncryptedFileSystemRepositoryVaultContents
+import org.archivekeep.files.repo.encryptedfiles.verifyingStreamViaBackgroundCoroutine
+import org.archivekeep.utils.datastore.passwordprotected.PasswordProtectedCustomJoseStorage
 import org.archivekeep.utils.loading.AutoRefreshLoadableFlow
 import org.archivekeep.utils.loading.Loadable
-import org.archivekeep.utils.sha256
+import org.archivekeep.utils.loading.firstLoadedOrNullOnErrorOrLocked
 import java.io.InputStream
+import java.io.PipedInputStream
+import java.io.PipedOutputStream
 import java.net.URI
 import java.net.URLEncoder
 import java.nio.charset.StandardCharsets
-import java.security.DigestInputStream
-import java.security.MessageDigest
 import java.util.Date
 
 private const val METADATA_JSON_KEY = "metadata.json"
 
-class S3Repository(
+class EncryptedS3Repository(
     val endpoint: URI,
     val region: String,
     val credentialsProvider: CredentialsProvider,
     val bucketName: String,
     val sharingDispatcher: CoroutineDispatcher = Dispatchers.Default,
+    val computeDispatcher: CoroutineDispatcher = Dispatchers.Default,
     val ioDispatcher: CoroutineDispatcher = Dispatchers.IO,
 ) : Repo {
     private lateinit var s3Client: S3Client
@@ -66,12 +76,52 @@ class S3Repository(
     private val contentsLastChangeFlow = MutableStateFlow(Date())
     private val metadataLastChangeFlow = MutableStateFlow(Date())
 
+    val vault =
+        PasswordProtectedCustomJoseStorage(
+            Json.serializersModule.serializer(),
+            defaultValueProducer = { EncryptedFileSystemRepositoryVaultContents(emptyList(), null, null) },
+            reader = {
+                s3Client.getObject(
+                    GetObjectRequest {
+                        bucket = bucketName
+                        key = VAULT_LOCATION
+                    },
+                ) { response ->
+                    response.body?.toByteArray()
+                }
+            },
+            writer = { updater ->
+                // TODO: maybe real locking?
+
+                val oldData =
+                    s3Client.getObject(
+                        GetObjectRequest {
+                            bucket = bucketName
+                            key = VAULT_LOCATION
+                        },
+                    ) { response ->
+                        response.body?.toByteArray()
+                    }
+
+                val newData = updater(oldData)
+
+                s3Client.putObject {
+                    bucket = bucketName
+                    key = VAULT_LOCATION
+
+                    body = ByteStream.fromBytes(newData)
+                }
+
+                newData
+            },
+        )
+
     suspend fun init() {
         s3Client =
             S3Client.fromEnvironment {
                 endpointUrl = Url.parse(endpoint.toString())
-                region = this@S3Repository.region
-                credentialsProvider = this@S3Repository.credentialsProvider
+                region = this@EncryptedS3Repository.region
+                credentialsProvider = this@EncryptedS3Repository.credentialsProvider
                 forcePathStyle = true
             }
 
@@ -97,7 +147,7 @@ class S3Repository(
                             s3Client
                                 .listObjects {
                                     bucket = bucketName
-                                    prefix = FILES_PREFIX
+                                    prefix = ENCRYPTED_FILES_PREFIX
                                     marker = nextMarker
                                 }
 
@@ -122,10 +172,9 @@ class S3Repository(
                                             s3Client.headObject {
                                                 bucket = bucketName
                                                 key = it.key
-                                                checksumMode = ChecksumMode.Enabled
                                             }
 
-                                        head.checksumSha256!!.fromBase64ToHex()
+                                        head.metadata!![RAW_FILE_SHA256_CHECKSUM]!!
                                     }
 
                                 RepoIndex.File(
@@ -181,19 +230,29 @@ class S3Repository(
     override suspend fun <T> open(
         filename: String,
         block: suspend (ArchiveFileInfo, InputStream) -> T,
-    ): T =
-        s3Client.getObject(
+    ): T {
+        val vaultContents = vault.data.firstLoadedOrNullOnErrorOrLocked()!!
+
+        return s3Client.getObject(
             GetObjectRequest {
                 bucket = bucketName
                 key = filename.toKey()
-                checksumMode = ChecksumMode.Enabled
             },
         ) { response ->
-            block(
-                ArchiveFileInfo(response.contentLength!!, response.checksumSha256!!.fromBase64ToHex()),
+            readCryptoStream(
                 response.body!!.toInputStream(),
-            )
+                ECDSAVerifier(vaultContents.currentFileSigningKey!!.toECKey().toECPublicKey()),
+                ECDHDecrypter(
+                    vaultContents.currentFileEncryptionKey!!.toECKey().toECPrivateKey(),
+                ),
+            ) { plainMetadata, contents ->
+                block(
+                    ArchiveFileInfo(plainMetadata.size, plainMetadata.checksumSha256),
+                    contents,
+                )
+            }
         }
+    }
 
     @OptIn(ExperimentalStdlibApi::class)
     override suspend fun save(
@@ -202,24 +261,48 @@ class S3Repository(
         stream: InputStream,
         monitor: (copiedBytes: Long) -> Unit,
     ) {
-        val digest = MessageDigest.getInstance("SHA-256")
-        val digestInputStream = DigestInputStream(stream, digest)
-
         try {
             checkNotExists(filename)
 
-            s3Client.putObject {
-                bucket = bucketName
-                key = filename.toKey()
-                checksumSha256 = info.checksumSha256.fromHexToBase64()
+            withContext(ioDispatcher) {
+                val vaultContents = vault.data.firstLoadedOrNullOnErrorOrLocked()
 
-                body = digestInputStream.asByteStream(contentLength = info.length)
-            }
-        } catch (e: S3Exception) {
-            if (e.message == "Value for x-amz-checksum-sha256 header is invalid.") {
-                throw ChecksumMismatch(info.checksumSha256, digest.digest().toHexString())
-            } else {
-                throw e
+                coroutineScope {
+                    val pipedInputStream =
+                        verifyingStreamViaBackgroundCoroutine(
+                            stream,
+                            monitor,
+                            info.checksumSha256,
+                            blockingIOPopulateDispatcher = ioDispatcher,
+                            checksumComputeDispatcher = computeDispatcher,
+                        )
+
+                    val encryptedInputStream = PipedInputStream()
+                    val encryptedOutputStream = PipedOutputStream(encryptedInputStream)
+
+                    val encryptedWriter =
+                        launch {
+                            writeCryptoStream(
+                                CryptoMetadata.Plain(
+                                    size = info.length,
+                                    checksumSha256 = info.checksumSha256,
+                                ),
+                                vaultContents!!.currentFileSigningKey!!,
+                                ECDHEncrypter(vaultContents.currentFileEncryptionKey!!.toECKey().toECPublicKey()),
+                                pipedInputStream,
+                                encryptedOutputStream,
+                            )
+                        }
+
+                    s3Client.putObject {
+                        bucket = bucketName
+                        key = filename.toKey()
+
+                        body = encryptedInputStream.asByteStream()
+                    }
+
+                    encryptedWriter.join()
+                }
             }
         } finally {
             contentsLastChangeFlow.update { Date() }
@@ -255,7 +338,6 @@ class S3Repository(
             s3Client.putObject {
                 bucket = bucketName
                 key = METADATA_JSON_KEY
-                checksumSha256 = newMetadataBytes.sha256().fromHexToBase64()
 
                 body = newMetadataBytes.inputStream().asByteStream(newMetadataBytes.size.toLong())
             }
@@ -281,11 +363,15 @@ class S3Repository(
         }
 
     companion object {
-        private const val FILES_PREFIX = "files/"
+        private const val ENCRYPTED_FILES_PREFIX = "encrypted-files/"
 
-        fun String.toKey() = "$FILES_PREFIX$this"
+        private const val RAW_FILE_SHA256_CHECKSUM = "raw-contents-checksum-sha256"
 
-        fun String.toFilename() = this.removePrefix(FILES_PREFIX)
+        private const val VAULT_LOCATION = "vault.jwe"
+
+        fun String.toKey() = "$ENCRYPTED_FILES_PREFIX$this.enc"
+
+        fun String.toFilename() = this.removePrefix(ENCRYPTED_FILES_PREFIX).removeSuffix(".enc")
 
         suspend fun open(
             endpoint: URI,

@@ -30,7 +30,7 @@ import org.archivekeep.app.core.domain.storages.StorageInformation
 import org.archivekeep.app.core.persistence.credentials.CredentialsStore
 import org.archivekeep.app.core.utils.identifiers.RepositoryURI
 import org.archivekeep.app.core.utils.identifiers.StorageURI
-import org.archivekeep.files.driver.s3.openS3Repository
+import org.archivekeep.files.driver.s3.S3Repository
 import org.archivekeep.files.repo.Repo
 import org.archivekeep.files.repo.remote.grpc.BasicAuthCredentials
 import org.archivekeep.utils.loading.Loadable
@@ -80,23 +80,24 @@ class S3StorageDriver(
             val successfulOpen = CompletableDeferred<Repo>()
 
             suspend fun openWithCredentials(basicAuthCredentials: BasicAuthCredentials): Repo =
-                openS3Repository(
-                    endpoint = URI.create(repoData.endpoint),
-                    region = "TODO",
-                    credentialsProvider =
-                        StaticCredentialsProvider {
-                            accessKeyId = basicAuthCredentials.username
-                            secretAccessKey = basicAuthCredentials.password
-                        },
-                    repoData.bucket,
-                ).also {
-                    credentialsForUnlock.update { map ->
-                        map
-                            .toMutableMap()
-                            .also { it[uri] = basicAuthCredentials }
-                            .toMap()
+                S3Repository
+                    .open(
+                        endpoint = URI.create(repoData.endpoint),
+                        region = "TODO",
+                        credentialsProvider =
+                            StaticCredentialsProvider {
+                                accessKeyId = basicAuthCredentials.username
+                                secretAccessKey = basicAuthCredentials.password
+                            },
+                        bucketName = repoData.bucket,
+                    ).also {
+                        credentialsForUnlock.update { map ->
+                            map
+                                .toMutableMap()
+                                .also { it[uri] = basicAuthCredentials }
+                                .toMap()
+                        }
                     }
-                }
 
             suspend fun tryAutoOpen(storedCredentials: BasicAuthCredentials?) {
                 if (storedCredentials != null) {

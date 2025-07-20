@@ -83,8 +83,7 @@ class FileSystemStorageDriver(
                     fileStores.mountedFileSystems
                         .mapLoadedDataAsOptional { connectedFSList ->
                             connectedFSList
-                                .filter { it.fsUUID == storageURI.data }
-                                .firstOrNull()
+                                .firstOrNull { it.fsUUID == storageURI.data }
                                 ?.let { connectedFS ->
                                     StorageInformation.Partition.Details(
                                         physicalID = connectedFS.fsUUID,
