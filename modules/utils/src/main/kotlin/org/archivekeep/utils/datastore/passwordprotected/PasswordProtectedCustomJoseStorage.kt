@@ -23,29 +23,16 @@ import kotlinx.coroutines.sync.withLock
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.json.Json
 import org.archivekeep.utils.coroutines.shareResourceIn
-import org.archivekeep.utils.datastore.passwordprotected.PasswordProtectedJoseStorage.State
+import org.archivekeep.utils.datastore.passwordprotected.PasswordProtectedCustomJoseStorage.State
 import org.archivekeep.utils.exceptions.IncorrectPasswordException
 import org.archivekeep.utils.loading.ProtectedLoadableResource
-import org.archivekeep.utils.safeFileRead
-import org.archivekeep.utils.safeFileReadWrite
-import java.nio.file.Path
 import java.security.InvalidKeyException
 
-/**
- * It can be in three states:
- *
- * - empty - file doesn't exist
- * - locked - file exists, but not unlocked
- * - unlocked - file exists, and unlocked
- *
- * Other unhappy paths:
- *
- * - unlocked but errored - password changed by other process, or other I/O error
- */
-class PasswordProtectedJoseStorage<T>(
-    val file: Path,
+class PasswordProtectedCustomJoseStorage<T>(
     val serializer: KSerializer<T>,
     val defaultValueProducer: () -> T,
+    val reader: suspend () -> ByteArray?,
+    val writer: suspend (updater: suspend (contents: ByteArray?) -> ByteArray) -> ByteArray,
     private val scope: CoroutineScope = CoroutineScope(Dispatchers.IO + SupervisorJob()),
 ) : PasswordProtectedDataStore<T> {
     private val mutex = Mutex()
@@ -72,21 +59,26 @@ class PasswordProtectedJoseStorage<T>(
                     is State.NotExisting -> emit(true)
                     State.NotInitialized -> {}
                     is State.Unlocked -> emit(false)
+                    is State.Failed -> {}
                 }
             }.first()
 
     suspend fun tryInitialize() {
         mutex.withLock {
             if (currentStateFlow.value is State.NotInitialized) {
-                val contents = safeFileRead(file)
+                try {
+                    val contents = reader()
 
-                if (contents == null) {
-                    currentStateFlow.value =
-                        State.NotExisting(
-                            defaultData = defaultValueProducer(),
-                        )
-                } else {
-                    currentStateFlow.value = State.Locked
+                    if (contents == null) {
+                        currentStateFlow.value =
+                            State.NotExisting(
+                                defaultData = defaultValueProducer(),
+                            )
+                    } else {
+                        currentStateFlow.value = State.Locked
+                    }
+                } catch (e: Throwable) {
+                    currentStateFlow.value = State.Failed(e)
                 }
             }
         }
@@ -96,7 +88,7 @@ class PasswordProtectedJoseStorage<T>(
         mutex.withLock {
             var newCreated: T? = null
 
-            safeFileReadWrite(file) { old ->
+            writer { old ->
                 if (old != null) {
                     throw RuntimeException("Already exists")
                 }
@@ -104,7 +96,7 @@ class PasswordProtectedJoseStorage<T>(
                 val new = defaultValueProducer()
                 newCreated = new
 
-                encrypt(Json.encodeToString(serializer, new), password)
+                encrypt(Json.encodeToString(serializer, new), password).encodeToByteArray()
             }
 
             val new = newCreated!!
@@ -115,11 +107,11 @@ class PasswordProtectedJoseStorage<T>(
 
     override suspend fun unlock(password: String) {
         mutex.withLock {
-            val contents = safeFileRead(file) ?: throw RuntimeException("File doesn't exist")
+            val contents = reader() ?: throw RuntimeException("File doesn't exist")
 
             val data =
                 try {
-                    decryptDecode(contents, password)
+                    decryptDecode(contents.decodeToString(), password)
                 } catch (e: JOSEException) {
                     if (e.cause is InvalidKeyException) {
                         throw IncorrectPasswordException(e)
@@ -144,21 +136,18 @@ class PasswordProtectedJoseStorage<T>(
             if (v is State.Unlocked) {
                 var newCreated: T? = null
 
-                safeFileReadWrite(
-                    file,
-                    transform = { oldString ->
-                        val old =
-                            oldString?.let {
-                                decryptDecode(it, password = v.password)
-                            } ?: defaultValueProducer()
+                writer { oldString ->
+                    val old =
+                        oldString?.let {
+                            decryptDecode(it.decodeToString(), password = v.password)
+                        } ?: defaultValueProducer()
 
-                        val new = transform(old)
+                    val new = transform(old)
 
-                        newCreated = new
+                    newCreated = new
 
-                        encrypt(Json.encodeToString(serializer, new), v.password)
-                    },
-                )
+                    encrypt(Json.encodeToString(serializer, new), v.password).encodeToByteArray()
+                }
 
                 val new = newCreated!!
 
@@ -207,6 +196,10 @@ class PasswordProtectedJoseStorage<T>(
         data object NotInitialized : State<Nothing>
 
         data object Locked : State<Nothing>
+
+        class Failed(
+            val error: Throwable,
+        ) : State<Nothing>
     }
 }
 
@@ -223,4 +216,7 @@ private fun <T> State<T>.toProtectedLoadableResource() =
 
         is State.Unlocked ->
             ProtectedLoadableResource.Loaded(data)
+
+        is State.Failed ->
+            ProtectedLoadableResource.Failed(error)
     }

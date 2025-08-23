@@ -49,7 +49,7 @@ import org.archivekeep.testing.storage.InMemoryLocalRepo
 import org.archivekeep.testing.storage.InMemoryRepo
 import org.archivekeep.testing.storage.SpeedLimitedLocalRepoWrapper
 import org.archivekeep.testing.storage.SpeedLimitedRepoWrapper
-import org.archivekeep.utils.datastore.passwordprotected.PasswordProtectedJoseStorage
+import org.archivekeep.utils.datastore.passwordprotected.PasswordProtectedJoseStorageInFile
 import org.archivekeep.utils.loading.Loadable
 import org.archivekeep.utils.loading.mapLoadedData
 import org.archivekeep.utils.loading.mapToLoadable
@@ -98,8 +98,8 @@ open class DemoEnvironment(
 
     private val demoTempDirectory = kotlin.io.path.createTempDirectory("archivekeep-demo-env")
 
-    override val walletDataStore: PasswordProtectedJoseStorage<WalletPO> =
-        PasswordProtectedJoseStorage(
+    override val walletDataStore: PasswordProtectedJoseStorageInFile<WalletPO> =
+        PasswordProtectedJoseStorageInFile(
             demoTempDirectory.resolve("credentials.jwe"),
             Json.serializersModule.serializer(),
             defaultValueProducer = { WalletPO(emptySet()) },

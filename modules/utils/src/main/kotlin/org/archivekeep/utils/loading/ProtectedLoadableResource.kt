@@ -59,3 +59,15 @@ suspend fun <T, A> Flow<ProtectedLoadableResource<T, A>>.firstLoadedOrNullOnErro
                     emit(null)
             }
         }.first()
+
+suspend fun <T, A> Flow<ProtectedLoadableResource<T, A>>.firstLoadedOrThrowOnErrorOrLocked(): T =
+    this
+        .transform {
+            when (it) {
+                is ProtectedLoadableResource.Loaded ->
+                    emit(it.value)
+                is ProtectedLoadableResource.Loading -> {}
+                is ProtectedLoadableResource.Failed -> throw RuntimeException(it.throwable)
+                is ProtectedLoadableResource.PendingAuthentication<*> -> throw RuntimeException("Not unlocked")
+            }
+        }.first()

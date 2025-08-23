@@ -25,7 +25,7 @@ class S3RepositoryTestRepo(
         }
 
     override suspend fun open(testDispatcher: TestDispatcher): S3Repository =
-        openS3Repository(
+        S3Repository.open(
             URI.create(s3URL),
             "aa",
             credentialsProvider,

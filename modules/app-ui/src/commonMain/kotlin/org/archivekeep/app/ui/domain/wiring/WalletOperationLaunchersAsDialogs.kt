@@ -6,7 +6,7 @@ import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.first
 import org.archivekeep.app.ui.dialogs.wallet.CreateWalletDialog
 import org.archivekeep.app.ui.dialogs.wallet.UnlockWalletDialog
-import org.archivekeep.utils.datastore.passwordprotected.PasswordProtectedJoseStorage
+import org.archivekeep.utils.datastore.passwordprotected.PasswordProtectedJoseStorageInFile
 
 @Composable
 fun rememberWalletOperationLaunchersAsDialogs(dialogRenderer: OverlayDialogRenderer): WalletOperationLaunchers {
@@ -21,17 +21,17 @@ fun rememberWalletOperationLaunchersAsDialogs(dialogRenderer: OverlayDialogRende
                     }
 
                     val state =
-                        (walletDataStore as PasswordProtectedJoseStorage)
+                        (walletDataStore as PasswordProtectedJoseStorageInFile)
                             .autoloadFlow
-                            .filter { it !is PasswordProtectedJoseStorage.State.NotInitialized }
+                            .filter { it !is PasswordProtectedJoseStorageInFile.State.NotInitialized }
                             .first()
 
-                    if (state is PasswordProtectedJoseStorage.State.NotExisting) {
+                    if (state is PasswordProtectedJoseStorageInFile.State.NotExisting) {
                         // TODO: implement open dialog for result, or something like that, and await,...
                         // or, rework to assert check and "open or create launcher" with separate UI button
                         dialogRenderer.openDialog(CreateWalletDialog())
                         false
-                    } else if (state is PasswordProtectedJoseStorage.State.Locked) {
+                    } else if (state is PasswordProtectedJoseStorageInFile.State.Locked) {
                         // TODO: implement open dialog for result, or something like that, and await
                         // or, rework to assert check and "open or create launcher" with separate UI button
                         dialogRenderer.openDialog(UnlockWalletDialog(onUnlock = {}))

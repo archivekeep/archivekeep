@@ -3,8 +3,6 @@ package org.archivekeep.files.repo.encryptedfiles
 import com.nimbusds.jose.crypto.ECDHDecrypter
 import com.nimbusds.jose.crypto.ECDHEncrypter
 import com.nimbusds.jose.crypto.ECDSAVerifier
-import com.nimbusds.jose.jwk.Curve
-import com.nimbusds.jose.jwk.gen.ECKeyGenerator
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineName
 import kotlinx.coroutines.CoroutineScope
@@ -40,7 +38,7 @@ import org.archivekeep.files.repo.files.safeSubPath
 import org.archivekeep.utils.InProgressHandler
 import org.archivekeep.utils.coroutines.flowScopedToThisJob
 import org.archivekeep.utils.coroutines.shareResourceIn
-import org.archivekeep.utils.datastore.passwordprotected.PasswordProtectedJoseStorage
+import org.archivekeep.utils.datastore.passwordprotected.PasswordProtectedJoseStorageInFile
 import org.archivekeep.utils.flows.logLoadableResourceLoad
 import org.archivekeep.utils.io.watchRecursively
 import org.archivekeep.utils.loading.Loadable
@@ -54,7 +52,6 @@ import java.nio.file.FileAlreadyExistsException
 import java.nio.file.Files
 import java.nio.file.Path
 import java.nio.file.StandardOpenOption
-import java.util.UUID
 import kotlin.io.path.createDirectory
 import kotlin.io.path.createParentDirectories
 import kotlin.io.path.exists
@@ -86,7 +83,7 @@ class EncryptedFileSystemRepository private constructor(
     private val inProgressHandler = InProgressHandler(scope)
 
     val vault =
-        PasswordProtectedJoseStorage(
+        PasswordProtectedJoseStorageInFile(
             vaultPath,
             Json.serializersModule.serializer(),
             defaultValueProducer = { EncryptedFileSystemRepositoryVaultContents(emptyList(), null, null) },
@@ -341,18 +338,7 @@ class EncryptedFileSystemRepository private constructor(
                 .apply {
                     vault.create(password)
 
-                    val ecJWK =
-                        ECKeyGenerator(Curve.P_256)
-                            .keyID(UUID.randomUUID().toString())
-                            .generate()
-
-                    vault.updateData {
-                        EncryptedFileSystemRepositoryVaultContents(
-                            listOf(ecJWK),
-                            ecJWK.keyID,
-                            ecJWK.keyID,
-                        )
-                    }
+                    vault.updateData { EncryptedFileSystemRepositoryVaultContents.generateNew() }
                 }
         }
 
@@ -360,8 +346,8 @@ class EncryptedFileSystemRepository private constructor(
             EncryptedFileSystemRepository(path)
                 .vault
                 .autoloadFlow
-                .dropWhile { it is PasswordProtectedJoseStorage.State.NotInitialized }
-                .map { it !is PasswordProtectedJoseStorage.State.NotExisting }
+                .dropWhile { it is PasswordProtectedJoseStorageInFile.State.NotInitialized }
+                .map { it !is PasswordProtectedJoseStorageInFile.State.NotExisting }
                 .first()
     }
 }

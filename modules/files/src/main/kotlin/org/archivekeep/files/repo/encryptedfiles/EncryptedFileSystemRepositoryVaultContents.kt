@@ -1,6 +1,8 @@
 package org.archivekeep.files.repo.encryptedfiles
 
+import com.nimbusds.jose.jwk.Curve
 import com.nimbusds.jose.jwk.JWK
+import com.nimbusds.jose.jwk.gen.ECKeyGenerator
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.descriptors.SerialDescriptor
@@ -9,6 +11,7 @@ import kotlinx.serialization.encoding.Decoder
 import kotlinx.serialization.encoding.Encoder
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonElement
+import java.util.UUID
 
 @Serializable
 data class EncryptedFileSystemRepositoryVaultContents(
@@ -24,6 +27,21 @@ data class EncryptedFileSystemRepositoryVaultContents(
 
     val currentFileEncryptionKey: JWK?
         get() = jwk.firstOrNull { it.keyID == currentFileEncryptionKeyID }
+
+    companion object {
+        fun generateNew(): EncryptedFileSystemRepositoryVaultContents {
+            val ecJWK =
+                ECKeyGenerator(Curve.P_256)
+                    .keyID(UUID.randomUUID().toString())
+                    .generate()
+
+            return EncryptedFileSystemRepositoryVaultContents(
+                listOf(ecJWK),
+                ecJWK.keyID,
+                ecJWK.keyID,
+            )
+        }
+    }
 }
 
 object JWKSerializer : KSerializer<JWK> {

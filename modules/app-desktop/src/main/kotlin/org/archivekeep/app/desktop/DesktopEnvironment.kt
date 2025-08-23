@@ -13,7 +13,7 @@ import org.archivekeep.app.core.persistence.platform.Environment
 import org.archivekeep.app.core.persistence.registry.PreferenceDataStoreRegistryData
 import org.archivekeep.app.core.persistence.repository.MemorizedRepositoryIndexRepositoryInDataStore
 import org.archivekeep.app.core.persistence.repository.MemorizedRepositoryMetadataRepositoryInDataStore
-import org.archivekeep.utils.datastore.passwordprotected.PasswordProtectedJoseStorage
+import org.archivekeep.utils.datastore.passwordprotected.PasswordProtectedJoseStorageInFile
 
 class DesktopEnvironment(
     val scope: CoroutineScope,
@@ -27,7 +27,7 @@ class DesktopEnvironment(
         )
 
     override val walletDataStore =
-        PasswordProtectedJoseStorage(
+        PasswordProtectedJoseStorageInFile(
             getWalletDatastorePath(),
             Json.serializersModule.serializer(),
             defaultValueProducer = { WalletPO(emptySet()) },
