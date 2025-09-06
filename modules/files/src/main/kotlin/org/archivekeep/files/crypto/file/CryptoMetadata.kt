@@ -6,16 +6,14 @@ import com.nimbusds.jose.JWEDecrypter
 import com.nimbusds.jose.JWEEncrypter
 import com.nimbusds.jose.JWEHeader
 import com.nimbusds.jose.JWEObject
-import com.nimbusds.jose.JWSAlgorithm
-import com.nimbusds.jose.JWSHeader
-import com.nimbusds.jose.JWSObject
 import com.nimbusds.jose.JWSVerifier
 import com.nimbusds.jose.Payload
-import com.nimbusds.jose.crypto.factories.DefaultJWSSignerFactory
 import com.nimbusds.jose.jwk.JWK
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
+import org.archivekeep.files.crypto.parseVerifyDecodeJWS
+import org.archivekeep.files.crypto.signAsJWS
 
 data class CryptoMetadata(
     val plain: Plain,
@@ -72,15 +70,7 @@ data class CryptoMetadata(
 
         jweObject.encrypt(encrypter)
 
-        val signedJWT =
-            JWSObject(
-                JWSHeader.Builder(JWSAlgorithm.ES256).keyID(signJWK.keyID).build(),
-                Payload(Json.encodeToString(JWSPayload(plain, jweObject.serialize()))),
-            )
-
-        signedJWT.sign(DefaultJWSSignerFactory().createJWSSigner(signJWK))
-
-        return signedJWT.serialize()
+        return signAsJWS(Json.encodeToString(JWSPayload(plain, jweObject.serialize())), signJWK)
     }
 
     companion object {
@@ -89,13 +79,7 @@ data class CryptoMetadata(
             decrypter: JWEDecrypter,
             raw: String,
         ): CryptoMetadata {
-            val jwsObject = JWSObject.parse(raw)
-
-            if (!jwsObject.verify(signatureVerifier)) {
-                throw RuntimeException("Verification failed")
-            }
-
-            val jwsPayload = Json.decodeFromString<JWSPayload>(jwsObject.payload.toString())
+            val jwsPayload = parseVerifyDecodeJWS<JWSPayload>(raw, signatureVerifier)
 
             val jweObject = JWEObject.parse(jwsPayload.encrypted)
             jweObject.decrypt(decrypter)

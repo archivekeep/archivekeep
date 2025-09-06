@@ -5,7 +5,10 @@ import aws.sdk.kotlin.services.s3.copyObject
 import aws.sdk.kotlin.services.s3.deleteObject
 import aws.sdk.kotlin.services.s3.headObject
 import aws.sdk.kotlin.services.s3.listObjects
+import aws.sdk.kotlin.services.s3.model.ChecksumAlgorithm
+import aws.sdk.kotlin.services.s3.model.ChecksumMode
 import aws.sdk.kotlin.services.s3.model.GetObjectRequest
+import aws.sdk.kotlin.services.s3.model.MetadataDirective
 import aws.sdk.kotlin.services.s3.model.NoSuchKey
 import aws.sdk.kotlin.services.s3.model.NotFound
 import aws.sdk.kotlin.services.s3.model.Object
@@ -33,6 +36,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.runInterruptible
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.ExperimentalSerializationApi
+import kotlinx.serialization.Serializable
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.decodeFromStream
@@ -40,6 +44,8 @@ import kotlinx.serialization.serializer
 import org.archivekeep.files.crypto.file.CryptoMetadata
 import org.archivekeep.files.crypto.file.readCryptoStream
 import org.archivekeep.files.crypto.file.writeCryptoStream
+import org.archivekeep.files.crypto.parseVerifyDecodeJWS
+import org.archivekeep.files.crypto.signAsJWS
 import org.archivekeep.files.exceptions.DestinationExists
 import org.archivekeep.files.repo.ArchiveFileInfo
 import org.archivekeep.files.repo.Repo
@@ -48,6 +54,8 @@ import org.archivekeep.files.repo.RepositoryMetadata
 import org.archivekeep.files.repo.encryptedfiles.EncryptedFileSystemRepositoryVaultContents
 import org.archivekeep.files.repo.encryptedfiles.verifyingStreamViaBackgroundCoroutine
 import org.archivekeep.utils.datastore.passwordprotected.PasswordProtectedCustomJoseStorage
+import org.archivekeep.utils.fromBase64ToHex
+import org.archivekeep.utils.fromHexToBase64
 import org.archivekeep.utils.loading.AutoRefreshLoadableFlow
 import org.archivekeep.utils.loading.Loadable
 import org.archivekeep.utils.loading.firstLoadedOrNullOnErrorOrLocked
@@ -58,9 +66,14 @@ import java.io.PipedOutputStream
 import java.net.URI
 import java.net.URLEncoder
 import java.nio.charset.StandardCharsets
+import java.security.DigestInputStream
+import java.security.MessageDigest
 import java.util.Date
 
-private const val METADATA_JSON_KEY = "metadata.json"
+@Serializable
+private data class SignedObjectMetadata(
+    val objectChecksumSha256: String,
+)
 
 class EncryptedS3Repository private constructor(
     val endpoint: URI,
@@ -184,8 +197,20 @@ class EncryptedS3Repository private constructor(
                                             GetObjectRequest {
                                                 bucket = bucketName
                                                 key = it.key
+                                                checksumMode = ChecksumMode.Enabled
                                             },
                                         ) { response ->
+                                            val objectChecksum = response.checksumSha256!!
+                                            val signedChecksum =
+                                                parseVerifyDecodeJWS<SignedObjectMetadata>(
+                                                    response.metadata!![SIGNED_METADATA]!!,
+                                                    ECDSAVerifier(vaultContents.currentFileSigningKey!!.toECKey().toECPublicKey()),
+                                                ).objectChecksumSha256
+
+                                            if (objectChecksum != signedChecksum) {
+                                                throw RuntimeException("Integrity corrupted of ${it.key!!.toFilename()}")
+                                            }
+
                                             readCryptoStream(
                                                 response.body!!.toInputStream(),
                                                 ECDSAVerifier(vaultContents.currentFileSigningKey!!.toECKey().toECPublicKey()),
@@ -275,6 +300,7 @@ class EncryptedS3Repository private constructor(
         }
     }
 
+    @OptIn(ExperimentalStdlibApi::class)
     override suspend fun save(
         filename: String,
         info: ArchiveFileInfo,
@@ -316,12 +342,40 @@ class EncryptedS3Repository private constructor(
                             }
                         }
 
+                    val digest = MessageDigest.getInstance("SHA-256")
+                    val digestInputStream = DigestInputStream(encryptedInputStream, digest)
+
                     try {
-                        s3Client.putObject {
+                        val newObject =
+                            s3Client.putObject {
+                                bucket = bucketName
+                                key = filename.toKey()
+
+                                body = interruptibleSourceFromInputStream(digestInputStream)
+
+                                checksumAlgorithm = ChecksumAlgorithm.Sha256
+                            }
+
+                        val digestHex = digest.digest().toHexString()
+                        if (newObject.checksumSha256?.fromBase64ToHex() != digestHex) {
+                            throw RuntimeException("Checksum doesn't match")
+                        }
+
+                        s3Client.copyObject {
+                            copySource = URLEncoder.encode("$bucketName/${filename.toKey()}", StandardCharsets.UTF_8.toString())
+
                             bucket = bucketName
                             key = filename.toKey()
 
-                            body = interruptibleSourceFromInputStream(encryptedInputStream)
+                            metadataDirective = MetadataDirective.Replace
+                            metadata =
+                                mapOf(
+                                    SIGNED_METADATA to
+                                        signAsJWS(
+                                            Json.encodeToString<SignedObjectMetadata>(SignedObjectMetadata(digestHex.fromHexToBase64())),
+                                            vaultContents.currentFileSigningKey!!,
+                                        ),
+                                )
                         }
                     } catch (e: Throwable) {
                         throw RuntimeException(e)
@@ -391,6 +445,10 @@ class EncryptedS3Repository private constructor(
         }
 
     companion object {
+        private const val METADATA_JSON_KEY = "metadata.json"
+
+        private const val SIGNED_METADATA = "signed-metadata"
+
         private const val ENCRYPTED_FILES_PREFIX = "encrypted-files/"
 
         private const val VAULT_LOCATION = "vault.jwe"
