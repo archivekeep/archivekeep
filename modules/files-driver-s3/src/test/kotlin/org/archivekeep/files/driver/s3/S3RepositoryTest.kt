@@ -1,12 +1,12 @@
 package org.archivekeep.files.driver.s3
 
 import aws.sdk.kotlin.services.s3.model.NoSuchBucket
-import aws.sdk.kotlin.services.s3.model.S3Exception
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.runTest
 import org.archivekeep.files.shouldHaveCommittedContentsOf
 import org.archivekeep.files.testContents01
 import org.archivekeep.files.withContentsFrom
+import org.archivekeep.utils.exceptions.WrongCredentialsException
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import org.testcontainers.containers.MinIOContainer
@@ -28,6 +28,7 @@ class S3RepositoryTest {
 
             val testRepo = S3RepositoryTestRepo(minio.s3URL, "test-bucket", "testuser", "testpassword")
             testRepo.createBucket()
+            testRepo.create()
 
             val accessor =
                 testRepo
@@ -59,7 +60,7 @@ class S3RepositoryTest {
 
             val testRepo = S3RepositoryTestRepo(minio.s3URL, "test-bucket", minio.userName + "corruption", minio.password)
 
-            assertThrows<S3Exception> {
+            assertThrows<WrongCredentialsException> {
                 testRepo.open(dispatcher)
             }
         }
@@ -71,7 +72,7 @@ class S3RepositoryTest {
 
             val testRepo = S3RepositoryTestRepo(minio.s3URL, "test-bucket", minio.userName, minio.password + "corruption")
 
-            assertThrows<S3Exception> {
+            assertThrows<WrongCredentialsException> {
                 testRepo.open(dispatcher)
             }
         }

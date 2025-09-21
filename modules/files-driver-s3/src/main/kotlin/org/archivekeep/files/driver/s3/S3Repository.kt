@@ -7,6 +7,7 @@ import aws.sdk.kotlin.services.s3.headObject
 import aws.sdk.kotlin.services.s3.listObjects
 import aws.sdk.kotlin.services.s3.model.ChecksumMode
 import aws.sdk.kotlin.services.s3.model.GetObjectRequest
+import aws.sdk.kotlin.services.s3.model.NoSuchBucket
 import aws.sdk.kotlin.services.s3.model.NoSuchKey
 import aws.sdk.kotlin.services.s3.model.NotFound
 import aws.sdk.kotlin.services.s3.model.Object
@@ -36,6 +37,7 @@ import org.archivekeep.files.repo.ArchiveFileInfo
 import org.archivekeep.files.repo.Repo
 import org.archivekeep.files.repo.RepoIndex
 import org.archivekeep.files.repo.RepositoryMetadata
+import org.archivekeep.utils.exceptions.WrongCredentialsException
 import org.archivekeep.utils.fromBase64ToHex
 import org.archivekeep.utils.fromHexToBase64
 import org.archivekeep.utils.loading.AutoRefreshLoadableFlow
@@ -51,7 +53,7 @@ import java.util.Date
 
 private const val METADATA_JSON_KEY = "metadata.json"
 
-class S3Repository(
+class S3Repository private constructor(
     val endpoint: URI,
     val region: String,
     val credentialsProvider: CredentialsProvider,
@@ -75,9 +77,15 @@ class S3Repository(
                 forcePathStyle = true
             }
 
-        s3Client.listObjects {
-            bucket = bucketName
-            maxKeys = 1
+        try {
+            s3Client.listObjects {
+                bucket = bucketName
+                maxKeys = 1
+            }
+        } catch (e: NoSuchBucket) {
+            throw e
+        } catch (e: S3Exception) {
+            throw WrongCredentialsException(cause = e)
         }
     }
 
@@ -148,7 +156,7 @@ class S3Repository(
             ioDispatcher,
             updateTriggerFlow = metadataLastChangeFlow,
         ) {
-            readMetadataFromS3()
+            readMetadataFromS3() ?: RepositoryMetadata()
         }
 
     override val metadataFlow: Flow<Loadable<RepositoryMetadata>> = metadataResource.stateFlow
@@ -249,7 +257,7 @@ class S3Repository(
         // TODO: lock metadata for concurrent update
 
         try {
-            val old = readMetadataFromS3()
+            val old = readMetadataFromS3() ?: RepositoryMetadata()
             val newMetadataBytes = Json.encodeToString(transform(old)).toByteArray()
 
             s3Client.putObject {
@@ -265,7 +273,7 @@ class S3Repository(
     }
 
     @OptIn(ExperimentalSerializationApi::class)
-    private suspend fun readMetadataFromS3() =
+    private suspend fun readMetadataFromS3(): RepositoryMetadata? =
         try {
             s3Client
                 .getObject(
@@ -277,7 +285,7 @@ class S3Repository(
                     Json.decodeFromStream(it.body!!.toInputStream())
                 }
         } catch (e: NoSuchKey) {
-            RepositoryMetadata()
+            null
         }
 
     companion object {
@@ -286,6 +294,27 @@ class S3Repository(
         fun String.toKey() = "$FILES_PREFIX$this"
 
         fun String.toFilename() = this.removePrefix(FILES_PREFIX)
+
+        suspend fun create(
+            endpoint: URI,
+            region: String,
+            credentialsProvider: CredentialsProvider,
+            bucketName: String,
+            sharingDispatcher: CoroutineDispatcher = Dispatchers.Default,
+            ioDispatcher: CoroutineDispatcher = Dispatchers.IO,
+        ) = S3Repository(
+            endpoint,
+            region,
+            credentialsProvider,
+            bucketName,
+            sharingDispatcher,
+            ioDispatcher,
+        ).apply {
+            init()
+
+            // create them from defaults
+            updateMetadata { it }
+        }
 
         suspend fun open(
             endpoint: URI,
@@ -301,8 +330,10 @@ class S3Repository(
             bucketName,
             sharingDispatcher,
             ioDispatcher,
-        ).also {
-            it.init()
+        ).apply {
+            init()
+
+            readMetadataFromS3() ?: throw S3LocationNotInitializedAsRepositoryException()
         }
     }
 }

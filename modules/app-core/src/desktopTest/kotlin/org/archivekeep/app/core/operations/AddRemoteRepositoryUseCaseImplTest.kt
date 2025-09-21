@@ -1,5 +1,6 @@
 package org.archivekeep.app.core.operations
 
+import aws.sdk.kotlin.runtime.auth.credentials.StaticCredentialsProvider
 import io.kotest.assertions.nondeterministic.eventually
 import io.kotest.matchers.collections.shouldContainExactly
 import io.kotest.matchers.nulls.shouldNotBeNull
@@ -17,7 +18,6 @@ import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import org.archivekeep.app.core.createTestBucket
 import org.archivekeep.app.core.domain.repositories.DefaultRepositoryService
-import org.archivekeep.app.core.domain.storages.KnownStorageService
 import org.archivekeep.app.core.persistence.credentials.CredentialsInProtectedWalletDataStore
 import org.archivekeep.app.core.persistence.credentials.CredentialsStore
 import org.archivekeep.app.core.persistence.drivers.filesystem.FileSystemStorageDriver
@@ -26,6 +26,7 @@ import org.archivekeep.app.core.persistence.drivers.s3.S3StorageDriver
 import org.archivekeep.app.core.persistence.platform.demo.DemoEnvironment
 import org.archivekeep.app.core.persistence.registry.RegisteredRepository
 import org.archivekeep.app.core.utils.identifiers.RepositoryURI
+import org.archivekeep.files.driver.s3.S3Repository
 import org.archivekeep.files.repo.remote.grpc.BasicAuthCredentials
 import org.archivekeep.utils.loading.firstLoadedOrNullOnErrorOrLocked
 import org.archivekeep.utils.loading.optional.OptionalLoadable
@@ -35,6 +36,7 @@ import org.testcontainers.containers.MinIOContainer
 import org.testcontainers.junit.jupiter.Container
 import org.testcontainers.junit.jupiter.Testcontainers
 import java.io.File
+import java.net.URI
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.minutes
 import kotlin.time.Duration.Companion.seconds
@@ -54,6 +56,15 @@ class AddRemoteRepositoryUseCaseImplTest {
         @TempDir t: File,
     ) = runTest {
         createTestBucket(minio, bucketName)
+        S3Repository.create(
+            URI.create(minio.s3URL),
+            "aa",
+            StaticCredentialsProvider {
+                accessKeyId = "testuser"
+                secretAccessKey = "testpassword"
+            },
+            bucketName,
+        )
 
         val dispatcher = StandardTestDispatcher(testScheduler)
         val scope = CoroutineScope(dispatcher)
@@ -62,27 +73,26 @@ class AddRemoteRepositoryUseCaseImplTest {
 
         val credentialsStore: CredentialsStore = CredentialsInProtectedWalletDataStore(env.walletDataStore)
 
+        val drivers =
+            listOf(
+                FileSystemStorageDriver(scope, env.fileStores, credentialsStore),
+                GRPCStorageDriver(scope, credentialsStore),
+                S3StorageDriver(scope, credentialsStore, ioDispatcher = dispatcher),
+            ).associateBy { it.ID }
         val repositoryService =
             DefaultRepositoryService(
                 scope,
-                listOf(
-                    FileSystemStorageDriver(scope, env.fileStores, credentialsStore),
-                    GRPCStorageDriver(scope, credentialsStore),
-                    S3StorageDriver(scope, credentialsStore, ioDispatcher = dispatcher),
-                ).associateBy { it.ID },
+                drivers,
                 env.registry,
                 env.repositoryIndexMemory,
                 env.repositoryMetadataMemory,
             )
 
-        val knownStorageService = KnownStorageService(scope, env.registry, env.fileStores)
-
         val useCase =
             AddRemoteRepositoryUseCaseImpl(
                 repositoryService,
                 env.registry,
-                env.fileStores,
-                knownStorageService,
+                drivers,
             )
 
         useCase.addS3(minio.s3URL, "test-bucket", minio.userName, minio.password, false)
@@ -123,6 +133,15 @@ class AddRemoteRepositoryUseCaseImplTest {
         @TempDir t: File,
     ) = runTest {
         createTestBucket(minio, bucketName)
+        S3Repository.create(
+            URI.create(minio.s3URL),
+            "aa",
+            StaticCredentialsProvider {
+                accessKeyId = "testuser"
+                secretAccessKey = "testpassword"
+            },
+            bucketName,
+        )
 
         val dispatcher = StandardTestDispatcher(testScheduler)
         val scope = CoroutineScope(dispatcher)
@@ -131,27 +150,26 @@ class AddRemoteRepositoryUseCaseImplTest {
 
         val credentialsStore: CredentialsStore = CredentialsInProtectedWalletDataStore(env.walletDataStore)
 
+        val drivers =
+            listOf(
+                FileSystemStorageDriver(scope, env.fileStores, credentialsStore),
+                GRPCStorageDriver(scope, credentialsStore),
+                S3StorageDriver(scope, credentialsStore, ioDispatcher = dispatcher),
+            ).associateBy { it.ID }
         val repositoryService =
             DefaultRepositoryService(
                 scope,
-                listOf(
-                    FileSystemStorageDriver(scope, env.fileStores, credentialsStore),
-                    GRPCStorageDriver(scope, credentialsStore),
-                    S3StorageDriver(scope, credentialsStore, ioDispatcher = dispatcher),
-                ).associateBy { it.ID },
+                drivers,
                 env.registry,
                 env.repositoryIndexMemory,
                 env.repositoryMetadataMemory,
             )
 
-        val knownStorageService = KnownStorageService(scope, env.registry, env.fileStores)
-
         val useCase =
             AddRemoteRepositoryUseCaseImpl(
                 repositoryService,
                 env.registry,
-                env.fileStores,
-                knownStorageService,
+                drivers,
             )
 
         env.walletDataStore.create("wallet-password")

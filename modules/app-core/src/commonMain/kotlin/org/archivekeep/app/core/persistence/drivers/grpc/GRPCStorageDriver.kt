@@ -22,6 +22,7 @@ import org.archivekeep.app.core.domain.storages.StorageConnection
 import org.archivekeep.app.core.domain.storages.StorageDriver
 import org.archivekeep.app.core.domain.storages.StorageInformation
 import org.archivekeep.app.core.persistence.credentials.CredentialsStore
+import org.archivekeep.app.core.persistence.drivers.RepositoryLocationDiscoveryForAdd
 import org.archivekeep.app.core.utils.identifiers.RepositoryURI
 import org.archivekeep.app.core.utils.identifiers.StorageURI
 import org.archivekeep.files.repo.Repo
@@ -63,6 +64,13 @@ class GRPCStorageDriver(
     }
 
     fun openRepoFlow(uri: RepositoryURI) = flow { accessor(uri) }
+
+    override suspend fun discoverRepository(
+        uri: RepositoryURI,
+        credentials: BasicAuthCredentials?,
+    ): RepositoryLocationDiscoveryForAdd {
+        TODO("Not yet implemented")
+    }
 
     suspend fun FlowCollector<ProtectedLoadableResource<Repo, RepoAuthRequest>>.accessor(uri: RepositoryURI) {
         // TODO: map parallel, partial loadable - some filesystems might be slow or unresponsive

@@ -58,6 +58,8 @@ class UnlockRepositoryDialogTestWithS3Repository {
 
             runBlocking {
                 testRepo.createBucket()
+                testRepo.create()
+
                 demoEnvironment.registry.updateRepositories {
                     it + setOf(RegisteredRepository(uri = subjectAtTestURI))
                 }

@@ -27,6 +27,7 @@ import org.archivekeep.app.core.domain.storages.StorageRepository
 import org.archivekeep.app.core.persistence.credentials.CredentialsInProtectedWalletDataStore
 import org.archivekeep.app.core.persistence.credentials.CredentialsStore
 import org.archivekeep.app.core.persistence.credentials.WalletPO
+import org.archivekeep.app.core.persistence.drivers.RepositoryLocationDiscoveryForAdd
 import org.archivekeep.app.core.persistence.drivers.filesystem.FileStores
 import org.archivekeep.app.core.persistence.drivers.filesystem.MountedFileSystem
 import org.archivekeep.app.core.persistence.platform.Environment
@@ -43,6 +44,7 @@ import org.archivekeep.files.repo.LocalRepo
 import org.archivekeep.files.repo.Repo
 import org.archivekeep.files.repo.RepoIndex
 import org.archivekeep.files.repo.RepositoryMetadata
+import org.archivekeep.files.repo.remote.grpc.BasicAuthCredentials
 import org.archivekeep.testing.fixtures.FixtureRepo
 import org.archivekeep.testing.fixtures.FixtureRepoBuilder
 import org.archivekeep.testing.storage.InMemoryLocalRepo
@@ -343,6 +345,13 @@ open class DemoEnvironment(
                                 }
                             }.stateIn(scope)
                     }
+
+                override suspend fun discoverRepository(
+                    uri: RepositoryURI,
+                    credentials: BasicAuthCredentials?,
+                ): RepositoryLocationDiscoveryForAdd {
+                    TODO("Not yet implemented")
+                }
             },
         )
 

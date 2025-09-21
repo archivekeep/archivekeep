@@ -4,6 +4,7 @@ import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
+import org.archivekeep.app.core.operations.AddRemoteRepositoryOutcome
 import org.archivekeep.app.core.operations.AddRemoteRepositoryUseCase
 import org.archivekeep.app.core.persistence.platform.demo.DemoEnvironment
 import org.archivekeep.app.core.persistence.platform.demo.phone
@@ -167,5 +168,5 @@ class NoOpAddRemoteRepositoryUseCase : AddRemoteRepositoryUseCase {
         uri: RepositoryURI,
         credentials: BasicAuthCredentials?,
         rememberCredentials: Boolean,
-    ) {}
+    ) = AddRemoteRepositoryOutcome.Added
 }

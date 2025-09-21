@@ -1,67 +1,58 @@
 package org.archivekeep.app.core.operations
 
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.filterIsInstance
-import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.withContext
-import org.archivekeep.app.core.domain.repositories.RepoAuthRequest
 import org.archivekeep.app.core.domain.repositories.RepositoryService
-import org.archivekeep.app.core.domain.repositories.UnlockOptions
-import org.archivekeep.app.core.domain.storages.NeedsUnlock
-import org.archivekeep.app.core.domain.storages.RepositoryAccessState
-import org.archivekeep.app.core.domain.storages.StorageRegistry
-import org.archivekeep.app.core.persistence.drivers.filesystem.FileStores
+import org.archivekeep.app.core.domain.storages.StorageDriver
+import org.archivekeep.app.core.domain.storages.getDriverForURI
+import org.archivekeep.app.core.persistence.drivers.RepositoryLocationDiscoveryOutcome
 import org.archivekeep.app.core.persistence.registry.RegistryDataStore
 import org.archivekeep.app.core.utils.identifiers.RepositoryURI
 import org.archivekeep.files.repo.remote.grpc.BasicAuthCredentials
-import org.archivekeep.utils.loading.optional.OptionalLoadable
 
 class AddRemoteRepositoryUseCaseImpl(
     val repositoryService: RepositoryService,
     val registry: RegistryDataStore,
-    val fileStores: FileStores,
-    val storageRegistry: StorageRegistry,
+    val drivers: Map<String, StorageDriver>,
 ) : AddRemoteRepositoryUseCase {
     override suspend fun invoke(
         uri: RepositoryURI,
         credentials: BasicAuthCredentials?,
         rememberCredentials: Boolean,
-    ) {
-        val repository = repositoryService.getRepository(uri)
+    ): AddRemoteRepositoryOutcome {
+        val driver = drivers.getDriverForURI(uri) ?: throw RuntimeException("Driver unsupported")
+        val discoveryResult = driver.discoverRepository(uri, credentials)
 
-        val result =
-            repository
-                .optionalAccessorFlow
-                .filterIsInstance<OptionalLoadable.LoadingFinished<RepositoryAccessState>>()
-                .first()
+        when (val outcome = discoveryResult.asRepositoryLocationDiscoveryOutcome()) {
+            RepositoryLocationDiscoveryOutcome.IsRepositoryLocation -> {
+                discoveryResult.preserveCredentialss(rememberCredentials)
 
-        withContext(Dispatchers.IO) {
-            when (result) {
-                is OptionalLoadable.Failed -> throw result.cause
-                is NeedsUnlock -> {
-                    if (credentials == null) {
-                        throw RequiresCredentialsException()
-                    } else {
-                        try {
-                            (result.unlockRequest as RepoAuthRequest).tryOpen(
-                                credentials,
-                                UnlockOptions(rememberCredentials),
-                            )
-                        } catch (e: Throwable) {
-                            throw WrongCredentialsException(cause = e)
-                        }
-                    }
-                }
-                is OptionalLoadable.NotAvailable -> {
-                    throw RuntimeException("Not available for a different reason: ${result.javaClass.name}", result.cause)
-                }
+                repositoryService.registerRepository(repositoryURI = uri)
 
-                is OptionalLoadable.LoadedAvailable -> {
-                    println("Success - result: $result")
-                }
+                return AddRemoteRepositoryOutcome.Added
+            }
+            is RepositoryLocationDiscoveryOutcome.LocationCanBeInitialized -> {
+                return AddRemoteRepositoryOutcome.NeedsInitialization(
+                    initializeAsPlain =
+                        outcome.initializeAsPlain?.let { initializeAsPlain ->
+                            {
+                                initializeAsPlain()
+
+                                discoveryResult.preserveCredentialss(rememberCredentials)
+
+                                repositoryService.registerRepository(repositoryURI = uri)
+                            }
+                        },
+                    initializeAsE2EEPasswordProtected =
+                        outcome.initializeAsE2EEPasswordProtected?.let { initializeAsE2EEPasswordProtected ->
+                            { password ->
+                                initializeAsE2EEPasswordProtected(password)
+
+                                discoveryResult.preserveCredentialss(rememberCredentials)
+
+                                repositoryService.registerRepository(repositoryURI = uri)
+                            }
+                        },
+                )
             }
         }
-
-        repositoryService.registerRepository(repositoryURI = uri)
     }
 }

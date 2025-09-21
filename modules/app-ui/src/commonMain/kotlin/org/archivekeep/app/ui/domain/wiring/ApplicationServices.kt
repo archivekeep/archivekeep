@@ -59,5 +59,6 @@ class ApplicationServices(
             environment.registry,
             environment.fileStores,
             knownStorageService,
+            storageDrivers,
         )
 }

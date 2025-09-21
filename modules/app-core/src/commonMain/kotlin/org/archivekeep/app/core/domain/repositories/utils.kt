@@ -6,6 +6,7 @@ import org.archivekeep.files.repo.Repo
 import org.archivekeep.utils.loading.ProtectedLoadableResource
 import org.archivekeep.utils.loading.optional.OptionalLoadable
 
+@Deprecated("Get rid of ProtectedLoadableResource")
 fun (ProtectedLoadableResource<Repo, RepoAuthRequest>).asOptionalLoadable() =
     when (this) {
         is ProtectedLoadableResource.Failed -> {

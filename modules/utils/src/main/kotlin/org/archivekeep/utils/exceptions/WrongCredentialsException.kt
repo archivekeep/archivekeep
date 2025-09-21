@@ -1,4 +1,4 @@
-package org.archivekeep.app.core.operations
+package org.archivekeep.utils.exceptions
 
 class WrongCredentialsException(
     message: String = "Credentials provided don't work",

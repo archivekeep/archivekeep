@@ -30,11 +30,13 @@ import org.archivekeep.app.core.domain.storages.StorageDriver
 import org.archivekeep.app.core.domain.storages.StorageInformation
 import org.archivekeep.app.core.persistence.credentials.ContentEncryptionPassword
 import org.archivekeep.app.core.persistence.credentials.CredentialsStore
+import org.archivekeep.app.core.persistence.drivers.RepositoryLocationDiscoveryForAdd
 import org.archivekeep.app.core.utils.generics.UniqueSharedFlowInstanceManager
 import org.archivekeep.app.core.utils.identifiers.RepositoryURI
 import org.archivekeep.app.core.utils.identifiers.StorageURI
 import org.archivekeep.files.repo.encryptedfiles.EncryptedFileSystemRepository
 import org.archivekeep.files.repo.files.FilesRepo
+import org.archivekeep.files.repo.remote.grpc.BasicAuthCredentials
 import org.archivekeep.utils.loading.mapLoadedData
 import org.archivekeep.utils.loading.optional.OptionalLoadable
 import org.archivekeep.utils.loading.optional.OptionalLoadable.LoadedAvailable
@@ -240,5 +242,12 @@ class FileSystemStorageDriver(
                     pathInFS.removePrefix(mp.fsSubPath).removePrefix("/"),
                 )
             }
+    }
+
+    override suspend fun discoverRepository(
+        uri: RepositoryURI,
+        credentials: BasicAuthCredentials?,
+    ): RepositoryLocationDiscoveryForAdd {
+        TODO("This is handled differently")
     }
 }

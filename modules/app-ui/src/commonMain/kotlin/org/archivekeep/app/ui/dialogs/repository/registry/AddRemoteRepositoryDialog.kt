@@ -4,7 +4,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.SecondaryTabRow
@@ -20,16 +20,15 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.buildAnnotatedString
-import androidx.compose.ui.text.input.KeyboardCapitalization
-import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.CoroutineScope
+import org.archivekeep.app.core.operations.AddRemoteRepositoryOutcome
 import org.archivekeep.app.core.operations.AddRemoteRepositoryUseCase
 import org.archivekeep.app.core.operations.RequiresCredentialsException
-import org.archivekeep.app.core.operations.WrongCredentialsException
 import org.archivekeep.app.core.operations.addS3
 import org.archivekeep.app.core.utils.generics.ExecutionOutcome
 import org.archivekeep.app.core.utils.identifiers.RepositoryURI
@@ -40,6 +39,7 @@ import org.archivekeep.app.ui.components.designsystem.dialog.DialogOverlayCard
 import org.archivekeep.app.ui.components.designsystem.elements.WarningAlert
 import org.archivekeep.app.ui.components.designsystem.input.CheckboxWithText
 import org.archivekeep.app.ui.components.designsystem.input.PasswordField
+import org.archivekeep.app.ui.components.designsystem.input.RadioWithTextAndExtra
 import org.archivekeep.app.ui.components.designsystem.input.TextField
 import org.archivekeep.app.ui.components.feature.dialogs.SimpleActionDialogControlButtons
 import org.archivekeep.app.ui.components.feature.dialogs.SimpleActionDialogDoneButtons
@@ -50,8 +50,14 @@ import org.archivekeep.app.ui.domain.wiring.LocalWalletOperationLaunchers
 import org.archivekeep.app.ui.domain.wiring.WalletOperationLaunchers
 import org.archivekeep.app.ui.utils.SingleLaunchGuard
 import org.archivekeep.files.repo.remote.grpc.BasicAuthCredentials
+import org.archivekeep.utils.exceptions.WrongCredentialsException
 
 class AddRemoteRepositoryDialog : Dialog {
+    enum class InitType {
+        PLAIN,
+        ENCRYPTED,
+    }
+
     class Input(
         val selectedRemoteType: MutableState<RemoteType> = mutableStateOf(RemoteType.S3),
         val s3input: S3 = S3(),
@@ -67,7 +73,7 @@ class AddRemoteRepositoryDialog : Dialog {
         ) {
             abstract fun canLaunch(): Boolean
 
-            abstract suspend fun execute(useCase: AddRemoteRepositoryUseCase)
+            abstract suspend fun execute(useCase: AddRemoteRepositoryUseCase): AddRemoteRepositoryOutcome
         }
 
         class S3(
@@ -78,7 +84,7 @@ class AddRemoteRepositoryDialog : Dialog {
         ) : RemoteInput() {
             override fun canLaunch(): Boolean = endpoint.value.isNotBlank()
 
-            override suspend fun execute(useCase: AddRemoteRepositoryUseCase) {
+            override suspend fun execute(useCase: AddRemoteRepositoryUseCase) =
                 useCase.addS3(
                     endpoint.value,
                     bucket.value,
@@ -86,7 +92,6 @@ class AddRemoteRepositoryDialog : Dialog {
                     secretKey.value,
                     rememberCredentials.value,
                 )
-            }
         }
 
         class Other(
@@ -95,9 +100,8 @@ class AddRemoteRepositoryDialog : Dialog {
         ) : RemoteInput() {
             override fun canLaunch(): Boolean = uri.value.isNotBlank()
 
-            override suspend fun execute(useCase: AddRemoteRepositoryUseCase) {
+            override suspend fun execute(useCase: AddRemoteRepositoryUseCase) =
                 useCase(RepositoryURI.fromFull(uri.value.trim()), basicAuthCredentialsState.value, rememberCredentials.value)
-            }
         }
 
         val currentInput =
@@ -116,17 +120,55 @@ class AddRemoteRepositoryDialog : Dialog {
     ) {
         val input = Input()
 
-        val launchGuard = SingleLaunchGuard(coroutineScope)
+        // TODO: refactor - combine with execution outcome of launchGuard
+        val addOutcome = mutableStateOf<AddRemoteRepositoryOutcome?>(null)
+        val addLaunchGuard = SingleLaunchGuard(coroutineScope)
+
+        val initType = mutableStateOf<InitType?>(null)
+        val initPassword = mutableStateOf("")
+        val initPasswordCheck = mutableStateOf("")
+
+        val createLaunchGuard = SingleLaunchGuard(coroutineScope)
+
+        val canLaunchInit =
+            derivedStateOf {
+                addOutcome.value is AddRemoteRepositoryOutcome.NeedsInitialization &&
+                    (
+                        initType.value == InitType.PLAIN ||
+                            (
+                                initType.value == InitType.ENCRYPTED && initPassword.value.isNotBlank() && initPassword.value == initPasswordCheck.value
+                            )
+                    )
+            }
 
         fun launchAdd() {
-            launchGuard.launch {
+            addLaunchGuard.launch {
+                addOutcome.value = null
+
                 if (input.currentInput.value.rememberCredentials.value) {
                     if (!walletOperationLaunchers.ensureWalletForWrite()) {
                         throw RuntimeException("Wallet not available")
                     }
                 }
 
-                input.currentInput.value.execute(useCase)
+                addOutcome.value = input.currentInput.value.execute(useCase)
+            }
+        }
+
+        fun launchCreate() {
+            createLaunchGuard.launch {
+                if (input.currentInput.value.rememberCredentials.value) {
+                    if (!walletOperationLaunchers.ensureWalletForWrite()) {
+                        throw RuntimeException("Wallet not available")
+                    }
+                }
+
+                val initializer = (addOutcome.value as AddRemoteRepositoryOutcome.NeedsInitialization)
+                when (initType.value) {
+                    InitType.PLAIN -> initializer.initializeAsPlain!!.invoke()
+                    InitType.ENCRYPTED -> initializer.initializeAsE2EEPasswordProtected!!.invoke(initPassword.value)
+                    null -> throw IllegalStateException()
+                }
             }
         }
     }
@@ -143,14 +185,18 @@ class AddRemoteRepositoryDialog : Dialog {
                 VM(coroutineScope, operationFactory.get(AddRemoteRepositoryUseCase::class.java), walletOperationLaunchers)
             }
 
-        val executionState = vm.launchGuard.state
+        val executionState = vm.addLaunchGuard.state
 
-        val isRunning = vm.launchGuard.runningJob != null
-        val isSuccess = vm.launchGuard.executionOutcome.value is ExecutionOutcome.Success
+        val isRunning = vm.addLaunchGuard.runningJob != null
+        val isSuccess = vm.addLaunchGuard.executionOutcome.value is ExecutionOutcome.Success
         val isEditable = !isRunning && !isSuccess
 
+        val initializationNeeded =
+            vm.addOutcome.value is AddRemoteRepositoryOutcome.NeedsInitialization &&
+                (vm.createLaunchGuard.executionOutcome.value !is ExecutionOutcome.Success)
+        val initIsEditble = vm.createLaunchGuard.runningJob == null || vm.createLaunchGuard.executionOutcome.value !is ExecutionOutcome.Success
+
         DialogOverlayCard(onDismissRequest = onClose) {
-            val launchAdd = { vm.launchAdd() }
             var uriText by vm.input.otherInput.uri
             var basicAuthCredentials by vm.input.otherInput.basicAuthCredentialsState
 
@@ -189,84 +235,7 @@ class AddRemoteRepositoryDialog : Dialog {
                     ScrollableColumn {
                         when (selectedTab) {
                             Input.RemoteType.S3 -> {
-                                Text(
-                                    "Connection details for S3 bucket:",
-                                )
-                                Spacer(Modifier.height(4.dp))
-                                TextField(
-                                    vm.input.s3input.endpoint.value,
-                                    onValueChange = { vm.input.s3input.endpoint.value = it },
-                                    label = { Text("Endpoint URL") },
-                                    placeholder = { Text("Endpoint URL") },
-                                    singleLine = true,
-                                    enabled = isEditable,
-                                    modifier = Modifier.fillMaxWidth(),
-                                    keyboardOptions =
-                                        KeyboardOptions(
-                                            capitalization = KeyboardCapitalization.None,
-                                            keyboardType = KeyboardType.Uri,
-                                        ),
-                                )
-                                if (vm.input.s3input.endpoint.value
-                                        .trim()
-                                        .startsWith("http://")
-                                ) {
-                                    Spacer(Modifier.height(8.dp))
-                                    WarningAlert {
-                                        Column {
-                                            Text(
-                                                "Insecure protocol is used for endpoint. " +
-                                                    "This results in plain data being sent over network, that is readable by anyone.",
-                                            )
-                                            Spacer(Modifier.height(8.dp))
-                                            Text("It is strongly recommended to connect to this server using a VPN you absolutely trust.")
-                                        }
-                                    }
-                                }
-                                TextField(
-                                    vm.input.s3input.bucket.value,
-                                    onValueChange = { vm.input.s3input.bucket.value = it },
-                                    label = { Text("Bucket name") },
-                                    placeholder = { Text("Bucket name") },
-                                    singleLine = true,
-                                    enabled = isEditable,
-                                    modifier = Modifier.fillMaxWidth(),
-                                )
-                                TextField(
-                                    vm.input.s3input.accessKey.value,
-                                    onValueChange = { vm.input.s3input.accessKey.value = it },
-                                    label = { Text("Access key") },
-                                    placeholder = { Text("Access key") },
-                                    singleLine = true,
-                                    enabled = isEditable,
-                                    modifier = Modifier.fillMaxWidth(),
-                                )
-                                PasswordField(
-                                    vm.input.s3input.secretKey.value,
-                                    onValueChange = { vm.input.s3input.secretKey.value = it },
-                                    label = { Text("Secret key") },
-                                    placeholder = { Text("Secret key") },
-                                    enabled = isEditable,
-                                    modifier = Modifier.fillMaxWidth(),
-                                )
-                                CheckboxWithText(
-                                    vm.input.s3input.rememberCredentials.value,
-                                    onValueChange = {
-                                        vm.input.s3input.rememberCredentials.value = it
-                                    },
-                                    text = "Remember credentials",
-                                )
-
-                                Spacer(Modifier.height(12.dp))
-                                WarningAlert {
-                                    Column {
-                                        Text(
-                                            "There's no E2E encryption yet. Your data could be accessed be server owner (service provider).",
-                                        )
-                                        Spacer(Modifier.height(8.dp))
-                                        Text("Do not use for sensitive data with servers (service providers) you don't trust.")
-                                    }
-                                }
+                                S3Form(vm.input.s3input, isEditable)
                             }
 
                             Input.RemoteType.OTHER -> {
@@ -332,23 +301,92 @@ class AddRemoteRepositoryDialog : Dialog {
                         }
 
                         if (error != null) {
-                            AutomaticErrorMessage(error.cause, onResolve = { vm.launchGuard.reset() })
+                            AutomaticErrorMessage(error.cause, onResolve = { vm.addLaunchGuard.reset() })
                         }
 
                         if (isSuccess) {
-                            Spacer(Modifier.height(12.dp))
-                            Text("Remote repository successfully added")
+                            if (!initializationNeeded) {
+                                Spacer(Modifier.height(12.dp))
+                                Text("Remote repository successfully added")
+                            } else {
+                                Text("Needs init")
+
+                                Spacer(Modifier.height(12.dp))
+                                RadioWithTextAndExtra(
+                                    selected = vm.initType.value == InitType.PLAIN,
+                                    onClick = { vm.initType.value = InitType.PLAIN },
+                                    text = "Plain objects (unencrypted, normal access)",
+                                    enabled = initIsEditble,
+                                    extra = {
+                                        if (vm.initType.value == InitType.PLAIN) {
+                                            WarningAlert {
+                                                Column {
+                                                    Text("Your data could be accessed be server owner (service provider).")
+                                                    Spacer(Modifier.height(8.dp))
+                                                    Text("Do not use for sensitive data with servers (service providers) you don't trust.")
+                                                }
+                                            }
+                                        }
+                                    },
+                                )
+                                RadioWithTextAndExtra(
+                                    selected = vm.initType.value == InitType.ENCRYPTED,
+                                    onClick = { vm.initType.value = InitType.ENCRYPTED },
+                                    text = "Encrypted (custom format)",
+                                    enabled = initIsEditble,
+                                    extra = {
+                                        if (vm.initType.value == InitType.ENCRYPTED) {
+                                            Column {
+                                                PasswordField(
+                                                    vm.initPassword.value,
+                                                    onValueChange = { vm.initPassword.value = it },
+                                                    placeholder = { Text("Enter password ...") },
+                                                    modifier = Modifier.padding(bottom = 8.dp).testTag("Enter password ..."),
+                                                    enabled = initIsEditble,
+                                                )
+
+                                                PasswordField(
+                                                    vm.initPasswordCheck.value,
+                                                    onValueChange = { vm.initPasswordCheck.value = it },
+                                                    placeholder = { Text("Verify password ...") },
+                                                    modifier = Modifier.padding(bottom = 8.dp).testTag("Verify password ..."),
+                                                    enabled = initIsEditble,
+                                                )
+                                                WarningAlert {
+                                                    Column {
+                                                        Text(
+                                                            "Contents are E2E encrypted. Filenames are not.",
+                                                        )
+                                                        Spacer(Modifier.height(8.dp))
+                                                        Text("Do not have sensitive data in filenames with servers (service providers) you don't trust.")
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    },
+                                )
+                            }
                         }
                     }
                 },
                 bottomContent = {
                     DialogButtonContainer {
                         if (isSuccess) {
-                            SimpleActionDialogDoneButtons(onClose)
+                            if (!initializationNeeded) {
+                                SimpleActionDialogDoneButtons(onClose)
+                            } else {
+                                SimpleActionDialogControlButtons(
+                                    "Init",
+                                    onLaunch = vm::launchCreate,
+                                    onClose = onClose,
+                                    canLaunch = vm.canLaunchInit.value,
+                                    isRunning = isRunning,
+                                )
+                            }
                         } else {
                             SimpleActionDialogControlButtons(
                                 "Add",
-                                onLaunch = launchAdd,
+                                onLaunch = vm::launchAdd,
                                 onClose = onClose,
                                 canLaunch =
                                     vm.input.currentInput.value

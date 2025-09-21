@@ -24,6 +24,14 @@ class S3RepositoryTestRepo(
             secretAccessKey = secretKey
         }
 
+    suspend fun create(): S3Repository =
+        S3Repository.create(
+            URI.create(s3URL),
+            "aa",
+            credentialsProvider,
+            bucketName,
+        )
+
     override suspend fun open(testDispatcher: TestDispatcher): S3Repository =
         S3Repository.open(
             URI.create(s3URL),

@@ -6,6 +6,7 @@ import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 import org.archivekeep.app.core.domain.storages.RepositoryAccessorProvider
 import org.archivekeep.app.core.domain.storages.StorageDriver
+import org.archivekeep.app.core.domain.storages.getDriverForURI
 import org.archivekeep.app.core.persistence.registry.RegisteredRepository
 import org.archivekeep.app.core.persistence.registry.RegistryDataStore
 import org.archivekeep.app.core.persistence.repository.MemorizedRepositoryIndexRepository
@@ -51,7 +52,7 @@ class DefaultRepositoryService(
         println("GET REPO FOR: $repositoryURI")
 
         val driver =
-            storageDrivers[repositoryURI.driver]
+            storageDrivers.getDriverForURI(repositoryURI)
                 ?: return object : RepositoryAccessorProvider {
                     override val repositoryAccessor: Flow<OptionalLoadable<Repo>> =
                         flowOf(

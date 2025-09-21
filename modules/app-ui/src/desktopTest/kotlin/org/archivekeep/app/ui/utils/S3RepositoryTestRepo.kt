@@ -6,7 +6,6 @@ import aws.sdk.kotlin.services.s3.createBucket
 import aws.sdk.kotlin.services.s3.putObject
 import aws.smithy.kotlin.runtime.content.asByteStream
 import aws.smithy.kotlin.runtime.net.url.Url
-import kotlinx.coroutines.test.TestDispatcher
 import org.archivekeep.files.driver.s3.S3Repository
 import org.archivekeep.utils.fromHexToBase64
 import org.archivekeep.utils.sha256
@@ -24,14 +23,12 @@ class S3RepositoryTestRepo(
             secretAccessKey = secretKey
         }
 
-    suspend fun open(testDispatcher: TestDispatcher): S3Repository =
-        S3Repository.open(
+    suspend fun create(): S3Repository =
+        S3Repository.create(
             URI.create(s3URL),
             "aa",
             credentialsProvider,
             bucketName,
-            sharingDispatcher = testDispatcher,
-            ioDispatcher = testDispatcher,
         )
 
     suspend fun createBucket() {

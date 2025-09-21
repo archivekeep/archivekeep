@@ -4,6 +4,7 @@ import com.google.common.collect.ClassToInstanceMap
 import com.google.common.collect.ImmutableClassToInstanceMap
 import kotlinx.coroutines.CoroutineScope
 import org.archivekeep.app.core.domain.repositories.RepositoryService
+import org.archivekeep.app.core.domain.storages.StorageDriver
 import org.archivekeep.app.core.domain.storages.StorageRegistry
 import org.archivekeep.app.core.operations.AddRemoteRepositoryUseCase
 import org.archivekeep.app.core.operations.AddRemoteRepositoryUseCaseImpl
@@ -23,6 +24,7 @@ class OperationFactory private constructor(
         registry: RegistryDataStore,
         fileStores: FileStores,
         storageRegistry: StorageRegistry,
+        drivers: Map<String, StorageDriver>,
     ) : this(
         ImmutableClassToInstanceMap
             .builder<Any>()
@@ -38,8 +40,7 @@ class OperationFactory private constructor(
                 AddRemoteRepositoryUseCaseImpl(
                     repositoryService,
                     registry,
-                    fileStores,
-                    storageRegistry,
+                    drivers,
                 ),
             ).put(
                 AssociateRepositoryOperation.Factory::class.java,

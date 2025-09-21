@@ -9,9 +9,11 @@ import aws.sdk.kotlin.services.s3.model.ChecksumAlgorithm
 import aws.sdk.kotlin.services.s3.model.ChecksumMode
 import aws.sdk.kotlin.services.s3.model.GetObjectRequest
 import aws.sdk.kotlin.services.s3.model.MetadataDirective
+import aws.sdk.kotlin.services.s3.model.NoSuchBucket
 import aws.sdk.kotlin.services.s3.model.NoSuchKey
 import aws.sdk.kotlin.services.s3.model.NotFound
 import aws.sdk.kotlin.services.s3.model.Object
+import aws.sdk.kotlin.services.s3.model.S3Exception
 import aws.sdk.kotlin.services.s3.putObject
 import aws.smithy.kotlin.runtime.auth.awscredentials.CredentialsProvider
 import aws.smithy.kotlin.runtime.content.ByteStream
@@ -54,6 +56,7 @@ import org.archivekeep.files.repo.RepositoryMetadata
 import org.archivekeep.files.repo.encryptedfiles.EncryptedFileSystemRepositoryVaultContents
 import org.archivekeep.files.repo.encryptedfiles.verifyingStreamViaBackgroundCoroutine
 import org.archivekeep.utils.datastore.passwordprotected.PasswordProtectedCustomJoseStorage
+import org.archivekeep.utils.exceptions.WrongCredentialsException
 import org.archivekeep.utils.fromBase64ToHex
 import org.archivekeep.utils.fromHexToBase64
 import org.archivekeep.utils.loading.AutoRefreshLoadableFlow
@@ -95,20 +98,7 @@ class EncryptedS3Repository private constructor(
         PasswordProtectedCustomJoseStorage(
             Json.serializersModule.serializer(),
             defaultValueProducer = { EncryptedFileSystemRepositoryVaultContents(emptyList(), null, null) },
-            reader = {
-                try {
-                    s3Client.getObject(
-                        GetObjectRequest {
-                            bucket = bucketName
-                            key = VAULT_LOCATION
-                        },
-                    ) { response ->
-                        response.body?.toByteArray()
-                    }
-                } catch (e: NoSuchKey) {
-                    null
-                }
-            },
+            reader = { readVaultContents() },
             writer = { updater ->
                 // TODO: maybe real locking?
 
@@ -139,6 +129,20 @@ class EncryptedS3Repository private constructor(
             },
         )
 
+    private suspend fun readVaultContents() =
+        try {
+            s3Client.getObject(
+                GetObjectRequest {
+                    bucket = bucketName
+                    key = VAULT_LOCATION
+                },
+            ) { response ->
+                response.body?.toByteArray()
+            }
+        } catch (e: NoSuchKey) {
+            null
+        }
+
     suspend fun init() {
         s3Client =
             S3Client.fromEnvironment {
@@ -148,9 +152,15 @@ class EncryptedS3Repository private constructor(
                 forcePathStyle = true
             }
 
-        s3Client.listObjects {
-            bucket = bucketName
-            maxKeys = 1
+        try {
+            s3Client.listObjects {
+                bucket = bucketName
+                maxKeys = 1
+            }
+        } catch (e: NoSuchBucket) {
+            throw e
+        } catch (e: S3Exception) {
+            throw WrongCredentialsException(cause = e)
         }
     }
 
@@ -189,50 +199,57 @@ class EncryptedS3Repository private constructor(
                     allItems
                         .map {
                             async {
-                                val plainMetadata =
-                                    run {
-                                        // TODO: add caching
+                                try {
+                                    val plainMetadata =
+                                        run {
+                                            // TODO: add caching
 
-                                        s3Client.getObject(
-                                            GetObjectRequest {
-                                                bucket = bucketName
-                                                key = it.key
-                                                checksumMode = ChecksumMode.Enabled
-                                            },
-                                        ) { response ->
-                                            val objectChecksum = response.checksumSha256!!
-                                            val signedChecksum =
-                                                parseVerifyDecodeJWS<SignedObjectMetadata>(
-                                                    response.metadata!![SIGNED_METADATA]!!,
+                                            s3Client.getObject(
+                                                GetObjectRequest {
+                                                    bucket = bucketName
+                                                    key = it.key
+                                                    checksumMode = ChecksumMode.Enabled
+                                                },
+                                            ) { response ->
+                                                val objectChecksum = response.checksumSha256!!
+                                                val signedChecksum =
+                                                    parseVerifyDecodeJWS<SignedObjectMetadata>(
+                                                        response.metadata!![SIGNED_METADATA]!!,
+                                                        ECDSAVerifier(vaultContents.currentFileSigningKey!!.toECKey().toECPublicKey()),
+                                                    ).objectChecksumSha256
+
+                                                if (objectChecksum != signedChecksum) {
+                                                    throw RuntimeException("Integrity corrupted of ${it.key!!.toFilename()}")
+                                                }
+
+                                                readCryptoStream(
+                                                    response.body!!.toInputStream(),
                                                     ECDSAVerifier(vaultContents.currentFileSigningKey!!.toECKey().toECPublicKey()),
-                                                ).objectChecksumSha256
-
-                                            if (objectChecksum != signedChecksum) {
-                                                throw RuntimeException("Integrity corrupted of ${it.key!!.toFilename()}")
-                                            }
-
-                                            readCryptoStream(
-                                                response.body!!.toInputStream(),
-                                                ECDSAVerifier(vaultContents.currentFileSigningKey!!.toECKey().toECPublicKey()),
-                                                ECDHDecrypter(
-                                                    vaultContents.currentFileEncryptionKey!!.toECKey().toECPrivateKey(),
-                                                ),
-                                            ) { plainMetadata, contents ->
-                                                plainMetadata
+                                                    ECDHDecrypter(
+                                                        vaultContents.currentFileEncryptionKey!!.toECKey().toECPrivateKey(),
+                                                    ),
+                                                ) { plainMetadata, contents ->
+                                                    plainMetadata
+                                                }
                                             }
                                         }
-                                    }
 
-                                RepoIndex.File(
-                                    it.key!!.toFilename(),
-                                    plainMetadata.size,
-                                    plainMetadata.checksumSha256,
-                                )
+                                    RepoIndex.File(
+                                        it.key!!.toFilename(),
+                                        plainMetadata.size,
+                                        plainMetadata.checksumSha256,
+                                    )
+                                } catch (e: Throwable) {
+                                    // TODO: show to UI
+                                    println("Index get error: $e")
+                                    e.printStackTrace()
+                                    null
+                                }
                             }
                         }.map { it.await() }
                 }
 
-            RepoIndex(files)
+            RepoIndex(files.filterNotNull())
         }
 
     override val indexFlow: StateFlow<Loadable<RepoIndex>> = indexResource.stateFlow
@@ -243,10 +260,14 @@ class EncryptedS3Repository private constructor(
             ioDispatcher,
             updateTriggerFlow = metadataLastChangeFlow,
         ) {
-            readMetadataFromS3()
+            readMetadataFromS3() ?: RepositoryMetadata()
         }
 
     override val metadataFlow: Flow<Loadable<RepositoryMetadata>> = metadataResource.stateFlow
+
+    suspend fun unlock(password: String) {
+        vault.unlock(password)
+    }
 
     override suspend fun index(): RepoIndex = indexResource.getFreshAndUpdateState()
 
@@ -362,7 +383,7 @@ class EncryptedS3Repository private constructor(
                         }
 
                         s3Client.copyObject {
-                            copySource = URLEncoder.encode("$bucketName/${filename.toKey()}", StandardCharsets.UTF_8.toString())
+                            copySource = "$bucketName/${filename.toKey()}"
 
                             bucket = bucketName
                             key = filename.toKey()
@@ -414,7 +435,7 @@ class EncryptedS3Repository private constructor(
         // TODO: encrypt or sign metadata
 
         try {
-            val old = readMetadataFromS3()
+            val old = readMetadataFromS3() ?: RepositoryMetadata()
             val newMetadataBytes = Json.encodeToString(transform(old)).toByteArray()
 
             s3Client.putObject {
@@ -429,7 +450,7 @@ class EncryptedS3Repository private constructor(
     }
 
     @OptIn(ExperimentalSerializationApi::class)
-    private suspend fun readMetadataFromS3() =
+    private suspend fun readMetadataFromS3(): RepositoryMetadata? =
         try {
             s3Client
                 .getObject(
@@ -441,7 +462,7 @@ class EncryptedS3Repository private constructor(
                     Json.decodeFromStream(it.body!!.toInputStream())
                 }
         } catch (e: NoSuchKey) {
-            RepositoryMetadata()
+            null
         }
 
     companion object {
@@ -475,6 +496,9 @@ class EncryptedS3Repository private constructor(
         ).apply {
             init()
 
+            // create them from defaults
+            updateMetadata { it }
+
             vault.create(password)
 
             vault.updateData {
@@ -482,12 +506,11 @@ class EncryptedS3Repository private constructor(
             }
         }
 
-        suspend fun openAndUnlock(
+        suspend fun open(
             endpoint: URI,
             region: String,
             credentialsProvider: CredentialsProvider,
             bucketName: String,
-            password: String,
             sharingDispatcher: CoroutineDispatcher = Dispatchers.Default,
             ioDispatcher: CoroutineDispatcher = Dispatchers.IO,
         ) = EncryptedS3Repository(
@@ -500,7 +523,27 @@ class EncryptedS3Repository private constructor(
         ).apply {
             init()
 
-            vault.unlock(password)
+            readMetadataFromS3() ?: throw S3LocationNotInitializedAsRepositoryException()
+            readVaultContents() ?: throw S3LocationNotInitializedAsRepositoryException()
+        }
+
+        suspend fun openAndUnlock(
+            endpoint: URI,
+            region: String,
+            credentialsProvider: CredentialsProvider,
+            bucketName: String,
+            password: String,
+            sharingDispatcher: CoroutineDispatcher = Dispatchers.Default,
+            ioDispatcher: CoroutineDispatcher = Dispatchers.IO,
+        ) = open(
+            endpoint,
+            region,
+            credentialsProvider,
+            bucketName,
+            sharingDispatcher,
+            ioDispatcher,
+        ).apply {
+            unlock(password)
         }
     }
 }
