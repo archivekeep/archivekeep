@@ -9,8 +9,8 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.transform
 import kotlinx.coroutines.plus
-import org.archivekeep.app.core.domain.storages.RepositoryAccessorProvider
 import org.archivekeep.app.core.domain.storages.asStatus
+import org.archivekeep.app.core.persistence.drivers.RepositoryLocationAccessor
 import org.archivekeep.app.core.persistence.registry.RegisteredRepository
 import org.archivekeep.app.core.persistence.repository.MemorizedRepositoryIndexRepository
 import org.archivekeep.app.core.persistence.repository.MemorizedRepositoryIndexRepository.Companion.memorizingCachingIndexFlow
@@ -45,13 +45,13 @@ class Repository(
     baseScope: CoroutineScope,
     val uri: RepositoryURI,
     registeredRepositoryFlow: Flow<RegisteredRepository?>,
-    private val repositoryAccessorProvider: RepositoryAccessorProvider,
+    private val repositoryAccessorProvider: RepositoryLocationAccessor,
     memorizedRepositoryIndexRepository: MemorizedRepositoryIndexRepository,
     private val memorizedRepositoryMetadataRepository: MemorizedRepositoryMetadataRepository,
 ) {
     private val scope = baseScope + InstanceProtector.forInstance(this)
 
-    val optionalAccessorFlow = repositoryAccessorProvider.repositoryAccessor
+    val optionalAccessorFlow = repositoryAccessorProvider.autoUnlockRepositoryAccessor
 
     @Deprecated("Switch to optionalAccessorFlow and handle NotAvailable on consumer side")
     val accessorFlow =

@@ -17,7 +17,6 @@ import org.archivekeep.app.core.domain.repositories.RepositoryInformation
 import org.archivekeep.app.core.domain.repositories.ResolvedRepositoryState
 import org.archivekeep.app.core.domain.storages.KnownStorage
 import org.archivekeep.app.core.domain.storages.RepositoryAccessState
-import org.archivekeep.app.core.domain.storages.RepositoryAccessorProvider
 import org.archivekeep.app.core.domain.storages.Storage
 import org.archivekeep.app.core.domain.storages.StorageConnection
 import org.archivekeep.app.core.domain.storages.StorageDriver
@@ -27,7 +26,8 @@ import org.archivekeep.app.core.domain.storages.StorageRepository
 import org.archivekeep.app.core.persistence.credentials.CredentialsInProtectedWalletDataStore
 import org.archivekeep.app.core.persistence.credentials.CredentialsStore
 import org.archivekeep.app.core.persistence.credentials.WalletPO
-import org.archivekeep.app.core.persistence.drivers.RepositoryLocationDiscoveryForAdd
+import org.archivekeep.app.core.persistence.drivers.RepositoryLocationAccessor
+import org.archivekeep.app.core.persistence.drivers.RepositoryLocationContentsState
 import org.archivekeep.app.core.persistence.drivers.filesystem.FileStores
 import org.archivekeep.app.core.persistence.drivers.filesystem.MountedFileSystem
 import org.archivekeep.app.core.persistence.platform.Environment
@@ -44,7 +44,6 @@ import org.archivekeep.files.repo.LocalRepo
 import org.archivekeep.files.repo.Repo
 import org.archivekeep.files.repo.RepoIndex
 import org.archivekeep.files.repo.RepositoryMetadata
-import org.archivekeep.files.repo.remote.grpc.BasicAuthCredentials
 import org.archivekeep.testing.fixtures.FixtureRepo
 import org.archivekeep.testing.fixtures.FixtureRepoBuilder
 import org.archivekeep.testing.storage.InMemoryLocalRepo
@@ -322,8 +321,11 @@ open class DemoEnvironment(
                         liveStatusFlowManager[storageURI],
                     )
 
-                override fun getProvider(uri: RepositoryURI): RepositoryAccessorProvider =
-                    object : RepositoryAccessorProvider {
+                override fun openLocation(uri: RepositoryURI): RepositoryLocationAccessor =
+                    object : RepositoryLocationAccessor {
+                        override val locationContents: Flow<OptionalLoadable<RepositoryLocationContentsState>>
+                            get() = TODO("Not yet implemented")
+
                         override val repositoryAccessor: Flow<RepositoryAccessState> =
                             flow {
                                 val repo =
@@ -344,14 +346,9 @@ open class DemoEnvironment(
                                     emit((OptionalLoadable.LoadedAvailable(repo)))
                                 }
                             }.stateIn(scope)
-                    }
 
-                override suspend fun discoverRepository(
-                    uri: RepositoryURI,
-                    credentials: BasicAuthCredentials?,
-                ): RepositoryLocationDiscoveryForAdd {
-                    TODO("Not yet implemented")
-                }
+                        override val autoUnlockRepositoryAccessor: Flow<RepositoryAccessState> = repositoryAccessor
+                    }
             },
         )
 

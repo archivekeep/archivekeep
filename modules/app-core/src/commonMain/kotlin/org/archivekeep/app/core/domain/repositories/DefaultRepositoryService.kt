@@ -4,16 +4,16 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
-import org.archivekeep.app.core.domain.storages.RepositoryAccessorProvider
+import org.archivekeep.app.core.domain.storages.RepositoryAccessState
 import org.archivekeep.app.core.domain.storages.StorageDriver
 import org.archivekeep.app.core.domain.storages.getDriverForURI
+import org.archivekeep.app.core.persistence.drivers.RepositoryLocationAccessor
 import org.archivekeep.app.core.persistence.registry.RegisteredRepository
 import org.archivekeep.app.core.persistence.registry.RegistryDataStore
 import org.archivekeep.app.core.persistence.repository.MemorizedRepositoryIndexRepository
 import org.archivekeep.app.core.persistence.repository.MemorizedRepositoryMetadataRepository
 import org.archivekeep.app.core.utils.generics.UniqueInstanceManager
 import org.archivekeep.app.core.utils.identifiers.RepositoryURI
-import org.archivekeep.files.repo.Repo
 import org.archivekeep.utils.loading.optional.OptionalLoadable
 
 class DefaultRepositoryService(
@@ -48,18 +48,21 @@ class DefaultRepositoryService(
         }
     }
 
-    private fun createBase(repositoryURI: RepositoryURI): RepositoryAccessorProvider {
+    private fun createBase(repositoryURI: RepositoryURI): RepositoryLocationAccessor {
         println("GET REPO FOR: $repositoryURI")
 
         val driver =
             storageDrivers.getDriverForURI(repositoryURI)
-                ?: return object : RepositoryAccessorProvider {
-                    override val repositoryAccessor: Flow<OptionalLoadable<Repo>> =
+                ?: return object : RepositoryLocationAccessor {
+                    override val locationContents: Flow<OptionalLoadable.Failed> =
                         flowOf(
                             OptionalLoadable.Failed(RuntimeException("Driver ${repositoryURI.driver} not supported")),
                         )
+
+                    override val repositoryAccessor: Flow<OptionalLoadable.Failed> = locationContents
+                    override val autoUnlockRepositoryAccessor: Flow<RepositoryAccessState> = repositoryAccessor
                 }
 
-        return driver.getProvider(repositoryURI)
+        return driver.openLocation(repositoryURI)
     }
 }

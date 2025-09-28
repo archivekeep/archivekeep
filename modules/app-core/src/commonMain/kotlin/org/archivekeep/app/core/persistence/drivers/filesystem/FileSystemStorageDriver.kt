@@ -23,20 +23,19 @@ import kotlinx.serialization.json.JsonPrimitive
 import kotlinx.serialization.json.jsonPrimitive
 import org.archivekeep.app.core.domain.storages.NeedsUnlock
 import org.archivekeep.app.core.domain.storages.RepositoryAccessState
-import org.archivekeep.app.core.domain.storages.RepositoryAccessorProvider
 import org.archivekeep.app.core.domain.storages.Storage
 import org.archivekeep.app.core.domain.storages.StorageConnection
 import org.archivekeep.app.core.domain.storages.StorageDriver
 import org.archivekeep.app.core.domain.storages.StorageInformation
 import org.archivekeep.app.core.persistence.credentials.ContentEncryptionPassword
 import org.archivekeep.app.core.persistence.credentials.CredentialsStore
-import org.archivekeep.app.core.persistence.drivers.RepositoryLocationDiscoveryForAdd
+import org.archivekeep.app.core.persistence.drivers.RepositoryLocationAccessor
+import org.archivekeep.app.core.persistence.drivers.RepositoryLocationContentsState
 import org.archivekeep.app.core.utils.generics.UniqueSharedFlowInstanceManager
 import org.archivekeep.app.core.utils.identifiers.RepositoryURI
 import org.archivekeep.app.core.utils.identifiers.StorageURI
 import org.archivekeep.files.repo.encryptedfiles.EncryptedFileSystemRepository
 import org.archivekeep.files.repo.files.FilesRepo
-import org.archivekeep.files.repo.remote.grpc.BasicAuthCredentials
 import org.archivekeep.utils.loading.mapLoadedData
 import org.archivekeep.utils.loading.optional.OptionalLoadable
 import org.archivekeep.utils.loading.optional.OptionalLoadable.LoadedAvailable
@@ -98,7 +97,7 @@ class FileSystemStorageDriver(
             liveStatusFlowManager[storageURI],
         )
 
-    override fun getProvider(uri: RepositoryURI): RepositoryAccessorProvider = Provider(uri, uri.typedRepoURIData as FileSystemRepositoryURIData)
+    override fun openLocation(uri: RepositoryURI): RepositoryLocationAccessor = Provider(uri, uri.typedRepoURIData as FileSystemRepositoryURIData)
 
     private sealed interface InnerState {
         val repoStateFlow: Flow<RepositoryAccessState>
@@ -187,7 +186,10 @@ class FileSystemStorageDriver(
     inner class Provider(
         val uri: RepositoryURI,
         val uriDATA: FileSystemRepositoryURIData,
-    ) : RepositoryAccessorProvider {
+    ) : RepositoryLocationAccessor {
+        override val locationContents: Flow<OptionalLoadable<RepositoryLocationContentsState>>
+            get() = TODO("Not yet implemented")
+
         private val internalStateFlow =
             getPathInFileSystem(uriDATA)
                 .distinctUntilChanged()
@@ -214,6 +216,8 @@ class FileSystemStorageDriver(
 
         @OptIn(ExperimentalCoroutinesApi::class)
         override val repositoryAccessor = internalStateFlow.flatMapLatestLoadedData { it.repoStateFlow }
+
+        override val autoUnlockRepositoryAccessor: Flow<RepositoryAccessState> = repositoryAccessor
     }
 
     data class PasswordRequest(
@@ -242,12 +246,5 @@ class FileSystemStorageDriver(
                     pathInFS.removePrefix(mp.fsSubPath).removePrefix("/"),
                 )
             }
-    }
-
-    override suspend fun discoverRepository(
-        uri: RepositoryURI,
-        credentials: BasicAuthCredentials?,
-    ): RepositoryLocationDiscoveryForAdd {
-        TODO("This is handled differently")
     }
 }

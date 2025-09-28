@@ -120,12 +120,18 @@ class UnlockRepositoryDialog(
 
         val basicAuthCredentialsState = mutableStateOf<BasicAuthCredentials?>(null)
 
-        val unlockOptionsState = mutableStateOf(UnlockOptions(rememberSession = false))
+        val unlockOptionsState =
+            mutableStateOf(
+                UnlockOptions(
+                    preserveCredentials = true,
+                    permanentCredentialsPreserve = false,
+                ),
+            )
         var unlockOptions by unlockOptionsState
 
         val unlockAction =
             simpleLaunchable(coroutineScope) { _: Unit ->
-                if (unlockOptions.rememberSession || rememberPasswordState.value) {
+                if (unlockOptions.permanentCredentialsPreserve || rememberPasswordState.value) {
                     if (!walletOperationLaunchers.ensureWalletForWrite()) {
                         throw RuntimeException("Wallet not available")
                     }
@@ -295,11 +301,11 @@ class UnlockRepositoryDialog(
                     )
                     Spacer(Modifier.height(12.dp))
                     CheckboxWithText(
-                        state.unlockOptions.rememberSession,
+                        state.unlockOptions.permanentCredentialsPreserve,
                         onValueChange = {
                             state.unlockOptions =
                                 state.unlockOptions.copy(
-                                    rememberSession = it,
+                                    permanentCredentialsPreserve = it,
                                 )
                         },
                         text = "Remember session",

@@ -24,7 +24,7 @@ fun <T, R> Flow<OptionalLoadable<T>>.mapLoadedData(function: suspend (data: T) -
 
                 is OptionalLoadable.Failed -> OptionalLoadable.Failed(it.cause)
                 OptionalLoadable.Loading -> OptionalLoadable.Loading
-                is OptionalLoadable.NotAvailable -> OptionalLoadable.NotAvailable(it.cause)
+                is OptionalLoadable.NotAvailable -> it
             }
         }.autoCatch()
 
