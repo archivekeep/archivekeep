@@ -7,6 +7,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import org.archivekeep.app.core.operations.RequiresCredentialsException
 import org.archivekeep.app.core.utils.exceptions.RepositoryLockedException
 import org.archivekeep.app.core.utils.generics.ExecutionOutcome
 import org.archivekeep.app.ui.components.designsystem.elements.ErrorAlert
@@ -36,6 +37,7 @@ fun AutomaticErrorMessage(
         ) {
             when (cause) {
                 is RepositoryLockedException -> RepositoryLockedError(cause, onResolve)
+                is RequiresCredentialsException -> Text("Credentials are required to access repository, or repository doesn't exist.")
                 is IncorrectPasswordException -> Text("Entered password isn't correct.")
                 else -> GeneralErrorMessage(cause)
             }

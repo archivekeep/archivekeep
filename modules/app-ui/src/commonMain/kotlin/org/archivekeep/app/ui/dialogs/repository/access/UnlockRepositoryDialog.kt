@@ -26,7 +26,8 @@ import compose.icons.tablericons.Lock
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.first
-import org.archivekeep.app.core.domain.repositories.RepoAuthRequest
+import org.archivekeep.app.core.api.repository.location.PasswordRequest
+import org.archivekeep.app.core.api.repository.location.UserCredentialsRequest
 import org.archivekeep.app.core.domain.repositories.Repository
 import org.archivekeep.app.core.domain.repositories.RepositoryInformation
 import org.archivekeep.app.core.domain.repositories.UnlockOptions
@@ -34,7 +35,6 @@ import org.archivekeep.app.core.domain.storages.RepositoryAccessState
 import org.archivekeep.app.core.domain.storages.asLoadableUnlockRequest
 import org.archivekeep.app.core.domain.storages.asUnlockRequest
 import org.archivekeep.app.core.persistence.credentials.WalletPO
-import org.archivekeep.app.core.persistence.drivers.filesystem.FileSystemStorageDriver
 import org.archivekeep.app.core.utils.generics.ExecutionOutcome
 import org.archivekeep.app.core.utils.identifiers.RepositoryURI
 import org.archivekeep.app.ui.components.designsystem.input.CheckboxWithText
@@ -89,10 +89,10 @@ class UnlockRepositoryDialog(
             onLaunch = { onLaunch(Unit) },
             canLaunch = {
                 when (accessState.asUnlockRequest()) {
-                    is RepoAuthRequest -> {
+                    is UserCredentialsRequest -> {
                         basicAuthCredentials?.let { it.username.isNotBlank() && it.password.isNotBlank() } ?: false
                     }
-                    is FileSystemStorageDriver.PasswordRequest -> {
+                    is PasswordRequest -> {
                         password.isNotBlank()
                     }
                     else -> false
@@ -120,12 +120,18 @@ class UnlockRepositoryDialog(
 
         val basicAuthCredentialsState = mutableStateOf<BasicAuthCredentials?>(null)
 
-        val unlockOptionsState = mutableStateOf(UnlockOptions(rememberSession = false))
+        val unlockOptionsState =
+            mutableStateOf(
+                UnlockOptions(
+                    preserveCredentials = true,
+                    permanentCredentialsPreserve = false,
+                ),
+            )
         var unlockOptions by unlockOptionsState
 
         val unlockAction =
             simpleLaunchable(coroutineScope) { _: Unit ->
-                if (unlockOptions.rememberSession || rememberPasswordState.value) {
+                if (unlockOptions.permanentCredentialsPreserve || rememberPasswordState.value) {
                     if (!walletOperationLaunchers.ensureWalletForWrite()) {
                         throw RuntimeException("Wallet not available")
                     }
@@ -133,13 +139,13 @@ class UnlockRepositoryDialog(
 
                 when (val request = accessState.first().asUnlockRequest()) {
                     null -> TODO()
-                    is RepoAuthRequest ->
+                    is UserCredentialsRequest ->
                         request.tryOpen(
                             basicAuthCredentialsState.value!!,
                             unlockOptions,
                         )
 
-                    is FileSystemStorageDriver.PasswordRequest -> {
+                    is PasswordRequest -> {
                         request.providePassword(passwordState.value, rememberPasswordState.value)
                     }
                 }
@@ -237,9 +243,6 @@ class UnlockRepositoryDialog(
         }
 
         LoadableGuard(state.unlockRequest) { unlockRequest ->
-            println(state.accessState)
-            println((state.accessState as? OptionalLoadable.NotAvailable)?.cause)
-
             when (unlockRequest) {
                 null -> {
                     Text(
@@ -251,7 +254,7 @@ class UnlockRepositoryDialog(
                     )
                 }
 
-                is RepoAuthRequest -> {
+                is UserCredentialsRequest -> {
                     Text(
                         buildAnnotatedString {
                             append("Authentication is needed to access ")
@@ -295,18 +298,18 @@ class UnlockRepositoryDialog(
                     )
                     Spacer(Modifier.height(12.dp))
                     CheckboxWithText(
-                        state.unlockOptions.rememberSession,
+                        state.unlockOptions.permanentCredentialsPreserve,
                         onValueChange = {
                             state.unlockOptions =
                                 state.unlockOptions.copy(
-                                    rememberSession = it,
+                                    permanentCredentialsPreserve = it,
                                 )
                         },
                         text = "Remember session",
                     )
                 }
 
-                is FileSystemStorageDriver.PasswordRequest -> {
+                is PasswordRequest -> {
                     Text(
                         buildAnnotatedString {
                             append("Password is needed to access ")

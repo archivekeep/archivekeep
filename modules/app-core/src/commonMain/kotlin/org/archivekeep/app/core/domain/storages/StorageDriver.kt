@@ -1,11 +1,9 @@
 package org.archivekeep.app.core.domain.storages
 
-import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.SharedFlow
-import org.archivekeep.app.core.persistence.drivers.RepositoryLocationDiscoveryForAdd
+import org.archivekeep.app.core.api.repository.location.RepositoryLocationAccessor
 import org.archivekeep.app.core.utils.identifiers.RepositoryURI
 import org.archivekeep.app.core.utils.identifiers.StorageURI
-import org.archivekeep.files.repo.remote.grpc.BasicAuthCredentials
 import org.archivekeep.utils.loading.Loadable
 import org.archivekeep.utils.loading.optional.OptionalLoadable
 
@@ -14,21 +12,7 @@ abstract class StorageDriver(
 ) {
     abstract fun getStorageAccessor(storageURI: StorageURI): StorageConnection
 
-    abstract fun getProvider(uri: RepositoryURI): RepositoryAccessorProvider
-
-    abstract suspend fun discoverRepository(
-        uri: RepositoryURI,
-        credentials: BasicAuthCredentials?,
-    ): RepositoryLocationDiscoveryForAdd
-}
-
-interface RepositoryAccessorProvider {
-    /**
-     * The current state of available accessor to repository contents.
-     *
-     * Should use [NeedsUnlock] to signal [OptionalLoadable.NotAvailable] due to pending authentication request.
-     */
-    val repositoryAccessor: Flow<RepositoryAccessState>
+    abstract fun openLocation(uri: RepositoryURI): RepositoryLocationAccessor
 }
 
 open class NeedsUnlock(

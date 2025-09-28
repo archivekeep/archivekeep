@@ -1,24 +1,24 @@
 package org.archivekeep.app.core.domain.repositories
 
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
-import org.archivekeep.app.core.domain.storages.RepositoryAccessorProvider
+import org.archivekeep.app.core.api.repository.location.RepositoryLocationAccessor
 import org.archivekeep.app.core.domain.storages.StorageDriver
 import org.archivekeep.app.core.domain.storages.getDriverForURI
+import org.archivekeep.app.core.persistence.credentials.CredentialsStore
 import org.archivekeep.app.core.persistence.registry.RegisteredRepository
 import org.archivekeep.app.core.persistence.registry.RegistryDataStore
 import org.archivekeep.app.core.persistence.repository.MemorizedRepositoryIndexRepository
 import org.archivekeep.app.core.persistence.repository.MemorizedRepositoryMetadataRepository
 import org.archivekeep.app.core.utils.generics.UniqueInstanceManager
 import org.archivekeep.app.core.utils.identifiers.RepositoryURI
-import org.archivekeep.files.repo.Repo
-import org.archivekeep.utils.loading.optional.OptionalLoadable
+import org.archivekeep.utils.loading.optional.OptionalLoadable.Failed
 
 class DefaultRepositoryService(
     private val scope: CoroutineScope,
     private val storageDrivers: Map<String, StorageDriver>,
+    private val credentialsStore: CredentialsStore,
     private val registry: RegistryDataStore,
     private val memorizedRepositoryIndexRepository: MemorizedRepositoryIndexRepository,
     private val memorizedRepositoryMetadataRepository: MemorizedRepositoryMetadataRepository,
@@ -35,6 +35,7 @@ class DefaultRepositoryService(
                 repositoryAccessorProvider = repositoryAccessor[uri],
                 memorizedRepositoryIndexRepository = memorizedRepositoryIndexRepository,
                 memorizedRepositoryMetadataRepository = memorizedRepositoryMetadataRepository,
+                credentialsStore = credentialsStore,
             )
         })
 
@@ -48,18 +49,16 @@ class DefaultRepositoryService(
         }
     }
 
-    private fun createBase(repositoryURI: RepositoryURI): RepositoryAccessorProvider {
-        println("GET REPO FOR: $repositoryURI")
-
+    private fun createBase(repositoryURI: RepositoryURI): RepositoryLocationAccessor {
         val driver =
             storageDrivers.getDriverForURI(repositoryURI)
-                ?: return object : RepositoryAccessorProvider {
-                    override val repositoryAccessor: Flow<OptionalLoadable<Repo>> =
+                ?: return object : RepositoryLocationAccessor {
+                    override val contentsStateFlow =
                         flowOf(
-                            OptionalLoadable.Failed(RuntimeException("Driver ${repositoryURI.driver} not supported")),
+                            Failed(RuntimeException("Driver ${repositoryURI.driver} not supported")),
                         )
                 }
 
-        return driver.getProvider(repositoryURI)
+        return driver.openLocation(repositoryURI)
     }
 }

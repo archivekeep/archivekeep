@@ -1,6 +1,7 @@
 package org.archivekeep.app.core.persistence.credentials
 
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.map
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.encodeToString
@@ -16,6 +17,8 @@ import org.archivekeep.utils.loading.optional.mapLoadedData
 class CredentialsInProtectedWalletDataStore(
     val datastore: ProtectedDataStore<WalletPO>,
 ) : CredentialsStore {
+    override val inMemoryCredentials = MutableStateFlow(emptyMap<RepositoryURI, BasicAuthCredentials>())
+
     override fun getRepositorySecretsFlow(uri: RepositoryURI): Flow<OptionalLoadable<Map<RepositorySecretType, JsonElement>>> =
         datastore
             .dataOptional

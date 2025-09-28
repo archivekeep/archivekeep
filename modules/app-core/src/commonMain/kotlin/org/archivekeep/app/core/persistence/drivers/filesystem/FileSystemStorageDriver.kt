@@ -1,47 +1,35 @@
 package org.archivekeep.app.core.persistence.drivers.filesystem
 
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.CoroutineStart
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.SharingStarted
-import kotlinx.coroutines.flow.channelFlow
 import kotlinx.coroutines.flow.distinctUntilChanged
-import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.onCompletion
 import kotlinx.coroutines.flow.onEach
-import kotlinx.coroutines.flow.onStart
-import kotlinx.coroutines.flow.shareIn
-import kotlinx.coroutines.flow.takeWhile
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.plus
 import kotlinx.serialization.json.JsonPrimitive
-import kotlinx.serialization.json.jsonPrimitive
+import org.archivekeep.app.core.api.repository.location.PasswordRequest
+import org.archivekeep.app.core.api.repository.location.RepositoryLocationAccessor
+import org.archivekeep.app.core.api.repository.location.RepositoryLocationContentsState
 import org.archivekeep.app.core.domain.storages.NeedsUnlock
 import org.archivekeep.app.core.domain.storages.RepositoryAccessState
-import org.archivekeep.app.core.domain.storages.RepositoryAccessorProvider
 import org.archivekeep.app.core.domain.storages.Storage
 import org.archivekeep.app.core.domain.storages.StorageConnection
 import org.archivekeep.app.core.domain.storages.StorageDriver
 import org.archivekeep.app.core.domain.storages.StorageInformation
 import org.archivekeep.app.core.persistence.credentials.ContentEncryptionPassword
 import org.archivekeep.app.core.persistence.credentials.CredentialsStore
-import org.archivekeep.app.core.persistence.drivers.RepositoryLocationDiscoveryForAdd
 import org.archivekeep.app.core.utils.generics.UniqueSharedFlowInstanceManager
 import org.archivekeep.app.core.utils.identifiers.RepositoryURI
 import org.archivekeep.app.core.utils.identifiers.StorageURI
 import org.archivekeep.files.repo.encryptedfiles.EncryptedFileSystemRepository
 import org.archivekeep.files.repo.files.FilesRepo
-import org.archivekeep.files.repo.remote.grpc.BasicAuthCredentials
 import org.archivekeep.utils.loading.mapLoadedData
 import org.archivekeep.utils.loading.optional.OptionalLoadable
 import org.archivekeep.utils.loading.optional.OptionalLoadable.LoadedAvailable
 import org.archivekeep.utils.loading.optional.OptionalLoadable.NotAvailable
-import org.archivekeep.utils.loading.optional.flatMapLatestLoadedData
 import org.archivekeep.utils.loading.optional.mapLoaded
 import org.archivekeep.utils.loading.optional.mapLoadedData
 import org.archivekeep.utils.loading.optional.mapLoadedDataAsOptional
@@ -98,127 +86,71 @@ class FileSystemStorageDriver(
             liveStatusFlowManager[storageURI],
         )
 
-    override fun getProvider(uri: RepositoryURI): RepositoryAccessorProvider = Provider(uri, uri.typedRepoURIData as FileSystemRepositoryURIData)
+    override fun openLocation(uri: RepositoryURI): RepositoryLocationAccessor = Provider(uri, uri.typedRepoURIData as FileSystemRepositoryURIData)
 
-    private sealed interface InnerState {
-        val repoStateFlow: Flow<RepositoryAccessState>
+    class FileSystemRepoLocation(
+        val repo: FilesRepo,
+    ) : RepositoryLocationContentsState.IsRepositoryLocation {
+        override val repoStateFlow = flowOf(LoadedAvailable(this.repo))
+    }
 
-        class FileSystemRepo(
-            val repo: FilesRepo,
-        ) : InnerState {
-            override val repoStateFlow = flowOf(LoadedAvailable(this.repo))
-        }
+    class EncryptedFileSystemRepoLocation(
+        val repositoryURI: RepositoryURI,
+        val pathInFilesystem: Path,
+        val credentialsStore: CredentialsStore,
+        val scope: CoroutineScope,
+    ) : RepositoryLocationContentsState.IsRepositoryLocation {
+        val opened = MutableStateFlow<EncryptedFileSystemRepository?>(null)
 
-        class EncryptedFileSystemRepo(
-            val repositoryURI: RepositoryURI,
-            val pathInFilesystem: Path,
-            val credentialsStore: CredentialsStore,
-            val scope: CoroutineScope,
-        ) : InnerState {
-            val opened = MutableStateFlow<EncryptedFileSystemRepository?>(null)
+        override val repoStateFlow: Flow<RepositoryAccessState> =
+            opened.map { repo ->
+                if (repo != null) {
+                    LoadedAvailable(repo)
+                } else {
+                    val passwordRequest =
+                        PasswordRequest { providedPassword, rememberPassword ->
+                            opened.value = EncryptedFileSystemRepository.openAndUnlock(pathInFilesystem, providedPassword)
 
-            val passwordRequest =
-                PasswordRequest { providedPassword, rememberPassword ->
-                    opened.value = EncryptedFileSystemRepository.openAndUnlock(pathInFilesystem, providedPassword)
-
-                    if (rememberPassword) {
-                        credentialsStore.saveRepositorySecret(repositoryURI, ContentEncryptionPassword, JsonPrimitive(providedPassword))
-                    }
-                }
-
-            val autoOpenFlow =
-                flow<Unit> {
-                    credentialsStore
-                        .getRepositorySecretsFlow(repositoryURI)
-                        .map { optionalCredentials ->
-                            println("Received credentials: $optionalCredentials")
-
-                            when (optionalCredentials) {
-                                OptionalLoadable.Loading -> false
-                                is OptionalLoadable.Failed -> false
-                                is LoadedAvailable -> {
-                                    optionalCredentials.value[ContentEncryptionPassword]?.let { contentEncryptionPassword ->
-                                        if (opened.value == null) {
-                                            try {
-                                                passwordRequest.providePassword(contentEncryptionPassword.jsonPrimitive.content, false)
-
-                                                return@map true
-                                            } catch (e: Throwable) {
-                                                // TODO: expose failure to UI, or move auto-unlocking responsibility out of driver logic
-                                                println("Auto-unlock failed: $e")
-                                            }
-                                        }
-                                    }
-
-                                    false
-                                }
-                                is NotAvailable -> false
+                            if (rememberPassword) {
+                                credentialsStore.saveRepositorySecret(repositoryURI, ContentEncryptionPassword, JsonPrimitive(providedPassword))
                             }
-                        }.takeWhile { success -> !success }
-                        .collect {}
-                }.shareIn(scope, SharingStarted.WhileSubscribed(0, 0))
-
-            override val repoStateFlow: Flow<RepositoryAccessState> =
-                channelFlow {
-                    val autoOpenCollector = launch(start = CoroutineStart.LAZY) { autoOpenFlow.collect {} }
-
-                    opened
-                        .onStart { autoOpenCollector.start() }
-                        .onCompletion { autoOpenCollector.cancel() }
-                        .collect { repo ->
-                            send(
-                                if (repo != null) {
-                                    LoadedAvailable(repo)
-                                } else {
-                                    NeedsUnlock(passwordRequest)
-                                },
-                            )
                         }
-                }
-        }
 
-        class NotRepository(
-            val cause: Exception,
-        ) : InnerState {
-            override val repoStateFlow = flowOf(OptionalLoadable.Failed(this.cause))
-        }
+                    NeedsUnlock(passwordRequest)
+                }
+            }
     }
 
     inner class Provider(
         val uri: RepositoryURI,
         val uriDATA: FileSystemRepositoryURIData,
-    ) : RepositoryAccessorProvider {
-        private val internalStateFlow =
+    ) : RepositoryLocationAccessor {
+        override val contentsStateFlow: Flow<OptionalLoadable<RepositoryLocationContentsState>> =
             getPathInFileSystem(uriDATA)
                 .distinctUntilChanged()
-                .mapLoadedData { pathInFilesystem ->
+                .mapLoaded { pathInFilesystem ->
                     println("Open $uriDATA")
 
                     FilesRepo
                         .openOrNull(pathInFilesystem)
                         ?.let {
-                            return@mapLoadedData InnerState.FileSystemRepo(it)
+                            return@mapLoaded LoadedAvailable(FileSystemRepoLocation(it))
                         }
 
                     if (EncryptedFileSystemRepository.isRepository(pathInFilesystem)) {
-                        return@mapLoadedData InnerState.EncryptedFileSystemRepo(
-                            uri,
-                            pathInFilesystem,
-                            credentialsStore,
-                            scope + SupervisorJob(),
+                        return@mapLoaded LoadedAvailable(
+                            EncryptedFileSystemRepoLocation(
+                                uri,
+                                pathInFilesystem,
+                                credentialsStore,
+                                scope + SupervisorJob(),
+                            ),
                         )
                     }
 
-                    InnerState.NotRepository(RuntimeException("Path $uriDATA is not repository"))
+                    return@mapLoaded OptionalLoadable.Failed(RuntimeException("Path $uriDATA is not repository"))
                 }.stateIn(scope)
-
-        @OptIn(ExperimentalCoroutinesApi::class)
-        override val repositoryAccessor = internalStateFlow.flatMapLatestLoadedData { it.repoStateFlow }
     }
-
-    data class PasswordRequest(
-        val providePassword: suspend (password: String, rememberPassword: Boolean) -> Unit,
-    )
 
     fun getPathInFileSystem(repo: FileSystemRepositoryURIData): Flow<OptionalLoadable<Path>> {
         val pathInFS = repo.pathInFS
@@ -242,12 +174,5 @@ class FileSystemStorageDriver(
                     pathInFS.removePrefix(mp.fsSubPath).removePrefix("/"),
                 )
             }
-    }
-
-    override suspend fun discoverRepository(
-        uri: RepositoryURI,
-        credentials: BasicAuthCredentials?,
-    ): RepositoryLocationDiscoveryForAdd {
-        TODO("This is handled differently")
     }
 }

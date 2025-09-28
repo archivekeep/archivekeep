@@ -3,6 +3,7 @@ package org.archivekeep.app.core.operations
 import aws.sdk.kotlin.runtime.auth.credentials.StaticCredentialsProvider
 import io.kotest.assertions.nondeterministic.eventually
 import io.kotest.matchers.collections.shouldContainExactly
+import io.kotest.matchers.maps.shouldContainExactly
 import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
 import kotlinx.coroutines.CoroutineScope
@@ -19,7 +20,6 @@ import kotlinx.serialization.json.Json
 import org.archivekeep.app.core.createTestBucket
 import org.archivekeep.app.core.domain.repositories.DefaultRepositoryService
 import org.archivekeep.app.core.persistence.credentials.CredentialsInProtectedWalletDataStore
-import org.archivekeep.app.core.persistence.credentials.CredentialsStore
 import org.archivekeep.app.core.persistence.drivers.filesystem.FileSystemStorageDriver
 import org.archivekeep.app.core.persistence.drivers.grpc.GRPCStorageDriver
 import org.archivekeep.app.core.persistence.drivers.s3.S3StorageDriver
@@ -71,18 +71,17 @@ class AddRemoteRepositoryUseCaseImplTest {
 
         val env = DemoEnvironment(scope, false, emptyList())
 
-        val credentialsStore: CredentialsStore = CredentialsInProtectedWalletDataStore(env.walletDataStore)
-
         val drivers =
             listOf(
-                FileSystemStorageDriver(scope, env.fileStores, credentialsStore),
-                GRPCStorageDriver(scope, credentialsStore),
-                S3StorageDriver(scope, credentialsStore, ioDispatcher = dispatcher),
+                FileSystemStorageDriver(scope, env.fileStores, env.credentialsStore),
+                GRPCStorageDriver(scope, env.credentialsStore),
+                S3StorageDriver(scope, env.credentialsStore, ioDispatcher = dispatcher),
             ).associateBy { it.ID }
         val repositoryService =
             DefaultRepositoryService(
                 scope,
                 drivers,
+                env.credentialsStore,
                 env.registry,
                 env.repositoryIndexMemory,
                 env.repositoryMetadataMemory,
@@ -92,6 +91,7 @@ class AddRemoteRepositoryUseCaseImplTest {
             AddRemoteRepositoryUseCaseImpl(
                 repositoryService,
                 env.registry,
+                env.credentialsStore,
                 drivers,
             )
 
@@ -102,6 +102,11 @@ class AddRemoteRepositoryUseCaseImplTest {
         env.registry.registeredRepositories.first() shouldContainExactly
             setOf(
                 RegisteredRepository(expectedResultURI),
+            )
+
+        env.credentialsStore.inMemoryCredentials.first() shouldContainExactly
+            mapOf(
+                expectedResultURI to BasicAuthCredentials(minio.userName, minio.password),
             )
 
         // assume slow refresh and re-subscribe
@@ -148,18 +153,17 @@ class AddRemoteRepositoryUseCaseImplTest {
 
         val env = DemoEnvironment(scope, false, emptyList())
 
-        val credentialsStore: CredentialsStore = CredentialsInProtectedWalletDataStore(env.walletDataStore)
-
         val drivers =
             listOf(
-                FileSystemStorageDriver(scope, env.fileStores, credentialsStore),
-                GRPCStorageDriver(scope, credentialsStore),
-                S3StorageDriver(scope, credentialsStore, ioDispatcher = dispatcher),
+                FileSystemStorageDriver(scope, env.fileStores, env.credentialsStore),
+                GRPCStorageDriver(scope, env.credentialsStore),
+                S3StorageDriver(scope, env.credentialsStore, ioDispatcher = dispatcher),
             ).associateBy { it.ID }
         val repositoryService =
             DefaultRepositoryService(
                 scope,
                 drivers,
+                env.credentialsStore,
                 env.registry,
                 env.repositoryIndexMemory,
                 env.repositoryMetadataMemory,
@@ -169,6 +173,7 @@ class AddRemoteRepositoryUseCaseImplTest {
             AddRemoteRepositoryUseCaseImpl(
                 repositoryService,
                 env.registry,
+                env.credentialsStore,
                 drivers,
             )
 

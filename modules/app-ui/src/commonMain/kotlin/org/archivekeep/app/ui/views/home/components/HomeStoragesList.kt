@@ -51,7 +51,7 @@ fun HomeStoragesList(allStoragesFlow: Loadable<List<HomeViewStorage>>) {
                     SectionCardTitle(
                         // TODO
                         false,
-                        storage.name ?: "Unnamed filesystem",
+                        storage.name ?: "Unnamed storage",
                         grayOutText = storage.name == null || !storageState.isConnected,
                         subtitle =
                             if (storage.name == null) {

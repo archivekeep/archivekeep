@@ -35,6 +35,7 @@ class ApplicationServices(
         DefaultRepositoryService(
             scope,
             storageDrivers,
+            environment.credentialsStore,
             environment.registry,
             environment.repositoryIndexMemory,
             environment.repositoryMetadataMemory,
@@ -56,8 +57,7 @@ class ApplicationServices(
     val operationFactory =
         OperationFactory(
             repoService,
-            environment.registry,
-            environment.fileStores,
+            environment,
             knownStorageService,
             storageDrivers,
         )

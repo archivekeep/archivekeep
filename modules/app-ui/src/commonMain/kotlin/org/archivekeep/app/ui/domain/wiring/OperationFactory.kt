@@ -10,11 +10,13 @@ import org.archivekeep.app.core.operations.AddRemoteRepositoryUseCase
 import org.archivekeep.app.core.operations.AddRemoteRepositoryUseCaseImpl
 import org.archivekeep.app.core.operations.AssociateRepositoryOperation
 import org.archivekeep.app.core.operations.AssociateRepositoryOperationImpl
+import org.archivekeep.app.core.persistence.credentials.CredentialsStore
 import org.archivekeep.app.core.persistence.drivers.filesystem.FileStores
 import org.archivekeep.app.core.persistence.drivers.filesystem.operations.AddFileSystemRepositoryUseCase
 import org.archivekeep.app.core.persistence.drivers.filesystem.operations.AddFileSystemRepositoryUseCaseImpl
 import org.archivekeep.app.core.persistence.drivers.filesystem.operations.DeinitializeFileSystemRepositoryUseCase
 import org.archivekeep.app.core.persistence.drivers.filesystem.operations.DeinitializeFileSystemRepositoryUseCaseImpl
+import org.archivekeep.app.core.persistence.platform.Environment
 import org.archivekeep.app.core.persistence.registry.RegistryDataStore
 import org.archivekeep.app.core.utils.identifiers.RepositoryURI
 
@@ -23,8 +25,7 @@ class OperationFactory private constructor(
 ) {
     constructor(
         repositoryService: RepositoryService,
-        registry: RegistryDataStore,
-        fileStores: FileStores,
+        env: Environment,
         storageRegistry: StorageRegistry,
         drivers: Map<String, StorageDriver>,
     ) : this(
@@ -33,15 +34,16 @@ class OperationFactory private constructor(
             .put(
                 AddFileSystemRepositoryUseCase::class.java,
                 AddFileSystemRepositoryUseCaseImpl(
-                    registry,
-                    fileStores,
+                    env.registry,
+                    env.fileStores,
                     storageRegistry,
                 ),
             ).put(
                 AddRemoteRepositoryUseCase::class.java,
                 AddRemoteRepositoryUseCaseImpl(
                     repositoryService,
-                    registry,
+                    env.registry,
+                    env.credentialsStore,
                     drivers,
                 ),
             ).put(

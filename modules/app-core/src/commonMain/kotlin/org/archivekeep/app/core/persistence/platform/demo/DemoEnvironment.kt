@@ -11,13 +11,14 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.update
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.serializer
+import org.archivekeep.app.core.api.repository.location.RepositoryLocationAccessor
+import org.archivekeep.app.core.api.repository.location.RepositoryLocationContentsState
 import org.archivekeep.app.core.domain.repositories.RepositoryConnectionState
 import org.archivekeep.app.core.domain.repositories.RepositoryEncryptionType
 import org.archivekeep.app.core.domain.repositories.RepositoryInformation
 import org.archivekeep.app.core.domain.repositories.ResolvedRepositoryState
 import org.archivekeep.app.core.domain.storages.KnownStorage
 import org.archivekeep.app.core.domain.storages.RepositoryAccessState
-import org.archivekeep.app.core.domain.storages.RepositoryAccessorProvider
 import org.archivekeep.app.core.domain.storages.Storage
 import org.archivekeep.app.core.domain.storages.StorageConnection
 import org.archivekeep.app.core.domain.storages.StorageDriver
@@ -27,7 +28,6 @@ import org.archivekeep.app.core.domain.storages.StorageRepository
 import org.archivekeep.app.core.persistence.credentials.CredentialsInProtectedWalletDataStore
 import org.archivekeep.app.core.persistence.credentials.CredentialsStore
 import org.archivekeep.app.core.persistence.credentials.WalletPO
-import org.archivekeep.app.core.persistence.drivers.RepositoryLocationDiscoveryForAdd
 import org.archivekeep.app.core.persistence.drivers.filesystem.FileStores
 import org.archivekeep.app.core.persistence.drivers.filesystem.MountedFileSystem
 import org.archivekeep.app.core.persistence.platform.Environment
@@ -44,7 +44,6 @@ import org.archivekeep.files.repo.LocalRepo
 import org.archivekeep.files.repo.Repo
 import org.archivekeep.files.repo.RepoIndex
 import org.archivekeep.files.repo.RepositoryMetadata
-import org.archivekeep.files.repo.remote.grpc.BasicAuthCredentials
 import org.archivekeep.testing.fixtures.FixtureRepo
 import org.archivekeep.testing.fixtures.FixtureRepoBuilder
 import org.archivekeep.testing.storage.InMemoryLocalRepo
@@ -322,9 +321,9 @@ open class DemoEnvironment(
                         liveStatusFlowManager[storageURI],
                     )
 
-                override fun getProvider(uri: RepositoryURI): RepositoryAccessorProvider =
-                    object : RepositoryAccessorProvider {
-                        override val repositoryAccessor: Flow<RepositoryAccessState> =
+                override fun openLocation(uri: RepositoryURI): RepositoryLocationAccessor =
+                    object : RepositoryLocationAccessor {
+                        override val contentsStateFlow: Flow<OptionalLoadable<RepositoryLocationContentsState>> =
                             flow {
                                 val repo =
                                     repo(uri)?.repo?.let { base ->
@@ -341,17 +340,18 @@ open class DemoEnvironment(
                                 if (repo == null) {
                                     emit(OptionalLoadable.Failed(RuntimeException("Not repo")))
                                 } else {
-                                    emit((OptionalLoadable.LoadedAvailable(repo)))
+                                    emit(
+                                        (
+                                            OptionalLoadable.LoadedAvailable(
+                                                object : RepositoryLocationContentsState.IsRepositoryLocation {
+                                                    override val repoStateFlow: Flow<RepositoryAccessState> = flowOf(OptionalLoadable.LoadedAvailable(repo))
+                                                },
+                                            )
+                                        ),
+                                    )
                                 }
                             }.stateIn(scope)
                     }
-
-                override suspend fun discoverRepository(
-                    uri: RepositoryURI,
-                    credentials: BasicAuthCredentials?,
-                ): RepositoryLocationDiscoveryForAdd {
-                    TODO("Not yet implemented")
-                }
             },
         )
 
