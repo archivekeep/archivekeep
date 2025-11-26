@@ -32,6 +32,7 @@ dependencies {
     testImplementation(libs.kotlin.test)
     testImplementation(libs.kotlinx.coroutines.test)
     testImplementation(libs.junit.jupiter)
+    testImplementation(libs.kotest.assertions.core)
 }
 
 tasks.named<Test>("test") {

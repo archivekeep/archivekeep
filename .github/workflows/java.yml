@@ -32,6 +32,15 @@ jobs:
       - name: Build code with Gradle Wrapper
         run: ./gradlew build
 
+      - name: Store reports (on failure)
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: reports
+          path: |
+            **/build/reports/
+            **/build/test-results/
+
       - name: Create release distributable (ProGuard processed)
         run: ./gradlew createReleaseDistributable
 

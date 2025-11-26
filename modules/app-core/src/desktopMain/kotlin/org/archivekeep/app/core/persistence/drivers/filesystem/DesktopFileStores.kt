@@ -9,7 +9,6 @@ import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.conflate
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.emitAll
-import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
@@ -29,7 +28,6 @@ import oshi.util.platform.linux.ProcPath
 import java.io.File
 import kotlin.coroutines.coroutineContext
 import kotlin.io.path.Path
-import kotlin.io.path.exists
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class DesktopFileStores(
@@ -39,13 +37,9 @@ class DesktopFileStores(
     private val mediaPath = Path("/run/media/")
 
     private val mediaDirectoriesFlow =
-        if (mediaPath.exists()) {
-            mediaPath
-                .listFilesFlow { it.isDirectory }
-                .distinctUntilChanged()
-        } else {
-            flowOf(emptyList())
-        }
+        mediaPath
+            .listFilesFlow { it.isDirectory }
+            .distinctUntilChanged()
 
     private val changeEventsFlow =
         mediaDirectoriesFlow
@@ -59,7 +53,7 @@ class DesktopFileStores(
                     watcher.add(ProcPath.MOUNTS)
                     watcher.add("/proc/self/mountinfo")
                     watcher.add("/run/media/")
-                    watcher.add(*mediaDirectories.map { it.path }.toTypedArray())
+                    watcher.add(*(mediaDirectories ?: emptyList()).map { it.path }.toTypedArray())
 
                     emitAll(
                         watcher

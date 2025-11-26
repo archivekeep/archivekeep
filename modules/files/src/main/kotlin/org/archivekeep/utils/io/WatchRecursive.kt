@@ -4,13 +4,13 @@ import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.currentCoroutineContext
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.emitAll
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.isActive
-import kotlinx.coroutines.runInterruptible
 import kotlinx.coroutines.withContext
 import java.nio.file.Path
 import java.nio.file.StandardWatchEventKinds
@@ -18,6 +18,11 @@ import java.nio.file.WatchEvent
 import java.nio.file.WatchService
 import java.nio.file.Watchable
 import kotlin.io.path.isDirectory
+import kotlin.time.Duration.Companion.milliseconds
+
+object WatchDefaults {
+    var watchDelay = 1500.milliseconds
+}
 
 fun (Path).watchRecursively(
     ioDispatcher: CoroutineDispatcher = Dispatchers.IO,
@@ -27,6 +32,7 @@ fun (Path).watchRecursively(
     flow {
         val watchService =
             withContext(ioDispatcher) {
+                // TODO: reuse watch services
                 fileSystem.newWatchService()
             }
 
@@ -89,8 +95,7 @@ fun (Path).watchRecursively(
                                 basePath.registerRecursive()
                             }
                         }
-                    }
-                    .mapToCustomWatchEvents()
+                    }.mapToCustomWatchEvents()
 
             emitAll(selfUpdatingFlow)
         } finally {
@@ -106,14 +111,14 @@ fun (Path).watchRecursively(
 fun WatchService.eventFlow(pollDispatcher: CoroutineDispatcher = Dispatchers.IO): Flow<Pair<Watchable, List<WatchEvent<out Any>>>> =
     flow {
         while (currentCoroutineContext().isActive) {
-            val currentKey =
-                runInterruptible {
-                    take()
-                }
+            // TODO: switch back to runInterruptible { take() } when ensured this won't exhaust dispatcher's threads
+            val currentKey = poll()
 
             if (currentKey != null) {
                 emit(Pair(currentKey.watchable(), currentKey.pollEvents()))
                 currentKey.reset()
+            } else {
+                delay(WatchDefaults.watchDelay)
             }
         }
     }.flowOn(pollDispatcher)

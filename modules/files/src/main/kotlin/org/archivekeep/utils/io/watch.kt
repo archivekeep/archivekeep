@@ -8,16 +8,20 @@ import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.debounce
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.emitAll
+import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.transformLatest
 import kotlinx.coroutines.withContext
 import java.io.File
 import java.nio.file.Path
 import java.nio.file.StandardWatchEventKinds
+import kotlin.io.path.absolute
+import kotlin.io.path.absolutePathString
 import kotlin.io.path.exists
 import kotlin.io.path.isDirectory
 import kotlin.time.Duration
@@ -46,9 +50,8 @@ fun (Path).watch(ioDispatcher: CoroutineDispatcher = Dispatchers.IO): Flow<Any> 
                 StandardWatchEventKinds.ENTRY_DELETE,
             )
 
-            emitAll(
-                watchService.eventFlow(),
-            )
+            emit("Set UP")
+            emitAll(watchService.eventFlow())
         } finally {
             withContext(NonCancellable) {
                 watchService.close()
@@ -56,19 +59,49 @@ fun (Path).watch(ioDispatcher: CoroutineDispatcher = Dispatchers.IO): Flow<Any> 
         }
     }.flowOn(ioDispatcher)
 
+@OptIn(ExperimentalCoroutinesApi::class)
+fun (Path).fileExistsFlow(): Flow<Boolean> {
+    val absolutePath = this.absolute()
+
+    if (absolutePath.absolutePathString() == "/") {
+        return flowOf(true)
+    } else {
+        val parent = absolutePath.parent
+
+        return parent
+            .fileExistsFlow()
+            .flatMapLatest { parentExists ->
+                if (parentExists) {
+                    parent
+                        .watch()
+                        .map { absolutePath.exists() }
+                        .distinctUntilChanged()
+                } else {
+                    flowOf(false)
+                }
+            }
+    }
+}
+
+@OptIn(ExperimentalCoroutinesApi::class)
 fun (Path).listFilesFlow(
     rateLimit: Duration = 100.milliseconds,
     repeatDelay: Duration = 250.milliseconds,
     predicate: (file: File) -> Boolean,
-) = watch()
-    .map { "Change event" }
-    .onStart { emit("Get on start") }
-    .debounceAndRepeatAfterDelay(
-        rateLimit = rateLimit,
-        repeatDelay = repeatDelay,
-    ).map {
-        toFile().listFiles()?.filter(predicate) ?: emptyList()
-    }.flowOn(Dispatchers.IO)
+) = fileExistsFlow()
+    .flatMapLatest { exists ->
+        if (exists) {
+            watch()
+                .debounceAndRepeatAfterDelay(
+                    rateLimit = rateLimit,
+                    repeatDelay = repeatDelay,
+                ).map {
+                    toFile().listFiles()?.filter(predicate) ?: emptyList()
+                }.flowOn(Dispatchers.IO)
+        } else {
+            flowOf(null)
+        }
+    }
 
 @OptIn(FlowPreview::class, ExperimentalCoroutinesApi::class)
 fun <T> (Flow<T>).debounceAndRepeatAfterDelay(
