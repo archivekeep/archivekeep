@@ -25,8 +25,8 @@ object WatchDefaults {
 }
 
 fun (Path).watchRecursively(
-    ioDispatcher: CoroutineDispatcher = Dispatchers.IO,
-    pollDispatcher: CoroutineDispatcher = Dispatchers.IO,
+    ioDispatcher: CoroutineDispatcher,
+    pollDispatcher: CoroutineDispatcher,
     log: Boolean = false,
 ): Flow<List<CustomWatchEvent>> =
     flow {

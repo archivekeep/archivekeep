@@ -1,6 +1,7 @@
 package org.archivekeep.files.repo.files
 
 import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.job
 import org.archivekeep.files.repo.WorkingRepoContractTest
 import org.archivekeep.files.utils.GenericTestScope
 import org.archivekeep.files.utils.runBlockingTest
@@ -24,7 +25,16 @@ class FilesWorkingRepoContractTest : WorkingRepoContractTest<FilesRepo>() {
         object : TestRepo<FilesRepo> {
             val path = tempPath.resolve(UUID.randomUUID().toString()).createDirectory()
 
-            override fun open(testDispatcher: CoroutineDispatcher): FilesRepo = FilesRepo(path, stateDispatcher = testDispatcher, ioDispatcher = testDispatcher)
+            override fun open(
+                scope: GenericTestScope,
+                testDispatcher: CoroutineDispatcher,
+            ): FilesRepo =
+                FilesRepo(
+                    path,
+                    parentJob = scope.backgroundScope.coroutineContext.job,
+                    stateDispatcher = testDispatcher,
+                    ioDispatcher = testDispatcher,
+                )
 
             override fun createUncommittedFile(
                 filename: String,

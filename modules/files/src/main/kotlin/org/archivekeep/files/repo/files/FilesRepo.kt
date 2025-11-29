@@ -6,6 +6,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.FlowPreview
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.currentCoroutineContext
@@ -76,12 +77,14 @@ const val checksumsSubDir = "checksums"
 
 class FilesRepo(
     val root: Path,
+    parentJob: Job? = null,
     internal val archiveRoot: Path = root.resolve(".archive"),
     checksumsRoot: Path = archiveRoot.resolve(checksumsSubDir),
     stateDispatcher: CoroutineDispatcher = Dispatchers.Default,
     val ioDispatcher: CoroutineDispatcher = Dispatchers.IO,
 ) : LocalRepo {
-    private val scope = CoroutineScope(SupervisorJob() + CoroutineName("AAA") + stateDispatcher)
+    private val job = SupervisorJob(parentJob)
+    private val scope = CoroutineScope(job + CoroutineName("FilesRepo: $root") + stateDispatcher)
 
     private val metadataPath = root.resolve(".archive").resolve("metadata.json")
 
@@ -90,6 +93,7 @@ class FilesRepo(
     private val indexStore =
         FilesystemIndexStore(
             checksumsRoot,
+            scope = scope,
             activeJobFlow = inProgressHandler.jobActiveOnIdleDelayedStart,
             fileSizeProvider = ::getFileSize,
             ioDispatcher = ioDispatcher,
@@ -349,7 +353,7 @@ class FilesRepo(
     @OptIn(FlowPreview::class)
     private val calculationCause =
         root
-            .watchRecursively(ioDispatcher)
+            .watchRecursively(ioDispatcher, ioDispatcher)
             .map { "update" }
             .debounce(100.milliseconds)
             .shareIn(scope, SharingStarted.WhileSubscribed(), 0)

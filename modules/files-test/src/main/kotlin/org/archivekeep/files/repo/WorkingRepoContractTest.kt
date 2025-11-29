@@ -22,7 +22,10 @@ import kotlinx.coroutines.test.runTest as standardRunTest
 @OptIn(ExperimentalStdlibApi::class)
 abstract class WorkingRepoContractTest<T : LocalRepo> {
     interface TestRepo<T : LocalRepo> {
-        fun open(testDispatcher: CoroutineDispatcher): T
+        fun open(
+            scope: GenericTestScope,
+            testDispatcher: CoroutineDispatcher,
+        ): T
 
         fun createUncommittedFile(
             filename: String,
@@ -43,7 +46,7 @@ abstract class WorkingRepoContractTest<T : LocalRepo> {
 
             val repoAccessor =
                 testRepo
-                    .open(getDispatcher())
+                    .open(this@runTest, getDispatcher())
                     .withContentsFrom(testContents01)
 
             val indexFlowState =
@@ -121,7 +124,7 @@ abstract class WorkingRepoContractTest<T : LocalRepo> {
 
             val repoAccessor =
                 testRepo
-                    .open(getDispatcher())
+                    .open(this@runTest, getDispatcher())
                     .withContentsFrom(testContents01)
 
             val indexFlowState =

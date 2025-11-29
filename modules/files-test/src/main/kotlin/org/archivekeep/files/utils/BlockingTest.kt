@@ -1,13 +1,16 @@
 package org.archivekeep.files.utils
 
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
-import kotlinx.coroutines.cancel
+import kotlinx.coroutines.cancelAndJoin
+import kotlinx.coroutines.job
 import kotlinx.coroutines.runBlocking
 
 fun runBlockingTest(testBody: suspend GenericTestScope.() -> Unit) =
-    runBlocking {
-        val backgroundScope = CoroutineScope(SupervisorJob())
+    runBlocking(Job()) {
+        val supervisorJob = SupervisorJob(coroutineContext.job)
+        val backgroundScope = CoroutineScope(supervisorJob)
 
         try {
             val currentScope = this@runBlocking
@@ -21,6 +24,6 @@ fun runBlockingTest(testBody: suspend GenericTestScope.() -> Unit) =
                 testBody()
             }
         } finally {
-            backgroundScope.cancel()
+            supervisorJob.cancelAndJoin()
         }
     }
