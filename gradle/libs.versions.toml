@@ -51,7 +51,8 @@ oshi-core = { group = "com.github.oshi", name = "oshi-core", version.ref = "oshi
 androidx-datastore = { group = "androidx.datastore", name = "datastore", version = "1.1.1" }
 androidx-datastore-preferences = { group = "androidx.datastore", name = "datastore-preferences", version = "1.1.1" }
 
-guava = { group = "com.google.guava", name = "guava", version = "33.3.1-jre" }
+guava-jre = { group = "com.google.guava", name = "guava", version = "33.5.0-jre" }
+guava-android = { group = "com.google.guava", name = "guava", version = "33.5.0-android" }
 
 jcip-annotations = { group = "net.jcip", name = "jcip-annotations", version = "1.0" }
 apache-tomcat-annotations = { group = "org.apache.tomcat", name = "annotations-api", version = "6.0.53" }

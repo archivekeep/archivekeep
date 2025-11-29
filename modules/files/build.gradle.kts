@@ -20,6 +20,9 @@ dependencies {
     implementation(libs.grpc.stub)
     implementation(libs.grpc.okhttp)
 
+    implementation(libs.guava.jre)
+    implementation(libs.guava.android)
+
     api(libs.grpc.kotlin.stub)
 
     implementation(libs.protobuf.kotlin.lite)

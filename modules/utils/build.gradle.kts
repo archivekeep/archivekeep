@@ -10,7 +10,8 @@ dependencies {
     implementation(libs.kotlinx.coroutines.core)
     implementation(libs.kotlinx.serialization.json)
 
-    implementation(libs.guava)
+    implementation(libs.guava.jre)
+    implementation(libs.guava.android)
 }
 
 tasks.named<Test>("test") {
