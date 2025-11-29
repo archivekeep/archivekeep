@@ -2,15 +2,11 @@ package org.archivekeep.utils.io
 
 import io.kotest.assertions.nondeterministic.eventually
 import io.kotest.matchers.shouldBe
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.cancel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.job
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
+import org.archivekeep.files.utils.runBlockingTest
 import org.junit.jupiter.api.RepeatedTest
 import org.junit.jupiter.api.RepetitionInfo
 import org.junit.jupiter.api.io.TempDir
@@ -28,13 +24,11 @@ class WatchKtTest {
     fun `list files should work on non-existing directory`(
         repetitionInfo: RepetitionInfo,
         @TempDir t: File,
-    ) = runBlocking {
+    ) = runBlockingTest {
         val futureDir = t.resolve("sub-directory-not-yet-created")
 
-        val collectScope = createCollectScope()
-
         val emissions = arrayListOf<List<String>?>()
-        collectScope.launch {
+        backgroundScope.launch {
             futureDir
                 .toPath()
                 .listFilesFlow { true }
@@ -54,21 +48,17 @@ class WatchKtTest {
         eventually(3.seconds) {
             emissions[emissions.size - 1] shouldBe listOf("a-new-file")
         }
-
-        collectScope.cancel()
     }
 
     @RepeatedTest(10)
     fun `list files should work on non-existing directory tree`(
         repetitionInfo: RepetitionInfo,
         @TempDir t: File,
-    ) = runBlocking {
+    ) = runBlockingTest {
         val futureDir = t.resolve("sub/sub/sub/tree-not-yet-created")
 
-        val collectScope = createCollectScope()
-
         val emissions = arrayListOf<List<String>?>()
-        collectScope.launch {
+        backgroundScope.launch {
             futureDir
                 .toPath()
                 .listFilesFlow { true }
@@ -88,9 +78,5 @@ class WatchKtTest {
         eventually(3.seconds) {
             emissions[emissions.size - 1] shouldBe listOf("a-new-file")
         }
-
-        collectScope.cancel()
     }
-
-    private fun CoroutineScope.createCollectScope() = CoroutineScope(Job(coroutineContext.job))
 }
