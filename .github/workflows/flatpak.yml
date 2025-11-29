@@ -72,7 +72,7 @@ jobs:
           path: ./distribution/flatpak
 
       - name: Build
-        uses: flathub-infra/flatpak-github-actions/flatpak-builder@fd6057f0ee4fac29a1a51c036b92c9c03ec74e17
+        uses: flatpak/flatpak-github-actions/flatpak-builder@v6
         with:
           bundle: archivekeep-desktop.${{ matrix.architecture }}.flatpak
           manifest-path: distribution/flatpak/org.archivekeep.ArchiveKeep.yaml
