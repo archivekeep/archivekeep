@@ -51,10 +51,12 @@ import java.nio.file.Path
 import java.nio.file.PathMatcher
 import java.nio.file.StandardOpenOption
 import java.util.Collections.singletonList
+import kotlin.io.path.ExperimentalPathApi
 import kotlin.io.path.Path
 import kotlin.io.path.createDirectory
 import kotlin.io.path.createParentDirectories
 import kotlin.io.path.deleteExisting
+import kotlin.io.path.deleteRecursively
 import kotlin.io.path.exists
 import kotlin.io.path.fileSize
 import kotlin.io.path.inputStream
@@ -77,7 +79,7 @@ class FilesRepo(
     internal val archiveRoot: Path = root.resolve(".archive"),
     checksumsRoot: Path = archiveRoot.resolve(checksumsSubDir),
     stateDispatcher: CoroutineDispatcher = Dispatchers.Default,
-    ioDispatcher: CoroutineDispatcher = Dispatchers.IO,
+    val ioDispatcher: CoroutineDispatcher = Dispatchers.IO,
 ) : LocalRepo {
     private val scope = CoroutineScope(SupervisorJob() + CoroutineName("AAA") + stateDispatcher)
 
@@ -411,6 +413,13 @@ class FilesRepo(
                     }
                 }
             }
+
+    @OptIn(ExperimentalPathApi::class)
+    suspend fun deinitialize() {
+        withContext(ioDispatcher) {
+            archiveRoot.deleteRecursively()
+        }
+    }
 }
 
 fun openFilesRepoOrNull(path: Path): FilesRepo? {

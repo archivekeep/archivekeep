@@ -12,6 +12,8 @@ import org.archivekeep.app.core.operations.AssociateRepositoryOperationImpl
 import org.archivekeep.app.core.persistence.drivers.filesystem.FileStores
 import org.archivekeep.app.core.persistence.drivers.filesystem.operations.AddFileSystemRepositoryUseCase
 import org.archivekeep.app.core.persistence.drivers.filesystem.operations.AddFileSystemRepositoryUseCaseImpl
+import org.archivekeep.app.core.persistence.drivers.filesystem.operations.DeinitializeFileSystemRepositoryUseCase
+import org.archivekeep.app.core.persistence.drivers.filesystem.operations.DeinitializeFileSystemRepositoryUseCaseImpl
 import org.archivekeep.app.core.persistence.registry.RegistryDataStore
 import org.archivekeep.app.core.utils.identifiers.RepositoryURI
 
@@ -54,6 +56,9 @@ class OperationFactory private constructor(
                             uri,
                         )
                 },
+            ).put(
+                DeinitializeFileSystemRepositoryUseCase::class.java,
+                DeinitializeFileSystemRepositoryUseCaseImpl(),
             ).build(),
     )
 

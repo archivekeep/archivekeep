@@ -40,6 +40,7 @@ import org.archivekeep.app.ui.components.feature.dialogs.SimpleActionDialogContr
 import org.archivekeep.app.ui.components.feature.dialogs.SimpleActionDialogDoneButtons
 import org.archivekeep.app.ui.components.feature.errors.AutomaticErrorMessage
 import org.archivekeep.app.ui.dialogs.Dialog
+import org.archivekeep.app.ui.domain.wiring.LocalArchiveOperationLaunchers
 import org.archivekeep.app.ui.domain.wiring.LocalOperationFactory
 import org.archivekeep.app.ui.domain.wiring.OperationFactory
 import org.archivekeep.app.ui.utils.appendBoldSpan
@@ -232,7 +233,7 @@ private fun AddRepositoryDialogContents(
                 }
 
                 ScrollableColumn {
-                    PreparationStatus(preparationStatus, addStatus, initStatus)
+                    PreparationStatus(preparationStatus, addStatus, initStatus, onClose)
 
                     if (
                         (preparationStatus is PreparationStatus.ReadyForAdd || preparationStatus is PreparationStatus.ReadyForInit) &&
@@ -245,6 +246,7 @@ private fun AddRepositoryDialogContents(
                                     preparationStatus,
                                     addStatus,
                                     initStatus,
+                                    onClose,
                                 )
                             }
 
@@ -329,7 +331,10 @@ private fun PreparationStatus(
     preparationStatus: PreparationStatus?,
     addStatus: AddStatus?,
     initStatus: InitStatus?,
+    onClose: () -> Unit,
 ) {
+    val l = LocalArchiveOperationLaunchers.current
+
     when (preparationStatus) {
         is PreparationStatus.PreparationException ->
             AutomaticErrorMessage(preparationStatus.cause, onResolve = {})
@@ -346,6 +351,13 @@ private fun PreparationStatus(
                     )
                     Text("Creation of archives in a sub-directory of existing archive isn't supported.")
                     Text("Select a location, which is not part of an existing archive, or de-initialize the existing archive directory as being an archive.")
+
+                    Button(onClick = {
+                        onClose()
+                        l.openDeinitializeFilesystemRepository(preparationStatus.rootPath)
+                    }) {
+                        Text("Deinitialize existing repository")
+                    }
                 }
             }
         }
