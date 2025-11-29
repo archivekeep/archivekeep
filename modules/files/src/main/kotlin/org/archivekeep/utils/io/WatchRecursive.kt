@@ -97,6 +97,7 @@ fun (Path).watchRecursively(
                         }
                     }.mapToCustomWatchEvents()
 
+            emit(listOf(CustomWatchEvent.Started))
             emitAll(selfUpdatingFlow)
         } finally {
             withContext(NonCancellable) {

@@ -350,8 +350,8 @@ class FilesRepo(
     private val calculationCause =
         root
             .watchRecursively(ioDispatcher)
-            .debounce(100.milliseconds)
             .map { "update" }
+            .debounce(100.milliseconds)
             .shareIn(scope, SharingStarted.WhileSubscribed(), 0)
             .onStart { emit("start on index change") }
 
@@ -366,7 +366,6 @@ class FilesRepo(
                     .jobActiveOnIdleDelayedStart
                     .flowScopedToThisJob {
                         calculationCause
-                            .conflate()
                             .produceLoadable(
                                 ioDispatcher,
                                 "Local status: $root",

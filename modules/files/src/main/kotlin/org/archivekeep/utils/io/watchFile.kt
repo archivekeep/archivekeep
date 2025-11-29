@@ -45,15 +45,14 @@ fun (Path).watchForSingleFile(
                     .map { list ->
                         list.filter {
                             when (it) {
+                                is CustomWatchEvent.Started -> true
                                 is CustomWatchEvent.Change -> {
-                                    println(it.subject.absolute())
                                     it.subject.absolute() == this@watchForSingleFile.absolute()
                                 }
                                 is CustomWatchEvent.Overflow -> true
                             }
                         }
-                    }
-                    .filter { it.isNotEmpty() },
+                    }.filter { it.isNotEmpty() },
             )
         } finally {
             withContext(NonCancellable) {
