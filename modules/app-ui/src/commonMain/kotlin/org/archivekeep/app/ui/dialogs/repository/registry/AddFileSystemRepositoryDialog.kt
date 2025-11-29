@@ -34,6 +34,7 @@ import org.archivekeep.app.ui.components.designsystem.dialog.DialogFilePicker
 import org.archivekeep.app.ui.components.designsystem.dialog.DialogInnerContainer
 import org.archivekeep.app.ui.components.designsystem.dialog.DialogInputLabel
 import org.archivekeep.app.ui.components.designsystem.dialog.DialogOverlay
+import org.archivekeep.app.ui.components.designsystem.elements.WarningAlert
 import org.archivekeep.app.ui.components.designsystem.input.CheckboxWithText
 import org.archivekeep.app.ui.components.feature.dialogs.SimpleActionDialogControlButtons
 import org.archivekeep.app.ui.components.feature.dialogs.SimpleActionDialogDoneButtons
@@ -41,6 +42,7 @@ import org.archivekeep.app.ui.components.feature.errors.AutomaticErrorMessage
 import org.archivekeep.app.ui.dialogs.Dialog
 import org.archivekeep.app.ui.domain.wiring.LocalOperationFactory
 import org.archivekeep.app.ui.domain.wiring.OperationFactory
+import org.archivekeep.app.ui.utils.appendBoldSpan
 import org.archivekeep.app.ui.utils.filesystem.LocalFilesystemDirectoryPicker
 import org.archivekeep.app.ui.utils.filesystem.PickResult
 
@@ -78,6 +80,7 @@ class AddFileSystemRepositoryDialog(
 
                     addOperation = newOperation
                 }
+
                 is PickResult.Failure -> {
                     addOperation = null
                 }
@@ -212,6 +215,7 @@ private fun AddRepositoryDialogContents(
                             changeEnabled = initStatus == null && addStatus == null,
                         )
                     }
+
                     is PlatformSpecificPermissionFulfilment.NeedsGrant -> {
                         HorizontalDivider()
                         Spacer(Modifier)
@@ -330,6 +334,22 @@ private fun PreparationStatus(
         is PreparationStatus.PreparationException ->
             AutomaticErrorMessage(preparationStatus.cause, onResolve = {})
 
+        is PreparationStatus.NotRoot -> {
+            WarningAlert {
+                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    Text(
+                        buildAnnotatedString {
+                            append("Existing archive was discovered in directory ")
+                            appendBoldSpan(preparationStatus.rootPath)
+                            append(", which is a parent of the selected directory.")
+                        },
+                    )
+                    Text("Creation of archives in a sub-directory of existing archive isn't supported.")
+                    Text("Select a location, which is not part of an existing archive, or de-initialize the existing archive directory as being an archive.")
+                }
+            }
+        }
+
         is PreparationStatus.PreparationNoContinue -> ProgressText("Error $preparationStatus")
 
         PreparationStatus.Preparing -> ProgressText("Preparing...")
@@ -355,6 +375,7 @@ private fun InitStatus(initStatus: InitStatus?) {
         is InitStatus.InitFailed -> {
             AutomaticErrorMessage(initStatus.cause, onResolve = {})
         }
+
         InitStatus.InitSuccessful -> ProgressText("Directory initialized successfully as repository.")
         InitStatus.Initializing -> ProgressText("Initializing...")
         null -> {}
@@ -367,6 +388,7 @@ private fun AddStatus(addStatus: AddStatus?) {
         is AddStatus.AddFailed -> {
             AutomaticErrorMessage(addStatus.cause, onResolve = {})
         }
+
         AddStatus.AddSuccessful -> ProgressText("Added successfully.")
         AddStatus.Adding -> ProgressText("Adding...")
         null -> {}
