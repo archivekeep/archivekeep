@@ -24,6 +24,16 @@ fun ExecutionErrorIfPresent(executionState: ProcedureExecutionState) {
 }
 
 @Composable
+fun ExecutionErrorIfPresent(executionOutcome: ExecutionOutcome?) {
+    if ((executionOutcome is ExecutionOutcome.Failed)) {
+        if (executionOutcome.cause !is CancellationException) {
+            Spacer(Modifier.height(12.dp))
+            AutomaticErrorMessage(executionOutcome.cause, onResolve = {})
+        }
+    }
+}
+
+@Composable
 fun LaunchableExecutionErrorIfPresent(launchable: Launchable<*>) {
     (launchable.executionOutcome.value as? ExecutionOutcome.Failed)
         ?.let { outcome ->

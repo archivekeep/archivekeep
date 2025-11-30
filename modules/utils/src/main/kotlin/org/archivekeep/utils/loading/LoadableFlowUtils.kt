@@ -93,11 +93,15 @@ fun <T, R> Flow<Loadable<T>>.flatMapLoadableFlow(function: (data: T) -> Flow<Loa
     this.flatMapLatest {
         when (it) {
             is Loadable.Loaded ->
-                function(it.value)
+                try {
+                    function(it.value)
+                } catch (e: Throwable) {
+                    flowOf(Loadable.Failed(e))
+                }
             is Loadable.Loading ->
-                flow { emit(it) }
+                flowOf(it)
             is Loadable.Failed ->
-                flow { emit(it) }
+                flowOf(it)
         }
     }
 

@@ -2,6 +2,17 @@
 
 ## Unreleased
 
+## 0.4.4 - 2025-11-30
+
+### Added
+
+- explanation of NotRoot error when adding a filesystem repository (related to #6),
+- repository deinitialization feature (related to #6).
+
+### Fixed
+
+- watcher for mounted media not working if /run/media/ didn't exist at the start of the application (related to #6). 
+
 ## 0.4.3 = 2025-06-17
 
 ### Added

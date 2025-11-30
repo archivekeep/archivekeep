@@ -23,7 +23,8 @@ kotlin {
                 implementation(libs.kotlinx.coroutines.core)
                 implementation(libs.kotlinx.serialization.json)
 
-                implementation(libs.guava)
+                implementation(libs.guava.jre)
+                implementation(libs.guava.android)
 
                 implementation(libs.jcip.annotations)
                 implementation(libs.jose.jwt)

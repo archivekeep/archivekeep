@@ -38,6 +38,15 @@ jobs:
       - name: Build (the rest)
         run: ./gradlew build
 
+      - name: Store reports (on failure)
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: reports
+          path: |
+            **/build/reports/
+            **/build/test-results/
+
   dependency-submission:
     runs-on: ubuntu-22.04
     permissions:

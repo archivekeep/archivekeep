@@ -8,6 +8,8 @@ import java.nio.file.WatchEvent
 import java.nio.file.Watchable
 
 sealed interface CustomWatchEvent {
+    data object Started : CustomWatchEvent
+
     data class Overflow(
         val baseDir: Path,
     ) : CustomWatchEvent
