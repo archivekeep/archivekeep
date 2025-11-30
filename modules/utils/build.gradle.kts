@@ -12,7 +12,8 @@ dependencies {
 
     implementation(libs.jose.jwt)
 
-    implementation(libs.guava)
+    implementation(libs.guava.jre)
+    implementation(libs.guava.android)
 }
 
 tasks.named<Test>("test") {

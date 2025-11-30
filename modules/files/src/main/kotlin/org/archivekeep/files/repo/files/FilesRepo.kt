@@ -6,13 +6,13 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.FlowPreview
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.SharingStarted
-import kotlinx.coroutines.flow.conflate
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
@@ -51,11 +51,13 @@ import java.nio.file.Path
 import java.nio.file.PathMatcher
 import java.nio.file.StandardOpenOption
 import java.util.Collections.singletonList
+import kotlin.io.path.ExperimentalPathApi
 import kotlin.io.path.Path
 import kotlin.io.path.absolutePathString
 import kotlin.io.path.createDirectory
 import kotlin.io.path.createParentDirectories
 import kotlin.io.path.deleteExisting
+import kotlin.io.path.deleteRecursively
 import kotlin.io.path.exists
 import kotlin.io.path.fileSize
 import kotlin.io.path.inputStream
@@ -75,12 +77,14 @@ const val checksumsSubDir = "checksums"
 
 class FilesRepo(
     val root: Path,
+    parentJob: Job? = null,
     internal val archiveRoot: Path = root.resolve(".archive"),
     checksumsRoot: Path = archiveRoot.resolve(checksumsSubDir),
     stateDispatcher: CoroutineDispatcher = Dispatchers.Default,
-    ioDispatcher: CoroutineDispatcher = Dispatchers.IO,
+    val ioDispatcher: CoroutineDispatcher = Dispatchers.IO,
 ) : LocalRepo {
-    private val scope = CoroutineScope(SupervisorJob() + CoroutineName("AAA") + stateDispatcher)
+    private val job = SupervisorJob(parentJob)
+    private val scope = CoroutineScope(job + CoroutineName("FilesRepo: $root") + stateDispatcher)
 
     private val metadataPath = root.resolve(".archive").resolve("metadata.json")
 
@@ -89,6 +93,7 @@ class FilesRepo(
     private val indexStore =
         FilesystemIndexStore(
             checksumsRoot,
+            scope = scope,
             activeJobFlow = inProgressHandler.jobActiveOnIdleDelayedStart,
             fileSizeProvider = ::getFileSize,
             ioDispatcher = ioDispatcher,
@@ -348,9 +353,9 @@ class FilesRepo(
     @OptIn(FlowPreview::class)
     private val calculationCause =
         root
-            .watchRecursively(ioDispatcher)
-            .debounce(100.milliseconds)
+            .watchRecursively(ioDispatcher, ioDispatcher)
             .map { "update" }
+            .debounce(100.milliseconds)
             .shareIn(scope, SharingStarted.WhileSubscribed(), 0)
             .onStart { emit("start on index change") }
 
@@ -365,7 +370,6 @@ class FilesRepo(
                     .jobActiveOnIdleDelayedStart
                     .flowScopedToThisJob {
                         calculationCause
-                            .conflate()
                             .produceLoadable(
                                 ioDispatcher,
                                 "Local status: $root",
@@ -409,6 +413,13 @@ class FilesRepo(
                     }
                 }
             }
+
+    @OptIn(ExperimentalPathApi::class)
+    suspend fun deinitialize() {
+        withContext(ioDispatcher) {
+            archiveRoot.deleteRecursively()
+        }
+    }
 
     companion object {
         fun openOrNull(path: Path): FilesRepo? {

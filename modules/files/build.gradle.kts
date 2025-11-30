@@ -22,6 +22,9 @@ dependencies {
 
     implementation(libs.jose.jwt)
 
+    implementation(libs.guava.jre)
+    implementation(libs.guava.android)
+
     api(libs.grpc.kotlin.stub)
 
     implementation(libs.protobuf.kotlin.lite)
@@ -34,6 +37,7 @@ dependencies {
     testImplementation(libs.kotlin.test)
     testImplementation(libs.kotlinx.coroutines.test)
     testImplementation(libs.junit.jupiter)
+    testImplementation(libs.kotest.assertions.core)
 }
 
 tasks.named<Test>("test") {

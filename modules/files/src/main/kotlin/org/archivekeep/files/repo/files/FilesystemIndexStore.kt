@@ -5,7 +5,6 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.conflate
 import kotlinx.coroutines.flow.debounce
@@ -39,13 +38,12 @@ import kotlin.time.Duration.Companion.milliseconds
 
 class FilesystemIndexStore(
     internal val checksumsRoot: Path,
+    val scope: CoroutineScope,
     val activeJobFlow: Flow<Job?>,
     val fileSizeProvider: (filename: String) -> Long?,
     val ioDispatcher: CoroutineDispatcher = Dispatchers.IO,
     val pollDispatcher: CoroutineDispatcher = Dispatchers.IO,
 ) {
-    private val scope = CoroutineScope(SupervisorJob() + ioDispatcher)
-
     val throttlePauseDuration: Duration = 500.milliseconds
 
     @OptIn(FlowPreview::class)

@@ -11,6 +11,7 @@ import org.archivekeep.app.ui.dialogs.repository.procedures.sync.DownloadFromRep
 import org.archivekeep.app.ui.dialogs.repository.procedures.sync.UploadToRepoDialog
 import org.archivekeep.app.ui.dialogs.repository.registry.AddFileSystemRepositoryDialog
 import org.archivekeep.app.ui.dialogs.repository.registry.AddRemoteRepositoryDialog
+import org.archivekeep.app.ui.dialogs.repository.registry.DeinitializeFileSystemRepositoryDialog
 import org.archivekeep.app.ui.dialogs.repository.registry.ForgetRepositoryDialog
 
 fun archiveOperationLaunchersAsDialogs(dialogRenderer: OverlayDialogRenderer) =
@@ -20,6 +21,7 @@ fun archiveOperationLaunchersAsDialogs(dialogRenderer: OverlayDialogRenderer) =
         openAssociateRepository = dialogRenderer.openFn(::AssociateRepositoryDialog),
         openUnassociateRepository = dialogRenderer.openFn(::UnassociateRepositoryDialog),
         openForgetRepository = dialogRenderer.openFn(::ForgetRepositoryDialog),
+        openDeinitializeFilesystemRepository = dialogRenderer.openFn(::DeinitializeFileSystemRepositoryDialog),
         unlockRepository = dialogRenderer.openFn(::UnlockRepositoryDialog),
         pushRepoToAll = dialogRenderer.openFn(::PushRepoDialog),
         openAddFileSystemRepository = dialogRenderer.openFn(::AddFileSystemRepositoryDialog),

@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Button
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -40,6 +41,7 @@ import org.archivekeep.app.ui.components.designsystem.dialog.DialogFilePicker
 import org.archivekeep.app.ui.components.designsystem.dialog.DialogInnerContainer
 import org.archivekeep.app.ui.components.designsystem.dialog.DialogInputLabel
 import org.archivekeep.app.ui.components.designsystem.dialog.DialogOverlay
+import org.archivekeep.app.ui.components.designsystem.elements.WarningAlert
 import org.archivekeep.app.ui.components.designsystem.input.CheckboxWithText
 import org.archivekeep.app.ui.components.designsystem.input.PasswordField
 import org.archivekeep.app.ui.components.designsystem.input.RadioWithText
@@ -49,9 +51,11 @@ import org.archivekeep.app.ui.components.feature.dialogs.SimpleActionDialogContr
 import org.archivekeep.app.ui.components.feature.dialogs.SimpleActionDialogDoneButtons
 import org.archivekeep.app.ui.components.feature.errors.AutomaticErrorMessage
 import org.archivekeep.app.ui.dialogs.Dialog
+import org.archivekeep.app.ui.domain.wiring.LocalArchiveOperationLaunchers
 import org.archivekeep.app.ui.domain.wiring.LocalOperationFactory
 import org.archivekeep.app.ui.domain.wiring.OperationFactory
 import org.archivekeep.app.ui.utils.SingleLaunchGuard
+import org.archivekeep.app.ui.utils.appendBoldSpan
 import org.archivekeep.app.ui.utils.filesystem.LocalFilesystemDirectoryPicker
 import org.archivekeep.app.ui.utils.filesystem.PickResult
 import org.archivekeep.utils.loading.Loadable
@@ -195,6 +199,8 @@ private fun AddRepositoryDialogContents(
     val passwordLaunchGuard = remember(coroutineScope) { SingleLaunchGuard(coroutineScope) }
     val singleLaunchGuard = remember(coroutineScope) { SingleLaunchGuard(coroutineScope) }
 
+    val l = LocalArchiveOperationLaunchers.current
+
     DialogCard {
         DialogInnerContainer(
             remember(intendedStorageType) {
@@ -248,6 +254,33 @@ private fun AddRepositoryDialogContents(
                         },
                     ) { option ->
                         when (option) {
+                            is AddFileSystemRepositoryOperation.Invalid.NotRoot -> {
+                                WarningAlert {
+                                    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                                        Text(
+                                            buildAnnotatedString {
+                                                append("The parent directory ")
+                                                appendBoldSpan(option.rootPath)
+                                                append(" is a archive repository.")
+                                            },
+                                        )
+                                        Text("Creation of repositories in a sub-directory of existing repository isn't supported.")
+                                        Text("Select a location, which is not inside of a repository.")
+
+                                        HorizontalDivider()
+
+                                        Text("Alternatively, deinitialize the existing parent directory to not be a repository.")
+
+                                        OutlinedButton(onClick = {
+                                            onClose()
+                                            l.openDeinitializeFilesystemRepository(option.rootPath)
+                                        }) {
+                                            Text("Deinitialize existing repository")
+                                        }
+                                    }
+                                }
+                            }
+
                             is AddFileSystemRepositoryOperation.Invalid -> {
                                 ProgressText("Error $option")
                             }

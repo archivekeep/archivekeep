@@ -1,30 +1,31 @@
 package org.archivekeep.files.repo
 
-import kotlinx.coroutines.delay
+import io.kotest.assertions.nondeterministic.eventually
+import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.test.StandardTestDispatcher
-import kotlinx.coroutines.test.TestDispatcher
-import kotlinx.coroutines.test.runTest
-import kotlinx.coroutines.withContext
-import org.archivekeep.files.advanceTimeByAndWaitForIdle
 import org.archivekeep.files.assertLoaded
 import org.archivekeep.files.flowToInputStream
 import org.archivekeep.files.operations.StatusOperation
 import org.archivekeep.files.testContents01
+import org.archivekeep.files.utils.GenericTestScope
 import org.archivekeep.files.withContentsFrom
 import org.archivekeep.utils.loading.Loadable
 import org.archivekeep.utils.loading.stateIn
-import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.RepeatedTest
 import kotlin.test.assertEquals
-import kotlin.time.Duration.Companion.milliseconds
-import kotlin.time.Duration.Companion.minutes
 import kotlin.time.Duration.Companion.seconds
+import kotlinx.coroutines.test.runTest as standardRunTest
 
+@OptIn(ExperimentalStdlibApi::class)
 abstract class WorkingRepoContractTest<T : LocalRepo> {
     interface TestRepo<T : LocalRepo> {
-        fun open(testDispatcher: TestDispatcher): T
+        fun open(
+            scope: GenericTestScope,
+            testDispatcher: CoroutineDispatcher,
+        ): T
 
         fun createUncommittedFile(
             filename: String,
@@ -38,16 +39,14 @@ abstract class WorkingRepoContractTest<T : LocalRepo> {
 
     // TODO: `move should not overwrite existing UNCOMMITTED file`
 
-    @Test
+    @RepeatedTest(4)
     fun `local index loads and updates after save`() =
         runTest {
-            val dispatcher = StandardTestDispatcher(testScheduler)
-
             val testRepo = createNew()
 
             val repoAccessor =
                 testRepo
-                    .open(dispatcher)
+                    .open(this@runTest, getDispatcher())
                     .withContentsFrom(testContents01)
 
             val indexFlowState =
@@ -64,21 +63,21 @@ abstract class WorkingRepoContractTest<T : LocalRepo> {
                     }
             }
 
-            advanceTimeByAndWaitForIdle(2.seconds)
-
-            indexFlowState.value.assertLoaded {
-                assertEquals(
-                    StatusOperation.Result(
-                        newFiles = emptyList(),
-                        indexedFiles =
-                            listOf(
-                                "A/01.txt",
-                                "A/02.txt",
-                                "B/03.txt",
-                            ),
-                    ),
-                    it,
-                )
+            eventually(2.seconds) {
+                indexFlowState.value.assertLoaded {
+                    assertEquals(
+                        StatusOperation.Result(
+                            newFiles = emptyList(),
+                            indexedFiles =
+                                listOf(
+                                    "A/01.txt",
+                                    "A/02.txt",
+                                    "B/03.txt",
+                                ),
+                        ),
+                        it,
+                    )
+                }
             }
 
             repoAccessor.save(
@@ -90,27 +89,26 @@ abstract class WorkingRepoContractTest<T : LocalRepo> {
                 flow {
                     for (i in 0..20) {
                         emit((0..(1024 * 128)).joinToString("") { "12345678" }.toByteArray())
-                        delay(10.milliseconds)
                     }
                 }.flowToInputStream(backgroundScope),
             )
 
-            advanceTimeByAndWaitForIdle(2.seconds)
-
-            indexFlowState.value.assertLoaded {
-                assertEquals(
-                    StatusOperation.Result(
-                        newFiles = emptyList(),
-                        indexedFiles =
-                            listOf(
-                                "A/01.txt",
-                                "A/02.txt",
-                                "B/03.txt",
-                                "BIG_FILE.txt",
-                            ),
-                    ),
-                    it,
-                )
+            eventually(2.seconds) {
+                indexFlowState.value.assertLoaded {
+                    assertEquals(
+                        StatusOperation.Result(
+                            newFiles = emptyList(),
+                            indexedFiles =
+                                listOf(
+                                    "A/01.txt",
+                                    "A/02.txt",
+                                    "B/03.txt",
+                                    "BIG_FILE.txt",
+                                ),
+                        ),
+                        it,
+                    )
+                }
             }
 
             val undesiredStateEmit = allStates.firstOrNull { it is Loadable.Loaded && it.value.newFiles.isNotEmpty() }
@@ -119,16 +117,14 @@ abstract class WorkingRepoContractTest<T : LocalRepo> {
             }
         }
 
-    @Test
+    @RepeatedTest(4)
     fun `local uncommitted file create`() =
         runTest {
-            val dispatcher = StandardTestDispatcher(testScheduler)
-
             val testRepo = createNew()
 
             val repoAccessor =
                 testRepo
-                    .open(dispatcher)
+                    .open(this@runTest, getDispatcher())
                     .withContentsFrom(testContents01)
 
             val indexFlowState =
@@ -146,48 +142,60 @@ abstract class WorkingRepoContractTest<T : LocalRepo> {
                     }
             }
 
-            advanceTimeByAndWaitForIdle(2.seconds)
-
-            indexFlowState.value.assertLoaded {
-                assertEquals(
-                    StatusOperation.Result(
-                        newFiles = emptyList(),
-                        indexedFiles =
-                            listOf(
-                                "A/01.txt",
-                                "A/02.txt",
-                                "B/03.txt",
-                            ),
-                    ),
-                    it,
-                )
+            eventually(2.seconds) {
+                indexFlowState.value.assertLoaded {
+                    assertEquals(
+                        StatusOperation.Result(
+                            newFiles = emptyList(),
+                            indexedFiles =
+                                listOf(
+                                    "A/01.txt",
+                                    "A/02.txt",
+                                    "B/03.txt",
+                                ),
+                        ),
+                        it,
+                    )
+                }
             }
 
-            withContext(dispatcher) {
-                testRepo.createUncommittedFile(
-                    "BIG_FILE.txt",
-                    (0..1000000).joinToString(separator = "") { "123456" }.toByteArray(),
-                )
+            testRepo.createUncommittedFile(
+                "BIG_FILE.txt",
+                (0..1000000).joinToString(separator = "") { "123456" }.toByteArray(),
+            )
+
+            eventually(2.seconds) {
+                indexFlowState.value.assertLoaded {
+                    assertEquals(
+                        StatusOperation.Result(
+                            newFiles =
+                                listOf(
+                                    "BIG_FILE.txt",
+                                ),
+                            indexedFiles =
+                                listOf(
+                                    "A/01.txt",
+                                    "A/02.txt",
+                                    "B/03.txt",
+                                ),
+                        ),
+                        it,
+                    )
+                }
             }
+        }
 
-            advanceTimeByAndWaitForIdle(2.minutes)
+    private fun GenericTestScope.getDispatcher() = coroutineContext[CoroutineDispatcher] ?: throw IllegalStateException("Dispatcher expected")
 
-            indexFlowState.value.assertLoaded {
-                assertEquals(
-                    StatusOperation.Result(
-                        newFiles =
-                            listOf(
-                                "BIG_FILE.txt",
-                            ),
-                        indexedFiles =
-                            listOf(
-                                "A/01.txt",
-                                "A/02.txt",
-                                "B/03.txt",
-                            ),
-                    ),
-                    it,
-                )
+    open fun runTest(testBody: suspend GenericTestScope.() -> Unit) =
+        standardRunTest {
+            val scope =
+                object : GenericTestScope, CoroutineScope by this@standardRunTest {
+                    override val backgroundScope = this@standardRunTest.backgroundScope
+                }
+
+            with(scope) {
+                testBody()
             }
         }
 }
