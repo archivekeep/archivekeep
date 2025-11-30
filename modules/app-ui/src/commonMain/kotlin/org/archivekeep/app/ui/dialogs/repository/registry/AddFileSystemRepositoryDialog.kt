@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Button
 import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -344,15 +345,19 @@ private fun PreparationStatus(
                 Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                     Text(
                         buildAnnotatedString {
-                            append("Existing archive was discovered in directory ")
+                            append("The parent directory ")
                             appendBoldSpan(preparationStatus.rootPath)
-                            append(", which is a parent of the selected directory.")
+                            append(" is a archive repository.")
                         },
                     )
-                    Text("Creation of archives in a sub-directory of existing archive isn't supported.")
-                    Text("Select a location, which is not part of an existing archive, or de-initialize the existing archive directory as being an archive.")
+                    Text("Creation of repositories in a sub-directory of existing repository isn't supported.")
+                    Text("Select a location, which is not inside of a repository.")
 
-                    Button(onClick = {
+                    HorizontalDivider()
+
+                    Text("Alternatively, deinitialize the existing parent directory to not be a repository.")
+
+                    OutlinedButton(onClick = {
                         onClose()
                         l.openDeinitializeFilesystemRepository(preparationStatus.rootPath)
                     }) {

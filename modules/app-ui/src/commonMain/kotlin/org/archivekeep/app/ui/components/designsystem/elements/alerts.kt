@@ -30,11 +30,6 @@ fun ErrorAlert(content: @Composable ColumnScope.() -> Unit) {
 }
 
 @Composable
-fun DangerAlert(content: @Composable ColumnScope.() -> Unit) {
-    ErrorAlert(content)
-}
-
-@Composable
 fun WarningAlert(content: @Composable ColumnScope.() -> Unit) {
     Surface(
         border =

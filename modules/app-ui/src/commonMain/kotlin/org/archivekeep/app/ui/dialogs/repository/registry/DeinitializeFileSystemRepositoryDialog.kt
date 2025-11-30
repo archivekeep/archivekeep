@@ -27,7 +27,7 @@ import org.archivekeep.app.ui.components.designsystem.dialog.DialogButtonContain
 import org.archivekeep.app.ui.components.designsystem.dialog.DialogCard
 import org.archivekeep.app.ui.components.designsystem.dialog.DialogInnerContainer
 import org.archivekeep.app.ui.components.designsystem.dialog.DialogOverlay
-import org.archivekeep.app.ui.components.designsystem.elements.DangerAlert
+import org.archivekeep.app.ui.components.designsystem.elements.WarningAlert
 import org.archivekeep.app.ui.components.designsystem.input.CheckboxWithText
 import org.archivekeep.app.ui.components.feature.LoadableGuard
 import org.archivekeep.app.ui.components.feature.dialogs.SimpleActionDialogControlButtons
@@ -47,7 +47,7 @@ class DeinitializeFileSystemRepositoryDialog(
         val coroutineScope: CoroutineScope,
         val operationFactory: OperationFactory,
     ) : RememberObserver {
-        var irreversibleActionConfirmed by mutableStateOf<Boolean>(false)
+        var metadataDestructionConfirmed by mutableStateOf<Boolean>(false)
 
         private var preparationScope: CoroutineScope = coroutineScope + SupervisorJob()
 
@@ -115,23 +115,26 @@ class DeinitializeFileSystemRepositoryDialog(
                                         }
                                     },
                                 )
-                                DangerAlert {
-                                    Text("Archive metadata will be destroyed.", modifier = Modifier.padding(bottom = 8.dp))
-                                    Text("This is potentially irreversible.")
+                                WarningAlert {
+                                    Text("All archive metadata will be destroyed.")
                                 }
+                                Text("Data will not be deleted.")
                                 Text(
                                     remember(path) {
                                         buildAnnotatedString {
-                                            append("Data will not be deleted. But, all archive metadata in ")
+                                            append("Metadata stored in ")
                                             appendBoldSpan(path + "/.archive")
-                                            append(" will be irreversibly destroyed. To use it as an archive, re-initialization is needed.")
+                                            append(" will be ")
+                                            appendBoldSpan("completely deleted")
+                                            append(".")
                                         }
                                     },
                                 )
+                                Text("To use it against as an archive repository, reinitialization and reindexing will be needed.")
                                 CheckboxWithText(
-                                    vm.irreversibleActionConfirmed,
-                                    text = "Yes, deinitialize repository",
-                                    onValueChange = { vm.irreversibleActionConfirmed = it },
+                                    vm.metadataDestructionConfirmed,
+                                    text = "Yes, destroy metadata",
+                                    onValueChange = { vm.metadataDestructionConfirmed = it },
                                     enabled = vm.deinitializeLaunchGuard.state == null,
                                 )
                                 ExecutionErrorIfPresent(vm.deinitializeLaunchGuard.executionOutcome.value)
@@ -181,7 +184,7 @@ class DeinitializeFileSystemRepositoryDialog(
                                                     },
                                                     onClose = onClose,
                                                     canLaunch =
-                                                        vm.irreversibleActionConfirmed && vm.deinitializeLaunchGuard.state !is SingleLaunchGuard.State.Running,
+                                                        vm.metadataDestructionConfirmed && vm.deinitializeLaunchGuard.state !is SingleLaunchGuard.State.Running,
                                                 )
                                             }
                                         }
