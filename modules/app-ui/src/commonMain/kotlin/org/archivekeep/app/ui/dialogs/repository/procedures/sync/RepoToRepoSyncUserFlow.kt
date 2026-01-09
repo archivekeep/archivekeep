@@ -13,7 +13,7 @@ import org.archivekeep.app.core.procedures.sync.RepoToRepoSync.JobState
 import org.archivekeep.app.ui.components.feature.dialogs.operations.DialogOperationControlState
 import org.archivekeep.app.ui.components.feature.dialogs.operations.toDialogOperationControlState
 import org.archivekeep.app.ui.utils.stickToFirstNotNullAsState
-import org.archivekeep.files.procedures.sync.RelocationSyncMode
+import org.archivekeep.files.procedures.sync.discovery.RelocationSyncMode
 import org.archivekeep.files.procedures.sync.operations.SyncOperation
 import org.archivekeep.utils.loading.Loadable
 import org.archivekeep.utils.loading.mapIfLoadedOrDefault

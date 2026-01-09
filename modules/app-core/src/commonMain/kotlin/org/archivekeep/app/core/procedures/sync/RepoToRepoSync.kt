@@ -4,8 +4,8 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.StateFlow
 import org.archivekeep.app.core.procedures.utils.JobWrapper
 import org.archivekeep.files.operations.CompareOperation
-import org.archivekeep.files.procedures.sync.DiscoveredSync
-import org.archivekeep.files.procedures.sync.RelocationSyncMode
+import org.archivekeep.files.procedures.sync.discovery.DiscoveredSync
+import org.archivekeep.files.procedures.sync.discovery.RelocationSyncMode
 import org.archivekeep.files.procedures.sync.operations.SyncOperation
 import org.archivekeep.utils.loading.Loadable
 import org.archivekeep.utils.loading.optional.OptionalLoadable

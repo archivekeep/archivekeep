@@ -1,6 +1,6 @@
 package org.archivekeep.cli.commands.mixins
 
-import org.archivekeep.files.procedures.sync.RelocationSyncMode
+import org.archivekeep.files.procedures.sync.discovery.RelocationSyncMode
 import picocli.CommandLine.Option
 
 class SyncOptions {

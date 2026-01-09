@@ -18,7 +18,7 @@ import org.archivekeep.app.ui.dialogs.AbstractDialog
 import org.archivekeep.app.ui.dialogs.repository.procedures.sync.describePreparedSyncOperation
 import org.archivekeep.app.ui.domain.data.getSyncCandidates
 import org.archivekeep.app.ui.utils.stickToFirstNotNullAsState
-import org.archivekeep.files.procedures.sync.RelocationSyncMode
+import org.archivekeep.files.procedures.sync.discovery.RelocationSyncMode
 import org.archivekeep.utils.loading.Loadable
 import org.archivekeep.utils.loading.mapLoadedData
 import org.archivekeep.utils.loading.mapToLoadable

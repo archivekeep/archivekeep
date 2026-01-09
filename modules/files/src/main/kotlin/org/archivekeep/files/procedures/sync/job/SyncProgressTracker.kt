@@ -1,4 +1,4 @@
-package org.archivekeep.files.procedures.sync
+package org.archivekeep.files.procedures.sync.job
 
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.SupervisorJob

@@ -12,8 +12,8 @@ import org.archivekeep.files.procedures.indexupdate.IndexUpdateProcedure
 import org.archivekeep.files.procedures.indexupdate.IndexUpdateProcedure.PreparationResult.Move
 import org.archivekeep.files.procedures.indexupdate.IndexUpdateProcedure.PreparationResult.NewFile
 import org.archivekeep.files.procedures.indexupdate.IndexUpdateStructuredProgressTracker
-import org.archivekeep.files.procedures.sync.DiscoveredNewFilesGroup
-import org.archivekeep.files.procedures.sync.DiscoveredRelocationsMoveApplyGroup
+import org.archivekeep.files.procedures.sync.discovery.DiscoveredNewFilesGroup
+import org.archivekeep.files.procedures.sync.discovery.DiscoveredRelocationsMoveApplyGroup
 import org.archivekeep.files.procedures.sync.operations.CopyNewFileOperation
 import org.archivekeep.files.repo.LocalRepo
 import org.archivekeep.files.repo.Repo

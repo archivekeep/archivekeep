@@ -26,10 +26,10 @@ import org.archivekeep.app.core.utils.generics.SyncFlowStringWriter
 import org.archivekeep.app.core.utils.generics.singleInstanceWeakValueMap
 import org.archivekeep.app.core.utils.identifiers.RepositoryURI
 import org.archivekeep.files.operations.CompareOperation
-import org.archivekeep.files.procedures.sync.DiscoveredSync
-import org.archivekeep.files.procedures.sync.RelocationSyncMode
-import org.archivekeep.files.procedures.sync.SyncProcedure
-import org.archivekeep.files.procedures.sync.WritterSyncLogger
+import org.archivekeep.files.procedures.sync.discovery.DiscoveredSync
+import org.archivekeep.files.procedures.sync.discovery.RelocationSyncMode
+import org.archivekeep.files.procedures.sync.discovery.SyncProcedureDiscovery
+import org.archivekeep.files.procedures.sync.log.WritterSyncLogger
 import org.archivekeep.files.procedures.sync.operations.SyncOperation
 import org.archivekeep.files.repo.Repo
 import org.archivekeep.utils.loading.Loadable
@@ -225,7 +225,7 @@ class RepoToRepoSyncServiceImpl(
                         }
 
                         val prepared =
-                            SyncProcedure(relocationSyncMode).prepareFromComparison(
+                            SyncProcedureDiscovery(relocationSyncMode).prepareFromComparison(
                                 comparisonLoadable.value,
                             )
 

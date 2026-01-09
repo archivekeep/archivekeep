@@ -4,7 +4,7 @@ import androidx.compose.runtime.Composable
 import org.archivekeep.app.ui.components.designsystem.progress.ProgressRow
 import org.archivekeep.app.ui.components.designsystem.progress.ProgressRowList
 import org.archivekeep.app.ui.utils.toUiString
-import org.archivekeep.files.procedures.sync.SyncProcedureJobTask.ProgressSummary
+import org.archivekeep.files.procedures.sync.job.SyncProcedureJobTask.ProgressSummary
 import org.archivekeep.files.procedures.sync.operations.SyncOperation
 import org.archivekeep.utils.procedures.tasks.TaskExecutionProgressSummary
 

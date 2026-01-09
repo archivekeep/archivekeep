@@ -1,4 +1,4 @@
-package org.archivekeep.files.procedures.sync
+package org.archivekeep.files.procedures.sync.log
 
 import java.io.PrintWriter
 

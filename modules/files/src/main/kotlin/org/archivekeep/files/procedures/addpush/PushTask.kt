@@ -1,7 +1,7 @@
 package org.archivekeep.files.procedures.addpush
 
-import org.archivekeep.files.procedures.sync.SyncLogger
-import org.archivekeep.files.procedures.sync.SyncProcedureJobTask
+import org.archivekeep.files.procedures.sync.job.SyncProcedureJobTask
+import org.archivekeep.files.procedures.sync.log.SyncLogger
 import org.archivekeep.files.procedures.sync.operations.CopyNewFileOperation
 import org.archivekeep.files.procedures.sync.operations.RelocationApplyOperation
 import org.archivekeep.files.repo.Repo

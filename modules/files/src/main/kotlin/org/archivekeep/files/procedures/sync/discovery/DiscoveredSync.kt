@@ -1,5 +1,7 @@
-package org.archivekeep.files.procedures.sync
+package org.archivekeep.files.procedures.sync.discovery
 
+import org.archivekeep.files.procedures.sync.job.SyncProcedureJobTask
+import org.archivekeep.files.procedures.sync.log.SyncLogger
 import org.archivekeep.files.procedures.sync.operations.SyncOperation
 import org.archivekeep.files.repo.Repo
 import org.archivekeep.utils.procedures.TaskProcedureJob

@@ -1,5 +1,6 @@
-package org.archivekeep.files.procedures.sync
+package org.archivekeep.files.procedures.sync.discovery
 
+import org.archivekeep.files.procedures.sync.job.SyncProcedureJobTask
 import org.archivekeep.files.procedures.sync.operations.SyncOperation
 
 sealed class DiscoveredSyncOperationsGroup<T : SyncOperation>(

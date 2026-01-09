@@ -5,6 +5,9 @@ import org.archivekeep.files.assertRepositoryContents
 import org.archivekeep.files.driver.fixtures.FixtureRepoBuilder
 import org.archivekeep.files.driver.inmemory.toInMemoryRepo
 import org.archivekeep.files.operations.CompareOperation
+import org.archivekeep.files.procedures.sync.discovery.RelocationSyncMode
+import org.archivekeep.files.procedures.sync.discovery.SyncProcedureDiscovery
+import org.archivekeep.files.procedures.sync.log.NoOpLogger
 import org.archivekeep.files.procedures.sync.operations.CopyNewFileOperation
 import org.archivekeep.files.procedures.sync.operations.RelocationApplyOperation
 import org.archivekeep.files.procedures.sync.operations.SyncOperation
@@ -39,7 +42,7 @@ class SyncProcedureTest {
         val otherRepo = otherRepoForSyncTest.toInMemoryRepo()
 
         runBlocking {
-            val prepared = SyncProcedure(relocateAll).prepare(baseRepo, otherRepo)
+            val prepared = SyncProcedureDiscovery(relocateAll).prepare(baseRepo, otherRepo)
 
             val job = prepared.createJob(baseRepo, otherRepo, { true }, NoOpLogger(), selections)
 
@@ -96,19 +99,5 @@ class SyncProcedureTest {
             deletePattern("old.txt".toRegex())
             addStored("new.txt", "old.txt")
         }
-    }
-}
-
-class NoOpLogger : SyncLogger {
-    override fun onFileStored(filename: String) {
-    }
-
-    override fun onFileMoved(
-        from: String,
-        to: String,
-    ) {
-    }
-
-    override fun onFileDeleted(filename: String) {
     }
 }

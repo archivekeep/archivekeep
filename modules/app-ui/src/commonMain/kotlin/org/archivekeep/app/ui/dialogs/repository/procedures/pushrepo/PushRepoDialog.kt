@@ -28,7 +28,7 @@ import org.archivekeep.app.ui.domain.wiring.LocalStorageService
 import org.archivekeep.app.ui.utils.appendBoldSpan
 import org.archivekeep.app.ui.utils.asMutableState
 import org.archivekeep.app.ui.utils.collectLoadableFlow
-import org.archivekeep.files.procedures.sync.RelocationSyncMode
+import org.archivekeep.files.procedures.sync.discovery.RelocationSyncMode
 import org.archivekeep.utils.loading.Loadable
 import org.archivekeep.utils.loading.mapToLoadable
 

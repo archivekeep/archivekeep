@@ -3,12 +3,12 @@ package org.archivekeep.cli.commands.shared
 import org.archivekeep.cli.MainCommand
 import org.archivekeep.cli.commands.mixins.SyncOptions
 import org.archivekeep.files.operations.CompareOperation
-import org.archivekeep.files.procedures.sync.DiscoveredAdditiveRelocationsGroup
-import org.archivekeep.files.procedures.sync.DiscoveredNewFilesGroup
-import org.archivekeep.files.procedures.sync.DiscoveredRelocationsMoveApplyGroup
-import org.archivekeep.files.procedures.sync.RelocationSyncMode
-import org.archivekeep.files.procedures.sync.SyncLogger
-import org.archivekeep.files.procedures.sync.SyncProcedure
+import org.archivekeep.files.procedures.sync.discovery.DiscoveredAdditiveRelocationsGroup
+import org.archivekeep.files.procedures.sync.discovery.DiscoveredNewFilesGroup
+import org.archivekeep.files.procedures.sync.discovery.DiscoveredRelocationsMoveApplyGroup
+import org.archivekeep.files.procedures.sync.discovery.RelocationSyncMode
+import org.archivekeep.files.procedures.sync.discovery.SyncProcedureDiscovery
+import org.archivekeep.files.procedures.sync.log.WritterSyncLogger
 import org.archivekeep.files.repo.Repo
 import java.io.PrintWriter
 
@@ -26,7 +26,7 @@ suspend fun executeSync(
 
     comparisonResult.printAll(out, baseName, otherName)
 
-    val preparedSync = SyncProcedure(syncOptions.syncMode).prepareFromComparison(comparisonResult)
+    val preparedSync = SyncProcedureDiscovery(syncOptions.syncMode).prepareFromComparison(comparisonResult)
 
     preparedSync.groups.filterIsInstance<DiscoveredRelocationsMoveApplyGroup>().forEach { relocationStep ->
         if (relocationStep.toIgnore.isNotEmpty()) {
@@ -67,23 +67,7 @@ suspend fun executeSync(
                         mainCommand.askForConfirmation("Do you want to $operationName new files?")
                 }
             },
-            logger =
-                object : SyncLogger {
-                    override fun onFileStored(filename: String) {
-                        out.println("file stored: $filename")
-                    }
-
-                    override fun onFileMoved(
-                        from: String,
-                        to: String,
-                    ) {
-                        out.println("file moved: $from -> $to")
-                    }
-
-                    override fun onFileDeleted(filename: String) {
-                        out.println("file deleted: $filename")
-                    }
-                },
+            logger = WritterSyncLogger(out),
         )
 
     job.run()

@@ -4,10 +4,10 @@ import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.buildAnnotatedString
 import org.archivekeep.app.ui.utils.appendBoldSpan
 import org.archivekeep.app.ui.utils.appendBoldStrikeThroughSpan
-import org.archivekeep.files.procedures.sync.DiscoveredAdditiveRelocationsGroup
-import org.archivekeep.files.procedures.sync.DiscoveredSync
-import org.archivekeep.files.procedures.sync.DiscoveredNewFilesGroup
-import org.archivekeep.files.procedures.sync.DiscoveredRelocationsMoveApplyGroup
+import org.archivekeep.files.procedures.sync.discovery.DiscoveredAdditiveRelocationsGroup
+import org.archivekeep.files.procedures.sync.discovery.DiscoveredNewFilesGroup
+import org.archivekeep.files.procedures.sync.discovery.DiscoveredRelocationsMoveApplyGroup
+import org.archivekeep.files.procedures.sync.discovery.DiscoveredSync
 import org.archivekeep.files.procedures.sync.operations.AdditiveReplicationOperation
 import org.archivekeep.files.procedures.sync.operations.RelocationApplyOperation
 
