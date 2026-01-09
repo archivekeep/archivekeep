@@ -9,7 +9,7 @@ import aws.smithy.kotlin.runtime.net.url.Url
 import kotlinx.coroutines.test.TestDispatcher
 import org.archivekeep.files.repo.RepoContractTest
 import org.archivekeep.utils.fromHexToBase64
-import org.archivekeep.utils.sha256
+import org.archivekeep.utils.hashing.sha256
 import java.net.URI
 
 class S3RepositoryTestRepo(

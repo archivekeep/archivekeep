@@ -1,6 +1,6 @@
 package org.archivekeep.app.core.persistence.platform.demo
 
-import org.archivekeep.testing.fixtures.FixtureRepoBuilder
+import org.archivekeep.files.driver.fixtures.FixtureRepoBuilder
 
 val documentsContents: FixtureRepoBuilder.() -> Unit = {
     ('A'..'Z').forEach { category ->

@@ -54,11 +54,10 @@ import org.archivekeep.app.ui.utils.appendBoldSpan
 import org.archivekeep.app.ui.utils.asAction
 import org.archivekeep.app.ui.utils.collectAsLoadable
 import org.archivekeep.app.ui.utils.simpleLaunchable
-import org.archivekeep.files.repo.remote.grpc.BasicAuthCredentials
+import org.archivekeep.files.repo.auth.BasicAuthCredentials
 import org.archivekeep.utils.datastore.passwordprotected.PasswordProtectedDataStore
 import org.archivekeep.utils.loading.Loadable
 import org.archivekeep.utils.loading.mapIfLoadedOrDefault
-import org.archivekeep.utils.loading.optional.OptionalLoadable
 
 class UnlockRepositoryDialog(
     uri: RepositoryURI,

@@ -7,7 +7,7 @@ import com.nimbusds.jose.jwk.Curve
 import com.nimbusds.jose.jwk.ECKey
 import com.nimbusds.jose.jwk.gen.ECKeyGenerator
 import kotlinx.coroutines.test.runTest
-import org.archivekeep.utils.sha256
+import org.archivekeep.utils.hashing.sha256
 import org.junit.jupiter.api.Test
 import java.io.ByteArrayInputStream
 import java.io.ByteArrayOutputStream

@@ -2,8 +2,8 @@ package org.archivekeep.files.operations
 
 import kotlinx.coroutines.runBlocking
 import org.archivekeep.files.createArchiveWithContents
-import org.archivekeep.files.repo.files.FilesRepo
-import org.archivekeep.utils.sha256
+import org.archivekeep.files.driver.filesystem.files.FilesRepo
+import org.archivekeep.utils.hashing.sha256
 import org.junit.jupiter.api.Assertions.assertIterableEquals
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.io.TempDir

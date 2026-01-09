@@ -17,11 +17,11 @@ import org.archivekeep.app.core.utils.identifiers.NamedRepositoryReference
 import org.archivekeep.app.core.utils.identifiers.RepositoryURI
 import org.archivekeep.app.ui.utils.combineTexts
 import org.archivekeep.files.operations.StatusOperation
-import org.archivekeep.utils.filesAutoPlural
 import org.archivekeep.utils.loading.optional.OptionalLoadable
 import org.archivekeep.utils.loading.optional.isLoading
 import org.archivekeep.utils.loading.optional.mapIfLoadedOrNull
 import org.archivekeep.utils.loading.optional.mapLoadedData
+import org.archivekeep.utils.text.filesAutoPlural
 
 class SecondaryArchiveRepository(
     val primaryRepositoryURI: RepositoryURI?,

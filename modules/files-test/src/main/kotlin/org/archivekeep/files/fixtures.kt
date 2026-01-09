@@ -1,7 +1,7 @@
 package org.archivekeep.files
 
+import org.archivekeep.files.driver.fixtures.FixtureRepo
 import org.archivekeep.files.repo.Repo
-import org.archivekeep.testing.fixtures.FixtureRepo
 
 val testContents01 =
     FixtureRepo {

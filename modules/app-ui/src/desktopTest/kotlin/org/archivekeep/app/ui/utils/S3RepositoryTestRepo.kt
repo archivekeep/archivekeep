@@ -8,7 +8,7 @@ import aws.smithy.kotlin.runtime.content.asByteStream
 import aws.smithy.kotlin.runtime.net.url.Url
 import org.archivekeep.files.driver.s3.S3Repository
 import org.archivekeep.utils.fromHexToBase64
-import org.archivekeep.utils.sha256
+import org.archivekeep.utils.hashing.sha256
 import java.net.URI
 
 class S3RepositoryTestRepo(

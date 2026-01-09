@@ -40,9 +40,9 @@ import org.archivekeep.files.repo.RepositoryMetadata
 import org.archivekeep.utils.exceptions.WrongCredentialsException
 import org.archivekeep.utils.fromBase64ToHex
 import org.archivekeep.utils.fromHexToBase64
+import org.archivekeep.utils.hashing.sha256
 import org.archivekeep.utils.loading.AutoRefreshLoadableFlow
 import org.archivekeep.utils.loading.Loadable
-import org.archivekeep.utils.sha256
 import java.io.InputStream
 import java.net.URI
 import java.net.URLEncoder

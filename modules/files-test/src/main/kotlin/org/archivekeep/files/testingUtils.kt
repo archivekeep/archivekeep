@@ -2,13 +2,13 @@ package org.archivekeep.files
 
 import kotlinx.coroutines.test.TestCoroutineScheduler
 import kotlinx.coroutines.test.TestScope
+import org.archivekeep.files.driver.fixtures.FixtureRepo
+import org.archivekeep.files.driver.fixtures.FixtureRepoBuilder
+import org.archivekeep.files.driver.inmemory.InMemoryRepo
 import org.archivekeep.files.repo.Repo
 import org.archivekeep.files.repo.assertFileHasStringContents
-import org.archivekeep.testing.fixtures.FixtureRepo
-import org.archivekeep.testing.fixtures.FixtureRepoBuilder
-import org.archivekeep.testing.storage.InMemoryRepo
+import org.archivekeep.utils.hashing.sha256
 import org.archivekeep.utils.loading.Loadable
-import org.archivekeep.utils.sha256
 import org.junit.jupiter.api.assertAll
 import java.io.File
 import kotlin.io.path.createParentDirectories

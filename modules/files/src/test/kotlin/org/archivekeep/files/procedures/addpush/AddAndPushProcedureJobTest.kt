@@ -3,13 +3,13 @@ package org.archivekeep.files.procedures.addpush
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
+import org.archivekeep.files.driver.fixtures.FixtureRepoBuilder
+import org.archivekeep.files.driver.inmemory.toInMemoryLocalRepo
+import org.archivekeep.files.driver.inmemory.toInMemoryRepo
 import org.archivekeep.files.fromStringContents
 import org.archivekeep.files.procedures.indexupdate.IndexUpdateProcedure
 import org.archivekeep.files.repo.Repo
 import org.archivekeep.files.shouldHaveCommittedContentsOf
-import org.archivekeep.testing.fixtures.FixtureRepoBuilder
-import org.archivekeep.testing.storage.toInMemoryLocalRepo
-import org.archivekeep.testing.storage.toInMemoryRepo
 import kotlin.test.Test
 
 class AddAndPushProcedureJobTest {

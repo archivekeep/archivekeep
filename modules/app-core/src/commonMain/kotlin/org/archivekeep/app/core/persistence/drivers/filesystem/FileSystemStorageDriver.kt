@@ -24,8 +24,8 @@ import org.archivekeep.app.core.persistence.credentials.CredentialsStore
 import org.archivekeep.app.core.utils.generics.UniqueSharedFlowInstanceManager
 import org.archivekeep.app.core.utils.identifiers.RepositoryURI
 import org.archivekeep.app.core.utils.identifiers.StorageURI
-import org.archivekeep.files.repo.encryptedfiles.EncryptedFileSystemRepository
-import org.archivekeep.files.repo.files.FilesRepo
+import org.archivekeep.files.driver.filesystem.encryptedfiles.EncryptedFileSystemRepository
+import org.archivekeep.files.driver.filesystem.files.FilesRepo
 import org.archivekeep.utils.loading.mapLoadedData
 import org.archivekeep.utils.loading.optional.OptionalLoadable
 import org.archivekeep.utils.loading.optional.OptionalLoadable.LoadedAvailable

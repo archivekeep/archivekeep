@@ -9,8 +9,8 @@ import org.archivekeep.files.procedures.sync.operations.AdditiveReplicationOpera
 import org.archivekeep.files.procedures.sync.operations.CopyNewFileOperation
 import org.archivekeep.files.procedures.sync.operations.RelocationApplyOperation
 import org.archivekeep.files.repo.Repo
-import org.archivekeep.utils.filesAutoPlural
 import org.archivekeep.utils.procedures.operations.OperationContext
+import org.archivekeep.utils.text.filesAutoPlural
 import java.time.Duration
 import java.time.LocalDateTime
 import kotlin.time.toKotlinDuration

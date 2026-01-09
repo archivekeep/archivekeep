@@ -20,7 +20,7 @@ import org.archivekeep.app.desktop.ui.dialogs.testing.setContentInDialogScreensh
 import org.archivekeep.app.desktop.ui.testing.screenshots.runHighDensityComposeUiTest
 import org.archivekeep.app.ui.domain.wiring.ApplicationProviders
 import org.archivekeep.app.ui.utils.PropertiesApplicationMetadata
-import org.archivekeep.testing.fixtures.FixtureRepoBuilder
+import org.archivekeep.files.driver.fixtures.FixtureRepoBuilder
 import org.junit.Test
 import kotlin.time.Duration.Companion.seconds
 

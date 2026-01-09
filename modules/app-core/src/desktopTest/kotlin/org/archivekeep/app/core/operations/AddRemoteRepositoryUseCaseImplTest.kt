@@ -27,7 +27,7 @@ import org.archivekeep.app.core.persistence.platform.demo.DemoEnvironment
 import org.archivekeep.app.core.persistence.registry.RegisteredRepository
 import org.archivekeep.app.core.utils.identifiers.RepositoryURI
 import org.archivekeep.files.driver.s3.S3Repository
-import org.archivekeep.files.repo.remote.grpc.BasicAuthCredentials
+import org.archivekeep.files.repo.auth.BasicAuthCredentials
 import org.archivekeep.utils.loading.firstLoadedOrNullOnErrorOrLocked
 import org.archivekeep.utils.loading.optional.OptionalLoadable
 import org.junit.jupiter.api.Test

@@ -13,6 +13,7 @@ plugins {
 
 dependencies {
     implementation(project(":files"))
+    implementation(project(":files-driver-grpc"))
 
     implementation(libs.picocli)
     kapt(libs.picocli.codegen)

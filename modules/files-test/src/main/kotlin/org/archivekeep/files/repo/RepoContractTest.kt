@@ -17,8 +17,8 @@ import org.archivekeep.files.quickSave
 import org.archivekeep.files.shouldHaveCommittedContentsOf
 import org.archivekeep.files.testContents01
 import org.archivekeep.files.withContentsFrom
+import org.archivekeep.utils.hashing.sha256
 import org.archivekeep.utils.loading.stateIn
-import org.archivekeep.utils.sha256
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import java.util.UUID

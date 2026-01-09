@@ -19,12 +19,12 @@ import org.archivekeep.app.core.domain.storages.StorageInformation
 import org.archivekeep.app.core.persistence.credentials.CredentialsStore
 import org.archivekeep.app.core.utils.identifiers.RepositoryURI
 import org.archivekeep.app.core.utils.identifiers.StorageURI
+import org.archivekeep.files.driver.grpc.Options
+import org.archivekeep.files.driver.grpc.createPAT
+import org.archivekeep.files.driver.grpc.isNotAuthorized
+import org.archivekeep.files.driver.grpc.openGrpcArchive
 import org.archivekeep.files.repo.Repo
-import org.archivekeep.files.repo.remote.grpc.BasicAuthCredentials
-import org.archivekeep.files.repo.remote.grpc.Options
-import org.archivekeep.files.repo.remote.grpc.createPAT
-import org.archivekeep.files.repo.remote.grpc.isNotAuthorized
-import org.archivekeep.files.repo.remote.grpc.openGrpcArchive
+import org.archivekeep.files.repo.auth.BasicAuthCredentials
 import org.archivekeep.utils.loading.Loadable
 import org.archivekeep.utils.loading.optional.OptionalLoadable
 import org.archivekeep.utils.loading.optional.stateIn

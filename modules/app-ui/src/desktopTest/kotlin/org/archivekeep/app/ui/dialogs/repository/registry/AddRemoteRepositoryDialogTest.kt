@@ -21,7 +21,7 @@ import org.archivekeep.app.ui.domain.wiring.LocalWalletOperationLaunchers
 import org.archivekeep.app.ui.domain.wiring.WalletOperationLaunchers
 import org.archivekeep.app.ui.performClickTextInput
 import org.archivekeep.app.ui.utils.PropertiesApplicationMetadata
-import org.archivekeep.files.repo.remote.grpc.BasicAuthCredentials
+import org.archivekeep.files.repo.auth.BasicAuthCredentials
 import org.junit.Test
 
 class AddRemoteRepositoryDialogTest {

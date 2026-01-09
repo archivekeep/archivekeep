@@ -6,7 +6,7 @@ import org.archivekeep.app.ui.components.designsystem.progress.ProgressRow
 import org.archivekeep.app.ui.components.designsystem.progress.ProgressRowList
 import org.archivekeep.files.procedures.indexupdate.IndexUpdateAddProgress
 import org.archivekeep.files.procedures.indexupdate.IndexUpdateMoveProgress
-import org.archivekeep.utils.filesAutoPlural
+import org.archivekeep.utils.text.filesAutoPlural
 
 @Composable
 fun LocalIndexUpdateProgress(

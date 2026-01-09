@@ -48,13 +48,13 @@ import org.archivekeep.files.crypto.file.readCryptoStream
 import org.archivekeep.files.crypto.file.writeCryptoStream
 import org.archivekeep.files.crypto.parseVerifyDecodeJWS
 import org.archivekeep.files.crypto.signAsJWS
+import org.archivekeep.files.encryption.EncryptedFileSystemRepositoryVaultContents
+import org.archivekeep.files.encryption.verifyingStreamViaBackgroundCoroutine
 import org.archivekeep.files.exceptions.DestinationExists
 import org.archivekeep.files.repo.ArchiveFileInfo
 import org.archivekeep.files.repo.Repo
 import org.archivekeep.files.repo.RepoIndex
 import org.archivekeep.files.repo.RepositoryMetadata
-import org.archivekeep.files.repo.encryptedfiles.EncryptedFileSystemRepositoryVaultContents
-import org.archivekeep.files.repo.encryptedfiles.verifyingStreamViaBackgroundCoroutine
 import org.archivekeep.utils.datastore.passwordprotected.PasswordProtectedCustomJoseStorage
 import org.archivekeep.utils.exceptions.WrongCredentialsException
 import org.archivekeep.utils.fromBase64ToHex

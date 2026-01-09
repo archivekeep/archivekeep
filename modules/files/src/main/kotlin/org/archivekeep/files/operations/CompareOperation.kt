@@ -2,7 +2,7 @@ package org.archivekeep.files.operations
 
 import org.archivekeep.files.repo.Repo
 import org.archivekeep.files.repo.RepoIndex
-import org.archivekeep.util.strings.pathDiff
+import org.archivekeep.utils.text.pathDiff
 import java.io.PrintWriter
 
 class CompareOperation {

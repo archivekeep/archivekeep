@@ -26,8 +26,8 @@ import org.archivekeep.app.ui.fixedFilesystemDirectoryPicker
 import org.archivekeep.app.ui.performClickTextInput
 import org.archivekeep.app.ui.utils.PropertiesApplicationMetadata
 import org.archivekeep.app.ui.utils.filesystem.LocalFilesystemDirectoryPicker
-import org.archivekeep.files.repo.encryptedfiles.EncryptedFileSystemRepository
-import org.archivekeep.files.repo.files.FilesRepo
+import org.archivekeep.files.driver.filesystem.encryptedfiles.EncryptedFileSystemRepository
+import org.archivekeep.files.driver.filesystem.files.FilesRepo
 import org.junit.Rule
 import org.junit.Test
 import org.junit.rules.TemporaryFolder

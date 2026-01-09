@@ -11,8 +11,8 @@ import org.archivekeep.app.core.persistence.registry.RegistryDataStore
 import org.archivekeep.app.core.utils.generics.Execution
 import org.archivekeep.app.core.utils.generics.perform
 import org.archivekeep.app.core.utils.identifiers.StorageURI
-import org.archivekeep.files.repo.encryptedfiles.EncryptedFileSystemRepository
-import org.archivekeep.files.repo.files.FilesRepo
+import org.archivekeep.files.driver.filesystem.encryptedfiles.EncryptedFileSystemRepository
+import org.archivekeep.files.driver.filesystem.files.FilesRepo
 import kotlin.io.path.Path
 
 abstract class AddFileSystemRepositoryOperationImpl(

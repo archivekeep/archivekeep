@@ -1,6 +1,6 @@
 package org.archivekeep.app.core.persistence.platform
 
-import org.archivekeep.testing.fixtures.FixtureRepoBuilder
+import org.archivekeep.files.driver.fixtures.FixtureRepoBuilder
 
 fun FixtureRepoBuilder.photosAdjustmentA() {
     deletePattern("2024/5/5.JPG".toRegex())

@@ -2,13 +2,13 @@ package org.archivekeep.files.procedures.sync
 
 import kotlinx.coroutines.runBlocking
 import org.archivekeep.files.assertRepositoryContents
+import org.archivekeep.files.driver.fixtures.FixtureRepoBuilder
+import org.archivekeep.files.driver.inmemory.toInMemoryRepo
 import org.archivekeep.files.operations.CompareOperation
 import org.archivekeep.files.procedures.sync.operations.CopyNewFileOperation
 import org.archivekeep.files.procedures.sync.operations.RelocationApplyOperation
 import org.archivekeep.files.procedures.sync.operations.SyncOperation
-import org.archivekeep.testing.fixtures.FixtureRepoBuilder
-import org.archivekeep.testing.storage.toInMemoryRepo
-import org.archivekeep.utils.sha256
+import org.archivekeep.utils.hashing.sha256
 import org.junit.jupiter.api.Test
 
 val relocateAll = RelocationSyncMode.Move(allowDuplicateIncrease = true, allowDuplicateReduction = true)

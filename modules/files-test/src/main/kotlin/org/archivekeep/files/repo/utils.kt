@@ -1,6 +1,6 @@
 package org.archivekeep.files.repo
 
-import org.archivekeep.utils.sha256
+import org.archivekeep.utils.hashing.sha256
 import kotlin.test.assertEquals
 
 fun ArchiveFileInfo.Companion.forStringContents(contents: String): ArchiveFileInfo {
