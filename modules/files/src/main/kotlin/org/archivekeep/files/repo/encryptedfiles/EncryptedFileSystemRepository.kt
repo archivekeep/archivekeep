@@ -40,6 +40,8 @@ import org.archivekeep.utils.coroutines.flowScopedToThisJob
 import org.archivekeep.utils.coroutines.shareResourceIn
 import org.archivekeep.utils.datastore.passwordprotected.PasswordProtectedJoseStorageInFile
 import org.archivekeep.utils.flows.logLoadableResourceLoad
+import org.archivekeep.utils.io.createTmpFileForWrite
+import org.archivekeep.utils.io.moveTmpToDestination
 import org.archivekeep.utils.io.watchRecursively
 import org.archivekeep.utils.loading.Loadable
 import org.archivekeep.utils.loading.firstLoadedOrNullOnErrorOrLocked
@@ -48,10 +50,8 @@ import org.archivekeep.utils.loading.produceLoadableStateIn
 import org.archivekeep.utils.loading.stateIn
 import org.archivekeep.utils.safeFileReadWrite
 import java.io.InputStream
-import java.nio.file.FileAlreadyExistsException
 import java.nio.file.Files
 import java.nio.file.Path
-import java.nio.file.StandardOpenOption
 import kotlin.io.path.createDirectory
 import kotlin.io.path.createParentDirectories
 import kotlin.io.path.exists
@@ -221,21 +221,15 @@ class EncryptedFileSystemRepository private constructor(
                 val vaultContents = vault.data.firstLoadedOrNullOnErrorOrLocked()
                 val dstPath = encryptedFilesRoot.resolve(safeSubPath("$filename.enc"))
 
+                if (dstPath.exists()) {
+                    throw DestinationExists(filename)
+                }
+
                 dstPath.createParentDirectories()
 
-                val os =
-                    try {
-                        Files.newOutputStream(
-                            dstPath,
-                            StandardOpenOption.CREATE_NEW,
-//                    StandardOpenOption.SYNC,
-                            StandardOpenOption.WRITE,
-                        )
-                    } catch (e: FileAlreadyExistsException) {
-                        throw DestinationExists(filename, cause = e)
-                    }
+                val (dstTmpFilePath, os) = createTmpFileForWrite(dstPath, Files::newOutputStream)
 
-                cleanup.files.add(dstPath)
+                cleanup.files.add(dstTmpFilePath)
 
                 os.use {
                     coroutineScope {
@@ -260,10 +254,12 @@ class EncryptedFileSystemRepository private constructor(
                                 os,
                             )
                         }
-
-                        cleanup.cancel()
                     }
                 }
+
+                moveTmpToDestination(dstTmpFilePath, dstPath)
+
+                cleanup.cancel()
             } finally {
                 withContext(NonCancellable) {
                     if (cleanup.files.isNotEmpty()) {

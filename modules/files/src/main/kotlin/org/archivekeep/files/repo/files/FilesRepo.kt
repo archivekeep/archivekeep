@@ -34,6 +34,8 @@ import org.archivekeep.files.repo.RepositoryMetadata
 import org.archivekeep.utils.InProgressHandler
 import org.archivekeep.utils.coroutines.flowScopedToThisJob
 import org.archivekeep.utils.flows.logLoadableResourceLoad
+import org.archivekeep.utils.io.createTmpFileForWrite
+import org.archivekeep.utils.io.moveTmpToDestination
 import org.archivekeep.utils.io.watchRecursively
 import org.archivekeep.utils.loading.Loadable
 import org.archivekeep.utils.loading.flatMapLoadableFlow
@@ -44,12 +46,10 @@ import org.archivekeep.utils.safeFileReadWrite
 import java.io.InputStream
 import java.nio.ByteBuffer
 import java.nio.channels.FileChannel
-import java.nio.file.FileAlreadyExistsException
 import java.nio.file.FileSystems
 import java.nio.file.Files
 import java.nio.file.Path
 import java.nio.file.PathMatcher
-import java.nio.file.StandardOpenOption
 import java.util.Collections.singletonList
 import kotlin.io.path.ExperimentalPathApi
 import kotlin.io.path.Path
@@ -228,27 +228,21 @@ class FilesRepo(
     ) {
         val dstPath = root.resolve(safeSubPath(filename))
 
+        if (dstPath.exists()) {
+            throw DestinationExists(filename)
+        }
+
         withContext(Dispatchers.IO) {
             dstPath.createParentDirectories()
 
-            val fc =
-                try {
-                    FileChannel.open(
-                        dstPath,
-                        StandardOpenOption.CREATE_NEW,
-//                    StandardOpenOption.SYNC,
-                        StandardOpenOption.WRITE,
-                    )
-                } catch (e: FileAlreadyExistsException) {
-                    throw DestinationExists(filename, cause = e)
-                }
+            val (dstTmpFilePath, fc) = createTmpFileForWrite(dstPath, FileChannel::open)
 
             val cleanup = UnfinishedStoreCleanup()
 
             try {
                 inProgressHandler.onStart(dstPath)
-                cleanup.files.add(dstPath)
-                println("copy to start: $dstPath")
+                cleanup.files.add(dstTmpFilePath)
+
                 fc.use { output ->
                     val buffer = ByteArray(2 * 1024 * 1024)
                     var read: Int = stream.read(buffer)
@@ -275,13 +269,14 @@ class FilesRepo(
                     output.force(true)
                     monitor(total)
                 }
-                println("copy to end: $dstPath")
 
-                val realChecksum = computeChecksum(dstPath)
+                val realChecksum = computeChecksum(dstTmpFilePath)
 
                 if (realChecksum != info.checksumSha256) {
                     throw ChecksumMismatch(expected = info.checksumSha256, actual = realChecksum)
                 }
+
+                moveTmpToDestination(dstTmpFilePath, dstPath)
 
                 indexStore.storeChecksumForSave(cleanup, filename, info.checksumSha256)
 
@@ -317,8 +312,6 @@ class FilesRepo(
     override suspend fun updateMetadata(transform: (old: RepositoryMetadata) -> RepositoryMetadata) {
         safeFileReadWrite(metadataPath) { oldString ->
             val old = oldString?.let { Json.decodeFromString(oldString) } ?: RepositoryMetadata()
-
-            println("Updating")
 
             Json.encodeToString(transform(old))
         }
