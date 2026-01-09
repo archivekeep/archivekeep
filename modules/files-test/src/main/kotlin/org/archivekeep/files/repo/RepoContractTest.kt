@@ -1,25 +1,25 @@
 package org.archivekeep.files.repo
 
 import io.kotest.assertions.nondeterministic.eventually
+import io.kotest.matchers.shouldBe
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.SharingStarted
-import kotlinx.coroutines.test.StandardTestDispatcher
-import kotlinx.coroutines.test.TestDispatcher
-import kotlinx.coroutines.test.advanceUntilIdle
-import kotlinx.coroutines.test.runTest
 import org.archivekeep.files.assertLoaded
 import org.archivekeep.files.exceptions.ChecksumMismatch
 import org.archivekeep.files.exceptions.DestinationExists
 import org.archivekeep.files.quickSave
 import org.archivekeep.files.shouldHaveCommittedContentsOf
 import org.archivekeep.files.testContents01
+import org.archivekeep.files.utils.GenericTestScope
+import org.archivekeep.files.utils.standardRunTest
 import org.archivekeep.files.withContentsFrom
 import org.archivekeep.utils.hashing.sha256
 import org.archivekeep.utils.loading.stateIn
-import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.RepeatedTest
 import org.junit.jupiter.api.assertThrows
 import java.util.UUID
 import kotlin.test.assertEquals
@@ -28,18 +28,16 @@ import kotlin.time.Duration.Companion.seconds
 @OptIn(ExperimentalCoroutinesApi::class)
 abstract class RepoContractTest<T : Repo> {
     interface TestRepo<T : Repo> {
-        suspend fun open(testDispatcher: TestDispatcher): T
+        suspend fun open(testDispatcher: CoroutineDispatcher): T
     }
 
     abstract suspend fun createNew(): TestRepo<T>
 
-    @Test
+    @RepeatedTest(4)
     fun `save should store file`() =
         runTest {
-            val dispatcher = StandardTestDispatcher(testScheduler)
-
             val testRepo = createNew()
-            val repoAccessor = testRepo.open(dispatcher)
+            val repoAccessor = testRepo.open(this@runTest.ioDispatcher)
 
             repoAccessor.quickSave(
                 "test-file.txt",
@@ -59,13 +57,11 @@ abstract class RepoContractTest<T : Repo> {
             )
         }
 
-    @Test
+    @RepeatedTest(4)
     fun `save should not overwrite existing file`() =
         runTest {
-            val dispatcher = StandardTestDispatcher(testScheduler)
-
             val testRepo = createNew()
-            val repoAccessor = testRepo.open(dispatcher)
+            val repoAccessor = testRepo.open(this@runTest.ioDispatcher)
 
             repoAccessor.quickSave(
                 "test-file.txt",
@@ -92,13 +88,11 @@ abstract class RepoContractTest<T : Repo> {
             )
         }
 
-    @Test
+    @RepeatedTest(4)
     fun `save should not store wrong file, and should work on correct retry`() =
         runTest {
-            val dispatcher = StandardTestDispatcher(testScheduler)
-
             val testRepo = createNew()
-            val repoAccessor = testRepo.open(dispatcher)
+            val repoAccessor = testRepo.open(this@runTest.ioDispatcher)
 
             assertThrows<ChecksumMismatch> {
                 repoAccessor.save(
@@ -118,27 +112,21 @@ abstract class RepoContractTest<T : Repo> {
                 "RIGHT CONTENTS",
             )
 
-            // TODO: eventual consistency is not ideal for the index() call afterwards,
-            //       fix implementation(s) to have inner invalidation, and wait for correct value
-            advanceUntilIdle()
-
-            assertEquals(
-                listOf(
-                    RepoIndex.File.forStringContents("test-file.txt", "RIGHT CONTENTS"),
-                ),
-                repoAccessor.index().files,
-            )
+            eventually(3.seconds) {
+                repoAccessor.index().files shouldBe
+                    listOf(
+                        RepoIndex.File.forStringContents("test-file.txt", "RIGHT CONTENTS"),
+                    )
+            }
         }
 
-    @Test
+    @RepeatedTest(4)
     fun `move file`() =
         runTest {
-            val dispatcher = StandardTestDispatcher(testScheduler)
-
             val testRepo = createNew()
             val repoAccessor =
                 testRepo
-                    .open(dispatcher)
+                    .open(this@runTest.ioDispatcher)
                     .withContentsFrom(testContents01)
 
             repoAccessor.move(
@@ -146,27 +134,23 @@ abstract class RepoContractTest<T : Repo> {
                 to = "NEW/A/01.txt",
             )
 
-            advanceUntilIdle()
-
-            assertEquals(
-                listOf(
-                    RepoIndex.File.forStringContents(path = "A/02.txt"),
-                    RepoIndex.File.forStringContents(path = "B/03.txt"),
-                    RepoIndex.File.forStringContents(path = "NEW/A/01.txt", stringContents = "A/01.txt"),
-                ),
-                repoAccessor.index().files,
-            )
+            eventually(3.seconds) {
+                repoAccessor.index().files shouldBe
+                    listOf(
+                        RepoIndex.File.forStringContents(path = "A/02.txt"),
+                        RepoIndex.File.forStringContents(path = "B/03.txt"),
+                        RepoIndex.File.forStringContents(path = "NEW/A/01.txt", stringContents = "A/01.txt"),
+                    )
+            }
         }
 
-    @Test
+    @RepeatedTest(4)
     fun `move should not overwrite existing file`() =
         runTest {
-            val dispatcher = StandardTestDispatcher(testScheduler)
-
             val testRepo = createNew()
             val repoAccessor =
                 testRepo
-                    .open(dispatcher)
+                    .open(this@runTest.ioDispatcher)
                     .withContentsFrom(testContents01)
 
             assertThrows<DestinationExists> {
@@ -176,28 +160,24 @@ abstract class RepoContractTest<T : Repo> {
                 )
             }
 
-            advanceUntilIdle()
-
-            assertEquals(
-                listOf(
-                    RepoIndex.File.forStringContents(path = "A/01.txt"),
-                    RepoIndex.File.forStringContents(path = "A/02.txt"),
-                    RepoIndex.File.forStringContents(path = "B/03.txt"),
-                ),
-                repoAccessor.index().files,
-            )
+            eventually(3.seconds) {
+                repoAccessor.index().files shouldBe
+                    listOf(
+                        RepoIndex.File.forStringContents(path = "A/01.txt"),
+                        RepoIndex.File.forStringContents(path = "A/02.txt"),
+                        RepoIndex.File.forStringContents(path = "B/03.txt"),
+                    )
+            }
         }
 
-    @Test
+    @RepeatedTest(4)
     fun `index loads and updates after save`() =
         runTest {
-            val dispatcher = StandardTestDispatcher(testScheduler)
-
             val testRepo = createNew()
 
             val repoAccessor =
                 testRepo
-                    .open(dispatcher)
+                    .open(this@runTest.ioDispatcher)
                     .withContentsFrom(testContents01)
 
             val indexFlowState =
@@ -235,18 +215,16 @@ abstract class RepoContractTest<T : Repo> {
             }
         }
 
-    @Test
-    open fun `metadata initial load (empty), update and load (new-value), and re-open inital load (new-value)`() =
+    @RepeatedTest(4)
+    fun `metadata initial load (empty), update and load (new-value), and re-open inital load (new-value)`() =
         runTest {
-            val dispatcher = StandardTestDispatcher(testScheduler)
-
             val testRepo = createNew()
             val newID = UUID.randomUUID().toString()
 
             run {
                 val repoAccessor =
                     testRepo
-                        .open(dispatcher)
+                        .open(this@runTest.ioDispatcher)
                         .withContentsFrom(testContents01)
 
                 val collectScope = CoroutineScope(SupervisorJob())
@@ -276,7 +254,7 @@ abstract class RepoContractTest<T : Repo> {
             }
 
             run {
-                val repoAccessor = testRepo.open(dispatcher)
+                val repoAccessor = testRepo.open(this@runTest.ioDispatcher)
 
                 val collectScope = CoroutineScope(SupervisorJob())
 
@@ -295,17 +273,15 @@ abstract class RepoContractTest<T : Repo> {
             }
         }
 
-    @Test
+    @RepeatedTest(4)
     fun `metadata change should not affect contents`() =
         runTest {
-            val dispatcher = StandardTestDispatcher(testScheduler)
-
             val testRepo = createNew()
             val newID = UUID.randomUUID().toString()
 
             val repoAccessor =
                 testRepo
-                    .open(dispatcher)
+                    .open(this@runTest.ioDispatcher)
                     .withContentsFrom(testContents01)
 
             repoAccessor.updateMetadata {
@@ -321,4 +297,6 @@ abstract class RepoContractTest<T : Repo> {
 
             repoAccessor shouldHaveCommittedContentsOf testContents01
         }
+
+    open fun runTest(testBody: suspend GenericTestScope.() -> Unit) = standardRunTest(testBody)
 }

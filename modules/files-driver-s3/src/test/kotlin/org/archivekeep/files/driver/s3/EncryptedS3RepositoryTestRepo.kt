@@ -1,7 +1,7 @@
 package org.archivekeep.files.driver.s3
 
 import aws.sdk.kotlin.runtime.auth.credentials.StaticCredentialsProvider
-import kotlinx.coroutines.test.TestDispatcher
+import kotlinx.coroutines.CoroutineDispatcher
 import org.archivekeep.files.repo.RepoContractTest
 import java.net.URI
 import java.util.UUID
@@ -46,7 +46,7 @@ class EncryptedS3RepositoryTestRepo private constructor(
         }
     }
 
-    override suspend fun open(testDispatcher: TestDispatcher): EncryptedS3Repository =
+    override suspend fun open(testDispatcher: CoroutineDispatcher): EncryptedS3Repository =
         EncryptedS3Repository
             .openAndUnlock(
                 URI.create(s3URL),

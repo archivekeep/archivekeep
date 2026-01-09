@@ -1,6 +1,6 @@
 package org.archivekeep.files.driver.filesystem.encryptedfiles
 
-import kotlinx.coroutines.test.TestDispatcher
+import kotlinx.coroutines.CoroutineDispatcher
 import org.archivekeep.files.repo.RepoContractTest.TestRepo
 import java.nio.file.Path
 import java.util.UUID
@@ -19,6 +19,6 @@ class EncryptedFileSystemRepositoryTestRepo(
         }
     }
 
-    override suspend fun open(testDispatcher: TestDispatcher): EncryptedFileSystemRepository =
+    override suspend fun open(testDispatcher: CoroutineDispatcher): EncryptedFileSystemRepository =
         EncryptedFileSystemRepository.openAndUnlock(path, password, stateDispatcher = testDispatcher)
 }

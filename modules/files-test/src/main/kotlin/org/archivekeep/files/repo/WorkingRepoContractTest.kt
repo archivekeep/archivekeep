@@ -2,7 +2,6 @@ package org.archivekeep.files.repo
 
 import io.kotest.assertions.nondeterministic.eventually
 import kotlinx.coroutines.CoroutineDispatcher
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.launch
@@ -11,13 +10,13 @@ import org.archivekeep.files.flowToInputStream
 import org.archivekeep.files.operations.StatusOperation
 import org.archivekeep.files.testContents01
 import org.archivekeep.files.utils.GenericTestScope
+import org.archivekeep.files.utils.standardRunTest
 import org.archivekeep.files.withContentsFrom
 import org.archivekeep.utils.loading.Loadable
 import org.archivekeep.utils.loading.stateIn
 import org.junit.jupiter.api.RepeatedTest
 import kotlin.test.assertEquals
 import kotlin.time.Duration.Companion.seconds
-import kotlinx.coroutines.test.runTest as standardRunTest
 
 @OptIn(ExperimentalStdlibApi::class)
 abstract class WorkingRepoContractTest<T : LocalRepo> {
@@ -187,15 +186,5 @@ abstract class WorkingRepoContractTest<T : LocalRepo> {
 
     private fun GenericTestScope.getDispatcher() = coroutineContext[CoroutineDispatcher] ?: throw IllegalStateException("Dispatcher expected")
 
-    open fun runTest(testBody: suspend GenericTestScope.() -> Unit) =
-        standardRunTest {
-            val scope =
-                object : GenericTestScope, CoroutineScope by this@standardRunTest {
-                    override val backgroundScope = this@standardRunTest.backgroundScope
-                }
-
-            with(scope) {
-                testBody()
-            }
-        }
+    open fun runTest(testBody: suspend GenericTestScope.() -> Unit) = standardRunTest(testBody)
 }

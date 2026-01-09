@@ -1,6 +1,7 @@
 package org.archivekeep.files.utils
 
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancelAndJoin
@@ -18,6 +19,8 @@ fun runBlockingTest(testBody: suspend GenericTestScope.() -> Unit) =
             val scope =
                 object : GenericTestScope, CoroutineScope by currentScope {
                     override val backgroundScope = backgroundScope
+
+                    override val ioDispatcher = Dispatchers.IO
                 }
 
             with(scope) {

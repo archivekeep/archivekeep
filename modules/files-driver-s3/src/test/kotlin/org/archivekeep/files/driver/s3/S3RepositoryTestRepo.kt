@@ -6,7 +6,7 @@ import aws.sdk.kotlin.services.s3.createBucket
 import aws.sdk.kotlin.services.s3.putObject
 import aws.smithy.kotlin.runtime.content.asByteStream
 import aws.smithy.kotlin.runtime.net.url.Url
-import kotlinx.coroutines.test.TestDispatcher
+import kotlinx.coroutines.CoroutineDispatcher
 import org.archivekeep.files.repo.RepoContractTest
 import org.archivekeep.utils.fromHexToBase64
 import org.archivekeep.utils.hashing.sha256
@@ -32,7 +32,7 @@ class S3RepositoryTestRepo(
             bucketName,
         )
 
-    override suspend fun open(testDispatcher: TestDispatcher): S3Repository =
+    override suspend fun open(testDispatcher: CoroutineDispatcher): S3Repository =
         S3Repository.open(
             URI.create(s3URL),
             "aa",

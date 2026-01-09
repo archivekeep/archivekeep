@@ -1,7 +1,7 @@
 package org.archivekeep.testing.storage
 
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.test.TestDispatcher
 import org.archivekeep.files.driver.inmemory.InMemoryRepo
 import org.archivekeep.files.repo.RepoContractTest
 import org.archivekeep.files.repo.RepositoryMetadata
@@ -13,7 +13,7 @@ class InMemoryRepoContractTest : RepoContractTest<InMemoryRepo>() {
             val contentsMutableStateFlow = MutableStateFlow<Map<String, ByteArray>>(emptyMap())
             val missingContentsMutableStateFlow = MutableStateFlow<Map<String, ByteArray>>(emptyMap())
 
-            override suspend fun open(testDispatcher: TestDispatcher): InMemoryRepo =
+            override suspend fun open(testDispatcher: CoroutineDispatcher): InMemoryRepo =
                 InMemoryRepo(
                     testDispatcher,
                     metadataMutableStateFlow,
