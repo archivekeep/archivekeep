@@ -3,8 +3,10 @@ package org.archivekeep.files.procedures.sync.job
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.yield
 import org.archivekeep.files.procedures.sync.discovery.DiscoveredSyncOperationsGroup
-import org.archivekeep.files.procedures.sync.log.SyncLogger
+import org.archivekeep.files.procedures.sync.job.observation.SyncExecutionObserver
 import org.archivekeep.files.procedures.sync.operations.SyncOperation
+import org.archivekeep.files.procedures.sync.operations.SyncOperation.ExecutionResult.FAIL
+import org.archivekeep.files.procedures.sync.operations.SyncOperation.ExecutionResult.SUCCESS
 import org.archivekeep.files.repo.Repo
 import org.archivekeep.utils.procedures.ProcedureExecutionContext
 import org.archivekeep.utils.procedures.tasks.ProcedureJobTask
@@ -33,7 +35,7 @@ class SyncProcedureJobTask<T : SyncOperation>(
         val context: ProcedureExecutionContext,
         val base: Repo,
         val dst: Repo,
-        val logger: SyncLogger,
+        val observer: SyncExecutionObserver,
         val prompter: suspend (step: DiscoveredSyncOperationsGroup<*>) -> Boolean,
     )
 
@@ -61,9 +63,15 @@ class SyncProcedureJobTask<T : SyncOperation>(
 
         tracker.runOverride(parentProcedureContext) { modifiedContext, reportCompleted ->
             operationsToExecute.forEach { operation ->
-                operation.apply(modifiedContext, base, dst, logger)
+                val result = operation.apply(modifiedContext, base, dst, logger)
 
-                reportCompleted(operation)
+                when (result) {
+                    SUCCESS -> reportCompleted(operation)
+
+                    FAIL -> {
+                        // TODO: implement
+                    }
+                }
 
                 yield()
             }

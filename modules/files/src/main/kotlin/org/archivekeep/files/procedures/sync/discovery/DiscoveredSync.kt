@@ -1,7 +1,7 @@
 package org.archivekeep.files.procedures.sync.discovery
 
 import org.archivekeep.files.procedures.sync.job.SyncProcedureJobTask
-import org.archivekeep.files.procedures.sync.log.SyncLogger
+import org.archivekeep.files.procedures.sync.job.observation.SyncExecutionObserver
 import org.archivekeep.files.procedures.sync.operations.SyncOperation
 import org.archivekeep.files.repo.Repo
 import org.archivekeep.utils.procedures.TaskProcedureJob
@@ -15,7 +15,7 @@ class DiscoveredSync internal constructor(
         dst: Repo,
         // TODO: this should work against real tasks (filtered by limitToSubset)
         prompter: suspend (step: DiscoveredSyncOperationsGroup<*>) -> Boolean,
-        logger: SyncLogger,
+        observer: SyncExecutionObserver,
         limitToSubset: Set<SyncOperation>? = null,
     ) = TaskProcedureJob(
         SequentialProcedureJobTaskGroup(
@@ -26,7 +26,7 @@ class DiscoveredSync internal constructor(
                         context,
                         base,
                         dst,
-                        logger,
+                        observer,
                         prompter,
                     )
                 },

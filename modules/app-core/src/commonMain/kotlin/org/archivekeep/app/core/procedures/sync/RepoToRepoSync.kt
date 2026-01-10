@@ -45,6 +45,7 @@ interface RepoToRepoSync {
         val progress: StateFlow<TaskExecutionProgressSummary.Group>,
         val inProgressOperationsProgress: StateFlow<List<OperationProgress>>,
         val progressLog: StateFlow<String>,
+        val errorLog: StateFlow<String>,
         val executionState: ProcedureExecutionState,
     ) : State
 }

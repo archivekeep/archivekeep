@@ -8,7 +8,7 @@ import org.archivekeep.files.procedures.sync.discovery.DiscoveredNewFilesGroup
 import org.archivekeep.files.procedures.sync.discovery.DiscoveredRelocationsMoveApplyGroup
 import org.archivekeep.files.procedures.sync.discovery.RelocationSyncMode
 import org.archivekeep.files.procedures.sync.discovery.SyncProcedureDiscovery
-import org.archivekeep.files.procedures.sync.log.WritterSyncLogger
+import org.archivekeep.files.procedures.sync.job.observation.WriterSyncLogger
 import org.archivekeep.files.repo.Repo
 import java.io.PrintWriter
 
@@ -18,6 +18,7 @@ suspend fun executeSync(
     to: Repo,
     syncOptions: SyncOptions,
     out: PrintWriter,
+    err: PrintWriter,
     operationName: String,
     baseName: String,
     otherName: String,
@@ -67,7 +68,7 @@ suspend fun executeSync(
                         mainCommand.askForConfirmation("Do you want to $operationName new files?")
                 }
             },
-            logger = WritterSyncLogger(out),
+            observer = WriterSyncLogger(out, err),
         )
 
     job.run()

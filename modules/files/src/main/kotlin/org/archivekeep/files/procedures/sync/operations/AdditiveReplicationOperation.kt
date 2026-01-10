@@ -1,7 +1,7 @@
 package org.archivekeep.files.procedures.sync.operations
 
 import org.archivekeep.files.operations.CompareOperation
-import org.archivekeep.files.procedures.sync.log.SyncLogger
+import org.archivekeep.files.procedures.sync.job.observation.SyncExecutionObserver
 import org.archivekeep.files.repo.Repo
 import org.archivekeep.utils.procedures.ProcedureExecutionContext
 
@@ -14,12 +14,20 @@ data class AdditiveReplicationOperation(
         context: ProcedureExecutionContext,
         base: Repo,
         dst: Repo,
-        logger: SyncLogger,
-    ) {
+        logger: SyncExecutionObserver,
+    ): SyncOperation.ExecutionResult {
+        var result = SyncOperation.ExecutionResult.SUCCESS
+
         relocation.extraBaseLocations.forEach { extraBaseLocation ->
             context.runOperation { context ->
-                copyFileAndLog(context, dst, base, extraBaseLocation, logger)
+                val success = copyFileAndLog(context, dst, base, extraBaseLocation, logger)
+
+                if (!success) {
+                    result = SyncOperation.ExecutionResult.FAIL
+                }
             }
         }
+
+        return result
     }
 }

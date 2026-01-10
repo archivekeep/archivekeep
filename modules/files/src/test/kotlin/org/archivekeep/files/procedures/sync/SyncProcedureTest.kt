@@ -7,7 +7,7 @@ import org.archivekeep.files.driver.inmemory.toInMemoryRepo
 import org.archivekeep.files.operations.CompareOperation
 import org.archivekeep.files.procedures.sync.discovery.RelocationSyncMode
 import org.archivekeep.files.procedures.sync.discovery.SyncProcedureDiscovery
-import org.archivekeep.files.procedures.sync.log.NoOpLogger
+import org.archivekeep.files.procedures.sync.job.observation.NoOpSyncExecutionObserver
 import org.archivekeep.files.procedures.sync.operations.CopyNewFileOperation
 import org.archivekeep.files.procedures.sync.operations.RelocationApplyOperation
 import org.archivekeep.files.procedures.sync.operations.SyncOperation
@@ -44,7 +44,7 @@ class SyncProcedureTest {
         runBlocking {
             val prepared = SyncProcedureDiscovery(relocateAll).prepare(baseRepo, otherRepo)
 
-            val job = prepared.createJob(baseRepo, otherRepo, { true }, NoOpLogger(), selections)
+            val job = prepared.createJob(baseRepo, otherRepo, { true }, NoOpSyncExecutionObserver(), selections)
 
             job.run()
 

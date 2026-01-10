@@ -29,7 +29,7 @@ import org.archivekeep.files.operations.CompareOperation
 import org.archivekeep.files.procedures.sync.discovery.DiscoveredSync
 import org.archivekeep.files.procedures.sync.discovery.RelocationSyncMode
 import org.archivekeep.files.procedures.sync.discovery.SyncProcedureDiscovery
-import org.archivekeep.files.procedures.sync.log.WritterSyncLogger
+import org.archivekeep.files.procedures.sync.job.observation.WriterSyncLogger
 import org.archivekeep.files.procedures.sync.operations.SyncOperation
 import org.archivekeep.files.repo.Repo
 import org.archivekeep.utils.loading.Loadable
@@ -269,6 +269,7 @@ class RepoToRepoSyncServiceImpl(
     ) : AbstractJobGuardRunnable(),
         JobWrapper<JobState> {
         private val executionLog = SyncFlowStringWriter()
+        private val executionErrorLog = SyncFlowStringWriter()
 
         val job =
             discoveredSync.createJob(
@@ -276,7 +277,7 @@ class RepoToRepoSyncServiceImpl(
                 other,
                 prompter = { true },
                 limitToSubset = limitToSubset,
-                logger = WritterSyncLogger(executionLog.writer),
+                observer = WriterSyncLogger(executionLog.writer, executionErrorLog.writer),
             )
 
         override val state: Flow<JobState> =
@@ -286,6 +287,7 @@ class RepoToRepoSyncServiceImpl(
                         job.task.executionProgressSummaryStateFlow,
                         job.inProgressOperationsProgressFlow,
                         executionLog.string,
+                        executionErrorLog.string,
                         it,
                     )
                 }

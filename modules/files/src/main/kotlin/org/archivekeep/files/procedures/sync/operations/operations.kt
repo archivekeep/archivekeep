@@ -3,7 +3,7 @@ package org.archivekeep.files.procedures.sync.operations
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.archivekeep.files.procedures.progress.CopyOperationProgress
-import org.archivekeep.files.procedures.sync.log.SyncLogger
+import org.archivekeep.files.procedures.sync.job.observation.SyncExecutionObserver
 import org.archivekeep.files.repo.Repo
 import org.archivekeep.utils.procedures.operations.OperationContext
 import java.time.Duration
@@ -56,19 +56,35 @@ internal suspend fun copyFileAndLog(
     dst: Repo,
     base: Repo,
     filename: String,
-    logger: SyncLogger,
-) {
-    copyFile(base, filename, dst, context::progressReport)
+    logger: SyncExecutionObserver,
+): Boolean {
+    try {
+        copyFile(base, filename, dst, context::progressReport)
 
-    logger.onFileStored(filename)
+        logger.onFileStored(filename)
+
+        return true
+    } catch (e: Throwable) {
+        logger.onFileStoreFailed(filename, e)
+
+        return false
+    }
 }
 
 internal suspend fun deleteFile(
     dst: Repo,
     filename: String,
-    logger: SyncLogger,
-) {
-    dst.delete(filename)
+    logger: SyncExecutionObserver,
+): Boolean {
+    try {
+        dst.delete(filename)
 
-    logger.onFileDeleted(filename)
+        logger.onFileDeleted(filename)
+
+        return true
+    } catch (e: Throwable) {
+        logger.onFileDeleteFailed(filename, e)
+
+        return false
+    }
 }

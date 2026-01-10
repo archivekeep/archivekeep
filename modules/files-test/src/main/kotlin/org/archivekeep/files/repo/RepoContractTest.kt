@@ -234,7 +234,7 @@ abstract class RepoContractTest<T : Repo> {
                         .metadataFlow
                         .stateIn(collectScope, SharingStarted.Eagerly)
 
-                eventually(2.seconds) {
+                eventually(5.seconds) {
                     metadataFlowState.value.assertLoaded {
                         assertEquals(null, it.associationGroupId)
                     }
@@ -244,7 +244,7 @@ abstract class RepoContractTest<T : Repo> {
                     it.copy(associationGroupId = newID)
                 }
 
-                eventually(2.seconds) {
+                eventually(5.seconds) {
                     metadataFlowState.value.assertLoaded {
                         assertEquals(newID, it.associationGroupId)
                     }

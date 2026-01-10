@@ -1,7 +1,7 @@
 package org.archivekeep.files.procedures.addpush
 
 import org.archivekeep.files.procedures.sync.job.SyncProcedureJobTask
-import org.archivekeep.files.procedures.sync.log.SyncLogger
+import org.archivekeep.files.procedures.sync.job.observation.NoOpSyncExecutionObserver
 import org.archivekeep.files.procedures.sync.operations.CopyNewFileOperation
 import org.archivekeep.files.procedures.sync.operations.RelocationApplyOperation
 import org.archivekeep.files.repo.Repo
@@ -26,20 +26,8 @@ class PushTask<ID>(
                     context,
                     repositoryProvider(repositoryURI),
                     repositoryProvider(destinationRepoID),
-                    // TODO: get rid of this object
-                    object : SyncLogger {
-                        override fun onFileStored(filename: String) {
-                        }
-
-                        override fun onFileMoved(
-                            from: String,
-                            to: String,
-                        ) {
-                        }
-
-                        override fun onFileDeleted(filename: String) {
-                        }
-                    },
+                    // TODO: add log also to push task
+                    observer = NoOpSyncExecutionObserver(),
                     prompter = { true },
                 )
             },

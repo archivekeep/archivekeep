@@ -12,12 +12,15 @@ import org.archivekeep.utils.procedures.ProcedureExecutionState
 import java.util.concurrent.CancellationException
 
 @Composable
-fun ExecutionErrorIfPresent(executionState: ProcedureExecutionState) {
+fun ExecutionErrorIfPresent(
+    executionState: ProcedureExecutionState,
+    spacerModifier: Modifier = Modifier.height(12.dp)
+) {
     (executionState as? ProcedureExecutionState.Finished)
         ?.error
         ?.let { error ->
             if (error !is CancellationException) {
-                Spacer(Modifier.height(12.dp))
+                Spacer(spacerModifier)
                 AutomaticErrorMessage(error, onResolve = {})
             }
         }

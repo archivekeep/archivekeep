@@ -36,6 +36,9 @@ class Push : Callable<Int> {
     val out: PrintWriter
         get() = spec.commandLine().out
 
+    val err: PrintWriter
+        get() = spec.commandLine().err
+
     override fun call(): Int =
         runBlocking(mainCommand.coroutineContext) {
             val currentArchive = mainCommand.openCurrentArchive()
@@ -47,6 +50,7 @@ class Push : Callable<Int> {
                 otherArchive,
                 syncOptions,
                 out,
+                err,
                 "push",
                 "current",
                 "other",
