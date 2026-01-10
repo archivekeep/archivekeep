@@ -6,7 +6,6 @@ import aws.sdk.kotlin.services.s3.deleteObject
 import aws.sdk.kotlin.services.s3.headObject
 import aws.sdk.kotlin.services.s3.listObjects
 import aws.sdk.kotlin.services.s3.model.ChecksumAlgorithm
-import aws.sdk.kotlin.services.s3.model.ChecksumMode
 import aws.sdk.kotlin.services.s3.model.GetObjectRequest
 import aws.sdk.kotlin.services.s3.model.MetadataDirective
 import aws.sdk.kotlin.services.s3.model.NoSuchBucket
@@ -29,6 +28,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -76,6 +76,7 @@ import java.util.Date
 @Serializable
 private data class SignedObjectMetadata(
     val objectChecksumSha256: String,
+    val plainMetadata: CryptoMetadata.Plain,
 )
 
 class EncryptedS3Repository private constructor(
@@ -202,36 +203,24 @@ class EncryptedS3Repository private constructor(
                                 try {
                                     val plainMetadata =
                                         run {
-                                            // TODO: add caching
-
-                                            s3Client.getObject(
-                                                GetObjectRequest {
+                                            val response =
+                                                s3Client.headObject {
                                                     bucket = bucketName
                                                     key = it.key
-                                                    checksumMode = ChecksumMode.Enabled
-                                                },
-                                            ) { response ->
-                                                val objectChecksum = response.checksumSha256!!
-                                                val signedChecksum =
-                                                    parseVerifyDecodeJWS<SignedObjectMetadata>(
-                                                        response.metadata!![SIGNED_METADATA]!!,
-                                                        ECDSAVerifier(vaultContents.currentFileSigningKey!!.toECKey().toECPublicKey()),
-                                                    ).objectChecksumSha256
-
-                                                if (objectChecksum != signedChecksum) {
-                                                    throw RuntimeException("Integrity corrupted of ${it.key!!.toFilename()}")
                                                 }
 
-                                                readCryptoStream(
-                                                    response.body!!.toInputStream(),
+                                            val objectChecksum = response.checksumSha256!!
+                                            val signedObjectMetadata =
+                                                parseVerifyDecodeJWS<SignedObjectMetadata>(
+                                                    response.metadata!![SIGNED_METADATA]!!,
                                                     ECDSAVerifier(vaultContents.currentFileSigningKey!!.toECKey().toECPublicKey()),
-                                                    ECDHDecrypter(
-                                                        vaultContents.currentFileEncryptionKey!!.toECKey().toECPrivateKey(),
-                                                    ),
-                                                ) { plainMetadata, contents ->
-                                                    plainMetadata
-                                                }
+                                                )
+
+                                            if (objectChecksum != signedObjectMetadata.objectChecksumSha256) {
+                                                throw RuntimeException("Integrity corrupted of ${it.key!!.toFilename()}")
                                             }
+
+                                            signedObjectMetadata.plainMetadata
                                         }
 
                                     RepoIndex.File(
@@ -246,7 +235,7 @@ class EncryptedS3Repository private constructor(
                                     null
                                 }
                             }
-                        }.map { it.await() }
+                        }.awaitAll()
                 }
 
             RepoIndex(files.filterNotNull())
@@ -347,14 +336,17 @@ class EncryptedS3Repository private constructor(
                     val encryptedInputStream = PipedInputStream()
                     val encryptedOutputStream = PipedOutputStream(encryptedInputStream)
 
+                    val plainMetadata =
+                        CryptoMetadata.Plain(
+                            size = info.length,
+                            checksumSha256 = info.checksumSha256,
+                        )
+
                     val encryptedWriter =
                         launch {
                             runInterruptible {
                                 writeCryptoStream(
-                                    CryptoMetadata.Plain(
-                                        size = info.length,
-                                        checksumSha256 = info.checksumSha256,
-                                    ),
+                                    plainMetadata,
                                     vaultContents.currentFileSigningKey!!,
                                     ECDHEncrypter(vaultContents.currentFileEncryptionKey!!.toECKey().toECPublicKey()),
                                     pipedInputStream,
@@ -382,6 +374,9 @@ class EncryptedS3Repository private constructor(
                             throw RuntimeException("Checksum doesn't match")
                         }
 
+                        val signedMetadataJSON = Json.encodeToString(SignedObjectMetadata(digestHex.fromHexToBase64(), plainMetadata))
+
+                        // TODO: create TMP file and don't use copy
                         s3Client.copyObject {
                             copySource = "$bucketName/${filename.toKey()}"
 
@@ -389,14 +384,8 @@ class EncryptedS3Repository private constructor(
                             key = filename.toKey()
 
                             metadataDirective = MetadataDirective.Replace
-                            metadata =
-                                mapOf(
-                                    SIGNED_METADATA to
-                                        signAsJWS(
-                                            Json.encodeToString<SignedObjectMetadata>(SignedObjectMetadata(digestHex.fromHexToBase64())),
-                                            vaultContents.currentFileSigningKey!!,
-                                        ),
-                                )
+
+                            metadata = mapOf(SIGNED_METADATA to signAsJWS(signedMetadataJSON, vaultContents.currentFileSigningKey!!))
                         }
                     } catch (e: Throwable) {
                         throw RuntimeException(e)
