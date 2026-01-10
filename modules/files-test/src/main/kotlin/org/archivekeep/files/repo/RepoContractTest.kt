@@ -216,7 +216,7 @@ abstract class RepoContractTest<T : Repo> {
         }
 
     @RepeatedTest(4)
-    fun `metadata initial load (empty), update and load (new-value), and re-open inital load (new-value)`() =
+    open fun `metadata initial load (empty), update and load (new-value), and re-open inital load (new-value)`() =
         runTest {
             val testRepo = createNew()
             val newID = UUID.randomUUID().toString()
