@@ -52,6 +52,7 @@ import org.archivekeep.files.crypto.file.readCryptoStream
 import org.archivekeep.files.crypto.file.writeCryptoStream
 import org.archivekeep.files.crypto.parseVerifyDecodeJWS
 import org.archivekeep.files.crypto.signAsJWS
+import org.archivekeep.files.driver.filesystem.InProgressHandler
 import org.archivekeep.files.encryption.EncryptedFileSystemRepositoryVaultContents
 import org.archivekeep.files.encryption.verifyingStreamViaBackgroundCoroutine
 import org.archivekeep.files.exceptions.DestinationExists
@@ -80,7 +81,6 @@ import java.security.DigestInputStream
 import java.security.MessageDigest
 import java.util.Date
 import kotlin.io.path.createTempFile
-import kotlin.io.path.deleteIfExists
 import kotlin.io.path.fileSize
 import kotlin.io.path.inputStream
 import kotlin.io.path.outputStream
@@ -106,6 +106,8 @@ class EncryptedS3Repository private constructor(
 
     private val contentsLastChangeFlow = MutableStateFlow(Date())
     private val metadataLastChangeFlow = MutableStateFlow(Date())
+
+    private val inProgressHandler = InProgressHandler(scope)
 
     val vault =
         PasswordProtectedCustomJoseStorage(
@@ -181,78 +183,78 @@ class EncryptedS3Repository private constructor(
         AutoRefreshLoadableFlow(
             scope,
             ioDispatcher,
+            activeFlagFlow = inProgressHandler.idleFlagFlow,
             updateTriggerFlow = contentsLastChangeFlow,
         ) {
-            val files =
-                coroutineScope {
-                    val vaultContents = vault.data.firstLoadedOrNullOnErrorOrLocked()!!
+            RepoIndex(loadIndexFiles())
+        }
 
-                    var allItems = emptyList<Object>()
-                    var nextMarker: String? = null
+    private suspend fun loadIndexFiles(): List<RepoIndex.File> =
+        coroutineScope {
+            val vaultContents = vault.data.firstLoadedOrNullOnErrorOrLocked()!!
 
-                    do {
-                        val response =
-                            s3Client
-                                .listObjects {
-                                    bucket = bucketName
-                                    prefix = ENCRYPTED_FILES_PATH_PREFIX
-                                    marker = nextMarker
-                                }
+            var allItems = emptyList<Object>()
+            var nextMarker: String? = null
 
-                        allItems = allItems + (response.contents ?: emptyList())
+            do {
+                val response =
+                    s3Client
+                        .listObjects {
+                            bucket = bucketName
+                            prefix = ENCRYPTED_FILES_PATH_PREFIX
+                            marker = nextMarker
+                        }
 
-                        nextMarker =
-                            if (response.isTruncated == true) {
-                                allItems.last().key
-                            } else {
-                                null
-                            }
-                    } while (nextMarker != null)
+                allItems = allItems + (response.contents ?: emptyList())
 
-                    allItems
-                        .map {
-                            async {
-                                try {
-                                    val plainMetadata =
-                                        run {
-                                            val response =
-                                                s3Client.headObject {
-                                                    bucket = bucketName
-                                                    key = it.key
+                nextMarker =
+                    if (response.isTruncated == true) {
+                        allItems.last().key
+                    } else {
+                        null
+                    }
+            } while (nextMarker != null)
 
-                                                    checksumMode = ChecksumMode.Enabled
-                                                }
+            allItems
+                .map {
+                    async {
+                        try {
+                            val plainMetadata =
+                                run {
+                                    val response =
+                                        s3Client.headObject {
+                                            bucket = bucketName
+                                            key = it.key
 
-                                            val objectChecksum = response.checksumSha256!!
-                                            val signedObjectMetadata =
-                                                parseVerifyDecodeJWS<SignedObjectMetadata>(
-                                                    response.metadata!![SIGNED_METADATA_OBJECT_PROPERTY]!!,
-                                                    ECDSAVerifier(vaultContents.currentFileSigningKey!!.toECKey().toECPublicKey()),
-                                                )
-
-                                            if (objectChecksum != signedObjectMetadata.objectChecksumSha256) {
-                                                throw RuntimeException("Integrity corrupted of ${it.key!!.fromEncryptedFilePath()}")
-                                            }
-
-                                            signedObjectMetadata.plainFileMetadata
+                                            checksumMode = ChecksumMode.Enabled
                                         }
 
-                                    RepoIndex.File(
-                                        it.key!!.fromEncryptedFilePath(),
-                                        plainMetadata.size,
-                                        plainMetadata.checksumSha256,
-                                    )
-                                } catch (e: Throwable) {
-                                    // TODO: show to UI
-                                    println("Index get error: $e")
-                                    e.printStackTrace()
-                                    null
-                                }
-                            }
-                        }.awaitAll()
-                }
+                                    val objectChecksum = response.checksumSha256!!
+                                    val signedObjectMetadata =
+                                        parseVerifyDecodeJWS<SignedObjectMetadata>(
+                                            response.metadata!![SIGNED_METADATA_OBJECT_PROPERTY]!!,
+                                            ECDSAVerifier(vaultContents.currentFileSigningKey!!.toECKey().toECPublicKey()),
+                                        )
 
-            RepoIndex(files.filterNotNull())
+                                    if (objectChecksum != signedObjectMetadata.objectChecksumSha256) {
+                                        throw RuntimeException("Integrity corrupted of ${it.key!!.fromEncryptedFilePath()}")
+                                    }
+
+                                    signedObjectMetadata.plainFileMetadata
+                                }
+
+                            RepoIndex.File(
+                                it.key!!.fromEncryptedFilePath(),
+                                plainMetadata.size,
+                                plainMetadata.checksumSha256,
+                            )
+                        } catch (e: Throwable) {
+                            // TODO: show to UI
+                            e.printStackTrace()
+                            null
+                        }
+                    }
+                }.awaitAll().filterNotNull()
         }
 
     override val indexFlow: StateFlow<Loadable<RepoIndex>> = indexResource.stateFlow
@@ -335,6 +337,7 @@ class EncryptedS3Repository private constructor(
 
         try {
             checkNotExists(filename)
+            inProgressHandler.onStart(filename)
 
             val tempFile = createTempFile("ak-enc-s3-p-upd")
             cleanup.files.add(tempFile)
@@ -362,12 +365,11 @@ class EncryptedS3Repository private constructor(
                     }
                 } catch (e: Throwable) {
                     throw RuntimeException(e)
-                } finally {
-                    tempFile.deleteIfExists()
                 }
             }
         } finally {
             withContext(NonCancellable) {
+                inProgressHandler.onEnd(filename)
                 cleanup.runPremature()
                 contentsLastChangeFlow.update { Date() }
             }

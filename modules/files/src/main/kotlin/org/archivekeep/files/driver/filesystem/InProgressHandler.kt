@@ -1,18 +1,18 @@
 package org.archivekeep.files.driver.filesystem
 
+import kotlinx.coroutines.CompletableJob
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.flow.runningFold
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
-import kotlinx.coroutines.flow.updateAndGet
-import java.util.concurrent.locks.Lock
-import java.util.concurrent.locks.ReentrantLock
-import kotlin.concurrent.withLock
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.milliseconds
 
@@ -28,11 +28,20 @@ class InProgressHandler<T>(
         ) = InProgressHandler<String>(scope, startDelayDuration, transform = { it })
     }
 
-    private val lock: Lock = ReentrantLock(true)
-
     private val inProgressFiles = MutableStateFlow(emptySet<String>())
 
-    val jobActiveOnIdle = MutableStateFlow<Job?>(SupervisorJob())
+    val idleFlagFlow =
+        inProgressFiles
+            .map { it.isEmpty() }
+            .stateIn(scope, SharingStarted.WhileSubscribed(), inProgressFiles.value.isEmpty())
+
+    val jobActiveOnIdle =
+        idleFlagFlow.runningFold(null) { previous: CompletableJob?, flag ->
+            previous?.cancel()
+
+            if (flag) SupervisorJob() else null
+        }.stateIn(scope, SharingStarted.WhileSubscribed(), null)
+
     val jobActiveOnIdleDelayedStart =
         jobActiveOnIdle
             .onEach {
@@ -45,19 +54,10 @@ class InProgressHandler<T>(
             }
 
     fun onStart(dstPath: T) {
-        lock.withLock {
-            inProgressFiles.update { it + setOf(transform(dstPath)) }
-            jobActiveOnIdle.updateAndGet { null }?.cancel()
-        }
+        inProgressFiles.update { it + setOf(transform(dstPath)) }
     }
 
     fun onEnd(dstPath: T) {
-        lock.withLock {
-            val newValues = inProgressFiles.updateAndGet { it - setOf(transform(dstPath)) }
-
-            if (newValues.isEmpty()) {
-                jobActiveOnIdle.value = SupervisorJob()
-            }
-        }
+        inProgressFiles.update { it - setOf(transform(dstPath)) }
     }
 }
