@@ -16,13 +16,13 @@ import org.archivekeep.cli.commands.Status
 import org.archivekeep.cli.utils.SignalInterruptCancellationException
 import org.archivekeep.cli.workingarchive.WorkingArchive
 import org.archivekeep.cli.workingarchive.openWorkingArchive
+import org.archivekeep.files.api.repository.Repo
+import org.archivekeep.files.api.repository.auth.BasicAuthCredentials
 import org.archivekeep.files.driver.filesystem.files.FilesRepo
 import org.archivekeep.files.driver.grpc.Options
 import org.archivekeep.files.driver.grpc.grpcPrefix
 import org.archivekeep.files.driver.grpc.isNotAuthorized
 import org.archivekeep.files.driver.grpc.openGrpcArchive
-import org.archivekeep.files.repo.Repo
-import org.archivekeep.files.repo.auth.BasicAuthCredentials
 import picocli.CommandLine
 import picocli.CommandLine.Command
 import picocli.CommandLine.IExecutionExceptionHandler

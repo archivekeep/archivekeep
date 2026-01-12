@@ -1,7 +1,7 @@
 package org.archivekeep.cli.workingarchive
 
+import org.archivekeep.files.api.repository.Repo
 import org.archivekeep.files.driver.filesystem.files.FilesRepo
-import org.archivekeep.files.repo.Repo
 import java.nio.file.Path
 import kotlin.io.path.relativeTo
 

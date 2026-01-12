@@ -2,9 +2,9 @@ package org.archivekeep.files.procedures.sync.operations
 
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import org.archivekeep.files.api.repository.Repo
 import org.archivekeep.files.procedures.progress.CopyOperationProgress
 import org.archivekeep.files.procedures.sync.job.observation.SyncExecutionObserver
-import org.archivekeep.files.repo.Repo
 import org.archivekeep.utils.procedures.operations.OperationContext
 import java.time.Duration
 import java.time.LocalDateTime

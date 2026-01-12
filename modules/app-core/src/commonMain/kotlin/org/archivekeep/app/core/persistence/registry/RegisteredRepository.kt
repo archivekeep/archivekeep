@@ -2,7 +2,7 @@ package org.archivekeep.app.core.persistence.registry
 
 import kotlinx.serialization.Serializable
 import org.archivekeep.app.core.utils.identifiers.RepositoryURI
-import org.archivekeep.files.repo.RepositoryMetadata
+import org.archivekeep.files.api.repository.RepositoryMetadata
 
 @Serializable
 data class RegisteredRepository(

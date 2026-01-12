@@ -1,5 +1,8 @@
 package org.archivekeep.files.repo
 
+import org.archivekeep.files.api.repository.ArchiveFileInfo
+import org.archivekeep.files.api.repository.Repo
+import org.archivekeep.files.api.repository.RepoIndex
 import org.archivekeep.utils.hashing.sha256
 import kotlin.test.assertEquals
 

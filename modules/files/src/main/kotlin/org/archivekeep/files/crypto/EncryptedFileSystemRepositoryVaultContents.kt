@@ -1,4 +1,4 @@
-package org.archivekeep.files.encryption
+package org.archivekeep.files.crypto
 
 import com.nimbusds.jose.jwk.Curve
 import com.nimbusds.jose.jwk.JWK

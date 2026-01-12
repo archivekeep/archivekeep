@@ -1,8 +1,8 @@
 package org.archivekeep.files
 
+import org.archivekeep.files.api.repository.ArchiveFileInfo
+import org.archivekeep.files.api.repository.Repo
 import org.archivekeep.files.procedures.indexupdate.IndexUpdateProcedure
-import org.archivekeep.files.repo.ArchiveFileInfo
-import org.archivekeep.files.repo.Repo
 import org.archivekeep.utils.hashing.sha256
 
 suspend fun (Repo).quickSave(

@@ -1,6 +1,6 @@
 package org.archivekeep.files.procedures.addpush
 
-import org.archivekeep.files.operations.CompareOperation
+import org.archivekeep.files.api.repository.operations.CompareOperation
 import org.archivekeep.files.procedures.indexupdate.IndexUpdateProcedure
 import org.archivekeep.files.procedures.sync.operations.RelocationApplyOperation
 

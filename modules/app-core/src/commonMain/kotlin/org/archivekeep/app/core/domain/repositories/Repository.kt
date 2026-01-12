@@ -21,9 +21,9 @@ import org.archivekeep.app.core.persistence.repository.MemorizedRepositoryMetada
 import org.archivekeep.app.core.persistence.repository.MemorizedRepositoryMetadataRepository.Companion.memorizingCachingMetadataFlow
 import org.archivekeep.app.core.utils.exceptions.RepositoryLockedException
 import org.archivekeep.app.core.utils.identifiers.RepositoryURI
-import org.archivekeep.files.exceptions.UnsupportedFeatureException
-import org.archivekeep.files.repo.LocalRepo
-import org.archivekeep.files.repo.RepositoryMetadata
+import org.archivekeep.files.api.exceptions.UnsupportedFeatureException
+import org.archivekeep.files.api.repository.LocalRepo
+import org.archivekeep.files.api.repository.RepositoryMetadata
 import org.archivekeep.utils.coroutines.InstanceProtector
 import org.archivekeep.utils.coroutines.shareResourceIn
 import org.archivekeep.utils.loading.Loadable

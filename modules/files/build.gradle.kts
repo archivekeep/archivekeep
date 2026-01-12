@@ -10,19 +10,19 @@ plugins {
 dependencies {
     api(project(":utils"))
 
-    implementation(libs.kotlinx.coroutines.core)
-    implementation(libs.kotlinx.serialization.json)
+    api(libs.kotlinx.coroutines.core)
+    api(libs.kotlinx.serialization.json)
 
-    implementation(libs.jose.jwt)
+    api(libs.jose.jwt)
 
-    implementation(libs.guava.jre)
-    implementation(libs.guava.android)
-
-    implementation(libs.kfswatch)
+    api(libs.guava.jre)
+    api(libs.guava.android)
 
     compileOnly(libs.apache.tomcat.annotations)
 
+    testImplementation(project(":files-driver-filesystem"))
     testImplementation(project(":files-test"))
+
     testImplementation(libs.kotlin.test)
     testImplementation(libs.kotlinx.coroutines.test)
     testImplementation(libs.junit.jupiter)

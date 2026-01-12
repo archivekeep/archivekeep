@@ -3,7 +3,7 @@ package org.archivekeep.app.core.operations
 import kotlinx.coroutines.CoroutineScope
 import org.archivekeep.app.core.utils.generics.ExecutionOutcome
 import org.archivekeep.app.core.utils.identifiers.RepositoryURI
-import org.archivekeep.files.RepositoryAssociationGroupId
+import org.archivekeep.files.api.repository.RepositoryAssociationGroupId
 
 interface AssociateRepositoryOperation {
     interface Factory {

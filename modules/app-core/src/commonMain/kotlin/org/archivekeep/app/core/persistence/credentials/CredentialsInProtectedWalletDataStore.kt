@@ -8,7 +8,7 @@ import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonElement
 import org.archivekeep.app.core.utils.identifiers.RepositoryURI
-import org.archivekeep.files.repo.auth.BasicAuthCredentials
+import org.archivekeep.files.api.repository.auth.BasicAuthCredentials
 import org.archivekeep.utils.datastore.passwordprotected.ProtectedDataStore
 import org.archivekeep.utils.loading.ProtectedLoadableResource
 import org.archivekeep.utils.loading.optional.OptionalLoadable

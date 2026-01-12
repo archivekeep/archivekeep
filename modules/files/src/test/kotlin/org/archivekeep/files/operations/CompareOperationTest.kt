@@ -1,6 +1,7 @@
 package org.archivekeep.files.operations
 
 import kotlinx.coroutines.runBlocking
+import org.archivekeep.files.api.repository.operations.CompareOperation
 import org.archivekeep.files.createArchiveWithContents
 import org.archivekeep.files.driver.filesystem.files.FilesRepo
 import org.archivekeep.utils.hashing.sha256

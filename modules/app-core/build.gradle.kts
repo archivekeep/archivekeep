@@ -18,6 +18,7 @@ kotlin {
         val commonMain by getting {
             dependencies {
                 api(project(":files"))
+                api(project(":files-driver-filesystem"))
                 api(project(":files-driver-grpc"))
                 api(project(":files-driver-s3"))
 

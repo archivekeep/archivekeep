@@ -1,4 +1,4 @@
-package org.archivekeep.files
+package org.archivekeep.files.api.repository
 
 const val ENCRYPTED_FILES_DIRECTORY = "encrypted-files"
 

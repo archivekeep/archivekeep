@@ -13,7 +13,7 @@ import kotlinx.coroutines.flow.onEach
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import org.archivekeep.app.core.utils.identifiers.RepositoryURI
-import org.archivekeep.files.repo.RepoIndex
+import org.archivekeep.files.api.repository.RepoIndex
 import org.archivekeep.utils.coroutines.shareResourceIn
 import org.archivekeep.utils.loading.optional.OptionalLoadable
 import org.archivekeep.utils.loading.optional.mapToOptionalLoadable

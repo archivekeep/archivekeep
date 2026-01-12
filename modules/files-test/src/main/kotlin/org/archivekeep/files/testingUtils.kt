@@ -2,10 +2,10 @@ package org.archivekeep.files
 
 import kotlinx.coroutines.test.TestCoroutineScheduler
 import kotlinx.coroutines.test.TestScope
+import org.archivekeep.files.api.repository.Repo
 import org.archivekeep.files.driver.fixtures.FixtureRepo
 import org.archivekeep.files.driver.fixtures.FixtureRepoBuilder
 import org.archivekeep.files.driver.inmemory.InMemoryRepo
-import org.archivekeep.files.repo.Repo
 import org.archivekeep.files.repo.assertFileHasStringContents
 import org.archivekeep.utils.hashing.sha256
 import org.archivekeep.utils.loading.Loadable

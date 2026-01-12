@@ -13,7 +13,7 @@ import org.archivekeep.app.core.domain.storages.getDriverForURI
 import org.archivekeep.app.core.persistence.credentials.CredentialsStore
 import org.archivekeep.app.core.persistence.registry.RegistryDataStore
 import org.archivekeep.app.core.utils.identifiers.RepositoryURI
-import org.archivekeep.files.repo.auth.BasicAuthCredentials
+import org.archivekeep.files.api.repository.auth.BasicAuthCredentials
 import org.archivekeep.utils.loading.optional.OptionalLoadable
 
 class AddRemoteRepositoryUseCaseImpl(

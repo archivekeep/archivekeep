@@ -18,9 +18,9 @@ import org.archivekeep.app.core.persistence.credentials.CredentialsInProtectedWa
 import org.archivekeep.app.core.persistence.credentials.CredentialsStore
 import org.archivekeep.app.core.persistence.platform.demo.DemoEnvironment
 import org.archivekeep.app.core.utils.identifiers.RepositoryURI
+import org.archivekeep.files.api.repository.auth.BasicAuthCredentials
 import org.archivekeep.files.driver.s3.EncryptedS3Repository
 import org.archivekeep.files.driver.s3.S3Repository
-import org.archivekeep.files.repo.auth.BasicAuthCredentials
 import org.archivekeep.utils.exceptions.WrongCredentialsException
 import org.archivekeep.utils.loading.optional.OptionalLoadable
 import org.archivekeep.utils.loading.optional.firstFinishedLoading

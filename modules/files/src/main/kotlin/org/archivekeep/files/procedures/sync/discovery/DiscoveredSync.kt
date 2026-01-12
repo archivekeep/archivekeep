@@ -1,9 +1,9 @@
 package org.archivekeep.files.procedures.sync.discovery
 
+import org.archivekeep.files.api.repository.Repo
 import org.archivekeep.files.procedures.sync.job.SyncProcedureJobTask
 import org.archivekeep.files.procedures.sync.job.observation.SyncExecutionObserver
 import org.archivekeep.files.procedures.sync.operations.SyncOperation
-import org.archivekeep.files.repo.Repo
 import org.archivekeep.utils.procedures.TaskProcedureJob
 import org.archivekeep.utils.procedures.tasks.SequentialProcedureJobTaskGroup
 

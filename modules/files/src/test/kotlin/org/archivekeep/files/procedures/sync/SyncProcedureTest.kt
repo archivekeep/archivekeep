@@ -1,10 +1,10 @@
 package org.archivekeep.files.procedures.sync
 
 import kotlinx.coroutines.runBlocking
+import org.archivekeep.files.api.repository.operations.CompareOperation
 import org.archivekeep.files.assertRepositoryContents
 import org.archivekeep.files.driver.fixtures.FixtureRepoBuilder
 import org.archivekeep.files.driver.inmemory.toInMemoryRepo
-import org.archivekeep.files.operations.CompareOperation
 import org.archivekeep.files.procedures.sync.discovery.RelocationSyncMode
 import org.archivekeep.files.procedures.sync.discovery.SyncProcedureDiscovery
 import org.archivekeep.files.procedures.sync.job.observation.NoOpSyncExecutionObserver

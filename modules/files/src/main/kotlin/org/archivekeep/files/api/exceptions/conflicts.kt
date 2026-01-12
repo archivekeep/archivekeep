@@ -1,4 +1,4 @@
-package org.archivekeep.files.exceptions
+package org.archivekeep.files.api.exceptions
 
 class DestinationExists(
     val path: String,

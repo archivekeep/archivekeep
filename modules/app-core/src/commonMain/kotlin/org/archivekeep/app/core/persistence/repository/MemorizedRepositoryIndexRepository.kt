@@ -4,8 +4,8 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.onEach
 import org.archivekeep.app.core.utils.identifiers.RepositoryURI
-import org.archivekeep.files.repo.Repo
-import org.archivekeep.files.repo.RepoIndex
+import org.archivekeep.files.api.repository.Repo
+import org.archivekeep.files.api.repository.RepoIndex
 import org.archivekeep.utils.loading.Loadable
 import org.archivekeep.utils.loading.optional.OptionalLoadable
 import org.archivekeep.utils.loading.optional.flatMapLatestLoadedData

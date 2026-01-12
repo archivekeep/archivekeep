@@ -34,10 +34,10 @@ import org.archivekeep.app.core.persistence.drivers.s3.S3StorageDriver.InnerStat
 import org.archivekeep.app.core.persistence.drivers.s3.S3StorageDriver.InnerState.PlainS3Repository
 import org.archivekeep.app.core.utils.identifiers.RepositoryURI
 import org.archivekeep.app.core.utils.identifiers.StorageURI
+import org.archivekeep.files.api.repository.auth.BasicAuthCredentials
 import org.archivekeep.files.driver.s3.EncryptedS3Repository
 import org.archivekeep.files.driver.s3.S3LocationNotInitializedAsRepositoryException
 import org.archivekeep.files.driver.s3.S3Repository
-import org.archivekeep.files.repo.auth.BasicAuthCredentials
 import org.archivekeep.utils.loading.Loadable
 import org.archivekeep.utils.loading.optional.OptionalLoadable
 import org.archivekeep.utils.loading.optional.OptionalLoadable.LoadedAvailable

@@ -2,7 +2,7 @@ package org.archivekeep.app.core.operations
 
 import org.archivekeep.app.core.persistence.drivers.s3.S3RepositoryURIData
 import org.archivekeep.app.core.utils.identifiers.RepositoryURI
-import org.archivekeep.files.repo.auth.BasicAuthCredentials
+import org.archivekeep.files.api.repository.auth.BasicAuthCredentials
 
 sealed interface AddRemoteRepositoryOutcome {
     data object Added : AddRemoteRepositoryOutcome

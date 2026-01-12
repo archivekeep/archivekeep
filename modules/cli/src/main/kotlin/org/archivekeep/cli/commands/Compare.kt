@@ -2,7 +2,7 @@ package org.archivekeep.cli.commands
 
 import kotlinx.coroutines.runBlocking
 import org.archivekeep.cli.MainCommand
-import org.archivekeep.files.operations.CompareOperation
+import org.archivekeep.files.api.repository.operations.CompareOperation
 import picocli.CommandLine.Command
 import picocli.CommandLine.Model.CommandSpec
 import picocli.CommandLine.Parameters

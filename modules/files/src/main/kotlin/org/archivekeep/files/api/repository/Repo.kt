@@ -1,11 +1,10 @@
-package org.archivekeep.files.repo
+package org.archivekeep.files.api.repository
 
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.Transient
-import org.archivekeep.files.RepositoryAssociationGroupId
-import org.archivekeep.files.operations.StatusOperation
+import org.archivekeep.files.api.repository.operations.StatusOperation
 import org.archivekeep.utils.loading.Loadable
 import java.io.InputStream
 import java.nio.file.Path

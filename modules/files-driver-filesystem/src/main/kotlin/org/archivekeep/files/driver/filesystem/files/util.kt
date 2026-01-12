@@ -1,7 +1,7 @@
 package org.archivekeep.files.driver.filesystem.files
 
-import org.archivekeep.files.exceptions.MaliciousPath
-import org.archivekeep.files.exceptions.NotNormalizedPath
+import org.archivekeep.files.api.exceptions.MaliciousPath
+import org.archivekeep.files.api.exceptions.NotNormalizedPath
 import java.nio.file.Path
 import java.nio.file.Paths
 import java.security.MessageDigest

@@ -5,7 +5,9 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.joinAll
 import kotlinx.coroutines.launch
-import org.archivekeep.files.operations.CompareOperation
+import org.archivekeep.files.api.repository.LocalRepo
+import org.archivekeep.files.api.repository.Repo
+import org.archivekeep.files.api.repository.operations.CompareOperation
 import org.archivekeep.files.procedures.indexupdate.IndexUpdateAddProgress
 import org.archivekeep.files.procedures.indexupdate.IndexUpdateMoveProgress
 import org.archivekeep.files.procedures.indexupdate.IndexUpdateProcedure
@@ -15,8 +17,6 @@ import org.archivekeep.files.procedures.indexupdate.IndexUpdateStructuredProgres
 import org.archivekeep.files.procedures.sync.discovery.DiscoveredNewFilesGroup
 import org.archivekeep.files.procedures.sync.discovery.DiscoveredRelocationsMoveApplyGroup
 import org.archivekeep.files.procedures.sync.operations.CopyNewFileOperation
-import org.archivekeep.files.repo.LocalRepo
-import org.archivekeep.files.repo.Repo
 import org.archivekeep.utils.combineToList
 import org.archivekeep.utils.procedures.AbstractProcedureJob
 import org.archivekeep.utils.procedures.ProcedureExecutionContext

@@ -2,14 +2,14 @@ package org.archivekeep.cli.commands.shared
 
 import org.archivekeep.cli.MainCommand
 import org.archivekeep.cli.commands.mixins.SyncOptions
-import org.archivekeep.files.operations.CompareOperation
+import org.archivekeep.files.api.repository.Repo
+import org.archivekeep.files.api.repository.operations.CompareOperation
 import org.archivekeep.files.procedures.sync.discovery.DiscoveredAdditiveRelocationsGroup
 import org.archivekeep.files.procedures.sync.discovery.DiscoveredNewFilesGroup
 import org.archivekeep.files.procedures.sync.discovery.DiscoveredRelocationsMoveApplyGroup
 import org.archivekeep.files.procedures.sync.discovery.RelocationSyncMode
 import org.archivekeep.files.procedures.sync.discovery.SyncProcedureDiscovery
 import org.archivekeep.files.procedures.sync.job.observation.WriterSyncLogger
-import org.archivekeep.files.repo.Repo
 import java.io.PrintWriter
 
 suspend fun executeSync(

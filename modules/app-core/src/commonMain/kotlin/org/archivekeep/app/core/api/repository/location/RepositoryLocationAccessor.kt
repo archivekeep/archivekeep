@@ -19,7 +19,7 @@ import org.archivekeep.app.core.domain.storages.RepositoryAccessState
 import org.archivekeep.app.core.persistence.credentials.ContentEncryptionPassword
 import org.archivekeep.app.core.persistence.credentials.CredentialsStore
 import org.archivekeep.app.core.utils.identifiers.RepositoryURI
-import org.archivekeep.files.repo.Repo
+import org.archivekeep.files.api.repository.Repo
 import org.archivekeep.utils.loading.filterLoaded
 import org.archivekeep.utils.loading.firstLoadedOrNullOnErrorOrLocked
 import org.archivekeep.utils.loading.optional.OptionalLoadable

@@ -1,4 +1,4 @@
-package org.archivekeep.files.encryption
+package org.archivekeep.files.crypto
 
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
@@ -8,7 +8,7 @@ import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runInterruptible
-import org.archivekeep.files.exceptions.ChecksumMismatch
+import org.archivekeep.files.api.exceptions.ChecksumMismatch
 import java.io.InputStream
 import java.io.PipedInputStream
 import java.io.PipedOutputStream

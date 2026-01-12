@@ -2,7 +2,7 @@ package org.archivekeep.app.core.domain.repositories
 
 import org.archivekeep.app.core.utils.identifiers.NamedRepositoryReference
 import org.archivekeep.app.core.utils.identifiers.RepositoryURI
-import org.archivekeep.files.RepositoryAssociationGroupId
+import org.archivekeep.files.api.repository.RepositoryAssociationGroupId
 
 data class ResolvedRepositoryState(
     val uri: RepositoryURI,

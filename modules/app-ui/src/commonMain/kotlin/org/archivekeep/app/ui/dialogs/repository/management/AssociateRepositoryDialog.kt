@@ -50,7 +50,7 @@ import org.archivekeep.app.ui.utils.Launchable
 import org.archivekeep.app.ui.utils.asAction
 import org.archivekeep.app.ui.utils.collectLoadableFlow
 import org.archivekeep.app.ui.utils.simpleLaunchable
-import org.archivekeep.files.RepositoryAssociationGroupId
+import org.archivekeep.files.api.repository.RepositoryAssociationGroupId
 import org.archivekeep.utils.loading.Loadable
 import org.archivekeep.utils.loading.mapLoadedData
 

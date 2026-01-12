@@ -3,10 +3,10 @@ package org.archivekeep.files.driver.fixtures
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.flow
-import org.archivekeep.files.repo.ArchiveFileInfo
-import org.archivekeep.files.repo.Repo
-import org.archivekeep.files.repo.RepoIndex
-import org.archivekeep.files.repo.RepositoryMetadata
+import org.archivekeep.files.api.repository.ArchiveFileInfo
+import org.archivekeep.files.api.repository.Repo
+import org.archivekeep.files.api.repository.RepoIndex
+import org.archivekeep.files.api.repository.RepositoryMetadata
 import org.archivekeep.utils.hashing.sha256
 import org.archivekeep.utils.loading.Loadable
 import java.io.InputStream

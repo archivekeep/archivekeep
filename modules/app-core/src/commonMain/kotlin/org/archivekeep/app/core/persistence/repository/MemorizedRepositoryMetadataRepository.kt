@@ -7,9 +7,9 @@ import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.onEach
 import org.archivekeep.app.core.utils.identifiers.RepositoryURI
-import org.archivekeep.files.exceptions.UnsupportedFeatureException
-import org.archivekeep.files.repo.Repo
-import org.archivekeep.files.repo.RepositoryMetadata
+import org.archivekeep.files.api.exceptions.UnsupportedFeatureException
+import org.archivekeep.files.api.repository.Repo
+import org.archivekeep.files.api.repository.RepositoryMetadata
 import org.archivekeep.utils.loading.Loadable
 import org.archivekeep.utils.loading.optional.OptionalLoadable
 import org.archivekeep.utils.loading.optional.flatMapLatestLoadedData

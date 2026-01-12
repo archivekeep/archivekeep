@@ -10,8 +10,8 @@ import kotlinx.coroutines.flow.conflate
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onStart
-import org.archivekeep.files.exceptions.NotRegularFilePath
-import org.archivekeep.files.repo.RepoIndex
+import org.archivekeep.files.api.exceptions.NotRegularFilePath
+import org.archivekeep.files.api.repository.RepoIndex
 import org.archivekeep.utils.coroutines.flowScopedToThisJob
 import org.archivekeep.utils.coroutines.shareResourceIn
 import org.archivekeep.utils.flows.logLoadableResourceLoad

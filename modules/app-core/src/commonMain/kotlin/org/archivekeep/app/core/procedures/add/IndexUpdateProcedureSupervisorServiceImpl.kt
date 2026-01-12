@@ -16,10 +16,10 @@ import org.archivekeep.app.core.utils.UniqueJobGuard
 import org.archivekeep.app.core.utils.generics.SyncFlowStringWriter
 import org.archivekeep.app.core.utils.generics.singleInstanceWeakValueMap
 import org.archivekeep.app.core.utils.identifiers.RepositoryURI
+import org.archivekeep.files.api.repository.Repo
 import org.archivekeep.files.procedures.indexupdate.IndexUpdateProcedure
 import org.archivekeep.files.procedures.indexupdate.IndexUpdateStructuredProgressTracker
 import org.archivekeep.files.procedures.indexupdate.IndexUpdateTextualProgressTracker
-import org.archivekeep.files.repo.Repo
 import org.archivekeep.utils.loading.Loadable
 import org.archivekeep.utils.loading.LoadableWithProgress
 import org.archivekeep.utils.loading.flatMapLoadableFlow

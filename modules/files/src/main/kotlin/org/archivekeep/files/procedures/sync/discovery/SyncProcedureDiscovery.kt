@@ -1,10 +1,10 @@
 package org.archivekeep.files.procedures.sync.discovery
 
-import org.archivekeep.files.operations.CompareOperation
+import org.archivekeep.files.api.repository.Repo
+import org.archivekeep.files.api.repository.operations.CompareOperation
 import org.archivekeep.files.procedures.sync.operations.AdditiveReplicationOperation
 import org.archivekeep.files.procedures.sync.operations.CopyNewFileOperation
 import org.archivekeep.files.procedures.sync.operations.RelocationApplyOperation
-import org.archivekeep.files.repo.Repo
 
 class SyncProcedureDiscovery(
     val relocationSyncMode: RelocationSyncMode,

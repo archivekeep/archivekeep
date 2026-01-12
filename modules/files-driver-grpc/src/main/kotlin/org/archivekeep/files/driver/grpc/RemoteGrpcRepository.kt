@@ -15,7 +15,11 @@ import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.produceIn
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import org.archivekeep.files.exceptions.UnsupportedFeatureException
+import org.archivekeep.files.api.exceptions.UnsupportedFeatureException
+import org.archivekeep.files.api.repository.ArchiveFileInfo
+import org.archivekeep.files.api.repository.Repo
+import org.archivekeep.files.api.repository.RepoIndex
+import org.archivekeep.files.api.repository.RepositoryMetadata
 import org.archivekeep.files.internal.grpc.Api
 import org.archivekeep.files.internal.grpc.ArchiveServiceGrpcKt
 import org.archivekeep.files.internal.grpc.archiveFile
@@ -24,10 +28,6 @@ import org.archivekeep.files.internal.grpc.chunkOrNull
 import org.archivekeep.files.internal.grpc.headOrNull
 import org.archivekeep.files.internal.grpc.listArchiveFilesRequest
 import org.archivekeep.files.internal.grpc.uploadArchiveFileRequest
-import org.archivekeep.files.repo.ArchiveFileInfo
-import org.archivekeep.files.repo.Repo
-import org.archivekeep.files.repo.RepoIndex
-import org.archivekeep.files.repo.RepositoryMetadata
 import org.archivekeep.utils.loading.Loadable
 import org.archivekeep.utils.loading.mapToLoadable
 import org.archivekeep.utils.loading.stateIn

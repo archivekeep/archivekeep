@@ -2,12 +2,12 @@ package org.archivekeep.files.procedures.sync.job
 
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.yield
+import org.archivekeep.files.api.repository.Repo
 import org.archivekeep.files.procedures.sync.discovery.DiscoveredSyncOperationsGroup
 import org.archivekeep.files.procedures.sync.job.observation.SyncExecutionObserver
 import org.archivekeep.files.procedures.sync.operations.SyncOperation
 import org.archivekeep.files.procedures.sync.operations.SyncOperation.ExecutionResult.FAIL
 import org.archivekeep.files.procedures.sync.operations.SyncOperation.ExecutionResult.SUCCESS
-import org.archivekeep.files.repo.Repo
 import org.archivekeep.utils.procedures.ProcedureExecutionContext
 import org.archivekeep.utils.procedures.tasks.ProcedureJobTask
 import org.archivekeep.utils.procedures.tasks.TaskExecutionProgressSummary

@@ -1,4 +1,4 @@
-package org.archivekeep.files.driver.filesystem
+package org.archivekeep.utils.coroutines
 
 import kotlinx.coroutines.CompletableJob
 import kotlinx.coroutines.CoroutineScope

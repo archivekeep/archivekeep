@@ -1,7 +1,7 @@
-package org.archivekeep.files.operations
+package org.archivekeep.files.api.repository.operations
 
-import org.archivekeep.files.repo.Repo
-import org.archivekeep.files.repo.RepoIndex
+import org.archivekeep.files.api.repository.Repo
+import org.archivekeep.files.api.repository.RepoIndex
 import org.archivekeep.utils.text.pathDiff
 import java.io.PrintWriter
 

@@ -1,10 +1,10 @@
 package org.archivekeep.files.driver.speedlimit
 
 import kotlinx.coroutines.delay
-import org.archivekeep.files.repo.ArchiveFileInfo
-import org.archivekeep.files.repo.Repo
-import org.archivekeep.files.repo.RepoIndex
-import org.archivekeep.files.repo.RepositoryMetadata
+import org.archivekeep.files.api.repository.ArchiveFileInfo
+import org.archivekeep.files.api.repository.Repo
+import org.archivekeep.files.api.repository.RepoIndex
+import org.archivekeep.files.api.repository.RepositoryMetadata
 import java.io.InputStream
 import kotlin.math.log10
 import kotlin.math.nextUp

@@ -25,13 +25,13 @@ import org.archivekeep.app.core.utils.UniqueJobGuard
 import org.archivekeep.app.core.utils.generics.SyncFlowStringWriter
 import org.archivekeep.app.core.utils.generics.singleInstanceWeakValueMap
 import org.archivekeep.app.core.utils.identifiers.RepositoryURI
-import org.archivekeep.files.operations.CompareOperation
+import org.archivekeep.files.api.repository.Repo
+import org.archivekeep.files.api.repository.operations.CompareOperation
 import org.archivekeep.files.procedures.sync.discovery.DiscoveredSync
 import org.archivekeep.files.procedures.sync.discovery.RelocationSyncMode
 import org.archivekeep.files.procedures.sync.discovery.SyncProcedureDiscovery
 import org.archivekeep.files.procedures.sync.job.observation.WriterSyncLogger
 import org.archivekeep.files.procedures.sync.operations.SyncOperation
-import org.archivekeep.files.repo.Repo
 import org.archivekeep.utils.loading.Loadable
 import org.archivekeep.utils.loading.mapToLoadable
 import org.archivekeep.utils.loading.optional.OptionalLoadable

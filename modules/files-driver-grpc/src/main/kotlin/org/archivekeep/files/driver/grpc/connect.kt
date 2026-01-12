@@ -11,12 +11,12 @@ import io.grpc.TlsChannelCredentials
 import io.grpc.internal.PickFirstLoadBalancerProvider
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import org.archivekeep.files.api.repository.Repo
+import org.archivekeep.files.api.repository.auth.BasicAuthCredentials
 import org.archivekeep.files.internal.grpc.ArchiveServiceGrpcKt
 import org.archivekeep.files.internal.grpc.PersonalAccessTokenServiceGrpcKt.PersonalAccessTokenServiceCoroutineStub
 import org.archivekeep.files.internal.grpc.createPersonalAccessTokenRequest
 import org.archivekeep.files.internal.grpc.getArchiveRequest
-import org.archivekeep.files.repo.Repo
-import org.archivekeep.files.repo.auth.BasicAuthCredentials
 import java.util.Date
 import java.util.concurrent.Executor
 import kotlin.io.encoding.Base64

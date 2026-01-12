@@ -1,4 +1,4 @@
-package org.archivekeep.files.repo.auth
+package org.archivekeep.files.api.repository.auth
 
 import kotlinx.serialization.Serializable
 

@@ -1,7 +1,7 @@
-package org.archivekeep.files.operations
+package org.archivekeep.files.api.repository.operations
 
-import org.archivekeep.files.repo.LocalRepo
-import org.archivekeep.files.repo.Repo
+import org.archivekeep.files.api.repository.LocalRepo
+import org.archivekeep.files.api.repository.Repo
 import kotlin.io.path.invariantSeparatorsPathString
 
 class NotLocalRepoException : RuntimeException("not local repo")

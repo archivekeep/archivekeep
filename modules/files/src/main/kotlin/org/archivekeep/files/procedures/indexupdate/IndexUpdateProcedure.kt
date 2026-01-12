@@ -3,10 +3,10 @@ package org.archivekeep.files.procedures.indexupdate
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.flow
-import org.archivekeep.files.exceptions.InvalidFilename
+import org.archivekeep.files.api.exceptions.InvalidFilename
+import org.archivekeep.files.api.repository.LocalRepo
+import org.archivekeep.files.api.repository.Repo
 import org.archivekeep.files.procedures.indexupdate.IndexUpdateProcedure.PreparationResult.Move
-import org.archivekeep.files.repo.LocalRepo
-import org.archivekeep.files.repo.Repo
 import org.archivekeep.utils.loading.LoadableWithProgress
 import java.io.PrintWriter
 import kotlin.io.path.invariantSeparatorsPathString
