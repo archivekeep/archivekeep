@@ -15,7 +15,7 @@ import kotlinx.serialization.json.Json
 import org.archivekeep.files.crypto.parseVerifyDecodeJWS
 import org.archivekeep.files.crypto.signAsJWS
 
-data class CryptoMetadata(
+data class EncryptedFileMetadata(
     val plain: Plain,
     val private: Private,
 ) {
@@ -78,13 +78,13 @@ data class CryptoMetadata(
             signatureVerifier: JWSVerifier,
             decrypter: JWEDecrypter,
             raw: String,
-        ): CryptoMetadata {
+        ): EncryptedFileMetadata {
             val jwsPayload = parseVerifyDecodeJWS<JWSPayload>(raw, signatureVerifier)
 
             val jweObject = JWEObject.parse(jwsPayload.encrypted)
             jweObject.decrypt(decrypter)
 
-            return CryptoMetadata(
+            return EncryptedFileMetadata(
                 jwsPayload.plain,
                 Json.decodeFromString(jweObject.payload.toString()),
             )

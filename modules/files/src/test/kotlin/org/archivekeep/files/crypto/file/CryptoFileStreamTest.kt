@@ -17,8 +17,8 @@ import kotlin.io.encoding.ExperimentalEncodingApi
 import kotlin.test.assertEquals
 
 private val testData = "Content of file to be encrypted"
-private val cryptoMetadataPlain =
-    CryptoMetadata.Plain(
+private val encryptedFileMetadataPlain =
+    EncryptedFileMetadata.Plain(
         size = testData.toByteArray().size.toLong(),
         checksumSha256 = testData.sha256(),
     )
@@ -37,7 +37,7 @@ class CryptoFileStreamTest {
             val encryptedOutputStream = ByteArrayOutputStream()
 
             writeCryptoStream(
-                cryptoMetadataPlain,
+                encryptedFileMetadataPlain,
                 ecJWK,
                 ECDHEncrypter(ecPublicJWK),
                 ByteArrayInputStream(testData.toByteArray()),
@@ -59,7 +59,7 @@ class CryptoFileStreamTest {
                 }
 
             assertEquals(testData, decryptedContentsBuffer.toString())
-            assertEquals(cryptoMetadataPlain, metadata)
+            assertEquals(encryptedFileMetadataPlain, metadata)
         }
 
     @OptIn(ExperimentalEncodingApi::class)
@@ -92,6 +92,6 @@ class CryptoFileStreamTest {
                 }
 
             assertEquals(testData, decryptedContentsBuffer.toString())
-            assertEquals(cryptoMetadataPlain, metadata)
+            assertEquals(encryptedFileMetadataPlain, metadata)
         }
 }

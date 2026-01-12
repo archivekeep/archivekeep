@@ -11,14 +11,14 @@ import java.util.UUID
 import kotlin.test.assertEquals
 
 private val TEST_METADATA =
-    CryptoMetadata(
+    EncryptedFileMetadata(
         plain =
-            CryptoMetadata.Plain(
+            EncryptedFileMetadata.Plain(
                 12353,
                 "unimportant",
             ),
         private =
-            CryptoMetadata.Private(
+            EncryptedFileMetadata.Private(
                 cipher = "SOME CIPHER",
                 secretKey = "A SECRET KEY".toByteArray(),
                 iv = "init vector".toByteArray(),
@@ -38,7 +38,7 @@ class CryptoMetadataTest {
         val encryptedContent = TEST_METADATA.encryptAndSign(ecJWK, ECDHEncrypter(ecPublicJWK))
 
         // encryption generates nondeterministic data, verify by decryption
-        val decryptedMetadata = CryptoMetadata.verifyAndDecrypt(ECDSAVerifier(ecPublicJWK), ECDHDecrypter(ecJWK), encryptedContent)
+        val decryptedMetadata = EncryptedFileMetadata.verifyAndDecrypt(ECDSAVerifier(ecPublicJWK), ECDHDecrypter(ecJWK), encryptedContent)
         assertEquals(TEST_METADATA, decryptedMetadata)
     }
 
@@ -56,7 +56,7 @@ class CryptoMetadataTest {
             @Suppress("ktlint:standard:max-line-length")
             "eyJraWQiOiIyMGVhYjJmYS1mODFiLTQyNzMtOTI0Yi1kNjMwYmJiMGEwMjUiLCJhbGciOiJFUzI1NiJ9.eyJwbGFpbiI6eyJzaXplIjoxMjM1MywiY2hlY2tzdW1TaGEyNTYiOiJ1bmltcG9ydGFudCJ9LCJlbmNyeXB0ZWQiOiJleUpsY0dzaU9uc2lhM1I1SWpvaVJVTWlMQ0pqY25ZaU9pSlFMVEkxTmlJc0luZ2lPaUkxTW1sWlltOXlaVnB6VjE5bWQyZHVWalUyZGxoTVRsRndTbmRNZGt4U05FNU5jRFpPWXpoNVpHMVZJaXdpZVNJNklsWkxNMlkwTlZVMExWQjVjSEpRWWxGVFlsQkVibWRuT0V4WVFYbDZUSE56TkV4T2NrMWlTVVEyVEhjaWZTd2laVzVqSWpvaVFUSTFOa2REVFNJc0ltRnNaeUk2SWtWRFJFZ3RSVk1yUVRJMU5rdFhJbjAuaXNVaXJzZjhqWnJMbEFlejRkRmgtZVNiWVBJVHFFbFRhZUk4emZKWmRta0E1MmdOdzl4eUN3LnRJb1JiMWFOQkVoWDIyZnIuU1pfMzFlTWRVYzNfVGgzNFJ6TE1WRkNNM0dTREM0enEwWTJuRTVHLVg1b1gwTlM3NkpRaGl5ZVJZbnBNenk1TFJRQzhmN3ZwUXBoQnlKQWNkZFM3TWsyMkt0QlN5alNfVmxncWJJbXVGVnI3cWxRMFowSEhMdE5xTW9nc19HU2xqd0hBc1FTd3lTNGdSX0RiRC1YVm9CaUZ6MC1RdEVEcGdIRkYualJSM1NTR0FEZlp5cW1FUFoyR0hIdyJ9.-6hTeogouFflJUVJjIs4a6hLXf5Hrg7JNm0PtD93GCw_X9ZRL32M37ANzDHxwVTVjdTvuFwPmqL6PGoA9CDxLw"
 
-        val decryptedMetadata = CryptoMetadata.verifyAndDecrypt(ECDSAVerifier(ecPublicJWK), ECDHDecrypter(ecJWK), encryptedContent)
+        val decryptedMetadata = EncryptedFileMetadata.verifyAndDecrypt(ECDSAVerifier(ecPublicJWK), ECDHDecrypter(ecJWK), encryptedContent)
 
         assertEquals(TEST_METADATA, decryptedMetadata)
     }

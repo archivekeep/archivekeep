@@ -25,7 +25,7 @@ import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.decodeFromStream
 import kotlinx.serialization.serializer
-import org.archivekeep.files.crypto.file.CryptoMetadata
+import org.archivekeep.files.crypto.file.EncryptedFileMetadata
 import org.archivekeep.files.crypto.file.readCryptoStream
 import org.archivekeep.files.crypto.file.writeCryptoStream
 import org.archivekeep.files.driver.filesystem.InProgressHandler
@@ -246,7 +246,7 @@ class EncryptedFileSystemRepository private constructor(
 
                         runInterruptible {
                             writeCryptoStream(
-                                CryptoMetadata.Plain(
+                                EncryptedFileMetadata.Plain(
                                     size = info.length,
                                     checksumSha256 = info.checksumSha256,
                                 ),

@@ -20,7 +20,7 @@ import kotlin.random.Random
 const val HEADER = "ArchiveKeep Encrypted File"
 
 fun writeCryptoStream(
-    fileMetadata: CryptoMetadata.Plain,
+    fileMetadata: EncryptedFileMetadata.Plain,
     signJWK: JWK,
     encrypter: JWEEncrypter,
     inputStream: InputStream,
@@ -31,11 +31,11 @@ fun writeCryptoStream(
 
     outputStream.write(2)
 
-    val cryptoMetadata =
-        CryptoMetadata(
+    val encryptedFileMetadata =
+        EncryptedFileMetadata(
             plain = fileMetadata,
             private =
-                CryptoMetadata.Private(
+                EncryptedFileMetadata.Private(
                     "AES-128-CFB",
                     KeyGenerator
                         .getInstance("AES")
@@ -46,7 +46,7 @@ fun writeCryptoStream(
                     iv = Random.nextBytes(16),
                 ),
         )
-    val rawMetadata = cryptoMetadata.encryptAndSign(signJWK, encrypter).toByteArray()
+    val rawMetadata = encryptedFileMetadata.encryptAndSign(signJWK, encrypter).toByteArray()
 
     outputStream.write(
         ByteBuffer
@@ -60,8 +60,8 @@ fun writeCryptoStream(
     outputStream.write(Random.nextBytes(99))
 
     val cipher = Cipher.getInstance("AES/CFB/NoPadding")
-    val ivParameterSpec = IvParameterSpec(cryptoMetadata.private.iv)
-    cipher.init(Cipher.ENCRYPT_MODE, SecretKeySpec(cryptoMetadata.private.secretKey, "AES"), ivParameterSpec)
+    val ivParameterSpec = IvParameterSpec(encryptedFileMetadata.private.iv)
+    cipher.init(Cipher.ENCRYPT_MODE, SecretKeySpec(encryptedFileMetadata.private.secretKey, "AES"), ivParameterSpec)
 
     val cipherOutputStream = CipherOutputStream(outputStream, cipher)
     inputStream.copyTo(cipherOutputStream)
@@ -72,7 +72,7 @@ suspend fun <T> readCryptoStream(
     inputStream: InputStream,
     signatureVerifier: JWSVerifier,
     decrypter: JWEDecrypter,
-    handler: suspend (plainMetadata: CryptoMetadata.Plain, decryptedStream: InputStream) -> T,
+    handler: suspend (plainMetadata: EncryptedFileMetadata.Plain, decryptedStream: InputStream) -> T,
 ): T {
     val buffered = inputStream.buffered()
 
@@ -97,15 +97,15 @@ suspend fun <T> readCryptoStream(
         throw RuntimeException("Read $bytesRead for metadata instead of full size $metadataSize")
     }
 
-    val metadata = CryptoMetadata.verifyAndDecrypt(signatureVerifier, decrypter, String(metadataRawBytes, 0, metadataRawBytes.indexOf(0)))
+    val metadata = EncryptedFileMetadata.verifyAndDecrypt(signatureVerifier, decrypter, String(metadataRawBytes, 0, metadataRawBytes.indexOf(0)))
 
     return decryptCryptoStreamContents(buffered, metadata, handler)
 }
 
 suspend fun <T> decryptCryptoStreamContents(
     input: InputStream,
-    metadata: CryptoMetadata,
-    handler: suspend (plainMetadata: CryptoMetadata.Plain, decryptedStream: InputStream) -> T,
+    metadata: EncryptedFileMetadata,
+    handler: suspend (plainMetadata: EncryptedFileMetadata.Plain, decryptedStream: InputStream) -> T,
 ): T {
     if (metadata.private.cipher != "AES-128-CFB") {
         throw RuntimeException("Unsupported cipher ${metadata.private.cipher}")
