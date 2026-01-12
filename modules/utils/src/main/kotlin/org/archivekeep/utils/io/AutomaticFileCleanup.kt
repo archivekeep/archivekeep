@@ -1,11 +1,11 @@
-package org.archivekeep.files.driver.filesystem.files
+package org.archivekeep.utils.io
 
 import java.nio.file.Path
 import java.util.concurrent.locks.ReentrantLock
 import kotlin.concurrent.withLock
 import kotlin.io.path.deleteIfExists
 
-class UnfinishedStoreCleanup(
+class AutomaticFileCleanup(
     val files: MutableList<Path> = mutableListOf(),
 ) {
     init {
@@ -30,7 +30,7 @@ class UnfinishedStoreCleanup(
 
     companion object {
         val lock = ReentrantLock()
-        var registeredCleanups = mutableSetOf<UnfinishedStoreCleanup>()
+        var registeredCleanups = mutableSetOf<AutomaticFileCleanup>()
 
         init {
             val cleanupThread =
@@ -43,13 +43,13 @@ class UnfinishedStoreCleanup(
             Runtime.getRuntime().addShutdownHook(cleanupThread)
         }
 
-        private fun add(entry: UnfinishedStoreCleanup) {
+        private fun add(entry: AutomaticFileCleanup) {
             lock.withLock {
                 registeredCleanups.add(entry)
             }
         }
 
-        private fun remove(entry: UnfinishedStoreCleanup) {
+        private fun remove(entry: AutomaticFileCleanup) {
             lock.withLock {
                 registeredCleanups.remove(entry)
             }

@@ -15,6 +15,7 @@ import org.archivekeep.files.repo.RepoIndex
 import org.archivekeep.utils.coroutines.flowScopedToThisJob
 import org.archivekeep.utils.coroutines.shareResourceIn
 import org.archivekeep.utils.flows.logLoadableResourceLoad
+import org.archivekeep.utils.io.AutomaticFileCleanup
 import org.archivekeep.utils.io.watchRecursively
 import org.archivekeep.utils.loading.produceLoadable
 import org.archivekeep.utils.loading.stateIn
@@ -149,7 +150,7 @@ class FilesystemIndexStore(
     }
 
     fun storeChecksumForSave(
-        cleanup: UnfinishedStoreCleanup,
+        cleanup: AutomaticFileCleanup,
         filename: String,
         checksumSha256: String,
     ) {

@@ -34,6 +34,7 @@ import org.archivekeep.files.repo.RepoIndex
 import org.archivekeep.files.repo.RepositoryMetadata
 import org.archivekeep.utils.coroutines.flowScopedToThisJob
 import org.archivekeep.utils.flows.logLoadableResourceLoad
+import org.archivekeep.utils.io.AutomaticFileCleanup
 import org.archivekeep.utils.io.createTmpFileForWrite
 import org.archivekeep.utils.io.moveTmpToDestination
 import org.archivekeep.utils.io.watchRecursively
@@ -238,7 +239,7 @@ class FilesRepo(
 
             val (dstTmpFilePath, fc) = createTmpFileForWrite(dstPath, FileChannel::open)
 
-            val cleanup = UnfinishedStoreCleanup()
+            val cleanup = AutomaticFileCleanup()
 
             try {
                 inProgressHandler.onStart(dstPath)

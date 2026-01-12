@@ -6,8 +6,8 @@ import aws.sdk.kotlin.services.s3.deleteObject
 import aws.sdk.kotlin.services.s3.headObject
 import aws.sdk.kotlin.services.s3.listObjects
 import aws.sdk.kotlin.services.s3.model.ChecksumAlgorithm
+import aws.sdk.kotlin.services.s3.model.ChecksumMode
 import aws.sdk.kotlin.services.s3.model.GetObjectRequest
-import aws.sdk.kotlin.services.s3.model.MetadataDirective
 import aws.sdk.kotlin.services.s3.model.NoSuchBucket
 import aws.sdk.kotlin.services.s3.model.NoSuchKey
 import aws.sdk.kotlin.services.s3.model.NotFound
@@ -26,6 +26,7 @@ import com.nimbusds.jose.crypto.ECDSAVerifier
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
@@ -57,8 +58,8 @@ import org.archivekeep.files.repo.RepoIndex
 import org.archivekeep.files.repo.RepositoryMetadata
 import org.archivekeep.utils.datastore.passwordprotected.PasswordProtectedCustomJoseStorage
 import org.archivekeep.utils.exceptions.WrongCredentialsException
-import org.archivekeep.utils.fromBase64ToHex
 import org.archivekeep.utils.fromHexToBase64
+import org.archivekeep.utils.io.AutomaticFileCleanup
 import org.archivekeep.utils.loading.AutoRefreshLoadableFlow
 import org.archivekeep.utils.loading.Loadable
 import org.archivekeep.utils.loading.firstLoadedOrNullOnErrorOrLocked
@@ -69,9 +70,15 @@ import java.io.PipedOutputStream
 import java.net.URI
 import java.net.URLEncoder
 import java.nio.charset.StandardCharsets
+import java.nio.file.Path
 import java.security.DigestInputStream
 import java.security.MessageDigest
 import java.util.Date
+import kotlin.io.path.createTempFile
+import kotlin.io.path.deleteIfExists
+import kotlin.io.path.fileSize
+import kotlin.io.path.inputStream
+import kotlin.io.path.outputStream
 
 @Serializable
 private data class SignedObjectMetadata(
@@ -207,6 +214,8 @@ class EncryptedS3Repository private constructor(
                                                 s3Client.headObject {
                                                     bucket = bucketName
                                                     key = it.key
+
+                                                    checksumMode = ChecksumMode.Enabled
                                                 }
 
                                             val objectChecksum = response.checksumSha256!!
@@ -317,87 +326,104 @@ class EncryptedS3Repository private constructor(
         stream: InputStream,
         monitor: (copiedBytes: Long) -> Unit,
     ) {
+        val cleanup = AutomaticFileCleanup()
+
         try {
             checkNotExists(filename)
+
+            val tempFile = createTempFile("ak-enc-s3-p-upd")
+            cleanup.files.add(tempFile)
 
             withContext(ioDispatcher) {
                 val vaultContents = vault.data.firstLoadedOrThrowOnErrorOrLocked()
 
-                coroutineScope {
-                    val pipedInputStream =
-                        verifyingStreamViaBackgroundCoroutine(
-                            stream,
-                            monitor,
-                            info.checksumSha256,
-                            blockingIOPopulateDispatcher = ioDispatcher,
-                            checksumComputeDispatcher = computeDispatcher,
-                        )
+                // TODO: monitor temp file creation - sub-task
+                val (digestHex, signedMetadataJSON) = populateTempFileForUpload(tempFile, stream, info, vaultContents)
 
-                    val encryptedInputStream = PipedInputStream()
-                    val encryptedOutputStream = PipedOutputStream(encryptedInputStream)
-
-                    val plainMetadata =
-                        EncryptedFileMetadata.Plain(
-                            size = info.length,
-                            checksumSha256 = info.checksumSha256,
-                        )
-
-                    val encryptedWriter =
-                        launch {
-                            runInterruptible {
-                                writeCryptoStream(
-                                    plainMetadata,
-                                    vaultContents.currentFileSigningKey!!,
-                                    ECDHEncrypter(vaultContents.currentFileEncryptionKey!!.toECKey().toECPublicKey()),
-                                    pipedInputStream,
-                                    encryptedOutputStream,
-                                )
-                            }
-                        }
-
-                    val digest = MessageDigest.getInstance("SHA-256")
-                    val digestInputStream = DigestInputStream(encryptedInputStream, digest)
-
-                    try {
-                        val newObject =
-                            s3Client.putObject {
-                                bucket = bucketName
-                                key = filename.toKey()
-
-                                body = interruptibleSourceFromInputStream(digestInputStream)
-
-                                checksumAlgorithm = ChecksumAlgorithm.Sha256
-                            }
-
-                        val digestHex = digest.digest().toHexString()
-                        if (newObject.checksumSha256?.fromBase64ToHex() != digestHex) {
-                            throw RuntimeException("Checksum doesn't match")
-                        }
-
-                        val signedMetadataJSON = Json.encodeToString(SignedObjectMetadata(digestHex.fromHexToBase64(), plainMetadata))
-
-                        // TODO: create TMP file and don't use copy
-                        s3Client.copyObject {
-                            copySource = "$bucketName/${filename.toKey()}"
-
+                try {
+                    tempFile.inputStream().use { inputStream ->
+                        s3Client.putObject {
                             bucket = bucketName
                             key = filename.toKey()
 
-                            metadataDirective = MetadataDirective.Replace
+                            // TODO: monitor upload
+                            body = inputStream.asByteStream(tempFile.fileSize())
+
+                            checksumAlgorithm = ChecksumAlgorithm.Sha256
+                            checksumSha256 = digestHex.fromHexToBase64()
 
                             metadata = mapOf(SIGNED_METADATA to signAsJWS(signedMetadataJSON, vaultContents.currentFileSigningKey!!))
                         }
-                    } catch (e: Throwable) {
-                        throw RuntimeException(e)
                     }
-
-                    encryptedWriter.join()
+                } catch (e: Throwable) {
+                    throw RuntimeException(e)
+                } finally {
+                    tempFile.deleteIfExists()
                 }
             }
         } finally {
-            contentsLastChangeFlow.update { Date() }
+            withContext(NonCancellable) {
+                cleanup.runPremature()
+                contentsLastChangeFlow.update { Date() }
+            }
         }
     }
+
+    @OptIn(ExperimentalStdlibApi::class)
+    private suspend fun populateTempFileForUpload(
+        tempFile: Path,
+        stream: InputStream,
+        info: ArchiveFileInfo,
+        vaultContents: EncryptedFileSystemRepositoryVaultContents,
+    ): Pair<String, String> =
+        coroutineScope {
+            val pipedInputStream =
+                verifyingStreamViaBackgroundCoroutine(
+                    stream,
+                    { },
+                    info.checksumSha256,
+                    blockingIOPopulateDispatcher = ioDispatcher,
+                    checksumComputeDispatcher = computeDispatcher,
+                )
+
+            val encryptedInputStream = PipedInputStream()
+            val encryptedOutputStream = PipedOutputStream(encryptedInputStream)
+
+            val plainMetadata =
+                EncryptedFileMetadata.Plain(
+                    size = info.length,
+                    checksumSha256 = info.checksumSha256,
+                )
+
+            val encryptedWriter =
+                launch {
+                    runInterruptible {
+                        writeCryptoStream(
+                            plainMetadata,
+                            vaultContents.currentFileSigningKey!!,
+                            ECDHEncrypter(vaultContents.currentFileEncryptionKey!!.toECKey().toECPublicKey()),
+                            pipedInputStream,
+                            encryptedOutputStream,
+                        )
+                    }
+                }
+
+            val digest = MessageDigest.getInstance("SHA-256")
+            val digestInputStream = DigestInputStream(encryptedInputStream, digest)
+
+            runInterruptible {
+                tempFile.outputStream().use { os ->
+                    digestInputStream.copyTo(os)
+                }
+            }
+
+            encryptedWriter.join()
+
+            val digestHex = digest.digest().toHexString()
+            val signedMetadataJSON = Json.encodeToString(SignedObjectMetadata(digestHex.fromHexToBase64(), plainMetadata))
+
+            Pair(digestHex, signedMetadataJSON)
+        }
 
     private suspend fun checkNotExists(filename: String) {
         try {

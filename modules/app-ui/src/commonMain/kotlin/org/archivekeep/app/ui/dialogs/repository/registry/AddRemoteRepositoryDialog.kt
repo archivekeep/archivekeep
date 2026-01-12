@@ -337,6 +337,14 @@ class AddRemoteRepositoryDialog : Dialog {
                                     extra = {
                                         if (vm.initType.value == InitType.ENCRYPTED) {
                                             Column {
+                                                WarningAlert {
+                                                    Text("Contents are E2E encrypted. Filenames are not.",)
+                                                    Spacer(Modifier.height(8.dp))
+                                                    Text("Do not have sensitive data in filenames with servers (service providers) you don't trust.")
+                                                }
+
+                                                Spacer(Modifier.height(8.dp))
+
                                                 PasswordField(
                                                     vm.initPassword.value,
                                                     onValueChange = { vm.initPassword.value = it },
@@ -349,18 +357,9 @@ class AddRemoteRepositoryDialog : Dialog {
                                                     vm.initPasswordCheck.value,
                                                     onValueChange = { vm.initPasswordCheck.value = it },
                                                     placeholder = { Text("Verify password ...") },
-                                                    modifier = Modifier.padding(bottom = 8.dp).testTag("Verify password ..."),
+                                                    modifier = Modifier.testTag("Verify password ..."),
                                                     enabled = initIsEditble,
                                                 )
-                                                WarningAlert {
-                                                    Column {
-                                                        Text(
-                                                            "Contents are E2E encrypted. Filenames are not.",
-                                                        )
-                                                        Spacer(Modifier.height(8.dp))
-                                                        Text("Do not have sensitive data in filenames with servers (service providers) you don't trust.")
-                                                    }
-                                                }
                                             }
                                         }
                                     },

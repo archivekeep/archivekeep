@@ -29,7 +29,6 @@ import org.archivekeep.files.crypto.file.EncryptedFileMetadata
 import org.archivekeep.files.crypto.file.readCryptoStream
 import org.archivekeep.files.crypto.file.writeCryptoStream
 import org.archivekeep.files.driver.filesystem.InProgressHandler
-import org.archivekeep.files.driver.filesystem.files.UnfinishedStoreCleanup
 import org.archivekeep.files.driver.filesystem.files.safeSubPath
 import org.archivekeep.files.encryption.EncryptedFileSystemRepositoryVaultContents
 import org.archivekeep.files.encryption.verifyingStreamViaBackgroundCoroutine
@@ -42,6 +41,7 @@ import org.archivekeep.utils.coroutines.flowScopedToThisJob
 import org.archivekeep.utils.coroutines.shareResourceIn
 import org.archivekeep.utils.datastore.passwordprotected.PasswordProtectedJoseStorageInFile
 import org.archivekeep.utils.flows.logLoadableResourceLoad
+import org.archivekeep.utils.io.AutomaticFileCleanup
 import org.archivekeep.utils.io.createTmpFileForWrite
 import org.archivekeep.utils.io.moveTmpToDestination
 import org.archivekeep.utils.io.watchRecursively
@@ -215,7 +215,7 @@ class EncryptedFileSystemRepository private constructor(
         monitor: (copiedBytes: Long) -> Unit,
     ) {
         withContext(ioDispatcher) {
-            val cleanup = UnfinishedStoreCleanup()
+            val cleanup = AutomaticFileCleanup()
 
             try {
                 inProgressHandler.onStart(filename)

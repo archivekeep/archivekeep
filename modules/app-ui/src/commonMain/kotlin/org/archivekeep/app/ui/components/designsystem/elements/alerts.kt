@@ -4,6 +4,7 @@ import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Surface
 import androidx.compose.runtime.Composable
@@ -22,10 +23,12 @@ fun ErrorAlert(content: @Composable ColumnScope.() -> Unit) {
         color = Color.Red.copy(alpha = 0.1f),
         shape = MaterialTheme.shapes.medium,
     ) {
-        Column(
-            Modifier.padding(12.dp),
-            content = content,
-        )
+        SelectionContainer {
+            Column(
+                Modifier.padding(12.dp),
+                content = content,
+            )
+        }
     }
 }
 
@@ -40,9 +43,11 @@ fun WarningAlert(content: @Composable ColumnScope.() -> Unit) {
         color = Color.Yellow.copy(alpha = 0.1f),
         shape = MaterialTheme.shapes.medium,
     ) {
-        Column(
-            Modifier.padding(12.dp),
-            content = content,
-        )
+        SelectionContainer {
+            Column(
+                Modifier.padding(12.dp),
+                content = content,
+            )
+        }
     }
 }
