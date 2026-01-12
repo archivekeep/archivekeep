@@ -67,7 +67,9 @@ class CredentialsInProtectedWalletDataStore(
         credentials: BasicAuthCredentials,
     ) {
         updateRepositoryCredentials { old ->
-            old +
+            val oldWithoutCurrentURI = old.filter { oldCredential -> oldCredential.uri != repositoryURI }.toSet()
+
+            oldWithoutCurrentURI +
                 setOf(
                     PersistedRepositoryCredentials(
                         repositoryURI,
