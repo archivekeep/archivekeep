@@ -333,7 +333,7 @@ class EncryptedFileSystemRepository private constructor(
                 throw RuntimeException("Already exists or destination is not empty")
             }
 
-            path.resolve("EncryptedFiles").createDirectory()
+            path.resolve(ENCRYPTED_FILES_DIRECTORY).createDirectory()
 
             return EncryptedFileSystemRepository(path)
                 .apply {
