@@ -31,6 +31,7 @@ import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.decodeFromStream
+import org.archivekeep.files.ARCHIVE_METADATA_FILENAME
 import org.archivekeep.files.exceptions.ChecksumMismatch
 import org.archivekeep.files.exceptions.DestinationExists
 import org.archivekeep.files.repo.ArchiveFileInfo
@@ -50,8 +51,6 @@ import java.nio.charset.StandardCharsets
 import java.security.DigestInputStream
 import java.security.MessageDigest
 import java.util.Date
-
-private const val METADATA_JSON_KEY = "metadata.json"
 
 class S3Repository private constructor(
     val endpoint: URI,
@@ -262,7 +261,7 @@ class S3Repository private constructor(
 
             s3Client.putObject {
                 bucket = bucketName
-                key = METADATA_JSON_KEY
+                key = ARCHIVE_METADATA_FILENAME
                 checksumSha256 = newMetadataBytes.sha256().fromHexToBase64()
 
                 body = newMetadataBytes.inputStream().asByteStream(newMetadataBytes.size.toLong())
@@ -279,7 +278,7 @@ class S3Repository private constructor(
                 .getObject(
                     GetObjectRequest {
                         bucket = bucketName
-                        key = METADATA_JSON_KEY
+                        key = ARCHIVE_METADATA_FILENAME
                     },
                 ) {
                     Json.decodeFromStream(it.body!!.toInputStream())

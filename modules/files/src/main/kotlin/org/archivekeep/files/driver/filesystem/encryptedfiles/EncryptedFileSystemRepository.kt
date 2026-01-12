@@ -25,6 +25,9 @@ import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.decodeFromStream
 import kotlinx.serialization.serializer
+import org.archivekeep.files.ARCHIVE_METADATA_FILENAME
+import org.archivekeep.files.ENCRYPTED_FILES_DIRECTORY
+import org.archivekeep.files.VAULT_FILENAME
 import org.archivekeep.files.crypto.file.EncryptedFileMetadata
 import org.archivekeep.files.crypto.file.readCryptoStream
 import org.archivekeep.files.crypto.file.writeCryptoStream
@@ -78,9 +81,9 @@ class EncryptedFileSystemRepository private constructor(
 ) : Repo {
     private val scope = CoroutineScope(SupervisorJob() + CoroutineName("EncryptedFileSystemRepository") + stateDispatcher)
 
-    private val encryptedFilesRoot = root.resolve("EncryptedFiles")
-    private val vaultPath = root.resolve("vault.jwe")
-    private val metadataPath = root.resolve("archive-metadata.json")
+    private val encryptedFilesRoot = root.resolve(ENCRYPTED_FILES_DIRECTORY)
+    private val vaultPath = root.resolve(VAULT_FILENAME)
+    private val metadataPath = root.resolve(ARCHIVE_METADATA_FILENAME)
 
     private val inProgressHandler = InProgressHandler(scope)
 

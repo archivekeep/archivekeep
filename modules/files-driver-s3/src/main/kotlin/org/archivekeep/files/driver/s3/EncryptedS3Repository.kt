@@ -44,6 +44,9 @@ import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.decodeFromStream
 import kotlinx.serialization.serializer
+import org.archivekeep.files.ARCHIVE_METADATA_FILENAME
+import org.archivekeep.files.ENCRYPTED_FILES_PATH_PREFIX
+import org.archivekeep.files.VAULT_FILENAME
 import org.archivekeep.files.crypto.file.EncryptedFileMetadata
 import org.archivekeep.files.crypto.file.readCryptoStream
 import org.archivekeep.files.crypto.file.writeCryptoStream
@@ -52,10 +55,12 @@ import org.archivekeep.files.crypto.signAsJWS
 import org.archivekeep.files.encryption.EncryptedFileSystemRepositoryVaultContents
 import org.archivekeep.files.encryption.verifyingStreamViaBackgroundCoroutine
 import org.archivekeep.files.exceptions.DestinationExists
+import org.archivekeep.files.fromEncryptedFilePath
 import org.archivekeep.files.repo.ArchiveFileInfo
 import org.archivekeep.files.repo.Repo
 import org.archivekeep.files.repo.RepoIndex
 import org.archivekeep.files.repo.RepositoryMetadata
+import org.archivekeep.files.toEncryptedFilePath
 import org.archivekeep.utils.datastore.passwordprotected.PasswordProtectedCustomJoseStorage
 import org.archivekeep.utils.exceptions.WrongCredentialsException
 import org.archivekeep.utils.fromHexToBase64
@@ -115,7 +120,7 @@ class EncryptedS3Repository private constructor(
                         s3Client.getObject(
                             GetObjectRequest {
                                 bucket = bucketName
-                                key = VAULT_LOCATION
+                                key = VAULT_FILENAME
                             },
                         ) { response ->
                             response.body?.toByteArray()
@@ -128,7 +133,7 @@ class EncryptedS3Repository private constructor(
 
                 s3Client.putObject {
                     bucket = bucketName
-                    key = VAULT_LOCATION
+                    key = VAULT_FILENAME
 
                     body = ByteStream.fromBytes(newData)
                 }
@@ -142,7 +147,7 @@ class EncryptedS3Repository private constructor(
             s3Client.getObject(
                 GetObjectRequest {
                     bucket = bucketName
-                    key = VAULT_LOCATION
+                    key = VAULT_FILENAME
                 },
             ) { response ->
                 response.body?.toByteArray()
@@ -190,7 +195,7 @@ class EncryptedS3Repository private constructor(
                             s3Client
                                 .listObjects {
                                     bucket = bucketName
-                                    prefix = ENCRYPTED_FILES_PREFIX
+                                    prefix = ENCRYPTED_FILES_PATH_PREFIX
                                     marker = nextMarker
                                 }
 
@@ -221,19 +226,19 @@ class EncryptedS3Repository private constructor(
                                             val objectChecksum = response.checksumSha256!!
                                             val signedObjectMetadata =
                                                 parseVerifyDecodeJWS<SignedObjectMetadata>(
-                                                    response.metadata!![SIGNED_METADATA]!!,
+                                                    response.metadata!![SIGNED_METADATA_OBJECT_PROPERTY]!!,
                                                     ECDSAVerifier(vaultContents.currentFileSigningKey!!.toECKey().toECPublicKey()),
                                                 )
 
                                             if (objectChecksum != signedObjectMetadata.objectChecksumSha256) {
-                                                throw RuntimeException("Integrity corrupted of ${it.key!!.toFilename()}")
+                                                throw RuntimeException("Integrity corrupted of ${it.key!!.fromEncryptedFilePath()}")
                                             }
 
                                             signedObjectMetadata.plainFileMetadata
                                         }
 
                                     RepoIndex.File(
-                                        it.key!!.toFilename(),
+                                        it.key!!.fromEncryptedFilePath(),
                                         plainMetadata.size,
                                         plainMetadata.checksumSha256,
                                     )
@@ -277,15 +282,15 @@ class EncryptedS3Repository private constructor(
             checkNotExists(to)
 
             s3Client.copyObject {
-                copySource = URLEncoder.encode("$bucketName/${from.toKey()}", StandardCharsets.UTF_8.toString())
+                copySource = URLEncoder.encode("$bucketName/${from.toEncryptedFilePath()}", StandardCharsets.UTF_8.toString())
 
                 bucket = bucketName
-                key = to.toKey()
+                key = to.toEncryptedFilePath()
             }
 
             s3Client.deleteObject {
                 bucket = bucketName
-                key = from.toKey()
+                key = from.toEncryptedFilePath()
             }
         } finally {
             contentsLastChangeFlow.update { Date() }
@@ -301,7 +306,7 @@ class EncryptedS3Repository private constructor(
         return s3Client.getObject(
             GetObjectRequest {
                 bucket = bucketName
-                key = filename.toKey()
+                key = filename.toEncryptedFilePath()
             },
         ) { response ->
             readCryptoStream(
@@ -344,7 +349,7 @@ class EncryptedS3Repository private constructor(
                     tempFile.inputStream().use { inputStream ->
                         s3Client.putObject {
                             bucket = bucketName
-                            key = filename.toKey()
+                            key = filename.toEncryptedFilePath()
 
                             // TODO: monitor upload
                             body = inputStream.asByteStream(tempFile.fileSize())
@@ -352,7 +357,7 @@ class EncryptedS3Repository private constructor(
                             checksumAlgorithm = ChecksumAlgorithm.Sha256
                             checksumSha256 = digestHex.fromHexToBase64()
 
-                            metadata = mapOf(SIGNED_METADATA to signAsJWS(signedMetadataJSON, vaultContents.currentFileSigningKey!!))
+                            metadata = mapOf(SIGNED_METADATA_OBJECT_PROPERTY to signAsJWS(signedMetadataJSON, vaultContents.currentFileSigningKey!!))
                         }
                     }
                 } catch (e: Throwable) {
@@ -429,7 +434,7 @@ class EncryptedS3Repository private constructor(
         try {
             s3Client.headObject {
                 bucket = bucketName
-                key = filename.toKey()
+                key = filename.toEncryptedFilePath()
             }
 
             throw DestinationExists(filename)
@@ -455,7 +460,9 @@ class EncryptedS3Repository private constructor(
 
             s3Client.putObject {
                 bucket = bucketName
-                key = METADATA_JSON_KEY
+                key = ARCHIVE_METADATA_FILENAME
+
+                contentType = "application/json"
 
                 body = newMetadataBytes.inputStream().asByteStream(newMetadataBytes.size.toLong())
             }
@@ -471,7 +478,7 @@ class EncryptedS3Repository private constructor(
                 .getObject(
                     GetObjectRequest {
                         bucket = bucketName
-                        key = METADATA_JSON_KEY
+                        key = ARCHIVE_METADATA_FILENAME
                     },
                 ) {
                     Json.decodeFromStream(it.body!!.toInputStream())
@@ -481,17 +488,7 @@ class EncryptedS3Repository private constructor(
         }
 
     companion object {
-        private const val METADATA_JSON_KEY = "metadata.json"
-
-        private const val SIGNED_METADATA = "signed-metadata"
-
-        private const val ENCRYPTED_FILES_PREFIX = "encrypted-files/"
-
-        private const val VAULT_LOCATION = "vault.jwe"
-
-        fun String.toKey() = "$ENCRYPTED_FILES_PREFIX$this.enc"
-
-        fun String.toFilename() = this.removePrefix(ENCRYPTED_FILES_PREFIX).removeSuffix(".enc")
+        private const val SIGNED_METADATA_OBJECT_PROPERTY = "signed-metadata"
 
         suspend fun create(
             endpoint: URI,
