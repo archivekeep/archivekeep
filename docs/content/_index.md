@@ -13,8 +13,8 @@
 <div class="main-display-container">
     <div class="main-display-inner-container">
         <div class="text">
-            <h2>Personal files archivation<span class="sub">With uncompromised control for the user</span></h2>
-            <p>No vendor lock-in. Use your own storages, rent hosted or cloud storages from vendors of your choice, or self-host. And, combine them as you want.</p>
+            <h2>ArchiveKeep<span class="sub">Personal files archivation</span></h2>
+            <p>Use your own <strong>SSD, HDD, USB flash-drives,...</strong> Rent <strong>cloud storages</strong> without vendor lock-in. Self-host. <strong>Combine</strong>.</p>
             <div class="links">
                 <a href='https://flathub.org/apps/org.archivekeep.ArchiveKeep'><picture><source type="image/svg+xml" srcset="https://flathub.org/api/badge?svg&locale=en"><img width="180" alt="Get it on Flathub" srcset="https://flathub.org/api/badge?locale=en 240w" src="https://flathub.org/api/badge?locale=en"/></picture></a>
                 <a class="other-link" href="{{< ref "/install" >}}">Or, install from sources</a>
@@ -27,7 +27,7 @@
 
 <div>
 {{< hint warning >}}
-This software is still under development.
+This software is under development.<br/>
 {{< /hint >}}
 </div>
 </div>
@@ -86,11 +86,12 @@ The contents of files stored in repositories are verifiable using digistal check
 
 ## Cloud supported
 
-Keeping a replica of data in remote storage(s) is essential for confidence in data preservation.
+For data preservation confidence, replication to remote storage(s) is essential.
 
-_**Note:** E2E encryption is not yet implemented, but planned._
+Supported API:
 
-_**Notice:** not recommended to use (with a vendor you don't trust) for data you strictly want to keep private._
+- S3 API - choose vendor(s) you like, no lock-in.
+
 
 </div>
 <div class="other small">
@@ -101,11 +102,14 @@ _**Notice:** not recommended to use (with a vendor you don't trust) for data you
 </div>
 <div class="text">
 
-## Standard API
+## Optional E2E encryption
 
-Choose vendor(s) you like. No lock-in.
+Optional E2E encryption provides ability to use untrusted media and services more securely, such as:
 
-Currently, there's support for S3 API only.
+* SD cards, USB flash-drives,... and other filesystems without encryption,
+* S3 repositories in the cloud.
+
+_**Notice:** only file contents are encrypted, not filenames._
 
 </div>
 </div>

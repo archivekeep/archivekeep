@@ -1,6 +1,16 @@
 # Changelog
 
-## Unreleased
+## Unreleased - E2E encryption
+
+### Added
+
+- optional encryption of filesystem repositories,
+- optional encryption of S3 repositories,
+- error log to sync operations.
+
+### Changed
+
+- errors in sync are skipped (and logged), and sync continues.
 
 ## 0.4.4 - 2025-11-30
 
@@ -13,7 +23,7 @@
 
 - watcher for mounted media not working if /run/media/ didn't exist at the start of the application (related to #6). 
 
-## 0.4.3 = 2025-06-17
+## 0.4.3 - 2025-06-17
 
 ### Added
 
