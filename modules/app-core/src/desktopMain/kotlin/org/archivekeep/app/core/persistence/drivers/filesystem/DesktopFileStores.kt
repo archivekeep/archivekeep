@@ -14,10 +14,10 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.transformLatest
-import org.archivekeep.utils.flows.logCollectionLoadableFlow
+import org.archivekeep.utils.collections.ListItemChangeLogger
 import org.archivekeep.utils.io.debounceAndRepeatAfterDelay
 import org.archivekeep.utils.io.listFilesFlow
-import org.archivekeep.utils.loading.AutoRefreshLoadableFlow
+import org.archivekeep.utils.loading.ResourceLoader
 import org.archivekeep.utils.loading.mapLoadedData
 import oshi.SystemInfo
 import oshi.software.os.OSFileStore
@@ -70,7 +70,7 @@ class DesktopFileStores(
             .conflate()
 
     val autoRefreshMountPoints =
-        AutoRefreshLoadableFlow(
+        ResourceLoader(
             scope,
             ioDispatcher,
             loadFn = {
@@ -120,11 +120,9 @@ class DesktopFileStores(
                             it.fsUUID.isNotBlank()
                         }
 
-                return@AutoRefreshLoadableFlow mountPoints
+                return@ResourceLoader mountPoints
             },
-            observe = {
-                it.logCollectionLoadableFlow("Loaded mount points")
-            },
+            observe = ListItemChangeLogger<MountedFileSystem.MountPoint>("Loaded mount points")::observe,
             updateTriggerFlow =
                 changeEventsFlow
                     .map { "change event: $it" }

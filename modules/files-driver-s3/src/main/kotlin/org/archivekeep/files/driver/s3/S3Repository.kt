@@ -42,8 +42,8 @@ import org.archivekeep.utils.exceptions.WrongCredentialsException
 import org.archivekeep.utils.fromBase64ToHex
 import org.archivekeep.utils.fromHexToBase64
 import org.archivekeep.utils.hashing.sha256
-import org.archivekeep.utils.loading.AutoRefreshLoadableFlow
 import org.archivekeep.utils.loading.Loadable
+import org.archivekeep.utils.loading.ResourceLoader
 import java.io.InputStream
 import java.net.URI
 import java.net.URLEncoder
@@ -89,7 +89,7 @@ class S3Repository private constructor(
     }
 
     private val indexResource =
-        AutoRefreshLoadableFlow(
+        ResourceLoader(
             scope,
             ioDispatcher,
             updateTriggerFlow = contentsLastChangeFlow,
@@ -150,7 +150,7 @@ class S3Repository private constructor(
     override val indexFlow: StateFlow<Loadable<RepoIndex>> = indexResource.stateFlow
 
     private val metadataResource =
-        AutoRefreshLoadableFlow(
+        ResourceLoader(
             scope,
             ioDispatcher,
             updateTriggerFlow = metadataLastChangeFlow,

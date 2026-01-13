@@ -66,8 +66,8 @@ import org.archivekeep.utils.datastore.passwordprotected.PasswordProtectedCustom
 import org.archivekeep.utils.exceptions.WrongCredentialsException
 import org.archivekeep.utils.fromHexToBase64
 import org.archivekeep.utils.io.AutomaticFileCleanup
-import org.archivekeep.utils.loading.AutoRefreshLoadableFlow
 import org.archivekeep.utils.loading.Loadable
+import org.archivekeep.utils.loading.ResourceLoader
 import org.archivekeep.utils.loading.firstLoadedOrNullOnErrorOrLocked
 import org.archivekeep.utils.loading.firstLoadedOrThrowOnErrorOrLocked
 import java.io.InputStream
@@ -180,10 +180,10 @@ class EncryptedS3Repository private constructor(
     }
 
     private val indexResource =
-        AutoRefreshLoadableFlow(
+        ResourceLoader(
             scope,
             ioDispatcher,
-            activeFlagFlow = inProgressHandler.idleFlagFlow,
+            enabledFlow = inProgressHandler.idleFlagFlow,
             updateTriggerFlow = contentsLastChangeFlow,
         ) {
             RepoIndex(loadIndexFiles())
@@ -260,7 +260,7 @@ class EncryptedS3Repository private constructor(
     override val indexFlow: StateFlow<Loadable<RepoIndex>> = indexResource.stateFlow
 
     private val metadataResource =
-        AutoRefreshLoadableFlow(
+        ResourceLoader(
             scope,
             ioDispatcher,
             updateTriggerFlow = metadataLastChangeFlow,

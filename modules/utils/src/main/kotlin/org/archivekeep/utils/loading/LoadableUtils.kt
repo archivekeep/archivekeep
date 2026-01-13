@@ -1,5 +1,6 @@
 package org.archivekeep.utils.loading
 
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.flow.MutableStateFlow
 
 val <T> Loadable<T>.isLoading
@@ -18,6 +19,8 @@ fun <T, R> Loadable<T>.mapIfLoadedOrDefault(
 inline fun <T> MutableStateFlow<Loadable<T>>.produceAndGet(producer: () -> T): T {
     try {
         return producer().also { value = Loadable.Loaded(it) }
+    } catch (e: CancellationException) {
+        throw e
     } catch (e: Throwable) {
         value = Loadable.Failed(e)
         throw e

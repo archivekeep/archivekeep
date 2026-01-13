@@ -12,8 +12,8 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.consumeAsFlow
 import kotlinx.coroutines.flow.onStart
 import org.archivekeep.utils.io.debounceAndRepeatAfterDelay
-import org.archivekeep.utils.loading.AutoRefreshLoadableFlow
 import org.archivekeep.utils.loading.Loadable
+import org.archivekeep.utils.loading.ResourceLoader
 import org.archivekeep.utils.loading.mapLoadedData
 import java.util.Date
 import java.util.concurrent.Executor
@@ -31,7 +31,7 @@ class AndroidFileStores(
     private val changes = Channel<Date>(capacity = 1)
 
     private val autoRefreshMountPoints =
-        AutoRefreshLoadableFlow(
+        ResourceLoader(
             scope,
             updateTriggerFlow =
                 changes

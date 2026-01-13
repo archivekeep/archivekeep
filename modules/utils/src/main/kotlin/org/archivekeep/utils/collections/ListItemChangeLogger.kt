@@ -19,6 +19,10 @@ class ListItemChangeLogger<T>(
 
         knownItems = latestItemsSet
     }
+
+    fun observe(c: Collection<T>) {
+        onNewItems(c)
+    }
 }
 
 private fun <T> Iterable<T>.toBulletList(action: String): String = this.joinToString { "\n * $action: $it" }

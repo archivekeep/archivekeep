@@ -87,7 +87,7 @@ class RepoToRepoSyncServiceImpl(
                             emit(
                                 OptionalLoadable.Failed(
                                     RuntimeException(
-                                        "Base index",
+                                        "Base index of $fromURI",
                                         baseLoadable.cause,
                                     ),
                                 ),
@@ -112,7 +112,7 @@ class RepoToRepoSyncServiceImpl(
                             emit(
                                 OptionalLoadable.Failed(
                                     RuntimeException(
-                                        "Base index",
+                                        "Other index: $otherURI",
                                         otherLoadable.cause,
                                     ),
                                 ),
