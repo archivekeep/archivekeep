@@ -10,6 +10,7 @@
 
 ### Changed
 
+- license from AGPL to GPL,
 - errors in sync are skipped (and logged), and sync continues.
 
 ## 0.4.4 - 2025-11-30

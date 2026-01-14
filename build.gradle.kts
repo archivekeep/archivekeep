@@ -66,8 +66,8 @@ subprojects {
 
                     licenses {
                         license {
-                            name = "GNU Affero General Public License, Version 3"
-                            url = "https://www.gnu.org/licenses/agpl-3.0.txt"
+                            name = "GNU General Public License"
+                            url = "https://www.gnu.org/licenses/gpl-3.0.txt"
                         }
                     }
                     developers {

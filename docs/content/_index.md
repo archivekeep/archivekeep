@@ -176,7 +176,7 @@ This is open-source software, and it is made **available for free, and comes wit
 
 ## License
 
-The project is licensed under **AGPL v3**.
+The project is licensed under **GPL v3 or later**.
 
 </div></div>
 </div></div>

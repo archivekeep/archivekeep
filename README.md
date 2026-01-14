@@ -98,7 +98,7 @@ Although author desires to make system 100% bulletproof to prevent loss of own d
 
 ## License
 
-The whole project is licensed under AGPLv3 - GNU Affero General Public License, version 3. See [LICENSE](LICENSE) for details.
+The whole project is licensed under GNU General Public License, version 3. See [LICENSE](LICENSE) for details.
 
 [Perkeep]: https://perkeep.org/
 [Syncthing]: https://syncthing.net/

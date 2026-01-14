@@ -68,7 +68,7 @@ compose.desktop {
                 iconFile.set(pngIconTask.destination)
             }
 
-            copyright = "AGPLv3"
+            copyright = "GPL-3.0-or-later"
             licenseFile.set(rootProject.file("LICENSE"))
         }
 
