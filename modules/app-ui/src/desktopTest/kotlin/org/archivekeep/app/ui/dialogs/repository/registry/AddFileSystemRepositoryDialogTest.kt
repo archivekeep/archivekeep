@@ -206,7 +206,9 @@ class AddFileSystemRepositoryDialogTest {
     fun testHappyAddFlowForPlainRepository() {
         runHighDensityComposeUiTest {
             val repoPath = testTempDir.newFolder("local-archives/test-repo").path
-            FilesRepo.create(Path(repoPath))
+            runBlocking {
+                FilesRepo.create(Path(repoPath))
+            }
 
             setContentInDialogScreenshotContainer {
                 ApplicationProviders(

@@ -40,6 +40,7 @@ import org.archivekeep.app.core.utils.generics.UniqueSharedFlowInstanceManager
 import org.archivekeep.app.core.utils.identifiers.RepositoryURI
 import org.archivekeep.app.core.utils.identifiers.StorageURI
 import org.archivekeep.files.api.repository.LocalRepo
+import org.archivekeep.files.api.repository.PLAIN_REPOSITORY_TYPE
 import org.archivekeep.files.api.repository.Repo
 import org.archivekeep.files.api.repository.RepoIndex
 import org.archivekeep.files.api.repository.RepositoryAssociationGroupId
@@ -410,7 +411,14 @@ open class DemoEnvironment(
                 displayName = displayName,
                 encryptionType = encryptionType,
                 physicalLocation = physicalLocation,
-                repo = repoFactory(contentsFixture, RepositoryMetadata(correlationId)),
+                repo =
+                    repoFactory(
+                        contentsFixture,
+                        RepositoryMetadata(
+                            repositoryType = PLAIN_REPOSITORY_TYPE,
+                            associationGroupId = correlationId,
+                        ),
+                    ),
             )
 
         fun localInMemoryFactory(): DemoRepository =

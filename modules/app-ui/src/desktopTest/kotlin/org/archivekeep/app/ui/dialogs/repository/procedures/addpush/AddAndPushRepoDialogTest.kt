@@ -81,7 +81,7 @@ class AddAndPushRepoDialogScreenshotTest {
                         "2024/08/01.JPG",
                         "2024/08/02.JPG",
                         "HDD B",
-                        "Backblaze S3 (planned)",
+                        "Backblaze S3",
                     )
 
                 eventually(2.seconds) {

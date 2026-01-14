@@ -234,7 +234,7 @@ val eBook =
 
 val BackBlaze =
     DemoEnvironment.DemoOnlineStorage(
-        displayName = "Backblaze S3 (planned)",
+        displayName = "Backblaze S3",
         connectionStatus = Storage.ConnectionStatus.CONNECTED,
         repositories = allArchives,
     )
