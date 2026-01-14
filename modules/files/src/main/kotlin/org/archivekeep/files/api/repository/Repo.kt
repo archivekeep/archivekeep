@@ -42,6 +42,7 @@ data class RepositoryAssociationGroup(
 
 @Serializable
 data class RepositoryMetadata(
+    val repositoryType: String? = null,
     val associationGroupId: RepositoryAssociationGroupId? = null,
 )
 

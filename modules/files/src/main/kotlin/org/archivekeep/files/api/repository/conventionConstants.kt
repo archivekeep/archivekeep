@@ -1,5 +1,8 @@
 package org.archivekeep.files.api.repository
 
+const val PLAIN_REPOSITORY_TYPE = "plain-files"
+const val ENCRYPTED_REPOSITORY_TYPE = "encrypted-files"
+
 const val ENCRYPTED_FILES_DIRECTORY = "encrypted-files"
 
 const val ENCRYPTED_FILES_PATH_PREFIX = "$ENCRYPTED_FILES_DIRECTORY/"

@@ -48,6 +48,7 @@ import org.archivekeep.files.api.exceptions.DestinationExists
 import org.archivekeep.files.api.repository.ARCHIVE_METADATA_FILENAME
 import org.archivekeep.files.api.repository.ArchiveFileInfo
 import org.archivekeep.files.api.repository.ENCRYPTED_FILES_PATH_PREFIX
+import org.archivekeep.files.api.repository.ENCRYPTED_REPOSITORY_TYPE
 import org.archivekeep.files.api.repository.Repo
 import org.archivekeep.files.api.repository.RepoIndex
 import org.archivekeep.files.api.repository.RepositoryMetadata
@@ -510,8 +511,11 @@ class EncryptedS3Repository private constructor(
         ).apply {
             init()
 
-            // create them from defaults
-            updateMetadata { it }
+            updateMetadata {
+                it.copy(
+                    repositoryType = ENCRYPTED_REPOSITORY_TYPE,
+                )
+            }
 
             vault.create(password)
 
@@ -537,8 +541,12 @@ class EncryptedS3Repository private constructor(
         ).apply {
             init()
 
-            readMetadataFromS3() ?: throw S3LocationNotInitializedAsRepositoryException()
+            val metadata = readMetadataFromS3() ?: throw S3LocationNotInitializedAsRepositoryException()
             readVaultContents() ?: throw S3LocationNotInitializedAsRepositoryException()
+
+            if (metadata.repositoryType != ENCRYPTED_REPOSITORY_TYPE) {
+                throw S3LocationNotInitializedAsRepositoryException()
+            }
         }
 
         suspend fun openAndUnlock(

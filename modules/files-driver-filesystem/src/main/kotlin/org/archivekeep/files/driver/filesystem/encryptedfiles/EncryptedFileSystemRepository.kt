@@ -29,6 +29,7 @@ import org.archivekeep.files.api.exceptions.DestinationExists
 import org.archivekeep.files.api.repository.ARCHIVE_METADATA_FILENAME
 import org.archivekeep.files.api.repository.ArchiveFileInfo
 import org.archivekeep.files.api.repository.ENCRYPTED_FILES_DIRECTORY
+import org.archivekeep.files.api.repository.ENCRYPTED_REPOSITORY_TYPE
 import org.archivekeep.files.api.repository.Repo
 import org.archivekeep.files.api.repository.RepoIndex
 import org.archivekeep.files.api.repository.RepositoryMetadata
@@ -340,6 +341,12 @@ class EncryptedFileSystemRepository private constructor(
                     vault.create(password)
 
                     vault.updateData { EncryptedFileSystemRepositoryVaultContents.generateNew() }
+
+                    updateMetadata {
+                        it.copy(
+                            repositoryType = ENCRYPTED_REPOSITORY_TYPE,
+                        )
+                    }
                 }
         }
 

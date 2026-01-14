@@ -35,6 +35,7 @@ import org.archivekeep.files.api.exceptions.ChecksumMismatch
 import org.archivekeep.files.api.exceptions.DestinationExists
 import org.archivekeep.files.api.repository.ARCHIVE_METADATA_FILENAME
 import org.archivekeep.files.api.repository.ArchiveFileInfo
+import org.archivekeep.files.api.repository.PLAIN_REPOSITORY_TYPE
 import org.archivekeep.files.api.repository.Repo
 import org.archivekeep.files.api.repository.RepoIndex
 import org.archivekeep.files.api.repository.RepositoryMetadata
@@ -312,7 +313,11 @@ class S3Repository private constructor(
             init()
 
             // create them from defaults
-            updateMetadata { it }
+            updateMetadata {
+                it.copy(
+                    repositoryType = PLAIN_REPOSITORY_TYPE,
+                )
+            }
         }
 
         suspend fun open(
@@ -332,7 +337,19 @@ class S3Repository private constructor(
         ).apply {
             init()
 
-            readMetadataFromS3() ?: throw S3LocationNotInitializedAsRepositoryException()
+            val metadata = readMetadataFromS3() ?: throw S3LocationNotInitializedAsRepositoryException()
+
+            when (metadata.repositoryType) {
+                PLAIN_REPOSITORY_TYPE -> {}
+                null -> {
+                    println("Auto-setting $endpoint:$region:$bucketName as plain repository")
+
+                    updateMetadata {
+                        it.copy(repositoryType = PLAIN_REPOSITORY_TYPE)
+                    }
+                }
+                else -> throw S3LocationNotInitializedAsRepositoryException()
+            }
         }
     }
 }
