@@ -14,7 +14,7 @@
     <div class="main-display-inner-container">
         <div class="text">
             <h2>ArchiveKeep<span class="sub">Personal files archivation</span></h2>
-            <p>Use your own <strong>SSD, HDD, USB flash-drives,...</strong> Rent <strong>cloud storages</strong> without vendor lock-in. Self-host. <strong>Combine</strong>.</p>
+            <p>Use your own <strong>SSD, HDD, USB flash-drives,...</strong> Rent <strong>cloud storages</strong> without vendor lock-in. Self-host. <strong>Combine</strong> storages.</p>
             <div class="links">
                 <a href='https://flathub.org/apps/org.archivekeep.ArchiveKeep'><picture><source type="image/svg+xml" srcset="https://flathub.org/api/badge?svg&locale=en"><img width="180" alt="Get it on Flathub" srcset="https://flathub.org/api/badge?locale=en 240w" src="https://flathub.org/api/badge?locale=en"/></picture></a>
                 <a class="other-link" href="{{< ref "/install" >}}">Or, install from sources</a>
@@ -26,9 +26,13 @@
     </div>
 
 <div>
+
 {{< hint warning >}}
-This software is under development.<br/>
+<p><strong>This software is under development.</strong></p>
+<p>It serves <a href="https://kravemir.org">author's</a> needs. However, there's still a room for improvement.
+<p>Consider buying author a pizza to support the development.</p>
 {{< /hint >}}
+
 </div>
 </div>
 

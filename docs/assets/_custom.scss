@@ -181,6 +181,16 @@ div.home-page {
         margin-block-end: 1.25rem;
       }
 
+      blockquote p {
+        margin-block-start: 0;
+        margin-block-end: 0;
+      }
+
+      blockquote p + p {
+        margin-block-start: 0.5rem;
+        margin-block-end: 0;
+      }
+
       div.links {
         display: flex;
         flex-wrap: wrap;
