@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased - E2E encryption
+## 0.5.0 - 2026-05-14 - E2E encryption
 
 ### Added
 
