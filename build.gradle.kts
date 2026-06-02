@@ -12,6 +12,7 @@ plugins {
     alias(libs.plugins.flatpak.gradle.generator)
     alias(libs.plugins.svg2ico) apply false
     alias(libs.plugins.protobuf) apply false
+    alias(libs.plugins.ksp) apply false
     alias(libs.plugins.ktlint) apply false
 
     id("java")
@@ -37,7 +38,7 @@ subprojects {
 }
 
 subprojects {
-    if (name in listOf("app-android", "app-ui", "app-core")) {
+    if (name in listOf("app-android", "app-ui", "app-core", "files-driver-filesystem")) {
         return@subprojects
     }
 
@@ -129,6 +130,8 @@ allprojects {
                 "kotlinCompilerClasspath",
                 "kotlinCompilerPluginClasspath",
                 "kotlinCompilerPluginClasspathMain",
+                "kspKotlinDesktopProcessorClasspath",
+                "kspPluginClasspath",
                 "annotationProcessor",
                 "compileClasspath",
                 "runtimeClasspath",

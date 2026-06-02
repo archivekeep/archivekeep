@@ -1,42 +1,70 @@
 plugins {
-    id("java-library")
-
-    alias(libs.plugins.kotlin.jvm)
+    alias(libs.plugins.kotlin.multiplatform)
     alias(libs.plugins.kotlin.serialization)
+
+    alias(libs.plugins.ksp)
+
+    id("com.android.library")
 
     alias(libs.plugins.ktlint)
 }
 
-dependencies {
-    api(project(":files"))
-    api(project(":utils"))
+kotlin {
+    androidTarget()
 
-    implementation(libs.kfswatch)
+    jvm("desktop")
 
-    compileOnly(libs.apache.tomcat.annotations)
+    jvmToolchain(17)
 
-    testImplementation(project(":files-test"))
-    testImplementation(libs.kotlin.test)
-    testImplementation(libs.kotlinx.coroutines.test)
-    testImplementation(libs.junit.jupiter)
-    testImplementation(libs.kotest.assertions.core)
+    sourceSets {
+        val commonMain by getting {
+            dependencies {
+                api(project(":files"))
+                api(project(":utils"))
+
+                implementation(libs.kfswatch)
+
+                implementation(libs.androidx.room.runtime)
+                implementation(libs.androidx.sqlite.bundled)
+
+                compileOnly(libs.apache.tomcat.annotations)
+            }
+        }
+        val androidMain by getting {}
+        val desktopMain by getting {}
+        val desktopTest by getting {
+            dependencies {
+                implementation(project(":files-test"))
+                implementation(libs.kotlin.test)
+                implementation(libs.kotlinx.coroutines.test)
+                implementation(libs.junit.jupiter)
+                implementation(libs.kotest.assertions.core)
+            }
+        }
+    }
 }
 
-tasks.named<Test>("test") {
+dependencies {
+    add("kspAndroid", libs.androidx.room.compiler)
+    add("kspDesktop", libs.androidx.room.compiler)
+}
+
+tasks.withType<Test> {
     useJUnitPlatform()
 }
 
-kotlin {
-    jvmToolchain(17)
-}
+android {
+    compileSdk = 35
+    namespace = "org.archivekeep.files.driver.filesystem"
 
-publishing {
-    publications.named<MavenPublication>("maven") {
-        artifactId = "archivekeep-files-driver-filesystem"
-
-        pom {
-            name = "ArchiveKeep Files Filesystem Driver"
-            description = "Library implementing filesystem driver for repositories."
-        }
+    defaultConfig {
+        minSdk = 30
+    }
+    compileOptions {
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
+    }
+    kotlin {
+        jvmToolchain(17)
     }
 }

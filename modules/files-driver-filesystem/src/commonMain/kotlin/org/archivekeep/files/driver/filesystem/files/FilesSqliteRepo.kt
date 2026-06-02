@@ -14,6 +14,7 @@ import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.debounce
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onStart
@@ -32,6 +33,8 @@ import org.archivekeep.files.api.repository.PLAIN_REPOSITORY_TYPE
 import org.archivekeep.files.api.repository.RepoIndex
 import org.archivekeep.files.api.repository.RepositoryMetadata
 import org.archivekeep.files.api.repository.operations.StatusOperation
+import org.archivekeep.files.driver.filesystem.files.sqlite.SQLiteDataSource
+import org.archivekeep.files.driver.filesystem.files.sqlite.createIndexDatabase
 import org.archivekeep.utils.coroutines.InProgressHandler
 import org.archivekeep.utils.coroutines.flowScopedToThisJob
 import org.archivekeep.utils.flows.logLoadableResourceLoad
@@ -40,7 +43,9 @@ import org.archivekeep.utils.io.createTmpFileForWrite
 import org.archivekeep.utils.io.moveTmpToDestination
 import org.archivekeep.utils.io.watchRecursively
 import org.archivekeep.utils.loading.Loadable
+import org.archivekeep.utils.loading.firstLoadedOrFailure
 import org.archivekeep.utils.loading.flatMapLoadableFlow
+import org.archivekeep.utils.loading.mapToLoadable
 import org.archivekeep.utils.loading.produceLoadable
 import org.archivekeep.utils.loading.produceLoadableStateIn
 import org.archivekeep.utils.loading.stateIn
@@ -53,35 +58,37 @@ import java.nio.file.Files
 import java.nio.file.Path
 import java.nio.file.PathMatcher
 import java.util.Collections.singletonList
-import kotlin.io.path.ExperimentalPathApi
+import java.util.Date
 import kotlin.io.path.Path
 import kotlin.io.path.absolutePathString
 import kotlin.io.path.createDirectory
 import kotlin.io.path.createParentDirectories
 import kotlin.io.path.deleteExisting
-import kotlin.io.path.deleteRecursively
 import kotlin.io.path.exists
 import kotlin.io.path.fileSize
+import kotlin.io.path.getLastModifiedTime
 import kotlin.io.path.inputStream
 import kotlin.io.path.invariantSeparatorsPathString
 import kotlin.io.path.isDirectory
 import kotlin.io.path.isRegularFile
 import kotlin.io.path.moveTo
+import kotlin.io.path.pathString
 import kotlin.io.path.readText
 import kotlin.io.path.relativeTo
+import kotlin.io.path.writeText
 import kotlin.streams.asSequence
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.milliseconds
 
-const val ignorePatternsFileName = ".archivekeepignore"
+private const val ignorePatternsFileName = ".archivekeepignore"
 
-const val checksumsSubDir = "checksums"
+private const val dbName = "archivekeep.db"
 
-class FilesRepo(
+class FilesSqliteRepo(
     val root: Path,
     parentJob: Job? = null,
     internal val archiveRoot: Path = root.resolve(".archive"),
-    checksumsRoot: Path = archiveRoot.resolve(checksumsSubDir),
+    dbPath: Path = archiveRoot.resolve(dbName),
     stateDispatcher: CoroutineDispatcher = Dispatchers.Default,
     val ioDispatcher: CoroutineDispatcher = Dispatchers.IO,
 ) : LocalRepo {
@@ -93,14 +100,8 @@ class FilesRepo(
     private val inProgressHandler =
         InProgressHandler<Path>(scope, transform = { it.absolutePathString() })
 
-    private val indexStore =
-        FilesystemIndexStore(
-            checksumsRoot,
-            scope = scope,
-            activeJobFlow = inProgressHandler.jobActiveOnIdleDelayedStart,
-            fileSizeProvider = ::getFileSize,
-            ioDispatcher = ioDispatcher,
-        )
+    private val database = createIndexDatabase(dbPath, ioDispatcher)
+    private val sqliteDataSource = SQLiteDataSource(database)
 
     override fun getFileSize(filename: String): Long? {
         val path = root.resolve(safeSubPath(filename))
@@ -148,7 +149,11 @@ class FilesRepo(
             }.toList()
     }
 
-    override suspend fun indexedFilenames(): List<String> = indexStore.all()
+    override suspend fun indexedFilenames(): List<String> =
+        sqliteDataSource.files
+            .flowOn(ioDispatcher)
+            .first()
+            .map { it.path }
 
     override suspend fun verifyFileExists(path: String): Boolean {
         val fullPath = root.resolve(safeSubPath(path))
@@ -156,7 +161,7 @@ class FilesRepo(
         return fullPath.exists() && fullPath.isRegularFile()
     }
 
-    override suspend fun fileChecksum(path: String): String = indexStore.fileChecksum(path)
+    override suspend fun fileChecksum(path: String): String = sqliteDataSource.file(path)!!.checksumSha256
 
     override suspend fun computeFileChecksum(path: Path): String {
         val fullPath = root.resolve(safeSubPath(path))
@@ -166,9 +171,11 @@ class FilesRepo(
 
     override suspend fun add(path: String) {
         val fullPath = root.resolve(safeSubPath(path))
+        val size = fullPath.fileSize()
+        val lastModified = Date(fullPath.getLastModifiedTime().toMillis())
         val checksum = computeChecksum(fullPath)
 
-        indexStore.storeFileChecksum(path, checksum)
+        sqliteDataSource.storeFile(path, size, lastModified, checksum)
     }
 
     override suspend fun delete(filename: String) {
@@ -179,11 +186,11 @@ class FilesRepo(
         }
 
         fullPath.deleteExisting()
-        indexStore.remove(filename)
+        sqliteDataSource.remove(filename)
     }
 
     override suspend fun remove(path: String) {
-        indexStore.remove(path)
+        sqliteDataSource.remove(path)
     }
 
     override suspend fun move(
@@ -196,12 +203,12 @@ class FilesRepo(
                 throw DestinationExists(to)
             }
 
-            val move = indexStore.beginMove(from, to)
+            val move = sqliteDataSource.beginMove(from, to)
 
             dstPath.createParentDirectories()
             root.resolve(from).moveTo(dstPath)
 
-            move.completed()
+            move.completed(Date(dstPath.getLastModifiedTime().toMillis()))
         }
     }
 
@@ -246,6 +253,8 @@ class FilesRepo(
                 inProgressHandler.onStart(dstPath)
                 cleanup.files.add(dstTmpFilePath)
 
+                sqliteDataSource.storeIncomingFile(dstPath.pathString, dstTmpFilePath.pathString, info.length, info.checksumSha256)
+
                 fc.use { output ->
                     val buffer = ByteArray(2 * 1024 * 1024)
                     var read: Int = stream.read(buffer)
@@ -281,7 +290,13 @@ class FilesRepo(
 
                 moveTmpToDestination(dstTmpFilePath, dstPath)
 
-                indexStore.storeChecksumForSave(cleanup, filename, info.checksumSha256)
+                sqliteDataSource.storeFile(
+                    filename,
+                    info.length,
+                    Date(dstPath.getLastModifiedTime().toMillis()),
+                    info.checksumSha256,
+                    dropIncomingFile = true,
+                )
 
                 cleanup.cancel()
             } finally {
@@ -290,6 +305,7 @@ class FilesRepo(
                         println("Not completed successfully, cleaning up: ${cleanup.files}")
                         cleanup.runPremature()
                     }
+                    sqliteDataSource.removeIncomingFile(dstPath.pathString)
                     inProgressHandler.onEnd(dstPath)
                 }
             }
@@ -324,10 +340,10 @@ class FilesRepo(
         withContext(Dispatchers.IO) {
             val fullPath = root.resolve(safeSubPath(path))
 
-            indexStore.contains(path) && fullPath.isRegularFile()
+            sqliteDataSource.file(path) != null && fullPath.isRegularFile()
         }
 
-    override suspend fun index(): RepoIndex = indexStore.index()
+    override suspend fun index(): RepoIndex = indexFlow.firstLoadedOrFailure()
 
     private fun loadIgnorePatterns(): List<PathMatcher> {
         val ignorePatternsFile = root.resolve(ignorePatternsFileName)
@@ -355,10 +371,25 @@ class FilesRepo(
             .shareIn(scope, SharingStarted.WhileSubscribed(), 0)
             .onStart { emit("start on index change") }
 
+    override val indexFlow =
+        sqliteDataSource.files
+            .map { entries ->
+                RepoIndex(
+                    files =
+                        entries.map {
+                            RepoIndex.File(
+                                path = it.path,
+                                size = it.size,
+                                checksumSha256 = it.checksumSha256,
+                            )
+                        },
+                )
+            }.mapToLoadable()
+            .stateIn(scope)
+
     @OptIn(ExperimentalCoroutinesApi::class)
     override val localIndex: Flow<Loadable<StatusOperation.Result>> =
-        indexStore
-            .indexFlow
+        indexFlow
             .flatMapLoadableFlow { index ->
                 val indexFiles = index.files.map { it.path }.toSet()
 
@@ -388,8 +419,6 @@ class FilesRepo(
             .flowOn(ioDispatcher)
             .stateIn(scope)
 
-    override val indexFlow = indexStore.indexFlow
-
     override val metadataFlow: Flow<Loadable<RepositoryMetadata>> =
         metadataPath
             .produceLoadableStateIn(
@@ -410,38 +439,19 @@ class FilesRepo(
                 }
             }
 
-    @OptIn(ExperimentalPathApi::class)
-    suspend fun deinitialize() {
-        withContext(ioDispatcher) {
-            archiveRoot.deleteRecursively()
-        }
-    }
-
     companion object {
-        fun openOrNull(path: Path): FilesRepo? {
-            val checksumDir = path.resolve(".archive").resolve(checksumsSubDir)
-
-            if (checksumDir.isDirectory()) {
-                return FilesRepo(
-                    path,
-                )
-            }
-
-            return null
-        }
-
-        suspend fun create(path: Path): FilesRepo {
+        suspend fun create(path: Path): FilesSqliteRepo {
             val archiveDir = path.resolve(".archive")
-            val checksumDir = archiveDir.resolve("checksums")
+            val dbPath = archiveDir.resolve(dbName)
 
-            if (checksumDir.isDirectory()) {
+            if (dbPath.isDirectory()) {
                 throw RuntimeException("Already exists")
             }
 
             archiveDir.createDirectory()
-            checksumDir.createDirectory()
+            dbPath.writeText("")
 
-            return FilesRepo(path).apply {
+            return FilesSqliteRepo(path).apply {
                 updateMetadata { it.copy(repositoryType = PLAIN_REPOSITORY_TYPE) }
             }
         }

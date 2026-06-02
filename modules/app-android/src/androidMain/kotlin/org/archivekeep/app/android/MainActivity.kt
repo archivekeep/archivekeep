@@ -13,11 +13,14 @@ import org.archivekeep.app.android.components.StatusBarProtection
 import org.archivekeep.app.ui.MainWindowContent
 import org.archivekeep.app.ui.components.designsystem.theme.AppTheme
 import org.archivekeep.app.ui.domain.wiring.ApplicationProviders
+import org.archivekeep.files.driver.filesystem.files.sqlite.initDatabase
 
 class MainActivity : AppCompatActivity() {
     @OptIn(ExperimentalMaterial3WindowSizeClassApi::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        initDatabase(applicationContext)
 
         enableEdgeToEdge(
             SystemBarStyle.dark(Color.TRANSPARENT),

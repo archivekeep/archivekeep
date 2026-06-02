@@ -1,6 +1,12 @@
 # TODO: cleanup this and document why which rules are added
 
 # ########################################### #
+#                     Room                    #
+# ########################################### #
+
+-keep class * extends androidx.room.RoomDatabase { <init>(); }
+
+# ########################################### #
 #                   AWS SDK                   #
 # ########################################### #
 
