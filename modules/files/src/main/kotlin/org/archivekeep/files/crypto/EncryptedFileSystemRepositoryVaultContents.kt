@@ -18,7 +18,7 @@ data class EncryptedFileSystemRepositoryVaultContents(
     val jwk: List<
         @Serializable(with = JWKSerializer::class)
         JWK,
-        >,
+    >,
     val currentFileSigningKeyID: String?,
     val currentFileEncryptionKeyID: String?,
 ) {

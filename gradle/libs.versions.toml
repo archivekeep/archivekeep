@@ -1,12 +1,12 @@
 [versions]
-kotlin = "2.0.20"
+kotlin = "2.3.21"
 
-kotlinx-coroutines = "1.10.1"
+kotlinx-coroutines = "1.11.0"
 
 compose = "1.7.3"
 grpc = "1.70.0"
 grpc-kotlin = "1.4.1"
-ksp = "2.0.20-1.0.25"
+ksp = "2.3.7"
 oshi = "6.8.0"
 picocli = "4.7.5"
 protobuf = "0.9.4"
@@ -15,16 +15,16 @@ room = "2.8.4"
 sqlite = "2.6.2"
 svg2ico = "2.6"
 
-ktlint = "12.1.2"
-junit-jupiter = "5.8.1"
+ktlint = "14.2.0"
+junit-jupiter = "6.1.0"
 
-kotest = "5.9.1"
+kotest = "6.1.11"
 
 [libraries]
 kotlin-test = { group = "org.jetbrains.kotlin", name = "kotlin-test", version.ref = "kotlin" }
 kotlinx-coroutines-core = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-core", version.ref = "kotlinx-coroutines" }
 kotlinx-coroutines-test = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-test", version.ref = "kotlinx-coroutines" }
-kotlinx-serialization-json = { group = "org.jetbrains.kotlinx", name = "kotlinx-serialization-json", version = "1.6.3" }
+kotlinx-serialization-json = { group = "org.jetbrains.kotlinx", name = "kotlinx-serialization-json", version = "1.11.0" }
 
 compose-material3-windowsizeclass = { group = "org.jetbrains.compose.material3", name = "material3-window-size-class", version.ref = "compose" }
 compose-grid = { group = "com.cheonjaeung.compose.grid", name = "grid", version = "2.0.0" }
@@ -78,7 +78,7 @@ kotlin-multiplatform = { id = "org.jetbrains.kotlin.multiplatform", version.ref 
 kotlin-kapt = { id = "org.jetbrains.kotlin.kapt", version.ref = "kotlin" }
 kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
 
-android-application = { id = "com.android.application", version = "8.5.2" }
+android-application = { id = "com.android.application", version = "8.13.2" }
 
 asciidoctor = { id = "org.asciidoctor.jvm.convert", version = "4.0.2" }
 

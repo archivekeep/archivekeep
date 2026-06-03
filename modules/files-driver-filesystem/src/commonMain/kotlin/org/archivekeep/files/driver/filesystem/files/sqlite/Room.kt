@@ -11,9 +11,8 @@ expect fun createDatabaseBuilder(path: Path): RoomDatabase.Builder<ArchiveDataba
 fun createIndexDatabase(
     path: Path,
     coroutineContext: CoroutineContext = Dispatchers.IO,
-): ArchiveDatabase {
-    return createDatabaseBuilder(path)
+): ArchiveDatabase =
+    createDatabaseBuilder(path)
         .setDriver(BundledSQLiteDriver())
         .setQueryCoroutineContext(coroutineContext)
         .build()
-}

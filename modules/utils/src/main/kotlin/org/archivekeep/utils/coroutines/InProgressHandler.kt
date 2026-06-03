@@ -36,11 +36,12 @@ class InProgressHandler<T>(
             .stateIn(scope, SharingStarted.WhileSubscribed(), inProgressFiles.value.isEmpty())
 
     val jobActiveOnIdle =
-        idleFlagFlow.runningFold(null) { previous: CompletableJob?, flag ->
-            previous?.cancel()
+        idleFlagFlow
+            .runningFold(null) { previous: CompletableJob?, flag ->
+                previous?.cancel()
 
-            if (flag) SupervisorJob() else null
-        }.stateIn(scope, SharingStarted.WhileSubscribed(), null)
+                if (flag) SupervisorJob() else null
+            }.stateIn(scope, SharingStarted.WhileSubscribed(), null)
 
     val jobActiveOnIdleDelayedStart =
         jobActiveOnIdle

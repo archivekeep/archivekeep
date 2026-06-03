@@ -255,7 +255,8 @@ class EncryptedS3Repository private constructor(
                             null
                         }
                     }
-                }.awaitAll().filterNotNull()
+                }.awaitAll()
+                .filterNotNull()
         }
 
     override val indexFlow: StateFlow<Loadable<RepoIndex>> = indexResource.stateFlow

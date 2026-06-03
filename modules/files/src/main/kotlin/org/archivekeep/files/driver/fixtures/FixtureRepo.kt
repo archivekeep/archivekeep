@@ -20,7 +20,7 @@ class FixtureRepo(
 
     constructor(fn: (FixtureRepoBuilder).() -> Unit) : this(FixtureRepoBuilder().also(fn))
 
-    val _index by lazy {
+    private val index by lazy {
         RepoIndex(
             contents.entries.map {
                 RepoIndex.File(
@@ -39,7 +39,7 @@ class FixtureRepo(
         )
     }
 
-    override suspend fun index(): RepoIndex = _index
+    override suspend fun index(): RepoIndex = index
 
     override suspend fun move(
         from: String,
@@ -82,7 +82,7 @@ class FixtureRepo(
         return builder.build()
     }
 
-    override val indexFlow = MutableStateFlow(Loadable.Loaded(_index))
+    override val indexFlow = MutableStateFlow(Loadable.Loaded(index))
 
     override val metadataFlow: Flow<Loadable<RepositoryMetadata>> = flow { TODO() }
 }

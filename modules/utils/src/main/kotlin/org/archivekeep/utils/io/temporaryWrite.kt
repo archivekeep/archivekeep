@@ -45,11 +45,12 @@ fun moveTmpToDestination(
         StandardCopyOption.ATOMIC_MOVE,
     )
 
-    FileChannel.open(
-        dstPath.parent,
-        StandardOpenOption.READ,
-    ).use {
-        // to be double-sure, sync parent
-        it.force(true)
-    }
+    FileChannel
+        .open(
+            dstPath.parent,
+            StandardOpenOption.READ,
+        ).use {
+            // to be double-sure, sync parent
+            it.force(true)
+        }
 }

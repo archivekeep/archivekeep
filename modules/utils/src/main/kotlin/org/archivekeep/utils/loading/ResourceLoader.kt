@@ -80,11 +80,12 @@ class ResourceLoader<T>(
     suspend fun getFreshAndUpdateState(): T =
         withContext(dispatcher) {
             loadingMutex.withLock {
-                mutableStateFlow.produceAndGet {
-                    loadFn()
-                }.also {
-                    observe(it)
-                }
+                mutableStateFlow
+                    .produceAndGet {
+                        loadFn()
+                    }.also {
+                        observe(it)
+                    }
             }
         }
 

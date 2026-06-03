@@ -14,9 +14,8 @@ fun initDatabase(appContext: Context) {
     applicationContext = appContext
 }
 
-actual fun createDatabaseBuilder(path: Path): RoomDatabase.Builder<ArchiveDatabase> {
-    return Room.databaseBuilder<ArchiveDatabase>(
+actual fun createDatabaseBuilder(path: Path): RoomDatabase.Builder<ArchiveDatabase> =
+    Room.databaseBuilder<ArchiveDatabase>(
         context = applicationContext,
         name = path.absolutePathString(),
     )
-}

@@ -9,6 +9,12 @@ plugins {
     alias(libs.plugins.ktlint)
 }
 
+val gradleOfflineBuildExtra by
+    configurations.creating {
+        isCanBeConsumed = true
+        isCanBeResolved = true
+    }
+
 kotlin {
     androidTarget()
 
@@ -47,6 +53,10 @@ kotlin {
 dependencies {
     add("kspAndroid", libs.androidx.room.compiler)
     add("kspDesktop", libs.androidx.room.compiler)
+
+    // for kspKotlinDesktop
+    gradleOfflineBuildExtra("com.google.devtools.ksp:symbol-processing-aa-embeddable:2.3.7")
+    gradleOfflineBuildExtra("org.jetbrains.kotlinx:kotlinx-coroutines-core-jvm:1.10.2")
 }
 
 tasks.withType<Test> {

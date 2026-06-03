@@ -66,7 +66,9 @@ class S3StorageDriver(
     internal sealed interface InnerState {
         val repositoryLocationContentsState: RepositoryLocationContentsState
 
-        class PlainS3Repository(val repo: S3Repository) : InnerState {
+        class PlainS3Repository(
+            val repo: S3Repository,
+        ) : InnerState {
             override val repositoryLocationContentsState: IsRepositoryLocation =
                 object : IsRepositoryLocation {
                     override val repoStateFlow = flowOf(LoadedAvailable(this@PlainS3Repository.repo))

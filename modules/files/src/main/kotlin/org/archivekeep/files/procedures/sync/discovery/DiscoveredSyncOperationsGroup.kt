@@ -6,8 +6,8 @@ import org.archivekeep.files.procedures.sync.operations.SyncOperation
 sealed class DiscoveredSyncOperationsGroup<T : SyncOperation>(
     val operations: List<T>,
 ) {
-    fun createJobTask(limitToSubset: Set<SyncOperation>?): SyncProcedureJobTask<T> {
-        return SyncProcedureJobTask(
+    fun createJobTask(limitToSubset: Set<SyncOperation>?): SyncProcedureJobTask<T> =
+        SyncProcedureJobTask(
             this,
             operations
                 .let { list ->
@@ -18,7 +18,6 @@ sealed class DiscoveredSyncOperationsGroup<T : SyncOperation>(
                     }
                 },
         )
-    }
 
     fun isNoOp(): Boolean = operations.isEmpty()
 
