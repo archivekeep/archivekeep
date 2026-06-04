@@ -21,7 +21,6 @@ import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.shareIn
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.ExperimentalSerializationApi
-import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.decodeFromStream
 import org.archivekeep.files.api.exceptions.ChecksumMismatch
@@ -440,6 +439,19 @@ class FilesSqliteRepo(
             }
 
     companion object {
+        fun openOrNull(path: Path): FilesSqliteRepo? {
+            val archiveDir = path.resolve(".archive")
+            val dbPath = archiveDir.resolve(dbName)
+
+            if (dbPath.exists()) {
+                return FilesSqliteRepo(
+                    path,
+                )
+            }
+
+            return null
+        }
+
         suspend fun create(path: Path): FilesSqliteRepo {
             val archiveDir = path.resolve(".archive")
             val dbPath = archiveDir.resolve(dbName)

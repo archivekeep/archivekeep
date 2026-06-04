@@ -190,11 +190,12 @@ private fun AddRepositoryDialogContents(
     optionLoadable: Loadable<AddFileSystemRepositoryOperation>?,
     onClose: () -> Unit,
 ) {
-    var createEncrypted by mutableStateOf(false)
-    var createPassword by mutableStateOf("")
-    var createPassword2 by mutableStateOf("")
+    var createEncrypted by remember { mutableStateOf(false) }
+    var createPassword by remember { mutableStateOf("") }
+    var createPassword2 by remember { mutableStateOf("") }
+    var createSQLite by remember { mutableStateOf(true) }
 
-    var password by mutableStateOf("")
+    var password by remember { mutableStateOf("") }
     val coroutineScope = rememberCoroutineScope()
     val passwordLaunchGuard = remember(coroutineScope) { SingleLaunchGuard(coroutineScope) }
     val singleLaunchGuard = remember(coroutineScope) { SingleLaunchGuard(coroutineScope) }
@@ -294,11 +295,29 @@ private fun AddRepositoryDialogContents(
                                 ProgressText("The directory is not a repository, yet. Continue to initialize it as an archive repository.")
 
                                 Spacer(Modifier.height(12.dp))
-                                RadioWithText(
+                                RadioWithTextAndExtra(
                                     selected = !createEncrypted,
                                     onClick = { createEncrypted = false },
                                     text = "Plain files (unencrypted, normal access)",
                                     enabled = canEdit,
+                                    extra = {
+                                        if (!createEncrypted) {
+                                            Column {
+                                                RadioWithText(
+                                                    selected = createSQLite,
+                                                    onClick = { createSQLite = true },
+                                                    text = "SQLite Index DB (recommended)",
+                                                    enabled = canEdit,
+                                                )
+                                                RadioWithText(
+                                                    selected = !createSQLite,
+                                                    onClick = { createSQLite = false },
+                                                    text = "Individual checksum files",
+                                                    enabled = canEdit,
+                                                )
+                                            }
+                                        }
+                                    },
                                 )
                                 RadioWithTextAndExtra(
                                     selected = createEncrypted,
@@ -328,8 +347,8 @@ private fun AddRepositoryDialogContents(
                                     },
                                 )
 
-                                InitStatus(option.initStatus.value)
-                                AddStatus(option.addStatus.value)
+                                InitStatus(option.initStatus.collectAsState().value)
+                                AddStatus(option.addStatus.collectAsState().value)
 
                                 if (initStatus == Execution.NotRunning && addStatus == Execution.NotRunning) {
                                     StorageMark(option.storageMarking, markConfirmed, setMarkConfirmed)
@@ -339,7 +358,7 @@ private fun AddRepositoryDialogContents(
                             is AddFileSystemRepositoryOperation.PlainFileSystemRepository -> {
                                 val addStatus = option.addStatus.collectAsState().value
 
-                                AddStatus(option.addStatus.value, notRunningStatus = { ProgressText("Repository can be added.") })
+                                AddStatus(option.addStatus.collectAsState().value, notRunningStatus = { ProgressText("Repository can be added.") })
 
                                 if (addStatus == Execution.NotRunning) {
                                     StorageMark(option.storageMarking, markConfirmed, setMarkConfirmed)
@@ -423,7 +442,7 @@ private fun AddRepositoryDialogContents(
                                             "Init",
                                             onLaunch = {
                                                 if (!createEncrypted) {
-                                                    singleLaunchGuard.launch { option.startInitAsPlain(markConfirmed) }
+                                                    singleLaunchGuard.launch { option.startInitAsPlain(markConfirmed, createSQLite) }
                                                 } else {
                                                     singleLaunchGuard.launch { option.startInitAsEncrypted(markConfirmed, createPassword) }
                                                 }
@@ -542,7 +561,11 @@ private fun InitStatus(initStatus: Execution) {
                 is ExecutionOutcome.Success -> ProgressText("Directory initialized successfully as repository.")
             }
         }
-        is Execution.InProgress -> ProgressText("Initializing...")
+
+        is Execution.InProgress -> {
+            ProgressText("Initializing...")
+        }
+
         Execution.NotRunning -> {}
     }
 }
@@ -559,8 +582,14 @@ private fun AddStatus(
                 is ExecutionOutcome.Success -> ProgressText("Added successfully.")
             }
         }
-        is Execution.InProgress -> ProgressText("Adding...")
-        Execution.NotRunning -> notRunningStatus()
+
+        is Execution.InProgress -> {
+            ProgressText("Adding...")
+        }
+
+        Execution.NotRunning -> {
+            notRunningStatus()
+        }
     }
 }
 

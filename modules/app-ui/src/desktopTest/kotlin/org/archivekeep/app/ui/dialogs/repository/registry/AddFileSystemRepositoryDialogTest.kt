@@ -28,6 +28,7 @@ import org.archivekeep.app.ui.utils.PropertiesApplicationMetadata
 import org.archivekeep.app.ui.utils.filesystem.LocalFilesystemDirectoryPicker
 import org.archivekeep.files.driver.filesystem.encryptedfiles.EncryptedFileSystemRepository
 import org.archivekeep.files.driver.filesystem.files.FilesRepo
+import org.archivekeep.files.driver.filesystem.files.FilesSqliteRepo
 import org.junit.Rule
 import org.junit.Test
 import org.junit.rules.TemporaryFolder
@@ -52,7 +53,7 @@ class AddFileSystemRepositoryDialogTest {
 
     @OptIn(ExperimentalTestApi::class)
     @Test
-    fun testHappyInitFlow() {
+    fun testHappyInitSQLiteFlow() {
         runHighDensityComposeUiTest {
             setContentInDialogScreenshotContainer {
                 ApplicationProviders(
@@ -78,7 +79,7 @@ class AddFileSystemRepositoryDialogTest {
             }
 
             run {
-                saveTestingDialogContainerBitmap("dialogs/add-filesystem-repository/init-plain-01-selection.png")
+                saveTestingDialogContainerBitmap("dialogs/add-filesystem-repository/init-plain-sqlite-01-selection.png")
 
                 onNodeWithText("local-archives/test-repo", true).assertExists()
                 onNodeWithText("The directory is not a repository, yet. Continue to initialize it as an archive repository.").assertExists()
@@ -89,7 +90,67 @@ class AddFileSystemRepositoryDialogTest {
                 onNodeWithText("Init").performClick()
 
                 eventually(2.seconds) {
-                    saveTestingDialogContainerBitmap("dialogs/add-filesystem-repository/init-plain-02-finished.png")
+                    saveTestingDialogContainerBitmap("dialogs/add-filesystem-repository/init-plain-sqlite-02-finished.png")
+
+                    onNodeWithText("Directory initialized successfully as repository.").assertExists()
+                    onNodeWithText("Added successfully.").assertExists()
+                    onNodeWithText("Init").assertDoesNotExist()
+                    onNodeWithText("Close").assertIsEnabled()
+                }
+
+                // should not fail
+                assertNotNull(FilesSqliteRepo.openOrNull(testTempDir.root.resolve("local-archives/test-repo").toPath()))
+            }
+        }
+    }
+
+    @OptIn(ExperimentalTestApi::class)
+    @Test
+    fun testHappyInitChecksumFilesFlow() {
+        runHighDensityComposeUiTest {
+            setContentInDialogScreenshotContainer {
+                ApplicationProviders(
+                    environmentFactory = { scope ->
+                        DemoEnvironment(
+                            scope,
+                            physicalMediaData = listOf(phone, usbStickAll, usbStickDocuments, usbStickMusic),
+                            enableSpeedLimit = false,
+                            mountPoints = mountPoints(),
+                        )
+                    },
+                    applicationMetadata = PropertiesApplicationMetadata(),
+                ) {
+                    CompositionLocalProvider(
+                        LocalFilesystemDirectoryPicker provides
+                            fixedFilesystemDirectoryPicker(testTempDir.newFolder("local-archives/test-repo").path),
+                    ) {
+                        AddFileSystemRepositoryDialog(
+                            intendedStorageType = FileSystemStorageType.LOCAL,
+                        ).render(onClose = {})
+                    }
+                }
+            }
+
+            run {
+                saveTestingDialogContainerBitmap("dialogs/add-filesystem-repository/init-plain-checksum-files-01-selection.png")
+
+                onNodeWithText("local-archives/test-repo", true).assertExists()
+                onNodeWithText("The directory is not a repository, yet. Continue to initialize it as an archive repository.").assertExists()
+                onNodeWithText("Storage is used for the first time, and it will be marked as local.").assertExists()
+                onNodeWithText("Individual checksum files").assertExists()
+            }
+
+            runBlocking {
+                onNodeWithText("Individual checksum files").performClick()
+
+                saveTestingDialogContainerBitmap("dialogs/add-filesystem-repository/init-plain-checksum-files-02-checksum-files.png")
+            }
+
+            runBlocking {
+                onNodeWithText("Init").performClick()
+
+                eventually(2.seconds) {
+                    saveTestingDialogContainerBitmap("dialogs/add-filesystem-repository/init-plain-checksum-files-03-finished.png")
 
                     onNodeWithText("Directory initialized successfully as repository.").assertExists()
                     onNodeWithText("Added successfully.").assertExists()

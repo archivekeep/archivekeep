@@ -43,7 +43,10 @@ sealed interface AddFileSystemRepositoryOperation {
         val addStatus: StateFlow<Execution>
         val storageMarkStatus: StateFlow<Execution?>
 
-        suspend fun startInitAsPlain(applyMarking: Boolean?)
+        suspend fun startInitAsPlain(
+            applyMarking: Boolean?,
+            sqliteDB: Boolean = true,
+        )
 
         suspend fun startInitAsEncrypted(
             applyMarking: Boolean?,

@@ -24,8 +24,10 @@ import org.archivekeep.app.core.persistence.credentials.CredentialsStore
 import org.archivekeep.app.core.utils.generics.UniqueSharedFlowInstanceManager
 import org.archivekeep.app.core.utils.identifiers.RepositoryURI
 import org.archivekeep.app.core.utils.identifiers.StorageURI
+import org.archivekeep.files.api.repository.Repo
 import org.archivekeep.files.driver.filesystem.encryptedfiles.EncryptedFileSystemRepository
 import org.archivekeep.files.driver.filesystem.files.FilesRepo
+import org.archivekeep.files.driver.filesystem.files.FilesSqliteRepo
 import org.archivekeep.utils.loading.mapLoadedData
 import org.archivekeep.utils.loading.optional.OptionalLoadable
 import org.archivekeep.utils.loading.optional.OptionalLoadable.LoadedAvailable
@@ -49,10 +51,7 @@ class FileSystemStorageDriver(
             factory = { key: StorageURI ->
                 fileStores.mountedFileSystems
                     .mapLoadedData { connectedFSList ->
-                        val connectedFS =
-                            connectedFSList
-                                .filter { it.fsUUID == key.data }
-                                .firstOrNull()
+                        val connectedFS = connectedFSList.firstOrNull { it.fsUUID == key.data }
 
                         if (connectedFS != null) {
                             Storage.ConnectionStatus.CONNECTED
@@ -89,9 +88,9 @@ class FileSystemStorageDriver(
     override fun openLocation(uri: RepositoryURI): RepositoryLocationAccessor = Provider(uri, uri.typedRepoURIData as FileSystemRepositoryURIData)
 
     class FileSystemRepoLocation(
-        val repo: FilesRepo,
+        repo: Repo,
     ) : RepositoryLocationContentsState.IsRepositoryLocation {
-        override val repoStateFlow = flowOf(LoadedAvailable(this.repo))
+        override val repoStateFlow = flowOf(LoadedAvailable(repo))
     }
 
     class EncryptedFileSystemRepoLocation(
@@ -130,6 +129,12 @@ class FileSystemStorageDriver(
                 .distinctUntilChanged()
                 .mapLoaded { pathInFilesystem ->
                     println("Open $uriDATA")
+
+                    FilesSqliteRepo
+                        .openOrNull(pathInFilesystem)
+                        ?.let {
+                            return@mapLoaded LoadedAvailable(FileSystemRepoLocation(it))
+                        }
 
                     FilesRepo
                         .openOrNull(pathInFilesystem)

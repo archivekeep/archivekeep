@@ -11,8 +11,6 @@ import org.archivekeep.app.core.persistence.registry.RegistryDataStore
 import org.archivekeep.app.core.utils.generics.Execution
 import org.archivekeep.app.core.utils.generics.perform
 import org.archivekeep.app.core.utils.identifiers.StorageURI
-import org.archivekeep.files.driver.filesystem.encryptedfiles.EncryptedFileSystemRepository
-import org.archivekeep.files.driver.filesystem.files.FilesRepo
 import kotlin.io.path.Path
 
 abstract class AddFileSystemRepositoryOperationImpl(
@@ -23,37 +21,6 @@ abstract class AddFileSystemRepositoryOperationImpl(
     val intendedStorageType: FileSystemStorageType?,
 ) {
     val pathPath = Path(path)
-
-    protected suspend fun runInitAsPlain(
-        initMutableStateFlow: MutableStateFlow<Execution>,
-        addMutableStateFlow: MutableStateFlow<Execution>,
-        storageMarkMutableStateFlow: MutableStateFlow<Execution?>,
-    ) {
-        initMutableStateFlow.perform {
-            FilesRepo.create(pathPath)
-        }
-
-        runAdd(
-            addMutableStateFlow,
-            storageMarkMutableStateFlow,
-        )
-    }
-
-    protected suspend fun runInitAsEncrypted(
-        password: String,
-        initMutableStateFlow: MutableStateFlow<Execution>,
-        addMutableStateFlow: MutableStateFlow<Execution>,
-        storageMarkMutableStateFlow: MutableStateFlow<Execution?>,
-    ) {
-        initMutableStateFlow.perform {
-            EncryptedFileSystemRepository.create(pathPath, password)
-        }
-
-        runAdd(
-            addMutableStateFlow,
-            storageMarkMutableStateFlow,
-        )
-    }
 
     protected suspend fun runAdd(
         addMutableStateFlow: MutableStateFlow<Execution>,
