@@ -18,10 +18,10 @@ kotlin {
 
                 implementation(libs.kotlinx.serialization.json)
 
-                implementation(compose.ui)
-                implementation(compose.foundation)
-                implementation(compose.material)
-                implementation(compose.components.resources)
+                implementation(libs.compose.foundation)
+                implementation(libs.compose.ui)
+                implementation(libs.compose.material)
+                implementation(libs.compose.components.resources)
             }
         }
     }

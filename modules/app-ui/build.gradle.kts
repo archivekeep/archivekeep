@@ -15,15 +15,15 @@ kotlin {
             dependencies {
                 implementation(project(":app-core"))
 
-                implementation(compose.ui)
-                implementation(compose.foundation)
+                implementation(libs.compose.foundation)
+                implementation(libs.compose.ui)
 
-                implementation(compose.components.resources)
-                implementation(compose.runtime)
+                implementation(libs.compose.components.resources)
+                implementation(libs.compose.runtime)
 
-                implementation(compose.material)
-                implementation(compose.material3)
-                implementation(compose.materialIconsExtended)
+                implementation(libs.compose.material)
+                implementation(libs.compose.material.icons.extended)
+                implementation(libs.compose.material3)
 
                 implementation(libs.kotlinx.serialization.json)
 
@@ -45,7 +45,6 @@ kotlin {
         }
         val desktopMain by getting {
             dependencies {
-                implementation(compose.desktop.common)
                 implementation(compose.desktop.currentOs)
             }
         }
@@ -54,7 +53,7 @@ kotlin {
                 implementation(compose.desktop.currentOs)
 
                 implementation(libs.kotlin.test)
-                implementation(compose.desktop.uiTestJUnit4)
+                implementation(libs.compose.ui.test.junit4.desktop)
 
                 implementation(libs.kotest.assertions.core)
 

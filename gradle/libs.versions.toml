@@ -3,7 +3,9 @@ kotlin = "2.3.21"
 
 kotlinx-coroutines = "1.11.0"
 
-compose = "1.7.3"
+compose = "1.11.1"
+material3 = "1.11.0-alpha07"
+
 grpc = "1.70.0"
 grpc-kotlin = "1.4.1"
 ksp = "2.3.7"
@@ -26,10 +28,18 @@ kotlinx-coroutines-core = { group = "org.jetbrains.kotlinx", name = "kotlinx-cor
 kotlinx-coroutines-test = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-test", version.ref = "kotlinx-coroutines" }
 kotlinx-serialization-json = { group = "org.jetbrains.kotlinx", name = "kotlinx-serialization-json", version = "1.11.0" }
 
-compose-material3-windowsizeclass = { group = "org.jetbrains.compose.material3", name = "material3-window-size-class", version.ref = "compose" }
-compose-grid = { group = "com.cheonjaeung.compose.grid", name = "grid", version = "2.0.0" }
+compose-components-resources = { module = "org.jetbrains.compose.components:components-resources", version.ref = "compose" }
 compose-filekit = { group = "io.github.vinceglb", name = "filekit-compose", version = "0.8.8" }
+compose-foundation = { module = "org.jetbrains.compose.foundation:foundation", version.ref = "compose" }
+compose-grid = { group = "com.cheonjaeung.compose.grid", name = "grid", version = "2.7.3" }
+compose-material = { module = "org.jetbrains.compose.material:material", version.ref = "compose" }
+compose-material-icons-extended = { module = "org.jetbrains.compose.material:material-icons-extended", version = "1.7.3"}
+compose-material3 = { module = "org.jetbrains.compose.material3:material3", version.ref = "material3" }
+compose-material3-windowsizeclass = { module = "org.jetbrains.compose.material3:material3-window-size-class", version.ref = "material3" }
 compose-resources-tabler-icons = { group = "br.com.devsrsouza.compose.icons", name = "tabler-icons", version = "1.1.1" }
+compose-runtime = { module = "org.jetbrains.compose.runtime:runtime", version.ref = "compose" }
+compose-ui = { module = "org.jetbrains.compose.ui:ui", version.ref = "compose" }
+compose-ui-test-junit4-desktop = { module = "org.jetbrains.compose.ui:ui-test-junit4-desktop", version.ref = "compose" }
 
 androidx-sqlite-bundled = { group = "androidx.sqlite", name = "sqlite-bundled", version.ref = "sqlite" }
 androidx-room-compiler = { group = "androidx.room", name = "room-compiler", version.ref = "room" }
