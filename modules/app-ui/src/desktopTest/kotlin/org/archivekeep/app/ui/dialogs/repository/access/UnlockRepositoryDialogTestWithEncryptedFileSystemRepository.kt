@@ -24,9 +24,9 @@ import org.archivekeep.app.desktop.ui.dialogs.testing.saveTestingDialogContainer
 import org.archivekeep.app.desktop.ui.dialogs.testing.setContentInDialogScreenshotContainer
 import org.archivekeep.app.desktop.ui.testing.screenshots.runHighDensityComposeUiTest
 import org.archivekeep.app.ui.domain.wiring.ApplicationProviders
-import org.archivekeep.app.ui.domain.wiring.ApplicationServices
 import org.archivekeep.app.ui.domain.wiring.LocalWalletOperationLaunchers
 import org.archivekeep.app.ui.domain.wiring.WalletOperationLaunchers
+import org.archivekeep.app.ui.domain.wiring.createApplicationServices
 import org.archivekeep.app.ui.domain.wiring.newServiceWorkExecutorDispatcher
 import org.archivekeep.app.ui.performClickTextInput
 import org.archivekeep.app.ui.utils.PropertiesApplicationMetadata
@@ -71,7 +71,7 @@ class UnlockRepositoryDialogTestWithEncryptedFileSystemRepository {
                 ) {
                     override val storageDrivers: List<StorageDriver> = listOf(FileSystemStorageDriver(scope, fileStores, credentialsStore))
                 }
-            val services = ApplicationServices(serviceWorkDispatcher, scope, demoEnvironment)
+            val services = createApplicationServices(serviceWorkDispatcher, scope, demoEnvironment)
 
             val tempRepoPath = testTempDir.newFolder("encrypted-repo")
 
@@ -118,7 +118,7 @@ class UnlockRepositoryDialogTestWithEncryptedFileSystemRepository {
 
                 val accessor =
                     services
-                        .repoService
+                        .repositoryService
                         .getRepository(subjectAtTestURI)
                         .optionalAccessorFlow
                         .stateIn(scope, SharingStarted.Eagerly)
@@ -150,7 +150,7 @@ class UnlockRepositoryDialogTestWithEncryptedFileSystemRepository {
                 ) {
                     override val storageDrivers: List<StorageDriver> = listOf(FileSystemStorageDriver(scope, fileStores, credentialsStore))
                 }
-            val services = ApplicationServices(serviceWorkDispatcher, scope, demoEnvironment)
+            val services = createApplicationServices(serviceWorkDispatcher, scope, demoEnvironment)
 
             runBlocking {
                 demoEnvironment.walletDataStore.create("test-wallet-password-${UUID.randomUUID()}")
@@ -208,7 +208,7 @@ class UnlockRepositoryDialogTestWithEncryptedFileSystemRepository {
 
                 val accessor =
                     services
-                        .repoService
+                        .repositoryService
                         .getRepository(subjectAtTestURI)
                         .optionalAccessorFlow
                         .stateIn(scope, SharingStarted.Eagerly)
@@ -252,7 +252,7 @@ class UnlockRepositoryDialogTestWithEncryptedFileSystemRepository {
                 ) {
                     override val storageDrivers: List<StorageDriver> = listOf(FileSystemStorageDriver(scope, fileStores, credentialsStore))
                 }
-            val services = ApplicationServices(serviceWorkDispatcher, scope, demoEnvironment)
+            val services = createApplicationServices(serviceWorkDispatcher, scope, demoEnvironment)
 
             val tempRepoPath = testTempDir.newFolder("encrypted-repo")
 

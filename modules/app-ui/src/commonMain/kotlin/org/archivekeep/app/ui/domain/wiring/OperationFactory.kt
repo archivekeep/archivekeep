@@ -2,6 +2,9 @@ package org.archivekeep.app.ui.domain.wiring
 
 import com.google.common.collect.ClassToInstanceMap
 import com.google.common.collect.ImmutableClassToInstanceMap
+import dev.zacsweers.metro.AppScope
+import dev.zacsweers.metro.Inject
+import dev.zacsweers.metro.SingleIn
 import kotlinx.coroutines.CoroutineScope
 import org.archivekeep.app.core.domain.repositories.RepositoryService
 import org.archivekeep.app.core.domain.storages.StorageDriver
@@ -10,19 +13,18 @@ import org.archivekeep.app.core.operations.AddRemoteRepositoryUseCase
 import org.archivekeep.app.core.operations.AddRemoteRepositoryUseCaseImpl
 import org.archivekeep.app.core.operations.AssociateRepositoryOperation
 import org.archivekeep.app.core.operations.AssociateRepositoryOperationImpl
-import org.archivekeep.app.core.persistence.credentials.CredentialsStore
-import org.archivekeep.app.core.persistence.drivers.filesystem.FileStores
 import org.archivekeep.app.core.persistence.drivers.filesystem.operations.AddFileSystemRepositoryUseCase
 import org.archivekeep.app.core.persistence.drivers.filesystem.operations.AddFileSystemRepositoryUseCaseImpl
 import org.archivekeep.app.core.persistence.drivers.filesystem.operations.DeinitializeFileSystemRepositoryUseCase
 import org.archivekeep.app.core.persistence.drivers.filesystem.operations.DeinitializeFileSystemRepositoryUseCaseImpl
 import org.archivekeep.app.core.persistence.platform.Environment
-import org.archivekeep.app.core.persistence.registry.RegistryDataStore
 import org.archivekeep.app.core.utils.identifiers.RepositoryURI
 
+@SingleIn(AppScope::class)
 class OperationFactory private constructor(
     private val factories: ClassToInstanceMap<Any>,
 ) {
+    @Inject
     constructor(
         repositoryService: RepositoryService,
         env: Environment,

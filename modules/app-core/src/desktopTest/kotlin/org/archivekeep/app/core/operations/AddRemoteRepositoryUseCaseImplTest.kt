@@ -15,7 +15,6 @@ import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.TestCoroutineScheduler
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.runTest
-import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import org.archivekeep.app.core.createTestBucket
 import org.archivekeep.app.core.domain.repositories.DefaultRepositoryService

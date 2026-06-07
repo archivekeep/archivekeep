@@ -1,5 +1,9 @@
 package org.archivekeep.app.core.procedures.sync
 
+import dev.zacsweers.metro.AppScope
+import dev.zacsweers.metro.ContributesBinding
+import dev.zacsweers.metro.Inject
+import dev.zacsweers.metro.SingleIn
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -43,6 +47,9 @@ import kotlin.time.Duration.Companion.milliseconds
 
 private typealias RepositoryIDPair = Pair<RepositoryURI, RepositoryURI>
 
+@Inject
+@SingleIn(AppScope::class)
+@ContributesBinding(AppScope::class)
 class RepoToRepoSyncServiceImpl(
     val scope: CoroutineScope,
     private val repositoryService: RepositoryService,
@@ -101,6 +108,7 @@ class RepoToRepoSyncServiceImpl(
                         }
 
                         is OptionalLoadable.LoadedAvailable -> {}
+
                         is OptionalLoadable.NotAvailable -> {
                             emit(OptionalLoadable.NotAvailable())
                             return@transform
@@ -126,6 +134,7 @@ class RepoToRepoSyncServiceImpl(
                         }
 
                         is OptionalLoadable.LoadedAvailable -> {}
+
                         is OptionalLoadable.NotAvailable -> {
                             emit(OptionalLoadable.NotAvailable())
                             return@transform
@@ -155,6 +164,7 @@ class RepoToRepoSyncServiceImpl(
                         }
 
                         is OptionalLoadable.LoadedAvailable -> {}
+
                         OptionalLoadable.Loading -> {}
                     }
                 }.flowOn(computeDispatcher)

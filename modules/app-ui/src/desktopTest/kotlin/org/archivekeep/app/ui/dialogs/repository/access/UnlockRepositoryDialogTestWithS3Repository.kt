@@ -18,7 +18,7 @@ import org.archivekeep.app.desktop.ui.dialogs.testing.saveTestingDialogContainer
 import org.archivekeep.app.desktop.ui.dialogs.testing.setContentInDialogScreenshotContainer
 import org.archivekeep.app.desktop.ui.testing.screenshots.runHighDensityComposeUiTest
 import org.archivekeep.app.ui.domain.wiring.ApplicationProviders
-import org.archivekeep.app.ui.domain.wiring.ApplicationServices
+import org.archivekeep.app.ui.domain.wiring.createApplicationServices
 import org.archivekeep.app.ui.domain.wiring.newServiceWorkExecutorDispatcher
 import org.archivekeep.app.ui.performClickTextInput
 import org.archivekeep.app.ui.utils.PropertiesApplicationMetadata
@@ -50,7 +50,7 @@ class UnlockRepositoryDialogTestWithS3Repository {
                     physicalMediaData = emptyList(),
                     enableSpeedLimit = false,
                 )
-            val services = ApplicationServices(serviceWorkDispatcher, scope, demoEnvironment)
+            val services = createApplicationServices(serviceWorkDispatcher, scope, demoEnvironment)
 
             val testRepo = S3RepositoryTestRepo(minio.s3URL, "test-bucket", "testuser", "testpassword")
 
@@ -97,7 +97,7 @@ class UnlockRepositoryDialogTestWithS3Repository {
 
                 val accessor =
                     services
-                        .repoService
+                        .repositoryService
                         .getRepository(subjectAtTestURI)
                         .optionalAccessorFlow
                         .stateIn(scope, SharingStarted.Eagerly)

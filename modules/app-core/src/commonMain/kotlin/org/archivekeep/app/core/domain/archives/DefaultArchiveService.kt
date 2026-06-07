@@ -1,5 +1,9 @@
 package org.archivekeep.app.core.domain.archives
 
+import dev.zacsweers.metro.AppScope
+import dev.zacsweers.metro.ContributesBinding
+import dev.zacsweers.metro.Inject
+import dev.zacsweers.metro.SingleIn
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -10,6 +14,9 @@ import org.archivekeep.utils.combineToList
 import org.archivekeep.utils.loading.flatMapLatestLoadedData
 import org.archivekeep.utils.loading.stateIn
 
+@Inject
+@SingleIn(AppScope::class)
+@ContributesBinding(AppScope::class)
 class DefaultArchiveService(
     scope: CoroutineScope,
     storageService: StorageService,

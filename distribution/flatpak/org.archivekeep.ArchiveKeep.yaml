@@ -5,7 +5,7 @@ runtime-version: '24.08'
 
 sdk: org.freedesktop.Sdk
 sdk-extensions:
-  - org.freedesktop.Sdk.Extension.openjdk17
+  - org.freedesktop.Sdk.Extension.openjdk21
 
 finish-args:
   - --socket=x11
@@ -27,12 +27,12 @@ modules:
   - name: openjdk
     buildsystem: simple
     build-commands:
-      - /usr/lib/sdk/openjdk17/install.sh
+      - /usr/lib/sdk/openjdk21/install.sh
 
   - name: archivekeep-desktop
     buildsystem: simple
     build-options:
-      append-path: "/usr/lib/sdk/openjdk17/bin"
+      append-path: "/usr/lib/sdk/openjdk21/bin"
     build-commands:
       - "sed -i s/distributionUrl.*/distributionUrl=gradle-bin.zip/ gradle/wrapper/gradle-wrapper.properties"
       - ./gradlew --no-daemon --offline --console=plain createReleaseDistributable

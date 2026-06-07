@@ -6,7 +6,6 @@ import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringSetPreferencesKey
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.map
-import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import org.archivekeep.app.core.utils.identifiers.StorageURI
 import org.archivekeep.utils.coroutines.shareResourceIn

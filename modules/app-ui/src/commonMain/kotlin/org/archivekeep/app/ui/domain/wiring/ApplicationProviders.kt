@@ -30,7 +30,7 @@ fun ApplicationProviders(
                 val scope = CoroutineScope(job)
                 val serviceWorkDispatcher = newServiceWorkExecutorDispatcher()
                 val environment = environmentFactory(scope + serviceWorkDispatcher)
-                val services = ApplicationServices(serviceWorkDispatcher, scope, environment)
+                val services = createApplicationServices(serviceWorkDispatcher, scope, environment)
 
                 override fun onAbandoned() {
                     job.cancel()
@@ -51,7 +51,7 @@ fun ApplicationProviders(
 
 @Composable
 fun ApplicationProviders(
-    applicationServices: ApplicationServices,
+    applicationServices: ApplicationServicesGraph,
     applicationMetadata: ApplicationMetadata,
     content: @Composable () -> Unit,
 ) {
@@ -64,13 +64,12 @@ fun ApplicationProviders(
         LocalApplicationMetadata provides applicationMetadata,
         LocalArchiveService provides applicationServices.archiveService,
         LocalStorageService provides applicationServices.storageService,
-        LocalRepoService provides applicationServices.repoService,
+        LocalRepoService provides applicationServices.repositoryService,
         LocalRepoToRepoSyncService provides applicationServices.syncService,
         LocalAddPushService provides applicationServices.addPushService,
         LocalIndexUpdateProcedureSupervisorService provides applicationServices.addOperationSupervisorService,
         LocalRegistry provides applicationServices.environment.registry,
         LocalFileStores provides applicationServices.environment.fileStores,
-        LocalStorageRegistry provides applicationServices.knownStorageService,
         LocalOperationFactory provides applicationServices.operationFactory,
         LocalRepositoryOpenService provides repositoryOpenService,
         LocalSharingCoroutineDispatcher provides applicationServices.serviceWorkDispatcher,

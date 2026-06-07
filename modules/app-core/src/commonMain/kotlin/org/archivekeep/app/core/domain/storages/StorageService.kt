@@ -1,5 +1,8 @@
 package org.archivekeep.app.core.domain.storages
 
+import dev.zacsweers.metro.AppScope
+import dev.zacsweers.metro.Inject
+import dev.zacsweers.metro.SingleIn
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -18,6 +21,8 @@ import org.archivekeep.utils.loading.mapLoadedData
 import org.archivekeep.utils.loading.stateIn
 import org.archivekeep.utils.loading.waitLoadedValue
 
+@Inject
+@SingleIn(AppScope::class)
 class StorageService(
     val scope: CoroutineScope,
     val knownStorageService: KnownStorageService,

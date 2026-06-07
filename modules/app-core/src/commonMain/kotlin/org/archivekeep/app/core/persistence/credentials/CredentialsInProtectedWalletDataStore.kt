@@ -4,7 +4,6 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.map
 import kotlinx.serialization.Serializable
-import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonElement
 import org.archivekeep.app.core.utils.identifiers.RepositoryURI
@@ -47,18 +46,25 @@ class CredentialsInProtectedWalletDataStore(
         datastore.data
             .map {
                 when (it) {
-                    is ProtectedLoadableResource.Failed ->
+                    is ProtectedLoadableResource.Failed -> {
                         it
-                    is ProtectedLoadableResource.Loaded ->
+                    }
+
+                    is ProtectedLoadableResource.Loaded -> {
                         ProtectedLoadableResource.Loaded(
                             it.value.repositoryCredentials.firstOrNull { it.uri == uri }?.let {
                                 Json.decodeFromString<BasicAuthCredentials>(it.rawCredentials)
                             },
                         )
-                    is ProtectedLoadableResource.Loading ->
+                    }
+
+                    is ProtectedLoadableResource.Loading -> {
                         it
-                    is ProtectedLoadableResource.PendingAuthentication ->
+                    }
+
+                    is ProtectedLoadableResource.PendingAuthentication -> {
                         it
+                    }
                 }
             }
 

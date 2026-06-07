@@ -1,5 +1,9 @@
 package org.archivekeep.app.core.procedures.addpush
 
+import dev.zacsweers.metro.AppScope
+import dev.zacsweers.metro.ContributesBinding
+import dev.zacsweers.metro.Inject
+import dev.zacsweers.metro.SingleIn
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -21,6 +25,9 @@ import org.archivekeep.utils.loading.Loadable
 import org.archivekeep.utils.loading.LoadableWithProgress
 import org.archivekeep.utils.loading.firstLoadedOrFailure
 
+@Inject
+@SingleIn(AppScope::class)
+@ContributesBinding(AppScope::class)
 class AddAndPushProcedureServiceImpl(
     private val scope: CoroutineScope,
     private val repositoryService: RepositoryService,
@@ -85,7 +92,10 @@ class AddAndPushProcedureServiceImpl(
                         ).prepare(accessor.value)
                             .transform {
                                 when (it) {
-                                    is LoadableWithProgress.Failed -> throw it.throwable
+                                    is LoadableWithProgress.Failed -> {
+                                        throw it.throwable
+                                    }
+
                                     is LoadableWithProgress.Loaded -> {
                                         val preparedAddOperation = it.value
 
@@ -100,6 +110,7 @@ class AddAndPushProcedureServiceImpl(
                                     }
 
                                     LoadableWithProgress.Loading -> {}
+
                                     is LoadableWithProgress.LoadingProgress -> {
                                         emit(AddAndPushProcedure.PreparingAddPushProcess(it.progress))
                                     }

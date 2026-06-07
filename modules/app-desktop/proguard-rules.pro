@@ -13,6 +13,7 @@
 # https://github.com/square/okhttp/blob/5fe3cc2d089810032671d6135ad137af6f491d28/README.md#proguard
 
 -dontwarn okhttp3.**
+-keep class okio.** { *; }
 -dontwarn okio.**
 -dontwarn javax.annotation.**
 -dontwarn org.conscrypt.**

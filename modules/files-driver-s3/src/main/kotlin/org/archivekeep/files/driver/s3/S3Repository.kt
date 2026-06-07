@@ -28,7 +28,6 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.serialization.ExperimentalSerializationApi
-import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.decodeFromStream
 import org.archivekeep.files.api.exceptions.ChecksumMismatch
@@ -341,6 +340,7 @@ class S3Repository private constructor(
 
             when (metadata.repositoryType) {
                 PLAIN_REPOSITORY_TYPE -> {}
+
                 null -> {
                     println("Auto-setting $endpoint:$region:$bucketName as plain repository")
 
@@ -348,7 +348,10 @@ class S3Repository private constructor(
                         it.copy(repositoryType = PLAIN_REPOSITORY_TYPE)
                     }
                 }
-                else -> throw S3LocationNotInitializedAsRepositoryException()
+
+                else -> {
+                    throw S3LocationNotInitializedAsRepositoryException()
+                }
             }
         }
     }

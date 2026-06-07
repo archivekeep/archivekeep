@@ -10,7 +10,6 @@ import com.nimbusds.jose.JWSVerifier
 import com.nimbusds.jose.Payload
 import com.nimbusds.jose.jwk.JWK
 import kotlinx.serialization.Serializable
-import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import org.archivekeep.files.crypto.parseVerifyDecodeJWS
 import org.archivekeep.files.crypto.signAsJWS

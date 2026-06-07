@@ -3,6 +3,7 @@ plugins {
     alias(libs.plugins.kotlin.compose)
     id("com.android.library")
     id("org.jetbrains.compose")
+    alias(libs.plugins.metro)
 }
 
 kotlin {
@@ -88,10 +89,10 @@ android {
         minSdk = 30
     }
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_17
-        targetCompatibility = JavaVersion.VERSION_17
+        sourceCompatibility = JavaVersion.VERSION_21
+        targetCompatibility = JavaVersion.VERSION_21
     }
     kotlin {
-        jvmToolchain(17)
+        jvmToolchain(21)
     }
 }

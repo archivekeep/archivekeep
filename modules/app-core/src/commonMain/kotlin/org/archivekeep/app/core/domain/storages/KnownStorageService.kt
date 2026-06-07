@@ -1,5 +1,9 @@
 package org.archivekeep.app.core.domain.storages
 
+import dev.zacsweers.metro.AppScope
+import dev.zacsweers.metro.ContributesBinding
+import dev.zacsweers.metro.Inject
+import dev.zacsweers.metro.SingleIn
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
@@ -14,6 +18,9 @@ import org.archivekeep.utils.loading.firstLoadedOrFailure
 import org.archivekeep.utils.loading.mapLoadedData
 import org.archivekeep.utils.loading.stateIn
 
+@Inject
+@SingleIn(AppScope::class)
+@ContributesBinding(AppScope::class)
 class KnownStorageService(
     val scope: CoroutineScope,
     val dataStore: RegistryDataStore,

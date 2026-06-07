@@ -1,5 +1,9 @@
 package org.archivekeep.app.core.domain.repositories
 
+import dev.zacsweers.metro.AppScope
+import dev.zacsweers.metro.ContributesBinding
+import dev.zacsweers.metro.Inject
+import dev.zacsweers.metro.SingleIn
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
@@ -15,6 +19,9 @@ import org.archivekeep.app.core.utils.generics.UniqueInstanceManager
 import org.archivekeep.app.core.utils.identifiers.RepositoryURI
 import org.archivekeep.utils.loading.optional.OptionalLoadable.Failed
 
+@Inject
+@SingleIn(AppScope::class)
+@ContributesBinding(AppScope::class)
 class DefaultRepositoryService(
     private val scope: CoroutineScope,
     private val storageDrivers: Map<String, StorageDriver>,

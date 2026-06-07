@@ -29,9 +29,10 @@ import org.archivekeep.app.desktop.ui.dialogs.testing.saveTestingDialogContainer
 import org.archivekeep.app.desktop.ui.dialogs.testing.setContentInDialogScreenshotContainer
 import org.archivekeep.app.desktop.ui.testing.screenshots.runHighDensityComposeUiTest
 import org.archivekeep.app.ui.domain.wiring.ApplicationProviders
-import org.archivekeep.app.ui.domain.wiring.ApplicationServices
+import org.archivekeep.app.ui.domain.wiring.ApplicationServicesGraph
 import org.archivekeep.app.ui.domain.wiring.LocalWalletOperationLaunchers
 import org.archivekeep.app.ui.domain.wiring.WalletOperationLaunchers
+import org.archivekeep.app.ui.domain.wiring.createApplicationServices
 import org.archivekeep.app.ui.domain.wiring.newServiceWorkExecutorDispatcher
 import org.archivekeep.app.ui.performClickTextInput
 import org.archivekeep.app.ui.utils.PropertiesApplicationMetadata
@@ -292,7 +293,7 @@ class AddRemoteRepositoryDialogTestWithS3 {
 
     class TestContext(
         val composeUiTest: SkikoComposeUiTest,
-        val services: ApplicationServices,
+        val services: ApplicationServicesGraph,
     ) : SemanticsNodeInteractionsProvider by composeUiTest {
         fun saveTestingDialogContainerBitmap(filename: String) {
             composeUiTest.saveTestingDialogContainerBitmap(filename)
@@ -310,7 +311,7 @@ class AddRemoteRepositoryDialogTestWithS3 {
                     physicalMediaData = listOf(phone, usbStickAll, usbStickDocuments, usbStickMusic),
                     enableSpeedLimit = false,
                 )
-            val services = ApplicationServices(serviceWorkDispatcher, scope, environment)
+            val services = createApplicationServices(serviceWorkDispatcher, scope, environment)
 
             try {
                 setContentInDialogScreenshotContainer {

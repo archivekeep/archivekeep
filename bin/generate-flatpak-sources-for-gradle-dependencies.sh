@@ -2,7 +2,7 @@
 
 set -e
 
-./gradlew --no-daemon --console=plain --info flatpakGradleGenerator
+./gradlew --no-daemon --no-configuration-cache --console=plain --info flatpakGradleGenerator
 
 cp ./build/flatpak/dependencies-sources.json ./distribution/flatpak/gradle-sources-root.json
 cp ./modules/app-core/build/flatpak/dependencies-sources.json ./distribution/flatpak/gradle-sources-app-core.json

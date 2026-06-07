@@ -6,6 +6,8 @@ kotlinx-coroutines = "1.11.0"
 compose = "1.11.1"
 material3 = "1.11.0-alpha07"
 
+metro = "1.1.1"
+
 grpc = "1.70.0"
 grpc-kotlin = "1.4.1"
 ksp = "2.3.7"
@@ -94,9 +96,11 @@ asciidoctor = { id = "org.asciidoctor.jvm.convert", version = "4.0.2" }
 
 compose = { id = "org.jetbrains.compose", version.ref = "compose" }
 
-flatpak-gradle-generator = { id = "io.github.jwharm.flatpak-gradle-generator", version = "1.5.0" }
+flatpak-gradle-generator = { id = "io.github.jwharm.flatpak-gradle-generator", version = "1.8.0" }
 
 ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
+
+metro = { id = "dev.zacsweers.metro", version.ref = "metro" }
 
 protobuf = { id = "com.google.protobuf", version.ref = "protobuf" }
 

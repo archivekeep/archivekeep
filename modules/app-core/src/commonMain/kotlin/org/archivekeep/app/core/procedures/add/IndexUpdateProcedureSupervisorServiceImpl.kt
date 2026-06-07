@@ -1,5 +1,9 @@
 package org.archivekeep.app.core.procedures.add
 
+import dev.zacsweers.metro.AppScope
+import dev.zacsweers.metro.ContributesBinding
+import dev.zacsweers.metro.Inject
+import dev.zacsweers.metro.SingleIn
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -27,6 +31,9 @@ import org.archivekeep.utils.procedures.AbstractProcedureJob
 import org.archivekeep.utils.procedures.ProcedureExecutionContext
 import java.io.PrintWriter
 
+@Inject
+@SingleIn(AppScope::class)
+@ContributesBinding(AppScope::class)
 class IndexUpdateProcedureSupervisorServiceImpl(
     val scope: CoroutineScope,
     val repositoryService: RepositoryService,
@@ -57,7 +64,10 @@ class IndexUpdateProcedureSupervisorServiceImpl(
                             ).prepare(repositoryAccess)
                                 .map {
                                     when (it) {
-                                        is LoadableWithProgress.Failed -> Loadable.Failed(it.throwable)
+                                        is LoadableWithProgress.Failed -> {
+                                            Loadable.Failed(it.throwable)
+                                        }
+
                                         is LoadableWithProgress.Loaded -> {
                                             Loadable.Loaded(
                                                 IndexUpdateProcedureSupervisor.Preparation(
@@ -80,7 +90,11 @@ class IndexUpdateProcedureSupervisorServiceImpl(
                                                 ),
                                             )
                                         }
-                                        LoadableWithProgress.Loading -> Loadable.Loading
+
+                                        LoadableWithProgress.Loading -> {
+                                            Loadable.Loading
+                                        }
+
                                         is LoadableWithProgress.LoadingProgress -> {
                                             Loadable.Loaded(
                                                 IndexUpdateProcedureSupervisor.Preparation(
