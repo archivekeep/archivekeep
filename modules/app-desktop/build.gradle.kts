@@ -8,6 +8,8 @@ plugins {
 
     alias(libs.plugins.compose)
 
+    alias(libs.plugins.metro)
+
     alias(libs.plugins.svg2ico)
 
     alias(libs.plugins.ktlint)

@@ -9,11 +9,12 @@ import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performTextClearance
 import androidx.compose.ui.test.performTextInput
+import dev.zacsweers.metro.createGraphFactory
 import io.kotest.assertions.nondeterministic.eventually
 import kotlinx.coroutines.runBlocking
 import org.archivekeep.app.core.persistence.drivers.filesystem.FileSystemStorageType
 import org.archivekeep.app.core.persistence.drivers.filesystem.MountedFileSystem
-import org.archivekeep.app.core.persistence.platform.demo.DemoEnvironment
+import org.archivekeep.app.core.persistence.platform.demo.DemoApplicationServices
 import org.archivekeep.app.core.persistence.platform.demo.phone
 import org.archivekeep.app.core.persistence.platform.demo.usbStickAll
 import org.archivekeep.app.core.persistence.platform.demo.usbStickDocuments
@@ -21,7 +22,7 @@ import org.archivekeep.app.core.persistence.platform.demo.usbStickMusic
 import org.archivekeep.app.desktop.ui.dialogs.testing.saveTestingDialogContainerBitmap
 import org.archivekeep.app.desktop.ui.dialogs.testing.setContentInDialogScreenshotContainer
 import org.archivekeep.app.desktop.ui.testing.screenshots.runHighDensityComposeUiTest
-import org.archivekeep.app.ui.domain.wiring.ApplicationProviders
+import org.archivekeep.app.ui.domain.wiring.ApplicationProvidersFromCore
 import org.archivekeep.app.ui.fixedFilesystemDirectoryPicker
 import org.archivekeep.app.ui.performClickTextInput
 import org.archivekeep.app.ui.utils.PropertiesApplicationMetadata
@@ -56,10 +57,11 @@ class AddFileSystemRepositoryDialogTest {
     fun testHappyInitSQLiteFlow() {
         runHighDensityComposeUiTest {
             setContentInDialogScreenshotContainer {
-                ApplicationProviders(
-                    environmentFactory = { scope ->
-                        DemoEnvironment(
+                ApplicationProvidersFromCore(
+                    coreApplicationServicesFactory = { scope, dispatcher ->
+                        createGraphFactory<DemoApplicationServices.Factory>().create(
                             scope,
+                            dispatcher,
                             physicalMediaData = listOf(phone, usbStickAll, usbStickDocuments, usbStickMusic),
                             enableSpeedLimit = false,
                             mountPoints = mountPoints(),
@@ -109,10 +111,11 @@ class AddFileSystemRepositoryDialogTest {
     fun testHappyInitChecksumFilesFlow() {
         runHighDensityComposeUiTest {
             setContentInDialogScreenshotContainer {
-                ApplicationProviders(
-                    environmentFactory = { scope ->
-                        DemoEnvironment(
+                ApplicationProvidersFromCore(
+                    coreApplicationServicesFactory = { scope, dispatcher ->
+                        createGraphFactory<DemoApplicationServices.Factory>().create(
                             scope,
+                            dispatcher,
                             physicalMediaData = listOf(phone, usbStickAll, usbStickDocuments, usbStickMusic),
                             enableSpeedLimit = false,
                             mountPoints = mountPoints(),
@@ -169,10 +172,11 @@ class AddFileSystemRepositoryDialogTest {
     fun testHappyInitEncryptedFlow() {
         runHighDensityComposeUiTest {
             setContentInDialogScreenshotContainer {
-                ApplicationProviders(
-                    environmentFactory = { scope ->
-                        DemoEnvironment(
+                ApplicationProvidersFromCore(
+                    coreApplicationServicesFactory = { scope, dispatcher ->
+                        createGraphFactory<DemoApplicationServices.Factory>().create(
                             scope,
+                            dispatcher,
                             physicalMediaData = listOf(phone, usbStickAll, usbStickDocuments, usbStickMusic),
                             enableSpeedLimit = false,
                             mountPoints = mountPoints(),
@@ -272,10 +276,11 @@ class AddFileSystemRepositoryDialogTest {
             }
 
             setContentInDialogScreenshotContainer {
-                ApplicationProviders(
-                    environmentFactory = { scope ->
-                        DemoEnvironment(
+                ApplicationProvidersFromCore(
+                    coreApplicationServicesFactory = { scope, dispatcher ->
+                        createGraphFactory<DemoApplicationServices.Factory>().create(
                             scope,
+                            dispatcher,
                             physicalMediaData = listOf(phone, usbStickAll, usbStickDocuments, usbStickMusic),
                             enableSpeedLimit = false,
                             mountPoints = mountPoints(),
@@ -324,10 +329,11 @@ class AddFileSystemRepositoryDialogTest {
             }
 
             setContentInDialogScreenshotContainer {
-                ApplicationProviders(
-                    environmentFactory = { scope ->
-                        DemoEnvironment(
+                ApplicationProvidersFromCore(
+                    coreApplicationServicesFactory = { scope, dispatcher ->
+                        createGraphFactory<DemoApplicationServices.Factory>().create(
                             scope,
+                            dispatcher,
                             physicalMediaData = listOf(phone, usbStickAll, usbStickDocuments, usbStickMusic),
                             enableSpeedLimit = false,
                             mountPoints = mountPoints(),
@@ -399,10 +405,11 @@ class AddFileSystemRepositoryDialogTest {
             }
 
             setContentInDialogScreenshotContainer {
-                ApplicationProviders(
-                    environmentFactory = { scope ->
-                        DemoEnvironment(
+                ApplicationProvidersFromCore(
+                    coreApplicationServicesFactory = { scope, dispatcher ->
+                        createGraphFactory<DemoApplicationServices.Factory>().create(
                             scope,
+                            dispatcher,
                             physicalMediaData = listOf(phone, usbStickAll, usbStickDocuments, usbStickMusic),
                             enableSpeedLimit = false,
                             mountPoints = mountPoints(),

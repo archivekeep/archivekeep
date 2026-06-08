@@ -8,6 +8,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 import org.archivekeep.app.core.api.repository.location.RepositoryLocationAccessor
+import org.archivekeep.app.core.domain.CoreApplicationServiceScope
 import org.archivekeep.app.core.domain.storages.StorageDriver
 import org.archivekeep.app.core.domain.storages.getDriverForURI
 import org.archivekeep.app.core.persistence.credentials.CredentialsStore
@@ -21,7 +22,7 @@ import org.archivekeep.utils.loading.optional.OptionalLoadable.Failed
 
 @Inject
 @SingleIn(AppScope::class)
-@ContributesBinding(AppScope::class)
+@ContributesBinding(CoreApplicationServiceScope::class)
 class DefaultRepositoryService(
     private val scope: CoroutineScope,
     private val storageDrivers: Map<String, StorageDriver>,

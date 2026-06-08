@@ -7,7 +7,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
-import org.archivekeep.app.core.persistence.platform.demo.DemoEnvironment
+import dev.zacsweers.metro.createGraphFactory
+import org.archivekeep.app.core.persistence.platform.demo.DemoApplicationServices
 import org.archivekeep.app.core.persistence.platform.demo.phone
 import org.archivekeep.app.core.persistence.platform.demo.usbStickAll
 import org.archivekeep.app.core.persistence.platform.demo.usbStickDocuments
@@ -16,7 +17,7 @@ import org.archivekeep.app.desktop.ui.testing.screenshots.runHighDensityComposeU
 import org.archivekeep.app.desktop.ui.testing.screenshots.saveTestingContainerBitmap
 import org.archivekeep.app.desktop.ui.testing.screenshots.setContentInMobileScreenshotContainer
 import org.archivekeep.app.ui.MainWindowContent
-import org.archivekeep.app.ui.domain.wiring.ApplicationProviders
+import org.archivekeep.app.ui.domain.wiring.ApplicationProvidersFromCore
 import org.archivekeep.app.ui.utils.PropertiesApplicationMetadata
 import org.junit.Test
 
@@ -34,10 +35,11 @@ class MainWindowMobileScreenshotTest {
                     mobileMainWindowHeight,
                 ),
             ) {
-                ApplicationProviders(
-                    environmentFactory = { scope ->
-                        DemoEnvironment(
+                ApplicationProvidersFromCore(
+                    coreApplicationServicesFactory = { scope, dispatcher ->
+                        createGraphFactory<DemoApplicationServices.Factory>().create(
                             scope,
+                            dispatcher,
                             physicalMediaData = listOf(phone, usbStickAll, usbStickDocuments, usbStickMusic),
                             enableSpeedLimit = false,
                         )

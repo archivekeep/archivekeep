@@ -13,6 +13,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
+import org.archivekeep.app.core.domain.CoreApplicationServiceScope
 import org.archivekeep.app.core.domain.repositories.RepositoryService
 import org.archivekeep.app.core.procedures.utils.JobWrapper
 import org.archivekeep.app.core.utils.AbstractJobGuardRunnable
@@ -33,7 +34,7 @@ import java.io.PrintWriter
 
 @Inject
 @SingleIn(AppScope::class)
-@ContributesBinding(AppScope::class)
+@ContributesBinding(CoreApplicationServiceScope::class)
 class IndexUpdateProcedureSupervisorServiceImpl(
     val scope: CoroutineScope,
     val repositoryService: RepositoryService,

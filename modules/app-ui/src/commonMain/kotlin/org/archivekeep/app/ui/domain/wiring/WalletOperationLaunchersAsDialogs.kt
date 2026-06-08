@@ -10,7 +10,7 @@ import org.archivekeep.utils.datastore.passwordprotected.PasswordProtectedJoseSt
 
 @Composable
 fun rememberWalletOperationLaunchersAsDialogs(dialogRenderer: OverlayDialogRenderer): WalletOperationLaunchers {
-    val walletDataStore = LocalApplicationServices.current.environment.walletDataStore
+    val walletDataStore = LocalApplicationServices.current.walletDataStore
 
     val walletOperationLaunchers =
         remember(walletDataStore) {

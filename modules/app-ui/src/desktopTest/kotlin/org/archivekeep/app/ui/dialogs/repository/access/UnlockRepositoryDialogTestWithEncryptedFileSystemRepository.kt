@@ -6,6 +6,7 @@ import androidx.compose.ui.test.assertIsEnabled
 import androidx.compose.ui.test.assertIsNotEnabled
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
+import dev.zacsweers.metro.createDynamicGraphFactory
 import io.kotest.assertions.nondeterministic.eventually
 import io.kotest.matchers.shouldBe
 import kotlinx.coroutines.CoroutineScope
@@ -13,12 +14,10 @@ import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.json.JsonPrimitive
-import org.archivekeep.app.core.domain.storages.StorageDriver
 import org.archivekeep.app.core.persistence.credentials.ContentEncryptionPassword
 import org.archivekeep.app.core.persistence.drivers.filesystem.FileSystemRepositoryURIData
-import org.archivekeep.app.core.persistence.drivers.filesystem.FileSystemStorageDriver
 import org.archivekeep.app.core.persistence.drivers.filesystem.MountedFileSystem
-import org.archivekeep.app.core.persistence.platform.demo.DemoEnvironment
+import org.archivekeep.app.core.persistence.platform.demo.DemoApplicationServices
 import org.archivekeep.app.core.persistence.registry.RegisteredRepository
 import org.archivekeep.app.desktop.ui.dialogs.testing.saveTestingDialogContainerBitmap
 import org.archivekeep.app.desktop.ui.dialogs.testing.setContentInDialogScreenshotContainer
@@ -29,6 +28,7 @@ import org.archivekeep.app.ui.domain.wiring.WalletOperationLaunchers
 import org.archivekeep.app.ui.domain.wiring.createApplicationServices
 import org.archivekeep.app.ui.domain.wiring.newServiceWorkExecutorDispatcher
 import org.archivekeep.app.ui.performClickTextInput
+import org.archivekeep.app.ui.utils.FilesystemDriverContainer
 import org.archivekeep.app.ui.utils.PropertiesApplicationMetadata
 import org.archivekeep.files.driver.filesystem.encryptedfiles.EncryptedFileSystemRepository
 import org.archivekeep.utils.loading.optional.OptionalLoadable
@@ -62,16 +62,16 @@ class UnlockRepositoryDialogTestWithEncryptedFileSystemRepository {
         runHighDensityComposeUiTest {
             val scope = CoroutineScope(SupervisorJob())
             val serviceWorkDispatcher = newServiceWorkExecutorDispatcher()
-            val demoEnvironment =
-                object : DemoEnvironment(
+            val demoApplicationServices =
+                createDynamicGraphFactory<DemoApplicationServices.Factory>(FilesystemDriverContainer()).create(
                     scope,
+                    serviceWorkDispatcher = serviceWorkDispatcher,
                     physicalMediaData = emptyList(),
                     enableSpeedLimit = false,
                     mountPoints = mountPoints(),
-                ) {
-                    override val storageDrivers: List<StorageDriver> = listOf(FileSystemStorageDriver(scope, fileStores, credentialsStore))
-                }
-            val services = createApplicationServices(serviceWorkDispatcher, scope, demoEnvironment)
+                    storagesOverride = emptyList(),
+                )
+            val services = createApplicationServices(demoApplicationServices)
 
             val tempRepoPath = testTempDir.newFolder("encrypted-repo")
 
@@ -80,7 +80,7 @@ class UnlockRepositoryDialogTestWithEncryptedFileSystemRepository {
             runBlocking {
                 EncryptedFileSystemRepository.create(tempRepoPath.toPath(), "test-password-123")
 
-                demoEnvironment.registry.updateRepositories {
+                demoApplicationServices.registry.updateRepositories {
                     it + setOf(RegisteredRepository(uri = subjectAtTestURI))
                 }
             }
@@ -141,19 +141,19 @@ class UnlockRepositoryDialogTestWithEncryptedFileSystemRepository {
         runHighDensityComposeUiTest {
             val scope = CoroutineScope(SupervisorJob())
             val serviceWorkDispatcher = newServiceWorkExecutorDispatcher()
-            val demoEnvironment =
-                object : DemoEnvironment(
+            val demoApplicationServices =
+                createDynamicGraphFactory<DemoApplicationServices.Factory>(FilesystemDriverContainer()).create(
                     scope,
+                    serviceWorkDispatcher = serviceWorkDispatcher,
                     physicalMediaData = emptyList(),
                     enableSpeedLimit = false,
                     mountPoints = mountPoints(),
-                ) {
-                    override val storageDrivers: List<StorageDriver> = listOf(FileSystemStorageDriver(scope, fileStores, credentialsStore))
-                }
-            val services = createApplicationServices(serviceWorkDispatcher, scope, demoEnvironment)
+                    storagesOverride = emptyList(),
+                )
+            val services = createApplicationServices(demoApplicationServices)
 
             runBlocking {
-                demoEnvironment.walletDataStore.create("test-wallet-password-${UUID.randomUUID()}")
+                demoApplicationServices.passwordProtectedWalletDataStore.create("test-wallet-password-${UUID.randomUUID()}")
             }
 
             val tempRepoPath = testTempDir.newFolder("encrypted-repo")
@@ -163,7 +163,7 @@ class UnlockRepositoryDialogTestWithEncryptedFileSystemRepository {
             runBlocking {
                 EncryptedFileSystemRepository.create(tempRepoPath.toPath(), "test-password-123")
 
-                demoEnvironment.registry.updateRepositories {
+                demoApplicationServices.registry.updateRepositories {
                     it + setOf(RegisteredRepository(uri = subjectAtTestURI))
                 }
             }
@@ -225,7 +225,7 @@ class UnlockRepositoryDialogTestWithEncryptedFileSystemRepository {
                 assertEquals(
                     JsonPrimitive("test-password-123"),
                     (
-                        demoEnvironment
+                        demoApplicationServices
                             .credentialsStore
                             .getRepositorySecretsFlow(subjectAtTestURI)
                             .firstFinishedLoading()
@@ -243,16 +243,16 @@ class UnlockRepositoryDialogTestWithEncryptedFileSystemRepository {
         runHighDensityComposeUiTest {
             val scope = CoroutineScope(SupervisorJob())
             val serviceWorkDispatcher = newServiceWorkExecutorDispatcher()
-            val demoEnvironment =
-                object : DemoEnvironment(
+            val demoApplicationServices =
+                createDynamicGraphFactory<DemoApplicationServices.Factory>(FilesystemDriverContainer()).create(
                     scope,
+                    serviceWorkDispatcher = serviceWorkDispatcher,
                     physicalMediaData = emptyList(),
                     enableSpeedLimit = false,
                     mountPoints = mountPoints(),
-                ) {
-                    override val storageDrivers: List<StorageDriver> = listOf(FileSystemStorageDriver(scope, fileStores, credentialsStore))
-                }
-            val services = createApplicationServices(serviceWorkDispatcher, scope, demoEnvironment)
+                    storagesOverride = emptyList(),
+                )
+            val services = createApplicationServices(demoApplicationServices)
 
             val tempRepoPath = testTempDir.newFolder("encrypted-repo")
 
@@ -261,7 +261,7 @@ class UnlockRepositoryDialogTestWithEncryptedFileSystemRepository {
             runBlocking {
                 EncryptedFileSystemRepository.create(tempRepoPath.toPath(), "test-password-123")
 
-                demoEnvironment.registry.updateRepositories {
+                demoApplicationServices.registry.updateRepositories {
                     it + setOf(RegisteredRepository(uri = subjectAtTestURI))
                 }
             }

@@ -1,9 +1,9 @@
 package org.archivekeep.app.ui.domain.services
 
 import org.archivekeep.app.core.persistence.drivers.filesystem.FileSystemStorageDriver
-import org.archivekeep.app.ui.domain.wiring.ApplicationServicesGraph
+import org.archivekeep.app.ui.domain.wiring.ApplicationServices
 
-actual fun createRepositoryOpenService(applicationServices: ApplicationServicesGraph): RepositoryOpenService =
+actual fun createRepositoryOpenService(applicationServices: ApplicationServices): RepositoryOpenService =
     DesktopRepositoryOpenService(
         applicationServices
             .storageDrivers

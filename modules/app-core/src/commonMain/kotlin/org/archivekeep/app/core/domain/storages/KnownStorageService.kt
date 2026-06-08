@@ -8,6 +8,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flatMapLatest
+import org.archivekeep.app.core.domain.CoreApplicationServiceScope
 import org.archivekeep.app.core.persistence.drivers.filesystem.FileStores
 import org.archivekeep.app.core.persistence.registry.RegisteredStorage
 import org.archivekeep.app.core.persistence.registry.RegistryDataStore
@@ -20,7 +21,7 @@ import org.archivekeep.utils.loading.stateIn
 
 @Inject
 @SingleIn(AppScope::class)
-@ContributesBinding(AppScope::class)
+@ContributesBinding(CoreApplicationServiceScope::class)
 class KnownStorageService(
     val scope: CoroutineScope,
     val dataStore: RegistryDataStore,

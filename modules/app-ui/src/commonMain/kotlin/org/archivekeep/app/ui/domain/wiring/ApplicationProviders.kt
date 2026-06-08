@@ -5,32 +5,45 @@ import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.RememberObserver
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.job
 import kotlinx.coroutines.plus
-import org.archivekeep.app.core.persistence.platform.Environment
+import org.archivekeep.app.core.domain.CoreApplicationServices
 import org.archivekeep.app.ui.domain.services.LocalSharingCoroutineDispatcher
 import org.archivekeep.app.ui.domain.services.createRepositoryOpenService
 import org.archivekeep.app.ui.utils.ApplicationMetadata
 import org.archivekeep.app.ui.utils.LocalApplicationMetadata
 
 @Composable
+fun ApplicationProvidersFromCore(
+    coreApplicationServicesFactory: (scope: CoroutineScope, serviceWorkDispatcher: CoroutineDispatcher) -> CoreApplicationServices,
+    applicationMetadata: ApplicationMetadata,
+    content: @Composable () -> Unit,
+) {
+    ApplicationProviders(
+        applicationServicesFactory = { scope, dispatcher -> createApplicationServices(coreApplicationServicesFactory(scope, dispatcher)) },
+        applicationMetadata = applicationMetadata,
+        content = content,
+    )
+}
+
+@Composable
 fun ApplicationProviders(
-    environmentFactory: (scope: CoroutineScope) -> Environment,
+    applicationServicesFactory: (scope: CoroutineScope, serviceWorkDispatcher: CoroutineDispatcher) -> ApplicationServices,
     applicationMetadata: ApplicationMetadata,
     content: @Composable () -> Unit,
 ) {
     val basescope = rememberCoroutineScope()
 
     val applicationServicesRemember =
-        remember(basescope, environmentFactory) {
+        remember(basescope, applicationServicesFactory) {
             object : RememberObserver {
                 val job = SupervisorJob(basescope.coroutineContext.job)
                 val scope = CoroutineScope(job)
                 val serviceWorkDispatcher = newServiceWorkExecutorDispatcher()
-                val environment = environmentFactory(scope + serviceWorkDispatcher)
-                val services = createApplicationServices(serviceWorkDispatcher, scope, environment)
+                val services = applicationServicesFactory(scope + serviceWorkDispatcher, serviceWorkDispatcher)
 
                 override fun onAbandoned() {
                     job.cancel()
@@ -51,7 +64,7 @@ fun ApplicationProviders(
 
 @Composable
 fun ApplicationProviders(
-    applicationServices: ApplicationServicesGraph,
+    applicationServices: ApplicationServices,
     applicationMetadata: ApplicationMetadata,
     content: @Composable () -> Unit,
 ) {
@@ -68,8 +81,8 @@ fun ApplicationProviders(
         LocalRepoToRepoSyncService provides applicationServices.syncService,
         LocalAddPushService provides applicationServices.addPushService,
         LocalIndexUpdateProcedureSupervisorService provides applicationServices.addOperationSupervisorService,
-        LocalRegistry provides applicationServices.environment.registry,
-        LocalFileStores provides applicationServices.environment.fileStores,
+        LocalRegistry provides applicationServices.registry,
+        LocalFileStores provides applicationServices.fileStores,
         LocalOperationFactory provides applicationServices.operationFactory,
         LocalRepositoryOpenService provides repositoryOpenService,
         LocalSharingCoroutineDispatcher provides applicationServices.serviceWorkDispatcher,

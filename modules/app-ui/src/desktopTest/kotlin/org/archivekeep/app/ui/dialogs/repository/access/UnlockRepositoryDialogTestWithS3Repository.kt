@@ -5,6 +5,7 @@ import androidx.compose.ui.test.assertIsEnabled
 import androidx.compose.ui.test.assertIsNotEnabled
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
+import dev.zacsweers.metro.createGraphFactory
 import io.kotest.assertions.nondeterministic.eventually
 import io.kotest.matchers.shouldBe
 import kotlinx.coroutines.CoroutineScope
@@ -12,7 +13,7 @@ import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.runBlocking
 import org.archivekeep.app.core.persistence.drivers.s3.S3RepositoryURIData
-import org.archivekeep.app.core.persistence.platform.demo.DemoEnvironment
+import org.archivekeep.app.core.persistence.platform.demo.DemoApplicationServices
 import org.archivekeep.app.core.persistence.registry.RegisteredRepository
 import org.archivekeep.app.desktop.ui.dialogs.testing.saveTestingDialogContainerBitmap
 import org.archivekeep.app.desktop.ui.dialogs.testing.setContentInDialogScreenshotContainer
@@ -44,13 +45,14 @@ class UnlockRepositoryDialogTestWithS3Repository {
         runHighDensityComposeUiTest {
             val scope = CoroutineScope(SupervisorJob())
             val serviceWorkDispatcher = newServiceWorkExecutorDispatcher()
-            val demoEnvironment =
-                DemoEnvironment(
+            val demoApplicationServices =
+                createGraphFactory<DemoApplicationServices.Factory>().create(
                     scope,
+                    serviceWorkDispatcher = serviceWorkDispatcher,
                     physicalMediaData = emptyList(),
                     enableSpeedLimit = false,
                 )
-            val services = createApplicationServices(serviceWorkDispatcher, scope, demoEnvironment)
+            val services = createApplicationServices(demoApplicationServices)
 
             val testRepo = S3RepositoryTestRepo(minio.s3URL, "test-bucket", "testuser", "testpassword")
 
@@ -60,7 +62,7 @@ class UnlockRepositoryDialogTestWithS3Repository {
                 testRepo.createBucket()
                 testRepo.create()
 
-                demoEnvironment.registry.updateRepositories {
+                demoApplicationServices.registry.updateRepositories {
                     it + setOf(RegisteredRepository(uri = subjectAtTestURI))
                 }
             }

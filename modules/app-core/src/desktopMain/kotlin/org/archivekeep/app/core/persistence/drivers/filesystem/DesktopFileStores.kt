@@ -1,5 +1,8 @@
 package org.archivekeep.app.core.persistence.drivers.filesystem
 
+import dev.zacsweers.metro.AppScope
+import dev.zacsweers.metro.Inject
+import dev.zacsweers.metro.SingleIn
 import io.github.irgaly.kfswatch.KfsDirectoryWatcher
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
@@ -29,6 +32,8 @@ import java.io.File
 import kotlin.coroutines.coroutineContext
 import kotlin.io.path.Path
 
+@Inject
+@SingleIn(AppScope::class)
 @OptIn(ExperimentalCoroutinesApi::class)
 class DesktopFileStores(
     scope: CoroutineScope,

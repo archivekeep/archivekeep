@@ -4,9 +4,10 @@ import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
+import dev.zacsweers.metro.createGraphFactory
 import org.archivekeep.app.core.operations.AddRemoteRepositoryOutcome
 import org.archivekeep.app.core.operations.AddRemoteRepositoryUseCase
-import org.archivekeep.app.core.persistence.platform.demo.DemoEnvironment
+import org.archivekeep.app.core.persistence.platform.demo.DemoApplicationServices
 import org.archivekeep.app.core.persistence.platform.demo.phone
 import org.archivekeep.app.core.persistence.platform.demo.usbStickAll
 import org.archivekeep.app.core.persistence.platform.demo.usbStickDocuments
@@ -15,7 +16,7 @@ import org.archivekeep.app.core.utils.identifiers.RepositoryURI
 import org.archivekeep.app.desktop.ui.dialogs.testing.saveTestingDialogContainerBitmap
 import org.archivekeep.app.desktop.ui.dialogs.testing.setContentInDialogScreenshotContainer
 import org.archivekeep.app.desktop.ui.testing.screenshots.runHighDensityComposeUiTest
-import org.archivekeep.app.ui.domain.wiring.ApplicationProviders
+import org.archivekeep.app.ui.domain.wiring.ApplicationProvidersFromCore
 import org.archivekeep.app.ui.domain.wiring.LocalOperationFactory
 import org.archivekeep.app.ui.domain.wiring.LocalWalletOperationLaunchers
 import org.archivekeep.app.ui.domain.wiring.WalletOperationLaunchers
@@ -30,10 +31,11 @@ class AddRemoteRepositoryDialogTest {
     fun testS3() {
         runHighDensityComposeUiTest {
             setContentInDialogScreenshotContainer {
-                ApplicationProviders(
-                    environmentFactory = { scope ->
-                        DemoEnvironment(
+                ApplicationProvidersFromCore(
+                    coreApplicationServicesFactory = { scope, dispatcher ->
+                        createGraphFactory<DemoApplicationServices.Factory>().create(
                             scope,
+                            dispatcher,
                             physicalMediaData = listOf(phone, usbStickAll, usbStickDocuments, usbStickMusic),
                             enableSpeedLimit = false,
                         )
@@ -77,10 +79,11 @@ class AddRemoteRepositoryDialogTest {
     fun testS3ShowsWarningOnInsecureProtocol() {
         runHighDensityComposeUiTest {
             setContentInDialogScreenshotContainer {
-                ApplicationProviders(
-                    environmentFactory = { scope ->
-                        DemoEnvironment(
+                ApplicationProvidersFromCore(
+                    coreApplicationServicesFactory = { scope, dispatcher ->
+                        createGraphFactory<DemoApplicationServices.Factory>().create(
                             scope,
+                            dispatcher,
                             physicalMediaData = listOf(phone, usbStickAll, usbStickDocuments, usbStickMusic),
                             enableSpeedLimit = false,
                         )
@@ -121,10 +124,11 @@ class AddRemoteRepositoryDialogTest {
     fun testOther() {
         runHighDensityComposeUiTest {
             setContentInDialogScreenshotContainer {
-                ApplicationProviders(
-                    environmentFactory = { scope ->
-                        DemoEnvironment(
+                ApplicationProvidersFromCore(
+                    coreApplicationServicesFactory = { scope, dispatcher ->
+                        createGraphFactory<DemoApplicationServices.Factory>().create(
                             scope,
+                            dispatcher,
                             physicalMediaData = listOf(phone, usbStickAll, usbStickDocuments, usbStickMusic),
                             enableSpeedLimit = false,
                         )

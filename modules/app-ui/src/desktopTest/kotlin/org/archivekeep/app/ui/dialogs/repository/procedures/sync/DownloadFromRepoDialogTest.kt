@@ -5,9 +5,10 @@ import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performMouseInput
+import dev.zacsweers.metro.createGraphFactory
 import io.kotest.assertions.nondeterministic.eventually
 import kotlinx.coroutines.runBlocking
-import org.archivekeep.app.core.persistence.platform.demo.DemoEnvironment
+import org.archivekeep.app.core.persistence.platform.demo.DemoApplicationServices
 import org.archivekeep.app.core.persistence.platform.demo.LaptopSSD
 import org.archivekeep.app.core.persistence.platform.demo.Photos
 import org.archivekeep.app.core.persistence.platform.demo.PhotosInHDDB
@@ -16,7 +17,7 @@ import org.archivekeep.app.core.persistence.platform.demo.hddB
 import org.archivekeep.app.desktop.ui.dialogs.testing.saveTestingDialogContainerBitmap
 import org.archivekeep.app.desktop.ui.dialogs.testing.setContentInDialogScreenshotContainer
 import org.archivekeep.app.desktop.ui.testing.screenshots.runHighDensityComposeUiTest
-import org.archivekeep.app.ui.domain.wiring.ApplicationProviders
+import org.archivekeep.app.ui.domain.wiring.ApplicationProvidersFromCore
 import org.archivekeep.app.ui.utils.PropertiesApplicationMetadata
 import org.junit.Test
 import kotlin.time.Duration.Companion.seconds
@@ -26,14 +27,15 @@ class DownloadFromRepoDialogScreenshotTest {
     @Test
     fun testPreparationAndInput() {
         runHighDensityComposeUiTest {
-            var demoEnvironment: DemoEnvironment? = null
+            var demoApplicationServices: DemoApplicationServices? = null
 
             setContentInDialogScreenshotContainer {
-                ApplicationProviders(
-                    environmentFactory = { scope ->
-                        demoEnvironment =
-                            DemoEnvironment(
+                ApplicationProvidersFromCore(
+                    coreApplicationServicesFactory = { scope, dispatcher ->
+                        demoApplicationServices =
+                            createGraphFactory<DemoApplicationServices.Factory>().create(
                                 scope,
+                                dispatcher,
                                 physicalMediaData =
                                     listOf(
                                         LaptopSSD.copy(
@@ -55,7 +57,8 @@ class DownloadFromRepoDialogScreenshotTest {
                                     ),
                                 enableSpeedLimit = false,
                             )
-                        demoEnvironment!!
+
+                        demoApplicationServices
                     },
                     applicationMetadata = PropertiesApplicationMetadata(),
                 ) {

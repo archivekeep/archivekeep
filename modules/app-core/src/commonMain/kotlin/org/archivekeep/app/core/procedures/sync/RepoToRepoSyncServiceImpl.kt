@@ -20,6 +20,7 @@ import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.transform
+import org.archivekeep.app.core.domain.CoreApplicationServiceScope
 import org.archivekeep.app.core.domain.repositories.RepositoryService
 import org.archivekeep.app.core.procedures.sync.RepoToRepoSync.JobState
 import org.archivekeep.app.core.procedures.sync.RepoToRepoSync.State
@@ -49,7 +50,7 @@ private typealias RepositoryIDPair = Pair<RepositoryURI, RepositoryURI>
 
 @Inject
 @SingleIn(AppScope::class)
-@ContributesBinding(AppScope::class)
+@ContributesBinding(CoreApplicationServiceScope::class)
 class RepoToRepoSyncServiceImpl(
     val scope: CoroutineScope,
     private val repositoryService: RepositoryService,

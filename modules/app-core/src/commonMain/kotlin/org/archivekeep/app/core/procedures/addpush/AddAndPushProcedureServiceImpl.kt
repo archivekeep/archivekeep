@@ -13,6 +13,7 @@ import kotlinx.coroutines.flow.emitAll
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.transform
+import org.archivekeep.app.core.domain.CoreApplicationServiceScope
 import org.archivekeep.app.core.domain.repositories.RepositoryService
 import org.archivekeep.app.core.procedures.utils.JobWrapper
 import org.archivekeep.app.core.utils.AbstractJobGuardRunnable
@@ -27,7 +28,7 @@ import org.archivekeep.utils.loading.firstLoadedOrFailure
 
 @Inject
 @SingleIn(AppScope::class)
-@ContributesBinding(AppScope::class)
+@ContributesBinding(CoreApplicationServiceScope::class)
 class AddAndPushProcedureServiceImpl(
     private val scope: CoroutineScope,
     private val repositoryService: RepositoryService,

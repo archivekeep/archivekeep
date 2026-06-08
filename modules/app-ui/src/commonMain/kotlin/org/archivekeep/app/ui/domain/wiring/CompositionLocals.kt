@@ -11,7 +11,7 @@ import org.archivekeep.app.core.procedures.addpush.AddAndPushProcedureService
 import org.archivekeep.app.core.procedures.sync.RepoToRepoSyncService
 import org.archivekeep.app.ui.domain.services.RepositoryOpenService
 
-val LocalApplicationServices = staticCompositionLocalOfNotProvided<ApplicationServicesGraph>()
+val LocalApplicationServices = staticCompositionLocalOfNotProvided<ApplicationServices>()
 
 val LocalStorageService = staticCompositionLocalOfNotProvided<StorageService>()
 val LocalRepoService = staticCompositionLocalOfNotProvided<RepositoryService>()

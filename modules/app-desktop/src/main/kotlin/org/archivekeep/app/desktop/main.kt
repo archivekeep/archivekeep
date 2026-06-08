@@ -2,34 +2,36 @@ package org.archivekeep.app.desktop
 
 import androidx.compose.runtime.remember
 import androidx.compose.ui.window.application
+import dev.zacsweers.metro.createGraphFactory
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.plus
-import org.archivekeep.app.core.persistence.platform.Environment
-import org.archivekeep.app.core.persistence.platform.demo.DemoEnvironment
+import org.archivekeep.app.core.persistence.platform.demo.DemoApplicationServices
 import org.archivekeep.app.ui.domain.wiring.ApplicationProviders
+import org.archivekeep.app.ui.domain.wiring.ApplicationServices
+import org.archivekeep.app.ui.domain.wiring.createApplicationServices
 import org.archivekeep.app.ui.utils.PropertiesApplicationMetadata
 
 fun main(args: Array<String>) {
     application {
-        val environment: (scope: CoroutineScope) -> Environment =
+        val applicationServices: (scope: CoroutineScope, serviceWorkDispatcher: CoroutineDispatcher) -> ApplicationServices =
             remember {
-                { scope ->
+                { scope, dispatcher ->
                     val isDemo = args.size == 1 && args[0] == "--demo"
 
                     if (isDemo) {
-                        DemoEnvironment(scope + Dispatchers.Default)
-                    } else {
-                        DesktopEnvironment(
-                            scope + Dispatchers.Default,
+                        // DemoEnvironment(scope + Dispatchers.Default)
+                        createApplicationServices(
+                            createGraphFactory<DemoApplicationServices.Factory>().create(scope, dispatcher),
                         )
+                    } else {
+                        createGraphFactory<DesktopApplicationServices.Factory>().create(scope, dispatcher)
                     }
                 }
             }
 
         val applicationMetadata = remember { PropertiesApplicationMetadata() }
 
-        ApplicationProviders(environment, applicationMetadata) {
+        ApplicationProviders(applicationServices, applicationMetadata) {
             MainWindow()
         }
     }

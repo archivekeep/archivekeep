@@ -1,5 +1,13 @@
 package org.archivekeep.app.core.persistence.platform.demo
 
+import dev.zacsweers.metro.AppScope
+import dev.zacsweers.metro.Binds
+import dev.zacsweers.metro.DependencyGraph
+import dev.zacsweers.metro.ElementsIntoSet
+import dev.zacsweers.metro.Named
+import dev.zacsweers.metro.Provides
+import dev.zacsweers.metro.SingleIn
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -13,6 +21,8 @@ import kotlinx.serialization.json.Json
 import kotlinx.serialization.serializer
 import org.archivekeep.app.core.api.repository.location.RepositoryLocationAccessor
 import org.archivekeep.app.core.api.repository.location.RepositoryLocationContentsState
+import org.archivekeep.app.core.domain.CoreApplicationServiceScope
+import org.archivekeep.app.core.domain.CoreApplicationServicesGraph
 import org.archivekeep.app.core.domain.repositories.RepositoryConnectionState
 import org.archivekeep.app.core.domain.repositories.RepositoryEncryptionType
 import org.archivekeep.app.core.domain.repositories.RepositoryInformation
@@ -25,12 +35,11 @@ import org.archivekeep.app.core.domain.storages.StorageDriver
 import org.archivekeep.app.core.domain.storages.StorageInformation
 import org.archivekeep.app.core.domain.storages.StorageNamedReference
 import org.archivekeep.app.core.domain.storages.StorageRepository
-import org.archivekeep.app.core.persistence.credentials.CredentialsInProtectedWalletDataStore
-import org.archivekeep.app.core.persistence.credentials.CredentialsStore
 import org.archivekeep.app.core.persistence.credentials.WalletPO
 import org.archivekeep.app.core.persistence.drivers.filesystem.FileStores
 import org.archivekeep.app.core.persistence.drivers.filesystem.MountedFileSystem
-import org.archivekeep.app.core.persistence.platform.Environment
+import org.archivekeep.app.core.persistence.platform.demo.DemoApplicationServices.DemoOnlineStorage
+import org.archivekeep.app.core.persistence.platform.demo.DemoApplicationServices.DemoPhysicalMedium
 import org.archivekeep.app.core.persistence.registry.RegisteredRepository
 import org.archivekeep.app.core.persistence.registry.RegisteredStorage
 import org.archivekeep.app.core.persistence.registry.RegistryDataStore
@@ -52,26 +61,28 @@ import org.archivekeep.files.driver.inmemory.InMemoryRepo
 import org.archivekeep.files.driver.speedlimit.SpeedLimitedLocalRepoWrapper
 import org.archivekeep.files.driver.speedlimit.SpeedLimitedRepoWrapper
 import org.archivekeep.utils.datastore.passwordprotected.PasswordProtectedJoseStorageInFile
+import org.archivekeep.utils.datastore.passwordprotected.ProtectedDataStore
 import org.archivekeep.utils.loading.Loadable
 import org.archivekeep.utils.loading.mapLoadedData
 import org.archivekeep.utils.loading.mapToLoadable
 import org.archivekeep.utils.loading.optional.OptionalLoadable
 import org.archivekeep.utils.loading.optional.stateIn
 import org.archivekeep.utils.loading.stateIn
+import java.nio.file.Path
 
-open class DemoEnvironment(
-    scope: CoroutineScope,
-    enableSpeedLimit: Boolean = true,
-    physicalMediaData: List<DemoPhysicalMedium> = listOf(LaptopSSD, LaptopHDD, hddB, hddC),
-    onlineStoragesData: List<DemoOnlineStorage> = emptyList(),
-    mountPoints: List<MountedFileSystem.MountPoint> = emptyList(),
-) : Environment {
+@DependencyGraph(AppScope::class, additionalScopes = [CoreApplicationServiceScope::class])
+interface DemoApplicationServices : CoreApplicationServicesGraph {
     data class InMemoryStorage(
         val registeredStorage: RegisteredStorage,
         val repos: Flow<List<MockedRepository>>,
     )
 
-    override val fileStores: FileStores =
+    @Provides
+    @SingleIn(AppScope::class)
+    fun fileStores(
+        scope: CoroutineScope,
+        mountPoints: List<MountedFileSystem.MountPoint> = emptyList(),
+    ): FileStores =
         object : FileStores {
             override val mountPoints: StateFlow<Loadable<List<MountedFileSystem.MountPoint>>> =
                 flowOf(mountPoints)
@@ -98,18 +109,30 @@ open class DemoEnvironment(
             override suspend fun loadFreshMountPoints(): List<MountedFileSystem.MountPoint> = mountPoints
         }
 
-    private val demoTempDirectory = kotlin.io.path.createTempDirectory("archivekeep-demo-env")
+    @Provides
+    @SingleIn(AppScope::class)
+    @Named("demoTempDirectory")
+    fun demoTempDirectory(): Path = kotlin.io.path.createTempDirectory("archivekeep-demo-env")
 
-    override val walletDataStore: PasswordProtectedJoseStorageInFile<WalletPO> =
+    @Provides
+    @SingleIn(AppScope::class)
+    fun walletDataStore(
+        @Named("demoTempDirectory") demoTempDirectory: Path,
+    ): PasswordProtectedJoseStorageInFile<WalletPO> =
         PasswordProtectedJoseStorageInFile(
             demoTempDirectory.resolve("credentials.jwe"),
             Json.serializersModule.serializer(),
             defaultValueProducer = { WalletPO(emptySet()) },
         )
 
-    override val credentialsStore: CredentialsStore = CredentialsInProtectedWalletDataStore(walletDataStore)
+    val passwordProtectedWalletDataStore: PasswordProtectedJoseStorageInFile<WalletPO>
 
-    val mediaMapped =
+    @Binds
+    val PasswordProtectedJoseStorageInFile<WalletPO>.bind: ProtectedDataStore<WalletPO>
+
+    @Provides
+    @SingleIn(AppScope::class)
+    fun mediaMapped(physicalMediaData: List<DemoPhysicalMedium>): MutableStateFlow<Map<String, Pair<InMemoryStorage, List<MockedRepository>>>> =
         MutableStateFlow(
             physicalMediaData
                 .associate {
@@ -131,7 +154,9 @@ open class DemoEnvironment(
                 },
         )
 
-    val onlineMapped =
+    @Provides
+    @SingleIn(AppScope::class)
+    fun onlineMapped(onlineStoragesData: List<DemoOnlineStorage>): Map<String, List<MockedRepository>> =
         onlineStoragesData
             .associate {
                 val repositories = it.repositories.map { r -> r.inStorage(it.reference) }
@@ -139,7 +164,14 @@ open class DemoEnvironment(
                 it.id to repositories
             }
 
-    override val registry =
+    @Provides
+    @SingleIn(AppScope::class)
+    fun registry(
+        scope: CoroutineScope,
+        mediaMapped: MutableStateFlow<Map<String, Pair<InMemoryStorage, List<MockedRepository>>>>,
+        onlineMapped: Map<String, List<MockedRepository>>,
+        onlineStoragesData: List<DemoOnlineStorage>,
+    ): RegistryDataStore =
         object : RegistryDataStore {
             override val registeredRepositories: MutableStateFlow<Set<RegisteredRepository>> =
                 MutableStateFlow(
@@ -200,7 +232,7 @@ open class DemoEnvironment(
             ) {
                 mediaMapped.update { old ->
                     old
-                        .mapValues { (key, value) ->
+                        .mapValues { (_, value) ->
                             if (value.first.registeredStorage.uri == uri) {
                                 value.copy(
                                     first =
@@ -216,28 +248,35 @@ open class DemoEnvironment(
             }
         }
 
-    fun repo(uri: RepositoryURI): MockedRepository? {
-        mediaMapped
-            .value
-            .flatMap { it.value.second }
-            .firstOrNull {
-                it.uri == uri
-            }?.let {
-                return@repo it
-            }
+    val repo: (uri: RepositoryURI) -> MockedRepository?
 
-        onlineMapped
-            .flatMap { it.value }
-            .firstOrNull {
-                it.uri == uri
-            }?.let {
-                return@repo it
-            }
+    @Provides
+    @SingleIn(AppScope::class)
+    fun provideRepoGetter(
+        mediaMapped: MutableStateFlow<Map<String, Pair<InMemoryStorage, List<MockedRepository>>>>,
+        onlineMapped: Map<String, List<MockedRepository>>,
+    ): (uri: RepositoryURI) -> MockedRepository? =
+        { uri: RepositoryURI ->
+            (
+                mediaMapped
+                    .value
+                    .flatMap { it.value.second }
+                    .firstOrNull {
+                        it.uri == uri
+                    }
+            )
+                ?: (
+                    onlineMapped
+                        .flatMap { it.value }
+                        .firstOrNull {
+                            it.uri == uri
+                        }
+                )
+        }
 
-        return null
-    }
-
-    override val repositoryIndexMemory =
+    @Provides
+    @SingleIn(AppScope::class)
+    fun repositoryIndexMemory(): MemorizedRepositoryIndexRepository =
         object : MemorizedRepositoryIndexRepository {
             override fun repositoryMemorizedIndexFlow(uri: RepositoryURI): Flow<OptionalLoadable<RepoIndex>> = flowOf(OptionalLoadable.NotAvailable())
 
@@ -249,7 +288,9 @@ open class DemoEnvironment(
             }
         }
 
-    override val repositoryMetadataMemory =
+    @Provides
+    @SingleIn(AppScope::class)
+    fun repositoryMetadataMemory(): MemorizedRepositoryMetadataRepository =
         object : MemorizedRepositoryMetadataRepository {
             override fun repositoryCachedMetadataFlow(uri: RepositoryURI): Flow<OptionalLoadable<RepositoryMetadata>> {
                 // TODO
@@ -264,7 +305,12 @@ open class DemoEnvironment(
             }
         }
 
-    val liveStatusFlowManager =
+    @Provides
+    @SingleIn(AppScope::class)
+    fun liveStatusFlowManager(
+        scope: CoroutineScope,
+        physicalMediaData: List<DemoPhysicalMedium>,
+    ): UniqueSharedFlowInstanceManager<StorageURI, Loadable.Loaded<Storage.ConnectionStatus>> =
         UniqueSharedFlowInstanceManager(
             scope,
             factory = { key: StorageURI ->
@@ -284,8 +330,18 @@ open class DemoEnvironment(
             },
         )
 
-    override val storageDrivers: List<StorageDriver> =
-        listOf(
+    @Provides
+    @ElementsIntoSet
+    fun storageDrivers(
+        scope: CoroutineScope,
+        @Named("enableSpeedLimit") enableSpeedLimit: Boolean,
+        physicalMediaData: List<DemoPhysicalMedium>,
+        onlineStoragesData: List<DemoOnlineStorage>,
+        liveStatusFlowManager: UniqueSharedFlowInstanceManager<StorageURI, Loadable.Loaded<Storage.ConnectionStatus>>,
+        repo: (uri: RepositoryURI) -> MockedRepository?,
+        @Named("storagesOverride") storagesOverride: List<StorageDriver>?,
+    ): List<StorageDriver> =
+        storagesOverride ?: listOf(
             object : StorageDriver(DemoRepositoryURIData.ID) {
                 override fun getStorageAccessor(storageURI: StorageURI): StorageConnection =
                     StorageConnection(
@@ -470,6 +526,30 @@ open class DemoEnvironment(
                 ),
             )
     }
+
+    @DependencyGraph.Factory
+    abstract class Factory {
+        abstract fun createBase(
+            @Provides scope: CoroutineScope,
+            @Provides serviceWorkDispatcher: CoroutineDispatcher,
+            @Provides @Named("enableSpeedLimit") enableSpeedLimit: Boolean,
+            @Provides physicalMediaData: List<DemoPhysicalMedium>,
+            @Provides onlineStoragesData: List<DemoOnlineStorage>,
+            @Provides mountPoints: List<MountedFileSystem.MountPoint>,
+            @Provides @Named("storagesOverride") storagesOverride: List<StorageDriver>?,
+        ): DemoApplicationServices
+
+        fun create(
+            scope: CoroutineScope,
+            serviceWorkDispatcher: CoroutineDispatcher,
+            enableSpeedLimit: Boolean = true,
+            physicalMediaData: List<DemoPhysicalMedium> = listOf(LaptopSSD, LaptopHDD, hddB, hddC),
+            onlineStoragesData: List<DemoOnlineStorage> = emptyList(),
+            mountPoints: List<MountedFileSystem.MountPoint> = emptyList(),
+            storagesOverride: List<StorageDriver>? = null,
+        ): DemoApplicationServices =
+            this.createBase(scope, serviceWorkDispatcher, enableSpeedLimit, physicalMediaData, onlineStoragesData, mountPoints, storagesOverride)
+    }
 }
 
 fun String.toSlug() =
@@ -479,7 +559,7 @@ fun String.toSlug() =
         .replace("-+".toRegex(), "-")
         .trim('-')
 
-fun DemoEnvironment.DemoPhysicalMedium.asKnownStorage(): KnownStorage =
+fun DemoApplicationServices.DemoPhysicalMedium.asKnownStorage(): KnownStorage =
     KnownStorage(
         this.uri,
         null,
@@ -488,7 +568,7 @@ fun DemoEnvironment.DemoPhysicalMedium.asKnownStorage(): KnownStorage =
         },
     )
 
-fun DemoEnvironment.DemoPhysicalMedium.asKnownRegisteredStorage(): KnownStorage =
+fun DemoApplicationServices.DemoPhysicalMedium.asKnownRegisteredStorage(): KnownStorage =
     KnownStorage(
         this.uri,
         RegisteredStorage(
@@ -500,4 +580,4 @@ fun DemoEnvironment.DemoPhysicalMedium.asKnownRegisteredStorage(): KnownStorage 
         },
     )
 
-fun DemoEnvironment.MockedRepository.asRegisteredRepository(): RegisteredRepository = RegisteredRepository(this.uri, this.displayName)
+fun DemoApplicationServices.MockedRepository.asRegisteredRepository(): RegisteredRepository = RegisteredRepository(this.uri, this.displayName)

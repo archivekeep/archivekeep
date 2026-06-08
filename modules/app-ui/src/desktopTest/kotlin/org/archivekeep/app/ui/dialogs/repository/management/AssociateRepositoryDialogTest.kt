@@ -5,9 +5,10 @@ import androidx.compose.ui.test.assertIsEnabled
 import androidx.compose.ui.test.assertIsNotEnabled
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
+import dev.zacsweers.metro.createGraphFactory
 import io.kotest.assertions.nondeterministic.eventually
 import kotlinx.coroutines.runBlocking
-import org.archivekeep.app.core.persistence.platform.demo.DemoEnvironment
+import org.archivekeep.app.core.persistence.platform.demo.DemoApplicationServices
 import org.archivekeep.app.core.persistence.platform.demo.Documents
 import org.archivekeep.app.core.persistence.platform.demo.LaptopHDD
 import org.archivekeep.app.core.persistence.platform.demo.LaptopSSD
@@ -15,7 +16,7 @@ import org.archivekeep.app.core.persistence.platform.demo.usbStickAllUnassociate
 import org.archivekeep.app.desktop.ui.dialogs.testing.saveTestingDialogContainerBitmap
 import org.archivekeep.app.desktop.ui.dialogs.testing.setContentInDialogScreenshotContainer
 import org.archivekeep.app.desktop.ui.testing.screenshots.runHighDensityComposeUiTest
-import org.archivekeep.app.ui.domain.wiring.ApplicationProviders
+import org.archivekeep.app.ui.domain.wiring.ApplicationProvidersFromCore
 import org.archivekeep.app.ui.utils.PropertiesApplicationMetadata
 import org.junit.Test
 import kotlin.test.assertEquals
@@ -27,16 +28,17 @@ class AssociateRepositoryDialogTest {
     fun testHappyPath() {
         runHighDensityComposeUiTest {
             var closed = false
-            var demoEnvironment: DemoEnvironment? = null
+            var demoApplicationServices: DemoApplicationServices? = null
 
             val subjectAtTestURI = Documents.inStorage(usbStickAllUnassociated.reference).uri
 
             setContentInDialogScreenshotContainer {
-                ApplicationProviders(
-                    environmentFactory = { scope ->
-                        demoEnvironment =
-                            DemoEnvironment(
+                ApplicationProvidersFromCore(
+                    coreApplicationServicesFactory = { scope, dispatcher ->
+                        demoApplicationServices =
+                            createGraphFactory<DemoApplicationServices.Factory>().create(
                                 scope,
+                                dispatcher,
                                 physicalMediaData =
                                     listOf(
                                         LaptopSSD,
@@ -45,7 +47,8 @@ class AssociateRepositoryDialogTest {
                                     ),
                                 enableSpeedLimit = false,
                             )
-                        demoEnvironment!!
+
+                        demoApplicationServices
                     },
                     applicationMetadata = PropertiesApplicationMetadata(),
                 ) {
@@ -76,7 +79,7 @@ class AssociateRepositoryDialogTest {
                     assertEquals(true, closed)
                     assertEquals(
                         "a-documents",
-                        demoEnvironment!!
+                        demoApplicationServices!!
                             .repo(subjectAtTestURI)!!
                             .repo
                             .getMetadata()

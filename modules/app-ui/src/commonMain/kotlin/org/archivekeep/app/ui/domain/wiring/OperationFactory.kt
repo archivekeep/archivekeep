@@ -6,6 +6,7 @@ import dev.zacsweers.metro.AppScope
 import dev.zacsweers.metro.Inject
 import dev.zacsweers.metro.SingleIn
 import kotlinx.coroutines.CoroutineScope
+import org.archivekeep.app.core.domain.CoreApplicationServices
 import org.archivekeep.app.core.domain.repositories.RepositoryService
 import org.archivekeep.app.core.domain.storages.StorageDriver
 import org.archivekeep.app.core.domain.storages.StorageRegistry
@@ -17,7 +18,6 @@ import org.archivekeep.app.core.persistence.drivers.filesystem.operations.AddFil
 import org.archivekeep.app.core.persistence.drivers.filesystem.operations.AddFileSystemRepositoryUseCaseImpl
 import org.archivekeep.app.core.persistence.drivers.filesystem.operations.DeinitializeFileSystemRepositoryUseCase
 import org.archivekeep.app.core.persistence.drivers.filesystem.operations.DeinitializeFileSystemRepositoryUseCaseImpl
-import org.archivekeep.app.core.persistence.platform.Environment
 import org.archivekeep.app.core.utils.identifiers.RepositoryURI
 
 @SingleIn(AppScope::class)
@@ -27,7 +27,7 @@ class OperationFactory private constructor(
     @Inject
     constructor(
         repositoryService: RepositoryService,
-        env: Environment,
+        env: CoreApplicationServices,
         storageRegistry: StorageRegistry,
         drivers: Map<String, StorageDriver>,
     ) : this(

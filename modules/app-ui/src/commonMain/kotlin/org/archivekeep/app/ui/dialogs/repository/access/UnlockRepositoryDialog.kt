@@ -91,10 +91,14 @@ class UnlockRepositoryDialog(
                     is UserCredentialsRequest -> {
                         basicAuthCredentials?.let { it.username.isNotBlank() && it.password.isNotBlank() } ?: false
                     }
+
                     is PasswordRequest -> {
                         password.isNotBlank()
                     }
-                    else -> false
+
+                    else -> {
+                        false
+                    }
                 }
             },
         )
@@ -137,12 +141,16 @@ class UnlockRepositoryDialog(
                 }
 
                 when (val request = accessState.first().asUnlockRequest()) {
-                    null -> TODO()
-                    is UserCredentialsRequest ->
+                    null -> {
+                        TODO()
+                    }
+
+                    is UserCredentialsRequest -> {
                         request.tryOpen(
                             basicAuthCredentialsState.value!!,
                             unlockOptions,
                         )
+                    }
 
                     is PasswordRequest -> {
                         request.providePassword(passwordState.value, rememberPasswordState.value)
@@ -162,7 +170,7 @@ class UnlockRepositoryDialog(
         onClose: () -> Unit,
     ): VM {
         val walletOperationLaunchers = LocalWalletOperationLaunchers.current
-        val credentialStorage = LocalApplicationServices.current.environment.walletDataStore
+        val credentialStorage = LocalApplicationServices.current.walletDataStore
 
         return remember {
             VM(

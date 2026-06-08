@@ -38,7 +38,7 @@ fun AppBar(
     onCloseRequest: (() -> Unit)?,
     content: @Composable RowScope.() -> Unit,
 ) {
-    val credentialStorage = LocalApplicationServices.current.environment.walletDataStore as? PasswordProtectedDataStore
+    val credentialStorage = LocalApplicationServices.current.walletDataStore as? PasswordProtectedDataStore
 
     val canUnlock = credentialStorage.canUnlock()
 

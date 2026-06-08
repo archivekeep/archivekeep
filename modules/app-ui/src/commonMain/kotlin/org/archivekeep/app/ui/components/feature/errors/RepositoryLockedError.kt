@@ -28,7 +28,7 @@ fun RepositoryLockedError(
 ) {
     val repoOperationLaunchers = LocalArchiveOperationLaunchers.current
     val walletOperationLaunchers = LocalWalletOperationLaunchers.current
-    val credentialStorage = LocalApplicationServices.current.environment.walletDataStore as? PasswordProtectedDataStore
+    val credentialStorage = LocalApplicationServices.current.walletDataStore as? PasswordProtectedDataStore
 
     Text("Repository ${cause.uri} is locked")
 

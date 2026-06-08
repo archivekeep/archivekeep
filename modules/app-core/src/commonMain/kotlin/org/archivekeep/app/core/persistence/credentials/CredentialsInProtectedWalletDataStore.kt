@@ -1,11 +1,16 @@
 package org.archivekeep.app.core.persistence.credentials
 
+import dev.zacsweers.metro.AppScope
+import dev.zacsweers.metro.ContributesBinding
+import dev.zacsweers.metro.Inject
+import dev.zacsweers.metro.SingleIn
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.map
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonElement
+import org.archivekeep.app.core.domain.CoreApplicationServiceScope
 import org.archivekeep.app.core.utils.identifiers.RepositoryURI
 import org.archivekeep.files.api.repository.auth.BasicAuthCredentials
 import org.archivekeep.utils.datastore.passwordprotected.ProtectedDataStore
@@ -13,6 +18,9 @@ import org.archivekeep.utils.loading.ProtectedLoadableResource
 import org.archivekeep.utils.loading.optional.OptionalLoadable
 import org.archivekeep.utils.loading.optional.mapLoadedData
 
+@Inject
+@SingleIn(AppScope::class)
+@ContributesBinding(CoreApplicationServiceScope::class)
 class CredentialsInProtectedWalletDataStore(
     val datastore: ProtectedDataStore<WalletPO>,
 ) : CredentialsStore {

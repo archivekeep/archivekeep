@@ -1,6 +1,7 @@
 package org.archivekeep.app.core.persistence.drivers.s3
 
 import aws.sdk.kotlin.runtime.auth.credentials.StaticCredentialsProvider
+import dev.zacsweers.metro.createGraphFactory
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.matchers.shouldBe
 import kotlinx.coroutines.CoroutineScope
@@ -14,9 +15,7 @@ import org.archivekeep.app.core.api.repository.location.UserCredentialsRequest
 import org.archivekeep.app.core.createTestBucket
 import org.archivekeep.app.core.domain.repositories.UnlockOptions
 import org.archivekeep.app.core.domain.storages.NeedsUnlock
-import org.archivekeep.app.core.persistence.credentials.CredentialsInProtectedWalletDataStore
-import org.archivekeep.app.core.persistence.credentials.CredentialsStore
-import org.archivekeep.app.core.persistence.platform.demo.DemoEnvironment
+import org.archivekeep.app.core.persistence.platform.demo.DemoApplicationServices
 import org.archivekeep.app.core.utils.identifiers.RepositoryURI
 import org.archivekeep.files.api.repository.auth.BasicAuthCredentials
 import org.archivekeep.files.driver.s3.EncryptedS3Repository
@@ -185,11 +184,19 @@ class S3StorageDriverTest {
             val dispatcher = StandardTestDispatcher(testScheduler)
             val scope = CoroutineScope(dispatcher)
 
-            val env = DemoEnvironment(scope, false, emptyList())
+            val env =
+                createGraphFactory<DemoApplicationServices.Factory>().create(
+                    scope,
+                    serviceWorkDispatcher = dispatcher,
+                    physicalMediaData = emptyList(),
+                    enableSpeedLimit = false,
+                    storagesOverride = emptyList(),
+                )
 
-            val credentialsStore: CredentialsStore = CredentialsInProtectedWalletDataStore(env.walletDataStore)
-
-            val driver = S3StorageDriver(scope, credentialsStore)
+            val driver =
+                env.storageDrivers.values
+                    .filterIsInstance<S3StorageDriver>()
+                    .first()
 
             testBody(
                 object : InnerTestScope {

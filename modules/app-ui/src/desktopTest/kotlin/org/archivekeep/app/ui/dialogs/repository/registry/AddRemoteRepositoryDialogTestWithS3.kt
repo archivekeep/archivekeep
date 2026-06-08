@@ -11,6 +11,7 @@ import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import aws.sdk.kotlin.runtime.auth.credentials.StaticCredentialsProvider
+import dev.zacsweers.metro.createGraphFactory
 import io.kotest.matchers.collections.shouldContain
 import io.kotest.matchers.collections.shouldNotContain
 import kotlinx.coroutines.CoroutineScope
@@ -19,7 +20,7 @@ import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
 import org.archivekeep.app.core.persistence.drivers.s3.S3RepositoryURIData
-import org.archivekeep.app.core.persistence.platform.demo.DemoEnvironment
+import org.archivekeep.app.core.persistence.platform.demo.DemoApplicationServices
 import org.archivekeep.app.core.persistence.platform.demo.phone
 import org.archivekeep.app.core.persistence.platform.demo.usbStickAll
 import org.archivekeep.app.core.persistence.platform.demo.usbStickDocuments
@@ -29,7 +30,7 @@ import org.archivekeep.app.desktop.ui.dialogs.testing.saveTestingDialogContainer
 import org.archivekeep.app.desktop.ui.dialogs.testing.setContentInDialogScreenshotContainer
 import org.archivekeep.app.desktop.ui.testing.screenshots.runHighDensityComposeUiTest
 import org.archivekeep.app.ui.domain.wiring.ApplicationProviders
-import org.archivekeep.app.ui.domain.wiring.ApplicationServicesGraph
+import org.archivekeep.app.ui.domain.wiring.ApplicationServices
 import org.archivekeep.app.ui.domain.wiring.LocalWalletOperationLaunchers
 import org.archivekeep.app.ui.domain.wiring.WalletOperationLaunchers
 import org.archivekeep.app.ui.domain.wiring.createApplicationServices
@@ -91,7 +92,7 @@ class AddRemoteRepositoryDialogTestWithS3 {
             onAllNodesWithText("WrongCredentialsException", substring = true).assertCountEquals(2)
 
             runBlocking {
-                services.environment.registry.registeredRepositories
+                services.registry.registeredRepositories
                     .first()
             } shouldNotContain registeredRepositoryForMock()
         }
@@ -136,7 +137,7 @@ class AddRemoteRepositoryDialogTestWithS3 {
             onNodeWithText("Remote repository successfully added").assertExists()
 
             runBlocking {
-                services.environment.registry.registeredRepositories
+                services.registry.registeredRepositories
                     .first()
             } shouldContain registeredRepositoryForMock()
         }
@@ -194,7 +195,7 @@ class AddRemoteRepositoryDialogTestWithS3 {
             onNodeWithText("Remote repository successfully added").assertExists()
 
             runBlocking {
-                services.environment.registry.registeredRepositories
+                services.registry.registeredRepositories
                     .first()
             } shouldContain registeredRepositoryForMock()
         }
@@ -239,7 +240,7 @@ class AddRemoteRepositoryDialogTestWithS3 {
             onNodeWithText("Remote repository successfully added").assertExists()
 
             runBlocking {
-                services.environment.registry.registeredRepositories
+                services.registry.registeredRepositories
                     .first()
             } shouldContain registeredRepositoryForMock()
         }
@@ -285,7 +286,7 @@ class AddRemoteRepositoryDialogTestWithS3 {
             onNodeWithText("Remote repository successfully added").assertExists()
 
             runBlocking {
-                services.environment.registry.registeredRepositories
+                services.registry.registeredRepositories
                     .first()
             } shouldContain registeredRepositoryForMock()
         }
@@ -293,7 +294,7 @@ class AddRemoteRepositoryDialogTestWithS3 {
 
     class TestContext(
         val composeUiTest: SkikoComposeUiTest,
-        val services: ApplicationServicesGraph,
+        val services: ApplicationServices,
     ) : SemanticsNodeInteractionsProvider by composeUiTest {
         fun saveTestingDialogContainerBitmap(filename: String) {
             composeUiTest.saveTestingDialogContainerBitmap(filename)
@@ -306,12 +307,13 @@ class AddRemoteRepositoryDialogTestWithS3 {
             val scope = CoroutineScope(job)
             val serviceWorkDispatcher = newServiceWorkExecutorDispatcher()
             val environment =
-                DemoEnvironment(
+                createGraphFactory<DemoApplicationServices.Factory>().create(
                     scope,
+                    serviceWorkDispatcher,
                     physicalMediaData = listOf(phone, usbStickAll, usbStickDocuments, usbStickMusic),
                     enableSpeedLimit = false,
                 )
-            val services = createApplicationServices(serviceWorkDispatcher, scope, environment)
+            val services = createApplicationServices(environment)
 
             try {
                 setContentInDialogScreenshotContainer {

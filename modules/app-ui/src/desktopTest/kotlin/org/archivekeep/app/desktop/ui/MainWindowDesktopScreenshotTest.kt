@@ -6,12 +6,13 @@ import androidx.compose.material3.windowsizeclass.WindowSizeClass
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.unit.DpSize
-import org.archivekeep.app.core.persistence.platform.demo.DemoEnvironment
+import dev.zacsweers.metro.createGraphFactory
+import org.archivekeep.app.core.persistence.platform.demo.DemoApplicationServices
 import org.archivekeep.app.desktop.ui.testing.screenshots.runHighDensityComposeUiTest
 import org.archivekeep.app.desktop.ui.testing.screenshots.saveTestingContainerBitmap
 import org.archivekeep.app.desktop.ui.testing.screenshots.setContentScreenshotContainer
 import org.archivekeep.app.ui.MainWindowContent
-import org.archivekeep.app.ui.domain.wiring.ApplicationProviders
+import org.archivekeep.app.ui.domain.wiring.ApplicationProvidersFromCore
 import org.archivekeep.app.ui.utils.DefaultMainWindowHeight
 import org.archivekeep.app.ui.utils.DefaultMainWindowWidth
 import org.archivekeep.app.ui.utils.PropertiesApplicationMetadata
@@ -28,10 +29,11 @@ class MainWindowDesktopScreenshotTest {
                     DefaultMainWindowHeight,
                 ),
             ) {
-                ApplicationProviders(
-                    environmentFactory = { scope ->
-                        DemoEnvironment(
+                ApplicationProvidersFromCore(
+                    coreApplicationServicesFactory = { scope, dispatcher ->
+                        createGraphFactory<DemoApplicationServices.Factory>().create(
                             scope,
+                            dispatcher,
                             enableSpeedLimit = false,
                         )
                     },

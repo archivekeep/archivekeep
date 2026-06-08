@@ -9,6 +9,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.flowOn
+import org.archivekeep.app.core.domain.CoreApplicationServiceScope
 import org.archivekeep.app.core.domain.storages.StorageService
 import org.archivekeep.utils.combineToList
 import org.archivekeep.utils.loading.flatMapLatestLoadedData
@@ -16,7 +17,7 @@ import org.archivekeep.utils.loading.stateIn
 
 @Inject
 @SingleIn(AppScope::class)
-@ContributesBinding(AppScope::class)
+@ContributesBinding(CoreApplicationServiceScope::class)
 class DefaultArchiveService(
     scope: CoroutineScope,
     storageService: StorageService,

@@ -1,6 +1,7 @@
 package org.archivekeep.app.core.operations
 
 import aws.sdk.kotlin.runtime.auth.credentials.StaticCredentialsProvider
+import dev.zacsweers.metro.createGraphFactory
 import io.kotest.assertions.nondeterministic.eventually
 import io.kotest.matchers.collections.shouldContainExactly
 import io.kotest.matchers.maps.shouldContainExactly
@@ -17,12 +18,8 @@ import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.runTest
 import kotlinx.serialization.json.Json
 import org.archivekeep.app.core.createTestBucket
-import org.archivekeep.app.core.domain.repositories.DefaultRepositoryService
 import org.archivekeep.app.core.persistence.credentials.CredentialsInProtectedWalletDataStore
-import org.archivekeep.app.core.persistence.drivers.filesystem.FileSystemStorageDriver
-import org.archivekeep.app.core.persistence.drivers.grpc.GRPCStorageDriver
-import org.archivekeep.app.core.persistence.drivers.s3.S3StorageDriver
-import org.archivekeep.app.core.persistence.platform.demo.DemoEnvironment
+import org.archivekeep.app.core.persistence.platform.demo.DemoApplicationServices
 import org.archivekeep.app.core.persistence.registry.RegisteredRepository
 import org.archivekeep.app.core.utils.identifiers.RepositoryURI
 import org.archivekeep.files.api.repository.auth.BasicAuthCredentials
@@ -68,23 +65,17 @@ class AddRemoteRepositoryUseCaseImplTest {
         val dispatcher = StandardTestDispatcher(testScheduler)
         val scope = CoroutineScope(dispatcher)
 
-        val env = DemoEnvironment(scope, false, emptyList())
-
-        val drivers =
-            listOf(
-                FileSystemStorageDriver(scope, env.fileStores, env.credentialsStore),
-                GRPCStorageDriver(scope, env.credentialsStore),
-                S3StorageDriver(scope, env.credentialsStore, ioDispatcher = dispatcher),
-            ).associateBy { it.ID }
-        val repositoryService =
-            DefaultRepositoryService(
+        val env =
+            createGraphFactory<DemoApplicationServices.Factory>().create(
                 scope,
-                drivers,
-                env.credentialsStore,
-                env.registry,
-                env.repositoryIndexMemory,
-                env.repositoryMetadataMemory,
+                serviceWorkDispatcher = dispatcher,
+                physicalMediaData = emptyList(),
+                enableSpeedLimit = false,
+                storagesOverride = emptyList(),
             )
+
+        val drivers = env.storageDrivers
+        val repositoryService = env.repositoryService
 
         val useCase =
             AddRemoteRepositoryUseCaseImpl(
@@ -150,23 +141,17 @@ class AddRemoteRepositoryUseCaseImplTest {
         val dispatcher = StandardTestDispatcher(testScheduler)
         val scope = CoroutineScope(dispatcher)
 
-        val env = DemoEnvironment(scope, false, emptyList())
-
-        val drivers =
-            listOf(
-                FileSystemStorageDriver(scope, env.fileStores, env.credentialsStore),
-                GRPCStorageDriver(scope, env.credentialsStore),
-                S3StorageDriver(scope, env.credentialsStore, ioDispatcher = dispatcher),
-            ).associateBy { it.ID }
-        val repositoryService =
-            DefaultRepositoryService(
+        val env =
+            createGraphFactory<DemoApplicationServices.Factory>().create(
                 scope,
-                drivers,
-                env.credentialsStore,
-                env.registry,
-                env.repositoryIndexMemory,
-                env.repositoryMetadataMemory,
+                serviceWorkDispatcher = dispatcher,
+                physicalMediaData = emptyList(),
+                enableSpeedLimit = false,
+                storagesOverride = emptyList(),
             )
+
+        val drivers = env.storageDrivers
+        val repositoryService = env.repositoryService
 
         val useCase =
             AddRemoteRepositoryUseCaseImpl(
@@ -176,7 +161,7 @@ class AddRemoteRepositoryUseCaseImplTest {
                 drivers,
             )
 
-        env.walletDataStore.create("wallet-password")
+        env.passwordProtectedWalletDataStore.create("wallet-password")
 
         useCase.addS3(minio.s3URL, "test-bucket", minio.userName, minio.password, true)
 

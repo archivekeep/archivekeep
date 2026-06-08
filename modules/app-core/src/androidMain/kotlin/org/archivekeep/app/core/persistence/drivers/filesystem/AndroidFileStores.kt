@@ -3,6 +3,9 @@ package org.archivekeep.app.core.persistence.drivers.filesystem
 import android.content.Context
 import android.os.storage.StorageManager
 import android.os.storage.StorageVolume
+import dev.zacsweers.metro.AppScope
+import dev.zacsweers.metro.Inject
+import dev.zacsweers.metro.SingleIn
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -18,6 +21,8 @@ import org.archivekeep.utils.loading.mapLoadedData
 import java.util.Date
 import java.util.concurrent.Executor
 
+@Inject
+@SingleIn(AppScope::class)
 class AndroidFileStores(
     val context: Context,
     scope: CoroutineScope,

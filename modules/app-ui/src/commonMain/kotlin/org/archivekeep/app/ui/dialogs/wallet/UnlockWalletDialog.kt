@@ -72,7 +72,7 @@ class UnlockWalletDialog(
         scope: CoroutineScope,
         onClose: () -> Unit,
     ): VM {
-        val joseStorage = LocalApplicationServices.current.environment.walletDataStore as PasswordProtectedDataStore
+        val joseStorage = LocalApplicationServices.current.walletDataStore as PasswordProtectedDataStore
 
         return remember(scope, joseStorage, onClose) { VM(scope, joseStorage, onClose) }
     }

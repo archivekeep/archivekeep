@@ -72,7 +72,7 @@ class CreateWalletDialog : AbstractDialog<CreateWalletDialog.State, CreateWallet
     ): VM {
         val applicationServices = LocalApplicationServices.current
 
-        return remember { VM(scope, applicationServices.environment.walletDataStore as PasswordProtectedDataStore, onClose) }
+        return remember { VM(scope, applicationServices.walletDataStore as PasswordProtectedDataStore, onClose) }
     }
 
     @Composable

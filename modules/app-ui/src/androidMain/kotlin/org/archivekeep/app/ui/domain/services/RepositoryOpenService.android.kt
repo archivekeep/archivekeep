@@ -1,5 +1,5 @@
 package org.archivekeep.app.ui.domain.services
 
-import org.archivekeep.app.ui.domain.wiring.ApplicationServicesGraph
+import org.archivekeep.app.ui.domain.wiring.ApplicationServices
 
-actual fun createRepositoryOpenService(applicationServices: ApplicationServicesGraph): RepositoryOpenService = AndroidRepositoryOpenService()
+actual fun createRepositoryOpenService(applicationServices: ApplicationServices): RepositoryOpenService = AndroidRepositoryOpenService()
