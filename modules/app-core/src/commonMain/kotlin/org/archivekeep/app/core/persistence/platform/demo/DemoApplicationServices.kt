@@ -10,73 +10,34 @@ import dev.zacsweers.metro.SingleIn
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOf
-import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.update
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.serializer
-import org.archivekeep.app.core.api.repository.location.RepositoryLocationAccessor
-import org.archivekeep.app.core.api.repository.location.RepositoryLocationContentsState
 import org.archivekeep.app.core.domain.CoreApplicationServiceScope
 import org.archivekeep.app.core.domain.CoreApplicationServicesGraph
-import org.archivekeep.app.core.domain.repositories.RepositoryConnectionState
-import org.archivekeep.app.core.domain.repositories.RepositoryEncryptionType
-import org.archivekeep.app.core.domain.repositories.RepositoryInformation
-import org.archivekeep.app.core.domain.repositories.ResolvedRepositoryState
-import org.archivekeep.app.core.domain.storages.KnownStorage
-import org.archivekeep.app.core.domain.storages.RepositoryAccessState
-import org.archivekeep.app.core.domain.storages.Storage
-import org.archivekeep.app.core.domain.storages.StorageConnection
 import org.archivekeep.app.core.domain.storages.StorageDriver
-import org.archivekeep.app.core.domain.storages.StorageInformation
-import org.archivekeep.app.core.domain.storages.StorageNamedReference
-import org.archivekeep.app.core.domain.storages.StorageRepository
 import org.archivekeep.app.core.persistence.credentials.WalletPO
 import org.archivekeep.app.core.persistence.drivers.filesystem.FileStores
 import org.archivekeep.app.core.persistence.drivers.filesystem.MountedFileSystem
-import org.archivekeep.app.core.persistence.platform.demo.DemoApplicationServices.DemoOnlineStorage
-import org.archivekeep.app.core.persistence.platform.demo.DemoApplicationServices.DemoPhysicalMedium
-import org.archivekeep.app.core.persistence.registry.RegisteredRepository
-import org.archivekeep.app.core.persistence.registry.RegisteredStorage
 import org.archivekeep.app.core.persistence.registry.RegistryDataStore
 import org.archivekeep.app.core.persistence.repository.MemorizedRepositoryIndexRepository
 import org.archivekeep.app.core.persistence.repository.MemorizedRepositoryMetadataRepository
-import org.archivekeep.app.core.utils.generics.UniqueSharedFlowInstanceManager
 import org.archivekeep.app.core.utils.identifiers.RepositoryURI
-import org.archivekeep.app.core.utils.identifiers.StorageURI
-import org.archivekeep.files.api.repository.LocalRepo
-import org.archivekeep.files.api.repository.PLAIN_REPOSITORY_TYPE
-import org.archivekeep.files.api.repository.Repo
 import org.archivekeep.files.api.repository.RepoIndex
-import org.archivekeep.files.api.repository.RepositoryAssociationGroupId
 import org.archivekeep.files.api.repository.RepositoryMetadata
-import org.archivekeep.files.driver.fixtures.FixtureRepo
-import org.archivekeep.files.driver.fixtures.FixtureRepoBuilder
-import org.archivekeep.files.driver.inmemory.InMemoryLocalRepo
-import org.archivekeep.files.driver.inmemory.InMemoryRepo
-import org.archivekeep.files.driver.speedlimit.SpeedLimitedLocalRepoWrapper
-import org.archivekeep.files.driver.speedlimit.SpeedLimitedRepoWrapper
 import org.archivekeep.utils.datastore.passwordprotected.PasswordProtectedJoseStorageInFile
 import org.archivekeep.utils.datastore.passwordprotected.ProtectedDataStore
 import org.archivekeep.utils.loading.Loadable
 import org.archivekeep.utils.loading.mapLoadedData
 import org.archivekeep.utils.loading.mapToLoadable
 import org.archivekeep.utils.loading.optional.OptionalLoadable
-import org.archivekeep.utils.loading.optional.stateIn
 import org.archivekeep.utils.loading.stateIn
 import java.nio.file.Path
+import kotlin.io.path.createTempDirectory
 
 @DependencyGraph(AppScope::class, additionalScopes = [CoreApplicationServiceScope::class])
 interface DemoApplicationServices : CoreApplicationServicesGraph {
-    data class InMemoryStorage(
-        val registeredStorage: RegisteredStorage,
-        val repos: Flow<List<MockedRepository>>,
-    )
-
     @Provides
     @SingleIn(AppScope::class)
     fun fileStores(
@@ -112,7 +73,7 @@ interface DemoApplicationServices : CoreApplicationServicesGraph {
     @Provides
     @SingleIn(AppScope::class)
     @Named("demoTempDirectory")
-    fun demoTempDirectory(): Path = kotlin.io.path.createTempDirectory("archivekeep-demo-env")
+    fun demoTempDirectory(): Path = createTempDirectory("archivekeep-demo-env")
 
     @Provides
     @SingleIn(AppScope::class)
@@ -130,149 +91,8 @@ interface DemoApplicationServices : CoreApplicationServicesGraph {
     @Binds
     val PasswordProtectedJoseStorageInFile<WalletPO>.bind: ProtectedDataStore<WalletPO>
 
-    @Provides
-    @SingleIn(AppScope::class)
-    fun mediaMapped(physicalMediaData: List<DemoPhysicalMedium>): MutableStateFlow<Map<String, Pair<InMemoryStorage, List<MockedRepository>>>> =
-        MutableStateFlow(
-            physicalMediaData
-                .associate {
-                    val repositories = it.repositories.map { r -> r.inStorage(it.reference) }
-
-                    it.id to
-                        Pair(
-                            InMemoryStorage(
-                                registeredStorage =
-                                    RegisteredStorage(
-                                        uri = it.uri,
-                                        label = it.displayName,
-                                        isLocal = it.isLocal,
-                                    ),
-                                repos = MutableStateFlow(repositories),
-                            ),
-                            repositories,
-                        )
-                },
-        )
-
-    @Provides
-    @SingleIn(AppScope::class)
-    fun onlineMapped(onlineStoragesData: List<DemoOnlineStorage>): Map<String, List<MockedRepository>> =
-        onlineStoragesData
-            .associate {
-                val repositories = it.repositories.map { r -> r.inStorage(it.reference) }
-
-                it.id to repositories
-            }
-
-    @Provides
-    @SingleIn(AppScope::class)
-    fun registry(
-        scope: CoroutineScope,
-        mediaMapped: MutableStateFlow<Map<String, Pair<InMemoryStorage, List<MockedRepository>>>>,
-        onlineMapped: Map<String, List<MockedRepository>>,
-        onlineStoragesData: List<DemoOnlineStorage>,
-    ): RegistryDataStore =
-        object : RegistryDataStore {
-            override val registeredRepositories: MutableStateFlow<Set<RegisteredRepository>> =
-                MutableStateFlow(
-                    mediaMapped
-                        .value
-                        .flatMap { (_, e) ->
-                            e.second.map { repo ->
-                                val a =
-                                    RegisteredRepository(
-                                        uri = repo.uri,
-                                        label = repo.displayName,
-                                    )
-
-                                a
-                            }
-                        }.toSet() +
-                        onlineMapped
-                            .flatMap { (_, e) ->
-                                e.map { repo ->
-                                    val a =
-                                        RegisteredRepository(
-                                            uri = repo.uri,
-                                            label = repo.displayName,
-                                        )
-
-                                    a
-                                }
-                            }.toSet(),
-                )
-
-            override val registeredStorages: SharedFlow<Loadable<Set<RegisteredStorage>>> =
-                mediaMapped
-                    .map {
-                        it
-                            .map { (_, pair) ->
-                                val (storage, _) = pair
-
-                                storage.registeredStorage
-                            }.toSet() +
-                            onlineStoragesData
-                                .map {
-                                    RegisteredStorage(
-                                        uri = it.uri,
-                                        label = it.displayName,
-                                        isLocal = false,
-                                    )
-                                }.toSet()
-                    }.mapToLoadable()
-                    .stateIn(scope)
-
-            override suspend fun updateRepositories(fn: (old: Set<RegisteredRepository>) -> Set<RegisteredRepository>) {
-                registeredRepositories.update(fn)
-            }
-
-            override suspend fun updateStorage(
-                uri: StorageURI,
-                transform: (storage: RegisteredStorage) -> RegisteredStorage,
-            ) {
-                mediaMapped.update { old ->
-                    old
-                        .mapValues { (_, value) ->
-                            if (value.first.registeredStorage.uri == uri) {
-                                value.copy(
-                                    first =
-                                        value.first.copy(
-                                            registeredStorage = transform(value.first.registeredStorage),
-                                        ),
-                                )
-                            } else {
-                                value
-                            }
-                        }
-                }
-            }
-        }
-
-    val repo: (uri: RepositoryURI) -> MockedRepository?
-
-    @Provides
-    @SingleIn(AppScope::class)
-    fun provideRepoGetter(
-        mediaMapped: MutableStateFlow<Map<String, Pair<InMemoryStorage, List<MockedRepository>>>>,
-        onlineMapped: Map<String, List<MockedRepository>>,
-    ): (uri: RepositoryURI) -> MockedRepository? =
-        { uri: RepositoryURI ->
-            (
-                mediaMapped
-                    .value
-                    .flatMap { it.value.second }
-                    .firstOrNull {
-                        it.uri == uri
-                    }
-            )
-                ?: (
-                    onlineMapped
-                        .flatMap { it.value }
-                        .firstOrNull {
-                            it.uri == uri
-                        }
-                )
-        }
+    @Binds
+    val DemoInMemoryRepositories.bind: RegistryDataStore
 
     @Provides
     @SingleIn(AppScope::class)
@@ -306,226 +126,11 @@ interface DemoApplicationServices : CoreApplicationServicesGraph {
         }
 
     @Provides
-    @SingleIn(AppScope::class)
-    fun liveStatusFlowManager(
-        scope: CoroutineScope,
-        physicalMediaData: List<DemoPhysicalMedium>,
-    ): UniqueSharedFlowInstanceManager<StorageURI, Loadable.Loaded<Storage.ConnectionStatus>> =
-        UniqueSharedFlowInstanceManager(
-            scope,
-            factory = { key: StorageURI ->
-                val realStatus =
-                    physicalMediaData
-                        .firstOrNull {
-                            it.id == key.data
-                        }?.connectionStatus
-
-                if (realStatus == null) {
-                    println("Repository with id `$key` not found")
-                }
-
-                flowOf(
-                    Loadable.Loaded(realStatus ?: Storage.ConnectionStatus.DISCONNECTED),
-                )
-            },
-        )
-
-    @Provides
     @ElementsIntoSet
     fun storageDrivers(
-        scope: CoroutineScope,
-        @Named("enableSpeedLimit") enableSpeedLimit: Boolean,
-        physicalMediaData: List<DemoPhysicalMedium>,
-        onlineStoragesData: List<DemoOnlineStorage>,
-        liveStatusFlowManager: UniqueSharedFlowInstanceManager<StorageURI, Loadable.Loaded<Storage.ConnectionStatus>>,
-        repo: (uri: RepositoryURI) -> MockedRepository?,
+        demoInMemoryRepositories: DemoInMemoryRepositories,
         @Named("storagesOverride") storagesOverride: List<StorageDriver>?,
-    ): List<StorageDriver> =
-        storagesOverride ?: listOf(
-            object : StorageDriver(DemoRepositoryURIData.ID) {
-                override fun getStorageAccessor(storageURI: StorageURI): StorageConnection =
-                    StorageConnection(
-                        storageURI,
-                        run {
-                            val physicalStorage =
-                                physicalMediaData.firstOrNull {
-                                    it.id == storageURI.data
-                                }
-                            if (physicalStorage != null) {
-                                return@run StorageInformation.Partition(
-                                    flowOf(
-                                        OptionalLoadable.LoadedAvailable(
-                                            StorageInformation.Partition.Details(
-                                                physicalID = physicalStorage.physicalID,
-                                                // TODO - implement real
-                                                driveType = StorageInformation.Partition.DriveType.Other,
-                                            ),
-                                        ),
-                                    ),
-                                )
-                            }
-
-                            val onlineStorage =
-                                onlineStoragesData.firstOrNull {
-                                    it.id == storageURI.data
-                                }
-                            if (onlineStorage != null) {
-                                return@run StorageInformation.OnlineStorage
-                            }
-
-                            return@run StorageInformation.Error(RuntimeException("Storage with $storageURI not found"))
-                        },
-                        liveStatusFlowManager[storageURI],
-                    )
-
-                override fun openLocation(uri: RepositoryURI): RepositoryLocationAccessor =
-                    object : RepositoryLocationAccessor {
-                        override val contentsStateFlow: Flow<OptionalLoadable<RepositoryLocationContentsState>> =
-                            flow {
-                                val repo =
-                                    repo(uri)?.repo?.let { base ->
-                                        if (enableSpeedLimit) {
-                                            when (base) {
-                                                is LocalRepo -> SpeedLimitedLocalRepoWrapper(base)
-                                                else -> SpeedLimitedRepoWrapper(base)
-                                            }
-                                        } else {
-                                            base
-                                        }
-                                    }
-
-                                if (repo == null) {
-                                    emit(OptionalLoadable.Failed(RuntimeException("Not repo")))
-                                } else {
-                                    emit(
-                                        (
-                                            OptionalLoadable.LoadedAvailable(
-                                                object : RepositoryLocationContentsState.IsRepositoryLocation {
-                                                    override val repoStateFlow: Flow<RepositoryAccessState> = flowOf(OptionalLoadable.LoadedAvailable(repo))
-                                                },
-                                            )
-                                        ),
-                                    )
-                                }
-                            }.stateIn(scope)
-                    }
-            },
-        )
-
-    data class DemoPhysicalMedium(
-        // this will probably differ in Linux and Windows
-        // udevadm info --query=all /dev/nvme0n1 | grep ID_SERIAL=
-        val physicalID: String,
-        val driveType: StorageInformation.Partition.DriveType,
-        val displayName: String,
-        val isLocal: Boolean,
-        val connectionStatus: Storage.ConnectionStatus,
-        val id: String = displayName.toSlug(),
-        val repositories: List<DemoRepository>,
-    ) {
-        val uri: StorageURI
-            get() = StorageURI(DemoRepositoryURIData.ID, id)
-
-        val reference = StorageNamedReference(uri, displayName)
-    }
-
-    data class DemoOnlineStorage(
-        val displayName: String,
-        val connectionStatus: Storage.ConnectionStatus,
-        val id: String = displayName.toSlug(),
-        val repositories: List<DemoRepository>,
-    ) {
-        val uri: StorageURI
-            get() = StorageURI(DemoRepositoryURIData.ID, id)
-
-        val reference = StorageNamedReference(uri, displayName)
-    }
-
-    data class DemoRepository(
-        val displayName: String,
-        val id: String = "a-${displayName.toSlug()}",
-        val correlationId: RepositoryAssociationGroupId? = "a-${displayName.toSlug()}",
-        val physicalLocation: String = "unknown",
-        // TODO: factory maybe?
-        val contentsFixture: FixtureRepo = FixtureRepo(emptyMap()),
-        val repoFactory: (fixture: FixtureRepo, metadata: RepositoryMetadata) -> Repo = { fixture, metadata ->
-            InMemoryRepo(
-                fixture.contents.mapValues { (_, v) -> v.toByteArray() },
-                metadata = metadata,
-            )
-        },
-    ) {
-        fun inStorage(
-            storage: StorageNamedReference,
-            encryptionType: RepositoryEncryptionType = RepositoryEncryptionType.NONE,
-        ): MockedRepository =
-            MockedRepository(
-                storageID = storage.uri.data,
-                name = id,
-                storage = storage,
-                associationId = correlationId,
-                displayName = displayName,
-                encryptionType = encryptionType,
-                physicalLocation = physicalLocation,
-                repo =
-                    repoFactory(
-                        contentsFixture,
-                        RepositoryMetadata(
-                            repositoryType = PLAIN_REPOSITORY_TYPE,
-                            associationGroupId = correlationId,
-                        ),
-                    ),
-            )
-
-        fun localInMemoryFactory(): DemoRepository =
-            this.copy(
-                repoFactory = { fixture, metadata ->
-                    InMemoryLocalRepo(
-                        initialContents = fixture.contents.mapValues { (_, v) -> v.toByteArray() },
-                        initialUnindexedContents = fixture.uncommittedContents.mapValues { (_, v) -> v.toByteArray() },
-                        initialMissingContents = fixture.missingContents.mapValues { (_, v) -> v.toByteArray() },
-                        metadata = metadata,
-                    )
-                },
-            )
-
-        fun withContents(modifications: FixtureRepoBuilder.() -> Unit): DemoRepository =
-            this.copy(
-                contentsFixture = contentsFixture.derive(modifications),
-            )
-
-        fun withNewContents(modifications: FixtureRepoBuilder.() -> Unit): DemoRepository =
-            this.copy(
-                contentsFixture = FixtureRepoBuilder().also(modifications).build(),
-            )
-    }
-
-    data class MockedRepository(
-        val storageID: String,
-        val name: String,
-        val storage: StorageNamedReference,
-        val associationId: RepositoryAssociationGroupId?,
-        val displayName: String,
-        val encryptionType: RepositoryEncryptionType,
-        val physicalLocation: String,
-        val repo: Repo,
-    ) {
-        val uri: RepositoryURI = DemoRepositoryURIData(storageID, name).toURI()
-
-        val storageRepository: StorageRepository =
-            StorageRepository(
-                storage,
-                uri,
-                ResolvedRepositoryState(
-                    uri,
-                    RepositoryInformation(
-                        associationId,
-                        displayName,
-                    ),
-                    RepositoryConnectionState.Connected,
-                ),
-            )
-    }
+    ): List<StorageDriver> = storagesOverride ?: listOf(demoInMemoryRepositories)
 
     @DependencyGraph.Factory
     abstract class Factory {
@@ -558,26 +163,3 @@ fun String.toSlug() =
         .replace("[^a-z\\d\\s]".toRegex(), "-")
         .replace("-+".toRegex(), "-")
         .trim('-')
-
-fun DemoApplicationServices.DemoPhysicalMedium.asKnownStorage(): KnownStorage =
-    KnownStorage(
-        this.uri,
-        null,
-        this.repositories.map {
-            it.inStorage(this.reference).asRegisteredRepository()
-        },
-    )
-
-fun DemoApplicationServices.DemoPhysicalMedium.asKnownRegisteredStorage(): KnownStorage =
-    KnownStorage(
-        this.uri,
-        RegisteredStorage(
-            this.uri,
-            this.displayName,
-        ),
-        this.repositories.map {
-            it.inStorage(this.reference).asRegisteredRepository()
-        },
-    )
-
-fun DemoApplicationServices.MockedRepository.asRegisteredRepository(): RegisteredRepository = RegisteredRepository(this.uri, this.displayName)

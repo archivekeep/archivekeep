@@ -11,8 +11,6 @@ import kotlinx.coroutines.runBlocking
 import org.archivekeep.app.core.persistence.platform.demo.DemoApplicationServices
 import org.archivekeep.app.core.persistence.platform.demo.LaptopSSD
 import org.archivekeep.app.core.persistence.platform.demo.Photos
-import org.archivekeep.app.core.persistence.platform.demo.PhotosInHDDB
-import org.archivekeep.app.core.persistence.platform.demo.PhotosInLaptopSSD
 import org.archivekeep.app.core.persistence.platform.demo.hddB
 import org.archivekeep.app.core.persistence.platform.photosAdjustmentA
 import org.archivekeep.app.core.persistence.platform.photosAdjustmentB
@@ -57,8 +55,8 @@ class UploadToRepoDialogScreenshotTest {
                     applicationMetadata = PropertiesApplicationMetadata(),
                 ) {
                     UploadToRepoDialog(
-                        PhotosInHDDB.uri,
-                        PhotosInLaptopSSD.uri,
+                        Photos.uriInStorage(hddB.reference),
+                        Photos.uriInStorage(LaptopSSD.reference),
                     ).render(onClose = {})
                 }
             }

@@ -2,8 +2,8 @@ package org.archivekeep.app.core.persistence.platform.demo
 
 data class Preset(
     val title: String,
-    val physicalMediaData: List<DemoApplicationServices.DemoPhysicalMedium>,
-    val onlineStoragesData: List<DemoApplicationServices.DemoOnlineStorage>,
+    val physicalMediaData: List<DemoPhysicalMedium>,
+    val onlineStoragesData: List<DemoOnlineStorage>,
 )
 
 val fullComplexPreset =

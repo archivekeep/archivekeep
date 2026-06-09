@@ -11,7 +11,6 @@ import kotlinx.coroutines.runBlocking
 import org.archivekeep.app.core.persistence.platform.demo.BackBlaze
 import org.archivekeep.app.core.persistence.platform.demo.DemoApplicationServices
 import org.archivekeep.app.core.persistence.platform.demo.Documents
-import org.archivekeep.app.core.persistence.platform.demo.DocumentsInLaptopSSD
 import org.archivekeep.app.core.persistence.platform.demo.LaptopSSD
 import org.archivekeep.app.core.persistence.platform.demo.hddB
 import org.archivekeep.app.core.persistence.platform.demo.ssdKeyChain
@@ -69,7 +68,7 @@ class AddAndPushRepoDialogScreenshotTest {
                     applicationMetadata = PropertiesApplicationMetadata(),
                 ) {
                     AddAndPushRepoDialog(
-                        DocumentsInLaptopSSD.uri,
+                        Documents.uriInStorage(LaptopSSD.reference),
                     ).render(onClose = {})
                 }
             }

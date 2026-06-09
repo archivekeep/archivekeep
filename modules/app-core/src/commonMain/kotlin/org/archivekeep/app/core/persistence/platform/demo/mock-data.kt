@@ -3,13 +3,12 @@ package org.archivekeep.app.core.persistence.platform.demo
 import org.archivekeep.app.core.domain.storages.Storage
 import org.archivekeep.app.core.domain.storages.StorageInformation.Partition.DriveType
 
-val Documents = DemoApplicationServices.DemoRepository("Documents").withContents(documentsContents)
-val Photos = DemoApplicationServices.DemoRepository("Photos").withContents(photosBaseContents)
-val Music = DemoApplicationServices.DemoRepository("Music").withContents(musicBaseContents)
-val Private = DemoApplicationServices.DemoRepository("Private").withContents(privateBaseContents)
-val Books = DemoApplicationServices.DemoRepository("E-Books").withContents(booksBaseContents)
-val Productions =
-    DemoApplicationServices.DemoRepository("Productions").withContents(productionsBaseContents)
+val Documents = DemoRepository("Documents").withContents(documentsContents)
+val Photos = DemoRepository("Photos").withContents(photosBaseContents)
+val Music = DemoRepository("Music").withContents(musicBaseContents)
+val Private = DemoRepository("Private").withContents(privateBaseContents)
+val Books = DemoRepository("E-Books").withContents(booksBaseContents)
+val Productions = DemoRepository("Productions").withContents(productionsBaseContents)
 
 val allArchives =
     listOf(
@@ -22,7 +21,7 @@ val allArchives =
     )
 
 val LaptopSSD =
-    DemoApplicationServices.DemoPhysicalMedium(
+    DemoPhysicalMedium(
         physicalID = "TODO",
         driveType = DriveType.SSD,
         displayName = "Laptop / SSD",
@@ -38,7 +37,7 @@ val LaptopSSD =
     )
 
 val hddB =
-    DemoApplicationServices.DemoPhysicalMedium(
+    DemoPhysicalMedium(
         physicalID = "TODO",
         driveType = DriveType.HDD,
         displayName = "HDD B",
@@ -61,7 +60,7 @@ val hddB =
     )
 
 val LaptopHDD =
-    DemoApplicationServices.DemoPhysicalMedium(
+    DemoPhysicalMedium(
         physicalID = "TODO",
         driveType = DriveType.HDD,
         displayName = "Laptop / HDD",
@@ -78,7 +77,7 @@ val LaptopHDD =
             ),
     )
 val hddC =
-    DemoApplicationServices.DemoPhysicalMedium(
+    DemoPhysicalMedium(
         physicalID = "TODO",
         driveType = DriveType.HDD,
         displayName = "HDD C",
@@ -99,7 +98,7 @@ val hddC =
             ),
     )
 val hddA =
-    DemoApplicationServices.DemoPhysicalMedium(
+    DemoPhysicalMedium(
         physicalID = "TODO",
         driveType = DriveType.HDD,
         displayName = "HDD A",
@@ -119,7 +118,7 @@ val hddA =
     )
 
 val ssdKeyChain =
-    DemoApplicationServices.DemoPhysicalMedium(
+    DemoPhysicalMedium(
         physicalID = "TODO",
         driveType = DriveType.HDD,
         displayName = "KeyChain SSD",
@@ -139,7 +138,7 @@ val ssdKeyChain =
     )
 
 val phone =
-    DemoApplicationServices.DemoPhysicalMedium(
+    DemoPhysicalMedium(
         physicalID = "TODO",
         driveType = DriveType.Other,
         displayName = "Phone",
@@ -157,7 +156,7 @@ val phone =
     )
 
 val usbStickAll =
-    DemoApplicationServices.DemoPhysicalMedium(
+    DemoPhysicalMedium(
         physicalID = "TODO",
         driveType = DriveType.HDD,
         displayName = "USB Stick - All",
@@ -172,7 +171,7 @@ val usbStickAll =
     )
 
 val usbStickAllUnassociated =
-    DemoApplicationServices.DemoPhysicalMedium(
+    DemoPhysicalMedium(
         physicalID = "TODO",
         driveType = DriveType.HDD,
         displayName = "USB Stick - All (unassociated)",
@@ -193,7 +192,7 @@ val usbStickAllUnassociated =
     )
 
 val usbStickDocuments =
-    DemoApplicationServices.DemoPhysicalMedium(
+    DemoPhysicalMedium(
         physicalID = "TODO",
         driveType = DriveType.HDD,
         displayName = "USB Stick - Documents",
@@ -206,7 +205,7 @@ val usbStickDocuments =
     )
 
 val usbStickMusic =
-    DemoApplicationServices.DemoPhysicalMedium(
+    DemoPhysicalMedium(
         physicalID = "TODO",
         driveType = DriveType.HDD,
         displayName = "USB Stick - Music",
@@ -219,7 +218,7 @@ val usbStickMusic =
     )
 
 val eBook =
-    DemoApplicationServices.DemoPhysicalMedium(
+    DemoPhysicalMedium(
         physicalID = "TODO",
         driveType = DriveType.Other,
         displayName = "EBook",
@@ -233,14 +232,14 @@ val eBook =
     )
 
 val BackBlaze =
-    DemoApplicationServices.DemoOnlineStorage(
+    DemoOnlineStorage(
         displayName = "Backblaze S3",
         connectionStatus = Storage.ConnectionStatus.CONNECTED,
         repositories = allArchives,
     )
 
 val NAS =
-    DemoApplicationServices.DemoOnlineStorage(
+    DemoOnlineStorage(
         displayName = "NAS",
         connectionStatus = Storage.ConnectionStatus.CONNECTED,
         repositories = allArchives,

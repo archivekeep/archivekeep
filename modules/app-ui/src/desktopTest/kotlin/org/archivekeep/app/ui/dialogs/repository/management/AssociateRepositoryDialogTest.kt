@@ -18,6 +18,7 @@ import org.archivekeep.app.desktop.ui.dialogs.testing.setContentInDialogScreensh
 import org.archivekeep.app.desktop.ui.testing.screenshots.runHighDensityComposeUiTest
 import org.archivekeep.app.ui.domain.wiring.ApplicationProvidersFromCore
 import org.archivekeep.app.ui.utils.PropertiesApplicationMetadata
+import org.archivekeep.utils.loading.optional.OptionalLoadable
 import org.junit.Test
 import kotlin.test.assertEquals
 import kotlin.time.Duration.Companion.seconds
@@ -30,7 +31,7 @@ class AssociateRepositoryDialogTest {
             var closed = false
             var demoApplicationServices: DemoApplicationServices? = null
 
-            val subjectAtTestURI = Documents.inStorage(usbStickAllUnassociated.reference).uri
+            val subjectAtTestURI = Documents.uriInStorage(usbStickAllUnassociated.reference)
 
             setContentInDialogScreenshotContainer {
                 ApplicationProvidersFromCore(
@@ -79,10 +80,14 @@ class AssociateRepositoryDialogTest {
                     assertEquals(true, closed)
                     assertEquals(
                         "a-documents",
-                        demoApplicationServices!!
-                            .repo(subjectAtTestURI)!!
-                            .repo
-                            .getMetadata()
+                        (
+                            demoApplicationServices!!
+                                .repositoryService
+                                .getRepository(subjectAtTestURI)
+                                .metadataFlowWithCaching
+                                .value
+                                as OptionalLoadable.LoadedAvailable
+                        ).value
                             .associationGroupId,
                     )
                 }
