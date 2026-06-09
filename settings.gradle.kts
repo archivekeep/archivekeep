@@ -21,6 +21,7 @@ include(
     ":app-android",
     ":app-core",
     ":app-desktop",
+    ":app-desktop-demo",
     ":app-ui",
 )
 
@@ -34,4 +35,5 @@ project(":cli").projectDir = file("modules/cli")
 project(":app-android").projectDir = file("modules/app-android")
 project(":app-core").projectDir = file("modules/app-core")
 project(":app-desktop").projectDir = file("modules/app-desktop")
+project(":app-desktop-demo").projectDir = file("modules/app-desktop-demo")
 project(":app-ui").projectDir = file("modules/app-ui")

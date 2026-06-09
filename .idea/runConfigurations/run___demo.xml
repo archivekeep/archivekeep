@@ -10,8 +10,7 @@
       </option>
       <option name="taskNames">
         <list>
-          <option value=":app-desktop:run" />
-          <option value="--args=&quot;--demo&quot;" />
+          <option value=":app-desktop-demo:run" />
         </list>
       </option>
       <option name="vmOptions" />

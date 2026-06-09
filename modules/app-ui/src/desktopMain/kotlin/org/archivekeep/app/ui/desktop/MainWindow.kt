@@ -1,4 +1,4 @@
-package org.archivekeep.app.desktop
+package org.archivekeep.app.ui.desktop
 
 import androidx.compose.material3.windowsizeclass.ExperimentalMaterial3WindowSizeClassApi
 import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
@@ -51,7 +51,7 @@ fun (ApplicationScope).MainWindow() {
             val windowSizeClass = calculateWindowSizeClass()
 
             AppTheme(
-                small = windowSizeClass.widthSizeClass < WindowWidthSizeClass.Expanded,
+                small = windowSizeClass.widthSizeClass < WindowWidthSizeClass.Companion.Expanded,
             ) {
                 MainWindowContent(
                     isFloating = windowState.placement == WindowPlacement.Floating,
