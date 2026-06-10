@@ -91,7 +91,10 @@ interface LocalRepo : Repo {
 
     suspend fun computeFileChecksum(path: Path): String
 
-    suspend fun add(path: String)
+    suspend fun add(
+        path: String,
+        reindex: Boolean = false,
+    )
 
     suspend fun remove(path: String)
 

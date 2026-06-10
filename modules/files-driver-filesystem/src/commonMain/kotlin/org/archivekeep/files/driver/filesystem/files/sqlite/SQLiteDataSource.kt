@@ -17,17 +17,23 @@ class SQLiteDataSource(
         lastModified: Date,
         checksumSha256: String,
         dropIncomingFile: Boolean = false,
+        reindex: Boolean = false,
     ) {
         database.useWriterConnection { transactor ->
             transactor.immediateTransaction {
-                database.fileDAO().addFile(
+                val newFileEntity =
                     FileEntity(
                         path = path,
                         size = size,
                         lastModified = lastModified,
                         checksumSha256 = checksumSha256,
-                    ),
-                )
+                    )
+
+                if (!reindex) {
+                    database.fileDAO().addFile(newFileEntity)
+                } else {
+                    database.fileDAO().updateFile(newFileEntity)
+                }
 
                 if (dropIncomingFile) {
                     database.incomingFileDAO().removeIncomingFile(path)

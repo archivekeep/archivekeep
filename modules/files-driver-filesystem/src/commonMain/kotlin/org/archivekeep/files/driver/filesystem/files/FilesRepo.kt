@@ -163,7 +163,10 @@ class FilesRepo(
         return computeChecksum(fullPath)
     }
 
-    override suspend fun add(path: String) {
+    override suspend fun add(
+        path: String,
+        reindex: Boolean,
+    ) {
         val fullPath = root.resolve(safeSubPath(path))
         val checksum = computeChecksum(fullPath)
 
@@ -380,6 +383,7 @@ class FilesRepo(
                                 StatusOperation.Result(
                                     newFiles = allFiles.filter { !indexFiles.contains(it) },
                                     indexedFiles = allFiles.filter { indexFiles.contains(it) },
+                                    modifiedIndexedFiles = emptyList(),
                                 )
                             }
                     }

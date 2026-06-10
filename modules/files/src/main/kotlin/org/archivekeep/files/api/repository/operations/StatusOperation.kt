@@ -36,12 +36,14 @@ class StatusOperation(
         return Result(
             newFiles = newFiles,
             indexedFiles = indexedFiles,
+            modifiedIndexedFiles = emptyList(),
         )
     }
 
     data class Result(
         val newFiles: List<String>,
         val indexedFiles: List<String>,
+        val modifiedIndexedFiles: List<String>,
     ) {
         val hasChanges: Boolean
             get() = newFiles.isNotEmpty()

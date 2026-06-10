@@ -47,7 +47,10 @@ open class InMemoryLocalRepo(
                 ?: throw FileDoesntExist(path.toString())
         ).sha256()
 
-    override suspend fun add(path: String) {
+    override suspend fun add(
+        path: String,
+        reindex: Boolean,
+    ) {
         val c = this.unindexedFiles.value[path] ?: throw FileDoesntExist(path)
 
         contentsFlow.update {

@@ -168,13 +168,16 @@ class FilesSqliteRepo(
         return computeChecksum(fullPath)
     }
 
-    override suspend fun add(path: String) {
+    override suspend fun add(
+        path: String,
+        reindex: Boolean,
+    ) {
         val fullPath = root.resolve(safeSubPath(path))
         val size = fullPath.fileSize()
         val lastModified = Date(fullPath.getLastModifiedTime().toMillis())
         val checksum = computeChecksum(fullPath)
 
-        sqliteDataSource.storeFile(path, size, lastModified, checksum)
+        sqliteDataSource.storeFile(path, size, lastModified, checksum, reindex = reindex)
     }
 
     override suspend fun delete(filename: String) {
@@ -388,9 +391,11 @@ class FilesSqliteRepo(
 
     @OptIn(ExperimentalCoroutinesApi::class)
     override val localIndex: Flow<Loadable<StatusOperation.Result>> =
-        indexFlow
+        sqliteDataSource
+            .files
+            .mapToLoadable()
             .flatMapLoadableFlow { index ->
-                val indexFiles = index.files.map { it.path }.toSet()
+                val indexFiles = index.map { it.path }.toSet()
 
                 inProgressHandler
                     .jobActiveOnIdleDelayedStart
@@ -411,6 +416,13 @@ class FilesSqliteRepo(
                                 StatusOperation.Result(
                                     newFiles = allFiles.filter { !indexFiles.contains(it) },
                                     indexedFiles = allFiles.filter { indexFiles.contains(it) },
+                                    modifiedIndexedFiles =
+                                        index
+                                            .filter {
+                                                val path = root.resolve(it.path)
+
+                                                path.exists() && path.getLastModifiedTime().toMillis() != it.lastModified.toInstant().toEpochMilli()
+                                            }.map { it.path },
                                 )
                             }
                     }

@@ -32,6 +32,11 @@ abstract class WorkingRepoContractTest<T : LocalRepo> {
             filename: String,
             bytes: ByteArray,
         )
+
+        fun overwriteFile(
+            filename: String,
+            bytes: ByteArray,
+        )
     }
 
     abstract fun createNew(): TestRepo<T>
@@ -75,6 +80,7 @@ abstract class WorkingRepoContractTest<T : LocalRepo> {
                                     "A/02.txt",
                                     "B/03.txt",
                                 ),
+                            modifiedIndexedFiles = emptyList(),
                         ),
                         it,
                     )
@@ -106,6 +112,7 @@ abstract class WorkingRepoContractTest<T : LocalRepo> {
                                     "B/03.txt",
                                     "BIG_FILE.txt",
                                 ),
+                            modifiedIndexedFiles = emptyList(),
                         ),
                         it,
                     )
@@ -154,6 +161,7 @@ abstract class WorkingRepoContractTest<T : LocalRepo> {
                                     "A/02.txt",
                                     "B/03.txt",
                                 ),
+                            modifiedIndexedFiles = emptyList(),
                         ),
                         it,
                     )
@@ -179,6 +187,89 @@ abstract class WorkingRepoContractTest<T : LocalRepo> {
                                     "A/02.txt",
                                     "B/03.txt",
                                 ),
+                            modifiedIndexedFiles = emptyList(),
+                        ),
+                        it,
+                    )
+                }
+            }
+        }
+
+    @RepeatedTest(4)
+    open fun shouldDetectModificationOfIndexedFileAndSupportReAdd() =
+        runTest {
+            val testRepo = createNew()
+
+            val repoAccessor =
+                testRepo
+                    .open(this@runTest, getDispatcher())
+                    .withContentsFrom(testContents01)
+
+            val indexFlowState =
+                repoAccessor
+                    .localIndex
+                    .stateIn(backgroundScope, SharingStarted.Eagerly)
+
+            eventually(2.seconds) {
+                indexFlowState.value.assertLoaded {
+                    assertEquals(
+                        StatusOperation.Result(
+                            newFiles = emptyList(),
+                            indexedFiles =
+                                listOf(
+                                    "A/01.txt",
+                                    "A/02.txt",
+                                    "B/03.txt",
+                                ),
+                            modifiedIndexedFiles = emptyList(),
+                        ),
+                        it,
+                    )
+                }
+            }
+
+            testRepo.overwriteFile(
+                "A/02.txt",
+                (0..1000000).joinToString(separator = "") { "123456" }.toByteArray(),
+            )
+
+            eventually(2.seconds) {
+                indexFlowState.value.assertLoaded {
+                    assertEquals(
+                        StatusOperation.Result(
+                            newFiles = emptyList(),
+                            indexedFiles =
+                                listOf(
+                                    "A/01.txt",
+                                    "A/02.txt",
+                                    "B/03.txt",
+                                ),
+                            modifiedIndexedFiles =
+                                listOf(
+                                    "A/02.txt",
+                                ),
+                        ),
+                        it,
+                    )
+                }
+            }
+
+            repoAccessor.add("A/02.txt", reindex = true)
+
+            println("added")
+
+            eventually(2.seconds) {
+                indexFlowState.value.assertLoaded {
+                    assertEquals(
+                        StatusOperation.Result(
+                            newFiles = emptyList(),
+                            indexedFiles =
+                                listOf(
+                                    "A/01.txt",
+                                    "A/02.txt",
+                                    "B/03.txt",
+                                ),
+                            modifiedIndexedFiles = emptyList(),
                         ),
                         it,
                     )

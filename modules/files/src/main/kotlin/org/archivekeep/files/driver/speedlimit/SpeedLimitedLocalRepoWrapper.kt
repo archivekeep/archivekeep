@@ -87,10 +87,12 @@ class SpeedLimitedLocalRepoWrapper(
             base.computeFileChecksum(path)
         }
 
-    override suspend fun add(path: String) =
-        delayed(1000) {
-            base.add(path)
-        }
+    override suspend fun add(
+        path: String,
+        reindex: Boolean,
+    ) = delayed(1000) {
+        base.add(path, reindex)
+    }
 
     override suspend fun remove(path: String) =
         delayed(100) {
