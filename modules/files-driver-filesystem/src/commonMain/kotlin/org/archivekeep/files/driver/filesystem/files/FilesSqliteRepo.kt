@@ -280,6 +280,8 @@ class FilesSqliteRepo(
                         }
                     }
 
+                    // TODO: check for info.length matching total
+
                     output.force(true)
                     monitor(total)
                 }
@@ -421,7 +423,14 @@ class FilesSqliteRepo(
                                             .filter {
                                                 val path = root.resolve(it.path)
 
-                                                path.exists() && path.getLastModifiedTime().toMillis() != it.lastModified.toInstant().toEpochMilli()
+                                                if (!path.exists()) {
+                                                    return@filter false
+                                                }
+
+                                                val timestampChanged = path.getLastModifiedTime().toMillis() != it.lastModified.toInstant().toEpochMilli()
+                                                val sizeChanged = path.fileSize() != it.size
+
+                                                timestampChanged || sizeChanged
                                             }.map { it.path },
                                 )
                             }
@@ -464,7 +473,10 @@ class FilesSqliteRepo(
             return null
         }
 
-        suspend fun create(path: Path): FilesSqliteRepo {
+        suspend fun create(
+            path: Path,
+            parentJob: Job? = null,
+        ): FilesSqliteRepo {
             val archiveDir = path.resolve(".archive")
             val dbPath = archiveDir.resolve(dbName)
 
@@ -475,7 +487,7 @@ class FilesSqliteRepo(
             archiveDir.createDirectory()
             dbPath.writeText("")
 
-            return FilesSqliteRepo(path).apply {
+            return FilesSqliteRepo(path, parentJob).apply {
                 updateMetadata { it.copy(repositoryType = PLAIN_REPOSITORY_TYPE) }
             }
         }

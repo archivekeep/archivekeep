@@ -70,6 +70,7 @@ fun SecondaryArchiveRepositoryRow(
             InArchiveRepositoryDropdownIconLaunched(
                 repository = repository,
                 canAdd = nonPrimaryRepository.canAdd,
+                canReindex = nonPrimaryRepository.canReindex,
                 isAssociated = storageRepo.otherRepositoryState.associationId != null,
             )
         },

@@ -36,6 +36,7 @@ abstract class WorkingRepoContractTest<T : LocalRepo> {
         fun overwriteFile(
             filename: String,
             bytes: ByteArray,
+            preserveTimestamp: Boolean = false,
         )
     }
 
@@ -91,11 +92,11 @@ abstract class WorkingRepoContractTest<T : LocalRepo> {
                 "BIG_FILE.txt",
                 ArchiveFileInfo(
                     (20 * (1024 * 128) * "12345678".length).toLong(),
-                    "6da17e0f6175d7754a7a9c8f3b531f6f503b4fa4c8271588a787c0de50e9b6b9",
+                    "5f148ac95d8f76f453d151c9d6608a5922f12a4b9fe041e809342d4c4b9e4aeb",
                 ),
                 flow {
-                    for (i in 0..20) {
-                        emit((0..(1024 * 128)).joinToString("") { "12345678" }.toByteArray())
+                    for (i in 0..<20) {
+                        emit((0..<(1024 * 128)).joinToString("") { "12345678" }.toByteArray())
                     }
                 }.flowToInputStream(backgroundScope),
             )
@@ -196,7 +197,86 @@ abstract class WorkingRepoContractTest<T : LocalRepo> {
         }
 
     @RepeatedTest(4)
-    open fun shouldDetectModificationOfIndexedFileAndSupportReAdd() =
+    open fun shouldDetectTimestampModificationOfIndexedFileAndSupportReAdd() =
+        runTest {
+            val testRepo = createNew()
+
+            val repoAccessor =
+                testRepo
+                    .open(this@runTest, getDispatcher())
+                    .withContentsFrom(testContents01)
+
+            val indexFlowState =
+                repoAccessor
+                    .localIndex
+                    .stateIn(backgroundScope, SharingStarted.Eagerly)
+
+            eventually(2.seconds) {
+                indexFlowState.value.assertLoaded {
+                    assertEquals(
+                        StatusOperation.Result(
+                            newFiles = emptyList(),
+                            indexedFiles =
+                                listOf(
+                                    "A/01.txt",
+                                    "A/02.txt",
+                                    "B/03.txt",
+                                ),
+                            modifiedIndexedFiles = emptyList(),
+                        ),
+                        it,
+                    )
+                }
+            }
+
+            testRepo.overwriteFile("A/02.txt", "A/99.txt".toByteArray())
+
+            eventually(2.seconds) {
+                indexFlowState.value.assertLoaded {
+                    assertEquals(
+                        StatusOperation.Result(
+                            newFiles = emptyList(),
+                            indexedFiles =
+                                listOf(
+                                    "A/01.txt",
+                                    "A/02.txt",
+                                    "B/03.txt",
+                                ),
+                            modifiedIndexedFiles =
+                                listOf(
+                                    "A/02.txt",
+                                ),
+                        ),
+                        it,
+                    )
+                }
+            }
+
+            repoAccessor.add("A/02.txt", reindex = true)
+
+            println("added")
+
+            eventually(2.seconds) {
+                indexFlowState.value.assertLoaded {
+                    assertEquals(
+                        StatusOperation.Result(
+                            newFiles = emptyList(),
+                            indexedFiles =
+                                listOf(
+                                    "A/01.txt",
+                                    "A/02.txt",
+                                    "B/03.txt",
+                                ),
+                            modifiedIndexedFiles = emptyList(),
+                        ),
+                        it,
+                    )
+                }
+            }
+        }
+
+    @RepeatedTest(4)
+    open fun shouldDetectSizeModificationOfIndexedFileAndSupportReAdd() =
         runTest {
             val testRepo = createNew()
 
@@ -231,6 +311,7 @@ abstract class WorkingRepoContractTest<T : LocalRepo> {
             testRepo.overwriteFile(
                 "A/02.txt",
                 (0..1000000).joinToString(separator = "") { "123456" }.toByteArray(),
+                preserveTimestamp = true,
             )
 
             eventually(2.seconds) {

@@ -16,6 +16,7 @@ import org.archivekeep.app.core.persistence.repository.MemorizedRepositoryIndexR
 import org.archivekeep.app.core.persistence.repository.MemorizedRepositoryMetadataRepository
 import org.archivekeep.app.core.procedures.add.IndexUpdateProcedureSupervisorService
 import org.archivekeep.app.core.procedures.addpush.AddAndPushProcedureService
+import org.archivekeep.app.core.procedures.reindex.FileReindexProcedureSupervisorService
 import org.archivekeep.app.core.procedures.sync.RepoToRepoSyncService
 import org.archivekeep.utils.datastore.passwordprotected.ProtectedDataStore
 
@@ -43,6 +44,7 @@ interface CoreApplicationServices {
     val syncService: RepoToRepoSyncService
     val addPushService: AddAndPushProcedureService
     val addOperationSupervisorService: IndexUpdateProcedureSupervisorService
+    val fileReindexProcedureSupervisorService: FileReindexProcedureSupervisorService
 
     val knownStorageService: KnownStorageService
 }

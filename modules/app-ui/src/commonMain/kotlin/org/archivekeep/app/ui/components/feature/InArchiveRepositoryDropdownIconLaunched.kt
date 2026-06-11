@@ -25,6 +25,7 @@ fun InArchiveRepositoryDropdownIconLaunched(
     repository: Repository,
     isAssociated: Boolean,
     canAdd: Boolean = false,
+    canReindex: Boolean = false,
 ) {
     val repositoryURI = repository.uri
     val operationsLaunchers = LocalArchiveOperationLaunchers.current
@@ -70,8 +71,16 @@ fun InArchiveRepositoryDropdownIconLaunched(
                 })
             }
 
-            if (repository.optionalAccessorFlow
-                    .map { it.needsUnlock() }
+            if (canReindex) {
+                DropdownMenuItem(onClick = {
+                    operationsLaunchers.openReindexOperation(repositoryURI)
+                    closeDropdown()
+                }, text = {
+                    Text("Reindex changed files")
+                })
+            }
+
+            if (remember { repository.optionalAccessorFlow.map { it.needsUnlock() } }
                     .collectAsState(false)
                     .value
             ) {

@@ -42,6 +42,7 @@ class HomeArchiveEntryViewModel(
     data class VMState(
         val canUnlock: Loadable<Boolean>,
         val canAdd: Loadable<Boolean>,
+        val canReindex: Loadable<Boolean>,
         val canPush: Loadable<Boolean>,
         val anySecondaryAvailable: Boolean,
         val loading: Boolean,
@@ -72,6 +73,7 @@ class HomeArchiveEntryViewModel(
             VMState(
                 canUnlock = accessor.mapLoadedData { false }.mapToLoadable(true),
                 canAdd = indexStatus.mapLoadedData { it.hasChanges }.mapToLoadable(false),
+                canReindex = indexStatus.mapLoadedData { it.modifiedIndexedFiles.isNotEmpty() }.mapToLoadable(false),
                 canPush =
                     if (nonLocalRepositories.any { it.second.canPushLoadable.mapIfLoadedOrNull { it } ?: false }) {
                         Loadable.Loaded(true)
@@ -99,6 +101,7 @@ class HomeArchiveEntryViewModel(
             VMState(
                 canUnlock = Loadable.Loading,
                 canAdd = Loadable.Loading,
+                canReindex = Loadable.Loading,
                 canPush = Loadable.Loading,
                 anySecondaryAvailable = false,
                 loading = true,
@@ -205,6 +208,17 @@ fun HomeArchiveEntryViewModel.VMState.actions(
                 },
                 isAvailable = it,
                 text = "Add",
+            )
+        },
+        this.canReindex.mapLoadedData {
+            Action(
+                onLaunch = {
+                    archiveOperationLaunchers.openReindexOperation(
+                        localArchive.primaryRepository.reference.uri,
+                    )
+                },
+                isAvailable = it,
+                text = "Reindex changed files",
             )
         },
         this.canPush.mapLoadedData {

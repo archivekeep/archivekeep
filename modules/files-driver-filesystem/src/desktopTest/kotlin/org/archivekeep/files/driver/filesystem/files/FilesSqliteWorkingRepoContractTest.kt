@@ -49,6 +49,7 @@ class FilesSqliteWorkingRepoContractTest : WorkingRepoContractTest<FilesSqliteRe
             override fun overwriteFile(
                 filename: String,
                 bytes: ByteArray,
+                preserveTimestamp: Boolean,
             ) {
                 path
                     .resolve(filename)

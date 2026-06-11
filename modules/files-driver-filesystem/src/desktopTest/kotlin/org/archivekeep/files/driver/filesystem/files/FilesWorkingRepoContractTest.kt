@@ -11,7 +11,9 @@ import org.junit.jupiter.api.io.TempDir
 import java.nio.file.Path
 import java.util.UUID
 import kotlin.io.path.createDirectory
+import kotlin.io.path.getLastModifiedTime
 import kotlin.io.path.outputStream
+import kotlin.io.path.setLastModifiedTime
 import kotlin.test.Test
 import kotlin.time.Duration.Companion.milliseconds
 
@@ -51,17 +53,29 @@ class FilesWorkingRepoContractTest : WorkingRepoContractTest<FilesRepo>() {
             override fun overwriteFile(
                 filename: String,
                 bytes: ByteArray,
+                preserveTimestamp: Boolean,
             ) {
+                val oldTimestamp = if (preserveTimestamp) path.getLastModifiedTime() else null
+
                 path
                     .resolve(filename)
                     .outputStream()
                     .use { it.write(bytes) }
+
+                oldTimestamp?.let { path.setLastModifiedTime(oldTimestamp) }
             }
         }
 
     @Test
     @Disabled("Feature not supported - not possible with checksum-only index")
-    override fun shouldDetectModificationOfIndexedFileAndSupportReAdd() {
+    override fun shouldDetectTimestampModificationOfIndexedFileAndSupportReAdd() {
+        super.shouldDetectTimestampModificationOfIndexedFileAndSupportReAdd()
+    }
+
+    @Test
+    @Disabled("Feature not supported - not possible with checksum-only index")
+    override fun shouldDetectSizeModificationOfIndexedFileAndSupportReAdd() {
+        super.shouldDetectSizeModificationOfIndexedFileAndSupportReAdd()
     }
 
     override fun runTest(testBody: suspend GenericTestScope.() -> Unit) = runBlockingTest(testBody)

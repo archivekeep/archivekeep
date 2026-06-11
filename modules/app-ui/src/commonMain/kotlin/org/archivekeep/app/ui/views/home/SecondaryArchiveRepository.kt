@@ -63,6 +63,7 @@ class SecondaryArchiveRepository(
         val isLoading = syncTexts.isLoading || syncRunning || localRepoStatus.isLoading
 
         val canAdd = localRepoStatus.mapIfLoadedOrNull { it.totalNewFiles > 0 } ?: false
+        val canReindex = localRepoStatus.mapIfLoadedOrNull { it.totalModifiedIndexedFiles > 0 } ?: false
         val canPush = canPushLoadable.mapIfLoadedOrNull { it } ?: false
     }
 

@@ -5,6 +5,7 @@ import org.archivekeep.app.ui.dialogs.repository.access.UnlockRepositoryDialog
 import org.archivekeep.app.ui.dialogs.repository.management.AssociateRepositoryDialog
 import org.archivekeep.app.ui.dialogs.repository.management.UnassociateRepositoryDialog
 import org.archivekeep.app.ui.dialogs.repository.procedures.addpush.AddAndPushRepoDialog
+import org.archivekeep.app.ui.dialogs.repository.procedures.indexupdate.FileReindexProcedureDialog
 import org.archivekeep.app.ui.dialogs.repository.procedures.indexupdate.IndexUpdateProcedureDialog
 import org.archivekeep.app.ui.dialogs.repository.procedures.pushrepo.PushRepoDialog
 import org.archivekeep.app.ui.dialogs.repository.procedures.sync.DownloadFromRepoDialog
@@ -18,6 +19,7 @@ fun archiveOperationLaunchersAsDialogs(dialogRenderer: OverlayDialogRenderer) =
     ArchiveOperationLaunchers(
         openAddAndPushOperation = dialogRenderer.openFn(::AddAndPushRepoDialog),
         openIndexUpdateOperation = dialogRenderer.openFn(::IndexUpdateProcedureDialog),
+        openReindexOperation = dialogRenderer.openFn(::FileReindexProcedureDialog),
         openAssociateRepository = dialogRenderer.openFn(::AssociateRepositoryDialog),
         openUnassociateRepository = dialogRenderer.openFn(::UnassociateRepositoryDialog),
         openForgetRepository = dialogRenderer.openFn(::ForgetRepositoryDialog),
