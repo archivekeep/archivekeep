@@ -411,7 +411,7 @@ class FilesSqliteRepo(
                                     findAllFiles(listOf("*"))
                                         .map {
                                             it.invariantSeparatorsPathString
-                                        }.sorted()
+                                        }.toSortedSet()
 
                                 currentCoroutineContext().ensureActive()
 
@@ -432,6 +432,7 @@ class FilesSqliteRepo(
 
                                                 timestampChanged || sizeChanged
                                             }.map { it.path },
+                                    missingFiles = indexFiles.filter { !allFiles.contains(it) },
                                 )
                             }
                     }

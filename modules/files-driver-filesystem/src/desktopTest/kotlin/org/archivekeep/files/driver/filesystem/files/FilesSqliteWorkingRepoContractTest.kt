@@ -10,6 +10,7 @@ import org.junit.jupiter.api.io.TempDir
 import java.nio.file.Path
 import java.util.UUID
 import kotlin.io.path.createDirectory
+import kotlin.io.path.deleteIfExists
 import kotlin.io.path.outputStream
 import kotlin.time.Duration.Companion.milliseconds
 
@@ -55,6 +56,10 @@ class FilesSqliteWorkingRepoContractTest : WorkingRepoContractTest<FilesSqliteRe
                     .resolve(filename)
                     .outputStream()
                     .use { it.write(bytes) }
+            }
+
+            override fun deleteFile(filename: String) {
+                path.resolve(filename).deleteIfExists()
             }
         }
 

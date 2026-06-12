@@ -38,6 +38,8 @@ abstract class WorkingRepoContractTest<T : LocalRepo> {
             bytes: ByteArray,
             preserveTimestamp: Boolean = false,
         )
+
+        fun deleteFile(filename: String)
     }
 
     abstract fun createNew(): TestRepo<T>
@@ -82,6 +84,7 @@ abstract class WorkingRepoContractTest<T : LocalRepo> {
                                     "B/03.txt",
                                 ),
                             modifiedIndexedFiles = emptyList(),
+                            missingFiles = emptyList(),
                         ),
                         it,
                     )
@@ -114,6 +117,7 @@ abstract class WorkingRepoContractTest<T : LocalRepo> {
                                     "BIG_FILE.txt",
                                 ),
                             modifiedIndexedFiles = emptyList(),
+                            missingFiles = emptyList(),
                         ),
                         it,
                     )
@@ -141,16 +145,6 @@ abstract class WorkingRepoContractTest<T : LocalRepo> {
                     .localIndex
                     .stateIn(backgroundScope, SharingStarted.Eagerly)
 
-            var allStates = listOf(indexFlowState.value)
-            backgroundScope.launch {
-                repoAccessor
-                    .localIndex
-                    .collect {
-                        println("Adding: $it")
-                        allStates = allStates + listOf(it)
-                    }
-            }
-
             eventually(2.seconds) {
                 indexFlowState.value.assertLoaded {
                     assertEquals(
@@ -163,6 +157,7 @@ abstract class WorkingRepoContractTest<T : LocalRepo> {
                                     "B/03.txt",
                                 ),
                             modifiedIndexedFiles = emptyList(),
+                            missingFiles = emptyList(),
                         ),
                         it,
                     )
@@ -189,6 +184,82 @@ abstract class WorkingRepoContractTest<T : LocalRepo> {
                                     "B/03.txt",
                                 ),
                             modifiedIndexedFiles = emptyList(),
+                            missingFiles = emptyList(),
+                        ),
+                        it,
+                    )
+                }
+            }
+        }
+
+    @RepeatedTest(4)
+    fun shouldDetectDeleteAndSupportRemove() =
+        runTest {
+            val testRepo = createNew()
+
+            val repoAccessor =
+                testRepo
+                    .open(this@runTest, getDispatcher())
+                    .withContentsFrom(testContents01)
+
+            val indexFlowState =
+                repoAccessor
+                    .localIndex
+                    .stateIn(backgroundScope, SharingStarted.Eagerly)
+
+            eventually(2.seconds) {
+                indexFlowState.value.assertLoaded {
+                    assertEquals(
+                        StatusOperation.Result(
+                            newFiles = emptyList(),
+                            indexedFiles =
+                                listOf(
+                                    "A/01.txt",
+                                    "A/02.txt",
+                                    "B/03.txt",
+                                ),
+                            modifiedIndexedFiles = emptyList(),
+                            missingFiles = emptyList(),
+                        ),
+                        it,
+                    )
+                }
+            }
+
+            testRepo.deleteFile("A/02.txt")
+
+            eventually(2.seconds) {
+                indexFlowState.value.assertLoaded {
+                    assertEquals(
+                        StatusOperation.Result(
+                            newFiles = emptyList(),
+                            indexedFiles =
+                                listOf(
+                                    "A/01.txt",
+                                    "B/03.txt",
+                                ),
+                            modifiedIndexedFiles = emptyList(),
+                            missingFiles = listOf("A/02.txt"),
+                        ),
+                        it,
+                    )
+                }
+            }
+
+            repoAccessor.remove("A/02.txt")
+
+            eventually(2.seconds) {
+                indexFlowState.value.assertLoaded {
+                    assertEquals(
+                        StatusOperation.Result(
+                            newFiles = emptyList(),
+                            indexedFiles =
+                                listOf(
+                                    "A/01.txt",
+                                    "B/03.txt",
+                                ),
+                            modifiedIndexedFiles = emptyList(),
+                            missingFiles = emptyList(),
                         ),
                         it,
                     )
@@ -223,6 +294,7 @@ abstract class WorkingRepoContractTest<T : LocalRepo> {
                                     "B/03.txt",
                                 ),
                             modifiedIndexedFiles = emptyList(),
+                            missingFiles = emptyList(),
                         ),
                         it,
                     )
@@ -246,6 +318,7 @@ abstract class WorkingRepoContractTest<T : LocalRepo> {
                                 listOf(
                                     "A/02.txt",
                                 ),
+                            missingFiles = emptyList(),
                         ),
                         it,
                     )
@@ -253,8 +326,6 @@ abstract class WorkingRepoContractTest<T : LocalRepo> {
             }
 
             repoAccessor.add("A/02.txt", reindex = true)
-
-            println("added")
 
             eventually(2.seconds) {
                 indexFlowState.value.assertLoaded {
@@ -268,6 +339,7 @@ abstract class WorkingRepoContractTest<T : LocalRepo> {
                                     "B/03.txt",
                                 ),
                             modifiedIndexedFiles = emptyList(),
+                            missingFiles = emptyList(),
                         ),
                         it,
                     )
@@ -302,6 +374,7 @@ abstract class WorkingRepoContractTest<T : LocalRepo> {
                                     "B/03.txt",
                                 ),
                             modifiedIndexedFiles = emptyList(),
+                            missingFiles = emptyList(),
                         ),
                         it,
                     )
@@ -325,10 +398,8 @@ abstract class WorkingRepoContractTest<T : LocalRepo> {
                                     "A/02.txt",
                                     "B/03.txt",
                                 ),
-                            modifiedIndexedFiles =
-                                listOf(
-                                    "A/02.txt",
-                                ),
+                            modifiedIndexedFiles = listOf("A/02.txt"),
+                            missingFiles = emptyList(),
                         ),
                         it,
                     )
@@ -336,8 +407,6 @@ abstract class WorkingRepoContractTest<T : LocalRepo> {
             }
 
             repoAccessor.add("A/02.txt", reindex = true)
-
-            println("added")
 
             eventually(2.seconds) {
                 indexFlowState.value.assertLoaded {
@@ -351,6 +420,7 @@ abstract class WorkingRepoContractTest<T : LocalRepo> {
                                     "B/03.txt",
                                 ),
                             modifiedIndexedFiles = emptyList(),
+                            missingFiles = emptyList(),
                         ),
                         it,
                     )

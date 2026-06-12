@@ -37,6 +37,7 @@ class StatusOperation(
             newFiles = newFiles,
             indexedFiles = indexedFiles,
             modifiedIndexedFiles = emptyList(),
+            missingFiles = emptyList(),
         )
     }
 
@@ -44,6 +45,7 @@ class StatusOperation(
         val newFiles: List<String>,
         val indexedFiles: List<String>,
         val modifiedIndexedFiles: List<String>,
+        val missingFiles: List<String>,
     ) {
         val hasChanges: Boolean
             get() = newFiles.isNotEmpty()

@@ -376,7 +376,7 @@ class FilesRepo(
                                     findAllFiles(listOf("*"))
                                         .map {
                                             it.invariantSeparatorsPathString
-                                        }.sorted()
+                                        }.toSortedSet()
 
                                 currentCoroutineContext().ensureActive()
 
@@ -384,6 +384,7 @@ class FilesRepo(
                                     newFiles = allFiles.filter { !indexFiles.contains(it) },
                                     indexedFiles = allFiles.filter { indexFiles.contains(it) },
                                     modifiedIndexedFiles = emptyList(),
+                                    missingFiles = indexFiles.filter { !allFiles.contains(it) },
                                 )
                             }
                     }

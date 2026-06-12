@@ -11,6 +11,7 @@ import org.junit.jupiter.api.io.TempDir
 import java.nio.file.Path
 import java.util.UUID
 import kotlin.io.path.createDirectory
+import kotlin.io.path.deleteIfExists
 import kotlin.io.path.getLastModifiedTime
 import kotlin.io.path.outputStream
 import kotlin.io.path.setLastModifiedTime
@@ -63,6 +64,10 @@ class FilesWorkingRepoContractTest : WorkingRepoContractTest<FilesRepo>() {
                     .use { it.write(bytes) }
 
                 oldTimestamp?.let { path.setLastModifiedTime(oldTimestamp) }
+            }
+
+            override fun deleteFile(filename: String) {
+                path.resolve(filename).deleteIfExists()
             }
         }
 
