@@ -71,6 +71,7 @@ fun SecondaryArchiveRepositoryRow(
                 repository = repository,
                 canAdd = nonPrimaryRepository.canAdd,
                 canReindex = nonPrimaryRepository.canReindex,
+                canCleanupDeletedFiles = nonPrimaryRepository.canCleanupDeletedFiles,
                 isAssociated = storageRepo.otherRepositoryState.associationId != null,
             )
         },

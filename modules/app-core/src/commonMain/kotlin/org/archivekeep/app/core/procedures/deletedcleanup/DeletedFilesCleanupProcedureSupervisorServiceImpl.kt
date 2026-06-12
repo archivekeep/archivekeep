@@ -1,4 +1,4 @@
-package org.archivekeep.app.core.procedures.reindex
+package org.archivekeep.app.core.procedures.deletedcleanup
 
 import dev.zacsweers.metro.AppScope
 import dev.zacsweers.metro.ContributesBinding
@@ -22,9 +22,9 @@ import org.archivekeep.app.core.utils.generics.SyncFlowStringWriter
 import org.archivekeep.app.core.utils.generics.singleInstanceWeakValueMap
 import org.archivekeep.app.core.utils.identifiers.RepositoryURI
 import org.archivekeep.files.api.repository.Repo
-import org.archivekeep.files.procedures.reindex.FileReindexProcedure
-import org.archivekeep.files.procedures.reindex.FileReindexStructuredProgressTracker
-import org.archivekeep.files.procedures.reindex.FileReindexTextualProgressTracker
+import org.archivekeep.files.procedures.deletedcleanup.DeletedFilesCleanupProcedure
+import org.archivekeep.files.procedures.deletedcleanup.DeletedFilesCleanupStructuredProgressTracker
+import org.archivekeep.files.procedures.deletedcleanup.DeletedFilesCleanupTextualProgressTracker
 import org.archivekeep.utils.loading.Loadable
 import org.archivekeep.utils.loading.flatMapLoadableFlow
 import org.archivekeep.utils.procedures.AbstractProcedureJob
@@ -34,30 +34,30 @@ import java.io.PrintWriter
 @Inject
 @SingleIn(AppScope::class)
 @ContributesBinding(CoreApplicationServiceScope::class)
-class FileReindexProcedureSupervisorServiceImpl(
+class DeletedFilesCleanupProcedureSupervisorServiceImpl(
     val scope: CoroutineScope,
     val repositoryService: RepositoryService,
-) : FileReindexProcedureSupervisorService {
-    private val operations = singleInstanceWeakValueMap(::FileReindexProcedureSupervisorImpl)
+) : DeletedFilesCleanupProcedureSupervisorService {
+    private val operations = singleInstanceWeakValueMap(::DeletedFilesCleanupProcedureSupervisorImpl)
 
     val jobGuards = UniqueJobGuard<RepositoryURI, JobImpl>()
 
-    override fun getFileReindexOperation(repositoryURI: RepositoryURI): FileReindexProcedureSupervisor = operations[repositoryURI]
+    override fun getDeletedFilesCleanupOperation(repositoryURI: RepositoryURI): DeletedFilesCleanupProcedureSupervisor = operations[repositoryURI]
 
-    inner class FileReindexProcedureSupervisorImpl(
+    inner class DeletedFilesCleanupProcedureSupervisorImpl(
         val repositoryURI: RepositoryURI,
-    ) : FileReindexProcedureSupervisor {
+    ) : DeletedFilesCleanupProcedureSupervisor {
         override val currentJobFlow: StateFlow<JobImpl?> = jobGuards.stateHoldersWeakReference[repositoryURI].asStateFlow()
 
         @OptIn(ExperimentalCoroutinesApi::class)
-        override fun prepare(): Flow<Loadable<FileReindexProcedureSupervisor.Preparation>> =
+        override fun prepare(): Flow<Loadable<DeletedFilesCleanupProcedureSupervisor.Preparation>> =
             repositoryService
                 .getRepository(repositoryURI)
                 .accessorFlow
                 .flatMapLoadableFlow { repositoryAccess ->
                     repositoryAccess.indexFlow
                         .flatMapLoadableFlow {
-                            FileReindexProcedure()
+                            DeletedFilesCleanupProcedure()
                                 .prepare(repositoryAccess)
                                 .map {
                                     when (it) {
@@ -67,7 +67,7 @@ class FileReindexProcedureSupervisorServiceImpl(
 
                                         is Loadable.Loaded -> {
                                             Loadable.Loaded(
-                                                FileReindexProcedureSupervisor.Preparation(
+                                                DeletedFilesCleanupProcedureSupervisor.Preparation(
                                                     it.value,
                                                     launch = { launchOptions ->
                                                         val job =
@@ -99,42 +99,42 @@ class FileReindexProcedureSupervisorServiceImpl(
 
     inner class JobImpl(
         private val repositoryAccess: Repo,
-        val preparationResult: FileReindexProcedure.PreparationResult,
-        val launchOptions: FileReindexProcedure.LaunchOptions,
+        val preparationResult: DeletedFilesCleanupProcedure.PreparationResult,
+        val launchOptions: DeletedFilesCleanupProcedure.LaunchOptions,
     ) : AbstractJobGuardRunnable(),
-        JobWrapper<FileReindexProcedureSupervisor.JobState> {
+        JobWrapper<DeletedFilesCleanupProcedureSupervisor.JobState> {
         private val executionLog = SyncFlowStringWriter()
-        private val writer = FileReindexTextualProgressTracker(PrintWriter(executionLog.writer, true))
+        private val writer = DeletedFilesCleanupTextualProgressTracker(PrintWriter(executionLog.writer, true))
 
         // TODO - this should be encapsulated into procedure's logic, not supervisor
-        private val filesToReindex =
+        private val filesToRemove =
             (
-                launchOptions.reindexFilesSubsetLimit?.intersect(preparationResult.modifiedIndexedFiles.toSet())
-                    ?: preparationResult.modifiedIndexedFiles
+                launchOptions.removeFilesSubsetLimit?.intersect(preparationResult.missingFiles.toSet())
+                    ?: preparationResult.missingFiles
             ).toSet()
 
-        private val indexUpdateProgressTracker = FileReindexStructuredProgressTracker(filesToReindex)
+        private val structuredProgressTracker = DeletedFilesCleanupStructuredProgressTracker(filesToRemove)
 
         val job =
             object : AbstractProcedureJob() {
                 override suspend fun execute(context: ProcedureExecutionContext) {
                     preparationResult.execute(
                         repositoryAccess,
-                        launchOptions.reindexFilesSubsetLimit,
+                        launchOptions.removeFilesSubsetLimit,
                         writer,
-                        indexUpdateProgressTracker,
+                        structuredProgressTracker,
                     )
                 }
             }
 
-        override val state: Flow<FileReindexProcedureSupervisor.JobState> =
+        override val state: Flow<DeletedFilesCleanupProcedureSupervisor.JobState> =
             combine(
-                indexUpdateProgressTracker.fileReindexProgressFlow,
+                structuredProgressTracker.fileRemoveProgressFlow,
                 executionLog.string,
                 job.executionState,
-            ) { reindexProgress, log, jobState ->
-                FileReindexProcedureSupervisor.JobState(
-                    reindexProgress,
+            ) { fileRemoveProgress, log, jobState ->
+                DeletedFilesCleanupProcedureSupervisor.JobState(
+                    fileRemoveProgress,
                     log,
                     jobState,
                 )

@@ -64,6 +64,7 @@ class SecondaryArchiveRepository(
 
         val canAdd = localRepoStatus.mapIfLoadedOrNull { it.totalNewFiles > 0 } ?: false
         val canReindex = localRepoStatus.mapIfLoadedOrNull { it.totalModifiedIndexedFiles > 0 } ?: false
+        val canCleanupDeletedFiles = localRepoStatus.mapIfLoadedOrNull { it.totalMissingFiles > 0 } ?: false
         val canPush = canPushLoadable.mapIfLoadedOrNull { it } ?: false
     }
 

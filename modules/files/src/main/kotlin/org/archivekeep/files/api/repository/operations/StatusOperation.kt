@@ -50,11 +50,12 @@ class StatusOperation(
         val hasChanges: Boolean
             get() = newFiles.isNotEmpty()
 
-        val summary = Summary(newFiles.size, modifiedIndexedFiles.size)
+        val summary = Summary(newFiles.size, modifiedIndexedFiles.size, missingFiles.size)
 
         data class Summary(
             val totalNewFiles: Int,
             val totalModifiedIndexedFiles: Int,
+            val totalMissingFiles: Int,
         )
     }
 }

@@ -1,4 +1,4 @@
-package org.archivekeep.app.ui.dialogs.repository.procedures.indexupdate
+package org.archivekeep.app.ui.dialogs.repository.procedures.deletedcleanup
 
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.RowScope
@@ -19,8 +19,8 @@ import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flatMapLatest
 import org.archivekeep.app.core.domain.repositories.Repository
 import org.archivekeep.app.core.domain.repositories.RepositoryInformation
-import org.archivekeep.app.core.procedures.reindex.FileReindexProcedureSupervisor
-import org.archivekeep.app.core.procedures.reindex.FileReindexProcedureSupervisorService
+import org.archivekeep.app.core.procedures.deletedcleanup.DeletedFilesCleanupProcedureSupervisor
+import org.archivekeep.app.core.procedures.deletedcleanup.DeletedFilesCleanupProcedureSupervisorService
 import org.archivekeep.app.core.utils.identifiers.RepositoryURI
 import org.archivekeep.app.ui.components.base.layout.IntrinsicSizeWrapperLayout
 import org.archivekeep.app.ui.components.base.layout.ScrollableLazyColumn
@@ -30,37 +30,37 @@ import org.archivekeep.app.ui.components.feature.dialogs.operations.DialogOperat
 import org.archivekeep.app.ui.components.feature.dialogs.operations.ExecutionErrorIfPresent
 import org.archivekeep.app.ui.components.feature.dialogs.operations.toDialogOperationControlState
 import org.archivekeep.app.ui.components.feature.manyselect.rememberManySelectForRender
-import org.archivekeep.app.ui.components.feature.operations.FileReindexProgress
+import org.archivekeep.app.ui.components.feature.operations.DeletedFilesCleanupProgress
 import org.archivekeep.app.ui.components.feature.operations.ScrollableLogTextInDialog
 import org.archivekeep.app.ui.dialogs.repository.AbstractRepositoryDialog
 import org.archivekeep.app.ui.domain.wiring.LocalApplicationServices
 import org.archivekeep.app.ui.utils.appendBoldSpan
 import org.archivekeep.app.ui.utils.collectAsLoadable
 import org.archivekeep.app.ui.utils.stickToFirstNotNull
-import org.archivekeep.files.procedures.reindex.FileReindexProcedure
+import org.archivekeep.files.procedures.deletedcleanup.DeletedFilesCleanupProcedure
 import org.archivekeep.utils.loading.Loadable
 import org.archivekeep.utils.loading.mapToLoadable
 import org.archivekeep.utils.loading.waitLoadedValue
 
-class FileReindexProcedureDialog(
+class DeletedFilesCleanupProcedureDialog(
     repositoryURI: RepositoryURI,
-) : AbstractRepositoryDialog<FileReindexProcedureDialog.State, FileReindexProcedureDialog.VM>(repositoryURI) {
+) : AbstractRepositoryDialog<DeletedFilesCleanupProcedureDialog.State, DeletedFilesCleanupProcedureDialog.VM>(repositoryURI) {
     data class State(
         val archiveName: String,
         // TODO: this should be Loadable - show loading of contents
-        val operationState: FileReindexProcedureSupervisor.State,
+        val operationState: DeletedFilesCleanupProcedureSupervisor.State,
         val selectedFilesToReindex: MutableState<Set<String>>,
         val onClose: () -> Unit,
     ) : IState {
         override val title =
             buildAnnotatedString {
                 appendBoldSpan(archiveName)
-                append(" - reindex changed files")
+                append(" - remove deleted files from index")
             }
 
         val controlState: DialogOperationControlState =
             when (val opState = operationState) {
-                is FileReindexProcedureSupervisor.JobState -> {
+                is DeletedFilesCleanupProcedureSupervisor.JobState -> {
                     opState.state.toDialogOperationControlState(
                         onCancel = null,
                         onHide = onClose,
@@ -68,7 +68,7 @@ class FileReindexProcedureDialog(
                     )
                 }
 
-                is FileReindexProcedureSupervisor.Preparation -> {
+                is DeletedFilesCleanupProcedureSupervisor.Preparation -> {
                     DialogOperationControlState.NotRunning(
                         onLaunch = ::onTriggerExecute,
                         onClose = onClose,
@@ -78,8 +78,8 @@ class FileReindexProcedureDialog(
             }
 
         private fun onTriggerExecute() {
-            (operationState as FileReindexProcedureSupervisor.Preparation).launch(
-                FileReindexProcedure.LaunchOptions(
+            (operationState as DeletedFilesCleanupProcedureSupervisor.Preparation).launch(
+                DeletedFilesCleanupProcedure.LaunchOptions(
                     selectedFilesToReindex.value,
                 ),
             )
@@ -91,10 +91,10 @@ class FileReindexProcedureDialog(
     inner class VM(
         val scope: CoroutineScope,
         val repository: SharedFlow<RepositoryInformation>,
-        val fileReindexProcedureSupervisorService: FileReindexProcedureSupervisorService,
+        val deletedFilesCleanupProcedureSupervisorService: DeletedFilesCleanupProcedureSupervisorService,
         val _onClose: () -> Unit,
     ) : IVM {
-        val operation = fileReindexProcedureSupervisorService.getFileReindexOperation(uri)
+        val operation = deletedFilesCleanupProcedureSupervisorService.getDeletedFilesCleanupOperation(uri)
 
         @OptIn(ExperimentalCoroutinesApi::class)
         val operationStateFlow =
@@ -116,13 +116,13 @@ class FileReindexProcedureDialog(
         repository: Repository,
         onClose: () -> Unit,
     ): VM {
-        val fileReindexProcedureSupervisorService = LocalApplicationServices.current.fileReindexProcedureSupervisorService
+        val deletedFilesCleanupProcedureSupervisorService = LocalApplicationServices.current.deletedFilesCleanupProcedureSupervisorService
 
         return remember {
             VM(
                 scope,
                 repository.informationFlow,
-                fileReindexProcedureSupervisorService,
+                deletedFilesCleanupProcedureSupervisorService,
                 _onClose = onClose,
             )
         }
@@ -147,15 +147,15 @@ class FileReindexProcedureDialog(
     @Composable
     override fun ColumnScope.renderContent(state: State) {
         when (val operationState = state.operationState) {
-            is FileReindexProcedureSupervisor.Preparation -> {
+            is DeletedFilesCleanupProcedureSupervisor.Preparation -> {
                 val preparationState = operationState.result
 
                 val filesManySelect =
                     rememberManySelectForRender(
-                        preparationState.modifiedIndexedFiles,
+                        preparationState.missingFiles,
                         state.selectedFilesToReindex,
-                        "Modified files files",
-                        allItemsLabel = { "All modified files ($it)" },
+                        "Deleted files to remove from index",
+                        allItemsLabel = { "All missing/deleted files ($it)" },
                         itemLabelText = { it },
                     )
 
@@ -166,15 +166,15 @@ class FileReindexProcedureDialog(
                     maxIntrinsicWidth = guessedWidth,
                 ) {
                     ScrollableLazyColumn {
-                        if (preparationState.modifiedIndexedFiles.isNotEmpty()) {
+                        if (preparationState.missingFiles.isNotEmpty()) {
                             filesManySelect.render(this)
                         }
                     }
                 }
             }
 
-            is FileReindexProcedureSupervisor.JobState -> {
-                FileReindexProgress(
+            is DeletedFilesCleanupProcedureSupervisor.JobState -> {
+                DeletedFilesCleanupProgress(
                     operationState.reindexProgress,
                 )
                 Spacer(Modifier.height(4.dp))
@@ -188,7 +188,7 @@ class FileReindexProcedureDialog(
     override fun RowScope.renderButtons(state: State) {
         DialogOperationControlButtons(
             state.controlState,
-            launchText = "Execute index update",
+            launchText = "Execute removal from index",
         )
     }
 }

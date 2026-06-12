@@ -26,6 +26,7 @@ fun InArchiveRepositoryDropdownIconLaunched(
     isAssociated: Boolean,
     canAdd: Boolean = false,
     canReindex: Boolean = false,
+    canCleanupDeletedFiles: Boolean = false,
 ) {
     val repositoryURI = repository.uri
     val operationsLaunchers = LocalArchiveOperationLaunchers.current
@@ -77,6 +78,15 @@ fun InArchiveRepositoryDropdownIconLaunched(
                     closeDropdown()
                 }, text = {
                     Text("Reindex changed files")
+                })
+            }
+
+            if (canCleanupDeletedFiles) {
+                DropdownMenuItem(onClick = {
+                    operationsLaunchers.openDeletedFilesCleanupOperation(repositoryURI)
+                    closeDropdown()
+                }, text = {
+                    Text("Cleanup deleted files")
                 })
             }
 

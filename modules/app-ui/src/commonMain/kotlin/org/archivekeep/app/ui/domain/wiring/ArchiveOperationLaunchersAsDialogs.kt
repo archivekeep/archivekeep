@@ -5,9 +5,10 @@ import org.archivekeep.app.ui.dialogs.repository.access.UnlockRepositoryDialog
 import org.archivekeep.app.ui.dialogs.repository.management.AssociateRepositoryDialog
 import org.archivekeep.app.ui.dialogs.repository.management.UnassociateRepositoryDialog
 import org.archivekeep.app.ui.dialogs.repository.procedures.addpush.AddAndPushRepoDialog
-import org.archivekeep.app.ui.dialogs.repository.procedures.indexupdate.FileReindexProcedureDialog
+import org.archivekeep.app.ui.dialogs.repository.procedures.deletedcleanup.DeletedFilesCleanupProcedureDialog
 import org.archivekeep.app.ui.dialogs.repository.procedures.indexupdate.IndexUpdateProcedureDialog
 import org.archivekeep.app.ui.dialogs.repository.procedures.pushrepo.PushRepoDialog
+import org.archivekeep.app.ui.dialogs.repository.procedures.reindex.FileReindexProcedureDialog
 import org.archivekeep.app.ui.dialogs.repository.procedures.sync.DownloadFromRepoDialog
 import org.archivekeep.app.ui.dialogs.repository.procedures.sync.UploadToRepoDialog
 import org.archivekeep.app.ui.dialogs.repository.registry.AddFileSystemRepositoryDialog
@@ -20,6 +21,7 @@ fun archiveOperationLaunchersAsDialogs(dialogRenderer: OverlayDialogRenderer) =
         openAddAndPushOperation = dialogRenderer.openFn(::AddAndPushRepoDialog),
         openIndexUpdateOperation = dialogRenderer.openFn(::IndexUpdateProcedureDialog),
         openReindexOperation = dialogRenderer.openFn(::FileReindexProcedureDialog),
+        openDeletedFilesCleanupOperation = dialogRenderer.openFn(::DeletedFilesCleanupProcedureDialog),
         openAssociateRepository = dialogRenderer.openFn(::AssociateRepositoryDialog),
         openUnassociateRepository = dialogRenderer.openFn(::UnassociateRepositoryDialog),
         openForgetRepository = dialogRenderer.openFn(::ForgetRepositoryDialog),

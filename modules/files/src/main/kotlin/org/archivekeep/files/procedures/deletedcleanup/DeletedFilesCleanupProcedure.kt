@@ -1,4 +1,4 @@
-package org.archivekeep.files.procedures.reindex
+package org.archivekeep.files.procedures.deletedcleanup
 
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
@@ -8,9 +8,9 @@ import org.archivekeep.files.api.repository.Repo
 import org.archivekeep.utils.loading.Loadable
 import org.archivekeep.utils.loading.firstLoadedOrFailure
 
-class FileReindexProcedure {
+class DeletedFilesCleanupProcedure {
     data class LaunchOptions(
-        val reindexFilesSubsetLimit: Set<String>? = null,
+        val removeFilesSubsetLimit: Set<String>? = null,
     )
 
     fun prepare(repo: Repo): Flow<Loadable<PreparationResult>> =
@@ -23,7 +23,7 @@ class FileReindexProcedure {
                 localRepo
                     .localIndex
                     .firstLoadedOrFailure()
-                    .modifiedIndexedFiles
+                    .missingFiles
 
             // TODO: check for not actually modified, creation of duplications, moves overwriting indexed files
 
@@ -37,33 +37,33 @@ class FileReindexProcedure {
         }.catch { e -> emit(Loadable.Failed(e)) }
 
     data class PreparationResult(
-        val modifiedIndexedFiles: List<String>,
+        val missingFiles: List<String>,
     ) {
         suspend fun execute(
             repo: Repo,
-            reindexFilesSubsetLimit: Set<String>? = null,
-            vararg progressTrackers: FileReindexProgressTracker,
+            removeFilesSubsetLimit: Set<String>? = null,
+            vararg progressTrackers: DeletedFilesCleanupProgressTracker,
         ) {
-            executeFilesReindex(repo, reindexFilesSubsetLimit, *progressTrackers)
+            executeFilesRemove(repo, removeFilesSubsetLimit, *progressTrackers)
         }
 
-        suspend fun executeFilesReindex(
+        suspend fun executeFilesRemove(
             repo: Repo,
-            reindexFilesSubsetLimit: Set<String>? = null,
-            vararg progressTrackers: FileReindexProgressTracker,
+            removeFilesSubsetLimit: Set<String>? = null,
+            vararg progressTrackers: DeletedFilesCleanupProgressTracker,
         ) {
             val localRepo = repo as? LocalRepo ?: throw RuntimeException("not local repo")
 
-            modifiedIndexedFiles.forEach { modifiedFile ->
-                if (reindexFilesSubsetLimit != null && !reindexFilesSubsetLimit.contains(modifiedFile)) {
+            missingFiles.forEach { removedFile ->
+                if (removeFilesSubsetLimit != null && !removeFilesSubsetLimit.contains(removedFile)) {
                     return@forEach
                 }
 
                 // TODO: handle failures
 
-                localRepo.add(modifiedFile, reindex = true)
+                localRepo.remove(removedFile)
 
-                progressTrackers.forEach { it.onFileReindexed(modifiedFile) }
+                progressTrackers.forEach { it.onFileRemoved(removedFile) }
             }
         }
     }

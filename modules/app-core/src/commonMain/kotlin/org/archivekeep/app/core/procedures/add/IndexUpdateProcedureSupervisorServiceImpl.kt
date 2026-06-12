@@ -119,7 +119,7 @@ class IndexUpdateProcedureSupervisorServiceImpl(
     ) : AbstractJobGuardRunnable(),
         JobWrapper<IndexUpdateProcedureSupervisor.JobState> {
         private val executionLog = SyncFlowStringWriter()
-        private val writter = IndexUpdateTextualProgressTracker(PrintWriter(executionLog.writer, true))
+        private val writer = IndexUpdateTextualProgressTracker(PrintWriter(executionLog.writer, true))
 
         // TODO - this should be encapsulated into procedure's logic, not supervisor
         private val movesToExecute = (launchOptions.movesSubsetLimit?.intersect(preparationResult.moves.toSet()) ?: preparationResult.moves).toSet()
@@ -143,7 +143,7 @@ class IndexUpdateProcedureSupervisorServiceImpl(
                         repositoryAccess,
                         launchOptions.movesSubsetLimit,
                         launchOptions.addFilesSubsetLimit,
-                        writter,
+                        writer,
                         indexUpdateProgressTracker,
                     )
                 }

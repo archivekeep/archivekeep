@@ -43,6 +43,7 @@ class HomeArchiveEntryViewModel(
         val canUnlock: Loadable<Boolean>,
         val canAdd: Loadable<Boolean>,
         val canReindex: Loadable<Boolean>,
+        val canCleanupDeletedFiles: Loadable<Boolean>,
         val canPush: Loadable<Boolean>,
         val anySecondaryAvailable: Boolean,
         val loading: Boolean,
@@ -74,6 +75,7 @@ class HomeArchiveEntryViewModel(
                 canUnlock = accessor.mapLoadedData { false }.mapToLoadable(true),
                 canAdd = indexStatus.mapLoadedData { it.hasChanges }.mapToLoadable(false),
                 canReindex = indexStatus.mapLoadedData { it.modifiedIndexedFiles.isNotEmpty() }.mapToLoadable(false),
+                canCleanupDeletedFiles = indexStatus.mapLoadedData { it.missingFiles.isNotEmpty() }.mapToLoadable(false),
                 canPush =
                     if (nonLocalRepositories.any { it.second.canPushLoadable.mapIfLoadedOrNull { it } ?: false }) {
                         Loadable.Loaded(true)
@@ -102,6 +104,7 @@ class HomeArchiveEntryViewModel(
                 canUnlock = Loadable.Loading,
                 canAdd = Loadable.Loading,
                 canReindex = Loadable.Loading,
+                canCleanupDeletedFiles = Loadable.Loading,
                 canPush = Loadable.Loading,
                 anySecondaryAvailable = false,
                 loading = true,
@@ -219,6 +222,17 @@ fun HomeArchiveEntryViewModel.VMState.actions(
                 },
                 isAvailable = it,
                 text = "Reindex changed files",
+            )
+        },
+        this.canCleanupDeletedFiles.mapLoadedData {
+            Action(
+                onLaunch = {
+                    archiveOperationLaunchers.openDeletedFilesCleanupOperation(
+                        localArchive.primaryRepository.reference.uri,
+                    )
+                },
+                isAvailable = it,
+                text = "Cleanup deleted files",
             )
         },
         this.canPush.mapLoadedData {
