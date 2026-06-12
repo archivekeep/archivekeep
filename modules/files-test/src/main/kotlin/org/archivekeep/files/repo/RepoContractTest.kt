@@ -13,7 +13,7 @@ import org.archivekeep.files.api.exceptions.DestinationExists
 import org.archivekeep.files.api.repository.ArchiveFileInfo
 import org.archivekeep.files.api.repository.Repo
 import org.archivekeep.files.api.repository.RepoIndex
-import org.archivekeep.files.assertLoaded
+import org.archivekeep.files.eventuallyShouldBeLoadedAndValueShould
 import org.archivekeep.files.quickSave
 import org.archivekeep.files.shouldHaveCommittedContentsOf
 import org.archivekeep.files.testContents01
@@ -188,33 +188,25 @@ abstract class RepoContractTest<T : Repo> {
                     .indexFlow
                     .stateIn(backgroundScope, SharingStarted.Eagerly)
 
-            eventually(2.seconds) {
-                indexFlowState.value.assertLoaded {
-                    assertEquals(
-                        listOf(
-                            RepoIndex.File.forStringContents(path = "A/01.txt"),
-                            RepoIndex.File.forStringContents(path = "A/02.txt"),
-                            RepoIndex.File.forStringContents(path = "B/03.txt"),
-                        ),
-                        it.files,
+            indexFlowState eventuallyShouldBeLoadedAndValueShould {
+                it.files shouldBe
+                    listOf(
+                        RepoIndex.File.forStringContents(path = "A/01.txt"),
+                        RepoIndex.File.forStringContents(path = "A/02.txt"),
+                        RepoIndex.File.forStringContents(path = "B/03.txt"),
                     )
-                }
             }
 
             repoAccessor.quickSave("C/04.txt")
 
-            eventually(2.seconds) {
-                indexFlowState.value.assertLoaded {
-                    assertEquals(
-                        listOf(
-                            RepoIndex.File.forStringContents(path = "A/01.txt"),
-                            RepoIndex.File.forStringContents(path = "A/02.txt"),
-                            RepoIndex.File.forStringContents(path = "B/03.txt"),
-                            RepoIndex.File.forStringContents(path = "C/04.txt"),
-                        ),
-                        it.files,
+            indexFlowState eventuallyShouldBeLoadedAndValueShould {
+                it.files shouldBe
+                    listOf(
+                        RepoIndex.File.forStringContents(path = "A/01.txt"),
+                        RepoIndex.File.forStringContents(path = "A/02.txt"),
+                        RepoIndex.File.forStringContents(path = "B/03.txt"),
+                        RepoIndex.File.forStringContents(path = "C/04.txt"),
                     )
-                }
             }
         }
 
@@ -237,20 +229,16 @@ abstract class RepoContractTest<T : Repo> {
                         .metadataFlow
                         .stateIn(collectScope, SharingStarted.Eagerly)
 
-                eventually(5.seconds) {
-                    metadataFlowState.value.assertLoaded {
-                        assertEquals(null, it.associationGroupId)
-                    }
+                metadataFlowState eventuallyShouldBeLoadedAndValueShould {
+                    it.associationGroupId shouldBe null
                 }
 
                 repoAccessor.updateMetadata {
                     it.copy(associationGroupId = newID)
                 }
 
-                eventually(5.seconds) {
-                    metadataFlowState.value.assertLoaded {
-                        assertEquals(newID, it.associationGroupId)
-                    }
+                metadataFlowState eventuallyShouldBeLoadedAndValueShould {
+                    it.associationGroupId shouldBe newID
                 }
 
                 collectScope.cancel()
@@ -266,10 +254,8 @@ abstract class RepoContractTest<T : Repo> {
                         .metadataFlow
                         .stateIn(collectScope, SharingStarted.Eagerly)
 
-                eventually(2.seconds) {
-                    metadataFlowState.value.assertLoaded {
-                        assertEquals(newID, it.associationGroupId)
-                    }
+                metadataFlowState eventuallyShouldBeLoadedAndValueShould {
+                    it.associationGroupId shouldBe newID
                 }
 
                 collectScope.cancel()

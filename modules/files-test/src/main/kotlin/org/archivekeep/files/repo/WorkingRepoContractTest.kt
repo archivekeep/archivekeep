@@ -1,6 +1,5 @@
 package org.archivekeep.files.repo
 
-import io.kotest.assertions.nondeterministic.eventually
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.flow
@@ -8,17 +7,16 @@ import kotlinx.coroutines.launch
 import org.archivekeep.files.api.repository.ArchiveFileInfo
 import org.archivekeep.files.api.repository.LocalRepo
 import org.archivekeep.files.api.repository.operations.StatusOperation
-import org.archivekeep.files.assertLoaded
+import org.archivekeep.files.eventuallyShouldBeLoadedAndValueShouldBe
 import org.archivekeep.files.flowToInputStream
 import org.archivekeep.files.testContents01
+import org.archivekeep.files.testContents01InitialWorkingStatus
 import org.archivekeep.files.utils.GenericTestScope
 import org.archivekeep.files.utils.standardRunTest
 import org.archivekeep.files.withContentsFrom
 import org.archivekeep.utils.loading.Loadable
 import org.archivekeep.utils.loading.stateIn
 import org.junit.jupiter.api.RepeatedTest
-import kotlin.test.assertEquals
-import kotlin.time.Duration.Companion.seconds
 
 @OptIn(ExperimentalStdlibApi::class)
 abstract class WorkingRepoContractTest<T : LocalRepo> {
@@ -72,24 +70,7 @@ abstract class WorkingRepoContractTest<T : LocalRepo> {
                     }
             }
 
-            eventually(2.seconds) {
-                indexFlowState.value.assertLoaded {
-                    assertEquals(
-                        StatusOperation.Result(
-                            newFiles = emptyList(),
-                            indexedFiles =
-                                listOf(
-                                    "A/01.txt",
-                                    "A/02.txt",
-                                    "B/03.txt",
-                                ),
-                            modifiedIndexedFiles = emptyList(),
-                            missingFiles = emptyList(),
-                        ),
-                        it,
-                    )
-                }
-            }
+            indexFlowState eventuallyShouldBeLoadedAndValueShouldBe testContents01InitialWorkingStatus
 
             repoAccessor.save(
                 "BIG_FILE.txt",
@@ -104,25 +85,19 @@ abstract class WorkingRepoContractTest<T : LocalRepo> {
                 }.flowToInputStream(backgroundScope),
             )
 
-            eventually(2.seconds) {
-                indexFlowState.value.assertLoaded {
-                    assertEquals(
-                        StatusOperation.Result(
-                            newFiles = emptyList(),
-                            indexedFiles =
-                                listOf(
-                                    "A/01.txt",
-                                    "A/02.txt",
-                                    "B/03.txt",
-                                    "BIG_FILE.txt",
-                                ),
-                            modifiedIndexedFiles = emptyList(),
-                            missingFiles = emptyList(),
+            indexFlowState eventuallyShouldBeLoadedAndValueShouldBe
+                StatusOperation.Result(
+                    newFiles = emptyList(),
+                    indexedFiles =
+                        listOf(
+                            "A/01.txt",
+                            "A/02.txt",
+                            "B/03.txt",
+                            "BIG_FILE.txt",
                         ),
-                        it,
-                    )
-                }
-            }
+                    modifiedIndexedFiles = emptyList(),
+                    missingFiles = emptyList(),
+                )
 
             val undesiredStateEmit = allStates.firstOrNull { it is Loadable.Loaded && it.value.newFiles.isNotEmpty() }
             assert(undesiredStateEmit == null) {
@@ -145,51 +120,28 @@ abstract class WorkingRepoContractTest<T : LocalRepo> {
                     .localIndex
                     .stateIn(backgroundScope, SharingStarted.Eagerly)
 
-            eventually(2.seconds) {
-                indexFlowState.value.assertLoaded {
-                    assertEquals(
-                        StatusOperation.Result(
-                            newFiles = emptyList(),
-                            indexedFiles =
-                                listOf(
-                                    "A/01.txt",
-                                    "A/02.txt",
-                                    "B/03.txt",
-                                ),
-                            modifiedIndexedFiles = emptyList(),
-                            missingFiles = emptyList(),
-                        ),
-                        it,
-                    )
-                }
-            }
+            indexFlowState eventuallyShouldBeLoadedAndValueShouldBe testContents01InitialWorkingStatus
 
             testRepo.createUncommittedFile(
                 "BIG_FILE.txt",
                 (0..1000000).joinToString(separator = "") { "123456" }.toByteArray(),
             )
 
-            eventually(2.seconds) {
-                indexFlowState.value.assertLoaded {
-                    assertEquals(
-                        StatusOperation.Result(
-                            newFiles =
-                                listOf(
-                                    "BIG_FILE.txt",
-                                ),
-                            indexedFiles =
-                                listOf(
-                                    "A/01.txt",
-                                    "A/02.txt",
-                                    "B/03.txt",
-                                ),
-                            modifiedIndexedFiles = emptyList(),
-                            missingFiles = emptyList(),
+            indexFlowState eventuallyShouldBeLoadedAndValueShouldBe
+                StatusOperation.Result(
+                    newFiles =
+                        listOf(
+                            "BIG_FILE.txt",
                         ),
-                        it,
-                    )
-                }
-            }
+                    indexedFiles =
+                        listOf(
+                            "A/01.txt",
+                            "A/02.txt",
+                            "B/03.txt",
+                        ),
+                    modifiedIndexedFiles = emptyList(),
+                    missingFiles = emptyList(),
+                )
         }
 
     @RepeatedTest(4)
@@ -207,64 +159,35 @@ abstract class WorkingRepoContractTest<T : LocalRepo> {
                     .localIndex
                     .stateIn(backgroundScope, SharingStarted.Eagerly)
 
-            eventually(2.seconds) {
-                indexFlowState.value.assertLoaded {
-                    assertEquals(
-                        StatusOperation.Result(
-                            newFiles = emptyList(),
-                            indexedFiles =
-                                listOf(
-                                    "A/01.txt",
-                                    "A/02.txt",
-                                    "B/03.txt",
-                                ),
-                            modifiedIndexedFiles = emptyList(),
-                            missingFiles = emptyList(),
-                        ),
-                        it,
-                    )
-                }
-            }
+            indexFlowState eventuallyShouldBeLoadedAndValueShouldBe testContents01InitialWorkingStatus
 
             testRepo.deleteFile("A/02.txt")
 
-            eventually(2.seconds) {
-                indexFlowState.value.assertLoaded {
-                    assertEquals(
-                        StatusOperation.Result(
-                            newFiles = emptyList(),
-                            indexedFiles =
-                                listOf(
-                                    "A/01.txt",
-                                    "B/03.txt",
-                                ),
-                            modifiedIndexedFiles = emptyList(),
-                            missingFiles = listOf("A/02.txt"),
+            indexFlowState eventuallyShouldBeLoadedAndValueShouldBe
+                StatusOperation.Result(
+                    newFiles = emptyList(),
+                    indexedFiles =
+                        listOf(
+                            "A/01.txt",
+                            "B/03.txt",
                         ),
-                        it,
-                    )
-                }
-            }
+                    modifiedIndexedFiles = emptyList(),
+                    missingFiles = listOf("A/02.txt"),
+                )
 
             repoAccessor.remove("A/02.txt")
 
-            eventually(2.seconds) {
-                indexFlowState.value.assertLoaded {
-                    assertEquals(
-                        StatusOperation.Result(
-                            newFiles = emptyList(),
-                            indexedFiles =
-                                listOf(
-                                    "A/01.txt",
-                                    "B/03.txt",
-                                ),
-                            modifiedIndexedFiles = emptyList(),
-                            missingFiles = emptyList(),
+            indexFlowState eventuallyShouldBeLoadedAndValueShouldBe
+                StatusOperation.Result(
+                    newFiles = emptyList(),
+                    indexedFiles =
+                        listOf(
+                            "A/01.txt",
+                            "B/03.txt",
                         ),
-                        it,
-                    )
-                }
-            }
+                    modifiedIndexedFiles = emptyList(),
+                    missingFiles = emptyList(),
+                )
         }
 
     @RepeatedTest(4)
@@ -282,69 +205,40 @@ abstract class WorkingRepoContractTest<T : LocalRepo> {
                     .localIndex
                     .stateIn(backgroundScope, SharingStarted.Eagerly)
 
-            eventually(2.seconds) {
-                indexFlowState.value.assertLoaded {
-                    assertEquals(
-                        StatusOperation.Result(
-                            newFiles = emptyList(),
-                            indexedFiles =
-                                listOf(
-                                    "A/01.txt",
-                                    "A/02.txt",
-                                    "B/03.txt",
-                                ),
-                            modifiedIndexedFiles = emptyList(),
-                            missingFiles = emptyList(),
-                        ),
-                        it,
-                    )
-                }
-            }
+            indexFlowState eventuallyShouldBeLoadedAndValueShouldBe testContents01InitialWorkingStatus
 
             testRepo.overwriteFile("A/02.txt", "A/99.txt".toByteArray())
 
-            eventually(2.seconds) {
-                indexFlowState.value.assertLoaded {
-                    assertEquals(
-                        StatusOperation.Result(
-                            newFiles = emptyList(),
-                            indexedFiles =
-                                listOf(
-                                    "A/01.txt",
-                                    "A/02.txt",
-                                    "B/03.txt",
-                                ),
-                            modifiedIndexedFiles =
-                                listOf(
-                                    "A/02.txt",
-                                ),
-                            missingFiles = emptyList(),
+            indexFlowState eventuallyShouldBeLoadedAndValueShouldBe
+                StatusOperation.Result(
+                    newFiles = emptyList(),
+                    indexedFiles =
+                        listOf(
+                            "A/01.txt",
+                            "A/02.txt",
+                            "B/03.txt",
                         ),
-                        it,
-                    )
-                }
-            }
+                    modifiedIndexedFiles =
+                        listOf(
+                            "A/02.txt",
+                        ),
+                    missingFiles = emptyList(),
+                )
 
             repoAccessor.add("A/02.txt", reindex = true)
 
-            eventually(2.seconds) {
-                indexFlowState.value.assertLoaded {
-                    assertEquals(
-                        StatusOperation.Result(
-                            newFiles = emptyList(),
-                            indexedFiles =
-                                listOf(
-                                    "A/01.txt",
-                                    "A/02.txt",
-                                    "B/03.txt",
-                                ),
-                            modifiedIndexedFiles = emptyList(),
-                            missingFiles = emptyList(),
+            indexFlowState eventuallyShouldBeLoadedAndValueShouldBe
+                StatusOperation.Result(
+                    newFiles = emptyList(),
+                    indexedFiles =
+                        listOf(
+                            "A/01.txt",
+                            "A/02.txt",
+                            "B/03.txt",
                         ),
-                        it,
-                    )
-                }
-            }
+                    modifiedIndexedFiles = emptyList(),
+                    missingFiles = emptyList(),
+                )
         }
 
     @RepeatedTest(4)
@@ -362,24 +256,7 @@ abstract class WorkingRepoContractTest<T : LocalRepo> {
                     .localIndex
                     .stateIn(backgroundScope, SharingStarted.Eagerly)
 
-            eventually(2.seconds) {
-                indexFlowState.value.assertLoaded {
-                    assertEquals(
-                        StatusOperation.Result(
-                            newFiles = emptyList(),
-                            indexedFiles =
-                                listOf(
-                                    "A/01.txt",
-                                    "A/02.txt",
-                                    "B/03.txt",
-                                ),
-                            modifiedIndexedFiles = emptyList(),
-                            missingFiles = emptyList(),
-                        ),
-                        it,
-                    )
-                }
-            }
+            indexFlowState eventuallyShouldBeLoadedAndValueShouldBe testContents01InitialWorkingStatus
 
             testRepo.overwriteFile(
                 "A/02.txt",
@@ -387,45 +264,33 @@ abstract class WorkingRepoContractTest<T : LocalRepo> {
                 preserveTimestamp = true,
             )
 
-            eventually(2.seconds) {
-                indexFlowState.value.assertLoaded {
-                    assertEquals(
-                        StatusOperation.Result(
-                            newFiles = emptyList(),
-                            indexedFiles =
-                                listOf(
-                                    "A/01.txt",
-                                    "A/02.txt",
-                                    "B/03.txt",
-                                ),
-                            modifiedIndexedFiles = listOf("A/02.txt"),
-                            missingFiles = emptyList(),
+            indexFlowState eventuallyShouldBeLoadedAndValueShouldBe
+                StatusOperation.Result(
+                    newFiles = emptyList(),
+                    indexedFiles =
+                        listOf(
+                            "A/01.txt",
+                            "A/02.txt",
+                            "B/03.txt",
                         ),
-                        it,
-                    )
-                }
-            }
+                    modifiedIndexedFiles = listOf("A/02.txt"),
+                    missingFiles = emptyList(),
+                )
 
             repoAccessor.add("A/02.txt", reindex = true)
 
-            eventually(2.seconds) {
-                indexFlowState.value.assertLoaded {
-                    assertEquals(
-                        StatusOperation.Result(
-                            newFiles = emptyList(),
-                            indexedFiles =
-                                listOf(
-                                    "A/01.txt",
-                                    "A/02.txt",
-                                    "B/03.txt",
-                                ),
-                            modifiedIndexedFiles = emptyList(),
-                            missingFiles = emptyList(),
+            indexFlowState eventuallyShouldBeLoadedAndValueShouldBe
+                StatusOperation.Result(
+                    newFiles = emptyList(),
+                    indexedFiles =
+                        listOf(
+                            "A/01.txt",
+                            "A/02.txt",
+                            "B/03.txt",
                         ),
-                        it,
-                    )
-                }
-            }
+                    modifiedIndexedFiles = emptyList(),
+                    missingFiles = emptyList(),
+                )
         }
 
     private fun GenericTestScope.getDispatcher() = coroutineContext[CoroutineDispatcher] ?: throw IllegalStateException("Dispatcher expected")

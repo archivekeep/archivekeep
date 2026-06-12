@@ -54,7 +54,7 @@ class DeletedFilesCleanupProcedureTest {
     ) = runBlockingTest {
         val repo =
             FilesSqliteRepo
-                .create(archiveDir.toPath())
+                .create(archiveDir.toPath(), this@runBlockingTest.backgroundScope.coroutineContext.job)
                 .withContentsFrom(testContents01)
 
         archiveDir.resolve("A/02.txt").delete()
