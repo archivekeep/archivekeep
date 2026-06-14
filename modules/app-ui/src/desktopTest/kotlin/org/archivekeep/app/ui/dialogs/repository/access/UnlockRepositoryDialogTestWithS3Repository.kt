@@ -5,25 +5,19 @@ import androidx.compose.ui.test.assertIsEnabled
 import androidx.compose.ui.test.assertIsNotEnabled
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
-import dev.zacsweers.metro.createGraphFactory
 import io.kotest.assertions.nondeterministic.eventually
 import io.kotest.matchers.shouldBe
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.runBlocking
 import org.archivekeep.app.core.persistence.drivers.s3.S3RepositoryURIData
-import org.archivekeep.app.core.persistence.platform.demo.DemoApplicationServices
 import org.archivekeep.app.core.persistence.registry.RegisteredRepository
-import org.archivekeep.app.desktop.ui.dialogs.testing.saveTestingDialogContainerBitmap
-import org.archivekeep.app.desktop.ui.dialogs.testing.setContentInDialogScreenshotContainer
-import org.archivekeep.app.desktop.ui.testing.screenshots.runHighDensityComposeUiTest
 import org.archivekeep.app.ui.domain.wiring.ApplicationProviders
-import org.archivekeep.app.ui.domain.wiring.createApplicationServices
-import org.archivekeep.app.ui.domain.wiring.newServiceWorkExecutorDispatcher
 import org.archivekeep.app.ui.performClickTextInput
 import org.archivekeep.app.ui.utils.PropertiesApplicationMetadata
 import org.archivekeep.app.ui.utils.S3RepositoryTestRepo
+import org.archivekeep.app.ui.utils.env.runHighDensityComposeUiTestWithDemoEnv
+import org.archivekeep.app.ui.utils.screenshots.saveTestingContainerBitmap
+import org.archivekeep.app.ui.utils.screenshots.setContentInDialogScreenshotContainer
 import org.archivekeep.utils.loading.optional.OptionalLoadable
 import org.archivekeep.utils.loading.optional.stateIn
 import org.junit.Rule
@@ -42,18 +36,9 @@ class UnlockRepositoryDialogTestWithS3Repository {
     @OptIn(ExperimentalTestApi::class)
     @Test
     fun testHappyPath() {
-        runHighDensityComposeUiTest {
-            val scope = CoroutineScope(SupervisorJob())
-            val serviceWorkDispatcher = newServiceWorkExecutorDispatcher()
-            val demoApplicationServices =
-                createGraphFactory<DemoApplicationServices.Factory>().create(
-                    scope,
-                    serviceWorkDispatcher = serviceWorkDispatcher,
-                    physicalMediaData = emptyList(),
-                    enableSpeedLimit = false,
-                )
-            val services = createApplicationServices(demoApplicationServices)
-
+        runHighDensityComposeUiTestWithDemoEnv(
+            physicalMediaData = emptyList(),
+        ) { env ->
             val testRepo = S3RepositoryTestRepo(minio.s3URL, "test-bucket", "testuser", "testpassword")
 
             val subjectAtTestURI = S3RepositoryURIData(testRepo.s3URL, testRepo.bucketName).toURI()
@@ -62,14 +47,14 @@ class UnlockRepositoryDialogTestWithS3Repository {
                 testRepo.createBucket()
                 testRepo.create()
 
-                demoApplicationServices.registry.updateRepositories {
+                env.services.registry.updateRepositories {
                     it + setOf(RegisteredRepository(uri = subjectAtTestURI))
                 }
             }
 
             setContentInDialogScreenshotContainer {
                 ApplicationProviders(
-                    applicationServices = services,
+                    applicationServices = env.services,
                     applicationMetadata = PropertiesApplicationMetadata(),
                 ) {
                     UnlockRepositoryDialog(subjectAtTestURI, onUnlock = {}).render(onClose = { })
@@ -79,7 +64,7 @@ class UnlockRepositoryDialogTestWithS3Repository {
             fun onSubmitNode() = onNodeWithText("Authenticate")
 
             run {
-                saveTestingDialogContainerBitmap("dialogs/unlock-repository/01-initial.png")
+                saveTestingContainerBitmap("dialogs/unlock-repository/01-initial.png")
 
                 onNodeWithText("Authentication is needed to access test-bucket repository.").assertExists()
                 onSubmitNode().assertIsNotEnabled()
@@ -89,7 +74,7 @@ class UnlockRepositoryDialogTestWithS3Repository {
                 onNodeWithText("Enter username ...").performClickTextInput(testRepo.accessKey)
                 onNodeWithText("Enter password ...").performClickTextInput(testRepo.secretKey)
 
-                saveTestingDialogContainerBitmap("dialogs/unlock-repository/02-input-provided.png")
+                saveTestingContainerBitmap("dialogs/unlock-repository/02-input-provided.png")
 
                 onSubmitNode().assertIsEnabled()
             }
@@ -98,14 +83,15 @@ class UnlockRepositoryDialogTestWithS3Repository {
                 onSubmitNode().performClick()
 
                 val accessor =
-                    services
+                    env
+                        .services
                         .repositoryService
                         .getRepository(subjectAtTestURI)
                         .optionalAccessorFlow
-                        .stateIn(scope, SharingStarted.Eagerly)
+                        .stateIn(env.scope, SharingStarted.Eagerly)
 
                 eventually(2.seconds) {
-                    saveTestingDialogContainerBitmap("dialogs/unlock-repository/03-final.png")
+                    saveTestingContainerBitmap("dialogs/unlock-repository/03-final.png")
 
                     accessor.value.javaClass shouldBe OptionalLoadable.LoadedAvailable::class.java
 

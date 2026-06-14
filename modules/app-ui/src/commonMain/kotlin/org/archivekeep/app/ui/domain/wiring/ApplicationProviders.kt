@@ -10,24 +10,10 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.job
 import kotlinx.coroutines.plus
-import org.archivekeep.app.core.domain.CoreApplicationServices
 import org.archivekeep.app.ui.domain.services.LocalSharingCoroutineDispatcher
 import org.archivekeep.app.ui.domain.services.createRepositoryOpenService
 import org.archivekeep.app.ui.utils.ApplicationMetadata
 import org.archivekeep.app.ui.utils.LocalApplicationMetadata
-
-@Composable
-fun ApplicationProvidersFromCore(
-    coreApplicationServicesFactory: (scope: CoroutineScope, serviceWorkDispatcher: CoroutineDispatcher) -> CoreApplicationServices,
-    applicationMetadata: ApplicationMetadata,
-    content: @Composable () -> Unit,
-) {
-    ApplicationProviders(
-        applicationServicesFactory = { scope, dispatcher -> createApplicationServices(coreApplicationServicesFactory(scope, dispatcher)) },
-        applicationMetadata = applicationMetadata,
-        content = content,
-    )
-}
 
 @Composable
 fun ApplicationProviders(

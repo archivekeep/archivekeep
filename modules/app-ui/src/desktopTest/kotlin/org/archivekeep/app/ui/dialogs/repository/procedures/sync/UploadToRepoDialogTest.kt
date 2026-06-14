@@ -5,21 +5,18 @@ import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performMouseInput
-import dev.zacsweers.metro.createGraphFactory
 import io.kotest.assertions.nondeterministic.eventually
 import kotlinx.coroutines.runBlocking
-import org.archivekeep.app.core.persistence.platform.demo.DemoApplicationServices
 import org.archivekeep.app.core.persistence.platform.demo.LaptopSSD
 import org.archivekeep.app.core.persistence.platform.demo.Photos
 import org.archivekeep.app.core.persistence.platform.demo.hddB
 import org.archivekeep.app.core.persistence.platform.photosAdjustmentA
 import org.archivekeep.app.core.persistence.platform.photosAdjustmentB
-import org.archivekeep.app.desktop.ui.dialogs.testing.saveTestingDialogContainerBitmap
-import org.archivekeep.app.desktop.ui.dialogs.testing.setContentInDialogScreenshotContainer
-import org.archivekeep.app.desktop.ui.testing.screenshots.runHighDensityComposeUiTest
 import org.archivekeep.app.ui.domain.wiring.ApplicationProviders
-import org.archivekeep.app.ui.domain.wiring.createApplicationServices
 import org.archivekeep.app.ui.utils.PropertiesApplicationMetadata
+import org.archivekeep.app.ui.utils.env.runHighDensityComposeUiTestWithDemoEnv
+import org.archivekeep.app.ui.utils.screenshots.saveTestingContainerBitmap
+import org.archivekeep.app.ui.utils.screenshots.setContentInDialogScreenshotContainer
 import org.archivekeep.files.driver.fixtures.FixtureRepoBuilder
 import org.junit.Test
 import kotlin.time.Duration.Companion.seconds
@@ -28,30 +25,20 @@ class UploadToRepoDialogScreenshotTest {
     @OptIn(ExperimentalTestApi::class)
     @Test
     fun testPreparationAndInput() {
-        runHighDensityComposeUiTest {
-            var demoApplicationServices: DemoApplicationServices? = null
-
+        runHighDensityComposeUiTestWithDemoEnv(
+            physicalMediaData =
+                listOf(
+                    LaptopSSD.copy(
+                        repositories = listOf(Photos.withContents(FixtureRepoBuilder::photosAdjustmentA)),
+                    ),
+                    hddB.copy(
+                        repositories = listOf(Photos.withContents(FixtureRepoBuilder::photosAdjustmentB)),
+                    ),
+                ),
+        ) { env ->
             setContentInDialogScreenshotContainer {
                 ApplicationProviders(
-                    applicationServicesFactory = { scope, dispatcher ->
-                        demoApplicationServices =
-                            createGraphFactory<DemoApplicationServices.Factory>().create(
-                                scope,
-                                dispatcher,
-                                physicalMediaData =
-                                    listOf(
-                                        LaptopSSD.copy(
-                                            repositories = listOf(Photos.withContents(FixtureRepoBuilder::photosAdjustmentA)),
-                                        ),
-                                        hddB.copy(
-                                            repositories = listOf(Photos.withContents(FixtureRepoBuilder::photosAdjustmentB)),
-                                        ),
-                                    ),
-                                enableSpeedLimit = false,
-                            )
-
-                        createApplicationServices(demoApplicationServices)
-                    },
+                    applicationServices = env.services,
                     applicationMetadata = PropertiesApplicationMetadata(),
                 ) {
                     UploadToRepoDialog(
@@ -81,7 +68,7 @@ class UploadToRepoDialogScreenshotTest {
                 // move away mouse
                 onNodeWithText("Photos - copy to", true).performMouseInput { moveTo(Offset.Zero) }
 
-                saveTestingDialogContainerBitmap("dialogs/sync/upload-example.png")
+                saveTestingContainerBitmap("dialogs/sync/upload-example.png")
             }
         }
     }

@@ -5,19 +5,17 @@ import androidx.compose.ui.test.assertIsEnabled
 import androidx.compose.ui.test.assertIsNotEnabled
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
-import dev.zacsweers.metro.createGraphFactory
 import io.kotest.assertions.nondeterministic.eventually
 import kotlinx.coroutines.runBlocking
-import org.archivekeep.app.core.persistence.platform.demo.DemoApplicationServices
 import org.archivekeep.app.core.persistence.platform.demo.Documents
 import org.archivekeep.app.core.persistence.platform.demo.LaptopHDD
 import org.archivekeep.app.core.persistence.platform.demo.LaptopSSD
 import org.archivekeep.app.core.persistence.platform.demo.usbStickAllUnassociated
-import org.archivekeep.app.desktop.ui.dialogs.testing.saveTestingDialogContainerBitmap
-import org.archivekeep.app.desktop.ui.dialogs.testing.setContentInDialogScreenshotContainer
-import org.archivekeep.app.desktop.ui.testing.screenshots.runHighDensityComposeUiTest
-import org.archivekeep.app.ui.domain.wiring.ApplicationProvidersFromCore
+import org.archivekeep.app.ui.domain.wiring.ApplicationProviders
 import org.archivekeep.app.ui.utils.PropertiesApplicationMetadata
+import org.archivekeep.app.ui.utils.env.runHighDensityComposeUiTestWithDemoEnv
+import org.archivekeep.app.ui.utils.screenshots.saveTestingContainerBitmap
+import org.archivekeep.app.ui.utils.screenshots.setContentInDialogScreenshotContainer
 import org.archivekeep.utils.loading.optional.OptionalLoadable
 import org.junit.Test
 import kotlin.test.assertEquals
@@ -27,30 +25,21 @@ class AssociateRepositoryDialogTest {
     @OptIn(ExperimentalTestApi::class)
     @Test
     fun testHappyPath() {
-        runHighDensityComposeUiTest {
+        runHighDensityComposeUiTestWithDemoEnv(
+            physicalMediaData =
+                listOf(
+                    LaptopSSD,
+                    LaptopHDD,
+                    usbStickAllUnassociated,
+                ),
+        ) { env ->
             var closed = false
-            var demoApplicationServices: DemoApplicationServices? = null
 
             val subjectAtTestURI = Documents.uriInStorage(usbStickAllUnassociated.reference)
 
             setContentInDialogScreenshotContainer {
-                ApplicationProvidersFromCore(
-                    coreApplicationServicesFactory = { scope, dispatcher ->
-                        demoApplicationServices =
-                            createGraphFactory<DemoApplicationServices.Factory>().create(
-                                scope,
-                                dispatcher,
-                                physicalMediaData =
-                                    listOf(
-                                        LaptopSSD,
-                                        LaptopHDD,
-                                        usbStickAllUnassociated,
-                                    ),
-                                enableSpeedLimit = false,
-                            )
-
-                        demoApplicationServices
-                    },
+                ApplicationProviders(
+                    applicationServices = env.services,
                     applicationMetadata = PropertiesApplicationMetadata(),
                 ) {
                     AssociateRepositoryDialog(subjectAtTestURI)
@@ -59,7 +48,7 @@ class AssociateRepositoryDialogTest {
             }
 
             run {
-                saveTestingDialogContainerBitmap("dialogs/associate-repository/input-01.png")
+                saveTestingContainerBitmap("dialogs/associate-repository/input-01.png")
 
                 onNodeWithText("Associate").assertIsNotEnabled()
                 onNodeWithText("Laptop / SSD / Documents", true).assertExists()
@@ -68,7 +57,7 @@ class AssociateRepositoryDialogTest {
             run {
                 onNodeWithText("Laptop / SSD / Documents", true).performClick()
 
-                saveTestingDialogContainerBitmap("dialogs/associate-repository/input-02.png")
+                saveTestingContainerBitmap("dialogs/associate-repository/input-02.png")
 
                 onNodeWithText("Associate").assertIsEnabled()
             }
@@ -81,7 +70,7 @@ class AssociateRepositoryDialogTest {
                     assertEquals(
                         "a-documents",
                         (
-                            demoApplicationServices!!
+                            env.services
                                 .repositoryService
                                 .getRepository(subjectAtTestURI)
                                 .metadataFlowWithCaching

@@ -11,33 +11,26 @@ import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import aws.sdk.kotlin.runtime.auth.credentials.StaticCredentialsProvider
-import dev.zacsweers.metro.createGraphFactory
 import io.kotest.matchers.collections.shouldContain
 import io.kotest.matchers.collections.shouldNotContain
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.SupervisorJob
-import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
 import org.archivekeep.app.core.persistence.drivers.s3.S3RepositoryURIData
-import org.archivekeep.app.core.persistence.platform.demo.DemoApplicationServices
 import org.archivekeep.app.core.persistence.platform.demo.phone
 import org.archivekeep.app.core.persistence.platform.demo.usbStickAll
 import org.archivekeep.app.core.persistence.platform.demo.usbStickDocuments
 import org.archivekeep.app.core.persistence.platform.demo.usbStickMusic
 import org.archivekeep.app.core.persistence.registry.RegisteredRepository
-import org.archivekeep.app.desktop.ui.dialogs.testing.saveTestingDialogContainerBitmap
-import org.archivekeep.app.desktop.ui.dialogs.testing.setContentInDialogScreenshotContainer
-import org.archivekeep.app.desktop.ui.testing.screenshots.runHighDensityComposeUiTest
 import org.archivekeep.app.ui.domain.wiring.ApplicationProviders
 import org.archivekeep.app.ui.domain.wiring.ApplicationServices
 import org.archivekeep.app.ui.domain.wiring.LocalWalletOperationLaunchers
 import org.archivekeep.app.ui.domain.wiring.WalletOperationLaunchers
-import org.archivekeep.app.ui.domain.wiring.createApplicationServices
-import org.archivekeep.app.ui.domain.wiring.newServiceWorkExecutorDispatcher
 import org.archivekeep.app.ui.performClickTextInput
 import org.archivekeep.app.ui.utils.PropertiesApplicationMetadata
 import org.archivekeep.app.ui.utils.S3RepositoryTestRepo
+import org.archivekeep.app.ui.utils.env.runHighDensityComposeUiTestWithDemoEnv
+import org.archivekeep.app.ui.utils.screenshots.saveTestingContainerBitmap
+import org.archivekeep.app.ui.utils.screenshots.setContentInDialogScreenshotContainer
 import org.archivekeep.files.driver.s3.EncryptedS3Repository
 import org.archivekeep.files.driver.s3.S3Repository
 import org.junit.Rule
@@ -297,50 +290,35 @@ class AddRemoteRepositoryDialogTestWithS3 {
         val services: ApplicationServices,
     ) : SemanticsNodeInteractionsProvider by composeUiTest {
         fun saveTestingDialogContainerBitmap(filename: String) {
-            composeUiTest.saveTestingDialogContainerBitmap(filename)
+            composeUiTest.saveTestingContainerBitmap(filename)
         }
     }
 
     private fun runDriverTest(block: TestContext.() -> Unit) {
-        runHighDensityComposeUiTest {
-            val job = SupervisorJob()
-            val scope = CoroutineScope(job)
-            val serviceWorkDispatcher = newServiceWorkExecutorDispatcher()
-            val environment =
-                createGraphFactory<DemoApplicationServices.Factory>().create(
-                    scope,
-                    serviceWorkDispatcher,
-                    physicalMediaData = listOf(phone, usbStickAll, usbStickDocuments, usbStickMusic),
-                    enableSpeedLimit = false,
-                )
-            val services = createApplicationServices(environment)
-
-            try {
-                setContentInDialogScreenshotContainer {
-                    ApplicationProviders(
-                        applicationServices = services,
-                        applicationMetadata = PropertiesApplicationMetadata(),
+        runHighDensityComposeUiTestWithDemoEnv(
+            physicalMediaData = listOf(phone, usbStickAll, usbStickDocuments, usbStickMusic),
+        ) { env ->
+            setContentInDialogScreenshotContainer {
+                ApplicationProviders(
+                    applicationServices = env.services,
+                    applicationMetadata = PropertiesApplicationMetadata(),
+                ) {
+                    CompositionLocalProvider(
+                        LocalWalletOperationLaunchers provides
+                            WalletOperationLaunchers(
+                                ensureWalletForWrite = { false },
+                                openUnlockWallet = { error("Shouldn't be called") },
+                            ),
                     ) {
-                        CompositionLocalProvider(
-                            LocalWalletOperationLaunchers provides
-                                WalletOperationLaunchers(
-                                    ensureWalletForWrite = { false },
-                                    openUnlockWallet = { error("Shouldn't be called") },
-                                ),
-                        ) {
-                            AddRemoteRepositoryDialog().render(onClose = {})
-                        }
+                        AddRemoteRepositoryDialog().render(onClose = {})
                     }
                 }
-
-                TestContext(
-                    this@runHighDensityComposeUiTest,
-                    services,
-                ).apply(block)
-            } finally {
-                job.cancel()
-                serviceWorkDispatcher.cancel()
             }
+
+            TestContext(
+                this@runHighDensityComposeUiTestWithDemoEnv,
+                env.services,
+            ).apply(block)
         }
     }
 }

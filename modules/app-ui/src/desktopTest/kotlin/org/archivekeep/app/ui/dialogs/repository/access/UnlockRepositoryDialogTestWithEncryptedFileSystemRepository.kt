@@ -9,27 +9,22 @@ import androidx.compose.ui.test.performClick
 import dev.zacsweers.metro.createDynamicGraphFactory
 import io.kotest.assertions.nondeterministic.eventually
 import io.kotest.matchers.shouldBe
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.json.JsonPrimitive
 import org.archivekeep.app.core.persistence.credentials.ContentEncryptionPassword
 import org.archivekeep.app.core.persistence.drivers.filesystem.FileSystemRepositoryURIData
 import org.archivekeep.app.core.persistence.drivers.filesystem.MountedFileSystem
-import org.archivekeep.app.core.persistence.platform.demo.DemoApplicationServices
 import org.archivekeep.app.core.persistence.registry.RegisteredRepository
-import org.archivekeep.app.desktop.ui.dialogs.testing.saveTestingDialogContainerBitmap
-import org.archivekeep.app.desktop.ui.dialogs.testing.setContentInDialogScreenshotContainer
-import org.archivekeep.app.desktop.ui.testing.screenshots.runHighDensityComposeUiTest
 import org.archivekeep.app.ui.domain.wiring.ApplicationProviders
 import org.archivekeep.app.ui.domain.wiring.LocalWalletOperationLaunchers
 import org.archivekeep.app.ui.domain.wiring.WalletOperationLaunchers
-import org.archivekeep.app.ui.domain.wiring.createApplicationServices
-import org.archivekeep.app.ui.domain.wiring.newServiceWorkExecutorDispatcher
 import org.archivekeep.app.ui.performClickTextInput
 import org.archivekeep.app.ui.utils.FilesystemDriverContainer
 import org.archivekeep.app.ui.utils.PropertiesApplicationMetadata
+import org.archivekeep.app.ui.utils.env.runHighDensityComposeUiTestWithDemoEnv
+import org.archivekeep.app.ui.utils.screenshots.saveTestingContainerBitmap
+import org.archivekeep.app.ui.utils.screenshots.setContentInDialogScreenshotContainer
 import org.archivekeep.files.driver.filesystem.encryptedfiles.EncryptedFileSystemRepository
 import org.archivekeep.utils.loading.optional.OptionalLoadable
 import org.archivekeep.utils.loading.optional.firstFinishedLoading
@@ -37,7 +32,7 @@ import org.archivekeep.utils.loading.optional.stateIn
 import org.junit.Rule
 import org.junit.Test
 import org.junit.rules.TemporaryFolder
-import java.util.UUID
+import java.util.*
 import kotlin.test.assertEquals
 import kotlin.time.Duration.Companion.seconds
 
@@ -59,20 +54,12 @@ class UnlockRepositoryDialogTestWithEncryptedFileSystemRepository {
     @OptIn(ExperimentalTestApi::class)
     @Test
     fun testHappyPath() {
-        runHighDensityComposeUiTest {
-            val scope = CoroutineScope(SupervisorJob())
-            val serviceWorkDispatcher = newServiceWorkExecutorDispatcher()
-            val demoApplicationServices =
-                createDynamicGraphFactory<DemoApplicationServices.Factory>(FilesystemDriverContainer()).create(
-                    scope,
-                    serviceWorkDispatcher = serviceWorkDispatcher,
-                    physicalMediaData = emptyList(),
-                    enableSpeedLimit = false,
-                    mountPoints = mountPoints(),
-                    storagesOverride = emptyList(),
-                )
-            val services = createApplicationServices(demoApplicationServices)
-
+        runHighDensityComposeUiTestWithDemoEnv(
+            factory = createDynamicGraphFactory(FilesystemDriverContainer()),
+            physicalMediaData = emptyList(),
+            mountPoints = mountPoints(),
+            storagesOverride = emptyList(),
+        ) { env ->
             val tempRepoPath = testTempDir.newFolder("encrypted-repo")
 
             val subjectAtTestURI = FileSystemRepositoryURIData(fsUUID = "TEST-TMP-DIR", pathInFS = "encrypted-repo").toURI()
@@ -80,14 +67,14 @@ class UnlockRepositoryDialogTestWithEncryptedFileSystemRepository {
             runBlocking {
                 EncryptedFileSystemRepository.create(tempRepoPath.toPath(), "test-password-123")
 
-                demoApplicationServices.registry.updateRepositories {
+                env.services.registry.updateRepositories {
                     it + setOf(RegisteredRepository(uri = subjectAtTestURI))
                 }
             }
 
             setContentInDialogScreenshotContainer {
                 ApplicationProviders(
-                    applicationServices = services,
+                    applicationServices = env.services,
                     applicationMetadata = PropertiesApplicationMetadata(),
                 ) {
                     UnlockRepositoryDialog(subjectAtTestURI, onUnlock = {}).render(onClose = { })
@@ -98,7 +85,7 @@ class UnlockRepositoryDialogTestWithEncryptedFileSystemRepository {
 
             runBlocking {
                 eventually(1.seconds) {
-                    saveTestingDialogContainerBitmap("dialogs/unlock-repository/provide-password-01-initial.png")
+                    saveTestingContainerBitmap("dialogs/unlock-repository/provide-password-01-initial.png")
 
                     onNodeWithText("Password is needed to access encrypted-repo repository.").assertExists()
                     onSubmitNode().assertIsNotEnabled()
@@ -108,7 +95,7 @@ class UnlockRepositoryDialogTestWithEncryptedFileSystemRepository {
             run {
                 onNodeWithText("Enter password ...").performClickTextInput("test-password-123")
 
-                saveTestingDialogContainerBitmap("dialogs/unlock-repository/provide-password-02-input-provided.png")
+                saveTestingContainerBitmap("dialogs/unlock-repository/provide-password-02-input-provided.png")
 
                 onSubmitNode().assertIsEnabled()
             }
@@ -117,14 +104,15 @@ class UnlockRepositoryDialogTestWithEncryptedFileSystemRepository {
                 onSubmitNode().performClick()
 
                 val accessor =
-                    services
+                    env
+                        .services
                         .repositoryService
                         .getRepository(subjectAtTestURI)
                         .optionalAccessorFlow
-                        .stateIn(scope, SharingStarted.Eagerly)
+                        .stateIn(env.scope, SharingStarted.Eagerly)
 
                 eventually(2.seconds) {
-                    saveTestingDialogContainerBitmap("dialogs/unlock-repository/provide-password-03-final.png")
+                    saveTestingContainerBitmap("dialogs/unlock-repository/provide-password-03-final.png")
 
                     accessor.value.javaClass shouldBe OptionalLoadable.LoadedAvailable::class.java
 
@@ -138,22 +126,14 @@ class UnlockRepositoryDialogTestWithEncryptedFileSystemRepository {
     @OptIn(ExperimentalTestApi::class)
     @Test
     fun testHappyPathWithRemember() {
-        runHighDensityComposeUiTest {
-            val scope = CoroutineScope(SupervisorJob())
-            val serviceWorkDispatcher = newServiceWorkExecutorDispatcher()
-            val demoApplicationServices =
-                createDynamicGraphFactory<DemoApplicationServices.Factory>(FilesystemDriverContainer()).create(
-                    scope,
-                    serviceWorkDispatcher = serviceWorkDispatcher,
-                    physicalMediaData = emptyList(),
-                    enableSpeedLimit = false,
-                    mountPoints = mountPoints(),
-                    storagesOverride = emptyList(),
-                )
-            val services = createApplicationServices(demoApplicationServices)
-
+        runHighDensityComposeUiTestWithDemoEnv(
+            factory = createDynamicGraphFactory(FilesystemDriverContainer()),
+            physicalMediaData = emptyList(),
+            mountPoints = mountPoints(),
+            storagesOverride = emptyList(),
+        ) { env ->
             runBlocking {
-                demoApplicationServices.passwordProtectedWalletDataStore.create("test-wallet-password-${UUID.randomUUID()}")
+                env.demo.passwordProtectedWalletDataStore.create("test-wallet-password-${UUID.randomUUID()}")
             }
 
             val tempRepoPath = testTempDir.newFolder("encrypted-repo")
@@ -163,14 +143,14 @@ class UnlockRepositoryDialogTestWithEncryptedFileSystemRepository {
             runBlocking {
                 EncryptedFileSystemRepository.create(tempRepoPath.toPath(), "test-password-123")
 
-                demoApplicationServices.registry.updateRepositories {
+                env.services.registry.updateRepositories {
                     it + setOf(RegisteredRepository(uri = subjectAtTestURI))
                 }
             }
 
             setContentInDialogScreenshotContainer {
                 ApplicationProviders(
-                    applicationServices = services,
+                    applicationServices = env.services,
                     applicationMetadata = PropertiesApplicationMetadata(),
                 ) {
                     CompositionLocalProvider(
@@ -187,34 +167,39 @@ class UnlockRepositoryDialogTestWithEncryptedFileSystemRepository {
 
             fun onSubmitNode() = onNodeWithText("Authenticate")
 
-            run {
-                saveTestingDialogContainerBitmap("dialogs/unlock-repository/provide-and-remember-password-01-initial.png")
+            runBlocking {
+                saveTestingContainerBitmap("dialogs/unlock-repository/provide-and-remember-password-01-initial.png")
 
-                onNodeWithText("Password is needed to access encrypted-repo repository.").assertExists()
-                onSubmitNode().assertIsNotEnabled()
+                eventually(2.seconds) {
+                    onNodeWithText("Password is needed to access encrypted-repo repository.").assertExists()
+                    onSubmitNode().assertIsNotEnabled()
+                }
             }
 
-            run {
+            runBlocking {
                 onNodeWithText("Enter password ...").performClickTextInput("test-password-123")
                 onNodeWithText("Remember password").performClick()
 
-                saveTestingDialogContainerBitmap("dialogs/unlock-repository/provide-and-remember-password-02-input-provided.png")
+                saveTestingContainerBitmap("dialogs/unlock-repository/provide-and-remember-password-02-input-provided.png")
 
-                onSubmitNode().assertIsEnabled()
+                eventually(2.seconds) {
+                    onSubmitNode().assertIsEnabled()
+                }
             }
 
             runBlocking {
                 onSubmitNode().performClick()
 
                 val accessor =
-                    services
+                    env
+                        .services
                         .repositoryService
                         .getRepository(subjectAtTestURI)
                         .optionalAccessorFlow
-                        .stateIn(scope, SharingStarted.Eagerly)
+                        .stateIn(env.scope, SharingStarted.Eagerly)
 
                 eventually(2.seconds) {
-                    saveTestingDialogContainerBitmap("dialogs/unlock-repository/provide-and-remember-password-03-final.png")
+                    saveTestingContainerBitmap("dialogs/unlock-repository/provide-and-remember-password-03-final.png")
 
                     accessor.value.javaClass shouldBe OptionalLoadable.LoadedAvailable::class.java
 
@@ -225,7 +210,8 @@ class UnlockRepositoryDialogTestWithEncryptedFileSystemRepository {
                 assertEquals(
                     JsonPrimitive("test-password-123"),
                     (
-                        demoApplicationServices
+                        env
+                            .services
                             .credentialsStore
                             .getRepositorySecretsFlow(subjectAtTestURI)
                             .firstFinishedLoading()
@@ -240,20 +226,12 @@ class UnlockRepositoryDialogTestWithEncryptedFileSystemRepository {
     @OptIn(ExperimentalTestApi::class)
     @Test
     fun testWrongPassword() {
-        runHighDensityComposeUiTest {
-            val scope = CoroutineScope(SupervisorJob())
-            val serviceWorkDispatcher = newServiceWorkExecutorDispatcher()
-            val demoApplicationServices =
-                createDynamicGraphFactory<DemoApplicationServices.Factory>(FilesystemDriverContainer()).create(
-                    scope,
-                    serviceWorkDispatcher = serviceWorkDispatcher,
-                    physicalMediaData = emptyList(),
-                    enableSpeedLimit = false,
-                    mountPoints = mountPoints(),
-                    storagesOverride = emptyList(),
-                )
-            val services = createApplicationServices(demoApplicationServices)
-
+        runHighDensityComposeUiTestWithDemoEnv(
+            factory = createDynamicGraphFactory(FilesystemDriverContainer()),
+            physicalMediaData = emptyList(),
+            mountPoints = mountPoints(),
+            storagesOverride = emptyList(),
+        ) { env ->
             val tempRepoPath = testTempDir.newFolder("encrypted-repo")
 
             val subjectAtTestURI = FileSystemRepositoryURIData(fsUUID = "TEST-TMP-DIR", pathInFS = "encrypted-repo").toURI()
@@ -261,14 +239,14 @@ class UnlockRepositoryDialogTestWithEncryptedFileSystemRepository {
             runBlocking {
                 EncryptedFileSystemRepository.create(tempRepoPath.toPath(), "test-password-123")
 
-                demoApplicationServices.registry.updateRepositories {
+                env.services.registry.updateRepositories {
                     it + setOf(RegisteredRepository(uri = subjectAtTestURI))
                 }
             }
 
             setContentInDialogScreenshotContainer {
                 ApplicationProviders(
-                    applicationServices = services,
+                    applicationServices = env.services,
                     applicationMetadata = PropertiesApplicationMetadata(),
                 ) {
                     UnlockRepositoryDialog(subjectAtTestURI, onUnlock = {}).render(onClose = { })
@@ -278,7 +256,7 @@ class UnlockRepositoryDialogTestWithEncryptedFileSystemRepository {
             fun onSubmitNode() = onNodeWithText("Authenticate")
 
             run {
-                saveTestingDialogContainerBitmap("dialogs/unlock-repository/provide-incorrect-password-01-initial.png")
+                saveTestingContainerBitmap("dialogs/unlock-repository/provide-incorrect-password-01-initial.png")
 
                 onNodeWithText("Password is needed to access encrypted-repo repository.").assertExists()
                 onSubmitNode().assertIsNotEnabled()
@@ -287,7 +265,7 @@ class UnlockRepositoryDialogTestWithEncryptedFileSystemRepository {
             run {
                 onNodeWithText("Enter password ...").performClickTextInput("test-password-wrong")
 
-                saveTestingDialogContainerBitmap("dialogs/unlock-repository/provide-incorrect-password-02-input-provided.png")
+                saveTestingContainerBitmap("dialogs/unlock-repository/provide-incorrect-password-02-input-provided.png")
 
                 onSubmitNode().assertIsEnabled()
             }
@@ -296,7 +274,7 @@ class UnlockRepositoryDialogTestWithEncryptedFileSystemRepository {
                 onSubmitNode().performClick()
 
                 eventually(2.seconds) {
-                    saveTestingDialogContainerBitmap("dialogs/unlock-repository/provide-incorrect-password-03-final.png")
+                    saveTestingContainerBitmap("dialogs/unlock-repository/provide-incorrect-password-03-final.png")
 
                     onNodeWithText("Entered password isn't correct.").assertExists()
                     onSubmitNode().assertIsEnabled()

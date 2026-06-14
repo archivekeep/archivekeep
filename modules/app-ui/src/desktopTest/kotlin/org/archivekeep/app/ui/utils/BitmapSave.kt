@@ -1,4 +1,4 @@
-package org.archivekeep.app.desktop.ui.testing
+package org.archivekeep.app.ui.utils
 
 import java.awt.image.BufferedImage
 import java.nio.file.Path

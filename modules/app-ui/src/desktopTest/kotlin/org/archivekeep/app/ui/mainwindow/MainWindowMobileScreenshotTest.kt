@@ -1,4 +1,4 @@
-package org.archivekeep.app.desktop.ui
+package org.archivekeep.app.ui.mainwindow
 
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.windowsizeclass.ExperimentalMaterial3WindowSizeClassApi
@@ -7,18 +7,16 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
-import dev.zacsweers.metro.createGraphFactory
-import org.archivekeep.app.core.persistence.platform.demo.DemoApplicationServices
 import org.archivekeep.app.core.persistence.platform.demo.phone
 import org.archivekeep.app.core.persistence.platform.demo.usbStickAll
 import org.archivekeep.app.core.persistence.platform.demo.usbStickDocuments
 import org.archivekeep.app.core.persistence.platform.demo.usbStickMusic
-import org.archivekeep.app.desktop.ui.testing.screenshots.runHighDensityComposeUiTest
-import org.archivekeep.app.desktop.ui.testing.screenshots.saveTestingContainerBitmap
-import org.archivekeep.app.desktop.ui.testing.screenshots.setContentInMobileScreenshotContainer
 import org.archivekeep.app.ui.MainWindowContent
-import org.archivekeep.app.ui.domain.wiring.ApplicationProvidersFromCore
+import org.archivekeep.app.ui.domain.wiring.ApplicationProviders
 import org.archivekeep.app.ui.utils.PropertiesApplicationMetadata
+import org.archivekeep.app.ui.utils.env.runHighDensityComposeUiTestWithDemoEnv
+import org.archivekeep.app.ui.utils.screenshots.saveTestingContainerBitmap
+import org.archivekeep.app.ui.utils.screenshots.setContentInMobileScreenshotContainer
 import org.junit.Test
 
 class MainWindowMobileScreenshotTest {
@@ -28,22 +26,17 @@ class MainWindowMobileScreenshotTest {
         val mobileMainWindowWidth = 400.dp
         val mobileMainWindowHeight = 750.dp
 
-        runHighDensityComposeUiTest {
+        runHighDensityComposeUiTestWithDemoEnv(
+            physicalMediaData = listOf(phone, usbStickAll, usbStickDocuments, usbStickMusic),
+        ) { env ->
             setContentInMobileScreenshotContainer(
                 Modifier.size(
                     mobileMainWindowWidth,
                     mobileMainWindowHeight,
                 ),
             ) {
-                ApplicationProvidersFromCore(
-                    coreApplicationServicesFactory = { scope, dispatcher ->
-                        createGraphFactory<DemoApplicationServices.Factory>().create(
-                            scope,
-                            dispatcher,
-                            physicalMediaData = listOf(phone, usbStickAll, usbStickDocuments, usbStickMusic),
-                            enableSpeedLimit = false,
-                        )
-                    },
+                ApplicationProviders(
+                    applicationServices = env.services,
                     applicationMetadata = PropertiesApplicationMetadata(),
                 ) {
                     MainWindowContent(

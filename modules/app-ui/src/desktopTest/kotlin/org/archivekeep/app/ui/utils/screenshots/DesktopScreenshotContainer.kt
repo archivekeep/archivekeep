@@ -1,4 +1,4 @@
-package org.archivekeep.app.desktop.ui.testing.screenshots
+package org.archivekeep.app.ui.utils.screenshots
 
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable

@@ -1,4 +1,4 @@
-package org.archivekeep.app.desktop.ui.testing.screenshots
+package org.archivekeep.app.ui.utils.screenshots
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.runtime.Composable
@@ -19,11 +19,26 @@ import androidx.compose.ui.test.SkikoComposeUiTest
 import androidx.compose.ui.test.runSkikoComposeUiTest
 import androidx.compose.ui.unit.Density
 import kotlinx.coroutines.runBlocking
-import org.archivekeep.app.desktop.ui.testing.save
+import org.archivekeep.app.ui.utils.save
 import kotlin.io.path.Path
 import kotlin.io.path.createParentDirectories
 
 private val semanticsKey = SemanticsPropertyKey<GraphicsLayer>("ScreenshotContainerGraphicsLayer")
+
+@Composable
+fun Modifier.screenshootContainer(): Modifier {
+    val graphicsLayer = rememberGraphicsLayer()
+
+    return this
+        .semantics {
+            set(semanticsKey, graphicsLayer)
+        }.drawWithContent {
+            graphicsLayer.record {
+                this@drawWithContent.drawContent()
+            }
+            drawLayer(graphicsLayer)
+        }
+}
 
 @Composable
 fun ScreenshotContainer(
@@ -31,23 +46,8 @@ fun ScreenshotContainer(
     innerModifier: Modifier = Modifier,
     content: @Composable () -> Unit,
 ) {
-    val graphicsLayer = rememberGraphicsLayer()
-
-    Box {
-        Box(
-            modifier =
-                modifier
-                    .semantics {
-                        set(semanticsKey, graphicsLayer)
-                    }.drawWithContent {
-                        graphicsLayer.record {
-                            this@drawWithContent.drawContent()
-                        }
-                        drawLayer(graphicsLayer)
-                    }.then(innerModifier),
-        ) {
-            content()
-        }
+    Box(modifier.screenshootContainer().then(innerModifier)) {
+        content()
     }
 }
 

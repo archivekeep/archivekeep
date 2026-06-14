@@ -9,24 +9,22 @@ import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performTextClearance
 import androidx.compose.ui.test.performTextInput
-import dev.zacsweers.metro.createGraphFactory
 import io.kotest.assertions.nondeterministic.eventually
 import kotlinx.coroutines.runBlocking
 import org.archivekeep.app.core.persistence.drivers.filesystem.FileSystemStorageType
 import org.archivekeep.app.core.persistence.drivers.filesystem.MountedFileSystem
-import org.archivekeep.app.core.persistence.platform.demo.DemoApplicationServices
 import org.archivekeep.app.core.persistence.platform.demo.phone
 import org.archivekeep.app.core.persistence.platform.demo.usbStickAll
 import org.archivekeep.app.core.persistence.platform.demo.usbStickDocuments
 import org.archivekeep.app.core.persistence.platform.demo.usbStickMusic
-import org.archivekeep.app.desktop.ui.dialogs.testing.saveTestingDialogContainerBitmap
-import org.archivekeep.app.desktop.ui.dialogs.testing.setContentInDialogScreenshotContainer
-import org.archivekeep.app.desktop.ui.testing.screenshots.runHighDensityComposeUiTest
-import org.archivekeep.app.ui.domain.wiring.ApplicationProvidersFromCore
+import org.archivekeep.app.ui.domain.wiring.ApplicationProviders
 import org.archivekeep.app.ui.fixedFilesystemDirectoryPicker
 import org.archivekeep.app.ui.performClickTextInput
 import org.archivekeep.app.ui.utils.PropertiesApplicationMetadata
+import org.archivekeep.app.ui.utils.env.runHighDensityComposeUiTestWithDemoEnv
 import org.archivekeep.app.ui.utils.filesystem.LocalFilesystemDirectoryPicker
+import org.archivekeep.app.ui.utils.screenshots.saveTestingContainerBitmap
+import org.archivekeep.app.ui.utils.screenshots.setContentInDialogScreenshotContainer
 import org.archivekeep.files.driver.filesystem.encryptedfiles.EncryptedFileSystemRepository
 import org.archivekeep.files.driver.filesystem.files.FilesRepo
 import org.archivekeep.files.driver.filesystem.files.FilesSqliteRepo
@@ -55,18 +53,13 @@ class AddFileSystemRepositoryDialogTest {
     @OptIn(ExperimentalTestApi::class)
     @Test
     fun testHappyInitSQLiteFlow() {
-        runHighDensityComposeUiTest {
+        runHighDensityComposeUiTestWithDemoEnv(
+            physicalMediaData = listOf(phone, usbStickAll, usbStickDocuments, usbStickMusic),
+            mountPoints = mountPoints(),
+        ) { env ->
             setContentInDialogScreenshotContainer {
-                ApplicationProvidersFromCore(
-                    coreApplicationServicesFactory = { scope, dispatcher ->
-                        createGraphFactory<DemoApplicationServices.Factory>().create(
-                            scope,
-                            dispatcher,
-                            physicalMediaData = listOf(phone, usbStickAll, usbStickDocuments, usbStickMusic),
-                            enableSpeedLimit = false,
-                            mountPoints = mountPoints(),
-                        )
-                    },
+                ApplicationProviders(
+                    applicationServices = env.services,
                     applicationMetadata = PropertiesApplicationMetadata(),
                 ) {
                     CompositionLocalProvider(
@@ -81,7 +74,7 @@ class AddFileSystemRepositoryDialogTest {
             }
 
             run {
-                saveTestingDialogContainerBitmap("dialogs/add-filesystem-repository/init-plain-sqlite-01-selection.png")
+                saveTestingContainerBitmap("dialogs/add-filesystem-repository/init-plain-sqlite-01-selection.png")
 
                 onNodeWithText("local-archives/test-repo", true).assertExists()
                 onNodeWithText("The directory is not a repository, yet. Continue to initialize it as an archive repository.").assertExists()
@@ -92,7 +85,7 @@ class AddFileSystemRepositoryDialogTest {
                 onNodeWithText("Init").performClick()
 
                 eventually(2.seconds) {
-                    saveTestingDialogContainerBitmap("dialogs/add-filesystem-repository/init-plain-sqlite-02-finished.png")
+                    saveTestingContainerBitmap("dialogs/add-filesystem-repository/init-plain-sqlite-02-finished.png")
 
                     onNodeWithText("Directory initialized successfully as repository.").assertExists()
                     onNodeWithText("Added successfully.").assertExists()
@@ -109,18 +102,13 @@ class AddFileSystemRepositoryDialogTest {
     @OptIn(ExperimentalTestApi::class)
     @Test
     fun testHappyInitChecksumFilesFlow() {
-        runHighDensityComposeUiTest {
+        runHighDensityComposeUiTestWithDemoEnv(
+            physicalMediaData = listOf(phone, usbStickAll, usbStickDocuments, usbStickMusic),
+            mountPoints = mountPoints(),
+        ) { env ->
             setContentInDialogScreenshotContainer {
-                ApplicationProvidersFromCore(
-                    coreApplicationServicesFactory = { scope, dispatcher ->
-                        createGraphFactory<DemoApplicationServices.Factory>().create(
-                            scope,
-                            dispatcher,
-                            physicalMediaData = listOf(phone, usbStickAll, usbStickDocuments, usbStickMusic),
-                            enableSpeedLimit = false,
-                            mountPoints = mountPoints(),
-                        )
-                    },
+                ApplicationProviders(
+                    applicationServices = env.services,
                     applicationMetadata = PropertiesApplicationMetadata(),
                 ) {
                     CompositionLocalProvider(
@@ -135,7 +123,7 @@ class AddFileSystemRepositoryDialogTest {
             }
 
             run {
-                saveTestingDialogContainerBitmap("dialogs/add-filesystem-repository/init-plain-checksum-files-01-selection.png")
+                saveTestingContainerBitmap("dialogs/add-filesystem-repository/init-plain-checksum-files-01-selection.png")
 
                 onNodeWithText("local-archives/test-repo", true).assertExists()
                 onNodeWithText("The directory is not a repository, yet. Continue to initialize it as an archive repository.").assertExists()
@@ -146,14 +134,14 @@ class AddFileSystemRepositoryDialogTest {
             runBlocking {
                 onNodeWithText("Individual checksum files").performClick()
 
-                saveTestingDialogContainerBitmap("dialogs/add-filesystem-repository/init-plain-checksum-files-02-checksum-files.png")
+                saveTestingContainerBitmap("dialogs/add-filesystem-repository/init-plain-checksum-files-02-checksum-files.png")
             }
 
             runBlocking {
                 onNodeWithText("Init").performClick()
 
                 eventually(2.seconds) {
-                    saveTestingDialogContainerBitmap("dialogs/add-filesystem-repository/init-plain-checksum-files-03-finished.png")
+                    saveTestingContainerBitmap("dialogs/add-filesystem-repository/init-plain-checksum-files-03-finished.png")
 
                     onNodeWithText("Directory initialized successfully as repository.").assertExists()
                     onNodeWithText("Added successfully.").assertExists()
@@ -170,18 +158,13 @@ class AddFileSystemRepositoryDialogTest {
     @OptIn(ExperimentalTestApi::class)
     @Test
     fun testHappyInitEncryptedFlow() {
-        runHighDensityComposeUiTest {
+        runHighDensityComposeUiTestWithDemoEnv(
+            physicalMediaData = listOf(phone, usbStickAll, usbStickDocuments, usbStickMusic),
+            mountPoints = mountPoints(),
+        ) { env ->
             setContentInDialogScreenshotContainer {
-                ApplicationProvidersFromCore(
-                    coreApplicationServicesFactory = { scope, dispatcher ->
-                        createGraphFactory<DemoApplicationServices.Factory>().create(
-                            scope,
-                            dispatcher,
-                            physicalMediaData = listOf(phone, usbStickAll, usbStickDocuments, usbStickMusic),
-                            enableSpeedLimit = false,
-                            mountPoints = mountPoints(),
-                        )
-                    },
+                ApplicationProviders(
+                    applicationServices = env.services,
                     applicationMetadata = PropertiesApplicationMetadata(),
                 ) {
                     CompositionLocalProvider(
@@ -198,7 +181,7 @@ class AddFileSystemRepositoryDialogTest {
             fun onInitSubmitButton() = onNodeWithText("Init")
 
             run {
-                saveTestingDialogContainerBitmap("dialogs/add-filesystem-repository/init-encrypted-01-selection.png")
+                saveTestingContainerBitmap("dialogs/add-filesystem-repository/init-encrypted-01-selection.png")
 
                 onNodeWithText("local-archives/test-repo", true).assertExists()
                 onNodeWithText("The directory is not a repository, yet. Continue to initialize it as an archive repository.").assertExists()
@@ -208,7 +191,7 @@ class AddFileSystemRepositoryDialogTest {
             run {
                 onNodeWithText("Encrypted (custom format)").performClick()
 
-                saveTestingDialogContainerBitmap("dialogs/add-filesystem-repository/init-encrypted-02-switch-to-encrypted.png")
+                saveTestingContainerBitmap("dialogs/add-filesystem-repository/init-encrypted-02-switch-to-encrypted.png")
 
                 onNodeWithText("Enter password ...").assertExists()
                 onNodeWithText("Verify password ...").assertExists()
@@ -218,7 +201,7 @@ class AddFileSystemRepositoryDialogTest {
             run {
                 onNodeWithText("Enter password ...").performClickTextInput("test-create-password")
 
-                saveTestingDialogContainerBitmap("dialogs/add-filesystem-repository/init-encrypted-03-1-first-password.png")
+                saveTestingContainerBitmap("dialogs/add-filesystem-repository/init-encrypted-03-1-first-password.png")
 
                 onInitSubmitButton().assertIsNotEnabled()
             }
@@ -226,7 +209,7 @@ class AddFileSystemRepositoryDialogTest {
             run {
                 onNodeWithText("Verify password ...").performClickTextInput("wrong-password")
 
-                saveTestingDialogContainerBitmap("dialogs/add-filesystem-repository/init-encrypted-03-2-wrong-password.png")
+                saveTestingContainerBitmap("dialogs/add-filesystem-repository/init-encrypted-03-2-wrong-password.png")
 
                 onInitSubmitButton().assertIsNotEnabled()
             }
@@ -238,7 +221,7 @@ class AddFileSystemRepositoryDialogTest {
                     performTextInput("test-create-password")
                 }
 
-                saveTestingDialogContainerBitmap("dialogs/add-filesystem-repository/init-encrypted-03-3-verify-password.png")
+                saveTestingContainerBitmap("dialogs/add-filesystem-repository/init-encrypted-03-3-verify-password.png")
 
                 onInitSubmitButton().assertIsEnabled()
             }
@@ -247,7 +230,7 @@ class AddFileSystemRepositoryDialogTest {
                 onNodeWithText("Init").performClick()
 
                 eventually(2.seconds) {
-                    saveTestingDialogContainerBitmap("dialogs/add-filesystem-repository/init-encrypted-04-finished.png")
+                    saveTestingContainerBitmap("dialogs/add-filesystem-repository/init-encrypted-04-finished.png")
 
                     onNodeWithText("Directory initialized successfully as repository.").assertExists()
                     onNodeWithText("Added successfully.").assertExists()
@@ -269,23 +252,18 @@ class AddFileSystemRepositoryDialogTest {
     @OptIn(ExperimentalTestApi::class)
     @Test
     fun testHappyAddFlowForPlainRepository() {
-        runHighDensityComposeUiTest {
+        runHighDensityComposeUiTestWithDemoEnv(
+            physicalMediaData = listOf(phone, usbStickAll, usbStickDocuments, usbStickMusic),
+            mountPoints = mountPoints(),
+        ) { env ->
             val repoPath = testTempDir.newFolder("local-archives/test-repo").path
             runBlocking {
                 FilesRepo.create(Path(repoPath))
             }
 
             setContentInDialogScreenshotContainer {
-                ApplicationProvidersFromCore(
-                    coreApplicationServicesFactory = { scope, dispatcher ->
-                        createGraphFactory<DemoApplicationServices.Factory>().create(
-                            scope,
-                            dispatcher,
-                            physicalMediaData = listOf(phone, usbStickAll, usbStickDocuments, usbStickMusic),
-                            enableSpeedLimit = false,
-                            mountPoints = mountPoints(),
-                        )
-                    },
+                ApplicationProviders(
+                    applicationServices = env.services,
                     applicationMetadata = PropertiesApplicationMetadata(),
                 ) {
                     CompositionLocalProvider(
@@ -299,7 +277,7 @@ class AddFileSystemRepositoryDialogTest {
             }
 
             run {
-                saveTestingDialogContainerBitmap("dialogs/add-filesystem-repository/add-01-input.png")
+                saveTestingContainerBitmap("dialogs/add-filesystem-repository/add-01-input.png")
 
                 onNodeWithText("local-archives/test-repo", true).assertExists()
                 onNodeWithText("Repository can be added.").assertExists()
@@ -310,7 +288,7 @@ class AddFileSystemRepositoryDialogTest {
                 onNodeWithText("Add").performClick()
 
                 eventually(2.seconds) {
-                    saveTestingDialogContainerBitmap("dialogs/add-filesystem-repository/add-02-finished.png")
+                    saveTestingContainerBitmap("dialogs/add-filesystem-repository/add-02-finished.png")
 
                     onNodeWithText("Added successfully.").assertExists()
                     onNodeWithText("Add").assertDoesNotExist()
@@ -322,23 +300,18 @@ class AddFileSystemRepositoryDialogTest {
     @OptIn(ExperimentalTestApi::class)
     @Test
     fun testHappyAddFlowForEncryptedRepository() {
-        runHighDensityComposeUiTest {
+        runHighDensityComposeUiTestWithDemoEnv(
+            physicalMediaData = listOf(phone, usbStickAll, usbStickDocuments, usbStickMusic),
+            mountPoints = mountPoints(),
+        ) { env ->
             val repoPath = testTempDir.newFolder("local-archives/test-encrypted-repo").path
             runBlocking {
                 EncryptedFileSystemRepository.create(Path(repoPath), "test-add-password")
             }
 
             setContentInDialogScreenshotContainer {
-                ApplicationProvidersFromCore(
-                    coreApplicationServicesFactory = { scope, dispatcher ->
-                        createGraphFactory<DemoApplicationServices.Factory>().create(
-                            scope,
-                            dispatcher,
-                            physicalMediaData = listOf(phone, usbStickAll, usbStickDocuments, usbStickMusic),
-                            enableSpeedLimit = false,
-                            mountPoints = mountPoints(),
-                        )
-                    },
+                ApplicationProviders(
+                    applicationServices = env.services,
                     applicationMetadata = PropertiesApplicationMetadata(),
                 ) {
                     CompositionLocalProvider(
@@ -352,7 +325,7 @@ class AddFileSystemRepositoryDialogTest {
             }
 
             run {
-                saveTestingDialogContainerBitmap("dialogs/add-filesystem-repository/add-encrypted-01-after-selection.png")
+                saveTestingContainerBitmap("dialogs/add-filesystem-repository/add-encrypted-01-after-selection.png")
 
                 onNodeWithText("local-archives/test-encrypted-repo", true).assertExists()
                 onNodeWithText("The repository is encrypted, and password protected.").assertExists()
@@ -364,7 +337,7 @@ class AddFileSystemRepositoryDialogTest {
             run {
                 onNodeWithText("Enter password ...").performClickTextInput("test-add-password")
 
-                saveTestingDialogContainerBitmap("dialogs/add-filesystem-repository/add-encrypted-02-input-password.png")
+                saveTestingContainerBitmap("dialogs/add-filesystem-repository/add-encrypted-02-input-password.png")
 
                 onNodeWithText("Unlock").assertIsEnabled()
                 onNodeWithText("Add").assertIsNotEnabled()
@@ -374,7 +347,7 @@ class AddFileSystemRepositoryDialogTest {
                 onNodeWithText("Unlock").performClick()
 
                 eventually(2.seconds) {
-                    saveTestingDialogContainerBitmap("dialogs/add-filesystem-repository/add-encrypted-03-unlocked.png")
+                    saveTestingContainerBitmap("dialogs/add-filesystem-repository/add-encrypted-03-unlocked.png")
 
                     onNodeWithText("Successfully unlocked.").assertExists()
                     onNodeWithText("Unlock").assertDoesNotExist()
@@ -386,7 +359,7 @@ class AddFileSystemRepositoryDialogTest {
                 onNodeWithText("Add").performClick()
 
                 eventually(2.seconds) {
-                    saveTestingDialogContainerBitmap("dialogs/add-filesystem-repository/add-encrypted-04-finished.png")
+                    saveTestingContainerBitmap("dialogs/add-filesystem-repository/add-encrypted-04-finished.png")
 
                     onNodeWithText("Added successfully.").assertExists()
                     onNodeWithText("Add").assertDoesNotExist()
@@ -398,23 +371,18 @@ class AddFileSystemRepositoryDialogTest {
     @OptIn(ExperimentalTestApi::class)
     @Test
     fun testIncorrectPasswordAddFlowForEncryptedRepository() {
-        runHighDensityComposeUiTest {
+        runHighDensityComposeUiTestWithDemoEnv(
+            physicalMediaData = listOf(phone, usbStickAll, usbStickDocuments, usbStickMusic),
+            mountPoints = mountPoints(),
+        ) { env ->
             val repoPath = testTempDir.newFolder("local-archives/test-encrypted-repo").path
             runBlocking {
                 EncryptedFileSystemRepository.create(Path(repoPath), "test-add-password")
             }
 
             setContentInDialogScreenshotContainer {
-                ApplicationProvidersFromCore(
-                    coreApplicationServicesFactory = { scope, dispatcher ->
-                        createGraphFactory<DemoApplicationServices.Factory>().create(
-                            scope,
-                            dispatcher,
-                            physicalMediaData = listOf(phone, usbStickAll, usbStickDocuments, usbStickMusic),
-                            enableSpeedLimit = false,
-                            mountPoints = mountPoints(),
-                        )
-                    },
+                ApplicationProviders(
+                    applicationServices = env.services,
                     applicationMetadata = PropertiesApplicationMetadata(),
                 ) {
                     CompositionLocalProvider(
@@ -428,7 +396,7 @@ class AddFileSystemRepositoryDialogTest {
             }
 
             run {
-                saveTestingDialogContainerBitmap("dialogs/add-filesystem-repository/add-wrong-password-encrypted-01-after-selection.png")
+                saveTestingContainerBitmap("dialogs/add-filesystem-repository/add-wrong-password-encrypted-01-after-selection.png")
 
                 onNodeWithText("local-archives/test-encrypted-repo", true).assertExists()
                 onNodeWithText("The repository is encrypted, and password protected.").assertExists()
@@ -440,7 +408,7 @@ class AddFileSystemRepositoryDialogTest {
             run {
                 onNodeWithText("Enter password ...").performClickTextInput("some-wrong-password")
 
-                saveTestingDialogContainerBitmap("dialogs/add-filesystem-repository/add-wrong-password-encrypted-02-input-password.png")
+                saveTestingContainerBitmap("dialogs/add-filesystem-repository/add-wrong-password-encrypted-02-input-password.png")
 
                 onNodeWithText("Unlock").assertIsEnabled()
                 onNodeWithText("Add").assertIsNotEnabled()
@@ -450,7 +418,7 @@ class AddFileSystemRepositoryDialogTest {
                 onNodeWithText("Unlock").performClick()
 
                 eventually(2.seconds) {
-                    saveTestingDialogContainerBitmap("dialogs/add-filesystem-repository/add-wrong-password-encrypted-03-failed.png")
+                    saveTestingContainerBitmap("dialogs/add-filesystem-repository/add-wrong-password-encrypted-03-failed.png")
 
                     onNodeWithText("Entered password isn't correct.").assertExists()
                     onNodeWithText("Unlock").assertIsEnabled()

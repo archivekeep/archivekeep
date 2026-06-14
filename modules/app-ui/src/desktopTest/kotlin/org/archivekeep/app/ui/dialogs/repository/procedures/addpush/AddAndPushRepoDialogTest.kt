@@ -5,21 +5,18 @@ import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performMouseInput
-import dev.zacsweers.metro.createGraphFactory
 import io.kotest.assertions.nondeterministic.eventually
 import kotlinx.coroutines.runBlocking
 import org.archivekeep.app.core.persistence.platform.demo.BackBlaze
-import org.archivekeep.app.core.persistence.platform.demo.DemoApplicationServices
 import org.archivekeep.app.core.persistence.platform.demo.Documents
 import org.archivekeep.app.core.persistence.platform.demo.LaptopSSD
 import org.archivekeep.app.core.persistence.platform.demo.hddB
 import org.archivekeep.app.core.persistence.platform.demo.ssdKeyChain
-import org.archivekeep.app.desktop.ui.dialogs.testing.saveTestingDialogContainerBitmap
-import org.archivekeep.app.desktop.ui.dialogs.testing.setContentInDialogScreenshotContainer
-import org.archivekeep.app.desktop.ui.testing.screenshots.runHighDensityComposeUiTest
 import org.archivekeep.app.ui.domain.wiring.ApplicationProviders
-import org.archivekeep.app.ui.domain.wiring.createApplicationServices
 import org.archivekeep.app.ui.utils.PropertiesApplicationMetadata
+import org.archivekeep.app.ui.utils.env.runHighDensityComposeUiTestWithDemoEnv
+import org.archivekeep.app.ui.utils.screenshots.saveTestingContainerBitmap
+import org.archivekeep.app.ui.utils.screenshots.setContentInDialogScreenshotContainer
 import org.junit.Test
 import kotlin.time.Duration.Companion.seconds
 
@@ -27,44 +24,35 @@ class AddAndPushRepoDialogScreenshotTest {
     @OptIn(ExperimentalTestApi::class)
     @Test
     fun testPreparationAndInput() {
-        runHighDensityComposeUiTest {
-            var demoApplicationServices: DemoApplicationServices? = null
-
+        runHighDensityComposeUiTestWithDemoEnv(
+            physicalMediaData =
+                listOf(
+                    LaptopSSD.copy(
+                        repositories =
+                            listOf(
+                                Documents
+                                    .withNewContents {
+                                        addUncommitted("Contracting/Invoices/2024/01.PDF", "Invoices/2024/01.PDF")
+                                        addUncommitted("Contracting/Invoices/2024/02.PDF", "Invoices/2024/02.PDF")
+                                        addMissing("Invoices/2024/01.PDF")
+                                        addMissing("Invoices/2024/02.PDF")
+                                        addUncommitted("2024/08/01.JPG")
+                                        addUncommitted("2024/08/02.JPG")
+                                        addUncommitted("something-unwanted.txt")
+                                    }.localInMemoryFactory(),
+                            ),
+                    ),
+                    ssdKeyChain.copy(repositories = listOf(Documents.withNewContents { })),
+                    hddB.copy(repositories = listOf(Documents.withNewContents { })),
+                ),
+            onlineStoragesData =
+                listOf(
+                    BackBlaze.copy(repositories = listOf(Documents.withNewContents {})),
+                ),
+        ) { env ->
             setContentInDialogScreenshotContainer {
                 ApplicationProviders(
-                    applicationServicesFactory = { scope, dispatcher ->
-                        demoApplicationServices =
-                            createGraphFactory<DemoApplicationServices.Factory>().create(
-                                scope,
-                                dispatcher,
-                                physicalMediaData =
-                                    listOf(
-                                        LaptopSSD.copy(
-                                            repositories =
-                                                listOf(
-                                                    Documents
-                                                        .withNewContents {
-                                                            addUncommitted("Contracting/Invoices/2024/01.PDF", "Invoices/2024/01.PDF")
-                                                            addUncommitted("Contracting/Invoices/2024/02.PDF", "Invoices/2024/02.PDF")
-                                                            addMissing("Invoices/2024/01.PDF")
-                                                            addMissing("Invoices/2024/02.PDF")
-                                                            addUncommitted("2024/08/01.JPG")
-                                                            addUncommitted("2024/08/02.JPG")
-                                                            addUncommitted("something-unwanted.txt")
-                                                        }.localInMemoryFactory(),
-                                                ),
-                                        ),
-                                        ssdKeyChain.copy(repositories = listOf(Documents.withNewContents { })),
-                                        hddB.copy(repositories = listOf(Documents.withNewContents { })),
-                                    ),
-                                onlineStoragesData =
-                                    listOf(
-                                        BackBlaze.copy(repositories = listOf(Documents.withNewContents {})),
-                                    ),
-                                enableSpeedLimit = false,
-                            )
-                        createApplicationServices(demoApplicationServices)
-                    },
+                    applicationServices = env.services,
                     applicationMetadata = PropertiesApplicationMetadata(),
                 ) {
                     AddAndPushRepoDialog(
@@ -96,7 +84,7 @@ class AddAndPushRepoDialogScreenshotTest {
                 // move away mouse
                 title().performMouseInput { moveTo(Offset.Zero) }
 
-                saveTestingDialogContainerBitmap("dialogs/add-and-push/example.png")
+                saveTestingContainerBitmap("dialogs/add-and-push/example.png")
             }
         }
     }

@@ -5,18 +5,16 @@ import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performMouseInput
-import dev.zacsweers.metro.createGraphFactory
 import io.kotest.assertions.nondeterministic.eventually
 import kotlinx.coroutines.runBlocking
-import org.archivekeep.app.core.persistence.platform.demo.DemoApplicationServices
 import org.archivekeep.app.core.persistence.platform.demo.LaptopSSD
 import org.archivekeep.app.core.persistence.platform.demo.Photos
 import org.archivekeep.app.core.persistence.platform.demo.hddB
-import org.archivekeep.app.desktop.ui.dialogs.testing.saveTestingDialogContainerBitmap
-import org.archivekeep.app.desktop.ui.dialogs.testing.setContentInDialogScreenshotContainer
-import org.archivekeep.app.desktop.ui.testing.screenshots.runHighDensityComposeUiTest
-import org.archivekeep.app.ui.domain.wiring.ApplicationProvidersFromCore
+import org.archivekeep.app.ui.domain.wiring.ApplicationProviders
 import org.archivekeep.app.ui.utils.PropertiesApplicationMetadata
+import org.archivekeep.app.ui.utils.env.runHighDensityComposeUiTestWithDemoEnv
+import org.archivekeep.app.ui.utils.screenshots.saveTestingContainerBitmap
+import org.archivekeep.app.ui.utils.screenshots.setContentInDialogScreenshotContainer
 import org.junit.Test
 import kotlin.time.Duration.Companion.seconds
 
@@ -24,40 +22,30 @@ class DownloadFromRepoDialogScreenshotTest {
     @OptIn(ExperimentalTestApi::class)
     @Test
     fun testPreparationAndInput() {
-        runHighDensityComposeUiTest {
-            var demoApplicationServices: DemoApplicationServices? = null
-
+        runHighDensityComposeUiTestWithDemoEnv(
+            physicalMediaData =
+                listOf(
+                    LaptopSSD.copy(
+                        repositories =
+                            listOf(
+                                Photos
+                                    .withContents {
+                                        deletePattern("2024/1/.*".toRegex())
+                                        addStored("2024/4/6-duplicate.JPG", "2024/4/6.JPG")
+                                    },
+                            ),
+                    ),
+                    hddB.copy(
+                        repositories =
+                            listOf(
+                                Photos,
+                            ),
+                    ),
+                ),
+        ) { env ->
             setContentInDialogScreenshotContainer {
-                ApplicationProvidersFromCore(
-                    coreApplicationServicesFactory = { scope, dispatcher ->
-                        demoApplicationServices =
-                            createGraphFactory<DemoApplicationServices.Factory>().create(
-                                scope,
-                                dispatcher,
-                                physicalMediaData =
-                                    listOf(
-                                        LaptopSSD.copy(
-                                            repositories =
-                                                listOf(
-                                                    Photos
-                                                        .withContents {
-                                                            deletePattern("2024/1/.*".toRegex())
-                                                            addStored("2024/4/6-duplicate.JPG", "2024/4/6.JPG")
-                                                        },
-                                                ),
-                                        ),
-                                        hddB.copy(
-                                            repositories =
-                                                listOf(
-                                                    Photos,
-                                                ),
-                                        ),
-                                    ),
-                                enableSpeedLimit = false,
-                            )
-
-                        demoApplicationServices
-                    },
+                ApplicationProviders(
+                    applicationServices = env.services,
                     applicationMetadata = PropertiesApplicationMetadata(),
                 ) {
                     DownloadFromRepoDialog(
@@ -87,7 +75,7 @@ class DownloadFromRepoDialogScreenshotTest {
                 // move away mouse
                 onNodeWithText("copy from", true).performMouseInput { moveTo(Offset.Zero) }
 
-                saveTestingDialogContainerBitmap("dialogs/sync/download-example.png")
+                saveTestingContainerBitmap("dialogs/sync/download-example.png")
             }
         }
     }
