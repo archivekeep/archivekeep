@@ -10,6 +10,7 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.currentCoroutineContext
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.SharingStarted
@@ -19,6 +20,7 @@ import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.shareIn
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.json.Json
@@ -33,7 +35,9 @@ import org.archivekeep.files.api.repository.RepoIndex
 import org.archivekeep.files.api.repository.RepositoryMetadata
 import org.archivekeep.files.api.repository.operations.StatusOperation
 import org.archivekeep.files.driver.filesystem.files.sqlite.SQLiteDataSource
+import org.archivekeep.files.driver.filesystem.files.sqlite.SQLiteIndexStore
 import org.archivekeep.files.driver.filesystem.files.sqlite.createIndexDatabase
+import org.archivekeep.files.driver.filesystem.files.sqlite.durationToDeath
 import org.archivekeep.utils.coroutines.InProgressHandler
 import org.archivekeep.utils.coroutines.flowScopedToThisJob
 import org.archivekeep.utils.flows.logLoadableResourceLoad
@@ -63,6 +67,7 @@ import kotlin.io.path.absolutePathString
 import kotlin.io.path.createDirectory
 import kotlin.io.path.createParentDirectories
 import kotlin.io.path.deleteExisting
+import kotlin.io.path.deleteIfExists
 import kotlin.io.path.exists
 import kotlin.io.path.fileSize
 import kotlin.io.path.getLastModifiedTime
@@ -78,6 +83,7 @@ import kotlin.io.path.writeText
 import kotlin.streams.asSequence
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.milliseconds
+import kotlin.time.Duration.Companion.seconds
 
 private const val ignorePatternsFileName = ".archivekeepignore"
 
@@ -92,7 +98,7 @@ class FilesSqliteRepo(
     val ioDispatcher: CoroutineDispatcher = Dispatchers.IO,
 ) : LocalRepo {
     private val job = SupervisorJob(parentJob)
-    private val scope = CoroutineScope(job + CoroutineName("FilesRepo: $root") + stateDispatcher)
+    private val scope = CoroutineScope(job + CoroutineName("FilesSqliteRepo: $root") + stateDispatcher)
 
     private val metadataPath = root.resolve(".archive").resolve("metadata.json")
 
@@ -101,6 +107,37 @@ class FilesSqliteRepo(
 
     private val database = createIndexDatabase(dbPath, ioDispatcher)
     private val sqliteDataSource = SQLiteDataSource(database)
+    private val sqliteIndexStore = SQLiteIndexStore(sqliteDataSource)
+
+    init {
+        // TODO: extract to dialog (maybe in future also add resume of unfinished)
+
+        scope.launch(ioDispatcher) {
+            autoRemoveDeadIncomingFiles()
+
+            // maybe died just recently and quickly started, redo
+            delay(durationToDeath + 1.seconds)
+            autoRemoveDeadIncomingFiles()
+        }
+    }
+
+    suspend fun autoRemoveDeadIncomingFiles() {
+        // TODO: write tests for this
+
+        sqliteIndexStore.getDeadIncomingFiles().forEach { file ->
+            println("Repairing dead incoming file: ${file.tmpWritePath} -> ${file.path}")
+
+            val tmpFile = root.resolve(safeSubPath(file.tmpWritePath))
+
+            if (tmpFile.exists()) {
+                tmpFile.deleteIfExists()
+            }
+
+            // TODO: check checksum of destination and store in index if matches
+
+            sqliteDataSource.removeIncomingFile(file.path)
+        }
+    }
 
     override fun getFileSize(filename: String): Long? {
         val path = root.resolve(safeSubPath(filename))
@@ -253,63 +290,61 @@ class FilesSqliteRepo(
 
             try {
                 inProgressHandler.onStart(dstPath)
-                cleanup.files.add(dstTmpFilePath)
+                sqliteIndexStore.incomingFile(filename, dstTmpFilePath.relativeTo(root).pathString, info.length, info.checksumSha256) {
+                    try {
+                        cleanup.files.add(dstTmpFilePath)
 
-                sqliteDataSource.storeIncomingFile(dstPath.pathString, dstTmpFilePath.pathString, info.length, info.checksumSha256)
+                        fc.use { output ->
+                            val buffer = ByteArray(2 * 1024 * 1024)
+                            var read: Int = stream.read(buffer)
+                            var total: Long = 0
+                            var lastSync: Long = 0
 
-                fc.use { output ->
-                    val buffer = ByteArray(2 * 1024 * 1024)
-                    var read: Int = stream.read(buffer)
-                    var total: Long = 0
-                    var lastSync: Long = 0
+                            while (read != -1) {
+                                // check the job is active
+                                currentCoroutineContext().ensureActive()
 
-                    while (read != -1) {
-                        // check the job is active
-                        currentCoroutineContext().ensureActive()
+                                output.write(ByteBuffer.wrap(buffer, 0, read))
 
-                        output.write(ByteBuffer.wrap(buffer, 0, read))
+                                total += read
 
-                        total += read
+                                read = stream.read(buffer)
 
-                        read = stream.read(buffer)
+                                if (total - lastSync > 25 * 1024 * 1024) {
+                                    output.force(false)
+                                    lastSync = total
+                                    monitor(total)
+                                }
+                            }
 
-                        if (total - lastSync > 25 * 1024 * 1024) {
-                            output.force(false)
-                            lastSync = total
+                            // TODO: check for info.length matching total
+
+                            output.force(true)
                             monitor(total)
                         }
+
+                        val realChecksum = computeChecksum(dstTmpFilePath)
+
+                        if (realChecksum != info.checksumSha256) {
+                            throw ChecksumMismatch(expected = info.checksumSha256, actual = realChecksum)
+                        }
+
+                        moveTmpToDestination(dstTmpFilePath, dstPath)
+
+                        cleanup.cancel()
+
+                        Date(dstPath.getLastModifiedTime().toMillis())
+                    } finally {
+                        withContext(NonCancellable) {
+                            if (cleanup.files.isNotEmpty()) {
+                                println("Not completed successfully, cleaning up: ${cleanup.files}")
+                                cleanup.runPremature()
+                            }
+                        }
                     }
-
-                    // TODO: check for info.length matching total
-
-                    output.force(true)
-                    monitor(total)
                 }
-
-                val realChecksum = computeChecksum(dstTmpFilePath)
-
-                if (realChecksum != info.checksumSha256) {
-                    throw ChecksumMismatch(expected = info.checksumSha256, actual = realChecksum)
-                }
-
-                moveTmpToDestination(dstTmpFilePath, dstPath)
-
-                sqliteDataSource.storeFile(
-                    filename,
-                    info.length,
-                    Date(dstPath.getLastModifiedTime().toMillis()),
-                    info.checksumSha256,
-                    dropIncomingFile = true,
-                )
-
-                cleanup.cancel()
             } finally {
                 withContext(NonCancellable) {
-                    if (cleanup.files.isNotEmpty()) {
-                        println("Not completed successfully, cleaning up: ${cleanup.files}")
-                        cleanup.runPremature()
-                    }
-                    sqliteDataSource.removeIncomingFile(dstPath.pathString)
                     inProgressHandler.onEnd(dstPath)
                 }
             }

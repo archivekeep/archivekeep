@@ -51,6 +51,7 @@ class SQLiteDataSource(
         tmpWritePath: String,
         size: Long,
         checksumSha256: String,
+        lastAlive: Date,
     ) {
         database.incomingFileDAO().addIncomingFile(
             IncomingFileEntity(
@@ -58,13 +59,29 @@ class SQLiteDataSource(
                 tmpWritePath = tmpWritePath,
                 size = size,
                 checksumSha256 = checksumSha256,
+                lastAlive = lastAlive,
             ),
         )
+    }
+
+    suspend fun updateIncomingFileLastAlive(
+        path: String,
+        date: Date,
+    ) {
+        database.useWriterConnection { transactor ->
+            transactor.immediateTransaction {
+                database.incomingFileDAO().updateIncomingFile(
+                    database.incomingFileDAO().getIncomingFileByPath(path)!!.copy(lastAlive = date),
+                )
+            }
+        }
     }
 
     suspend fun removeIncomingFile(path: String) {
         database.incomingFileDAO().removeIncomingFile(path)
     }
+
+    suspend fun getIncomingFilesAliveBefore(date: Date): List<IncomingFileEntity> = database.incomingFileDAO().getIncomingFilesAliveBefore(date)
 
     suspend fun beginMove(
         from: String,
