@@ -23,6 +23,7 @@ import kotlinx.coroutines.plus
 import org.archivekeep.app.core.persistence.drivers.filesystem.operations.DeinitializeFileSystemRepositoryPreparation
 import org.archivekeep.app.core.persistence.drivers.filesystem.operations.DeinitializeFileSystemRepositoryUseCase
 import org.archivekeep.app.core.utils.generics.ExecutionOutcome
+import org.archivekeep.app.core.utils.identifiers.RepositoryURI
 import org.archivekeep.app.ui.components.designsystem.dialog.DialogButtonContainer
 import org.archivekeep.app.ui.components.designsystem.dialog.DialogCard
 import org.archivekeep.app.ui.components.designsystem.dialog.DialogInnerContainer
@@ -34,6 +35,7 @@ import org.archivekeep.app.ui.components.feature.dialogs.SimpleActionDialogContr
 import org.archivekeep.app.ui.components.feature.dialogs.SimpleActionDialogDoneButtons
 import org.archivekeep.app.ui.components.feature.dialogs.operations.ExecutionErrorIfPresent
 import org.archivekeep.app.ui.dialogs.Dialog
+import org.archivekeep.app.ui.domain.wiring.LocalApplicationServices
 import org.archivekeep.app.ui.domain.wiring.LocalOperationFactory
 import org.archivekeep.app.ui.domain.wiring.OperationFactory
 import org.archivekeep.app.ui.utils.SingleLaunchGuard
@@ -41,13 +43,14 @@ import org.archivekeep.app.ui.utils.appendBoldSpan
 import org.archivekeep.utils.loading.Loadable
 
 class DeinitializeFileSystemRepositoryDialog(
+    val repositoryURI: RepositoryURI?,
     val path: String,
 ) : Dialog {
     inner class VM(
         val coroutineScope: CoroutineScope,
         val operationFactory: OperationFactory,
     ) : RememberObserver {
-        var metadataDestructionConfirmed by mutableStateOf<Boolean>(false)
+        var metadataDestructionConfirmed by mutableStateOf(false)
 
         private var preparationScope: CoroutineScope = coroutineScope + SupervisorJob()
 
@@ -91,6 +94,8 @@ class DeinitializeFileSystemRepositoryDialog(
     override fun render(onClose: () -> Unit) {
         val operationFactory = LocalOperationFactory.current
         val coroutineScope = rememberCoroutineScope()
+
+        val registry = LocalApplicationServices.current.registry
 
         val vm =
             remember(coroutineScope, operationFactory) {
@@ -180,6 +185,12 @@ class DeinitializeFileSystemRepositoryDialog(
                                                     onLaunch = {
                                                         vm.deinitializeLaunchGuard.launch {
                                                             option.runDeinitialize()
+
+                                                            if (repositoryURI != null) {
+                                                                registry.updateRepositories { old ->
+                                                                    old.filter { it.uri != repositoryURI }.toSet()
+                                                                }
+                                                            }
                                                         }
                                                     },
                                                     onClose = onClose,

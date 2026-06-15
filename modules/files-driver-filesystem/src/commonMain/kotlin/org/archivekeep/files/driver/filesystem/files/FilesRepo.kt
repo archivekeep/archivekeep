@@ -76,7 +76,7 @@ private const val ignorePatternsFileName = ".archivekeepignore"
 private const val checksumsSubDir = "checksums"
 
 class FilesRepo(
-    val root: Path,
+    override val root: Path,
     parentJob: Job? = null,
     internal val archiveRoot: Path = root.resolve(".archive"),
     checksumsRoot: Path = archiveRoot.resolve(checksumsSubDir),

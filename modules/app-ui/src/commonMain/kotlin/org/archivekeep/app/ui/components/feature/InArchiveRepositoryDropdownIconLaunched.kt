@@ -19,6 +19,9 @@ import org.archivekeep.app.core.domain.storages.needsUnlock
 import org.archivekeep.app.ui.components.designsystem.sections.SectionCardBottomListItemIconButton
 import org.archivekeep.app.ui.components.feature.repository.WithRepositoryOpener
 import org.archivekeep.app.ui.domain.wiring.LocalArchiveOperationLaunchers
+import org.archivekeep.files.driver.filesystem.files.FilesystemWorkingRepository
+import org.archivekeep.utils.loading.optional.OptionalLoadable
+import kotlin.io.path.absolutePathString
 
 @Composable
 fun InArchiveRepositoryDropdownIconLaunched(
@@ -124,6 +127,17 @@ fun InArchiveRepositoryDropdownIconLaunched(
             }, text = {
                 Text("Forget")
             })
+
+            (repository.optionalAccessorFlow.collectAsState().value as? OptionalLoadable.LoadedAvailable)
+                ?.let { it.value as? FilesystemWorkingRepository }
+                ?.let {
+                    DropdownMenuItem(onClick = {
+                        operationsLaunchers.openDeinitializeFilesystemRepository(repositoryURI, it.root.absolutePathString())
+                        isDropdownExpanded = false
+                    }, text = {
+                        Text("Deinitialize")
+                    })
+                }
         }
     }
 }

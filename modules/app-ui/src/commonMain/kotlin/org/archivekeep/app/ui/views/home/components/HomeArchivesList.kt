@@ -70,6 +70,10 @@ private fun HomeArchiveEntry(
                 }
                 ArchiveDropdownIconLaunched(
                     repositoryURI = localArchive.primaryRepository.reference.uri,
+                    repositoryAccessor =
+                        localArchive.repository.optionalAccessorFlow
+                            .collectAsState()
+                            .value,
                     isAssociated = localArchive.archive.associationId != null,
                 )
             },

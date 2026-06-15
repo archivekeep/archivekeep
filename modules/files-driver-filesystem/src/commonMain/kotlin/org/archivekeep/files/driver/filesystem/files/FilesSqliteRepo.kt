@@ -91,7 +91,7 @@ private const val ignorePatternsFileName = ".archivekeepignore"
 private const val dbName = "archivekeep.db"
 
 class FilesSqliteRepo(
-    val root: Path,
+    override val root: Path,
     parentJob: Job? = null,
     internal val archiveRoot: Path = root.resolve(".archive"),
     dbPath: Path = archiveRoot.resolve(dbName),

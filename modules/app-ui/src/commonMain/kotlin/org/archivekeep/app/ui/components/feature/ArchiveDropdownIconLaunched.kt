@@ -15,10 +15,15 @@ import compose.icons.tablericons.DotsVertical
 import org.archivekeep.app.core.utils.identifiers.RepositoryURI
 import org.archivekeep.app.ui.components.designsystem.sections.SectionCardTitleIconButton
 import org.archivekeep.app.ui.domain.wiring.LocalArchiveOperationLaunchers
+import org.archivekeep.files.api.repository.Repo
+import org.archivekeep.files.driver.filesystem.files.FilesystemWorkingRepository
+import org.archivekeep.utils.loading.optional.OptionalLoadable
+import kotlin.io.path.absolutePathString
 
 @Composable
 fun ArchiveDropdownIconLaunched(
     repositoryURI: RepositoryURI,
+    repositoryAccessor: OptionalLoadable<Repo>,
     isAssociated: Boolean,
 ) {
     val operationsLaunchers = LocalArchiveOperationLaunchers.current
@@ -63,6 +68,17 @@ fun ArchiveDropdownIconLaunched(
             }, text = {
                 Text("Forget")
             })
+
+            (repositoryAccessor as? OptionalLoadable.LoadedAvailable)
+                ?.let { it.value as? FilesystemWorkingRepository }
+                ?.let {
+                    DropdownMenuItem(onClick = {
+                        operationsLaunchers.openDeinitializeFilesystemRepository(repositoryURI, it.root.absolutePathString())
+                        isDropdownExpanded = false
+                    }, text = {
+                        Text("Deinitialize")
+                    })
+                }
         }
     }
 }
