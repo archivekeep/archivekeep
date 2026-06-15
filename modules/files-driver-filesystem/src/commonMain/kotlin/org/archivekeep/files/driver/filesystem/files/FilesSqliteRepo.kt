@@ -29,7 +29,6 @@ import org.archivekeep.files.api.exceptions.ChecksumMismatch
 import org.archivekeep.files.api.exceptions.DestinationExists
 import org.archivekeep.files.api.exceptions.NotRegularFilePath
 import org.archivekeep.files.api.repository.ArchiveFileInfo
-import org.archivekeep.files.api.repository.LocalRepo
 import org.archivekeep.files.api.repository.PLAIN_REPOSITORY_TYPE
 import org.archivekeep.files.api.repository.RepoIndex
 import org.archivekeep.files.api.repository.RepositoryMetadata
@@ -60,14 +59,16 @@ import java.nio.file.FileSystems
 import java.nio.file.Files
 import java.nio.file.Path
 import java.nio.file.PathMatcher
+import java.util.*
 import java.util.Collections.singletonList
-import java.util.Date
+import kotlin.io.path.ExperimentalPathApi
 import kotlin.io.path.Path
 import kotlin.io.path.absolutePathString
 import kotlin.io.path.createDirectory
 import kotlin.io.path.createParentDirectories
 import kotlin.io.path.deleteExisting
 import kotlin.io.path.deleteIfExists
+import kotlin.io.path.deleteRecursively
 import kotlin.io.path.exists
 import kotlin.io.path.fileSize
 import kotlin.io.path.getLastModifiedTime
@@ -96,7 +97,7 @@ class FilesSqliteRepo(
     dbPath: Path = archiveRoot.resolve(dbName),
     stateDispatcher: CoroutineDispatcher = Dispatchers.Default,
     val ioDispatcher: CoroutineDispatcher = Dispatchers.IO,
-) : LocalRepo {
+) : FilesystemWorkingRepository {
     private val job = SupervisorJob(parentJob)
     private val scope = CoroutineScope(job + CoroutineName("FilesSqliteRepo: $root") + stateDispatcher)
 
@@ -146,6 +147,13 @@ class FilesSqliteRepo(
 
         sqliteIndexStore.getDeadPendingMoves().forEach { pendingMove ->
             sqliteDataSource.removePendingMove(pendingMove.to)
+        }
+    }
+
+    @OptIn(ExperimentalPathApi::class)
+    override suspend fun deinitialize() {
+        withContext(ioDispatcher) {
+            archiveRoot.deleteRecursively()
         }
     }
 

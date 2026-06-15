@@ -62,7 +62,7 @@ class AddFileSystemRepositoryUseCaseImpl(
                     var tryPath: Path? = pathPath.parent
 
                     while (tryPath != null) {
-                        val archive = FilesRepo.openOrNull(tryPath)
+                        val archive = FilesSqliteRepo.openOrNull(tryPath) ?: FilesRepo.openOrNull(tryPath)
 
                         if (archive != null) {
                             return@run tryPath

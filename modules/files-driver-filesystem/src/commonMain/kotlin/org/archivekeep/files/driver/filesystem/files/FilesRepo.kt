@@ -26,7 +26,6 @@ import org.archivekeep.files.api.exceptions.ChecksumMismatch
 import org.archivekeep.files.api.exceptions.DestinationExists
 import org.archivekeep.files.api.exceptions.NotRegularFilePath
 import org.archivekeep.files.api.repository.ArchiveFileInfo
-import org.archivekeep.files.api.repository.LocalRepo
 import org.archivekeep.files.api.repository.PLAIN_REPOSITORY_TYPE
 import org.archivekeep.files.api.repository.RepoIndex
 import org.archivekeep.files.api.repository.RepositoryMetadata
@@ -83,7 +82,7 @@ class FilesRepo(
     checksumsRoot: Path = archiveRoot.resolve(checksumsSubDir),
     stateDispatcher: CoroutineDispatcher = Dispatchers.Default,
     val ioDispatcher: CoroutineDispatcher = Dispatchers.IO,
-) : LocalRepo {
+) : FilesystemWorkingRepository {
     private val job = SupervisorJob(parentJob)
     private val scope = CoroutineScope(job + CoroutineName("FilesRepo: $root") + stateDispatcher)
 
@@ -415,7 +414,7 @@ class FilesRepo(
             }
 
     @OptIn(ExperimentalPathApi::class)
-    suspend fun deinitialize() {
+    override suspend fun deinitialize() {
         withContext(ioDispatcher) {
             archiveRoot.deleteRecursively()
         }
