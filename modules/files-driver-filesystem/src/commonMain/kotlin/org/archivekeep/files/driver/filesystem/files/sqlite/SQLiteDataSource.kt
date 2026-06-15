@@ -83,9 +83,12 @@ class SQLiteDataSource(
 
     suspend fun getIncomingFilesAliveBefore(date: Date): List<IncomingFileEntity> = database.incomingFileDAO().getIncomingFilesAliveBefore(date)
 
+    suspend fun getMovesAliveBefore(date: Date): List<PendingMoveEntity> = database.pendingMoveDAO().getPendingMovesAliveBefore(date)
+
     suspend fun beginMove(
         from: String,
         to: String,
+        lastAlive: Date,
     ): PendingMove {
         val originalFile = database.fileDAO().getFileByPath(from)!!
 
@@ -95,6 +98,7 @@ class SQLiteDataSource(
                 to = to,
                 checksumSha256 = originalFile.checksumSha256,
                 size = originalFile.size,
+                lastAlive = lastAlive,
             ),
         )
 
@@ -107,6 +111,20 @@ class SQLiteDataSource(
         val size: Long,
         val checksumSha256: String,
     ) {
+        suspend fun updateMoveLastAlive(date: Date) {
+            database.useWriterConnection { transactor ->
+                transactor.immediateTransaction {
+                    database.pendingMoveDAO().updatePendingMove(
+                        database.pendingMoveDAO().getPendingMoveByPath(to)!!.copy(lastAlive = date),
+                    )
+                }
+            }
+        }
+
+        suspend fun failed() {
+            database.pendingMoveDAO().removePendingMove(to)
+        }
+
         suspend fun completed(lastModified: Date) {
             database.useWriterConnection { transactor ->
                 transactor.immediateTransaction {
@@ -123,5 +141,9 @@ class SQLiteDataSource(
                 }
             }
         }
+    }
+
+    suspend fun removePendingMove(to: String) {
+        database.pendingMoveDAO().removePendingMove(to)
     }
 }

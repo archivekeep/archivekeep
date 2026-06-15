@@ -1,8 +1,10 @@
 package org.archivekeep.files.driver.filesystem.files.sqlite
 
+import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import java.util.*
 
 class SQLiteIndexStore(
@@ -30,7 +32,9 @@ class SQLiteIndexStore(
                     block()
                 }
             } catch (e: Throwable) {
-                sqliteDataSource.removeIncomingFile(path)
+                withContext(NonCancellable) {
+                    sqliteDataSource.removeIncomingFile(path)
+                }
 
                 throw e
             }
@@ -42,5 +46,35 @@ class SQLiteIndexStore(
             checksumSha256,
             dropIncomingFile = true,
         )
+    }
+
+    suspend fun getDeadPendingMoves() = sqliteDataSource.getMovesAliveBefore(Date(Date().time - durationToDeath.inWholeMilliseconds))
+
+    suspend inline fun moveFile(
+        from: String,
+        to: String,
+        crossinline block: suspend () -> Date,
+    ) {
+        val move = sqliteDataSource.beginMove(from, to, Date())
+
+        val lastModified =
+            try {
+                coroutineScope {
+                    launch {
+                        move.updateMoveLastAlive(Date())
+                        delay(aliveUpdateFrequency)
+                    }
+
+                    block()
+                }
+            } catch (e: Throwable) {
+                withContext(NonCancellable) {
+                    move.failed()
+                }
+
+                throw e
+            }
+
+        move.completed(lastModified)
     }
 }

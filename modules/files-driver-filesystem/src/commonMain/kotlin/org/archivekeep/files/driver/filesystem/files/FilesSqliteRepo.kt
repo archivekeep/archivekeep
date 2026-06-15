@@ -114,10 +114,12 @@ class FilesSqliteRepo(
 
         scope.launch(ioDispatcher) {
             autoRemoveDeadIncomingFiles()
+            autoRemovePendingMoves()
 
             // maybe died just recently and quickly started, redo
             delay(durationToDeath + 1.seconds)
             autoRemoveDeadIncomingFiles()
+            autoRemovePendingMoves()
         }
     }
 
@@ -136,6 +138,14 @@ class FilesSqliteRepo(
             // TODO: check checksum of destination and store in index if matches
 
             sqliteDataSource.removeIncomingFile(file.path)
+        }
+    }
+
+    suspend fun autoRemovePendingMoves() {
+        // TODO: write tests for this
+
+        sqliteIndexStore.getDeadPendingMoves().forEach { pendingMove ->
+            sqliteDataSource.removePendingMove(pendingMove.to)
         }
     }
 
@@ -242,12 +252,12 @@ class FilesSqliteRepo(
                 throw DestinationExists(to)
             }
 
-            val move = sqliteDataSource.beginMove(from, to)
+            sqliteIndexStore.moveFile(from, to) {
+                dstPath.createParentDirectories()
+                root.resolve(from).moveTo(dstPath)
 
-            dstPath.createParentDirectories()
-            root.resolve(from).moveTo(dstPath)
-
-            move.completed(Date(dstPath.getLastModifiedTime().toMillis()))
+                Date(dstPath.getLastModifiedTime().toMillis())
+            }
         }
     }
 
