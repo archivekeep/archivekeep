@@ -14,6 +14,7 @@ import androidx.compose.material.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextOverflow
@@ -70,10 +71,11 @@ fun HomeNonLocalArchivesList(otherArchivesLoadable: Loadable<List<HomeArchiveNon
                                         horizontal = sectionCardHorizontalPadding,
                                     ),
                         ) {
-                            if (repo.repository
-                                    .optionalAccessorFlow
-                                    .map { it.needsUnlock() }
-                                    .collectAsState(false)
+                            if (remember {
+                                    repo.repository
+                                        .optionalAccessorFlow
+                                        .map { it.needsUnlock() }
+                                }.collectAsState(false)
                                     .value
                             ) {
                                 Icon(

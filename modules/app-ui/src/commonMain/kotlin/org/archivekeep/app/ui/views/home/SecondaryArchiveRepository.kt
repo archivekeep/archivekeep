@@ -103,7 +103,7 @@ class SecondaryArchiveRepository(
 
             val canPushLoadable =
                 syncStatus?.mapLoadedData {
-                    (it.missingBaseInOther != 0 || it.relocations > 0) && connectionStatus.isAvailable
+                    (it.missingBaseInOther != 0 || it.relocations > 0) && connectionStatus.isConnected
                 } ?: OptionalLoadable.NotAvailable()
 
             val canPull =
@@ -119,7 +119,7 @@ class SecondaryArchiveRepository(
                 localRepoStatus = localRepoStatus.mapLoadedData { it.summary },
                 syncRunning = syncRunning,
                 canPushLoadable = canPushLoadable,
-                canPull = canPull && connectionStatus.isAvailable,
+                canPull = canPull && connectionStatus.isConnected,
                 syncTexts = syncTexts,
             )
         }.stateIn(scope, SharingStarted.Lazily, initialValue)

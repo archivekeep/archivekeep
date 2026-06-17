@@ -1,6 +1,10 @@
 package org.archivekeep.app.ui.components.feature
 
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.material.Icon
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Text
@@ -11,6 +15,8 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
 import compose.icons.TablerIcons
 import compose.icons.tablericons.DotsVertical
 import kotlinx.coroutines.flow.map
@@ -19,6 +25,7 @@ import org.archivekeep.app.core.domain.storages.needsUnlock
 import org.archivekeep.app.ui.components.designsystem.sections.SectionCardBottomListItemIconButton
 import org.archivekeep.app.ui.components.feature.repository.WithRepositoryOpener
 import org.archivekeep.app.ui.domain.wiring.LocalArchiveOperationLaunchers
+import org.archivekeep.app.ui.utils.Action2
 import org.archivekeep.files.driver.filesystem.files.FilesystemWorkingRepository
 import org.archivekeep.utils.loading.optional.OptionalLoadable
 import kotlin.io.path.absolutePathString
@@ -27,7 +34,9 @@ import kotlin.io.path.absolutePathString
 fun InArchiveRepositoryDropdownIconLaunched(
     repository: Repository,
     isAssociated: Boolean,
-    canAdd: Boolean = false,
+    actionAdd: Action2? = null,
+    actionPush: Action2? = null,
+    actionPull: Action2? = null,
     canReindex: Boolean = false,
     canCleanupDeletedFiles: Boolean = false,
 ) {
@@ -66,12 +75,23 @@ fun InArchiveRepositoryDropdownIconLaunched(
                 })
             }
 
-            if (canAdd) {
+            listOfNotNull(
+                actionAdd,
+                actionPush,
+                actionPull,
+            ).forEach { action ->
                 DropdownMenuItem(onClick = {
-                    operationsLaunchers.openIndexUpdateOperation(repositoryURI)
+                    action.onClick()
                     closeDropdown()
                 }, text = {
-                    Text("Add")
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Icon(
+                            action.icon,
+                            contentDescription = action.title,
+                            modifier = Modifier.padding(end = 8.dp).size(14.dp),
+                        )
+                        Text(action.title)
+                    }
                 })
             }
 

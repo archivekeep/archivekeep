@@ -11,11 +11,13 @@ import androidx.compose.ui.unit.dp
 import compose.icons.TablerIcons
 import compose.icons.tablericons.Download
 import compose.icons.tablericons.Lock
+import compose.icons.tablericons.Plus
 import compose.icons.tablericons.Upload
 import org.archivekeep.app.ui.components.designsystem.sections.SectionCardBottomListItem
-import org.archivekeep.app.ui.components.designsystem.sections.SectionCardBottomListItemIconButton
+import org.archivekeep.app.ui.components.designsystem.sections.SectionCardBottomListItemIconActionButton
 import org.archivekeep.app.ui.components.feature.InArchiveRepositoryDropdownIconLaunched
 import org.archivekeep.app.ui.domain.wiring.LocalArchiveOperationLaunchers
+import org.archivekeep.app.ui.utils.Action2
 import org.archivekeep.app.ui.views.home.SecondaryArchiveRepository
 
 @Composable
@@ -27,6 +29,42 @@ fun SecondaryArchiveRepositoryRow(
     val storageRepo = nonPrimaryRepository.repo
     val repository = storageRepo.repository
     val launchers = LocalArchiveOperationLaunchers.current
+
+    val actionAdd =
+        Action2(
+            TablerIcons.Plus,
+            "Add new files",
+            enabled = nonPrimaryRepository.canAdd,
+            onClick = {
+                launchers.openIndexUpdateOperation(storageRepo.repository.uri)
+            },
+        )
+
+    val actionPush =
+        Action2(
+            TablerIcons.Upload,
+            "Push",
+            enabled = nonPrimaryRepository.canPush,
+            onClick = {
+                launchers.pushToRepo(
+                    storageRepo.repository.uri,
+                    storageRepo.primaryRepositoryURI!!,
+                )
+            },
+        )
+
+    val actionPull =
+        Action2(
+            TablerIcons.Download,
+            "Pull",
+            enabled = nonPrimaryRepository.canPull,
+            onClick = {
+                launchers.pullFromRepo(
+                    storageRepo.repository.uri,
+                    storageRepo.primaryRepositoryURI!!,
+                )
+            },
+        )
 
     SectionCardBottomListItem(
         title = name,
@@ -45,31 +83,14 @@ fun SecondaryArchiveRepositoryRow(
             }
         },
         actions = {
-            SectionCardBottomListItemIconButton(
-                TablerIcons.Upload,
-                contentDescription = "Push",
-                enabled = nonPrimaryRepository.canPush,
-                onClick = {
-                    launchers.pushToRepo(
-                        storageRepo.repository.uri,
-                        storageRepo.primaryRepositoryURI!!,
-                    )
-                },
-            )
-            SectionCardBottomListItemIconButton(
-                TablerIcons.Download,
-                contentDescription = "Pull",
-                enabled = nonPrimaryRepository.canPull,
-                onClick = {
-                    launchers.pullFromRepo(
-                        storageRepo.repository.uri,
-                        storageRepo.primaryRepositoryURI!!,
-                    )
-                },
-            )
+            SectionCardBottomListItemIconActionButton(actionAdd)
+            SectionCardBottomListItemIconActionButton(actionPush)
+            SectionCardBottomListItemIconActionButton(actionPull)
             InArchiveRepositoryDropdownIconLaunched(
                 repository = repository,
-                canAdd = nonPrimaryRepository.canAdd,
+                actionAdd = actionAdd,
+                actionPush = actionPush,
+                actionPull = actionPull,
                 canReindex = nonPrimaryRepository.canReindex,
                 canCleanupDeletedFiles = nonPrimaryRepository.canCleanupDeletedFiles,
                 isAssociated = storageRepo.otherRepositoryState.associationId != null,
