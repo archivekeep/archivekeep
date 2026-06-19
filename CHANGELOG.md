@@ -19,7 +19,7 @@
 - upgraded UI and test libraries.
 - migrated application services creation to Metro DI.
 
-## 0.5.0 - 2026-05-14 - E2E encryption
+## 0.5.0 - 2026-01-14 - E2E encryption
 
 ### Added
 

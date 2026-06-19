@@ -62,13 +62,137 @@
     <content_rating type="oars-1.1" />
 
     <releases>
-        <release version="0.5.0" date="2026-01-14" />
-        <release version="0.4.4" date="2025-11-30" />
-        <release version="0.4.3" date="2025-06-17" />
-        <release version="0.4.2" date="2025-05-25" />
-        <release version="0.4.1" date="2025-05-10" />
-        <release version="0.4.0" date="2025-04-29" />
-        <release version="0.3.3" date="2025-03-31" />
+        <release version="0.5.0" date="2026-01-14">
+            <description>
+                <p>E2E encryption</p>
+                <p>Added:</p>
+                <ul>
+                    <li>optional encryption of filesystem repositories,</li>
+                    <li>optional encryption of S3 repositories,</li>
+                    <li>error log to sync operations.</li>
+                </ul>
+                <p>Changed:</p>
+                <ul>
+                    <li>license from AGPL to GPL,</li>
+                    <li>errors in sync are skipped (and logged), and sync continues.</li>
+                </ul>
+            </description>
+        </release>
+        <release version="0.4.4" date="2025-11-30">
+            <description>
+                <p>Added:</p>
+                <ul>
+                    <li>explanation of NotRoot error when adding a filesystem repository (related to #6),</li>
+                    <li>repository deinitialization feature (related to #6).</li>
+                </ul>
+                <p>Fixed:</p>
+                <ul>
+                    <li>watcher for mounted media not working if /run/media/ didn't exist at the start of the application (related to #6).</li>
+                </ul>
+            </description>
+        </release>
+        <release version="0.4.3" date="2025-06-17">
+            <description>
+                <p>Added:</p>
+                <ul>
+                    <li>S3 integration - support S3 bucket as repository storage</li>
+                </ul>
+                <p>Changed:</p>
+                <ul>
+                    <li>UI: add dialog for filesystem repository shows only close button on completion</li>
+                </ul>
+            </description>
+        </release>
+        <release version="0.4.2" date="2025-05-25">
+            <description>
+                <p>Added:</p>
+                <ul>
+                    <li>progress info (percentage, name, speed, and estimate) about currently copied file:</li>
+                    <li>in repo to repo sync dialogs,</li>
+                    <li>in add &amp; push dialog.</li>
+                    <li>estimate of time remaining to execute all sync operations</li>
+                </ul>
+                <p>Fixes:</p>
+                <ul>
+                    <li>blinking or showing "1 uncommitted file" during copy operations</li>
+                    <li>scrollbar missing in Desktop App</li>
+                </ul>
+                <p>Changes:</p>
+                <ul>
+                    <li>Performance:</li>
+                    <li>pause checking of local index status (uncommitted files) during save (copy) operation</li>
+                    <li>index contents auto-refresh monitors only checksums dir (not all contents)</li>
+                    <li>metadata information auto-refresh monitors only the file itself (not all - checksums and other things)</li>
+                    <li>Other:</li>
+                    <li>sync to filesystem (force data write to medium) for writes to repo every 25MB to get real values for write speed</li>
+                </ul>
+                <p>Technical:</p>
+                <ul>
+                    <li>refactoring &amp; tests</li>
+                </ul>
+            </description>
+        </release>
+        <release version="0.4.1" date="2025-05-10">
+            <description>
+                <p>Changed:</p>
+                <ul>
+                    <li>UI: make style more lighter by removing shadows, and adjust dimensions</li>
+                    <li>logging: a bit cleaner logs</li>
+                </ul>
+            </description>
+        </release>
+        <release version="0.4.0" date="2025-04-29">
+            <description>
+                <p>Initial Android application, and UI improvements</p>
+                <p>Added:</p>
+                <ul>
+                    <li>UI: add connection status tag for storages in Storages view</li>
+                    <li>UI: indicate disconnected status of repositories (reduce alpha, add text)</li>
+                    <li>UI: responsive app navigation layout supporting mobile screens:</li>
+                    <li>top bar &amp; drawer for small screens,</li>
+                    <li>top &amp; bottom bar on narrow but tall screens,</li>
+                    <li>rail bar for wide screens with low height,</li>
+                    <li>top bar with embedded navigation for big screens.</li>
+                    <li>UI: navigation bar instead of navigation rail on small width screens (window sizes)</li>
+                </ul>
+                <p>Changed:</p>
+                <ul>
+                    <li>UI: move repository add actions to dropdown in app bar (or rail bar)</li>
+                    <li>UI: improve look and feel of storages view</li>
+                    <li>UI: show only available and connected storages in home view</li>
+                    <li>UI: split storages based on type (local/external/online) in storages view</li>
+                    <li>UI: less framed look of the application (make content flow behind window insets)</li>
+                    <li>UI: remove welcome text from home page once setup for more efficient space use</li>
+                    <li>UI: more compact dimensions for small window/screen sizes</li>
+                    <li>UI: make dialogs utilize (more) screen space (dynamically based on items in many select)</li>
+                </ul>
+                <p>Fixed:</p>
+                <ul>
+                    <li>repository shouldn't be added if init fails</li>
+                    <li>repository addition not always detects correct filesystem (on new mounts) and mixes up different filesystems</li>
+                </ul>
+            </description>
+        </release>
+        <release version="0.3.3" date="2025-03-31">
+            <description>
+                <p>Added:</p>
+                <ul>
+                    <li>feature: support index update for non-primary (filesystem) repositories of archives</li>
+                    <li>UI: improve Upload/Download dialog: add progress summary, and error details in case of failure</li>
+                    <li>UI: show execution indicator in dialogs</li>
+                    <li>UI: show execution error (if failed) in dialogs</li>
+                </ul>
+                <p>Change:</p>
+                <ul>
+                    <li>UI: unify and improve dialog control buttons for repository data operation dialogs</li>
+                    <li>metadata: expand and improve AppStream metainfo (by @bragefuglseth)</li>
+                </ul>
+                <p>Fixed:</p>
+                <ul>
+                    <li>UI: crash with large amounts of items (to add/commit/push)</li>
+                </ul>
+            </description>
+        </release>
         <release version="0.3.2" date="2025-03-25" />
         <release version="0.3.1" date="2025-03-22" />
         <release version="0.3.0" date="2025-03-21" />
