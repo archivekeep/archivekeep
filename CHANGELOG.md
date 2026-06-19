@@ -2,6 +2,23 @@
 
 ## Unreleased
 
+### Added
+
+- filesystem repositories with SQLite-backed index,
+- detection of modified files and reindex dialog (SQLite-backed index only),
+- detection of deleted files and cleanup dialog (SQLite-backed index only),
+- action Add to other repository row actions.
+
+### Changed
+
+- actions in other repository row display conditionally (only if available).
+
+### Technical
+
+- upgraded Java to 21, Kotlin to 2.3.21, Gradle to 9.5.1, Android Gradle Plugin to 8.13.2, and Compose Multiplatform to 1.11.1.
+- upgraded UI and test libraries.
+- migrated application services creation to Metro DI.
+
 ## 0.5.0 - 2026-05-14 - E2E encryption
 
 ### Added
