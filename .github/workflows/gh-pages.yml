@@ -77,6 +77,15 @@ jobs:
         with:
           path: ./docs/public
 
+      - name: Store reports (on failure)
+        if: failure()
+        uses: actions/upload-artifact@v6
+        with:
+          name: reports
+          path: |
+            **/build/reports/
+            **/build/test-results/
+
   deploy:
     environment:
       name: github-pages

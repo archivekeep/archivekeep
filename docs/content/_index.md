@@ -21,10 +21,9 @@
             </div>
         </div>
         <div class="other">
-        <img src="/generated_screenshots/desktop/main-window.png" />
+        {{< home-image "/generated_screenshots/desktop/main-window.png" "" >}}
         </div>
     </div>
-
 <div>
 
 {{< hint warning >}}
@@ -50,12 +49,12 @@ Devices can read your files without having to install any extra software.
 The archivekeep only facilitates archivation process to help you replicate your data for preservation.
 </div>
 <div class="other small">
-<img src="/generated_screenshots/dialogs/add-and-push/example.png" />
+{{< home-image "/generated_screenshots/dialogs/add-and-push/example.png" "" >}}
 </div>
 </div>
 <div class="sub-display-inner-container">
 <div class="other small">
-<img src="/generated_screenshots/dialogs/sync/upload-example.png" />
+{{< home-image "/generated_screenshots/dialogs/sync/upload-example.png" "" >}}
 </div>
 <div class="text">
 
@@ -79,7 +78,7 @@ The replication process prevents propagation of redactions, deletions, corruptio
 The contents of files stored in repositories are verifiable using digistal checksums.
 </div>
 <div class="other small">
-<img src="/generated_screenshots/dialogs/sync/download-example.png" />
+{{< home-image "/generated_screenshots/dialogs/sync/download-example.png" "" >}}
 </div>
 </div>
 </div>
@@ -145,7 +144,7 @@ _**Note:** there's no dedicated application for self-hosting._
 
 </div>
 <div class="other small">
-<img src="/generated_screenshots/mobile/main-window.png" />
+{{< home-image "/generated_screenshots/mobile/main-window.png" "" >}}
 </div>
 </div>
 </div>

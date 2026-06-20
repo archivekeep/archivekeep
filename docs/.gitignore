@@ -8,7 +8,7 @@
 /resources/_gen
 
 # generated inputs
-/static/generated_screenshots
+/content/generated_screenshots
 
 # build outputs
 /public

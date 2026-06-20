@@ -1,0 +1,29 @@
+{{ $imgPath := .Get 0 }}
+{{ $alt := .Get 1 }}
+
+{{ $img := .Page.Resources.Get $imgPath }}
+
+{{ $imgJpg := $img.Resize (printf "%dx%d jpeg" $img.Width $img.Height) }}
+
+{{ $sizes := "(max-width: 300px) 95vw, 300px"}}
+
+<a href="{{ $img.RelPermalink }}" target="_blank">
+    <picture style="display: inherit">
+        <source type="image/webp"
+                sizes="{{ $sizes }}"
+                srcset="{{ with $img.Resize "fit 300x300 webp mitchellNetravali q50" }}{{.RelPermalink}} {{.Width}}w{{end}},
+                        {{ with $img.Resize "fit 450x450 webp mitchellNetravali q50" }}{{.RelPermalink}} {{.Width}}w{{end}},
+                        {{ with $img.Resize "fit 600x600 webp mitchellNetravali q50" }}{{.RelPermalink}} {{.Width}}w{{end}},
+                        {{ with $img.Resize "fit 750x750 webp mitchellNetravali q50" }}{{.RelPermalink}} {{.Width}}w{{end}}"
+        />
+        <img style="height: auto; width: auto"
+             srcset="{{ with $img.Resize "fit 300x300 mitchellNetravali q50" }}{{.RelPermalink}} {{.Width}}w{{end}},
+        {{ with $img}}{{ .RelPermalink }} {{.Width}}w{{end}}"
+        sizes="{{ $sizes }}"
+        alt="{{ $alt }}"
+        title="{{ $alt }}"
+        src="{{ $imgJpg.RelPermalink }}"
+        width="{{ $img.Width }}"
+        height="{{ $img.Height }}"/>
+    </picture>
+</a>
