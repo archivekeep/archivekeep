@@ -1,6 +1,12 @@
 # TODO: cleanup this and document why which rules are added
 
 # ########################################### #
+#                SQLite Bundled               #
+# ########################################### #
+
+-keepclasseswithmembers class androidx.sqlite.driver.bundled.** { native <methods>; }
+
+# ########################################### #
 #                     Room                    #
 # ########################################### #
 
