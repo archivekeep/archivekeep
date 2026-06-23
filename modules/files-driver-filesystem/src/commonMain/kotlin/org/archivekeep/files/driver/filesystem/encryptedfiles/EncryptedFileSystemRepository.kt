@@ -49,7 +49,7 @@ import org.archivekeep.utils.io.createTmpFileForWrite
 import org.archivekeep.utils.io.moveTmpToDestination
 import org.archivekeep.utils.io.watchRecursively
 import org.archivekeep.utils.loading.Loadable
-import org.archivekeep.utils.loading.firstLoadedOrNullOnErrorOrLocked
+import org.archivekeep.utils.loading.optional.firstLoadedOrNullOnFailedOrNotAvailable
 import org.archivekeep.utils.loading.produceLoadable
 import org.archivekeep.utils.loading.produceLoadableStateIn
 import org.archivekeep.utils.loading.stateIn
@@ -136,7 +136,7 @@ class EncryptedFileSystemRepository private constructor(
             }
 
     override suspend fun index(): RepoIndex {
-        val vaultContents = vault.data.firstLoadedOrNullOnErrorOrLocked()!!
+        val vaultContents = vault.data.firstLoadedOrNullOnFailedOrNotAvailable()!!
 
         val files =
             Files
@@ -190,7 +190,7 @@ class EncryptedFileSystemRepository private constructor(
         filename: String,
         block: suspend (ArchiveFileInfo, InputStream) -> T,
     ): T {
-        val vaultContents = vault.data.firstLoadedOrNullOnErrorOrLocked()!!
+        val vaultContents = vault.data.firstLoadedOrNullOnFailedOrNotAvailable()!!
 
         return encryptedFilesRoot
             .resolve(safeSubPath("$filename.enc"))
@@ -223,7 +223,7 @@ class EncryptedFileSystemRepository private constructor(
             try {
                 inProgressHandler.onStart(filename)
 
-                val vaultContents = vault.data.firstLoadedOrNullOnErrorOrLocked()
+                val vaultContents = vault.data.firstLoadedOrNullOnFailedOrNotAvailable()
                 val dstPath = encryptedFilesRoot.resolve(safeSubPath("$filename.enc"))
 
                 if (dstPath.exists()) {

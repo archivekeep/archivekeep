@@ -20,10 +20,10 @@ import org.archivekeep.app.core.persistence.credentials.ContentEncryptionPasswor
 import org.archivekeep.app.core.persistence.credentials.CredentialsStore
 import org.archivekeep.app.core.utils.identifiers.RepositoryURI
 import org.archivekeep.files.api.repository.Repo
-import org.archivekeep.utils.loading.filterLoaded
-import org.archivekeep.utils.loading.firstLoadedOrNullOnErrorOrLocked
 import org.archivekeep.utils.loading.optional.OptionalLoadable
 import org.archivekeep.utils.loading.optional.OptionalLoadable.LoadedAvailable
+import org.archivekeep.utils.loading.optional.filterLoaded
+import org.archivekeep.utils.loading.optional.firstLoadedOrNullOnFailedOrNotAvailable
 import org.archivekeep.utils.loading.optional.flatMapLatestLoadedData
 import kotlin.coroutines.cancellation.CancellationException
 import kotlin.time.Duration.Companion.milliseconds
@@ -109,7 +109,10 @@ private suspend fun FlowCollector<OptionalLoadable<Repo>>.autoUnlock(
                         }
 
                         is OptionalLoadable.Loading -> {}
-                        else -> onShowLocked.send(Unit)
+
+                        else -> {
+                            onShowLocked.send(Unit)
+                        }
                     }
 
                     true
@@ -132,7 +135,7 @@ private suspend fun FlowCollector<OptionalLoadable<Repo>>.autoUnlock(
                 val credentialsFlow = credentialsStore.getRepositoryCredentialsFlow(uri)
 
                 val storedCredentials =
-                    credentialsStore.inMemoryCredentials.value[uri] ?: credentialsFlow.firstLoadedOrNullOnErrorOrLocked()
+                    credentialsStore.inMemoryCredentials.value[uri] ?: credentialsFlow.firstLoadedOrNullOnFailedOrNotAvailable()
 
                 if (storedCredentials != null) {
                     unlockRequest.tryOpen(storedCredentials, UnlockOptions(false, false))

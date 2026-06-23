@@ -19,12 +19,21 @@ fun <T, R> Flow<OptionalLoadable<T>>.mapLoadedData(function: suspend (data: T) -
     this
         .map {
             when (it) {
-                is OptionalLoadable.LoadedAvailable ->
+                is OptionalLoadable.LoadedAvailable -> {
                     OptionalLoadable.LoadedAvailable(function(it.value))
+                }
 
-                is OptionalLoadable.Failed -> OptionalLoadable.Failed(it.cause)
-                OptionalLoadable.Loading -> OptionalLoadable.Loading
-                is OptionalLoadable.NotAvailable -> it
+                is OptionalLoadable.Failed -> {
+                    OptionalLoadable.Failed(it.cause)
+                }
+
+                OptionalLoadable.Loading -> {
+                    OptionalLoadable.Loading
+                }
+
+                is OptionalLoadable.NotAvailable -> {
+                    it
+                }
             }
         }.autoCatch()
 
@@ -65,7 +74,7 @@ fun <T, R> Flow<Loadable<T>>.mapLoadedDataAsOptional(function: suspend (data: T)
     this
         .map {
             when (it) {
-                is Loadable.Loaded ->
+                is Loadable.Loaded -> {
                     function(it.value).let { result ->
                         if (result != null) {
                             OptionalLoadable.LoadedAvailable(result)
@@ -73,8 +82,15 @@ fun <T, R> Flow<Loadable<T>>.mapLoadedDataAsOptional(function: suspend (data: T)
                             OptionalLoadable.NotAvailable()
                         }
                     }
-                is Loadable.Failed -> OptionalLoadable.Failed(it.throwable)
-                Loadable.Loading -> OptionalLoadable.Loading
+                }
+
+                is Loadable.Failed -> {
+                    OptionalLoadable.Failed(it.throwable)
+                }
+
+                Loadable.Loading -> {
+                    OptionalLoadable.Loading
+                }
             }
         }.autoCatch()
 
@@ -109,10 +125,39 @@ suspend inline fun <T> Flow<OptionalLoadable<T>>.firstFinished(): T? =
     this
         .transform {
             when (it) {
-                is OptionalLoadable.Failed -> throw it.cause
+                is OptionalLoadable.Failed -> {
+                    throw it.cause
+                }
+
                 OptionalLoadable.Loading -> {}
-                is OptionalLoadable.LoadedAvailable -> emit(it.value)
-                is OptionalLoadable.NotAvailable -> emit(null)
+
+                is OptionalLoadable.LoadedAvailable -> {
+                    emit(it.value)
+                }
+
+                is OptionalLoadable.NotAvailable -> {
+                    emit(null)
+                }
+            }
+        }.first()
+
+suspend inline fun <T> Flow<OptionalLoadable<T>>.firstLoadedOrNullOnFailedOrNotAvailable(): T? =
+    this
+        .transform {
+            when (it) {
+                is OptionalLoadable.Failed -> {
+                    emit(null)
+                }
+
+                OptionalLoadable.Loading -> {}
+
+                is OptionalLoadable.LoadedAvailable -> {
+                    emit(it.value)
+                }
+
+                is OptionalLoadable.NotAvailable -> {
+                    emit(null)
+                }
             }
         }.first()
 
@@ -129,3 +174,5 @@ fun <T> Flow<OptionalLoadable<T>>.stateIn(
 
 suspend inline fun <reified T> Flow<OptionalLoadable<T>>.firstFinishedLoading(): OptionalLoadable.LoadingFinished<T> =
     this.filterIsInstance<OptionalLoadable.LoadingFinished<T>>().first()
+
+fun <T> Flow<OptionalLoadable<T>>.filterLoaded(): Flow<OptionalLoadable.LoadedAvailable<T>> = this.filterIsInstance()

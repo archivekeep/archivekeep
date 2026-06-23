@@ -11,6 +11,7 @@ import com.nimbusds.jose.crypto.PasswordBasedEncrypter
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.first
@@ -25,7 +26,8 @@ import kotlinx.serialization.json.Json
 import org.archivekeep.utils.coroutines.shareResourceIn
 import org.archivekeep.utils.datastore.passwordprotected.PasswordProtectedCustomJoseStorage.State
 import org.archivekeep.utils.exceptions.IncorrectPasswordException
-import org.archivekeep.utils.loading.ProtectedLoadableResource
+import org.archivekeep.utils.loading.PendingAuthenticationException
+import org.archivekeep.utils.loading.optional.OptionalLoadable
 import java.security.InvalidKeyException
 
 class PasswordProtectedCustomJoseStorage<T>(
@@ -45,9 +47,9 @@ class PasswordProtectedCustomJoseStorage<T>(
                 tryInitialize()
             }.stateIn(scope, SharingStarted.Lazily, State.NotInitialized)
 
-    override val data =
+    override val data: Flow<OptionalLoadable<T>> =
         autoloadFlow
-            .map { it.toProtectedLoadableResource() }
+            .map { it.toOptionalLoadable() }
             .shareResourceIn(scope)
 
     override suspend fun needsUnlock(): Boolean =
@@ -55,10 +57,20 @@ class PasswordProtectedCustomJoseStorage<T>(
             .autoloadFlow
             .transform {
                 when (it) {
-                    State.Locked -> emit(true)
-                    is State.NotExisting -> emit(true)
+                    State.Locked -> {
+                        emit(true)
+                    }
+
+                    is State.NotExisting -> {
+                        emit(true)
+                    }
+
                     State.NotInitialized -> {}
-                    is State.Unlocked -> emit(false)
+
+                    is State.Unlocked -> {
+                        emit(false)
+                    }
+
                     is State.Failed -> {}
                 }
             }.first()
@@ -203,20 +215,25 @@ class PasswordProtectedCustomJoseStorage<T>(
     }
 }
 
-private fun <T> State<T>.toProtectedLoadableResource() =
+private fun <T> State<T>.toOptionalLoadable() =
     when (this) {
-        is State.NotInitialized ->
-            ProtectedLoadableResource.Loading
+        is State.NotInitialized -> {
+            OptionalLoadable.Loading
+        }
 
-        is State.NotExisting ->
-            ProtectedLoadableResource.Loaded(defaultData)
+        is State.NotExisting -> {
+            OptionalLoadable.LoadedAvailable(defaultData)
+        }
 
-        is State.Locked ->
-            ProtectedLoadableResource.PendingAuthentication("TODO")
+        is State.Locked -> {
+            OptionalLoadable.NotAvailable(PendingAuthenticationException())
+        }
 
-        is State.Unlocked ->
-            ProtectedLoadableResource.Loaded(data)
+        is State.Unlocked -> {
+            OptionalLoadable.LoadedAvailable(data)
+        }
 
-        is State.Failed ->
-            ProtectedLoadableResource.Failed(error)
+        is State.Failed -> {
+            OptionalLoadable.Failed(error)
+        }
     }

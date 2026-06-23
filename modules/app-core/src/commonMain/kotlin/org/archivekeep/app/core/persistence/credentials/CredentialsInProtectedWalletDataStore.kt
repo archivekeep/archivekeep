@@ -6,7 +6,6 @@ import dev.zacsweers.metro.Inject
 import dev.zacsweers.metro.SingleIn
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.map
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonElement
@@ -14,7 +13,6 @@ import org.archivekeep.app.core.domain.CoreApplicationServiceScope
 import org.archivekeep.app.core.utils.identifiers.RepositoryURI
 import org.archivekeep.files.api.repository.auth.BasicAuthCredentials
 import org.archivekeep.utils.datastore.passwordprotected.ProtectedDataStore
-import org.archivekeep.utils.loading.ProtectedLoadableResource
 import org.archivekeep.utils.loading.optional.OptionalLoadable
 import org.archivekeep.utils.loading.optional.mapLoadedData
 
@@ -28,7 +26,7 @@ class CredentialsInProtectedWalletDataStore(
 
     override fun getRepositorySecretsFlow(uri: RepositoryURI): Flow<OptionalLoadable<Map<RepositorySecretType, JsonElement>>> =
         datastore
-            .dataOptional
+            .data
             .mapLoadedData {
                 it.repositorySecrets[uri] ?: emptyMap()
             }
@@ -50,29 +48,12 @@ class CredentialsInProtectedWalletDataStore(
     }
 
     @Deprecated("Switch to getRepositorySecrets")
-    override fun getRepositoryCredentialsFlow(uri: RepositoryURI): Flow<ProtectedLoadableResource<BasicAuthCredentials?, Any>> =
-        datastore.data
-            .map {
-                when (it) {
-                    is ProtectedLoadableResource.Failed -> {
-                        it
-                    }
-
-                    is ProtectedLoadableResource.Loaded -> {
-                        ProtectedLoadableResource.Loaded(
-                            it.value.repositoryCredentials.firstOrNull { it.uri == uri }?.let {
-                                Json.decodeFromString<BasicAuthCredentials>(it.rawCredentials)
-                            },
-                        )
-                    }
-
-                    is ProtectedLoadableResource.Loading -> {
-                        it
-                    }
-
-                    is ProtectedLoadableResource.PendingAuthentication -> {
-                        it
-                    }
+    override fun getRepositoryCredentialsFlow(uri: RepositoryURI): Flow<OptionalLoadable<BasicAuthCredentials?>> =
+        datastore
+            .data
+            .mapLoadedData {
+                it.repositoryCredentials.firstOrNull { it.uri == uri }?.let {
+                    Json.decodeFromString<BasicAuthCredentials>(it.rawCredentials)
                 }
             }
 

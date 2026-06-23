@@ -24,8 +24,8 @@ import org.archivekeep.app.core.persistence.registry.RegisteredRepository
 import org.archivekeep.app.core.utils.identifiers.RepositoryURI
 import org.archivekeep.files.api.repository.auth.BasicAuthCredentials
 import org.archivekeep.files.driver.s3.S3Repository
-import org.archivekeep.utils.loading.firstLoadedOrNullOnErrorOrLocked
 import org.archivekeep.utils.loading.optional.OptionalLoadable
+import org.archivekeep.utils.loading.optional.firstLoadedOrNullOnFailedOrNotAvailable
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.io.TempDir
 import org.testcontainers.containers.MinIOContainer
@@ -174,7 +174,7 @@ class AddRemoteRepositoryUseCaseImplTest {
 
         env.walletDataStore
             .data
-            .firstLoadedOrNullOnErrorOrLocked()
+            .firstLoadedOrNullOnFailedOrNotAvailable()
             .shouldNotBeNull {
                 this.repositoryCredentials shouldContainExactly
                     setOf(

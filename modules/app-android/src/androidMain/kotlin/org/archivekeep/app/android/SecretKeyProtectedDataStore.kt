@@ -15,7 +15,7 @@ import kotlinx.serialization.json.JsonElement
 import org.archivekeep.app.core.utils.datastore.DataStoreKSerializer
 import org.archivekeep.utils.coroutines.shareResourceIn
 import org.archivekeep.utils.datastore.passwordprotected.ProtectedDataStore
-import org.archivekeep.utils.loading.ProtectedLoadableResource
+import org.archivekeep.utils.loading.optional.OptionalLoadable
 import java.nio.file.Path
 
 class SecretKeyProtectedDataStore<E>(
@@ -48,20 +48,19 @@ class SecretKeyProtectedDataStore<E>(
 
     override suspend fun needsUnlock(): Boolean = false
 
-    @Deprecated("Drop ProtectedLoadableResource", replaceWith = ReplaceWith("dataOptional"))
-    override val data: Flow<ProtectedLoadableResource<E, Any>> =
+    override val data: Flow<OptionalLoadable<E>> =
         rawDataStore
             .data
             .map {
                 try {
-                    ProtectedLoadableResource.Loaded(it.encryptedData.decrypt())
+                    OptionalLoadable.LoadedAvailable(it.encryptedData.decrypt())
                 } catch (e: Throwable) {
                     // TODO: don't purge automatically
                     rawDataStore.updateData {
                         DataAtRestStructure(null, defaultValueProducer().encrypt())
                     }
 
-                    ProtectedLoadableResource.Failed(e)
+                    OptionalLoadable.Failed(e)
                 }
             }.shareResourceIn(scope)
 

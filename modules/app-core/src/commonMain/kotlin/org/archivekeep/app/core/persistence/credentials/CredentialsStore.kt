@@ -5,7 +5,6 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.serialization.json.JsonElement
 import org.archivekeep.app.core.utils.identifiers.RepositoryURI
 import org.archivekeep.files.api.repository.auth.BasicAuthCredentials
-import org.archivekeep.utils.loading.ProtectedLoadableResource
 import org.archivekeep.utils.loading.optional.OptionalLoadable
 
 interface CredentialsStore {
@@ -20,7 +19,7 @@ interface CredentialsStore {
     )
 
     @Deprecated("Switch to getRepositorySecrets")
-    fun getRepositoryCredentialsFlow(uri: RepositoryURI): Flow<ProtectedLoadableResource<BasicAuthCredentials?, Any>>
+    fun getRepositoryCredentialsFlow(uri: RepositoryURI): Flow<OptionalLoadable<BasicAuthCredentials?>>
 
     @Deprecated("Switch to saveRepositorySecret")
     suspend fun saveRepositoryCredentials(

@@ -7,11 +7,12 @@ import kotlinx.coroutines.flow.map
 import org.archivekeep.app.core.persistence.credentials.WalletPO
 import org.archivekeep.utils.datastore.passwordprotected.PasswordProtectedDataStore
 import org.archivekeep.utils.datastore.passwordprotected.PasswordProtectedJoseStorageInFile
-import org.archivekeep.utils.loading.ProtectedLoadableResource
+import org.archivekeep.utils.loading.PendingAuthenticationException
+import org.archivekeep.utils.loading.optional.OptionalLoadable
 
 fun(PasswordProtectedDataStore<WalletPO>?).canUnlockFlow() =
     (this as? PasswordProtectedJoseStorageInFile)?.data?.map {
-        it is ProtectedLoadableResource.PendingAuthentication
+        it is OptionalLoadable.NotAvailable && it.cause is PendingAuthenticationException
     } ?: flowOf(false)
 
 @Composable

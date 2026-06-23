@@ -68,8 +68,7 @@ import org.archivekeep.utils.fromHexToBase64
 import org.archivekeep.utils.io.AutomaticFileCleanup
 import org.archivekeep.utils.loading.Loadable
 import org.archivekeep.utils.loading.ResourceLoader
-import org.archivekeep.utils.loading.firstLoadedOrNullOnErrorOrLocked
-import org.archivekeep.utils.loading.firstLoadedOrThrowOnErrorOrLocked
+import org.archivekeep.utils.loading.optional.firstLoadedOrNullOnFailedOrNotAvailable
 import java.io.InputStream
 import java.io.PipedInputStream
 import java.io.PipedOutputStream
@@ -79,7 +78,7 @@ import java.nio.charset.StandardCharsets
 import java.nio.file.Path
 import java.security.DigestInputStream
 import java.security.MessageDigest
-import java.util.Date
+import java.util.*
 import kotlin.io.path.createTempFile
 import kotlin.io.path.fileSize
 import kotlin.io.path.inputStream
@@ -191,7 +190,7 @@ class EncryptedS3Repository private constructor(
 
     private suspend fun loadIndexFiles(): List<RepoIndex.File> =
         coroutineScope {
-            val vaultContents = vault.data.firstLoadedOrNullOnErrorOrLocked()!!
+            val vaultContents = vault.data.firstLoadedOrNullOnFailedOrNotAvailable()!!
 
             var allItems = emptyList<Object>()
             var nextMarker: String? = null
@@ -304,7 +303,7 @@ class EncryptedS3Repository private constructor(
         filename: String,
         block: suspend (ArchiveFileInfo, InputStream) -> T,
     ): T {
-        val vaultContents = vault.data.firstLoadedOrNullOnErrorOrLocked()!!
+        val vaultContents = vault.data.firstLoadedOrNullOnFailedOrNotAvailable()!!
 
         return s3Client.getObject(
             GetObjectRequest {
@@ -344,7 +343,7 @@ class EncryptedS3Repository private constructor(
             cleanup.files.add(tempFile)
 
             withContext(ioDispatcher) {
-                val vaultContents = vault.data.firstLoadedOrThrowOnErrorOrLocked()
+                val vaultContents = vault.data.firstLoadedOrNullOnFailedOrNotAvailable()!!
 
                 // TODO: monitor temp file creation - sub-task
                 val (digestHex, signedMetadataJSON) = populateTempFileForUpload(tempFile, stream, info, vaultContents)
