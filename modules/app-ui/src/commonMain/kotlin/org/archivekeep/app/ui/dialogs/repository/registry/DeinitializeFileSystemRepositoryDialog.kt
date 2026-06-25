@@ -36,7 +36,6 @@ import org.archivekeep.app.ui.components.feature.dialogs.SimpleActionDialogDoneB
 import org.archivekeep.app.ui.components.feature.dialogs.operations.ExecutionErrorIfPresent
 import org.archivekeep.app.ui.dialogs.Dialog
 import org.archivekeep.app.ui.domain.wiring.LocalApplicationServices
-import org.archivekeep.app.ui.domain.wiring.LocalOperationFactory
 import org.archivekeep.app.ui.domain.wiring.OperationFactory
 import org.archivekeep.app.ui.utils.SingleLaunchGuard
 import org.archivekeep.app.ui.utils.appendBoldSpan
@@ -92,7 +91,7 @@ class DeinitializeFileSystemRepositoryDialog(
 
     @Composable
     override fun render(onClose: () -> Unit) {
-        val operationFactory = LocalOperationFactory.current
+        val operationFactory = LocalApplicationServices.current.operationFactory
         val coroutineScope = rememberCoroutineScope()
 
         val registry = LocalApplicationServices.current.registry

@@ -18,8 +18,7 @@ import org.archivekeep.app.ui.components.designsystem.dialog.fullWidthDialogWidt
 import org.archivekeep.app.ui.components.feature.dialogs.operations.DialogOperationControlButtons
 import org.archivekeep.app.ui.dialogs.AbstractDialog
 import org.archivekeep.app.ui.dialogs.repository.procedures.sync.parts.RepoToRepoSyncMainContents
-import org.archivekeep.app.ui.domain.wiring.LocalRepoToRepoSyncService
-import org.archivekeep.app.ui.domain.wiring.LocalStorageService
+import org.archivekeep.app.ui.domain.wiring.LocalApplicationServices
 import org.archivekeep.app.ui.utils.appendBoldSpan
 import org.archivekeep.app.ui.utils.collectAsLoadable
 import org.archivekeep.utils.loading.Loadable
@@ -64,8 +63,8 @@ data class UploadToRepoDialog(
         scope: CoroutineScope,
         onClose: () -> Unit,
     ): VM {
-        val storageService = LocalStorageService.current
-        val syncService = LocalRepoToRepoSyncService.current
+        val storageService = LocalApplicationServices.current.storageService
+        val syncService = LocalApplicationServices.current.syncService
 
         return remember(storageService, syncService, scope) {
             VM(storageService, syncService, scope, onClose)

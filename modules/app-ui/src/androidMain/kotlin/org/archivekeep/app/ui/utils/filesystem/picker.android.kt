@@ -5,11 +5,11 @@ import io.github.vinceglb.filekit.compose.rememberDirectoryPickerLauncher
 import io.github.vinceglb.filekit.core.FileKitPlatformSettings
 import kotlinx.coroutines.runBlocking
 import org.archivekeep.app.ui.dialogs.repository.registry.getPathFromURI
-import org.archivekeep.app.ui.domain.wiring.LocalFileStores
+import org.archivekeep.app.ui.domain.wiring.LocalApplicationServices
 
 actual fun defaultFilesystemDirectoryPicker(): @Composable (onResult: (result: PickResult) -> Unit) -> () -> Unit =
     { onResult ->
-        val fileStores = LocalFileStores.current
+        val fileStores = LocalApplicationServices.current.fileStores
 
         val pickerLauncher =
             rememberDirectoryPickerLauncher(

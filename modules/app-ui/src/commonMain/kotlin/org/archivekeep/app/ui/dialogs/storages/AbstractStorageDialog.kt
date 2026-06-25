@@ -14,7 +14,7 @@ import org.archivekeep.app.ui.components.designsystem.dialog.DialogInnerContaine
 import org.archivekeep.app.ui.components.designsystem.dialog.DialogOverlayCard
 import org.archivekeep.app.ui.components.feature.LoadableGuard
 import org.archivekeep.app.ui.dialogs.Dialog
-import org.archivekeep.app.ui.domain.wiring.LocalStorageService
+import org.archivekeep.app.ui.domain.wiring.LocalApplicationServices
 import org.archivekeep.utils.loading.Loadable
 
 abstract class AbstractStorageDialog<T_State : AbstractStorageDialog.IState, T_VM : Any>(
@@ -45,7 +45,7 @@ abstract class AbstractStorageDialog<T_State : AbstractStorageDialog.IState, T_V
 
     @Composable
     override fun render(onClose: () -> Unit) {
-        val storageService = LocalStorageService.current
+        val storageService = LocalApplicationServices.current.storageService
 
         val storage =
             remember(storageService, uri) {

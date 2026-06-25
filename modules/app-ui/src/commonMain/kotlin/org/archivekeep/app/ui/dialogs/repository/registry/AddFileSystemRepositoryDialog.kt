@@ -51,8 +51,8 @@ import org.archivekeep.app.ui.components.feature.dialogs.SimpleActionDialogContr
 import org.archivekeep.app.ui.components.feature.dialogs.SimpleActionDialogDoneButtons
 import org.archivekeep.app.ui.components.feature.errors.AutomaticErrorMessage
 import org.archivekeep.app.ui.dialogs.Dialog
+import org.archivekeep.app.ui.domain.wiring.LocalApplicationServices
 import org.archivekeep.app.ui.domain.wiring.LocalArchiveOperationLaunchers
-import org.archivekeep.app.ui.domain.wiring.LocalOperationFactory
 import org.archivekeep.app.ui.domain.wiring.OperationFactory
 import org.archivekeep.app.ui.utils.SingleLaunchGuard
 import org.archivekeep.app.ui.utils.appendBoldSpan
@@ -127,7 +127,7 @@ class AddFileSystemRepositoryDialog(
 
     @Composable
     override fun render(onClose: () -> Unit) {
-        val operationFactory = LocalOperationFactory.current
+        val operationFactory = LocalApplicationServices.current.operationFactory
 
         val coroutineScope = rememberCoroutineScope()
 

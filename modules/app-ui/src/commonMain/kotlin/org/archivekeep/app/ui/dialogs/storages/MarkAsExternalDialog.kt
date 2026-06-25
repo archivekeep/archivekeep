@@ -17,7 +17,7 @@ import org.archivekeep.app.core.persistence.registry.RegistryDataStore
 import org.archivekeep.app.core.utils.identifiers.StorageURI
 import org.archivekeep.app.ui.components.feature.dialogs.SimpleActionDialogControlButtons
 import org.archivekeep.app.ui.components.feature.dialogs.operations.LaunchableExecutionErrorIfPresent
-import org.archivekeep.app.ui.domain.wiring.LocalRegistry
+import org.archivekeep.app.ui.domain.wiring.LocalApplicationServices
 import org.archivekeep.app.ui.utils.Launchable
 import org.archivekeep.app.ui.utils.appendBoldSpan
 import org.archivekeep.app.ui.utils.asAction
@@ -68,7 +68,7 @@ class MarkAsExternalDialog(
         storage: Storage,
         onClose: () -> Unit,
     ): VM {
-        val registry = LocalRegistry.current
+        val registry = LocalApplicationServices.current.registry
         val coroutineScope = rememberCoroutineScope()
 
         return remember {

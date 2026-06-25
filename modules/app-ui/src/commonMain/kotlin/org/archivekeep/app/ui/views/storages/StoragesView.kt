@@ -8,7 +8,7 @@ import kotlinx.coroutines.CoroutineScope
 import org.archivekeep.app.ui.components.designsystem.layout.views.ViewScrollableContainer
 import org.archivekeep.app.ui.components.designsystem.sections.SectionBlock
 import org.archivekeep.app.ui.components.designsystem.theme.CColors
-import org.archivekeep.app.ui.domain.wiring.LocalStorageService
+import org.archivekeep.app.ui.domain.wiring.LocalApplicationServices
 import org.archivekeep.app.ui.utils.collectLoadableFlow
 import org.archivekeep.app.ui.views.View
 import org.archivekeep.app.ui.views.storages.components.StoragesList
@@ -17,7 +17,7 @@ import org.archivekeep.utils.loading.mapLoadedData
 class StoragesView : View<StoragesViewModel> {
     @Composable
     override fun produceViewModel(scope: CoroutineScope): StoragesViewModel {
-        val storageService = LocalStorageService.current
+        val storageService = LocalApplicationServices.current.storageService
 
         return remember(scope, storageService) {
             StoragesViewModel(

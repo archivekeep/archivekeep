@@ -6,7 +6,7 @@ import kotlinx.coroutines.CoroutineScope
 import org.archivekeep.app.core.domain.repositories.Repository
 import org.archivekeep.app.core.utils.identifiers.RepositoryURI
 import org.archivekeep.app.ui.dialogs.AbstractDialog
-import org.archivekeep.app.ui.domain.wiring.LocalRepoService
+import org.archivekeep.app.ui.domain.wiring.LocalApplicationServices
 
 abstract class AbstractRepositoryDialog<T_State : AbstractDialog.IState, T_VM : AbstractDialog.IVM>(
     val uri: RepositoryURI,
@@ -23,7 +23,7 @@ abstract class AbstractRepositoryDialog<T_State : AbstractDialog.IState, T_VM : 
         scope: CoroutineScope,
         onClose: () -> Unit,
     ): T_VM {
-        val repositoryService = LocalRepoService.current
+        val repositoryService = LocalApplicationServices.current.repositoryService
 
         val repository = remember(uri) { repositoryService.getRepository(uri) }
 

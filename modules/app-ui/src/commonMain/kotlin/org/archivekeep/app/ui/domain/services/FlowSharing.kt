@@ -1,14 +1,9 @@
 package org.archivekeep.app.ui.domain.services
 
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.staticCompositionLocalOf
 import kotlinx.coroutines.CoroutineDispatcher
-
-val LocalSharingCoroutineDispatcher =
-    staticCompositionLocalOf<CoroutineDispatcher> {
-        error("CompositionLocal LocalSharingCoroutineDispatcher not provided")
-    }
+import org.archivekeep.app.ui.domain.wiring.LocalApplicationServices
 
 val SharingCoroutineDispatcher: CoroutineDispatcher
     @Composable
-    get() = LocalSharingCoroutineDispatcher.current
+    get() = LocalApplicationServices.current.serviceWorkDispatcher

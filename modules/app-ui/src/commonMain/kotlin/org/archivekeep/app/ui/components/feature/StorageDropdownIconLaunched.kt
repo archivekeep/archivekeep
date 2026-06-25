@@ -14,14 +14,14 @@ import compose.icons.TablerIcons
 import compose.icons.tablericons.DotsVertical
 import org.archivekeep.app.core.utils.identifiers.StorageURI
 import org.archivekeep.app.ui.components.designsystem.sections.SectionCardTitleIconButton
+import org.archivekeep.app.ui.domain.wiring.LocalApplicationServices
 import org.archivekeep.app.ui.domain.wiring.LocalStorageOperationsLaunchers
-import org.archivekeep.app.ui.domain.wiring.LocalStorageService
 import org.archivekeep.app.ui.utils.collectLoadableFlow
 import org.archivekeep.utils.loading.mapLoadedData
 
 @Composable
 fun StorageDropdownIconLaunched(uri: StorageURI) {
-    val storageService = LocalStorageService.current
+    val storageService = LocalApplicationServices.current.storageService
     val operationsLaunchers = LocalStorageOperationsLaunchers.current
 
     val storageLoadable =

@@ -45,7 +45,7 @@ import org.archivekeep.app.ui.components.feature.dialogs.SimpleActionDialogContr
 import org.archivekeep.app.ui.components.feature.dialogs.SimpleActionDialogDoneButtons
 import org.archivekeep.app.ui.components.feature.errors.AutomaticErrorMessage
 import org.archivekeep.app.ui.dialogs.Dialog
-import org.archivekeep.app.ui.domain.wiring.LocalOperationFactory
+import org.archivekeep.app.ui.domain.wiring.LocalApplicationServices
 import org.archivekeep.app.ui.domain.wiring.LocalWalletOperationLaunchers
 import org.archivekeep.app.ui.domain.wiring.WalletOperationLaunchers
 import org.archivekeep.app.ui.utils.SingleLaunchGuard
@@ -176,7 +176,7 @@ class AddRemoteRepositoryDialog : Dialog {
     @OptIn(ExperimentalMaterial3Api::class)
     @Composable
     override fun render(onClose: () -> Unit) {
-        val operationFactory = LocalOperationFactory.current
+        val operationFactory = LocalApplicationServices.current.operationFactory
         val walletOperationLaunchers = LocalWalletOperationLaunchers.current
 
         val coroutineScope = rememberCoroutineScope()
@@ -338,7 +338,7 @@ class AddRemoteRepositoryDialog : Dialog {
                                         if (vm.initType.value == InitType.ENCRYPTED) {
                                             Column {
                                                 WarningAlert {
-                                                    Text("Contents are E2E encrypted. Filenames are not.",)
+                                                    Text("Contents are E2E encrypted. Filenames are not.")
                                                     Spacer(Modifier.height(8.dp))
                                                     Text("Do not have sensitive data in filenames with servers (service providers) you don't trust.")
                                                 }

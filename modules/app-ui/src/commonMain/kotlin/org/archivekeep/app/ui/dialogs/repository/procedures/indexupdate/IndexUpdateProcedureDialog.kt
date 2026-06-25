@@ -36,7 +36,7 @@ import org.archivekeep.app.ui.components.feature.operations.IndexUpdatePreparati
 import org.archivekeep.app.ui.components.feature.operations.LocalIndexUpdateProgress
 import org.archivekeep.app.ui.components.feature.operations.ScrollableLogTextInDialog
 import org.archivekeep.app.ui.dialogs.repository.AbstractRepositoryDialog
-import org.archivekeep.app.ui.domain.wiring.LocalIndexUpdateProcedureSupervisorService
+import org.archivekeep.app.ui.domain.wiring.LocalApplicationServices
 import org.archivekeep.app.ui.utils.appendBoldSpan
 import org.archivekeep.app.ui.utils.collectAsLoadable
 import org.archivekeep.app.ui.utils.stickToFirstNotNull
@@ -65,19 +65,21 @@ class IndexUpdateProcedureDialog(
 
         val controlState: DialogOperationControlState =
             when (val opState = operationState) {
-                is IndexUpdateProcedureSupervisor.JobState ->
+                is IndexUpdateProcedureSupervisor.JobState -> {
                     opState.state.toDialogOperationControlState(
                         onCancel = null,
                         onHide = onClose,
                         onClose = onClose,
                     )
+                }
 
-                is IndexUpdateProcedureSupervisor.Preparation ->
+                is IndexUpdateProcedureSupervisor.Preparation -> {
                     DialogOperationControlState.NotRunning(
                         onLaunch = ::onTriggerExecute,
                         onClose = onClose,
                         canLaunch = opState.result is IndexUpdateProcedure.PreparationResult,
                     )
+                }
             }
 
         private fun onTriggerExecute() {
@@ -120,7 +122,7 @@ class IndexUpdateProcedureDialog(
         repository: Repository,
         onClose: () -> Unit,
     ): VM {
-        val addOperationSupervisorService = LocalIndexUpdateProcedureSupervisorService.current
+        val addOperationSupervisorService = LocalApplicationServices.current.addOperationSupervisorService
 
         return remember {
             VM(

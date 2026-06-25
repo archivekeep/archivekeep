@@ -18,8 +18,7 @@ import org.archivekeep.app.core.utils.identifiers.RepositoryURI
 import org.archivekeep.app.ui.components.feature.dialogs.SimpleActionDialogControlButtons
 import org.archivekeep.app.ui.components.feature.dialogs.operations.LaunchableExecutionErrorIfPresent
 import org.archivekeep.app.ui.dialogs.repository.AbstractRepositoryDialog
-import org.archivekeep.app.ui.domain.wiring.LocalArchiveService
-import org.archivekeep.app.ui.domain.wiring.LocalRepoService
+import org.archivekeep.app.ui.domain.wiring.LocalApplicationServices
 import org.archivekeep.app.ui.utils.Launchable
 import org.archivekeep.app.ui.utils.appendBoldSpan
 import org.archivekeep.app.ui.utils.asTrivialAction
@@ -75,8 +74,8 @@ class UnassociateRepositoryDialog(
         repository: Repository,
         onClose: () -> Unit,
     ): VM {
-        val archiveService = LocalArchiveService.current
-        val repositoryService = LocalRepoService.current
+        val archiveService = LocalApplicationServices.current.archiveService
+        val repositoryService = LocalApplicationServices.current.repositoryService
 
         return remember {
             VM(

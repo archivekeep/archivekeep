@@ -28,9 +28,7 @@ import org.archivekeep.app.ui.components.feature.dialogs.operations.DialogOperat
 import org.archivekeep.app.ui.components.feature.dialogs.operations.toDialogOperationControlState
 import org.archivekeep.app.ui.dialogs.AbstractDialog
 import org.archivekeep.app.ui.domain.data.getSyncCandidates
-import org.archivekeep.app.ui.domain.wiring.LocalAddPushService
-import org.archivekeep.app.ui.domain.wiring.LocalRepoService
-import org.archivekeep.app.ui.domain.wiring.LocalStorageService
+import org.archivekeep.app.ui.domain.wiring.LocalApplicationServices
 import org.archivekeep.app.ui.utils.appendBoldSpan
 import org.archivekeep.app.ui.utils.stickToFirstNotNullAsState
 import org.archivekeep.files.procedures.indexupdate.IndexUpdateProcedure
@@ -82,14 +80,18 @@ class AddAndPushRepoDialogViewModel(
 
         val controlState: DialogOperationControlState by derivedStateOf {
             when (state) {
-                is JobState ->
+                is JobState -> {
                     state.jobState.executionState.toDialogOperationControlState(
                         onCancel = onCancel,
                         onHide = onClose,
                         onClose = onClose,
                     )
-                AddAndPushProcedure.NotReadyAddPushProcess, is AddAndPushProcedure.PreparingAddPushProcess ->
+                }
+
+                AddAndPushProcedure.NotReadyAddPushProcess, is AddAndPushProcedure.PreparingAddPushProcess -> {
                     DialogOperationControlState.NotRunning(onLaunch = {}, onClose = onClose, canLaunch = false)
+                }
+
                 is ReadyAddPushProcess -> {
                     val candidates = otherRepositoryCandidates.mapIfLoadedOrDefault(emptyList()) { it }
                     val selections = selectedDestinationRepositories
@@ -145,9 +147,9 @@ fun rememberAddAndPushDialogViewModel(
     repositoryURI: RepositoryURI,
     onClose: () -> Unit,
 ): AddAndPushRepoDialogViewModel {
-    val storageService = LocalStorageService.current
-    val repositoryService = LocalRepoService.current
-    val addPushOperationService = LocalAddPushService.current
+    val storageService = LocalApplicationServices.current.storageService
+    val repositoryService = LocalApplicationServices.current.repositoryService
+    val addPushOperationService = LocalApplicationServices.current.addPushService
 
     val vm =
         remember(scope, repositoryURI) {

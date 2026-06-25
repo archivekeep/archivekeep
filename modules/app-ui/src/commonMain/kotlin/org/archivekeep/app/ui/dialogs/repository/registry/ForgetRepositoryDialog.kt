@@ -20,8 +20,7 @@ import org.archivekeep.app.core.utils.identifiers.RepositoryURI
 import org.archivekeep.app.ui.components.feature.dialogs.SimpleActionDialogControlButtons
 import org.archivekeep.app.ui.components.feature.dialogs.operations.LaunchableExecutionErrorIfPresent
 import org.archivekeep.app.ui.dialogs.repository.AbstractRepositoryDialog
-import org.archivekeep.app.ui.domain.wiring.LocalRegistry
-import org.archivekeep.app.ui.domain.wiring.LocalStorageService
+import org.archivekeep.app.ui.domain.wiring.LocalApplicationServices
 import org.archivekeep.app.ui.utils.Launchable
 import org.archivekeep.app.ui.utils.appendBoldSpan
 import org.archivekeep.app.ui.utils.asTrivialAction
@@ -74,8 +73,8 @@ class ForgetRepositoryDialog(
         repository: Repository,
         onClose: () -> Unit,
     ): VM {
-        val storageService = LocalStorageService.current
-        val registry = LocalRegistry.current
+        val storageService = LocalApplicationServices.current.storageService
+        val registry = LocalApplicationServices.current.registry
 
         return remember {
             VM(scope, storageService, registry, uri, onClose)

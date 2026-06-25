@@ -13,11 +13,7 @@ import org.archivekeep.app.ui.components.designsystem.layout.views.ViewScrollabl
 import org.archivekeep.app.ui.components.designsystem.sections.SectionBlock
 import org.archivekeep.app.ui.components.designsystem.theme.CColors
 import org.archivekeep.app.ui.components.feature.WelcomeText
-import org.archivekeep.app.ui.domain.wiring.LocalAddPushService
-import org.archivekeep.app.ui.domain.wiring.LocalArchiveService
-import org.archivekeep.app.ui.domain.wiring.LocalRepoService
-import org.archivekeep.app.ui.domain.wiring.LocalRepoToRepoSyncService
-import org.archivekeep.app.ui.domain.wiring.LocalStorageService
+import org.archivekeep.app.ui.domain.wiring.LocalApplicationServices
 import org.archivekeep.app.ui.utils.collectLoadableFlow
 import org.archivekeep.app.ui.views.View
 import org.archivekeep.app.ui.views.home.components.HomeArchivesIntro
@@ -32,11 +28,11 @@ import org.archivekeep.utils.loading.mapLoadedData
 class HomeView : View<HomeViewModel> {
     @Composable
     override fun produceViewModel(scope: CoroutineScope): HomeViewModel {
-        val archiveService = LocalArchiveService.current
-        val repositoryService = LocalRepoService.current
-        val storageService = LocalStorageService.current
-        val syncService = LocalRepoToRepoSyncService.current
-        val addPushOperationService = LocalAddPushService.current
+        val archiveService = LocalApplicationServices.current.archiveService
+        val repositoryService = LocalApplicationServices.current.repositoryService
+        val storageService = LocalApplicationServices.current.storageService
+        val syncService = LocalApplicationServices.current.syncService
+        val addPushOperationService = LocalApplicationServices.current.addPushService
 
         return remember(
             scope,

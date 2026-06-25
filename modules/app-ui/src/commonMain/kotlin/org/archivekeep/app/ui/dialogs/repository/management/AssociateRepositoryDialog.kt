@@ -42,9 +42,7 @@ import org.archivekeep.app.ui.components.feature.dialogs.operations.LaunchableEx
 import org.archivekeep.app.ui.dialogs.repository.AbstractRepositoryDialog
 import org.archivekeep.app.ui.dialogs.repository.management.AssociateRepositoryDialog.VM
 import org.archivekeep.app.ui.dialogs.repository.management.AssociateRepositoryDialog.VM.State
-import org.archivekeep.app.ui.domain.wiring.LocalArchiveService
-import org.archivekeep.app.ui.domain.wiring.LocalOperationFactory
-import org.archivekeep.app.ui.domain.wiring.LocalRepoService
+import org.archivekeep.app.ui.domain.wiring.LocalApplicationServices
 import org.archivekeep.app.ui.domain.wiring.OperationFactory
 import org.archivekeep.app.ui.utils.Launchable
 import org.archivekeep.app.ui.utils.asAction
@@ -117,7 +115,9 @@ class AssociateRepositoryDialog(
                         throw result.cause
                     }
 
-                    is ExecutionOutcome.Success -> onClose()
+                    is ExecutionOutcome.Success -> {
+                        onClose()
+                    }
                 }
             }
     }
@@ -128,9 +128,9 @@ class AssociateRepositoryDialog(
         repository: Repository,
         onClose: () -> Unit,
     ): VM {
-        val archiveService = LocalArchiveService.current
-        val repositoryService = LocalRepoService.current
-        val operationLaunchers = LocalOperationFactory.current
+        val archiveService = LocalApplicationServices.current.archiveService
+        val repositoryService = LocalApplicationServices.current.repositoryService
+        val operationLaunchers = LocalApplicationServices.current.operationFactory
 
         return remember(scope, repository, operationLaunchers) {
             VM(

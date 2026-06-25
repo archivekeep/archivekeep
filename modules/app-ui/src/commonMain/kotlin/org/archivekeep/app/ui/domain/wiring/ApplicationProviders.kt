@@ -10,7 +10,6 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.job
 import kotlinx.coroutines.plus
-import org.archivekeep.app.ui.domain.services.LocalSharingCoroutineDispatcher
 import org.archivekeep.app.ui.domain.services.createRepositoryOpenService
 import org.archivekeep.app.ui.utils.ApplicationMetadata
 import org.archivekeep.app.ui.utils.LocalApplicationMetadata
@@ -61,17 +60,7 @@ fun ApplicationProviders(
 
     CompositionLocalProvider(
         LocalApplicationMetadata provides applicationMetadata,
-        LocalArchiveService provides applicationServices.archiveService,
-        LocalStorageService provides applicationServices.storageService,
-        LocalRepoService provides applicationServices.repositoryService,
-        LocalRepoToRepoSyncService provides applicationServices.syncService,
-        LocalAddPushService provides applicationServices.addPushService,
-        LocalIndexUpdateProcedureSupervisorService provides applicationServices.addOperationSupervisorService,
-        LocalRegistry provides applicationServices.registry,
-        LocalFileStores provides applicationServices.fileStores,
-        LocalOperationFactory provides applicationServices.operationFactory,
         LocalRepositoryOpenService provides repositoryOpenService,
-        LocalSharingCoroutineDispatcher provides applicationServices.serviceWorkDispatcher,
         LocalApplicationServices provides applicationServices,
     ) {
         content()

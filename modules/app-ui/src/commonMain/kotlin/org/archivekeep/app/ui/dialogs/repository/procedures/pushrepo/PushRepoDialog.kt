@@ -23,8 +23,7 @@ import org.archivekeep.app.ui.components.designsystem.dialog.LabelText
 import org.archivekeep.app.ui.components.designsystem.sections.SectionCardItemStateText
 import org.archivekeep.app.ui.components.feature.RelocationSyncModeOptions
 import org.archivekeep.app.ui.dialogs.repository.AbstractRepositoryDialog
-import org.archivekeep.app.ui.domain.wiring.LocalRepoToRepoSyncService
-import org.archivekeep.app.ui.domain.wiring.LocalStorageService
+import org.archivekeep.app.ui.domain.wiring.LocalApplicationServices
 import org.archivekeep.app.ui.utils.appendBoldSpan
 import org.archivekeep.app.ui.utils.asMutableState
 import org.archivekeep.app.ui.utils.collectLoadableFlow
@@ -55,8 +54,8 @@ class PushRepoDialog(
         repository: Repository,
         onClose: () -> Unit,
     ): PushRepoDialogViewModel {
-        val storageService = LocalStorageService.current
-        val syncService = LocalRepoToRepoSyncService.current
+        val storageService = LocalApplicationServices.current.storageService
+        val syncService = LocalApplicationServices.current.syncService
 
         return remember {
             PushRepoDialogViewModel(
