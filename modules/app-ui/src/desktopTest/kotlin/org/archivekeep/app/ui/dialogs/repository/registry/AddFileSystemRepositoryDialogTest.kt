@@ -20,7 +20,6 @@ import org.archivekeep.app.core.persistence.platform.demo.usbStickMusic
 import org.archivekeep.app.ui.domain.wiring.ApplicationProviders
 import org.archivekeep.app.ui.fixedFilesystemDirectoryPicker
 import org.archivekeep.app.ui.performClickTextInput
-import org.archivekeep.app.ui.utils.PropertiesApplicationMetadata
 import org.archivekeep.app.ui.utils.env.runHighDensityComposeUiTestWithDemoEnv
 import org.archivekeep.app.ui.utils.filesystem.LocalFilesystemDirectoryPicker
 import org.archivekeep.app.ui.utils.screenshots.saveTestingContainerBitmap
@@ -58,10 +57,7 @@ class AddFileSystemRepositoryDialogTest {
             mountPoints = mountPoints(),
         ) { env ->
             setContentInDialogScreenshotContainer {
-                ApplicationProviders(
-                    applicationServices = env.services,
-                    applicationMetadata = PropertiesApplicationMetadata(),
-                ) {
+                ApplicationProviders(env.services) {
                     CompositionLocalProvider(
                         LocalFilesystemDirectoryPicker provides
                             fixedFilesystemDirectoryPicker(testTempDir.newFolder("local-archives/test-repo").path),
@@ -107,10 +103,7 @@ class AddFileSystemRepositoryDialogTest {
             mountPoints = mountPoints(),
         ) { env ->
             setContentInDialogScreenshotContainer {
-                ApplicationProviders(
-                    applicationServices = env.services,
-                    applicationMetadata = PropertiesApplicationMetadata(),
-                ) {
+                ApplicationProviders(env.services) {
                     CompositionLocalProvider(
                         LocalFilesystemDirectoryPicker provides
                             fixedFilesystemDirectoryPicker(testTempDir.newFolder("local-archives/test-repo").path),
@@ -163,10 +156,7 @@ class AddFileSystemRepositoryDialogTest {
             mountPoints = mountPoints(),
         ) { env ->
             setContentInDialogScreenshotContainer {
-                ApplicationProviders(
-                    applicationServices = env.services,
-                    applicationMetadata = PropertiesApplicationMetadata(),
-                ) {
+                ApplicationProviders(env.services) {
                     CompositionLocalProvider(
                         LocalFilesystemDirectoryPicker provides
                             fixedFilesystemDirectoryPicker(testTempDir.newFolder("local-archives/test-repo").path),
@@ -262,10 +252,7 @@ class AddFileSystemRepositoryDialogTest {
             }
 
             setContentInDialogScreenshotContainer {
-                ApplicationProviders(
-                    applicationServices = env.services,
-                    applicationMetadata = PropertiesApplicationMetadata(),
-                ) {
+                ApplicationProviders(env.services) {
                     CompositionLocalProvider(
                         LocalFilesystemDirectoryPicker provides fixedFilesystemDirectoryPicker(repoPath),
                     ) {
@@ -310,10 +297,7 @@ class AddFileSystemRepositoryDialogTest {
             }
 
             setContentInDialogScreenshotContainer {
-                ApplicationProviders(
-                    applicationServices = env.services,
-                    applicationMetadata = PropertiesApplicationMetadata(),
-                ) {
+                ApplicationProviders(env.services) {
                     CompositionLocalProvider(
                         LocalFilesystemDirectoryPicker provides fixedFilesystemDirectoryPicker(repoPath),
                     ) {
@@ -381,10 +365,7 @@ class AddFileSystemRepositoryDialogTest {
             }
 
             setContentInDialogScreenshotContainer {
-                ApplicationProviders(
-                    applicationServices = env.services,
-                    applicationMetadata = PropertiesApplicationMetadata(),
-                ) {
+                ApplicationProviders(env.services) {
                     CompositionLocalProvider(
                         LocalFilesystemDirectoryPicker provides fixedFilesystemDirectoryPicker(repoPath),
                     ) {

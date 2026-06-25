@@ -12,7 +12,6 @@ import org.archivekeep.app.core.persistence.platform.demo.LaptopHDD
 import org.archivekeep.app.core.persistence.platform.demo.LaptopSSD
 import org.archivekeep.app.core.persistence.platform.demo.usbStickAllUnassociated
 import org.archivekeep.app.ui.domain.wiring.ApplicationProviders
-import org.archivekeep.app.ui.utils.PropertiesApplicationMetadata
 import org.archivekeep.app.ui.utils.env.runHighDensityComposeUiTestWithDemoEnv
 import org.archivekeep.app.ui.utils.screenshots.saveTestingContainerBitmap
 import org.archivekeep.app.ui.utils.screenshots.setContentInDialogScreenshotContainer
@@ -38,10 +37,7 @@ class AssociateRepositoryDialogTest {
             val subjectAtTestURI = Documents.uriInStorage(usbStickAllUnassociated.reference)
 
             setContentInDialogScreenshotContainer {
-                ApplicationProviders(
-                    applicationServices = env.services,
-                    applicationMetadata = PropertiesApplicationMetadata(),
-                ) {
+                ApplicationProviders(env.services) {
                     AssociateRepositoryDialog(subjectAtTestURI)
                         .render(onClose = { closed = true })
                 }

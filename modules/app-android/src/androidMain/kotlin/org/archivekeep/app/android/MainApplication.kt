@@ -28,6 +28,6 @@ class MainApplication : Application() {
                 AndroidEnvironmentPaths(filesDir),
             )
 
-        services = createApplicationServices(androidApplicationServices)
+        services = createApplicationServices(androidApplicationServices, AndroidApplicationMetadata())
     }
 }

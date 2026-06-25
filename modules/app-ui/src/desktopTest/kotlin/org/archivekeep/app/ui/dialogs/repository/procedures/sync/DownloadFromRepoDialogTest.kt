@@ -11,7 +11,6 @@ import org.archivekeep.app.core.persistence.platform.demo.LaptopSSD
 import org.archivekeep.app.core.persistence.platform.demo.Photos
 import org.archivekeep.app.core.persistence.platform.demo.hddB
 import org.archivekeep.app.ui.domain.wiring.ApplicationProviders
-import org.archivekeep.app.ui.utils.PropertiesApplicationMetadata
 import org.archivekeep.app.ui.utils.env.runHighDensityComposeUiTestWithDemoEnv
 import org.archivekeep.app.ui.utils.screenshots.saveTestingContainerBitmap
 import org.archivekeep.app.ui.utils.screenshots.setContentInDialogScreenshotContainer
@@ -44,10 +43,7 @@ class DownloadFromRepoDialogScreenshotTest {
                 ),
         ) { env ->
             setContentInDialogScreenshotContainer {
-                ApplicationProviders(
-                    applicationServices = env.services,
-                    applicationMetadata = PropertiesApplicationMetadata(),
-                ) {
+                ApplicationProviders(env.services) {
                     DownloadFromRepoDialog(
                         Photos.uriInStorage(hddB.reference),
                         Photos.uriInStorage(LaptopSSD.reference),

@@ -21,7 +21,6 @@ import org.archivekeep.app.ui.domain.wiring.LocalWalletOperationLaunchers
 import org.archivekeep.app.ui.domain.wiring.WalletOperationLaunchers
 import org.archivekeep.app.ui.performClickTextInput
 import org.archivekeep.app.ui.utils.FilesystemDriverContainer
-import org.archivekeep.app.ui.utils.PropertiesApplicationMetadata
 import org.archivekeep.app.ui.utils.env.runHighDensityComposeUiTestWithDemoEnv
 import org.archivekeep.app.ui.utils.screenshots.saveTestingContainerBitmap
 import org.archivekeep.app.ui.utils.screenshots.setContentInDialogScreenshotContainer
@@ -73,10 +72,7 @@ class UnlockRepositoryDialogTestWithEncryptedFileSystemRepository {
             }
 
             setContentInDialogScreenshotContainer {
-                ApplicationProviders(
-                    applicationServices = env.services,
-                    applicationMetadata = PropertiesApplicationMetadata(),
-                ) {
+                ApplicationProviders(env.services) {
                     UnlockRepositoryDialog(subjectAtTestURI, onUnlock = {}).render(onClose = { })
                 }
             }
@@ -149,10 +145,7 @@ class UnlockRepositoryDialogTestWithEncryptedFileSystemRepository {
             }
 
             setContentInDialogScreenshotContainer {
-                ApplicationProviders(
-                    applicationServices = env.services,
-                    applicationMetadata = PropertiesApplicationMetadata(),
-                ) {
+                ApplicationProviders(env.services) {
                     CompositionLocalProvider(
                         LocalWalletOperationLaunchers provides
                             WalletOperationLaunchers(
@@ -245,10 +238,7 @@ class UnlockRepositoryDialogTestWithEncryptedFileSystemRepository {
             }
 
             setContentInDialogScreenshotContainer {
-                ApplicationProviders(
-                    applicationServices = env.services,
-                    applicationMetadata = PropertiesApplicationMetadata(),
-                ) {
+                ApplicationProviders(applicationServices = env.services) {
                     UnlockRepositoryDialog(subjectAtTestURI, onUnlock = {}).render(onClose = { })
                 }
             }

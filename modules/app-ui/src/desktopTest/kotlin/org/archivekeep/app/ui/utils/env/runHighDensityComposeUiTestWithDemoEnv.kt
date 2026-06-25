@@ -20,6 +20,7 @@ import org.archivekeep.app.core.persistence.platform.demo.hddB
 import org.archivekeep.app.core.persistence.platform.demo.hddC
 import org.archivekeep.app.ui.domain.wiring.createApplicationServices
 import org.archivekeep.app.ui.domain.wiring.newServiceWorkExecutorDispatcher
+import org.archivekeep.app.ui.utils.PropertiesApplicationMetadata
 import org.archivekeep.app.ui.utils.screenshots.runHighDensityComposeUiTest
 
 @OptIn(ExperimentalTestApi::class)
@@ -51,7 +52,7 @@ fun runHighDensityComposeUiTestWithDemoEnv(
                         storagesOverride = storagesOverride,
                     )
 
-                override val services = createApplicationServices(demo)
+                override val services = createApplicationServices(demo, PropertiesApplicationMetadata())
             }
 
         runHighDensityComposeUiTest(sizeNotScaled) {

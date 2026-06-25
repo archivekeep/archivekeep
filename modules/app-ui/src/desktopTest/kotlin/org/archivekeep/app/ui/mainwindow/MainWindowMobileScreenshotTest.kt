@@ -13,7 +13,6 @@ import org.archivekeep.app.core.persistence.platform.demo.usbStickDocuments
 import org.archivekeep.app.core.persistence.platform.demo.usbStickMusic
 import org.archivekeep.app.ui.MainWindowContent
 import org.archivekeep.app.ui.domain.wiring.ApplicationProviders
-import org.archivekeep.app.ui.utils.PropertiesApplicationMetadata
 import org.archivekeep.app.ui.utils.env.runHighDensityComposeUiTestWithDemoEnv
 import org.archivekeep.app.ui.utils.screenshots.saveTestingContainerBitmap
 import org.archivekeep.app.ui.utils.screenshots.setContentInMobileScreenshotContainer
@@ -35,10 +34,7 @@ class MainWindowMobileScreenshotTest {
                     mobileMainWindowHeight,
                 ),
             ) {
-                ApplicationProviders(
-                    applicationServices = env.services,
-                    applicationMetadata = PropertiesApplicationMetadata(),
-                ) {
+                ApplicationProviders(env.services) {
                     MainWindowContent(
                         isFloating = false,
                         windowSizeClass =

@@ -1,7 +1,7 @@
 package org.archivekeep.app.ui.utils
 
 import androidx.compose.runtime.Composable
-import org.archivekeep.app.ui.domain.wiring.staticCompositionLocalOfNotProvided
+import org.archivekeep.app.ui.domain.wiring.LocalApplicationServices
 
 interface ApplicationMetadata {
     val version: String
@@ -9,8 +9,6 @@ interface ApplicationMetadata {
     companion object {
         val version: String
             @Composable
-            get() = LocalApplicationMetadata.current.version
+            get() = LocalApplicationServices.current.applicationMetadata.version
     }
 }
-
-val LocalApplicationMetadata = staticCompositionLocalOfNotProvided<ApplicationMetadata>()

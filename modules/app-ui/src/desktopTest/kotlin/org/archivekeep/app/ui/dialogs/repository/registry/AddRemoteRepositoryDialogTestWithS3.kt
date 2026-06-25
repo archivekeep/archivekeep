@@ -26,7 +26,6 @@ import org.archivekeep.app.ui.domain.wiring.ApplicationServices
 import org.archivekeep.app.ui.domain.wiring.LocalWalletOperationLaunchers
 import org.archivekeep.app.ui.domain.wiring.WalletOperationLaunchers
 import org.archivekeep.app.ui.performClickTextInput
-import org.archivekeep.app.ui.utils.PropertiesApplicationMetadata
 import org.archivekeep.app.ui.utils.S3RepositoryTestRepo
 import org.archivekeep.app.ui.utils.env.runHighDensityComposeUiTestWithDemoEnv
 import org.archivekeep.app.ui.utils.screenshots.saveTestingContainerBitmap
@@ -299,10 +298,7 @@ class AddRemoteRepositoryDialogTestWithS3 {
             physicalMediaData = listOf(phone, usbStickAll, usbStickDocuments, usbStickMusic),
         ) { env ->
             setContentInDialogScreenshotContainer {
-                ApplicationProviders(
-                    applicationServices = env.services,
-                    applicationMetadata = PropertiesApplicationMetadata(),
-                ) {
+                ApplicationProviders(env.services) {
                     CompositionLocalProvider(
                         LocalWalletOperationLaunchers provides
                             WalletOperationLaunchers(

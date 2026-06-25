@@ -1,8 +1,13 @@
 package org.archivekeep.app.ui.utils
 
+import dev.zacsweers.metro.AppScope
+import dev.zacsweers.metro.Inject
+import dev.zacsweers.metro.SingleIn
 import java.io.InputStream
-import java.util.Properties
+import java.util.*
 
+@Inject
+@SingleIn(AppScope::class)
 class PropertiesApplicationMetadata(
     val propertiesFileName: String = "org/archivekeep/app/core/application.properties",
 ) : ApplicationMetadata {

@@ -10,7 +10,6 @@ import org.archivekeep.app.ui.MainWindowContent
 import org.archivekeep.app.ui.domain.wiring.ApplicationProviders
 import org.archivekeep.app.ui.utils.DefaultMainWindowHeight
 import org.archivekeep.app.ui.utils.DefaultMainWindowWidth
-import org.archivekeep.app.ui.utils.PropertiesApplicationMetadata
 import org.archivekeep.app.ui.utils.env.runHighDensityComposeUiTestWithDemoEnv
 import org.archivekeep.app.ui.utils.screenshots.saveTestingContainerBitmap
 import org.archivekeep.app.ui.utils.screenshots.setContentScreenshotContainer
@@ -27,10 +26,7 @@ class MainWindowDesktopScreenshotTest {
                     DefaultMainWindowHeight,
                 ),
             ) {
-                ApplicationProviders(
-                    applicationServices = env.services,
-                    applicationMetadata = PropertiesApplicationMetadata(),
-                ) {
+                ApplicationProviders(env.services) {
                     MainWindowContent(
                         isFloating = true,
                         windowSizeClass =

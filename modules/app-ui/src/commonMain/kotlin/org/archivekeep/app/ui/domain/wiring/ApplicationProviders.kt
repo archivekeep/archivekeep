@@ -11,13 +11,10 @@ import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.job
 import kotlinx.coroutines.plus
 import org.archivekeep.app.ui.domain.services.createRepositoryOpenService
-import org.archivekeep.app.ui.utils.ApplicationMetadata
-import org.archivekeep.app.ui.utils.LocalApplicationMetadata
 
 @Composable
 fun ApplicationProviders(
     applicationServicesFactory: (scope: CoroutineScope, serviceWorkDispatcher: CoroutineDispatcher) -> ApplicationServices,
-    applicationMetadata: ApplicationMetadata,
     content: @Composable () -> Unit,
 ) {
     val basescope = rememberCoroutineScope()
@@ -44,13 +41,12 @@ fun ApplicationProviders(
             }
         }
 
-    ApplicationProviders(applicationServicesRemember.services, applicationMetadata, content)
+    ApplicationProviders(applicationServicesRemember.services, content)
 }
 
 @Composable
 fun ApplicationProviders(
     applicationServices: ApplicationServices,
-    applicationMetadata: ApplicationMetadata,
     content: @Composable () -> Unit,
 ) {
     val repositoryOpenService =
@@ -59,7 +55,6 @@ fun ApplicationProviders(
         }
 
     CompositionLocalProvider(
-        LocalApplicationMetadata provides applicationMetadata,
         LocalRepositoryOpenService provides repositoryOpenService,
         LocalApplicationServices provides applicationServices,
     ) {

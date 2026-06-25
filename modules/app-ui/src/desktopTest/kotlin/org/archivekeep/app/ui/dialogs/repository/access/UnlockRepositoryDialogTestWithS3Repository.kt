@@ -13,7 +13,6 @@ import org.archivekeep.app.core.persistence.drivers.s3.S3RepositoryURIData
 import org.archivekeep.app.core.persistence.registry.RegisteredRepository
 import org.archivekeep.app.ui.domain.wiring.ApplicationProviders
 import org.archivekeep.app.ui.performClickTextInput
-import org.archivekeep.app.ui.utils.PropertiesApplicationMetadata
 import org.archivekeep.app.ui.utils.S3RepositoryTestRepo
 import org.archivekeep.app.ui.utils.env.runHighDensityComposeUiTestWithDemoEnv
 import org.archivekeep.app.ui.utils.screenshots.saveTestingContainerBitmap
@@ -53,10 +52,7 @@ class UnlockRepositoryDialogTestWithS3Repository {
             }
 
             setContentInDialogScreenshotContainer {
-                ApplicationProviders(
-                    applicationServices = env.services,
-                    applicationMetadata = PropertiesApplicationMetadata(),
-                ) {
+                ApplicationProviders(env.services) {
                     UnlockRepositoryDialog(subjectAtTestURI, onUnlock = {}).render(onClose = { })
                 }
             }

@@ -22,6 +22,7 @@ fun main(args: Array<String>) {
                         // DemoEnvironment(scope + Dispatchers.Default)
                         createApplicationServices(
                             createGraphFactory<DemoApplicationServices.Factory>().create(scope, dispatcher),
+                            PropertiesApplicationMetadata(),
                         )
                     } else {
                         createGraphFactory<DesktopApplicationServices.Factory>().create(scope, dispatcher)
@@ -29,9 +30,7 @@ fun main(args: Array<String>) {
                 }
             }
 
-        val applicationMetadata = remember { PropertiesApplicationMetadata() }
-
-        ApplicationProviders(applicationServices, applicationMetadata) {
+        ApplicationProviders(applicationServices) {
             MainWindow()
         }
     }

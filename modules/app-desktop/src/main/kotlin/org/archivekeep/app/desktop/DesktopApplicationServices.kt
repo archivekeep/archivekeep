@@ -25,6 +25,8 @@ import org.archivekeep.app.core.persistence.repository.MemorizedRepositoryIndexR
 import org.archivekeep.app.core.persistence.repository.MemorizedRepositoryMetadataRepository
 import org.archivekeep.app.core.persistence.repository.MemorizedRepositoryMetadataRepositoryInDataStore
 import org.archivekeep.app.ui.domain.wiring.ApplicationServices
+import org.archivekeep.app.ui.utils.ApplicationMetadata
+import org.archivekeep.app.ui.utils.PropertiesApplicationMetadata
 import org.archivekeep.utils.datastore.passwordprotected.PasswordProtectedJoseStorageInFile
 import org.archivekeep.utils.datastore.passwordprotected.ProtectedDataStore
 
@@ -51,6 +53,9 @@ interface DesktopApplicationServices :
 
     @Binds
     val DesktopFileStores.bind: FileStores
+
+    @Binds
+    val PropertiesApplicationMetadata.bind: ApplicationMetadata
 
     @Provides
     @SingleIn(AppScope::class)
