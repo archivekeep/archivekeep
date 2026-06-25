@@ -62,6 +62,8 @@ class AssociateRepositoryDialogTest {
                 onNodeWithText("Associate").performClick()
 
                 eventually(2.seconds) {
+                    waitForIdle()
+
                     assertEquals(true, closed)
                     assertEquals(
                         "a-documents",
