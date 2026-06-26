@@ -10,7 +10,6 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.job
 import kotlinx.coroutines.plus
-import org.archivekeep.app.ui.domain.services.createRepositoryOpenService
 
 @Composable
 fun ApplicationProviders(
@@ -49,13 +48,7 @@ fun ApplicationProviders(
     applicationServices: ApplicationServices,
     content: @Composable () -> Unit,
 ) {
-    val repositoryOpenService =
-        remember(applicationServices) {
-            createRepositoryOpenService(applicationServices)
-        }
-
     CompositionLocalProvider(
-        LocalRepositoryOpenService provides repositoryOpenService,
         LocalApplicationServices provides applicationServices,
     ) {
         content()

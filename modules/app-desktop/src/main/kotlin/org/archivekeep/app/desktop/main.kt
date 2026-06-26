@@ -6,9 +6,9 @@ import dev.zacsweers.metro.createGraphFactory
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import org.archivekeep.app.core.persistence.platform.demo.DemoApplicationServices
+import org.archivekeep.app.ui.domain.services.NoOpRepositoryOpenService
 import org.archivekeep.app.ui.domain.wiring.ApplicationProviders
 import org.archivekeep.app.ui.domain.wiring.ApplicationServices
-import org.archivekeep.app.ui.domain.wiring.createApplicationServices
 import org.archivekeep.app.ui.utils.PropertiesApplicationMetadata
 
 fun main(args: Array<String>) {
@@ -20,9 +20,10 @@ fun main(args: Array<String>) {
 
                     if (isDemo) {
                         // DemoEnvironment(scope + Dispatchers.Default)
-                        createApplicationServices(
+                        createGraphFactory<ApplicationServices.FromCore.Factory>().create(
                             createGraphFactory<DemoApplicationServices.Factory>().create(scope, dispatcher),
                             PropertiesApplicationMetadata(),
+                            NoOpRepositoryOpenService,
                         )
                     } else {
                         createGraphFactory<DesktopApplicationServices.Factory>().create(scope, dispatcher)

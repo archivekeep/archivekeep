@@ -18,7 +18,8 @@ import org.archivekeep.app.core.persistence.platform.demo.LaptopHDD
 import org.archivekeep.app.core.persistence.platform.demo.LaptopSSD
 import org.archivekeep.app.core.persistence.platform.demo.hddB
 import org.archivekeep.app.core.persistence.platform.demo.hddC
-import org.archivekeep.app.ui.domain.wiring.createApplicationServices
+import org.archivekeep.app.ui.domain.services.NoOpRepositoryOpenService
+import org.archivekeep.app.ui.domain.wiring.ApplicationServices
 import org.archivekeep.app.ui.domain.wiring.newServiceWorkExecutorDispatcher
 import org.archivekeep.app.ui.utils.PropertiesApplicationMetadata
 import org.archivekeep.app.ui.utils.screenshots.runHighDensityComposeUiTest
@@ -52,7 +53,8 @@ fun runHighDensityComposeUiTestWithDemoEnv(
                         storagesOverride = storagesOverride,
                     )
 
-                override val services = createApplicationServices(demo, PropertiesApplicationMetadata())
+                override val services =
+                    createGraphFactory<ApplicationServices.FromCore.Factory>().create(demo, PropertiesApplicationMetadata(), NoOpRepositoryOpenService)
             }
 
         runHighDensityComposeUiTest(sizeNotScaled) {

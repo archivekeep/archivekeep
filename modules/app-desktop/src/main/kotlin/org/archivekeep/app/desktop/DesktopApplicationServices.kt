@@ -24,6 +24,8 @@ import org.archivekeep.app.core.persistence.repository.MemorizedRepositoryIndexR
 import org.archivekeep.app.core.persistence.repository.MemorizedRepositoryIndexRepositoryInDataStore
 import org.archivekeep.app.core.persistence.repository.MemorizedRepositoryMetadataRepository
 import org.archivekeep.app.core.persistence.repository.MemorizedRepositoryMetadataRepositoryInDataStore
+import org.archivekeep.app.ui.domain.services.DesktopRepositoryOpenService
+import org.archivekeep.app.ui.domain.services.RepositoryOpenService
 import org.archivekeep.app.ui.domain.wiring.ApplicationServices
 import org.archivekeep.app.ui.utils.ApplicationMetadata
 import org.archivekeep.app.ui.utils.PropertiesApplicationMetadata
@@ -54,6 +56,10 @@ interface DesktopApplicationServices :
     @Binds
     val DesktopFileStores.bind: FileStores
 
+    @Provides
+    @SingleIn(AppScope::class)
+    fun repositoryOpenService(fileSystemStorageDriver: FileSystemStorageDriver): RepositoryOpenService = DesktopRepositoryOpenService(fileSystemStorageDriver)
+
     @Binds
     val PropertiesApplicationMetadata.bind: ApplicationMetadata
 
@@ -69,12 +75,15 @@ interface DesktopApplicationServices :
 
     @Provides
     @SingleIn(AppScope::class)
-    @IntoSet
     fun filesystemStorageDriver(
         scope: CoroutineScope,
         fileStores: FileStores,
         credentialsStore: CredentialsStore,
-    ): StorageDriver = FileSystemStorageDriver(scope, fileStores, credentialsStore)
+    ): FileSystemStorageDriver = FileSystemStorageDriver(scope, fileStores, credentialsStore)
+
+    @Binds
+    @IntoSet
+    val FileSystemStorageDriver.bind: StorageDriver
 
     @DependencyGraph.Factory
     fun interface Factory {

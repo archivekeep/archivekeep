@@ -5,12 +5,15 @@ import dev.zacsweers.metro.DependencyGraph
 import dev.zacsweers.metro.Includes
 import dev.zacsweers.metro.Provides
 import org.archivekeep.app.core.domain.CoreApplicationServices
+import org.archivekeep.app.ui.domain.services.RepositoryOpenService
 import org.archivekeep.app.ui.utils.ApplicationMetadata
 
 interface ApplicationServices : CoreApplicationServices {
     val operationFactory: OperationFactory
 
     val applicationMetadata: ApplicationMetadata
+
+    val repositoryOpenService: RepositoryOpenService
 
     @DependencyGraph(AppScope::class)
     interface FromCore : ApplicationServices {
@@ -19,6 +22,7 @@ interface ApplicationServices : CoreApplicationServices {
             fun create(
                 @Includes core: CoreApplicationServices,
                 @Provides applicationMetadata: ApplicationMetadata,
+                @Provides repositoryOpenService: RepositoryOpenService,
             ): FromCore
         }
     }
