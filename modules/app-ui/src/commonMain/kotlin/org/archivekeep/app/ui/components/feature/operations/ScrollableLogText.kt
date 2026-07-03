@@ -16,8 +16,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.compose.ui.unit.dp
-import org.archivekeep.app.ui.components.base.layout.IntrinsicSizeWrapperLayout
-import org.archivekeep.app.ui.components.base.layout.ScrollableLazyColumn
+import org.archivekeep.app.ui.components.base.layout.ScrollableLazyColumnWithGuessedWidth
 import org.archivekeep.app.ui.components.designsystem.dialog.LabelText
 import org.archivekeep.app.ui.components.designsystem.dialog.labelTextStyle
 import org.archivekeep.utils.collections.limitSize
@@ -64,17 +63,12 @@ fun ScrollableLogTextInDialog(textLines: List<String>) {
         color = Color.Black.copy(0.05f),
     ) {
         SelectionContainer(Modifier.padding(start = 10.dp, end = 10.dp, top = 6.dp, bottom = 10.dp)) {
-            IntrinsicSizeWrapperLayout(
-                minIntrinsicWidth = guessedWidth,
-                maxIntrinsicWidth = guessedWidth,
-            ) {
-                ScrollableLazyColumn {
-                    item { LabelText("Log") }
-                    item { Spacer(Modifier.height(4.dp)) }
+            ScrollableLazyColumnWithGuessedWidth(guessedWidth) {
+                item { LabelText("Log") }
+                item { Spacer(Modifier.height(4.dp)) }
 
-                    items(textLines) { text ->
-                        Text(text.trimEnd())
-                    }
+                items(textLines) { text ->
+                    Text(text.trimEnd())
                 }
             }
         }

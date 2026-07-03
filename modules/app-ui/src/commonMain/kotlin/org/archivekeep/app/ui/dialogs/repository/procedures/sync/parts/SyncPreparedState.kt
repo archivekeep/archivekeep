@@ -4,8 +4,7 @@ import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import org.archivekeep.app.core.procedures.sync.RepoToRepoSync
-import org.archivekeep.app.ui.components.base.layout.IntrinsicSizeWrapperLayout
-import org.archivekeep.app.ui.components.base.layout.ScrollableLazyColumn
+import org.archivekeep.app.ui.components.base.layout.ScrollableLazyColumnWithGuessedWidth
 import org.archivekeep.app.ui.components.feature.manyselect.ManySelectForRender
 import org.archivekeep.app.ui.components.feature.manyselect.rememberManySelectForRenderFromState
 import org.archivekeep.app.ui.components.feature.manyselect.rememberManySelectForRenderFromStateAnnotated
@@ -27,10 +26,11 @@ internal fun ColumnScope.SyncPreparedState(
             .map<DiscoveredSyncOperationsGroup<*>, ManySelectForRender<*, *, *>> { step ->
                 when (step) {
                     is DiscoveredAdditiveRelocationsGroup -> {
-                        val state = rememberManySelectWithMergedState(
-                            step.operations,
-                            userFlowState.selectedOperations
-                        )
+                        val state =
+                            rememberManySelectWithMergedState(
+                                step.operations,
+                                userFlowState.selectedOperations,
+                            )
 
                         rememberManySelectForRenderFromState(
                             state,
@@ -41,10 +41,11 @@ internal fun ColumnScope.SyncPreparedState(
                     }
 
                     is DiscoveredNewFilesGroup -> {
-                        val state = rememberManySelectWithMergedState(
-                            step.operations,
-                            userFlowState.selectedOperations
-                        )
+                        val state =
+                            rememberManySelectWithMergedState(
+                                step.operations,
+                                userFlowState.selectedOperations,
+                            )
 
                         rememberManySelectForRenderFromState(
                             state,
@@ -55,10 +56,11 @@ internal fun ColumnScope.SyncPreparedState(
                     }
 
                     is DiscoveredRelocationsMoveApplyGroup -> {
-                        val state = rememberManySelectWithMergedState(
-                            step.operations,
-                            userFlowState.selectedOperations
-                        )
+                        val state =
+                            rememberManySelectWithMergedState(
+                                step.operations,
+                                userFlowState.selectedOperations,
+                            )
 
                         rememberManySelectForRenderFromStateAnnotated(
                             state = state,
@@ -72,12 +74,7 @@ internal fun ColumnScope.SyncPreparedState(
 
     val guessedWidth = blocks.maxOf { it.guessedWidth }
 
-    IntrinsicSizeWrapperLayout(
-        minIntrinsicWidth = guessedWidth,
-        maxIntrinsicWidth = guessedWidth,
-    ) {
-        ScrollableLazyColumn(Modifier.Companion.weight(1f, fill = false)) {
-            blocks.forEach { it.render(this) }
-        }
+    ScrollableLazyColumnWithGuessedWidth(guessedWidth, Modifier.weight(1f, fill = false)) {
+        blocks.forEach { it.render(this) }
     }
 }

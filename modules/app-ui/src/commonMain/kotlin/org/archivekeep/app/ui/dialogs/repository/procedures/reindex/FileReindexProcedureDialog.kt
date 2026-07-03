@@ -22,8 +22,7 @@ import org.archivekeep.app.core.domain.repositories.RepositoryInformation
 import org.archivekeep.app.core.procedures.reindex.FileReindexProcedureSupervisor
 import org.archivekeep.app.core.procedures.reindex.FileReindexProcedureSupervisorService
 import org.archivekeep.app.core.utils.identifiers.RepositoryURI
-import org.archivekeep.app.ui.components.base.layout.IntrinsicSizeWrapperLayout
-import org.archivekeep.app.ui.components.base.layout.ScrollableLazyColumn
+import org.archivekeep.app.ui.components.base.layout.ScrollableLazyColumnWithGuessedWidth
 import org.archivekeep.app.ui.components.designsystem.dialog.fullWidthDialogWidthModifier
 import org.archivekeep.app.ui.components.feature.dialogs.operations.DialogOperationControlButtons
 import org.archivekeep.app.ui.components.feature.dialogs.operations.DialogOperationControlState
@@ -159,16 +158,9 @@ class FileReindexProcedureDialog(
                         itemLabelText = { it },
                     )
 
-                val guessedWidth = filesManySelect.guessedWidth
-
-                IntrinsicSizeWrapperLayout(
-                    minIntrinsicWidth = guessedWidth,
-                    maxIntrinsicWidth = guessedWidth,
-                ) {
-                    ScrollableLazyColumn {
-                        if (preparationState.modifiedIndexedFiles.isNotEmpty()) {
-                            filesManySelect.render(this)
-                        }
+                ScrollableLazyColumnWithGuessedWidth(filesManySelect.guessedWidth) {
+                    if (preparationState.modifiedIndexedFiles.isNotEmpty()) {
+                        filesManySelect.render(this)
                     }
                 }
             }

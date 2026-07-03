@@ -6,12 +6,27 @@ import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.Dp
 
 @Composable
-expect fun ScrollableLazyColumn(
+fun ScrollableLazyColumnWithGuessedWidth(
+    guessedWidth: Dp,
     modifier: Modifier = Modifier,
     columnModifier: Modifier = Modifier,
     state: LazyListState = rememberLazyListState(),
     scrollbarPadding: PaddingValues = scrollableLazyColumnPadding,
     content: LazyListScope.() -> Unit,
-)
+) {
+    IntrinsicSizeWrapperLayout(
+        minIntrinsicWidth = guessedWidth,
+        maxIntrinsicWidth = guessedWidth,
+    ) {
+        ScrollableLazyColumn(
+            modifier = modifier,
+            columnModifier = columnModifier,
+            state = state,
+            scrollbarPadding = scrollbarPadding,
+            content = content,
+        )
+    }
+}

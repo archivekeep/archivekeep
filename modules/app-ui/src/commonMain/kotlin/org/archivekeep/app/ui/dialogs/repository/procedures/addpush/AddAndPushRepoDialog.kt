@@ -19,9 +19,8 @@ import org.archivekeep.app.core.procedures.addpush.AddAndPushProcedure.NotReadyA
 import org.archivekeep.app.core.procedures.addpush.AddAndPushProcedure.PreparingAddPushProcess
 import org.archivekeep.app.core.procedures.addpush.AddAndPushProcedure.ReadyAddPushProcess
 import org.archivekeep.app.core.utils.identifiers.RepositoryURI
-import org.archivekeep.app.ui.components.base.layout.IntrinsicSizeWrapperLayout
 import org.archivekeep.app.ui.components.base.layout.ScrollableColumn
-import org.archivekeep.app.ui.components.base.layout.ScrollableLazyColumn
+import org.archivekeep.app.ui.components.base.layout.ScrollableLazyColumnWithGuessedWidth
 import org.archivekeep.app.ui.components.designsystem.dialog.LabelText
 import org.archivekeep.app.ui.components.feature.LoadableGuard
 import org.archivekeep.app.ui.components.feature.dialogs.operations.DialogOperationControlButtons
@@ -88,8 +87,9 @@ class AddAndPushRepoDialog(
     @Composable
     override fun ColumnScope.renderContent(state: VMState) {
         when (val status = state.state) {
-            is NotReadyAddPushProcess ->
+            is NotReadyAddPushProcess -> {
                 Text("Loading")
+            }
 
             is PreparingAddPushProcess -> {
                 LabelText("Preparing add and push operation:")
@@ -116,33 +116,28 @@ class AddAndPushRepoDialog(
 
                 val guessedWidth = max(filesManySelect.guessedWidth, movesManySelect.guessedWidth)
 
-                IntrinsicSizeWrapperLayout(
-                    minIntrinsicWidth = guessedWidth,
-                    maxIntrinsicWidth = guessedWidth,
-                ) {
-                    ScrollableLazyColumn {
+                ScrollableLazyColumnWithGuessedWidth(guessedWidth) {
+                    item {
+                        LoadableGuard(
+                            state.otherRepositoryCandidates,
+                        ) {
+                            DestinationManySelect(
+                                it,
+                                state.selectedDestinationRepositories,
+                            )
+                        }
+                        Spacer(modifier = Modifier.height(6.dp))
+                    }
+
+                    status.addPreprationResult.moves.ifNotEmpty {
+                        movesManySelect.render(this)
                         item {
-                            LoadableGuard(
-                                state.otherRepositoryCandidates,
-                            ) {
-                                DestinationManySelect(
-                                    it,
-                                    state.selectedDestinationRepositories,
-                                )
-                            }
-                            Spacer(modifier = Modifier.height(6.dp))
+                            Spacer(Modifier.height(12.dp))
                         }
+                    }
 
-                        status.addPreprationResult.moves.ifNotEmpty {
-                            movesManySelect.render(this)
-                            item {
-                                Spacer(Modifier.height(12.dp))
-                            }
-                        }
-
-                        status.addPreprationResult.newFileNames.ifNotEmpty {
-                            filesManySelect.render(this)
-                        }
+                    status.addPreprationResult.newFileNames.ifNotEmpty {
+                        filesManySelect.render(this)
                     }
                 }
             }

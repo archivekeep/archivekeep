@@ -23,8 +23,7 @@ import org.archivekeep.app.core.domain.repositories.RepositoryInformation
 import org.archivekeep.app.core.procedures.add.IndexUpdateProcedureSupervisor
 import org.archivekeep.app.core.procedures.add.IndexUpdateProcedureSupervisorService
 import org.archivekeep.app.core.utils.identifiers.RepositoryURI
-import org.archivekeep.app.ui.components.base.layout.IntrinsicSizeWrapperLayout
-import org.archivekeep.app.ui.components.base.layout.ScrollableLazyColumn
+import org.archivekeep.app.ui.components.base.layout.ScrollableLazyColumnWithGuessedWidth
 import org.archivekeep.app.ui.components.designsystem.dialog.LabelText
 import org.archivekeep.app.ui.components.designsystem.dialog.fullWidthDialogWidthModifier
 import org.archivekeep.app.ui.components.feature.dialogs.operations.DialogOperationControlButtons
@@ -181,19 +180,14 @@ class IndexUpdateProcedureDialog(
 
                         val guessedWidth = max(filesManySelect.guessedWidth, movesManySelect.guessedWidth)
 
-                        IntrinsicSizeWrapperLayout(
-                            minIntrinsicWidth = guessedWidth,
-                            maxIntrinsicWidth = guessedWidth,
-                        ) {
-                            ScrollableLazyColumn {
-                                if (preparationState.moves.isNotEmpty()) {
-                                    movesManySelect.render(this)
-                                    item { Spacer(Modifier.height(12.dp)) }
-                                }
+                        ScrollableLazyColumnWithGuessedWidth(guessedWidth) {
+                            if (preparationState.moves.isNotEmpty()) {
+                                movesManySelect.render(this)
+                                item { Spacer(Modifier.height(12.dp)) }
+                            }
 
-                                if (preparationState.newFileNames.isNotEmpty()) {
-                                    filesManySelect.render(this)
-                                }
+                            if (preparationState.newFileNames.isNotEmpty()) {
+                                filesManySelect.render(this)
                             }
                         }
                     }
