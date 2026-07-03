@@ -18,7 +18,7 @@ import org.archivekeep.app.core.domain.repositories.RepositoryService
 import org.archivekeep.app.core.procedures.utils.JobWrapper
 import org.archivekeep.app.core.utils.AbstractJobGuardRunnable
 import org.archivekeep.app.core.utils.UniqueJobGuard
-import org.archivekeep.app.core.utils.generics.SyncFlowStringWriter
+import org.archivekeep.app.core.utils.generics.SyncFlowTextLinesWriter
 import org.archivekeep.app.core.utils.generics.singleInstanceWeakValueMap
 import org.archivekeep.app.core.utils.identifiers.RepositoryURI
 import org.archivekeep.files.api.repository.Repo
@@ -118,7 +118,7 @@ class IndexUpdateProcedureSupervisorServiceImpl(
         val launchOptions: IndexUpdateProcedure.LaunchOptions,
     ) : AbstractJobGuardRunnable(),
         JobWrapper<IndexUpdateProcedureSupervisor.JobState> {
-        private val executionLog = SyncFlowStringWriter()
+        private val executionLog = SyncFlowTextLinesWriter()
         private val writer = IndexUpdateTextualProgressTracker(PrintWriter(executionLog.writer, true))
 
         // TODO - this should be encapsulated into procedure's logic, not supervisor
@@ -153,7 +153,7 @@ class IndexUpdateProcedureSupervisorServiceImpl(
             combine(
                 indexUpdateProgressTracker.addProgressFlow,
                 indexUpdateProgressTracker.moveProgressFlow,
-                executionLog.string,
+                executionLog.lines,
                 job.executionState,
             ) { addProgress, moveProgress, log, jobState ->
                 IndexUpdateProcedureSupervisor.JobState(

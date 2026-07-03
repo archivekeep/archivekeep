@@ -17,7 +17,7 @@ interface DeletedFilesCleanupProcedureSupervisor {
 
     data class JobState(
         val reindexProgress: DeletedFilesCleanupProgress,
-        val log: String,
+        val log: List<String>,
         val state: ProcedureExecutionState,
     ) : State
 

@@ -27,7 +27,7 @@ import org.archivekeep.app.core.procedures.sync.RepoToRepoSync.State
 import org.archivekeep.app.core.procedures.utils.JobWrapper
 import org.archivekeep.app.core.utils.AbstractJobGuardRunnable
 import org.archivekeep.app.core.utils.UniqueJobGuard
-import org.archivekeep.app.core.utils.generics.SyncFlowStringWriter
+import org.archivekeep.app.core.utils.generics.SyncFlowTextLinesWriter
 import org.archivekeep.app.core.utils.generics.singleInstanceWeakValueMap
 import org.archivekeep.app.core.utils.identifiers.RepositoryURI
 import org.archivekeep.files.api.repository.Repo
@@ -279,8 +279,8 @@ class RepoToRepoSyncServiceImpl(
         val limitToSubset: Set<SyncOperation>,
     ) : AbstractJobGuardRunnable(),
         JobWrapper<JobState> {
-        private val executionLog = SyncFlowStringWriter()
-        private val executionErrorLog = SyncFlowStringWriter()
+        private val executionLog = SyncFlowTextLinesWriter()
+        private val executionErrorLog = SyncFlowTextLinesWriter()
 
         val job =
             discoveredSync.createJob(
@@ -297,8 +297,8 @@ class RepoToRepoSyncServiceImpl(
                     JobState(
                         job.task.executionProgressSummaryStateFlow,
                         job.inProgressOperationsProgressFlow,
-                        executionLog.string,
-                        executionErrorLog.string,
+                        executionLog.lines,
+                        executionErrorLog.lines,
                         it,
                     )
                 }

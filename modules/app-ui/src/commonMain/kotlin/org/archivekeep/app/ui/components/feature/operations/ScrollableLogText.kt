@@ -25,17 +25,6 @@ import kotlin.math.max
 private const val itemsToConsider = 500
 private const val itemsToMeasure = 30
 
-@Deprecated(
-    "Use overload accepting a list of text lines. This is more expensive, because splits text into individual lines.",
-    ReplaceWith("ScrollableLogTextInDialog(textLines)"),
-)
-@Composable
-fun ScrollableLogTextInDialog(text: String) {
-    val textLines = remember(text) { text.split("\n") }
-
-    ScrollableLogTextInDialog(textLines)
-}
-
 @Composable
 fun ScrollableLogTextInDialog(textLines: List<String>) {
     val textMeasurer = rememberTextMeasurer()

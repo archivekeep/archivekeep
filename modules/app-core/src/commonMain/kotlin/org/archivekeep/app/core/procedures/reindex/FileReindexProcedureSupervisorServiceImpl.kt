@@ -18,7 +18,7 @@ import org.archivekeep.app.core.domain.repositories.RepositoryService
 import org.archivekeep.app.core.procedures.utils.JobWrapper
 import org.archivekeep.app.core.utils.AbstractJobGuardRunnable
 import org.archivekeep.app.core.utils.UniqueJobGuard
-import org.archivekeep.app.core.utils.generics.SyncFlowStringWriter
+import org.archivekeep.app.core.utils.generics.SyncFlowTextLinesWriter
 import org.archivekeep.app.core.utils.generics.singleInstanceWeakValueMap
 import org.archivekeep.app.core.utils.identifiers.RepositoryURI
 import org.archivekeep.files.api.repository.Repo
@@ -103,7 +103,7 @@ class FileReindexProcedureSupervisorServiceImpl(
         val launchOptions: FileReindexProcedure.LaunchOptions,
     ) : AbstractJobGuardRunnable(),
         JobWrapper<FileReindexProcedureSupervisor.JobState> {
-        private val executionLog = SyncFlowStringWriter()
+        private val executionLog = SyncFlowTextLinesWriter()
         private val writer = FileReindexTextualProgressTracker(PrintWriter(executionLog.writer, true))
 
         // TODO - this should be encapsulated into procedure's logic, not supervisor
@@ -130,7 +130,7 @@ class FileReindexProcedureSupervisorServiceImpl(
         override val state: Flow<FileReindexProcedureSupervisor.JobState> =
             combine(
                 indexUpdateProgressTracker.fileReindexProgressFlow,
-                executionLog.string,
+                executionLog.lines,
                 job.executionState,
             ) { reindexProgress, log, jobState ->
                 FileReindexProcedureSupervisor.JobState(

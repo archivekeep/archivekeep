@@ -19,7 +19,7 @@ interface IndexUpdateProcedureSupervisor {
     data class JobState(
         val addProgress: IndexUpdateAddProgress,
         val moveProgress: IndexUpdateMoveProgress,
-        val log: String,
+        val log: List<String>,
         val state: ProcedureExecutionState,
     ) : State
 

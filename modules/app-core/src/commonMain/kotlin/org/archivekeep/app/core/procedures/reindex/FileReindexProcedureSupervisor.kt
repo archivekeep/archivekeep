@@ -17,7 +17,7 @@ interface FileReindexProcedureSupervisor {
 
     data class JobState(
         val reindexProgress: FileReindexProgress,
-        val log: String,
+        val log: List<String>,
         val state: ProcedureExecutionState,
     ) : State
 

@@ -26,47 +26,49 @@ import org.archivekeep.app.ui.components.feature.operations.ScrollableLogTextInD
 import org.archivekeep.app.ui.components.feature.operations.SyncProgress
 import org.archivekeep.utils.procedures.ProcedureExecutionState
 
-private const val TAB_SUMMARY = "summary";
-private const val TAB_LOG = "log";
-private const val TAB_ERROR_LOG = "error-log";
+private const val TAB_SUMMARY = "summary"
+private const val TAB_LOG = "log"
+private const val TAB_ERROR_LOG = "error-log"
 
-private val tabOptions = listOf(
-    TAB_SUMMARY to "Summary",
-    TAB_LOG to "Log",
-    TAB_ERROR_LOG to "Errors"
-)
+private val tabOptions =
+    listOf(
+        TAB_SUMMARY to "Summary",
+        TAB_LOG to "Log",
+        TAB_ERROR_LOG to "Errors",
+    )
 
 @Composable
 internal fun SyncJobState(operation: RepoToRepoSync.JobState) {
     var selectedTab by remember { mutableStateOf(TAB_SUMMARY) }
 
-    val errorLog = operation.errorLog.collectAsState("").value
+    val errorLog = operation.errorLog.collectAsState().value
 
     Spacer(Modifier.height(12.dp))
 
     SingleChoiceSegmentedButtonRow {
         tabOptions.forEachIndexed { index, tab ->
             SegmentedButton(
-                shape = SegmentedButtonDefaults.itemShape(
-                    index = index,
-                    count = tabOptions.size
-                ),
+                shape =
+                    SegmentedButtonDefaults.itemShape(
+                        index = index,
+                        count = tabOptions.size,
+                    ),
                 onClick = { selectedTab = tab.first },
                 selected = selectedTab == tab.first,
                 label = {
                     Row {
                         Text(tab.second)
 
-                        if (tab.first == TAB_ERROR_LOG && errorLog.isNotBlank()) {
+                        if (tab.first == TAB_ERROR_LOG && errorLog.isNotEmpty()) {
                             Text(
                                 modifier = Modifier.padding(start = 8.dp),
                                 color = Color.Red,
-                                text = errorLog.trim().lines().size.toString(),
-                                fontWeight = FontWeight.SemiBold
+                                text = errorLog.size.toString(),
+                                fontWeight = FontWeight.SemiBold,
                             )
                         }
                     }
-                }
+                },
             )
         }
     }
@@ -77,9 +79,15 @@ internal fun SyncJobState(operation: RepoToRepoSync.JobState) {
         TAB_SUMMARY -> {
             LabelText(
                 when (val executionState = operation.executionState) {
-                    ProcedureExecutionState.NotStarted -> "Starting"
-                    ProcedureExecutionState.Running -> "Progress"
-                    is ProcedureExecutionState.Finished ->
+                    ProcedureExecutionState.NotStarted -> {
+                        "Starting"
+                    }
+
+                    ProcedureExecutionState.Running -> {
+                        "Progress"
+                    }
+
+                    is ProcedureExecutionState.Finished -> {
                         if (executionState.success) {
                             "Finished"
                         } else if (executionState.cancelled) {
@@ -87,6 +95,7 @@ internal fun SyncJobState(operation: RepoToRepoSync.JobState) {
                         } else {
                             "Failed"
                         }
+                    }
                 },
             )
             SyncProgress(
@@ -98,8 +107,13 @@ internal fun SyncJobState(operation: RepoToRepoSync.JobState) {
             InProgressOperationsList(operation.inProgressOperationsProgress.collectAsState().value)
         }
 
-        TAB_LOG -> ScrollableLogTextInDialog(operation.progressLog.collectAsState("").value)
-        TAB_ERROR_LOG -> ScrollableLogTextInDialog(errorLog)
+        TAB_LOG -> {
+            ScrollableLogTextInDialog(operation.progressLog.collectAsState().value)
+        }
+
+        TAB_ERROR_LOG -> {
+            ScrollableLogTextInDialog(errorLog)
+        }
     }
 
     ExecutionErrorIfPresent(operation.executionState)
