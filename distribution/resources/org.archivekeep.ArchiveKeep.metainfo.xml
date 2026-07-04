@@ -62,6 +62,24 @@
     <content_rating type="oars-1.1" />
 
     <releases>
+        <release version="0.6.1" date="2026-07-04">
+            <description>
+                <p>SQLite-index performance and operation dialog fixes</p>
+                <p>Changed:</p>
+                <ul>
+                    <li>common tabs UI structure for operation dialogs.</li>
+                </ul>
+                <p>Fixed:</p>
+                <ul>
+                    <li>performance issue where SQLite-backed index repositories took 1 second to store even tiny files,</li>
+                    <li>operation log with too many lines crashing the UI and application in Add and Push/Pull dialogs.</li>
+                </ul>
+                <p>Docs:</p>
+                <ul>
+                    <li>updated screenshot generation to wait for main window loading completion.</li>
+                </ul>
+            </description>
+        </release>
         <release version="0.6.0" date="2026-06-20">
             <description>
                 <p>SQLite-backed index repository</p>

@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## 0.6.1 - 2026-07-04 - SQLite-index performance and operation dialog fixes
+
 ### Changed
 
 - common tabs UI structure for operation dialogs.
