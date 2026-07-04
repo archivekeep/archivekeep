@@ -2,6 +2,20 @@
 
 ## Unreleased
 
+### Changed
+
+- common tabs UI structure for operation dialogs.
+
+### Fixed
+
+- performance issue where SQLite-backed index repositories took 1 second to store even tiny files,
+- operation log with too many lines crashing the UI and application in Add and Push/Pull dialogs.
+
+### Docs
+
+- updated screenshot generation to wait for main window loading completion.
+
+
 ## 0.6.0 - 2026-06-20 - SQLite-backed index repository
 
 ### Added
