@@ -24,12 +24,17 @@ class SQLiteIndexStore(
         val lastModified =
             try {
                 coroutineScope {
-                    launch {
-                        sqliteDataSource.updateIncomingFileLastAlive(path, Date())
-                        delay(aliveUpdateFrequency)
-                    }
+                    val lastAliveKeeper =
+                        launch {
+                            sqliteDataSource.updateIncomingFileLastAlive(path, Date())
+                            delay(aliveUpdateFrequency)
+                        }
 
-                    block()
+                    try {
+                        block()
+                    } finally {
+                        lastAliveKeeper.cancel()
+                    }
                 }
             } catch (e: Throwable) {
                 withContext(NonCancellable) {
