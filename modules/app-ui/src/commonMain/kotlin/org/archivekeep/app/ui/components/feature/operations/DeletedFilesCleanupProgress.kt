@@ -1,22 +1,22 @@
 package org.archivekeep.app.ui.components.feature.operations
 
 import androidx.compose.runtime.Composable
+import org.archivekeep.app.core.procedures.deletedcleanup.DeletedFilesCleanupProcedureSupervisor
 import org.archivekeep.app.ui.components.designsystem.dialog.LabelText
 import org.archivekeep.app.ui.components.designsystem.progress.ProgressRow
 import org.archivekeep.app.ui.components.designsystem.progress.ProgressRowList
-import org.archivekeep.files.procedures.deletedcleanup.DeletedFilesCleanupProgress
 import org.archivekeep.utils.text.filesAutoPlural
 
 @Composable
-fun DeletedFilesCleanupProgress(fileReindexProgress: DeletedFilesCleanupProgress) {
+fun DeletedFilesCleanupProgress(jobState: DeletedFilesCleanupProcedureSupervisor.JobState) {
     LabelText("Deleted files cleanup")
 
     ProgressRowList {
-        val selectedFilesToReindex = fileReindexProgress.filesToRemove
-        if (selectedFilesToReindex.isNotEmpty()) {
+        val selectedFilesToRemove = jobState.deletedFilesCleanupProgress.filesToRemove
+        if (selectedFilesToRemove.isNotEmpty()) {
             ProgressRow(progress = {
-                fileReindexProgress.removedFiles.size / selectedFilesToReindex.size.toFloat()
-            }, "Removed ${fileReindexProgress.removedFiles.size} of ${filesAutoPlural(selectedFilesToReindex)}")
+                jobState.deletedFilesCleanupProgress.removedFiles.size / selectedFilesToRemove.size.toFloat()
+            }, "Removed ${jobState.deletedFilesCleanupProgress.removedFiles.size} of ${filesAutoPlural(selectedFilesToRemove)}")
         }
     }
 }

@@ -2,6 +2,7 @@ package org.archivekeep.app.core.procedures.sync
 
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.StateFlow
+import org.archivekeep.app.core.procedures.utils.BaseJobState
 import org.archivekeep.app.core.procedures.utils.JobWrapper
 import org.archivekeep.files.api.repository.operations.CompareOperation
 import org.archivekeep.files.procedures.sync.discovery.DiscoveredSync
@@ -44,8 +45,9 @@ interface RepoToRepoSync {
     data class JobState(
         val progress: StateFlow<TaskExecutionProgressSummary.Group>,
         val inProgressOperationsProgress: StateFlow<List<OperationProgress>>,
-        val progressLog: StateFlow<List<String>>,
+        override val progressLog: StateFlow<List<String>>,
         val errorLog: StateFlow<List<String>>,
-        val executionState: ProcedureExecutionState,
-    ) : State
+        override val executionState: ProcedureExecutionState,
+    ) : State,
+        BaseJobState
 }

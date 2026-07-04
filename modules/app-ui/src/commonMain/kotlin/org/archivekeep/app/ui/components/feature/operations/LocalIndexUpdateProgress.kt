@@ -1,12 +1,18 @@
 package org.archivekeep.app.ui.components.feature.operations
 
 import androidx.compose.runtime.Composable
+import org.archivekeep.app.core.procedures.add.IndexUpdateProcedureSupervisor.JobState
 import org.archivekeep.app.ui.components.designsystem.dialog.LabelText
 import org.archivekeep.app.ui.components.designsystem.progress.ProgressRow
 import org.archivekeep.app.ui.components.designsystem.progress.ProgressRowList
 import org.archivekeep.files.procedures.indexupdate.IndexUpdateAddProgress
 import org.archivekeep.files.procedures.indexupdate.IndexUpdateMoveProgress
 import org.archivekeep.utils.text.filesAutoPlural
+
+@Composable
+fun LocalIndexUpdateProgress(state: JobState) {
+    LocalIndexUpdateProgress(state.moveProgress, state.addProgress)
+}
 
 @Composable
 fun LocalIndexUpdateProgress(

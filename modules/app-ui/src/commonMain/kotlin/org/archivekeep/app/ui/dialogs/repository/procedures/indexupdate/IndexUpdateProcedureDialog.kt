@@ -28,12 +28,11 @@ import org.archivekeep.app.ui.components.designsystem.dialog.LabelText
 import org.archivekeep.app.ui.components.designsystem.dialog.fullWidthDialogWidthModifier
 import org.archivekeep.app.ui.components.feature.dialogs.operations.DialogOperationControlButtons
 import org.archivekeep.app.ui.components.feature.dialogs.operations.DialogOperationControlState
-import org.archivekeep.app.ui.components.feature.dialogs.operations.ExecutionErrorIfPresent
 import org.archivekeep.app.ui.components.feature.dialogs.operations.toDialogOperationControlState
 import org.archivekeep.app.ui.components.feature.manyselect.rememberManySelectForRender
 import org.archivekeep.app.ui.components.feature.operations.IndexUpdatePreparationProgress
 import org.archivekeep.app.ui.components.feature.operations.LocalIndexUpdateProgress
-import org.archivekeep.app.ui.components.feature.operations.ScrollableLogTextInDialog
+import org.archivekeep.app.ui.components.feature.operations.OperationProgressTabs
 import org.archivekeep.app.ui.dialogs.repository.AbstractRepositoryDialog
 import org.archivekeep.app.ui.domain.wiring.LocalApplicationServices
 import org.archivekeep.app.ui.utils.appendBoldSpan
@@ -65,7 +64,7 @@ class IndexUpdateProcedureDialog(
         val controlState: DialogOperationControlState =
             when (val opState = operationState) {
                 is IndexUpdateProcedureSupervisor.JobState -> {
-                    opState.state.toDialogOperationControlState(
+                    opState.executionState.toDialogOperationControlState(
                         onCancel = null,
                         onHide = onClose,
                         onClose = onClose,
@@ -195,13 +194,7 @@ class IndexUpdateProcedureDialog(
             }
 
             is IndexUpdateProcedureSupervisor.JobState -> {
-                LocalIndexUpdateProgress(
-                    operationState.moveProgress,
-                    operationState.addProgress,
-                )
-                Spacer(Modifier.height(4.dp))
-                ScrollableLogTextInDialog(operationState.log)
-                ExecutionErrorIfPresent(operationState.state)
+                OperationProgressTabs(::LocalIndexUpdateProgress, operationState)
             }
         }
     }

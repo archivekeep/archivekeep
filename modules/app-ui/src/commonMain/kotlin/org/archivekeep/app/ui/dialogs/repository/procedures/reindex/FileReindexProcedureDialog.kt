@@ -2,15 +2,12 @@ package org.archivekeep.app.ui.dialogs.repository.procedures.reindex
 
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.RowScope
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.height
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.buildAnnotatedString
-import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.SharedFlow
@@ -26,11 +23,10 @@ import org.archivekeep.app.ui.components.base.layout.ScrollableLazyColumnWithGue
 import org.archivekeep.app.ui.components.designsystem.dialog.fullWidthDialogWidthModifier
 import org.archivekeep.app.ui.components.feature.dialogs.operations.DialogOperationControlButtons
 import org.archivekeep.app.ui.components.feature.dialogs.operations.DialogOperationControlState
-import org.archivekeep.app.ui.components.feature.dialogs.operations.ExecutionErrorIfPresent
 import org.archivekeep.app.ui.components.feature.dialogs.operations.toDialogOperationControlState
 import org.archivekeep.app.ui.components.feature.manyselect.rememberManySelectForRender
 import org.archivekeep.app.ui.components.feature.operations.FileReindexProgress
-import org.archivekeep.app.ui.components.feature.operations.ScrollableLogTextInDialog
+import org.archivekeep.app.ui.components.feature.operations.OperationProgressTabs
 import org.archivekeep.app.ui.dialogs.repository.AbstractRepositoryDialog
 import org.archivekeep.app.ui.domain.wiring.LocalApplicationServices
 import org.archivekeep.app.ui.utils.appendBoldSpan
@@ -60,7 +56,7 @@ class FileReindexProcedureDialog(
         val controlState: DialogOperationControlState =
             when (val opState = operationState) {
                 is FileReindexProcedureSupervisor.JobState -> {
-                    opState.state.toDialogOperationControlState(
+                    opState.executionState.toDialogOperationControlState(
                         onCancel = null,
                         onHide = onClose,
                         onClose = onClose,
@@ -166,12 +162,7 @@ class FileReindexProcedureDialog(
             }
 
             is FileReindexProcedureSupervisor.JobState -> {
-                FileReindexProgress(
-                    operationState.reindexProgress,
-                )
-                Spacer(Modifier.height(4.dp))
-                ScrollableLogTextInDialog(operationState.log)
-                ExecutionErrorIfPresent(operationState.state)
+                OperationProgressTabs(::FileReindexProgress, operationState)
             }
         }
     }

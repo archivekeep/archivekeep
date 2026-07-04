@@ -2,6 +2,7 @@ package org.archivekeep.app.core.procedures.reindex
 
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.StateFlow
+import org.archivekeep.app.core.procedures.utils.BaseJobState
 import org.archivekeep.app.core.procedures.utils.JobWrapper
 import org.archivekeep.files.procedures.reindex.FileReindexProcedure
 import org.archivekeep.files.procedures.reindex.FileReindexProgress
@@ -17,9 +18,10 @@ interface FileReindexProcedureSupervisor {
 
     data class JobState(
         val reindexProgress: FileReindexProgress,
-        val log: List<String>,
-        val state: ProcedureExecutionState,
-    ) : State
+        override val progressLog: StateFlow<List<String>>,
+        override val executionState: ProcedureExecutionState,
+    ) : State,
+        BaseJobState
 
     data class Preparation(
         val result: FileReindexProcedure.PreparationResult,

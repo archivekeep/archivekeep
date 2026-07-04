@@ -2,6 +2,7 @@ package org.archivekeep.app.core.procedures.deletedcleanup
 
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.StateFlow
+import org.archivekeep.app.core.procedures.utils.BaseJobState
 import org.archivekeep.app.core.procedures.utils.JobWrapper
 import org.archivekeep.files.procedures.deletedcleanup.DeletedFilesCleanupProcedure
 import org.archivekeep.files.procedures.deletedcleanup.DeletedFilesCleanupProgress
@@ -16,10 +17,11 @@ interface DeletedFilesCleanupProcedureSupervisor {
     sealed interface State
 
     data class JobState(
-        val reindexProgress: DeletedFilesCleanupProgress,
-        val log: List<String>,
-        val state: ProcedureExecutionState,
-    ) : State
+        val deletedFilesCleanupProgress: DeletedFilesCleanupProgress,
+        override val progressLog: StateFlow<List<String>>,
+        override val executionState: ProcedureExecutionState,
+    ) : State,
+        BaseJobState
 
     data class Preparation(
         val result: DeletedFilesCleanupProcedure.PreparationResult,

@@ -2,6 +2,7 @@ package org.archivekeep.app.core.procedures.add
 
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.StateFlow
+import org.archivekeep.app.core.procedures.utils.BaseJobState
 import org.archivekeep.app.core.procedures.utils.JobWrapper
 import org.archivekeep.files.procedures.indexupdate.IndexUpdateAddProgress
 import org.archivekeep.files.procedures.indexupdate.IndexUpdateMoveProgress
@@ -19,9 +20,10 @@ interface IndexUpdateProcedureSupervisor {
     data class JobState(
         val addProgress: IndexUpdateAddProgress,
         val moveProgress: IndexUpdateMoveProgress,
-        val log: List<String>,
-        val state: ProcedureExecutionState,
-    ) : State
+        override val progressLog: StateFlow<List<String>>,
+        override val executionState: ProcedureExecutionState,
+    ) : State,
+        BaseJobState
 
     data class Preparation(
         val result: IndexUpdateProcedure.Preparation,

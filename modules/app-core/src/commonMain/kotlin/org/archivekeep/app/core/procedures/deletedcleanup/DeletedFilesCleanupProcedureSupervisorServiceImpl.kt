@@ -130,12 +130,11 @@ class DeletedFilesCleanupProcedureSupervisorServiceImpl(
         override val state: Flow<DeletedFilesCleanupProcedureSupervisor.JobState> =
             combine(
                 structuredProgressTracker.fileRemoveProgressFlow,
-                executionLog.lines,
                 job.executionState,
-            ) { fileRemoveProgress, log, jobState ->
+            ) { fileRemoveProgress, jobState ->
                 DeletedFilesCleanupProcedureSupervisor.JobState(
                     fileRemoveProgress,
-                    log,
+                    executionLog.lines,
                     jobState,
                 )
             }

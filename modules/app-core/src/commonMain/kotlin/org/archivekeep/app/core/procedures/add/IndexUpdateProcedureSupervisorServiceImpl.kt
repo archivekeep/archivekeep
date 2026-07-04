@@ -153,13 +153,12 @@ class IndexUpdateProcedureSupervisorServiceImpl(
             combine(
                 indexUpdateProgressTracker.addProgressFlow,
                 indexUpdateProgressTracker.moveProgressFlow,
-                executionLog.lines,
                 job.executionState,
-            ) { addProgress, moveProgress, log, jobState ->
+            ) { addProgress, moveProgress, jobState ->
                 IndexUpdateProcedureSupervisor.JobState(
                     addProgress,
                     moveProgress,
-                    log,
+                    executionLog.lines,
                     jobState,
                 )
             }

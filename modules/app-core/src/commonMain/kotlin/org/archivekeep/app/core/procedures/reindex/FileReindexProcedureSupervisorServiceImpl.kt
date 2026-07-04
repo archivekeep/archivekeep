@@ -130,12 +130,11 @@ class FileReindexProcedureSupervisorServiceImpl(
         override val state: Flow<FileReindexProcedureSupervisor.JobState> =
             combine(
                 indexUpdateProgressTracker.fileReindexProgressFlow,
-                executionLog.lines,
                 job.executionState,
-            ) { reindexProgress, log, jobState ->
+            ) { reindexProgress, jobState ->
                 FileReindexProcedureSupervisor.JobState(
                     reindexProgress,
-                    log,
+                    executionLog.lines,
                     jobState,
                 )
             }
