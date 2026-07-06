@@ -7,6 +7,7 @@ import kotlinx.coroutines.flow.map
 import org.archivekeep.app.core.domain.archives.ArchiveService
 import org.archivekeep.app.core.domain.repositories.RepositoryService
 import org.archivekeep.app.core.domain.storages.StorageService
+import org.archivekeep.app.core.procedures.add.IndexUpdateProcedureSupervisorService
 import org.archivekeep.app.core.procedures.addpush.AddAndPushProcedureService
 import org.archivekeep.app.core.procedures.sync.RepoToRepoSyncService
 import org.archivekeep.utils.combineToObject
@@ -25,6 +26,7 @@ class HomeViewModel(
     val storageService: StorageService,
     val repoToRepoSyncService: RepoToRepoSyncService,
     val addAndPushProcedureService: AddAndPushProcedureService,
+    val indexUpdateProcedureSupervisorService: IndexUpdateProcedureSupervisorService,
 ) {
     val allLocalArchivesFlow =
         archiveService.allArchives
@@ -37,6 +39,7 @@ class HomeViewModel(
                         HomeArchiveEntryViewModel(
                             scope,
                             addAndPushProcedureService,
+                            indexUpdateProcedureSupervisorService,
                             repoToRepoSyncService,
                             repositoryService.getRepository(primaryRepository.uri),
                             archive = a,

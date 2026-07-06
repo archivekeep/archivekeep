@@ -13,10 +13,13 @@ import org.archivekeep.app.core.domain.archives.AssociatedArchive
 import org.archivekeep.app.core.domain.repositories.Repository
 import org.archivekeep.app.core.domain.storages.StorageNamedReference
 import org.archivekeep.app.core.domain.storages.StoragePartiallyResolved
+import org.archivekeep.app.core.procedures.add.IndexUpdateProcedureSupervisor
+import org.archivekeep.app.core.procedures.add.IndexUpdateProcedureSupervisorService
 import org.archivekeep.app.core.procedures.addpush.AddAndPushProcedureService
 import org.archivekeep.app.core.procedures.sync.RepoToRepoSyncService
 import org.archivekeep.app.core.utils.identifiers.NamedRepositoryReference
 import org.archivekeep.app.ui.domain.wiring.ArchiveOperationLaunchers
+import org.archivekeep.app.ui.domain.wiring.LocalApplicationServices
 import org.archivekeep.app.ui.enableUnfinishedFeatures
 import org.archivekeep.app.ui.utils.Action
 import org.archivekeep.utils.loading.Loadable
@@ -32,6 +35,7 @@ import org.archivekeep.utils.safeCombine
 class HomeArchiveEntryViewModel(
     scope: CoroutineScope,
     addAndPushProcedureService: AddAndPushProcedureService,
+    indexUpdateProcedureSupervisorService: IndexUpdateProcedureSupervisorService,
     repoToRepoSyncService: RepoToRepoSyncService,
     val repository: Repository,
     val archive: AssociatedArchive,
@@ -49,11 +53,14 @@ class HomeArchiveEntryViewModel(
         val loading: Boolean,
         val indexStatusText: OptionalLoadable<String>,
         val addPushOperationRunning: Boolean,
+        val addOperationRunning: Boolean,
     ) {
         val canAddPush = if (addPushOperationRunning) Loadable.Loaded(true) else (canAdd.mapLoadedData { it && anySecondaryAvailable })
     }
 
     val addPushOperation = addAndPushProcedureService.getAddAndPushProcedure(primaryRepository.reference.uri)
+
+    val addOperation = indexUpdateProcedureSupervisorService.getAddOperation(primaryRepository.reference.uri)
 
     val secondaryRepositories: StateFlow<List<Pair<StoragePartiallyResolved, SecondaryArchiveRepository.State>>> =
         safeCombine(
@@ -70,7 +77,8 @@ class HomeArchiveEntryViewModel(
             repository.optionalAccessorFlow,
             secondaryRepositories,
             addPushOperation.currentJobFlow.map { it != null },
-        ) { indexStatus, accessor, nonLocalRepositories, addPushOperationRunning ->
+            addOperation.currentJobFlow.map { it != null },
+        ) { indexStatus, accessor, nonLocalRepositories, addPushOperationRunning, addOperationRunning ->
             VMState(
                 canUnlock = accessor.mapLoadedData { false }.mapToLoadable(true),
                 canAdd = indexStatus.mapLoadedData { it.hasChanges }.mapToLoadable(false),
@@ -94,6 +102,7 @@ class HomeArchiveEntryViewModel(
                             "${it.indexedFiles.size} files${it.newFiles.size.let { if (it > 0) ", $it uncommitted" else "" }}"
                         },
                 addPushOperationRunning = addPushOperationRunning,
+                addOperationRunning = addOperationRunning,
             )
         }.onEach {
             println("Archive state: ${archive.label}: $it")
@@ -110,6 +119,7 @@ class HomeArchiveEntryViewModel(
                 loading = true,
                 indexStatusText = OptionalLoadable.Loading,
                 addPushOperationRunning = false,
+                addOperationRunning = false,
             ),
         )
 
@@ -211,6 +221,7 @@ fun HomeArchiveEntryViewModel.VMState.actions(
                 },
                 isAvailable = it,
                 text = "Add",
+                running = this.addOperationRunning,
             )
         },
         this.canReindex.mapLoadedData {

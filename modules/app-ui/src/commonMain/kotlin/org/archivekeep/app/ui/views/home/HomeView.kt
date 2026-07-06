@@ -28,26 +28,17 @@ import org.archivekeep.utils.loading.mapLoadedData
 class HomeView : View<HomeViewModel> {
     @Composable
     override fun produceViewModel(scope: CoroutineScope): HomeViewModel {
-        val archiveService = LocalApplicationServices.current.archiveService
-        val repositoryService = LocalApplicationServices.current.repositoryService
-        val storageService = LocalApplicationServices.current.storageService
-        val syncService = LocalApplicationServices.current.syncService
-        val addPushOperationService = LocalApplicationServices.current.addPushService
+        val services = LocalApplicationServices.current
 
-        return remember(
-            scope,
-            archiveService,
-            storageService,
-            syncService,
-            addPushOperationService,
-        ) {
+        return remember(scope, services) {
             HomeViewModel(
                 scope,
-                archiveService,
-                repositoryService,
-                storageService,
-                syncService,
-                addPushOperationService,
+                services.archiveService,
+                services.repositoryService,
+                services.storageService,
+                services.syncService,
+                services.addPushService,
+                services.addOperationSupervisorService,
             )
         }
     }
