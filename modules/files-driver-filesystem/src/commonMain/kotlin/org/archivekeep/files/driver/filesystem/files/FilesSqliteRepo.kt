@@ -9,6 +9,7 @@ import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.ensureActive
@@ -107,6 +108,7 @@ class FilesSqliteRepo(
         InProgressHandler<Path>(scope, transform = { it.absolutePathString() })
 
     private val database = createIndexDatabase(dbPath, ioDispatcher)
+
     private val sqliteDataSource = SQLiteDataSource(database)
     private val sqliteIndexStore = SQLiteIndexStore(sqliteDataSource)
 
@@ -114,13 +116,18 @@ class FilesSqliteRepo(
         // TODO: extract to dialog (maybe in future also add resume of unfinished)
 
         scope.launch(ioDispatcher) {
-            autoRemoveDeadIncomingFiles()
-            autoRemovePendingMoves()
+            try {
+                autoRemoveDeadIncomingFiles()
+                autoRemovePendingMoves()
 
-            // maybe died just recently and quickly started, redo
-            delay(durationToDeath + 1.seconds)
-            autoRemoveDeadIncomingFiles()
-            autoRemovePendingMoves()
+                // maybe died just recently and quickly started, redo
+                delay(durationToDeath + 1.seconds)
+                autoRemoveDeadIncomingFiles()
+                autoRemovePendingMoves()
+            } catch (e: Throwable) {
+                println("Error during auto-repair: ${e.message}")
+                e.printStackTrace()
+            }
         }
     }
 
@@ -513,6 +520,11 @@ class FilesSqliteRepo(
                 }
             }
 
+    private fun close() {
+        scope.cancel()
+        database.close()
+    }
+
     companion object {
         fun openOrNull(path: Path): FilesSqliteRepo? {
             val archiveDir = path.resolve(".archive")
@@ -526,6 +538,8 @@ class FilesSqliteRepo(
 
             return null
         }
+
+        fun isRepo(path: Path) = openOrNull(path)?.also { it.close() } != null
 
         suspend fun create(
             path: Path,

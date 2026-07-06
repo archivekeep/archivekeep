@@ -10,6 +10,7 @@ import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performTextClearance
 import androidx.compose.ui.test.performTextInput
 import io.kotest.assertions.nondeterministic.eventually
+import io.kotest.matchers.shouldBe
 import kotlinx.coroutines.runBlocking
 import org.archivekeep.app.core.persistence.drivers.filesystem.FileSystemStorageType
 import org.archivekeep.app.core.persistence.drivers.filesystem.MountedFileSystem
@@ -90,7 +91,7 @@ class AddFileSystemRepositoryDialogTest {
                 }
 
                 // should not fail
-                assertNotNull(FilesSqliteRepo.openOrNull(testTempDir.root.resolve("local-archives/test-repo").toPath()))
+                FilesSqliteRepo.isRepo(testTempDir.root.resolve("local-archives/test-repo").toPath()) shouldBe true
             }
         }
     }

@@ -50,7 +50,7 @@ class AddFileSystemRepositoryUseCaseImpl(
             )
         }
 
-        if (FilesSqliteRepo.openOrNull(pathPath) != null || FilesRepo.openOrNull(pathPath) != null) {
+        if (FilesSqliteRepo.isRepo(pathPath) || FilesRepo.openOrNull(pathPath) != null) {
             val storageMarking = getStorageMarking(path, intendedStorageType)
 
             return (
