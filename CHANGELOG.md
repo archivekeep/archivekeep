@@ -1,6 +1,16 @@
 # Changelog
 
-## Unreleased
+## 0.6.2 - 2026-07-06
+
+### Added
+
+- spinner indicator while add operation is running,
+- warning about SQLite repositories on external media and Android incompatibility.
+
+### Fixed
+
+- Android: application crash on open of an SQLite-backed filesystem repository from external storage.
+
 
 ## 0.6.1 - 2026-07-04 - SQLite-index performance and operation dialog fixes
 
