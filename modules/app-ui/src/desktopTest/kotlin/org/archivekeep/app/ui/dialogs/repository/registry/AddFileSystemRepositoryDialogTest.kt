@@ -122,11 +122,11 @@ class AddFileSystemRepositoryDialogTest {
                 onNodeWithText("local-archives/test-repo", true).assertExists()
                 onNodeWithText("The directory is not a repository, yet. Continue to initialize it as an archive repository.").assertExists()
                 onNodeWithText("Storage is used for the first time, and it will be marked as local.").assertExists()
-                onNodeWithText("Individual checksum files").assertExists()
+                onNodeWithText("Individual checksum files", substring = true).assertExists()
             }
 
             runBlocking {
-                onNodeWithText("Individual checksum files").performClick()
+                onNodeWithText("Individual checksum files", substring = true).performClick()
 
                 saveTestingContainerBitmap("dialogs/add-filesystem-repository/init-plain-checksum-files-02-checksum-files.png")
             }

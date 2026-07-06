@@ -303,16 +303,25 @@ private fun AddRepositoryDialogContents(
                                     extra = {
                                         if (!createEncrypted) {
                                             Column {
-                                                RadioWithText(
+                                                RadioWithTextAndExtra(
                                                     selected = createSQLite,
                                                     onClick = { createSQLite = true },
-                                                    text = "SQLite Index DB (recommended)",
+                                                    text = "SQLite Index DB (recommended in most cases)",
                                                     enabled = canEdit,
-                                                )
+                                                ) {
+                                                    if (createSQLite) {
+                                                        Column {
+                                                            WarningAlert {
+                                                                Text("SQLite Index DB repositories located on external media are not supported on Android.")
+                                                            }
+                                                            Spacer(Modifier.height(12.dp))
+                                                        }
+                                                    }
+                                                }
                                                 RadioWithText(
                                                     selected = !createSQLite,
                                                     onClick = { createSQLite = false },
-                                                    text = "Individual checksum files",
+                                                    text = "Individual checksum files (needed for sharing with Android devices via external media)",
                                                     enabled = canEdit,
                                                 )
                                             }
