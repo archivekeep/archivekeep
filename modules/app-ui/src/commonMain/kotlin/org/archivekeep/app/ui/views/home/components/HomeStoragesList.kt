@@ -28,12 +28,12 @@ import org.archivekeep.app.ui.components.feature.LoadableGuard
 import org.archivekeep.app.ui.components.feature.StorageDropdownIconLaunched
 import org.archivekeep.app.ui.domain.wiring.LocalArchiveOperationLaunchers
 import org.archivekeep.app.ui.enableUnfinishedFeatures
-import org.archivekeep.app.ui.views.home.HomeViewStorage
+import org.archivekeep.app.ui.views.home.model.HomeStorageUiState
 import org.archivekeep.utils.loading.Loadable
 
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
-fun HomeStoragesList(allStoragesFlow: Loadable<List<HomeViewStorage>>) {
+fun HomeStoragesList(allStoragesFlow: Loadable<List<HomeStorageUiState>>) {
     LoadableGuard(allStoragesFlow) { allStorages ->
         VerticalGrid(
             columns = SimpleGridCells.Adaptive(minSize = 250.dp),

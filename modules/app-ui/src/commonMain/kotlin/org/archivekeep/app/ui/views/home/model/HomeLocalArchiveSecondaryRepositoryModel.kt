@@ -1,4 +1,4 @@
-package org.archivekeep.app.ui.views.home
+package org.archivekeep.app.ui.views.home.model
 
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -9,21 +9,16 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.stateIn
 import org.archivekeep.app.core.domain.repositories.Repository
-import org.archivekeep.app.core.domain.repositories.RepositoryConnectionState
 import org.archivekeep.app.core.domain.repositories.ResolvedRepositoryState
 import org.archivekeep.app.core.procedures.sync.RepoToRepoSync
 import org.archivekeep.app.core.procedures.sync.RepoToRepoSyncService
 import org.archivekeep.app.core.utils.identifiers.NamedRepositoryReference
 import org.archivekeep.app.core.utils.identifiers.RepositoryURI
-import org.archivekeep.app.ui.utils.combineTexts
-import org.archivekeep.files.api.repository.operations.StatusOperation
 import org.archivekeep.utils.loading.optional.OptionalLoadable
-import org.archivekeep.utils.loading.optional.isLoading
 import org.archivekeep.utils.loading.optional.mapIfLoadedOrNull
 import org.archivekeep.utils.loading.optional.mapLoadedData
-import org.archivekeep.utils.text.filesAutoPlural
 
-class SecondaryArchiveRepository(
+class HomeLocalArchiveSecondaryRepositoryModel(
     val primaryRepositoryURI: RepositoryURI?,
     // TODO: reference only
     val otherRepositoryState: ResolvedRepositoryState,
@@ -31,47 +26,10 @@ class SecondaryArchiveRepository(
 ) {
     val reference: NamedRepositoryReference = otherRepositoryState.namedReference
 
-    data class State(
-        val repo: SecondaryArchiveRepository,
-        val localRepoStatus: OptionalLoadable<StatusOperation.Result.Summary>,
-        val connectionStatus: RepositoryConnectionState,
-        val syncRunning: Boolean,
-        val canPushLoadable: OptionalLoadable<Boolean>,
-        val canPull: Boolean,
-        val syncTexts: OptionalLoadable<List<String>>,
-    ) {
-        val needsUnlock = connectionStatus is RepositoryConnectionState.ConnectedLocked
-
-        val addTexts =
-            localRepoStatus.mapLoadedData {
-                if (it.totalNewFiles > 0) {
-                    listOf("Uncommitted ${filesAutoPlural(it.totalNewFiles)}")
-                } else {
-                    emptyList()
-                }
-            }
-
-        val texts: OptionalLoadable<String> =
-            combineTexts(
-                OptionalLoadable.LoadedAvailable(
-                    if (!connectionStatus.isConnected) listOf("Disconnected") else emptyList(),
-                ),
-                addTexts,
-                syncTexts,
-            ).mapLoadedData { it.joinToString(", ") }
-
-        val isLoading = syncTexts.isLoading || syncRunning || localRepoStatus.isLoading
-
-        val canAdd = localRepoStatus.mapIfLoadedOrNull { it.totalNewFiles > 0 } ?: false
-        val canReindex = localRepoStatus.mapIfLoadedOrNull { it.totalModifiedIndexedFiles > 0 } ?: false
-        val canCleanupDeletedFiles = localRepoStatus.mapIfLoadedOrNull { it.totalMissingFiles > 0 } ?: false
-        val canPush = canPushLoadable.mapIfLoadedOrNull { it } ?: false
-    }
-
     fun stateFlow(
         scope: CoroutineScope,
         repoToRepoSyncService: RepoToRepoSyncService,
-    ): StateFlow<State> {
+    ): StateFlow<HomeLocalArchiveSecondaryRepositoryUiState> {
         val repoToRepoSync =
             primaryRepositoryURI?.let {
                 repoToRepoSyncService.getRepoToRepoSync(
@@ -84,7 +42,7 @@ class SecondaryArchiveRepository(
         val syncRunningFlow = repoToRepoSync?.currentJobFlow?.map { it != null } ?: MutableStateFlow(false)
 
         val initialValue =
-            State(
+            HomeLocalArchiveSecondaryRepositoryUiState(
                 repo = this,
                 connectionStatus = otherRepositoryState.connectionState,
                 localRepoStatus = OptionalLoadable.Loading,
@@ -113,7 +71,7 @@ class SecondaryArchiveRepository(
 
             val syncTexts = syncStatus?.mapLoadedData(::textTags) ?: OptionalLoadable.NotAvailable()
 
-            State(
+            HomeLocalArchiveSecondaryRepositoryUiState(
                 repo = this,
                 connectionStatus = connectionStatus,
                 localRepoStatus = localRepoStatus.mapLoadedData { it.summary },
@@ -126,7 +84,7 @@ class SecondaryArchiveRepository(
     }
 }
 
-fun textTags(status: RepoToRepoSync.CompareState): List<String> =
+private fun textTags(status: RepoToRepoSync.CompareState): List<String> =
     listOfNotNull(
         if (status.missingBaseInOther > 0) "${status.missingBaseInOther} missing" else null,
         if (status.missingOtherInBase > 0) "${status.missingOtherInBase} extra" else null,

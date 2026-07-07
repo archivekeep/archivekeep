@@ -34,11 +34,11 @@ import org.archivekeep.app.ui.components.designsystem.sections.sectionCardHorizo
 import org.archivekeep.app.ui.components.designsystem.theme.AppTheme
 import org.archivekeep.app.ui.components.feature.InArchiveRepositoryDropdownIconLaunched
 import org.archivekeep.app.ui.components.feature.LoadableGuard
-import org.archivekeep.app.ui.views.home.HomeArchiveNonLocalArchive
+import org.archivekeep.app.ui.views.home.model.HomeNonLocalArchiveUiState
 import org.archivekeep.utils.loading.Loadable
 
 @Composable
-fun HomeNonLocalArchivesList(otherArchivesLoadable: Loadable<List<HomeArchiveNonLocalArchive>>) {
+fun HomeNonLocalArchivesList(otherArchivesLoadable: Loadable<List<HomeNonLocalArchiveUiState>>) {
     LoadableGuard(otherArchivesLoadable) { nonLocalArchives ->
         VerticalGrid(
             columns = SimpleGridCells.Adaptive(minSize = 250.dp),

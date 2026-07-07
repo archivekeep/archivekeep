@@ -1,6 +1,5 @@
 package org.archivekeep.app.ui.views.home
 
-import androidx.compose.runtime.mutableStateOf
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.map
@@ -10,8 +9,12 @@ import org.archivekeep.app.core.domain.storages.StorageService
 import org.archivekeep.app.core.procedures.add.IndexUpdateProcedureSupervisorService
 import org.archivekeep.app.core.procedures.addpush.AddAndPushProcedureService
 import org.archivekeep.app.core.procedures.sync.RepoToRepoSyncService
+import org.archivekeep.app.ui.views.home.model.HomeLocalArchiveModel
+import org.archivekeep.app.ui.views.home.model.HomeLocalArchiveSecondaryRepositoryModel
+import org.archivekeep.app.ui.views.home.model.HomeNonLocalArchiveUiState
+import org.archivekeep.app.ui.views.home.model.HomeStorageListUiState
+import org.archivekeep.app.ui.views.home.model.HomeStorageUiState
 import org.archivekeep.utils.combineToObject
-import org.archivekeep.utils.loading.Loadable
 import org.archivekeep.utils.loading.flatMapLatestLoadedData
 import org.archivekeep.utils.loading.flatMapLoadableFlow
 import org.archivekeep.utils.loading.isLoading
@@ -32,37 +35,19 @@ class HomeViewModel(
         archiveService.allArchives
             .mapLoadedData {
                 it
-                    .mapNotNull { a ->
+                    .mapNotNull { archive ->
                         val (storage, primaryRepository) =
-                            a.primaryRepository ?: return@mapNotNull null
+                            archive.primaryRepository ?: return@mapNotNull null
 
-                        HomeArchiveEntryViewModel(
+                        HomeLocalArchiveModel(
                             scope,
                             addAndPushProcedureService,
                             indexUpdateProcedureSupervisorService,
                             repoToRepoSyncService,
-                            repositoryService.getRepository(primaryRepository.uri),
-                            archive = a,
-                            primaryRepository.displayName,
-                            primaryRepository =
-                                HomeArchiveEntryViewModel.PrimaryRepositoryDetails(
-                                    primaryRepository.namedReference,
-                                    storage.namedReference,
-                                    stats = mutableStateOf(Loadable.Loading),
-                                ),
-                            otherRepositories =
-                                a.repositories
-                                    .filter { it.second.uri != primaryRepository.uri }
-                                    .map { (storage, repo) ->
-                                        Pair(
-                                            storage,
-                                            SecondaryArchiveRepository(
-                                                primaryRepository.uri,
-                                                repo,
-                                                repository = repositoryService.getRepository(repo.namedReference.uri),
-                                            ),
-                                        )
-                                    },
+                            repositoryService,
+                            archive = archive,
+                            resolvedRepositoryState = primaryRepository,
+                            storage = storage,
                         )
                     }.sortedBy { it.displayName }
             }.stateIn(scope)
@@ -80,7 +65,7 @@ class HomeViewModel(
                             .map { storage ->
                                 val storageReference = storage.namedReference
 
-                                HomeViewStorage(
+                                HomeStorageUiState(
                                     scope,
                                     repoToRepoSyncService = repoToRepoSyncService,
                                     storage = storage,
@@ -91,7 +76,7 @@ class HomeViewModel(
                                                     .filter {
                                                         it.first.uri == storageReference.uri
                                                     }.map { (_, repo) ->
-                                                        SecondaryArchiveRepository(
+                                                        HomeLocalArchiveSecondaryRepositoryModel(
                                                             aa.primaryRepository?.second?.uri,
                                                             repo,
                                                             repository =
@@ -102,7 +87,7 @@ class HomeViewModel(
                                                     }
                                             },
                                 )
-                            }
+                            }.filter { it.otherRepositoriesInThisStorage.isNotEmpty() }
                     }
             }.flatMapLatestLoadedData { unsortedList ->
                 val withState =
@@ -111,7 +96,7 @@ class HomeViewModel(
                     }
 
                 combineToObject(withState) { storages ->
-                    HomeStoragesState(
+                    HomeStorageListUiState(
                         isLoadingSomeItems = storages.any { it.first.isLoading },
                         hasAnyRegistered = storages.isNotEmpty(),
                         availableStorages =
@@ -131,13 +116,13 @@ class HomeViewModel(
                         return@mapNotNull null
                     }
 
-                    HomeArchiveNonLocalArchive(
+                    HomeNonLocalArchiveUiState(
                         a,
                         a.repositories[0].second.displayName,
                         otherRepositories =
                             a.repositories
                                 .map { (storage, repo) ->
-                                    HomeArchiveNonLocalArchive.OtherRepositoryDetails(
+                                    HomeNonLocalArchiveUiState.OtherRepositoryDetails(
                                         repo.namedReference,
                                         storage.namedReference,
                                         repositoryService.getRepository(repo.namedReference.uri),

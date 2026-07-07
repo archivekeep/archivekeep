@@ -18,11 +18,11 @@ import org.archivekeep.app.ui.components.designsystem.sections.SectionCardBottom
 import org.archivekeep.app.ui.components.feature.InArchiveRepositoryDropdownIconLaunched
 import org.archivekeep.app.ui.domain.wiring.LocalArchiveOperationLaunchers
 import org.archivekeep.app.ui.utils.Action2
-import org.archivekeep.app.ui.views.home.SecondaryArchiveRepository
+import org.archivekeep.app.ui.views.home.model.HomeLocalArchiveSecondaryRepositoryUiState
 
 @Composable
 fun SecondaryArchiveRepositoryRow(
-    nonPrimaryRepository: SecondaryArchiveRepository.State,
+    nonPrimaryRepository: HomeLocalArchiveSecondaryRepositoryUiState,
     icon: ImageVector,
     name: String = nonPrimaryRepository.repo.reference.displayName,
 ) {
