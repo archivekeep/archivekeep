@@ -1,7 +1,8 @@
 package org.archivekeep.app.ui.components.feature.operations
 
 import androidx.compose.runtime.Composable
-import org.archivekeep.app.ui.components.base.layout.HeightKeepingBox
+import androidx.compose.ui.Modifier
+import org.archivekeep.app.ui.components.base.layout.keepSize
 import org.archivekeep.app.ui.components.designsystem.progress.ProgressRow
 import org.archivekeep.app.ui.components.designsystem.progress.ProgressRowList
 import org.archivekeep.app.ui.utils.toUiString
@@ -11,14 +12,7 @@ import kotlin.math.floor
 
 @Composable
 fun InProgressOperationsList(progress: List<OperationProgress>) {
-    HeightKeepingBox {
-        InProgressOperationsListInner(progress)
-    }
-}
-
-@Composable
-private fun InProgressOperationsListInner(progress: List<OperationProgress>) {
-    ProgressRowList {
+    ProgressRowList(Modifier.keepSize()) {
         progress.forEach { atom ->
             val tags =
                 listOfNotNull(

@@ -9,9 +9,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 
 @Composable
-fun ProgressRowList(content: @Composable ColumnScope.() -> Unit) {
+fun ProgressRowList(
+    modifier: Modifier = Modifier,
+    content: @Composable ColumnScope.() -> Unit,
+) {
     Column(
-        Modifier.padding(vertical = 12.dp, horizontal = 4.dp),
+        modifier.padding(vertical = 12.dp, horizontal = 4.dp),
         verticalArrangement = Arrangement.spacedBy(8.dp),
         content = content,
     )
