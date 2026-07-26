@@ -12,6 +12,7 @@ import compose.icons.TablerIcons
 import compose.icons.tablericons.Download
 import compose.icons.tablericons.Lock
 import compose.icons.tablericons.Plus
+import compose.icons.tablericons.Trash
 import compose.icons.tablericons.Upload
 import org.archivekeep.app.ui.components.designsystem.sections.SectionCardBottomListItem
 import org.archivekeep.app.ui.components.designsystem.sections.SectionCardBottomListItemIconActionButton
@@ -36,7 +37,7 @@ fun SecondaryArchiveRepositoryRow(
             "Add new files",
             enabled = nonPrimaryRepository.canAdd,
             onClick = {
-                launchers.openIndexUpdateOperation(storageRepo.repository.uri)
+                launchers.openIndexUpdateOperation(repository.uri)
             },
         )
 
@@ -47,7 +48,7 @@ fun SecondaryArchiveRepositoryRow(
             enabled = nonPrimaryRepository.canPush,
             onClick = {
                 launchers.pushToRepo(
-                    storageRepo.repository.uri,
+                    repository.uri,
                     storageRepo.primaryRepositoryURI!!,
                 )
             },
@@ -60,11 +61,27 @@ fun SecondaryArchiveRepositoryRow(
             enabled = nonPrimaryRepository.canPull,
             onClick = {
                 launchers.pullFromRepo(
-                    storageRepo.repository.uri,
+                    repository.uri,
                     storageRepo.primaryRepositoryURI!!,
                 )
             },
         )
+
+    val cleanupFiles =
+        if (nonPrimaryRepository.canCleanupDeletedFiles) {
+            Action2(
+                TablerIcons.Trash,
+                "Cleanup deleted files",
+                enabled = true,
+                onClick = {
+                    launchers.openDeletedFilesCleanupOperation(repository.uri)
+                },
+            )
+        } else {
+            null
+        }
+
+    val actions = listOfNotNull(actionAdd, actionPush, actionPull, cleanupFiles)
 
     SectionCardBottomListItem(
         title = name,
@@ -83,16 +100,11 @@ fun SecondaryArchiveRepositoryRow(
             }
         },
         actions = {
-            SectionCardBottomListItemIconActionButton(actionAdd)
-            SectionCardBottomListItemIconActionButton(actionPush)
-            SectionCardBottomListItemIconActionButton(actionPull)
+            actions.forEach { SectionCardBottomListItemIconActionButton(it) }
             InArchiveRepositoryDropdownIconLaunched(
                 repository = repository,
-                actionAdd = actionAdd,
-                actionPush = actionPush,
-                actionPull = actionPull,
+                actions = actions,
                 canReindex = nonPrimaryRepository.canReindex,
-                canCleanupDeletedFiles = nonPrimaryRepository.canCleanupDeletedFiles,
                 isAssociated = storageRepo.otherRepositoryState.associationId != null,
             )
         },

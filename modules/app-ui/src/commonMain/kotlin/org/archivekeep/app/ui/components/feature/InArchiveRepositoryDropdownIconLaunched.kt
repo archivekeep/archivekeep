@@ -34,11 +34,8 @@ import kotlin.io.path.absolutePathString
 fun InArchiveRepositoryDropdownIconLaunched(
     repository: Repository,
     isAssociated: Boolean,
-    actionAdd: Action2? = null,
-    actionPush: Action2? = null,
-    actionPull: Action2? = null,
+    actions: List<Action2> = emptyList(),
     canReindex: Boolean = false,
-    canCleanupDeletedFiles: Boolean = false,
 ) {
     val repositoryURI = repository.uri
     val operationsLaunchers = LocalArchiveOperationLaunchers.current
@@ -75,11 +72,7 @@ fun InArchiveRepositoryDropdownIconLaunched(
                 })
             }
 
-            listOfNotNull(
-                actionAdd,
-                actionPush,
-                actionPull,
-            ).forEach { action ->
+            actions.forEach { action ->
                 DropdownMenuItem(onClick = {
                     action.onClick()
                     closeDropdown()
@@ -101,15 +94,6 @@ fun InArchiveRepositoryDropdownIconLaunched(
                     closeDropdown()
                 }, text = {
                     Text("Reindex changed files")
-                })
-            }
-
-            if (canCleanupDeletedFiles) {
-                DropdownMenuItem(onClick = {
-                    operationsLaunchers.openDeletedFilesCleanupOperation(repositoryURI)
-                    closeDropdown()
-                }, text = {
-                    Text("Cleanup deleted files")
                 })
             }
 
