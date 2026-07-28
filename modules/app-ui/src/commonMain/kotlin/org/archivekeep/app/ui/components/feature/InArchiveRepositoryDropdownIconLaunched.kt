@@ -19,9 +19,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import compose.icons.TablerIcons
 import compose.icons.tablericons.DotsVertical
-import kotlinx.coroutines.flow.map
 import org.archivekeep.app.core.domain.repositories.Repository
-import org.archivekeep.app.core.domain.storages.needsUnlock
 import org.archivekeep.app.ui.components.designsystem.sections.SectionCardBottomListItemIconButton
 import org.archivekeep.app.ui.components.feature.repository.WithRepositoryOpener
 import org.archivekeep.app.ui.domain.wiring.LocalArchiveOperationLaunchers
@@ -35,7 +33,6 @@ fun InArchiveRepositoryDropdownIconLaunched(
     repository: Repository,
     isAssociated: Boolean,
     actions: List<Action2> = emptyList(),
-    canReindex: Boolean = false,
 ) {
     val repositoryURI = repository.uri
     val operationsLaunchers = LocalArchiveOperationLaunchers.current
@@ -85,27 +82,6 @@ fun InArchiveRepositoryDropdownIconLaunched(
                         )
                         Text(action.title)
                     }
-                })
-            }
-
-            if (canReindex) {
-                DropdownMenuItem(onClick = {
-                    operationsLaunchers.openReindexOperation(repositoryURI)
-                    closeDropdown()
-                }, text = {
-                    Text("Reindex changed files")
-                })
-            }
-
-            if (remember { repository.optionalAccessorFlow.map { it.needsUnlock() } }
-                    .collectAsState(false)
-                    .value
-            ) {
-                DropdownMenuItem(onClick = {
-                    operationsLaunchers.unlockRepository(repositoryURI, null)
-                    closeDropdown()
-                }, text = {
-                    Text("Unlock")
                 })
             }
 

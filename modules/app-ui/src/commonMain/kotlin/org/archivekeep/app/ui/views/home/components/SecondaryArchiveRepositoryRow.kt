@@ -4,6 +4,8 @@ import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -11,9 +13,13 @@ import androidx.compose.ui.unit.dp
 import compose.icons.TablerIcons
 import compose.icons.tablericons.Download
 import compose.icons.tablericons.Lock
+import compose.icons.tablericons.LockOpen
 import compose.icons.tablericons.Plus
+import compose.icons.tablericons.RefreshAlert
 import compose.icons.tablericons.Trash
 import compose.icons.tablericons.Upload
+import kotlinx.coroutines.flow.map
+import org.archivekeep.app.core.domain.storages.needsUnlock
 import org.archivekeep.app.ui.components.designsystem.sections.SectionCardBottomListItem
 import org.archivekeep.app.ui.components.designsystem.sections.SectionCardBottomListItemIconActionButton
 import org.archivekeep.app.ui.components.feature.InArchiveRepositoryDropdownIconLaunched
@@ -81,7 +87,38 @@ fun SecondaryArchiveRepositoryRow(
             null
         }
 
-    val actions = listOfNotNull(actionAdd, actionPush, actionPull, cleanupFiles)
+    val reindex =
+        if (nonPrimaryRepository.canReindex) {
+            Action2(
+                TablerIcons.RefreshAlert,
+                "Reindex changed files",
+                enabled = true,
+                onClick = {
+                    launchers.openReindexOperation(repository.uri)
+                },
+            )
+        } else {
+            null
+        }
+
+    val unlock =
+        if (remember { repository.optionalAccessorFlow.map { it.needsUnlock() } }
+                .collectAsState(false)
+                .value
+        ) {
+            Action2(
+                TablerIcons.LockOpen,
+                "Unlock",
+                enabled = true,
+                onClick = {
+                    launchers.unlockRepository(repository.uri, null)
+                },
+            )
+        } else {
+            null
+        }
+
+    val actions = listOfNotNull(actionAdd, actionPush, actionPull, cleanupFiles, reindex, unlock)
 
     SectionCardBottomListItem(
         title = name,
@@ -104,7 +141,6 @@ fun SecondaryArchiveRepositoryRow(
             InArchiveRepositoryDropdownIconLaunched(
                 repository = repository,
                 actions = actions,
-                canReindex = nonPrimaryRepository.canReindex,
                 isAssociated = storageRepo.otherRepositoryState.associationId != null,
             )
         },
