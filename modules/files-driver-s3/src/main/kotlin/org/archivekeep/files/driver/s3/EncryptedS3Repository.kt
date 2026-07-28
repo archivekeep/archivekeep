@@ -446,7 +446,10 @@ class EncryptedS3Repository private constructor(
     }
 
     override suspend fun delete(filename: String) {
-        TODO("Not yet implemented")
+        s3Client.deleteObject {
+            bucket = bucketName
+            key = filename.toEncryptedFilePath()
+        }
     }
 
     override suspend fun getMetadata() = metadataResource.getFreshAndUpdateState()

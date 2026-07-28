@@ -24,7 +24,7 @@ import org.archivekeep.utils.hashing.sha256
 import org.archivekeep.utils.loading.stateIn
 import org.junit.jupiter.api.RepeatedTest
 import org.junit.jupiter.api.assertThrows
-import java.util.UUID
+import java.util.*
 import kotlin.test.assertEquals
 import kotlin.time.Duration.Companion.seconds
 
@@ -143,6 +143,26 @@ abstract class RepoContractTest<T : Repo> {
                         RepoIndex.File.forStringContents(path = "A/02.txt"),
                         RepoIndex.File.forStringContents(path = "B/03.txt"),
                         RepoIndex.File.forStringContents(path = "NEW/A/01.txt", stringContents = "A/01.txt"),
+                    )
+            }
+        }
+
+    @RepeatedTest(4)
+    fun `delete file`() =
+        runTest {
+            val testRepo = createNew()
+            val repoAccessor =
+                testRepo
+                    .open(this@runTest.ioDispatcher)
+                    .withContentsFrom(testContents01)
+
+            repoAccessor.delete("A/01.txt")
+
+            eventually(3.seconds) {
+                repoAccessor.index().files shouldBe
+                    listOf(
+                        RepoIndex.File.forStringContents(path = "A/02.txt"),
+                        RepoIndex.File.forStringContents(path = "B/03.txt"),
                     )
             }
         }

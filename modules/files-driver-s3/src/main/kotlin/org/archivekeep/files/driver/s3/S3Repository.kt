@@ -50,7 +50,7 @@ import java.net.URLEncoder
 import java.nio.charset.StandardCharsets
 import java.security.DigestInputStream
 import java.security.MessageDigest
-import java.util.Date
+import java.util.*
 
 class S3Repository private constructor(
     val endpoint: URI,
@@ -247,7 +247,10 @@ class S3Repository private constructor(
     }
 
     override suspend fun delete(filename: String) {
-        TODO("Not yet implemented")
+        s3Client.deleteObject {
+            bucket = bucketName
+            key = filename.toKey()
+        }
     }
 
     override suspend fun getMetadata() = metadataResource.getFreshAndUpdateState()

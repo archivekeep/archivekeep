@@ -87,7 +87,7 @@ open class InMemoryRepo(
     }
 
     override suspend fun delete(filename: String) {
-        if (contains(filename)) {
+        if (!contains(filename)) {
             throw FileDoesntExist(filename)
         }
 

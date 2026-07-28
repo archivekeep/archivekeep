@@ -25,6 +25,7 @@ import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.decodeFromStream
 import kotlinx.serialization.serializer
 import org.archivekeep.files.api.exceptions.DestinationExists
+import org.archivekeep.files.api.exceptions.FileDoesntExist
 import org.archivekeep.files.api.repository.ARCHIVE_METADATA_FILENAME
 import org.archivekeep.files.api.repository.ArchiveFileInfo
 import org.archivekeep.files.api.repository.ENCRYPTED_FILES_DIRECTORY
@@ -59,6 +60,7 @@ import java.nio.file.Files
 import java.nio.file.Path
 import kotlin.io.path.createDirectory
 import kotlin.io.path.createParentDirectories
+import kotlin.io.path.deleteExisting
 import kotlin.io.path.exists
 import kotlin.io.path.extension
 import kotlin.io.path.inputStream
@@ -278,7 +280,13 @@ class EncryptedFileSystemRepository private constructor(
     }
 
     override suspend fun delete(filename: String) {
-        TODO("Not yet implemented")
+        val dstPath = encryptedFilesRoot.resolve(safeSubPath("$filename.enc"))
+
+        if (!dstPath.exists()) {
+            throw FileDoesntExist(filename)
+        }
+
+        dstPath.deleteExisting()
     }
 
     @OptIn(ExperimentalSerializationApi::class)
