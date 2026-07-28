@@ -38,6 +38,15 @@ data class HomeLocalArchiveUiState(
                     running = false,
                 )
             },
+            Loadable.Loaded(
+                Action(
+                    text = "Associate",
+                    isAvailable = !localArchive.isAssociated,
+                    onLaunch = {
+                        archiveOperationLaunchers.openAssociateRepository(localArchive.primaryRepository.reference.uri)
+                    },
+                ),
+            ),
             this.canAddPush.mapLoadedData {
                 Action(
                     onLaunch = {

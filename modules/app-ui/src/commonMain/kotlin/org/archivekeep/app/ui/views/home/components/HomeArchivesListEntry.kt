@@ -1,14 +1,21 @@
 package org.archivekeep.app.ui.views.home.components
 
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
 import compose.icons.TablerIcons
 import compose.icons.tablericons.Folder
+import org.archivekeep.app.ui.components.designsystem.elements.WarningBadge
 import org.archivekeep.app.ui.components.designsystem.sections.SectionCard
 import org.archivekeep.app.ui.components.designsystem.sections.SectionCardActionsRow
 import org.archivekeep.app.ui.components.designsystem.sections.SectionCardBottomList
 import org.archivekeep.app.ui.components.designsystem.sections.SectionCardTitle
 import org.archivekeep.app.ui.components.designsystem.sections.SectionCardTitleIconButton
+import org.archivekeep.app.ui.components.designsystem.sections.sectionCardHorizontalPadding
 import org.archivekeep.app.ui.components.designsystem.theme.CIcons
 import org.archivekeep.app.ui.components.feature.ArchiveDropdownIconLaunched
 import org.archivekeep.app.ui.components.feature.repository.WithRepositoryOpener
@@ -40,12 +47,18 @@ fun HomeArchivesListEntry(
                         localArchive.repository.optionalAccessorFlow
                             .collectAsState()
                             .value,
-                    isAssociated = localArchive.archive.associationId != null,
+                    isAssociated = localArchive.isAssociated,
                 )
             },
         )
 
         HomeCardStateText(state.indexStatusText)
+
+        if (!localArchive.isAssociated) {
+            Row(Modifier.padding(horizontal = sectionCardHorizontalPadding, vertical = 4.dp)) {
+                WarningBadge { Text("Unassociated") }
+            }
+        }
 
         SectionCardActionsRow(
             state.actions(archiveOperationLaunchers, localArchive),

@@ -7,7 +7,6 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import org.archivekeep.app.core.domain.archives.AssociatedArchive
-import org.archivekeep.app.core.domain.repositories.Repository
 import org.archivekeep.app.core.domain.repositories.RepositoryService
 import org.archivekeep.app.core.domain.repositories.ResolvedRepositoryState
 import org.archivekeep.app.core.domain.storages.StorageNamedReference
@@ -23,7 +22,6 @@ import org.archivekeep.utils.loading.optional.mapIfLoadedOrNull
 import org.archivekeep.utils.loading.optional.mapLoadedData
 import org.archivekeep.utils.loading.optional.mapToLoadable
 import org.archivekeep.utils.safeCombine
-import kotlin.collections.map
 
 class HomeLocalArchiveModel(
     scope: CoroutineScope,
@@ -35,6 +33,8 @@ class HomeLocalArchiveModel(
     resolvedRepositoryState: ResolvedRepositoryState,
     storage: StoragePartiallyResolved,
 ) {
+    val isAssociated = archive.associationId != null
+
     val repository = repositoryService.getRepository(resolvedRepositoryState.uri)
 
     val displayName = resolvedRepositoryState.displayName
