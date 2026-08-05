@@ -5,36 +5,44 @@ import androidx.compose.runtime.remember
 import org.archivekeep.app.core.utils.identifiers.RepositoryURI
 import org.archivekeep.app.ui.domain.wiring.LocalApplicationServices
 import org.archivekeep.app.ui.utils.collectAsState
+import org.archivekeep.utils.loading.Loadable
 import org.archivekeep.utils.loading.optional.OptionalLoadable
 
 data class RepositoryOpenerScope(
-    val openRepository: () -> Unit,
+    val openRepository: (() -> Unit)?,
 )
 
 @Composable
-fun WithRepositoryOpener(
+fun <R> withRepositoryOpener(
     uri: RepositoryURI,
-    contentIfUnsupported: @Composable () -> Unit = {},
-    content: @Composable RepositoryOpenerScope.() -> Unit,
-) {
+    factory: RepositoryOpenerScope.() -> R,
+): Loadable<R> {
     val repositoryOpener = LocalApplicationServices.current.repositoryOpenService
 
     val openFunction = remember(repositoryOpener, uri) { repositoryOpener.getRepositoryOpener(uri) }.collectAsState().value
 
-    when (openFunction) {
-        is OptionalLoadable.Loading -> {}
+    return when (openFunction) {
+        is OptionalLoadable.Loading -> {
+            Loadable.Loading
+        }
 
-        is OptionalLoadable.Failed -> {}
+        is OptionalLoadable.Failed -> {
+            Loadable.Failed(openFunction.cause)
+        }
 
         is OptionalLoadable.NotAvailable -> {
-            contentIfUnsupported()
+            with(
+                RepositoryOpenerScope(openRepository = null),
+            ) {
+                Loadable.Loaded(factory())
+            }
         }
 
         is OptionalLoadable.LoadedAvailable -> {
             with(
                 RepositoryOpenerScope(openRepository = openFunction.value),
             ) {
-                content()
+                Loadable.Loaded(factory())
             }
         }
     }

@@ -10,10 +10,10 @@ import org.archivekeep.app.core.procedures.add.IndexUpdateProcedureSupervisorSer
 import org.archivekeep.app.core.procedures.addpush.AddAndPushProcedureService
 import org.archivekeep.app.core.procedures.sync.RepoToRepoSyncService
 import org.archivekeep.app.ui.views.home.model.HomeLocalArchiveModel
-import org.archivekeep.app.ui.views.home.model.HomeLocalArchiveSecondaryRepositoryModel
 import org.archivekeep.app.ui.views.home.model.HomeNonLocalArchiveUiState
 import org.archivekeep.app.ui.views.home.model.HomeStorageListUiState
 import org.archivekeep.app.ui.views.home.model.HomeStorageUiState
+import org.archivekeep.app.ui.views.home.model.RepositoryItemModel
 import org.archivekeep.utils.combineToObject
 import org.archivekeep.utils.loading.flatMapLatestLoadedData
 import org.archivekeep.utils.loading.flatMapLoadableFlow
@@ -76,7 +76,7 @@ class HomeViewModel(
                                                     .filter {
                                                         it.first.uri == storageReference.uri
                                                     }.map { (_, repo) ->
-                                                        HomeLocalArchiveSecondaryRepositoryModel(
+                                                        RepositoryItemModel(
                                                             aa.primaryRepository?.second?.uri,
                                                             repo,
                                                             repository =

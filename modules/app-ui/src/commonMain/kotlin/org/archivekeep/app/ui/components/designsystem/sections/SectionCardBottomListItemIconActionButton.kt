@@ -1,19 +1,15 @@
 package org.archivekeep.app.ui.components.designsystem.sections
 
 import androidx.compose.runtime.Composable
-import org.archivekeep.app.ui.utils.Action2
+import org.archivekeep.app.ui.utils.Action
 
 @Composable
-fun SectionCardBottomListItemIconActionButton(
-    action: Action2,
-    showIfNotEnabled: Boolean = false,
-) {
-    if (showIfNotEnabled || action.enabled) {
+fun SectionCardBottomListItemIconActionButton(action: Action) {
+    if (action.isPending && action.icon != null) {
         SectionCardBottomListItemIconButton(
             icon = action.icon,
             contentDescription = action.title,
-            enabled = action.enabled,
-            onClick = action.onClick,
+            onClick = action.onLaunch,
         )
     }
 }

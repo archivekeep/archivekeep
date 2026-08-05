@@ -27,7 +27,7 @@ fun SectionCardActionsRow(
     actions: List<Loadable<Action>>,
     noActionsText: String,
 ) {
-    val availableActions = actions.filterIsInstance<Loadable.Loaded<Action>>().filter { it.value.isAvailable }.map { it.value }
+    val pendingActions = actions.filterIsInstance<Loadable.Loaded<Action>>().filter { it.value.isPending && it.value.isAvailable }.map { it.value }
 
     Row(
         horizontalArrangement = Arrangement.spacedBy(6.dp),
@@ -42,19 +42,19 @@ fun SectionCardActionsRow(
                     end = sectionCardHorizontalPadding,
                 ),
     ) {
-        if (availableActions.isEmpty()) {
+        if (pendingActions.isEmpty()) {
             if (actions.none { it.isLoading }) {
                 SectionCardActionsRowText(noActionsText, modifier = Modifier.fillMaxWidth())
             } else {
                 SectionCardActionsRowText("Loading.", modifier = Modifier.fillMaxWidth())
             }
         } else {
-            val firstAction = availableActions.first()
-            val remainingActions = availableActions.subList(1, availableActions.size)
+            val firstAction = pendingActions.first()
+            val remainingActions = pendingActions.subList(1, pendingActions.size)
 
             SectionCardButton(
                 onClick = firstAction.onLaunch,
-                text = firstAction.text,
+                text = firstAction.title,
                 running = firstAction.running,
             )
 
@@ -86,7 +86,7 @@ fun SectionCardActionsRow(
                                     isDropdownExpanded = false
                                 },
                                 text = {
-                                    Text(action.text)
+                                    Text(action.title)
                                 },
                             )
                         }

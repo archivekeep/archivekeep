@@ -1,42 +1,26 @@
 package org.archivekeep.app.ui.components.feature
 
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.material.Icon
 import androidx.compose.material3.DropdownMenu
-import androidx.compose.material3.DropdownMenuItem
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
 import compose.icons.TablerIcons
 import compose.icons.tablericons.DotsVertical
-import org.archivekeep.app.core.domain.repositories.Repository
+import org.archivekeep.app.ui.components.designsystem.dropdownmenu.ActionDropdownMenuItem
 import org.archivekeep.app.ui.components.designsystem.sections.SectionCardBottomListItemIconButton
-import org.archivekeep.app.ui.components.feature.repository.WithRepositoryOpener
-import org.archivekeep.app.ui.domain.wiring.LocalArchiveOperationLaunchers
-import org.archivekeep.app.ui.utils.Action2
-import org.archivekeep.files.driver.filesystem.files.FilesystemWorkingRepository
-import org.archivekeep.utils.loading.optional.OptionalLoadable
-import kotlin.io.path.absolutePathString
+import org.archivekeep.app.ui.utils.Action
+import org.archivekeep.app.ui.views.home.model.RepositoryBaseUiActions
+import org.archivekeep.utils.loading.Loadable
 
 @Composable
 fun InArchiveRepositoryDropdownIconLaunched(
-    repository: Repository,
-    isAssociated: Boolean,
-    actions: List<Action2> = emptyList(),
+    secondaryRepositoryActions: List<Loadable<Action>>,
+    repositoryActions: RepositoryBaseUiActions,
 ) {
-    val repositoryURI = repository.uri
-    val operationsLaunchers = LocalArchiveOperationLaunchers.current
-
     Box(
         contentAlignment = Alignment.BottomEnd,
     ) {
@@ -60,64 +44,18 @@ fun InArchiveRepositoryDropdownIconLaunched(
             expanded = isDropdownExpanded,
             onDismissRequest = ::closeDropdown,
         ) {
-            WithRepositoryOpener(repositoryURI) {
-                DropdownMenuItem(onClick = {
-                    openRepository()
-                    closeDropdown()
-                }, text = {
-                    Text("Open")
-                })
+            with(repositoryActions) {
+                ActionDropdownMenuItem(open, ::closeDropdown)
+                ActionDropdownMenuItem(unlock, ::closeDropdown)
+                secondaryRepositoryActions.forEach { action -> ActionDropdownMenuItem(action, ::closeDropdown) }
+                ActionDropdownMenuItem(add, ::closeDropdown)
+                ActionDropdownMenuItem(cleanupFiles, ::closeDropdown)
+                ActionDropdownMenuItem(reindex, ::closeDropdown)
+                ActionDropdownMenuItem(associate, ::closeDropdown)
+                ActionDropdownMenuItem(unassociate, ::closeDropdown)
+                ActionDropdownMenuItem(forget, ::closeDropdown)
+                ActionDropdownMenuItem(deinitialize, ::closeDropdown)
             }
-
-            actions.forEach { action ->
-                DropdownMenuItem(onClick = {
-                    action.onClick()
-                    closeDropdown()
-                }, text = {
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Icon(
-                            action.icon,
-                            contentDescription = action.title,
-                            modifier = Modifier.padding(end = 8.dp).size(14.dp),
-                        )
-                        Text(action.title)
-                    }
-                })
-            }
-
-            if (isAssociated) {
-                DropdownMenuItem(onClick = {
-                    operationsLaunchers.openUnassociateRepository(repositoryURI)
-                    closeDropdown()
-                }, text = {
-                    Text("Unassociate")
-                })
-            } else {
-                DropdownMenuItem(onClick = {
-                    operationsLaunchers.openAssociateRepository(repositoryURI)
-                    closeDropdown()
-                }, text = {
-                    Text("Associate")
-                })
-            }
-
-            DropdownMenuItem(onClick = {
-                operationsLaunchers.openForgetRepository(repositoryURI)
-                closeDropdown()
-            }, text = {
-                Text("Forget")
-            })
-
-            (repository.optionalAccessorFlow.collectAsState().value as? OptionalLoadable.LoadedAvailable)
-                ?.let { it.value as? FilesystemWorkingRepository }
-                ?.let {
-                    DropdownMenuItem(onClick = {
-                        operationsLaunchers.openDeinitializeFilesystemRepository(repositoryURI, it.root.absolutePathString())
-                        isDropdownExpanded = false
-                    }, text = {
-                        Text("Deinitialize")
-                    })
-                }
         }
     }
 }

@@ -15,10 +15,9 @@ import org.archivekeep.app.core.procedures.sync.RepoToRepoSyncService
 import org.archivekeep.app.core.utils.identifiers.NamedRepositoryReference
 import org.archivekeep.app.core.utils.identifiers.RepositoryURI
 import org.archivekeep.utils.loading.optional.OptionalLoadable
-import org.archivekeep.utils.loading.optional.mapIfLoadedOrNull
 import org.archivekeep.utils.loading.optional.mapLoadedData
 
-class HomeLocalArchiveSecondaryRepositoryModel(
+class RepositoryItemModel(
     val primaryRepositoryURI: RepositoryURI?,
     // TODO: reference only
     val otherRepositoryState: ResolvedRepositoryState,
@@ -29,7 +28,7 @@ class HomeLocalArchiveSecondaryRepositoryModel(
     fun stateFlow(
         scope: CoroutineScope,
         repoToRepoSyncService: RepoToRepoSyncService,
-    ): StateFlow<HomeLocalArchiveSecondaryRepositoryUiState> {
+    ): StateFlow<RepositoryItemUiState> {
         val repoToRepoSync =
             primaryRepositoryURI?.let {
                 repoToRepoSyncService.getRepoToRepoSync(
@@ -42,21 +41,23 @@ class HomeLocalArchiveSecondaryRepositoryModel(
         val syncRunningFlow = repoToRepoSync?.currentJobFlow?.map { it != null } ?: MutableStateFlow(false)
 
         val initialValue =
-            HomeLocalArchiveSecondaryRepositoryUiState(
+            RepositoryItemUiState(
                 repo = this,
                 connectionStatus = otherRepositoryState.connectionState,
                 localRepoStatus = OptionalLoadable.Loading,
                 syncRunning = false,
                 canPushLoadable = OptionalLoadable.Loading,
-                canPull = false,
+                canPullLoadable = OptionalLoadable.Loading,
                 syncTexts = OptionalLoadable.Loading,
+                repositoryAccessState = OptionalLoadable.Loading,
             )
 
         return combine(
+            this.repository.optionalAccessorFlow,
             syncStatusFlow,
             syncRunningFlow,
             repository.localRepoStatus,
-        ) { syncStatus, syncRunning, localRepoStatus ->
+        ) { repositoryAccessor, syncStatus, syncRunning, localRepoStatus ->
             val connectionStatus = otherRepositoryState.connectionState
 
             val canPushLoadable =
@@ -64,21 +65,22 @@ class HomeLocalArchiveSecondaryRepositoryModel(
                     (it.missingBaseInOther != 0 || it.relocations > 0) && connectionStatus.isConnected
                 } ?: OptionalLoadable.NotAvailable()
 
-            val canPull =
-                syncStatus?.mapIfLoadedOrNull {
-                    it.missingOtherInBase != 0 || it.relocations > 0
-                } ?: false
+            val canPullLoadable =
+                syncStatus?.mapLoadedData {
+                    (it.missingOtherInBase != 0 || it.relocations > 0) && connectionStatus.isConnected
+                } ?: OptionalLoadable.NotAvailable()
 
             val syncTexts = syncStatus?.mapLoadedData(::textTags) ?: OptionalLoadable.NotAvailable()
 
-            HomeLocalArchiveSecondaryRepositoryUiState(
+            RepositoryItemUiState(
                 repo = this,
                 connectionStatus = connectionStatus,
                 localRepoStatus = localRepoStatus.mapLoadedData { it.summary },
                 syncRunning = syncRunning,
                 canPushLoadable = canPushLoadable,
-                canPull = canPull && connectionStatus.isConnected,
+                canPullLoadable = canPullLoadable,
                 syncTexts = syncTexts,
+                repositoryAccessState = repositoryAccessor,
             )
         }.stateIn(scope, SharingStarted.Lazily, initialValue)
     }

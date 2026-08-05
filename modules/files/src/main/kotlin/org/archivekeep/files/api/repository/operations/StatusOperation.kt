@@ -47,9 +47,6 @@ class StatusOperation(
         val modifiedIndexedFiles: List<String>,
         val missingFiles: List<String>,
     ) {
-        val hasChanges: Boolean
-            get() = newFiles.isNotEmpty()
-
         val summary = Summary(newFiles.size, modifiedIndexedFiles.size, missingFiles.size)
 
         data class Summary(

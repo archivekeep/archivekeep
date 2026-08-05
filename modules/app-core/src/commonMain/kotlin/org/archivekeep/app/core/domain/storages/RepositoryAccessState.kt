@@ -18,10 +18,18 @@ fun RepositoryAccessState.asStatus(): RepositoryConnectionState =
             }
         }
 
-        is OptionalLoadable.LoadedAvailable -> RepositoryConnectionState.Connected
-        OptionalLoadable.Loading -> RepositoryConnectionState.Disconnected
+        is OptionalLoadable.LoadedAvailable -> {
+            RepositoryConnectionState.Connected
+        }
+
+        OptionalLoadable.Loading -> {
+            RepositoryConnectionState.Disconnected
+        }
+
         // TODO: better
-        is OptionalLoadable.NotAvailable -> RepositoryConnectionState.ConnectedLocked
+        is OptionalLoadable.NotAvailable -> {
+            RepositoryConnectionState.ConnectedLocked
+        }
     }
 
 fun RepositoryAccessState.asUnlockRequest() = (this as? NeedsUnlock)?.unlockRequest
@@ -36,3 +44,12 @@ fun RepositoryAccessState.asLoadableUnlockRequest(): Loadable<Any?> =
     }
 
 fun RepositoryAccessState.needsUnlock() = this is NeedsUnlock
+
+fun RepositoryAccessState.needsUnlockLoadable(): Loadable<Boolean> =
+    when (this) {
+        is OptionalLoadable.Failed -> Loadable.Failed(this.cause)
+        OptionalLoadable.Loading -> Loadable.Loading
+        is OptionalLoadable.LoadedAvailable<*> -> Loadable.Loaded(false)
+        is NeedsUnlock -> Loadable.Loaded(true)
+        is OptionalLoadable.NotAvailable -> Loadable.Loaded(false)
+    }

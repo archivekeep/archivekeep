@@ -34,8 +34,11 @@ import org.archivekeep.app.ui.components.designsystem.sections.sectionCardHorizo
 import org.archivekeep.app.ui.components.designsystem.theme.AppTheme
 import org.archivekeep.app.ui.components.feature.InArchiveRepositoryDropdownIconLaunched
 import org.archivekeep.app.ui.components.feature.LoadableGuard
+import org.archivekeep.app.ui.domain.wiring.LocalArchiveOperationLaunchers
 import org.archivekeep.app.ui.views.home.model.HomeNonLocalArchiveUiState
+import org.archivekeep.app.ui.views.home.model.RepositoryOperationalState
 import org.archivekeep.utils.loading.Loadable
+import org.archivekeep.utils.loading.optional.mapLoadedData
 
 @Composable
 fun HomeNonLocalArchivesList(otherArchivesLoadable: Loadable<List<HomeNonLocalArchiveUiState>>) {
@@ -118,10 +121,24 @@ fun HomeNonLocalArchivesList(otherArchivesLoadable: Loadable<List<HomeNonLocalAr
                                         Modifier.size(16.dp),
                                     )
                                 }
-                                InArchiveRepositoryDropdownIconLaunched(
-                                    repository = repo.repository,
-                                    isAssociated = nonLocalArchive.archive.associationId != null,
-                                )
+
+                                // TODO: move out logic from UI
+                                val repositoryOperationalState =
+                                    RepositoryOperationalState(
+                                        repo.repository.optionalAccessorFlow
+                                            .collectAsState()
+                                            .value,
+                                        isAssociated = false,
+                                        repo.repository.localRepoStatus
+                                            .collectAsState()
+                                            .value
+                                            .mapLoadedData { it.summary },
+                                    )
+
+                                val launchers = LocalArchiveOperationLaunchers.current
+                                val ra = repositoryOperationalState.actions(launchers, repo.repository.uri)
+
+                                InArchiveRepositoryDropdownIconLaunched(emptyList(), ra)
                             }
                         }
                     }

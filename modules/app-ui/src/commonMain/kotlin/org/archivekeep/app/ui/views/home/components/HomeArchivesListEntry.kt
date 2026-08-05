@@ -7,8 +7,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import compose.icons.TablerIcons
-import compose.icons.tablericons.Folder
 import org.archivekeep.app.ui.components.designsystem.elements.WarningBadge
 import org.archivekeep.app.ui.components.designsystem.sections.SectionCard
 import org.archivekeep.app.ui.components.designsystem.sections.SectionCardActionsRow
@@ -18,9 +16,9 @@ import org.archivekeep.app.ui.components.designsystem.sections.SectionCardTitleI
 import org.archivekeep.app.ui.components.designsystem.sections.sectionCardHorizontalPadding
 import org.archivekeep.app.ui.components.designsystem.theme.CIcons
 import org.archivekeep.app.ui.components.feature.ArchiveDropdownIconLaunched
-import org.archivekeep.app.ui.components.feature.repository.WithRepositoryOpener
 import org.archivekeep.app.ui.domain.wiring.ArchiveOperationLaunchers
 import org.archivekeep.app.ui.views.home.model.HomeLocalArchiveModel
+import org.archivekeep.utils.loading.Loadable
 import org.archivekeep.utils.loading.mapIfLoadedOrDefault
 
 @Composable
@@ -31,24 +29,21 @@ fun HomeArchivesListEntry(
     SectionCard {
         val state = localArchive.state.collectAsState().value
 
+        val actions = state.actions(archiveOperationLaunchers, localArchive)
+
         SectionCardTitle(
             state.loading,
             localArchive.displayName,
             icons = {
-                WithRepositoryOpener(localArchive.primaryRepository.reference.uri) {
-                    SectionCardTitleIconButton(
-                        icon = TablerIcons.Folder,
-                        onClick = openRepository,
-                    )
+                (actions.open as? Loadable.Loaded) ?.let {
+                    if (it.value.isAvailable) {
+                        SectionCardTitleIconButton(
+                            icon = it.value.icon!!,
+                            onClick = it.value.onLaunch,
+                        )
+                    }
                 }
-                ArchiveDropdownIconLaunched(
-                    repositoryURI = localArchive.primaryRepository.reference.uri,
-                    repositoryAccessor =
-                        localArchive.repository.optionalAccessorFlow
-                            .collectAsState()
-                            .value,
-                    isAssociated = localArchive.isAssociated,
-                )
+                ArchiveDropdownIconLaunched(actions)
             },
         )
 
@@ -61,7 +56,7 @@ fun HomeArchivesListEntry(
         }
 
         SectionCardActionsRow(
-            state.actions(archiveOperationLaunchers, localArchive),
+            actions.asList(),
             noActionsText =
                 if (state.canPush.mapIfLoadedOrDefault(false) { it }) {
                     "Copies out of sync."

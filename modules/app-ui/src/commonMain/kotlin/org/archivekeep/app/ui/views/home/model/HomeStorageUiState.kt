@@ -18,17 +18,17 @@ class HomeStorageUiState(
     val storage: StoragePartiallyResolved,
     val reference: StorageNamedReference = storage.namedReference,
     val name: String? = storage.knownStorage.registeredStorage?.label,
-    val otherRepositoriesInThisStorage: List<HomeLocalArchiveSecondaryRepositoryModel>,
+    val otherRepositoriesInThisStorage: List<RepositoryItemModel>,
 ) {
     data class ResolvedState(
-        val resolvedRepositories: Loadable<List<HomeLocalArchiveSecondaryRepositoryUiState>>,
+        val resolvedRepositories: Loadable<List<RepositoryItemUiState>>,
         val isConnected: Boolean,
     ) {
         val canPushAny = resolvedRepositories.mapIfLoadedOrDefault(false) { it.any { it.canPush } }
         val canPullAny = resolvedRepositories.mapIfLoadedOrDefault(false) { it.any { it.canPull } }
     }
 
-    val secondaryRepositories: StateFlow<List<HomeLocalArchiveSecondaryRepositoryUiState>> =
+    val secondaryRepositories: StateFlow<List<RepositoryItemUiState>> =
         safeCombine(otherRepositoriesInThisStorage.map { it.stateFlow(scope, repoToRepoSyncService) }) {
             it.toList()
         }.stateIn(scope, SharingStarted.Lazily, emptyList())

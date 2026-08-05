@@ -2,8 +2,6 @@ package org.archivekeep.app.ui.components.feature
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.material3.DropdownMenu
-import androidx.compose.material3.DropdownMenuItem
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -12,22 +10,12 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import compose.icons.TablerIcons
 import compose.icons.tablericons.DotsVertical
-import org.archivekeep.app.core.utils.identifiers.RepositoryURI
+import org.archivekeep.app.ui.components.designsystem.dropdownmenu.ActionDropdownMenuItem
 import org.archivekeep.app.ui.components.designsystem.sections.SectionCardTitleIconButton
-import org.archivekeep.app.ui.domain.wiring.LocalArchiveOperationLaunchers
-import org.archivekeep.files.api.repository.Repo
-import org.archivekeep.files.driver.filesystem.files.FilesystemWorkingRepository
-import org.archivekeep.utils.loading.optional.OptionalLoadable
-import kotlin.io.path.absolutePathString
+import org.archivekeep.app.ui.views.home.model.HomeLocalArchiveUiActions
 
 @Composable
-fun ArchiveDropdownIconLaunched(
-    repositoryURI: RepositoryURI,
-    repositoryAccessor: OptionalLoadable<Repo>,
-    isAssociated: Boolean,
-) {
-    val operationsLaunchers = LocalArchiveOperationLaunchers.current
-
+fun ArchiveDropdownIconLaunched(actions: HomeLocalArchiveUiActions) {
     Box(
         contentAlignment = Alignment.BottomEnd,
     ) {
@@ -35,6 +23,10 @@ fun ArchiveDropdownIconLaunched(
             remember {
                 mutableStateOf(false)
             }
+
+        fun closeDropdown() {
+            isDropdownExpanded = false
+        }
 
         SectionCardTitleIconButton(
             icon = TablerIcons.DotsVertical,
@@ -46,39 +38,16 @@ fun ArchiveDropdownIconLaunched(
             expanded = isDropdownExpanded,
             onDismissRequest = { isDropdownExpanded = false },
         ) {
-            if (isAssociated) {
-                DropdownMenuItem(onClick = {
-                    operationsLaunchers.openUnassociateRepository(repositoryURI)
-                    isDropdownExpanded = false
-                }, text = {
-                    Text("Unassociate")
-                })
-            } else {
-                DropdownMenuItem(onClick = {
-                    operationsLaunchers.openAssociateRepository(repositoryURI)
-                    isDropdownExpanded = false
-                }, text = {
-                    Text("Associate")
-                })
+            with(actions) {
+                ActionDropdownMenuItem(unlock, ::closeDropdown)
+                ActionDropdownMenuItem(add, ::closeDropdown)
+                ActionDropdownMenuItem(cleanupFiles, ::closeDropdown)
+                ActionDropdownMenuItem(reindex, ::closeDropdown)
+                ActionDropdownMenuItem(associate, ::closeDropdown)
+                ActionDropdownMenuItem(unassociate, ::closeDropdown)
+                ActionDropdownMenuItem(forget, ::closeDropdown)
+                ActionDropdownMenuItem(deinitialize, ::closeDropdown)
             }
-
-            DropdownMenuItem(onClick = {
-                operationsLaunchers.openForgetRepository(repositoryURI)
-                isDropdownExpanded = false
-            }, text = {
-                Text("Forget")
-            })
-
-            (repositoryAccessor as? OptionalLoadable.LoadedAvailable)
-                ?.let { it.value as? FilesystemWorkingRepository }
-                ?.let {
-                    DropdownMenuItem(onClick = {
-                        operationsLaunchers.openDeinitializeFilesystemRepository(repositoryURI, it.root.absolutePathString())
-                        isDropdownExpanded = false
-                    }, text = {
-                        Text("Deinitialize")
-                    })
-                }
         }
     }
 }

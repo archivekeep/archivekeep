@@ -20,7 +20,6 @@ import org.archivekeep.utils.loading.optional.OptionalLoadable
 import org.archivekeep.utils.loading.optional.isLoading
 import org.archivekeep.utils.loading.optional.mapIfLoadedOrNull
 import org.archivekeep.utils.loading.optional.mapLoadedData
-import org.archivekeep.utils.loading.optional.mapToLoadable
 import org.archivekeep.utils.safeCombine
 
 class HomeLocalArchiveModel(
@@ -45,13 +44,13 @@ class HomeLocalArchiveModel(
             storage.namedReference,
         )
 
-    val otherRepositories: List<Pair<StoragePartiallyResolved, HomeLocalArchiveSecondaryRepositoryModel>> =
+    val otherRepositories: List<Pair<StoragePartiallyResolved, RepositoryItemModel>> =
         archive.repositories
             .filter { it.second.uri != resolvedRepositoryState.uri }
             .map { (storage, repo) ->
                 Pair(
                     storage,
-                    HomeLocalArchiveSecondaryRepositoryModel(
+                    RepositoryItemModel(
                         resolvedRepositoryState.uri,
                         repo,
                         repository = repositoryService.getRepository(repo.namedReference.uri),
@@ -63,7 +62,7 @@ class HomeLocalArchiveModel(
 
     val addOperation = indexUpdateProcedureSupervisorService.getAddOperation(primaryRepository.reference.uri)
 
-    val secondaryRepositories: StateFlow<List<Pair<StoragePartiallyResolved, HomeLocalArchiveSecondaryRepositoryUiState>>> =
+    val secondaryRepositories: StateFlow<List<Pair<StoragePartiallyResolved, RepositoryItemUiState>>> =
         safeCombine(
             otherRepositories.map { (storage, secondaryArchiveRepository) ->
                 secondaryArchiveRepository.stateFlow(scope, repoToRepoSyncService).map { Pair(storage, it) }
@@ -81,13 +80,8 @@ class HomeLocalArchiveModel(
             addOperation.currentJobFlow.map { it != null },
         ) { indexStatus, accessor, nonLocalRepositories, addPushOperationRunning, addOperationRunning ->
             HomeLocalArchiveUiState(
-                canUnlock = accessor.mapLoadedData { false }.mapToLoadable(true),
-                canAdd = indexStatus.mapLoadedData { it.hasChanges }.mapToLoadable(false),
-                canReindex = indexStatus.mapLoadedData { it.modifiedIndexedFiles.isNotEmpty() }.mapToLoadable(false),
-                canCleanupDeletedFiles =
-                    indexStatus
-                        .mapLoadedData { it.missingFiles.isNotEmpty() }
-                        .mapToLoadable(false),
+                repositoryAccessState = accessor,
+                localRepoStatus = indexStatus.mapLoadedData { it.summary },
                 canPush =
                     if (nonLocalRepositories.any { it.second.canPushLoadable.mapIfLoadedOrNull { it } ?: false }) {
                         Loadable.Loaded(true)
@@ -107,21 +101,21 @@ class HomeLocalArchiveModel(
                         },
                 addPushOperationRunning = addPushOperationRunning,
                 addOperationRunning = addOperationRunning,
+                isAssociated = isAssociated,
             )
         }.stateIn(
             scope,
             SharingStarted.WhileSubscribed(),
             HomeLocalArchiveUiState(
-                canUnlock = Loadable.Loading,
-                canAdd = Loadable.Loading,
-                canReindex = Loadable.Loading,
-                canCleanupDeletedFiles = Loadable.Loading,
+                repositoryAccessState = OptionalLoadable.Loading,
+                localRepoStatus = OptionalLoadable.Loading,
                 canPush = Loadable.Loading,
                 anySecondaryAvailable = false,
                 loading = true,
                 indexStatusText = OptionalLoadable.Loading,
                 addPushOperationRunning = false,
                 addOperationRunning = false,
+                isAssociated = isAssociated,
             ),
         )
 
