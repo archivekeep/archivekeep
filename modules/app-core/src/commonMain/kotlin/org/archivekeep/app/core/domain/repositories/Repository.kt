@@ -3,26 +3,23 @@ package org.archivekeep.app.core.domain.repositories
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.transform
 import kotlinx.coroutines.plus
-import org.archivekeep.app.core.api.repository.location.RepositoryLocationAccessor
-import org.archivekeep.app.core.api.repository.location.autoUnlocker
-import org.archivekeep.app.core.api.repository.location.repositoryAccessor
 import org.archivekeep.app.core.domain.storages.asStatus
-import org.archivekeep.app.core.persistence.credentials.CredentialsStore
 import org.archivekeep.app.core.persistence.registry.RegisteredRepository
 import org.archivekeep.app.core.persistence.repository.MemorizedRepositoryIndexRepository
 import org.archivekeep.app.core.persistence.repository.MemorizedRepositoryIndexRepository.Companion.memorizingCachingIndexFlow
-import org.archivekeep.app.core.persistence.repository.MemorizedRepositoryMetadataRepository
-import org.archivekeep.app.core.persistence.repository.MemorizedRepositoryMetadataRepository.Companion.memorizingCachingMetadataFlow
+import org.archivekeep.app.core.persistence.repository.MemorizedRepositoryMetadataService
 import org.archivekeep.app.core.utils.exceptions.RepositoryLockedException
 import org.archivekeep.app.core.utils.identifiers.RepositoryURI
 import org.archivekeep.files.api.exceptions.UnsupportedFeatureException
 import org.archivekeep.files.api.repository.LocalRepo
+import org.archivekeep.files.api.repository.Repo
 import org.archivekeep.files.api.repository.RepositoryMetadata
 import org.archivekeep.utils.coroutines.InstanceProtector
 import org.archivekeep.utils.coroutines.shareResourceIn
@@ -48,19 +45,11 @@ class Repository(
     baseScope: CoroutineScope,
     val uri: RepositoryURI,
     registeredRepositoryFlow: Flow<RegisteredRepository?>,
-    private val repositoryAccessorProvider: RepositoryLocationAccessor,
+    val optionalAccessorFlow: StateFlow<OptionalLoadable<Repo>>,
     memorizedRepositoryIndexRepository: MemorizedRepositoryIndexRepository,
-    private val memorizedRepositoryMetadataRepository: MemorizedRepositoryMetadataRepository,
-    credentialsStore: CredentialsStore,
+    private val memorizedRepositoryMetadataService: MemorizedRepositoryMetadataService,
 ) {
     private val scope = baseScope + InstanceProtector.forInstance(this)
-
-    val optionalAccessorFlow =
-        repositoryAccessorProvider
-            .contentsStateFlow
-            .repositoryAccessor()
-            .autoUnlocker(uri, credentialsStore)
-            .stateIn(scope)
 
     @Deprecated("Switch to optionalAccessorFlow and handle NotAvailable on consumer side")
     val accessorFlow =
@@ -78,12 +67,7 @@ class Repository(
                 optionalAccessorFlow,
             ).stateIn(scope)
 
-    val metadataFlowWithCaching =
-        memorizedRepositoryMetadataRepository
-            .memorizingCachingMetadataFlow(
-                uri,
-                optionalAccessorFlow,
-            ).stateIn(scope)
+    val metadataFlowWithCaching = memorizedRepositoryMetadataService.flows[uri]
 
     val informationFlow =
         combine(
@@ -127,28 +111,36 @@ class Repository(
 
             val metadata =
                 transform(
-                    memorizedRepositoryMetadataRepository
+                    memorizedRepositoryMetadataService
+                        .repository
                         .repositoryCachedMetadataFlow(uri)
                         .firstFinished()
                         ?: RepositoryMetadata(),
                 )
 
             println("Setting memorized metadata: $metadata")
-            memorizedRepositoryMetadataRepository.updateRepositoryMemorizedMetadataIfDiffers(uri, metadata)
+            memorizedRepositoryMetadataService.repository.updateRepositoryMemorizedMetadataIfDiffers(uri, metadata)
         }
     }
 
     private suspend fun requireLoadedAccessor() =
-        repositoryAccessorProvider
-            .contentsStateFlow
-            .repositoryAccessor()
+        optionalAccessorFlow
             .transform {
                 when (it) {
-                    is OptionalLoadable.Failed -> throw it.cause
-                    is OptionalLoadable.LoadedAvailable -> emit(it.value)
+                    is OptionalLoadable.Failed -> {
+                        throw it.cause
+                    }
+
+                    is OptionalLoadable.LoadedAvailable -> {
+                        emit(it.value)
+                    }
+
                     OptionalLoadable.Loading -> {}
+
                     // TODO
-                    is OptionalLoadable.NotAvailable -> throw RepositoryLockedException(uri)
+                    is OptionalLoadable.NotAvailable -> {
+                        throw RepositoryLockedException(uri)
+                    }
                 }
             }.first()
 }

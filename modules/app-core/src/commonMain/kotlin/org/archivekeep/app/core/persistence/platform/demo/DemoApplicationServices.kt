@@ -25,7 +25,6 @@ import org.archivekeep.app.core.persistence.repository.MemorizedRepositoryIndexR
 import org.archivekeep.app.core.persistence.repository.MemorizedRepositoryMetadataRepository
 import org.archivekeep.app.core.utils.identifiers.RepositoryURI
 import org.archivekeep.files.api.repository.RepoIndex
-import org.archivekeep.files.api.repository.RepositoryMetadata
 import org.archivekeep.utils.datastore.passwordprotected.PasswordProtectedJoseStorageInFile
 import org.archivekeep.utils.datastore.passwordprotected.ProtectedDataStore
 import org.archivekeep.utils.loading.Loadable
@@ -110,20 +109,7 @@ interface DemoApplicationServices : CoreApplicationServicesGraph {
 
     @Provides
     @SingleIn(AppScope::class)
-    fun repositoryMetadataMemory(): MemorizedRepositoryMetadataRepository =
-        object : MemorizedRepositoryMetadataRepository {
-            override fun repositoryCachedMetadataFlow(uri: RepositoryURI): Flow<OptionalLoadable<RepositoryMetadata>> {
-                // TODO
-                return flowOf(OptionalLoadable.NotAvailable())
-            }
-
-            override suspend fun updateRepositoryMemorizedMetadataIfDiffers(
-                uri: RepositoryURI,
-                metadata: RepositoryMetadata?,
-            ) {
-                // TODO
-            }
-        }
+    fun repositoryMetadataMemory(): MemorizedRepositoryMetadataRepository = InMemoryMemorizedRepositoryMetadataRepository()
 
     @Provides
     @ElementsIntoSet
