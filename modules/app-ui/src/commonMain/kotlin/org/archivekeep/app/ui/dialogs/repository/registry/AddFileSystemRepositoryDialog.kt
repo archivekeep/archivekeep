@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material.Divider
 import androidx.compose.material3.Button
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
@@ -30,9 +31,10 @@ import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.plus
 import org.archivekeep.app.core.persistence.drivers.filesystem.FileSystemStorageType
-import org.archivekeep.app.core.persistence.drivers.filesystem.operations.AddFileSystemRepositoryOperation
-import org.archivekeep.app.core.persistence.drivers.filesystem.operations.AddFileSystemRepositoryOperation.StorageMarking
-import org.archivekeep.app.core.persistence.drivers.filesystem.operations.AddFileSystemRepositoryUseCase
+import org.archivekeep.app.core.persistence.drivers.filesystem.operations.add.AddFileSystemRepositoryOperation
+import org.archivekeep.app.core.persistence.drivers.filesystem.operations.add.AddFileSystemRepositoryUseCase
+import org.archivekeep.app.core.persistence.drivers.filesystem.operations.add.StorageRegistrationInput
+import org.archivekeep.app.core.persistence.drivers.filesystem.operations.add.StorageRegistrationState
 import org.archivekeep.app.core.utils.generics.Execution
 import org.archivekeep.app.core.utils.generics.ExecutionOutcome
 import org.archivekeep.app.ui.components.designsystem.dialog.DialogButtonContainer
@@ -42,10 +44,10 @@ import org.archivekeep.app.ui.components.designsystem.dialog.DialogInnerContaine
 import org.archivekeep.app.ui.components.designsystem.dialog.DialogInputLabel
 import org.archivekeep.app.ui.components.designsystem.dialog.DialogOverlay
 import org.archivekeep.app.ui.components.designsystem.elements.WarningAlert
-import org.archivekeep.app.ui.components.designsystem.input.CheckboxWithText
 import org.archivekeep.app.ui.components.designsystem.input.PasswordField
 import org.archivekeep.app.ui.components.designsystem.input.RadioWithText
 import org.archivekeep.app.ui.components.designsystem.input.RadioWithTextAndExtra
+import org.archivekeep.app.ui.components.designsystem.input.TextField
 import org.archivekeep.app.ui.components.feature.LoadableGuard
 import org.archivekeep.app.ui.components.feature.dialogs.SimpleActionDialogControlButtons
 import org.archivekeep.app.ui.components.feature.dialogs.SimpleActionDialogDoneButtons
@@ -60,17 +62,16 @@ import org.archivekeep.app.ui.utils.filesystem.LocalFilesystemDirectoryPicker
 import org.archivekeep.app.ui.utils.filesystem.PickResult
 import org.archivekeep.utils.loading.Loadable
 
-class AddFileSystemRepositoryDialog(
-    val intendedStorageType: FileSystemStorageType?,
-) : Dialog {
-    inner class VM(
+class AddFileSystemRepositoryDialog : Dialog {
+    class VM(
         val coroutineScope: CoroutineScope,
         val operationFactory: OperationFactory,
     ) : RememberObserver {
         var pickResult by mutableStateOf<PickResult?>(null)
             private set
 
-        var markConfirmed by mutableStateOf<Boolean?>(false)
+        var storageType by mutableStateOf<FileSystemStorageType?>(null)
+        var storageLabel by mutableStateOf<String>("")
 
         private var operationScope: CoroutineScope = coroutineScope + SupervisorJob()
 
@@ -79,7 +80,8 @@ class AddFileSystemRepositoryDialog(
 
         fun setPick(result: PickResult) {
             pickResult = result
-            markConfirmed = null
+            storageType = null
+            storageLabel = ""
 
             operationScope.cancel()
             operationScope = coroutineScope + SupervisorJob()
@@ -93,13 +95,19 @@ class AddFileSystemRepositoryDialog(
                             val newOperation =
                                 operationFactory
                                     .get(AddFileSystemRepositoryUseCase::class.java)
-                                    .begin(
+                                    .create(
                                         operationScope,
                                         result.path,
-                                        intendedStorageType,
                                     )
 
                             ensureActive()
+                            if (newOperation is AddFileSystemRepositoryOperation.Available) {
+                                val registration = newOperation.storageRegistration
+                                if (registration is StorageRegistrationState.Unregistered) {
+                                    storageType = registration.suggestedType
+                                    storageLabel = registration.suggestedLabel ?: ""
+                                }
+                            }
                             addOperation = Loadable.Loaded(newOperation)
                         } catch (e: Throwable) {
                             ensureActive()
@@ -153,14 +161,16 @@ class AddFileSystemRepositoryDialog(
 
         DialogOverlay(onDismissRequest = onClose) {
             AddRepositoryDialogContents(
-                intendedStorageType,
                 permissionGrant,
                 selectedPath,
                 onLaunch,
-                vm.markConfirmed,
-                { vm.markConfirmed = it },
+                vm.storageType,
+                { vm.storageType = it },
+                vm.storageLabel,
+                { vm.storageLabel = it },
                 vm.addOperation,
                 onClose,
+                vm.storageType?.let { StorageRegistrationInput(it, vm.storageLabel) },
             )
         }
     }
@@ -181,14 +191,16 @@ expect fun platformSpecificFileSystemRepositoryGuard(): PlatformSpecificPermissi
 
 @Composable
 private fun AddRepositoryDialogContents(
-    intendedStorageType: FileSystemStorageType?,
     permissionFulfilment: PlatformSpecificPermissionFulfilment,
     pick: PickResult?,
     onTriggerChange: () -> Unit,
-    markConfirmed: Boolean?,
-    setMarkConfirmed: (newValue: Boolean?) -> Unit,
+    storageType: FileSystemStorageType?,
+    setStorageType: (newValue: FileSystemStorageType) -> Unit,
+    label: String,
+    setLabel: (newValue: String) -> Unit,
     optionLoadable: Loadable<AddFileSystemRepositoryOperation>?,
     onClose: () -> Unit,
+    storageRegistrationInput: StorageRegistrationInput?,
 ) {
     var createEncrypted by remember { mutableStateOf(false) }
     var createPassword by remember { mutableStateOf("") }
@@ -204,17 +216,7 @@ private fun AddRepositoryDialogContents(
 
     DialogCard {
         DialogInnerContainer(
-            remember(intendedStorageType) {
-                buildAnnotatedString {
-                    append(
-                        when (intendedStorageType) {
-                            FileSystemStorageType.LOCAL -> "Add local repository"
-                            FileSystemStorageType.EXTERNAL -> "Add external repository"
-                            null -> "Add repository"
-                        },
-                    )
-                }
-            },
+            remember { buildAnnotatedString { append("Add repository") } },
             content = {
                 when (permissionFulfilment) {
                     PlatformSpecificPermissionFulfilment.IsFine -> {
@@ -357,24 +359,26 @@ private fun AddRepositoryDialogContents(
                                 )
 
                                 InitStatus(option.initStatus.collectAsState().value)
-                                AddStatus(option.addStatus.collectAsState().value)
+                                AddStatus(addStatus)
 
                                 if (initStatus == Execution.NotRunning && addStatus == Execution.NotRunning) {
-                                    StorageMark(option.storageMarking, markConfirmed, setMarkConfirmed)
+                                    StorageMark(option.storageRegistration, storageType, setStorageType, label, setLabel)
                                 }
                             }
 
                             is AddFileSystemRepositoryOperation.PlainFileSystemRepository -> {
                                 val addStatus = option.addStatus.collectAsState().value
 
-                                AddStatus(option.addStatus.collectAsState().value, notRunningStatus = { ProgressText("Repository can be added.") })
+                                AddStatus(addStatus, notRunningStatus = { ProgressText("Repository can be added.") })
 
                                 if (addStatus == Execution.NotRunning) {
-                                    StorageMark(option.storageMarking, markConfirmed, setMarkConfirmed)
+                                    StorageMark(option.storageRegistration, storageType, setStorageType, label, setLabel)
                                 }
                             }
 
                             is AddFileSystemRepositoryOperation.EncryptedFileSystemRepository -> {
+                                val addStatus = option.addStatus.collectAsState().value
+
                                 ProgressText("The repository is encrypted, and password protected.")
 
                                 option.unlockStatus.collectAsState().value.let {
@@ -410,7 +414,11 @@ private fun AddRepositoryDialogContents(
                                     }
                                 }
 
-                                AddStatus(option.addStatus.collectAsState().value)
+                                if (addStatus == Execution.NotRunning) {
+                                    StorageMark(option.storageRegistration, storageType, setStorageType, label, setLabel)
+                                }
+
+                                AddStatus(addStatus)
                             }
                         }
                     }
@@ -451,15 +459,22 @@ private fun AddRepositoryDialogContents(
                                             "Init",
                                             onLaunch = {
                                                 if (!createEncrypted) {
-                                                    singleLaunchGuard.launch { option.startInitAsPlain(markConfirmed, createSQLite) }
+                                                    singleLaunchGuard.launch {
+                                                        option.startInitAsPlain(storageRegistrationInput, createSQLite)
+                                                    }
                                                 } else {
-                                                    singleLaunchGuard.launch { option.startInitAsEncrypted(markConfirmed, createPassword) }
+                                                    singleLaunchGuard.launch {
+                                                        option.startInitAsEncrypted(storageRegistrationInput, createPassword)
+                                                    }
                                                 }
                                             },
                                             onClose = onClose,
                                             canLaunch =
                                                 state == Execution.NotRunning &&
-                                                    (!option.storageMarking.isRemark || markConfirmed == true) &&
+                                                    (
+                                                        option.storageRegistration is StorageRegistrationState.Registered ||
+                                                            (storageType != null && label.isNotBlank())
+                                                    ) &&
 
                                                     (
                                                         !createEncrypted ||
@@ -480,10 +495,15 @@ private fun AddRepositoryDialogContents(
                                         SimpleActionDialogControlButtons(
                                             "Add",
                                             onLaunch = {
-                                                singleLaunchGuard.launch { option.runAddExecution(markConfirmed) }
+                                                singleLaunchGuard.launch { option.executeAdd(storageRegistrationInput) }
                                             },
                                             onClose = onClose,
-                                            canLaunch = state == Execution.NotRunning && (!option.storageMarking.isRemark || markConfirmed == true),
+                                            canLaunch =
+                                                state == Execution.NotRunning &&
+                                                    (
+                                                        option.storageRegistration is StorageRegistrationState.Registered ||
+                                                            (storageType != null && label.isNotBlank())
+                                                    ),
                                         )
                                     }
                                 }
@@ -503,11 +523,15 @@ private fun AddRepositoryDialogContents(
                                         SimpleActionDialogControlButtons(
                                             "Add",
                                             onLaunch = {
-                                                singleLaunchGuard.launch { option.runAddExecution(markConfirmed) }
+                                                singleLaunchGuard.launch { option.executeAdd(storageRegistrationInput) }
                                             },
                                             onClose = onClose,
                                             canLaunch =
-                                                state == Execution.NotRunning && isUnlocked && (!option.storageMarking.isRemark || markConfirmed == true),
+                                                state == Execution.NotRunning && isUnlocked &&
+                                                    (
+                                                        option.storageRegistration is StorageRegistrationState.Registered ||
+                                                            (storageType != null && label.isNotBlank())
+                                                    ),
                                         )
                                     }
                                 }
@@ -522,42 +546,28 @@ private fun AddRepositoryDialogContents(
 
 @Composable
 private fun StorageMark(
-    storageMarkMatch: StorageMarking?,
-    markConfirmed: Boolean?,
-    setMarkConfirmed: (newValue: Boolean?) -> Unit,
+    storageRegistrationState: StorageRegistrationState,
+    storageType: FileSystemStorageType?,
+    setStorageType: (newValue: FileSystemStorageType) -> Unit,
+    label: String,
+    setLabel: (newValue: String) -> Unit,
 ) {
-    when (storageMarkMatch) {
-        StorageMarking.ALRIGHT -> {}
-
-        StorageMarking.NEEDS_MARK_AS_LOCAL -> {
-            ProgressText("Storage is used for the first time, and it will be marked as local.")
-        }
-
-        StorageMarking.NEEDS_MARK_AS_EXTERNAL -> {
-            ProgressText("Storage is used for the first time, and it will be marked as external.")
-        }
-
-        StorageMarking.NEEDS_REMARK_AS_LOCAL -> {
-            Text("Storage is currently external, re-mark it to local?")
-            CheckboxWithText(
-                markConfirmed == true,
-                text = "Yes, re-mark storage as local",
-                onValueChange = { setMarkConfirmed(it) },
-            )
-        }
-
-        StorageMarking.NEEDS_REMARK_AS_EXTERNAL -> {
-            ProgressText("Storage is currently local, re-mark it as external?")
-            CheckboxWithText(
-                markConfirmed == true,
-                text = "Yes, re-mark storage as external",
-                onValueChange = { setMarkConfirmed(it) },
-            )
-        }
-
-        null -> {
-            ProgressText("Preparing ...")
-        }
+    if (storageRegistrationState is StorageRegistrationState.Unregistered) {
+        Divider(Modifier.padding(top = 16.dp, bottom = 12.dp))
+        Text("Storage is not registered yet. It will be registered.", Modifier.padding(bottom = 8.dp))
+        Text("Select storage type:", Modifier.padding(bottom = 8.dp))
+        RadioWithText(
+            storageType == FileSystemStorageType.LOCAL,
+            onClick = { setStorageType(FileSystemStorageType.LOCAL) },
+            text = "Local - this device",
+        )
+        RadioWithText(
+            storageType == FileSystemStorageType.EXTERNAL,
+            onClick = { setStorageType(FileSystemStorageType.EXTERNAL) },
+            text = "External - media device",
+        )
+        TextField(value = label, onValueChange = { setLabel(it) }, placeholder = { Text("Enter device label ...") }, modifier = Modifier.padding(top = 8.dp))
+        Divider(Modifier.padding(top = 12.dp, bottom = 8.dp))
     }
 }
 

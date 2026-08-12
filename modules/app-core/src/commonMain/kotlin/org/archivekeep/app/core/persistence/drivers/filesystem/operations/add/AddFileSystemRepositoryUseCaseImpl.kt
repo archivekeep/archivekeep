@@ -1,11 +1,10 @@
-package org.archivekeep.app.core.persistence.drivers.filesystem.operations
+package org.archivekeep.app.core.persistence.drivers.filesystem.operations.add
 
 import kotlinx.coroutines.CoroutineScope
 import org.archivekeep.app.core.domain.storages.StorageRegistry
 import org.archivekeep.app.core.persistence.drivers.filesystem.FileStores
 import org.archivekeep.app.core.persistence.drivers.filesystem.FileSystemStorageType
 import org.archivekeep.app.core.persistence.drivers.filesystem.getFileSystemForPath
-import org.archivekeep.app.core.persistence.drivers.filesystem.operations.AddFileSystemRepositoryOperation.StorageMarking
 import org.archivekeep.app.core.persistence.registry.RegistryDataStore
 import org.archivekeep.files.driver.filesystem.encryptedfiles.EncryptedFileSystemRepository
 import org.archivekeep.files.driver.filesystem.files.FilesRepo
@@ -15,11 +14,11 @@ import kotlin.io.path.Path
 import kotlin.io.path.exists
 import kotlin.io.path.isDirectory
 
-internal fun checkMarking(
-    storageMarking: StorageMarking,
-    markConfirm: Boolean?,
+internal fun checkInput(
+    storageState: StorageRegistrationState,
+    storageRegistrationInput: StorageRegistrationInput?,
 ) {
-    if (storageMarking.isRemark && markConfirm != true) {
+    if (storageState is StorageRegistrationState.Unregistered && storageRegistrationInput == null) {
         throw IllegalArgumentException("Storage re-mark needs to be confirmed")
     }
 }
@@ -29,10 +28,9 @@ class AddFileSystemRepositoryUseCaseImpl(
     val fileStores: FileStores,
     val storageRegistry: StorageRegistry,
 ) : AddFileSystemRepositoryUseCase {
-    override suspend fun begin(
+    override suspend fun create(
         scope: CoroutineScope,
         path: String,
-        intendedStorageType: FileSystemStorageType?,
     ): AddFileSystemRepositoryOperation {
         val pathPath = Path(path)
 
@@ -43,18 +41,18 @@ class AddFileSystemRepositoryUseCaseImpl(
         // TODO: check for and emit Status.AlreadyRegistered if the case
 
         if (EncryptedFileSystemRepository.isRepository(pathPath)) {
-            val storageMarking = getStorageMarking(path, intendedStorageType)
+            val storageMarking = getStorageState(path)
 
             return (
-                AddEncryptedFileSystemRepositoryOperation(scope, registry, fileStores, path, intendedStorageType, storageMarking)
+                AddEncryptedFileSystemRepositoryOperation(scope, registry, fileStores, path, storageMarking)
             )
         }
 
         if (FilesSqliteRepo.isRepo(pathPath) || FilesRepo.openOrNull(pathPath) != null) {
-            val storageMarking = getStorageMarking(path, intendedStorageType)
+            val storageMarking = getStorageState(path)
 
             return (
-                AddPlainFileSystemRepositoryOperation(scope, registry, fileStores, path, intendedStorageType, storageMarking)
+                AddPlainFileSystemRepositoryOperation(scope, registry, fileStores, path, storageMarking)
             )
         } else {
             val parentDirRepoPath =
@@ -88,8 +86,7 @@ class AddFileSystemRepositoryUseCaseImpl(
                             registry,
                             fileStores,
                             path,
-                            intendedStorageType,
-                            getStorageMarking(path, intendedStorageType),
+                            getStorageState(path),
                             encryptedNotPossibleDueToNotEmpty = pathPath.toFile().list().isNotEmpty(),
                         )
                     }
@@ -98,33 +95,39 @@ class AddFileSystemRepositoryUseCaseImpl(
         }
     }
 
-    private suspend fun getStorageMarking(
-        path: String,
-        intendedStorageType: FileSystemStorageType?,
-    ): StorageMarking {
-        val fs = fileStores.loadFreshMountPoints().getFileSystemForPath(path)
-        val storage = fs?.let { storageRegistry.getStorageByURI(it.storageURI) }
+    private suspend fun getStorageState(path: String): StorageRegistrationState {
+        val fs = fileStores.loadFreshMountPoints().getFileSystemForPath(path) ?: throw RuntimeException("No FS mounted for $path")
+        val storage = fs.let { storageRegistry.getStorageByURI(it.storageURI) }
 
-        return when (intendedStorageType) {
-            FileSystemStorageType.LOCAL -> {
-                when (storage?.isLocal) {
-                    null -> StorageMarking.NEEDS_MARK_AS_LOCAL
-                    true -> StorageMarking.ALRIGHT
-                    false -> StorageMarking.NEEDS_REMARK_AS_LOCAL
+        if (storage != null) {
+            return StorageRegistrationState.Registered(
+                isLocal = storage.isLocal ?: true,
+                label = storage.label ?: "",
+            )
+        } else {
+            val mp = fs.mountPath
+
+            val suggestedStorageType =
+                when {
+                    mp == "/" -> FileSystemStorageType.LOCAL
+                    mp == "/var" -> FileSystemStorageType.LOCAL
+                    mp == "/var/home" -> FileSystemStorageType.LOCAL
+                    mp.startsWith("/media") -> FileSystemStorageType.EXTERNAL
+                    mp.startsWith("/run/media") -> FileSystemStorageType.EXTERNAL
+                    else -> null
                 }
-            }
 
-            FileSystemStorageType.EXTERNAL -> {
-                when (storage?.isLocal) {
-                    null -> StorageMarking.NEEDS_MARK_AS_EXTERNAL
-                    true -> StorageMarking.NEEDS_REMARK_AS_EXTERNAL
-                    false -> StorageMarking.ALRIGHT
+            val suggestedLabel =
+                when (suggestedStorageType) {
+                    FileSystemStorageType.LOCAL -> "Local"
+                    else -> mp.trimEnd('/').substringAfterLast("/")
                 }
-            }
 
-            null -> {
-                StorageMarking.ALRIGHT
-            }
+            return StorageRegistrationState.Unregistered(
+                suggestedType = suggestedStorageType,
+                suggestedLabel =
+                suggestedLabel,
+            )
         }
     }
 }

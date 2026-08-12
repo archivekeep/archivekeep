@@ -55,16 +55,10 @@ fun MainMenuDropdownIconLaunched(modifier: Modifier = Modifier) {
             onDismissRequest = { isDropdownExpanded = false },
         ) {
             DropdownMenuItem(onClick = {
-                operationsLaunchers.openAddFileSystemRepository(FileSystemStorageType.LOCAL)
+                operationsLaunchers.openAddFileSystemRepository()
                 isDropdownExpanded = false
             }, text = {
-                Text("Add local file repository …")
-            })
-            DropdownMenuItem(onClick = {
-                operationsLaunchers.openAddFileSystemRepository(FileSystemStorageType.EXTERNAL)
-                isDropdownExpanded = false
-            }, text = {
-                Text("Add external file repository …")
+                Text("Add file repository …")
             })
             DropdownMenuItem(onClick = {
                 operationsLaunchers.openAddRemoteRepository()

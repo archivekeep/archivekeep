@@ -1,7 +1,6 @@
 package org.archivekeep.app.ui.domain.wiring
 
 import androidx.compose.runtime.staticCompositionLocalOf
-import org.archivekeep.app.core.persistence.drivers.filesystem.FileSystemStorageType
 import org.archivekeep.app.core.utils.identifiers.RepositoryURI
 import org.archivekeep.app.core.utils.identifiers.StorageURI
 
@@ -16,7 +15,7 @@ data class ArchiveOperationLaunchers(
     val openDeinitializeFilesystemRepository: (repositoryURI: RepositoryURI?, path: String) -> Unit,
     val unlockRepository: (repositoryURI: RepositoryURI, onUnlock: (() -> Unit)?) -> Unit,
     val pushRepoToAll: (repositoryURI: RepositoryURI) -> Unit,
-    val openAddFileSystemRepository: (intendedFileSystemStorageType: FileSystemStorageType?) -> Unit,
+    val openAddFileSystemRepository: () -> Unit,
     val openAddRemoteRepository: () -> Unit,
     val pushAllToStorage: (storageURI: StorageURI) -> Unit,
     val pullAllFromStorage: (storageURI: StorageURI) -> Unit,

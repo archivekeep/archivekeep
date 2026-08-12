@@ -1,4 +1,4 @@
-package org.archivekeep.app.core.persistence.drivers.filesystem.operations
+package org.archivekeep.app.core.persistence.drivers.filesystem.operations.add
 
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -18,13 +18,13 @@ abstract class AddFileSystemRepositoryOperationImpl(
     val registry: RegistryDataStore,
     val fileStores: FileStores,
     val path: String,
-    val intendedStorageType: FileSystemStorageType?,
 ) {
     val pathPath = Path(path)
 
     protected suspend fun runAdd(
         addMutableStateFlow: MutableStateFlow<Execution>,
         storageMarkMutableStateFlow: MutableStateFlow<Execution?>,
+        storageRegistrationInput: StorageRegistrationInput?,
     ) {
         var storageURI: StorageURI? = null
 
@@ -63,20 +63,26 @@ abstract class AddFileSystemRepositoryOperationImpl(
             storageURI = newRepo.storageURI
         }
 
-        runMarkStorage(storageMarkMutableStateFlow, storageURI!!)
+        runMarkStorage(storageMarkMutableStateFlow, storageRegistrationInput, storageURI!!)
     }
 
     private suspend fun runMarkStorage(
         storageMarkMutableStateFlow: MutableStateFlow<Execution?>,
+        storageRegistrationInput: StorageRegistrationInput?,
         uri: StorageURI,
     ) {
+        if (storageRegistrationInput == null) return
+
         storageMarkMutableStateFlow.perform {
             registry.updateStorage(uri) {
-                when (intendedStorageType) {
-                    FileSystemStorageType.LOCAL -> it.copy(isLocal = true)
-                    FileSystemStorageType.EXTERNAL -> it.copy(isLocal = false)
-                    null -> it
-                }
+                it.copy(
+                    label = storageRegistrationInput.label,
+                    isLocal =
+                        when (storageRegistrationInput.storageType) {
+                            FileSystemStorageType.LOCAL -> true
+                            FileSystemStorageType.EXTERNAL -> false
+                        },
+                )
             }
         }
     }

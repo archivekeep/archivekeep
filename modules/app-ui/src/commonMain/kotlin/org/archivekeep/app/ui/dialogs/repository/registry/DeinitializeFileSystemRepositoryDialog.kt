@@ -20,8 +20,8 @@ import kotlinx.coroutines.cancel
 import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.plus
-import org.archivekeep.app.core.persistence.drivers.filesystem.operations.DeinitializeFileSystemRepositoryPreparation
-import org.archivekeep.app.core.persistence.drivers.filesystem.operations.DeinitializeFileSystemRepositoryUseCase
+import org.archivekeep.app.core.persistence.drivers.filesystem.operations.deinitialize.DeinitializeFileSystemRepositoryPreparation
+import org.archivekeep.app.core.persistence.drivers.filesystem.operations.deinitialize.DeinitializeFileSystemRepositoryUseCase
 import org.archivekeep.app.core.utils.generics.ExecutionOutcome
 import org.archivekeep.app.core.utils.identifiers.RepositoryURI
 import org.archivekeep.app.ui.components.designsystem.dialog.DialogButtonContainer

@@ -55,7 +55,7 @@ fun HomeArchivesIntro() {
             ) {
                 Button(
                     onClick = {
-                        archiveOperationLaunchers.openAddFileSystemRepository(FileSystemStorageType.LOCAL)
+                        archiveOperationLaunchers.openAddFileSystemRepository()
                     },
                     modifier = Modifier.defaultMinSize(120.dp),
                 ) {

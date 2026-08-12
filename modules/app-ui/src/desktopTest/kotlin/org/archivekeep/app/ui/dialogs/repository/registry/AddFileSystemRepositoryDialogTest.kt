@@ -12,7 +12,6 @@ import androidx.compose.ui.test.performTextInput
 import io.kotest.assertions.nondeterministic.eventually
 import io.kotest.matchers.shouldBe
 import kotlinx.coroutines.runBlocking
-import org.archivekeep.app.core.persistence.drivers.filesystem.FileSystemStorageType
 import org.archivekeep.app.core.persistence.drivers.filesystem.MountedFileSystem
 import org.archivekeep.app.core.persistence.platform.demo.phone
 import org.archivekeep.app.core.persistence.platform.demo.usbStickAll
@@ -63,9 +62,7 @@ class AddFileSystemRepositoryDialogTest {
                         LocalFilesystemDirectoryPicker provides
                             fixedFilesystemDirectoryPicker(testTempDir.newFolder("local-archives/test-repo").path),
                     ) {
-                        AddFileSystemRepositoryDialog(
-                            intendedStorageType = FileSystemStorageType.LOCAL,
-                        ).render(onClose = {})
+                        AddFileSystemRepositoryDialog().render(onClose = {})
                     }
                 }
             }
@@ -75,14 +72,22 @@ class AddFileSystemRepositoryDialogTest {
 
                 onNodeWithText("local-archives/test-repo", true).assertExists()
                 onNodeWithText("The directory is not a repository, yet. Continue to initialize it as an archive repository.").assertExists()
-                onNodeWithText("Storage is used for the first time, and it will be marked as local.").assertExists()
+                onNodeWithText("Storage is not registered yet. It will be registered.").assertExists()
+            }
+
+            run {
+                onNodeWithText("Local - this device").performClick()
+
+                saveTestingContainerBitmap("dialogs/add-filesystem-repository/init-plain-sqlite-02-confirm-local.png")
+
+                onNodeWithText("Init").assertIsEnabled()
             }
 
             runBlocking {
                 onNodeWithText("Init").performClick()
 
                 eventually(2.seconds) {
-                    saveTestingContainerBitmap("dialogs/add-filesystem-repository/init-plain-sqlite-02-finished.png")
+                    saveTestingContainerBitmap("dialogs/add-filesystem-repository/init-plain-sqlite-03-finished.png")
 
                     onNodeWithText("Directory initialized successfully as repository.").assertExists()
                     onNodeWithText("Added successfully.").assertExists()
@@ -109,9 +114,7 @@ class AddFileSystemRepositoryDialogTest {
                         LocalFilesystemDirectoryPicker provides
                             fixedFilesystemDirectoryPicker(testTempDir.newFolder("local-archives/test-repo").path),
                     ) {
-                        AddFileSystemRepositoryDialog(
-                            intendedStorageType = FileSystemStorageType.LOCAL,
-                        ).render(onClose = {})
+                        AddFileSystemRepositoryDialog().render(onClose = {})
                     }
                 }
             }
@@ -121,14 +124,17 @@ class AddFileSystemRepositoryDialogTest {
 
                 onNodeWithText("local-archives/test-repo", true).assertExists()
                 onNodeWithText("The directory is not a repository, yet. Continue to initialize it as an archive repository.").assertExists()
-                onNodeWithText("Storage is used for the first time, and it will be marked as local.").assertExists()
+                onNodeWithText("Storage is not registered yet. It will be registered.").assertExists()
                 onNodeWithText("Individual checksum files", substring = true).assertExists()
             }
 
             runBlocking {
+                onNodeWithText("Local - this device").performClick()
                 onNodeWithText("Individual checksum files", substring = true).performClick()
 
                 saveTestingContainerBitmap("dialogs/add-filesystem-repository/init-plain-checksum-files-02-checksum-files.png")
+
+                onNodeWithText("Init").assertIsEnabled()
             }
 
             runBlocking {
@@ -162,9 +168,7 @@ class AddFileSystemRepositoryDialogTest {
                         LocalFilesystemDirectoryPicker provides
                             fixedFilesystemDirectoryPicker(testTempDir.newFolder("local-archives/test-repo").path),
                     ) {
-                        AddFileSystemRepositoryDialog(
-                            intendedStorageType = FileSystemStorageType.LOCAL,
-                        ).render(onClose = {})
+                        AddFileSystemRepositoryDialog().render(onClose = {})
                     }
                 }
             }
@@ -176,10 +180,11 @@ class AddFileSystemRepositoryDialogTest {
 
                 onNodeWithText("local-archives/test-repo", true).assertExists()
                 onNodeWithText("The directory is not a repository, yet. Continue to initialize it as an archive repository.").assertExists()
-                onNodeWithText("Storage is used for the first time, and it will be marked as local.").assertExists()
+                onNodeWithText("Storage is not registered yet. It will be registered.").assertExists()
             }
 
             run {
+                onNodeWithText("Local - this device").performClick()
                 onNodeWithText("Encrypted (custom format)").performClick()
 
                 saveTestingContainerBitmap("dialogs/add-filesystem-repository/init-encrypted-02-switch-to-encrypted.png")
@@ -257,26 +262,32 @@ class AddFileSystemRepositoryDialogTest {
                     CompositionLocalProvider(
                         LocalFilesystemDirectoryPicker provides fixedFilesystemDirectoryPicker(repoPath),
                     ) {
-                        AddFileSystemRepositoryDialog(
-                            intendedStorageType = FileSystemStorageType.LOCAL,
-                        ).render(onClose = {})
+                        AddFileSystemRepositoryDialog().render(onClose = {})
                     }
                 }
             }
 
             run {
-                saveTestingContainerBitmap("dialogs/add-filesystem-repository/add-01-input.png")
+                saveTestingContainerBitmap("dialogs/add-filesystem-repository/add-plain-01-input.png")
 
                 onNodeWithText("local-archives/test-repo", true).assertExists()
                 onNodeWithText("Repository can be added.").assertExists()
-                onNodeWithText("Storage is used for the first time, and it will be marked as local.").assertExists()
+                onNodeWithText("Storage is not registered yet. It will be registered.").assertExists()
+            }
+
+            run {
+                onNodeWithText("Local - this device").performClick()
+
+                saveTestingContainerBitmap("dialogs/add-filesystem-repository/add-plain-02-confirm-local.png")
+
+                onNodeWithText("Add").assertIsEnabled()
             }
 
             runBlocking {
                 onNodeWithText("Add").performClick()
 
                 eventually(2.seconds) {
-                    saveTestingContainerBitmap("dialogs/add-filesystem-repository/add-02-finished.png")
+                    saveTestingContainerBitmap("dialogs/add-filesystem-repository/add-plain-03-finished.png")
 
                     onNodeWithText("Added successfully.").assertExists()
                     onNodeWithText("Add").assertDoesNotExist()
@@ -302,14 +313,14 @@ class AddFileSystemRepositoryDialogTest {
                     CompositionLocalProvider(
                         LocalFilesystemDirectoryPicker provides fixedFilesystemDirectoryPicker(repoPath),
                     ) {
-                        AddFileSystemRepositoryDialog(
-                            intendedStorageType = FileSystemStorageType.LOCAL,
-                        ).render(onClose = {})
+                        AddFileSystemRepositoryDialog().render(onClose = {})
                     }
                 }
             }
 
             run {
+                onNodeWithText("Local - this device").performClick()
+
                 saveTestingContainerBitmap("dialogs/add-filesystem-repository/add-encrypted-01-after-selection.png")
 
                 onNodeWithText("local-archives/test-encrypted-repo", true).assertExists()
@@ -370,9 +381,7 @@ class AddFileSystemRepositoryDialogTest {
                     CompositionLocalProvider(
                         LocalFilesystemDirectoryPicker provides fixedFilesystemDirectoryPicker(repoPath),
                     ) {
-                        AddFileSystemRepositoryDialog(
-                            intendedStorageType = FileSystemStorageType.LOCAL,
-                        ).render(onClose = {})
+                        AddFileSystemRepositoryDialog().render(onClose = {})
                     }
                 }
             }

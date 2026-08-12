@@ -56,7 +56,7 @@ fun HomeStoragesIntro() {
             ) {
                 FilledTonalButton(
                     onClick = {
-                        archiveOperationLaunchers.openAddFileSystemRepository(FileSystemStorageType.EXTERNAL)
+                        archiveOperationLaunchers.openAddFileSystemRepository()
                     },
                     modifier = Modifier.defaultMinSize(120.dp),
                 ) {

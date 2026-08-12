@@ -1,4 +1,4 @@
-package org.archivekeep.app.core.persistence.drivers.filesystem.operations
+package org.archivekeep.app.core.persistence.drivers.filesystem.operations.deinitialize
 
 import kotlinx.coroutines.CoroutineScope
 import org.archivekeep.files.driver.filesystem.files.FilesRepo
