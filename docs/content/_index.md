@@ -29,7 +29,7 @@
 {{< hint warning >}}
 <p><strong>This software is under development.</strong></p>
 <p>It serves <a href="https://kravemir.org">author's</a> needs. However, there's still a room for improvement.
-<p>Consider buying author a pizza to support the development.</p>
+<p>Consider buying author a coffee to support the development.</p>
 {{< /hint >}}
 
 </div>

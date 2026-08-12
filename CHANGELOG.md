@@ -1,6 +1,26 @@
 # Changelog
 
-## Unreleased
+## 0.6.3 - 2026-08-12
+
+### Added
+
+- warning badge for unassociated repositories,
+- Associate button for unassociated repositories,
+- icon buttons for cleanup, re-index, and unlock actions to repository rows,
+- support for file deletion in encrypted filesystem repository, S3 repository and encrypted S3 repository.
+
+### Changed
+
+- storage registration and marking when adding a filesystem repository:
+  - merge local/external filesystem repository add into a single button,
+  - ask for a storage type only if not already registered,
+  - try to guess storage label and type.
+- repository actions logic is unified for local and other archive repositories.
+
+### Fixed
+
+- repository is shown as unassociated during metadata loading even when metadata is memorized,
+- rapid width jumping in progress copy dialogs when the filename text changes.
 
 ## 0.6.2 - 2026-07-06
 

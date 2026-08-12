@@ -62,6 +62,27 @@
     <content_rating type="oars-1.1" />
 
     <releases>
+        <release version="0.6.3" date="2026-08-12">
+            <description>
+                <p>Added:</p>
+                <ul>
+                    <li>warning badge for unassociated repositories,</li>
+                    <li>Associate button for unassociated repositories,</li>
+                    <li>icon buttons for cleanup, re-index, and unlock actions to repository rows,</li>
+                    <li>support for file deletion in encrypted filesystem repository, S3 repository and encrypted S3 repository.</li>
+                </ul>
+                <p>Changed:</p>
+                <ul>
+                    <li>storage registration and marking when adding a filesystem repository: merge local/external filesystem repository add into a single button, ask for a storage type only if not already registered, try to guess storage label and type.</li>
+                    <li>repository actions logic is unified for local and other archive repositories.</li>
+                </ul>
+                <p>Fixed:</p>
+                <ul>
+                    <li>repository is shown as unassociated during metadata loading even when metadata is memorized,</li>
+                    <li>rapid width jumping in progress copy dialogs when the filename text changes.</li>
+                </ul>
+            </description>
+        </release>
         <release version="0.6.2" date="2026-07-06">
             <description>
                 <p>Added:</p>
