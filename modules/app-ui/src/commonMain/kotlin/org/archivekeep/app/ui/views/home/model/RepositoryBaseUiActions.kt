@@ -13,4 +13,12 @@ interface RepositoryBaseUiActions {
     val unassociate: Loadable<Action>
     val forget: Loadable<Action>
     val deinitialize: Loadable<Action>
+
+    fun iconActions(): List<Loadable<Action>> =
+        listOf(
+            unlock,
+            add,
+            cleanupFiles,
+            reindex,
+        )
 }

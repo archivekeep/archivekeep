@@ -10,7 +10,7 @@ import org.archivekeep.utils.loading.optional.OptionalLoadable
 @Composable
 fun SectionCardItemStateText(loadable: Loadable<String>) {
     when (loadable) {
-        is Loadable.Failed ->
+        is Loadable.Failed -> {
             Text(
                 "ERROR: ${loadable.throwable.message}",
                 overflow = TextOverflow.Ellipsis,
@@ -18,8 +18,9 @@ fun SectionCardItemStateText(loadable: Loadable<String>) {
                 fontSize = 11.sp,
                 lineHeight = 14.sp,
             )
+        }
 
-        is Loadable.Loading ->
+        is Loadable.Loading -> {
             Text(
                 "Loading ...",
                 overflow = TextOverflow.Ellipsis,
@@ -27,8 +28,9 @@ fun SectionCardItemStateText(loadable: Loadable<String>) {
                 fontSize = 11.sp,
                 lineHeight = 14.sp,
             )
+        }
 
-        is Loadable.Loaded ->
+        is Loadable.Loaded -> {
             Text(
                 text = loadable.value,
                 overflow = TextOverflow.Ellipsis,
@@ -36,13 +38,14 @@ fun SectionCardItemStateText(loadable: Loadable<String>) {
                 fontSize = 11.sp,
                 lineHeight = 14.sp,
             )
+        }
     }
 }
 
 @Composable
 fun SectionCardItemStateText(loadable: OptionalLoadable<String>) {
     when (loadable) {
-        is OptionalLoadable.Failed ->
+        is OptionalLoadable.Failed -> {
             Text(
                 "ERROR: ${loadable.cause.message}",
                 overflow = TextOverflow.Ellipsis,
@@ -50,8 +53,9 @@ fun SectionCardItemStateText(loadable: OptionalLoadable<String>) {
                 fontSize = 11.sp,
                 lineHeight = 14.sp,
             )
+        }
 
-        is OptionalLoadable.Loading ->
+        is OptionalLoadable.Loading -> {
             Text(
                 "Loading ...",
                 overflow = TextOverflow.Ellipsis,
@@ -59,8 +63,9 @@ fun SectionCardItemStateText(loadable: OptionalLoadable<String>) {
                 fontSize = 11.sp,
                 lineHeight = 14.sp,
             )
+        }
 
-        is OptionalLoadable.NotAvailable ->
+        is OptionalLoadable.NotAvailable -> {
             Text(
                 "Not available ...",
                 overflow = TextOverflow.Ellipsis,
@@ -68,14 +73,18 @@ fun SectionCardItemStateText(loadable: OptionalLoadable<String>) {
                 fontSize = 11.sp,
                 lineHeight = 14.sp,
             )
+        }
 
-        is OptionalLoadable.LoadedAvailable ->
-            Text(
-                text = loadable.value,
-                overflow = TextOverflow.Ellipsis,
-                softWrap = false,
-                fontSize = 11.sp,
-                lineHeight = 14.sp,
-            )
+        is OptionalLoadable.LoadedAvailable -> {
+            if (!loadable.value.isBlank()) {
+                Text(
+                    text = loadable.value,
+                    overflow = TextOverflow.Ellipsis,
+                    softWrap = false,
+                    fontSize = 11.sp,
+                    lineHeight = 14.sp,
+                )
+            }
+        }
     }
 }

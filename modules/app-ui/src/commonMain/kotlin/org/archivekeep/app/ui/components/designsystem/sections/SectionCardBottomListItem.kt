@@ -61,7 +61,9 @@ fun SectionCardBottomListItem(
                 lineHeight = 16.sp,
             )
 
-            statusText.let { SectionCardItemStateText(it) }
+            statusText.let {
+                SectionCardItemStateText(it)
+            }
         }
 
         Row(

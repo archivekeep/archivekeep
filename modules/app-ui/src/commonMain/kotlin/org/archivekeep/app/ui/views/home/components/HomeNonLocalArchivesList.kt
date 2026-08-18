@@ -1,43 +1,29 @@
 package org.archivekeep.app.ui.views.home.components
 
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
-import androidx.compose.material.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.remember
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import com.cheonjaeung.compose.grid.SimpleGridCells
 import com.cheonjaeung.compose.grid.VerticalGrid
-import compose.icons.TablerIcons
-import compose.icons.tablericons.ArrowsDownUp
-import compose.icons.tablericons.Lock
 import kotlinx.coroutines.flow.map
 import org.archivekeep.app.core.domain.storages.needsUnlock
 import org.archivekeep.app.ui.components.designsystem.sections.SectionCard
 import org.archivekeep.app.ui.components.designsystem.sections.SectionCardBottomList
 import org.archivekeep.app.ui.components.designsystem.sections.SectionCardTitle
-import org.archivekeep.app.ui.components.designsystem.sections.sectionCardHorizontalPadding
 import org.archivekeep.app.ui.components.designsystem.theme.AppTheme
-import org.archivekeep.app.ui.components.feature.InArchiveRepositoryDropdownIconLaunched
+import org.archivekeep.app.ui.components.designsystem.theme.CIcons
 import org.archivekeep.app.ui.components.feature.LoadableGuard
 import org.archivekeep.app.ui.domain.wiring.LocalArchiveOperationLaunchers
 import org.archivekeep.app.ui.views.home.model.HomeNonLocalArchiveUiState
 import org.archivekeep.app.ui.views.home.model.RepositoryOperationalState
 import org.archivekeep.utils.loading.Loadable
+import org.archivekeep.utils.loading.optional.OptionalLoadable
 import org.archivekeep.utils.loading.optional.mapLoadedData
 
 @Composable
@@ -64,83 +50,48 @@ fun HomeNonLocalArchivesList(otherArchivesLoadable: Loadable<List<HomeNonLocalAr
                     Spacer(Modifier.height(4.dp))
 
                     SectionCardBottomList(nonLocalArchive.otherRepositories) { repo ->
-                        Row(
-                            verticalAlignment = Alignment.CenterVertically,
-                            modifier =
-                                Modifier
-                                    .fillMaxWidth()
-                                    .padding(
-                                        vertical = 4.dp,
-                                        horizontal = sectionCardHorizontalPadding,
-                                    ),
-                        ) {
-                            if (remember {
+                        val name =
+                            repo.storageReference.displayName + (
+                                if (repo.reference.displayName != nonLocalArchive.displayName) {
+                                    " (${repo.reference.displayName})"
+                                } else {
+                                    ""
+                                }
+                            )
+
+                        // TODO: move out logic from UI
+                        val repositoryOperationalState =
+                            RepositoryOperationalState(
+                                repo.repository.optionalAccessorFlow
+                                    .collectAsState()
+                                    .value,
+                                isAssociated = false,
+                                repo.repository.localRepoStatus
+                                    .collectAsState()
+                                    .value
+                                    .mapLoadedData { it.summary },
+                            )
+
+                        val launchers = LocalArchiveOperationLaunchers.current
+                        val ra = repositoryOperationalState.actions(launchers, repo.repository.uri)
+
+                        RepositoryRow(
+                            statusText = OptionalLoadable.LoadedAvailable(""), // TODO: implement status text
+                            isLoading = false, // TODO: implement loading indication
+                            isConnected = true,
+                            needsUnlock =
+                                remember {
                                     repo.repository
                                         .optionalAccessorFlow
                                         .map { it.needsUnlock() }
                                 }.collectAsState(false)
-                                    .value
-                            ) {
-                                Icon(
-                                    TablerIcons.Lock,
-                                    contentDescription = "Locked",
-                                    Modifier.size(16.dp),
-                                )
-                                Spacer(Modifier.width(6.dp))
-                            }
-
-                            Column(
-                                verticalArrangement = Arrangement.Center,
-                                modifier = Modifier.weight(1f),
-                            ) {
-                                val name =
-                                    repo.storageReference.displayName + (
-                                        if (repo.reference.displayName != nonLocalArchive.displayName) {
-                                            " (${repo.reference.displayName})"
-                                        } else {
-                                            ""
-                                        }
-                                    )
-
-                                Text(
-                                    name,
-                                    overflow = TextOverflow.Ellipsis,
-                                    softWrap = false,
-                                    fontSize = 14.sp,
-                                    lineHeight = 16.sp,
-                                )
-                            }
-
-                            Row(
-                                verticalAlignment = Alignment.CenterVertically,
-                            ) {
-                                Box(Modifier.padding(6.dp)) {
-                                    Icon(
-                                        TablerIcons.ArrowsDownUp,
-                                        contentDescription = "Download",
-                                        Modifier.size(16.dp),
-                                    )
-                                }
-
-                                // TODO: move out logic from UI
-                                val repositoryOperationalState =
-                                    RepositoryOperationalState(
-                                        repo.repository.optionalAccessorFlow
-                                            .collectAsState()
-                                            .value,
-                                        isAssociated = false,
-                                        repo.repository.localRepoStatus
-                                            .collectAsState()
-                                            .value
-                                            .mapLoadedData { it.summary },
-                                    )
-
-                                val launchers = LocalArchiveOperationLaunchers.current
-                                val ra = repositoryOperationalState.actions(launchers, repo.repository.uri)
-
-                                InArchiveRepositoryDropdownIconLaunched(emptyList(), ra)
-                            }
-                        }
+                                    .value,
+                            name = name,
+                            icon = CIcons.Repository,
+                            iconActions = ra.iconActions(),
+                            secondaryRepositoryActions = emptyList(),
+                            repositoryActions = ra,
+                        )
                     }
                 }
             }
