@@ -12,10 +12,10 @@ interface HomeLocalArchiveUiActions : RepositoryBaseUiActions {
             unlock,
             associate,
             unassociate,
-            add,
             reindex,
             cleanupFiles,
             addPush,
+            add,
             push,
         )
 }
