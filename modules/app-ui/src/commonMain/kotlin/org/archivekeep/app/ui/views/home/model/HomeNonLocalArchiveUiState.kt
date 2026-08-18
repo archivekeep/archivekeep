@@ -10,6 +10,8 @@ class HomeNonLocalArchiveUiState(
     val displayName: String,
     val otherRepositories: List<OtherRepositoryDetails>,
 ) {
+    val isAssociated = archive.associationId != null
+
     class OtherRepositoryDetails(
         val reference: NamedRepositoryReference,
         val storageReference: StorageNamedReference,

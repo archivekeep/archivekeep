@@ -1,8 +1,10 @@
 package org.archivekeep.app.ui.views.home.components
 
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -13,9 +15,11 @@ import com.cheonjaeung.compose.grid.SimpleGridCells
 import com.cheonjaeung.compose.grid.VerticalGrid
 import kotlinx.coroutines.flow.map
 import org.archivekeep.app.core.domain.storages.needsUnlock
+import org.archivekeep.app.ui.components.designsystem.elements.WarningBadge
 import org.archivekeep.app.ui.components.designsystem.sections.SectionCard
 import org.archivekeep.app.ui.components.designsystem.sections.SectionCardBottomList
 import org.archivekeep.app.ui.components.designsystem.sections.SectionCardTitle
+import org.archivekeep.app.ui.components.designsystem.sections.sectionCardHorizontalPadding
 import org.archivekeep.app.ui.components.designsystem.theme.AppTheme
 import org.archivekeep.app.ui.components.designsystem.theme.CIcons
 import org.archivekeep.app.ui.components.feature.LoadableGuard
@@ -46,6 +50,12 @@ fun HomeNonLocalArchivesList(otherArchivesLoadable: Loadable<List<HomeNonLocalAr
                         icons = {
                         },
                     )
+
+                    if (!nonLocalArchive.isAssociated) {
+                        Row(Modifier.padding(horizontal = sectionCardHorizontalPadding, vertical = 4.dp)) {
+                            WarningBadge { Text("Unassociated") }
+                        }
+                    }
 
                     Spacer(Modifier.height(4.dp))
 
