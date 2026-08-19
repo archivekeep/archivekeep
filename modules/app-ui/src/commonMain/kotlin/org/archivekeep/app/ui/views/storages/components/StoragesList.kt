@@ -14,16 +14,14 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.cheonjaeung.compose.grid.SimpleGridCells
-import com.cheonjaeung.compose.grid.VerticalGrid
 import org.archivekeep.app.ui.components.designsystem.elements.ConnectionStatusTag
 import org.archivekeep.app.ui.components.designsystem.sections.EmptySectionCard
 import org.archivekeep.app.ui.components.designsystem.sections.SectionCard
 import org.archivekeep.app.ui.components.designsystem.sections.SectionCardBottomList
+import org.archivekeep.app.ui.components.designsystem.sections.SectionCardGrid
 import org.archivekeep.app.ui.components.designsystem.sections.SectionCardTitle
 import org.archivekeep.app.ui.components.designsystem.sections.sectionCardHorizontalPadding
 import org.archivekeep.app.ui.components.designsystem.sections.sectionCardItem
-import org.archivekeep.app.ui.components.designsystem.theme.AppTheme
 import org.archivekeep.app.ui.components.feature.LoadableGuard
 import org.archivekeep.app.ui.components.feature.StorageDropdownIconLaunched
 import org.archivekeep.app.ui.views.storages.StoragesViewState
@@ -35,11 +33,7 @@ fun StoragesList(
     emptyText: String,
 ) {
     LoadableGuard(allStoragesLoadable) { allStorages ->
-        VerticalGrid(
-            columns = SimpleGridCells.Adaptive(minSize = 250.dp),
-            horizontalArrangement = Arrangement.spacedBy(AppTheme.dimens.gridSpacingHorizontal),
-            verticalArrangement = Arrangement.spacedBy(AppTheme.dimens.gridSpacingVertical),
-        ) {
+        SectionCardGrid {
             if (allStorages.isEmpty()) {
                 EmptySectionCard(emptyText)
             }

@@ -15,14 +15,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.cheonjaeung.compose.grid.SimpleGridCells
-import com.cheonjaeung.compose.grid.VerticalGrid
 import org.archivekeep.app.ui.components.designsystem.sections.SectionCard
 import org.archivekeep.app.ui.components.designsystem.sections.SectionCardBottomList
 import org.archivekeep.app.ui.components.designsystem.sections.SectionCardButton
+import org.archivekeep.app.ui.components.designsystem.sections.SectionCardGrid
 import org.archivekeep.app.ui.components.designsystem.sections.SectionCardTitle
 import org.archivekeep.app.ui.components.designsystem.sections.sectionCardHorizontalPadding
-import org.archivekeep.app.ui.components.designsystem.theme.AppTheme
 import org.archivekeep.app.ui.components.designsystem.theme.CIcons
 import org.archivekeep.app.ui.components.feature.LoadableGuard
 import org.archivekeep.app.ui.components.feature.StorageDropdownIconLaunched
@@ -35,11 +33,7 @@ import org.archivekeep.utils.loading.Loadable
 @Composable
 fun HomeStoragesList(allStoragesFlow: Loadable<List<HomeStorageUiState>>) {
     LoadableGuard(allStoragesFlow) { allStorages ->
-        VerticalGrid(
-            columns = SimpleGridCells.Adaptive(minSize = 250.dp),
-            horizontalArrangement = Arrangement.spacedBy(AppTheme.dimens.gridSpacingHorizontal),
-            verticalArrangement = Arrangement.spacedBy(AppTheme.dimens.gridSpacingVertical),
-        ) {
+        SectionCardGrid {
             if (allStorages.isEmpty()) {
                 Text("Nothing here ...")
             }

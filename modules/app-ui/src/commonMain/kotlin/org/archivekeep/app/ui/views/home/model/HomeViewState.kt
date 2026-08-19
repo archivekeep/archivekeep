@@ -6,7 +6,7 @@ import org.archivekeep.utils.loading.mapIfLoadedOrDefault
 
 class HomeViewState(
     val localArchives: Loadable<List<HomeLocalArchiveModel>>,
-    val nonLocalArchives: Loadable<List<HomeNonLocalArchiveUiState>>,
+    val nonLocalArchives: Loadable<List<HomeExternalArchiveModel>>,
     val externalStorages: Loadable<HomeStorageListUiState>,
 ) {
     val showBaseLoading = localArchives.isLoading || externalStorages.isLoading

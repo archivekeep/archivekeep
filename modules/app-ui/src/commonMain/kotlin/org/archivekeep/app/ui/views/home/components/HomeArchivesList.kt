@@ -1,12 +1,8 @@
 package org.archivekeep.app.ui.views.home.components
 
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.unit.dp
-import com.cheonjaeung.compose.grid.SimpleGridCells
-import com.cheonjaeung.compose.grid.VerticalGrid
-import org.archivekeep.app.ui.components.designsystem.theme.AppTheme
+import org.archivekeep.app.ui.components.designsystem.sections.SectionCardGrid
 import org.archivekeep.app.ui.components.feature.LoadableGuard
 import org.archivekeep.app.ui.domain.wiring.LocalArchiveOperationLaunchers
 import org.archivekeep.app.ui.views.home.model.HomeLocalArchiveModel
@@ -17,11 +13,7 @@ fun HomeArchivesList(localArchivesListLoadable: Loadable<List<HomeLocalArchiveMo
     val archiveOperationLaunchers = LocalArchiveOperationLaunchers.current
 
     LoadableGuard(localArchivesListLoadable) { allLocalArchives ->
-        VerticalGrid(
-            columns = SimpleGridCells.Adaptive(minSize = 250.dp),
-            horizontalArrangement = Arrangement.spacedBy(AppTheme.dimens.gridSpacingHorizontal),
-            verticalArrangement = Arrangement.spacedBy(AppTheme.dimens.gridSpacingVertical),
-        ) {
+        SectionCardGrid {
             if (allLocalArchives.isEmpty()) {
                 Text("nothing here ...")
             }

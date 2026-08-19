@@ -9,8 +9,8 @@ import org.archivekeep.app.core.domain.storages.StorageService
 import org.archivekeep.app.core.procedures.add.IndexUpdateProcedureSupervisorService
 import org.archivekeep.app.core.procedures.addpush.AddAndPushProcedureService
 import org.archivekeep.app.core.procedures.sync.RepoToRepoSyncService
+import org.archivekeep.app.ui.views.home.model.HomeExternalArchiveModel
 import org.archivekeep.app.ui.views.home.model.HomeLocalArchiveModel
-import org.archivekeep.app.ui.views.home.model.HomeNonLocalArchiveUiState
 import org.archivekeep.app.ui.views.home.model.HomeStorageListUiState
 import org.archivekeep.app.ui.views.home.model.HomeStorageUiState
 import org.archivekeep.app.ui.views.home.model.RepositoryItemModel
@@ -116,13 +116,14 @@ class HomeViewModel(
                         return@mapNotNull null
                     }
 
-                    HomeNonLocalArchiveUiState(
+                    HomeExternalArchiveModel(
+                        scope,
                         a,
                         a.repositories[0].second.displayName,
                         otherRepositories =
                             a.repositories
                                 .map { (storage, repo) ->
-                                    HomeNonLocalArchiveUiState.OtherRepositoryDetails(
+                                    HomeExternalArchiveModel.OtherRepositoryDetails(
                                         repo.namedReference,
                                         storage.namedReference,
                                         repositoryService.getRepository(repo.namedReference.uri),
