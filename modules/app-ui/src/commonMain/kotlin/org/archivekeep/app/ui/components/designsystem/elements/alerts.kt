@@ -14,33 +14,32 @@ import androidx.compose.ui.unit.dp
 
 @Composable
 fun ErrorAlert(content: @Composable ColumnScope.() -> Unit) {
-    Surface(
-        border =
-            BorderStroke(
-                width = 1.dp,
-                color = Color.Red,
-            ),
-        color = Color.Red.copy(alpha = 0.1f),
-        shape = MaterialTheme.shapes.medium,
-    ) {
-        SelectionContainer {
-            Column(
-                Modifier.padding(12.dp),
-                content = content,
-            )
-        }
-    }
+    Alert(Color.Red, Color.Red.copy(alpha = 0.1f), content)
 }
 
 @Composable
 fun WarningAlert(content: @Composable ColumnScope.() -> Unit) {
+    Alert(Color.Yellow, Color.Yellow.copy(alpha = 0.1f), content)
+}
+
+@Composable
+fun SuccessAlert(content: @Composable ColumnScope.() -> Unit) {
+    Alert(Color.Green, Color.Green.copy(alpha = 0.1f), content)
+}
+
+@Composable
+private fun Alert(
+    borderColor: Color,
+    surfaceColor: Color,
+    content: @Composable (ColumnScope.() -> Unit),
+) {
     Surface(
         border =
             BorderStroke(
                 width = 1.dp,
-                color = Color.Yellow,
+                color = borderColor,
             ),
-        color = Color.Yellow.copy(alpha = 0.1f),
+        color = surfaceColor,
         shape = MaterialTheme.shapes.medium,
     ) {
         SelectionContainer {

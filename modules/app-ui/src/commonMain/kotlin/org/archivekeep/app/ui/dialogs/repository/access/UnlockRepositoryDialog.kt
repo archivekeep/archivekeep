@@ -8,7 +8,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.material.Icon
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -37,6 +36,7 @@ import org.archivekeep.app.core.domain.storages.asUnlockRequest
 import org.archivekeep.app.core.persistence.credentials.WalletPO
 import org.archivekeep.app.core.utils.generics.ExecutionOutcome
 import org.archivekeep.app.core.utils.identifiers.RepositoryURI
+import org.archivekeep.app.ui.components.designsystem.elements.SuccessAlert
 import org.archivekeep.app.ui.components.designsystem.input.CheckboxWithText
 import org.archivekeep.app.ui.components.designsystem.input.PasswordField
 import org.archivekeep.app.ui.components.designsystem.input.TextField
@@ -223,29 +223,35 @@ class UnlockRepositoryDialog(
         @Composable
         fun WalletOpenBlock() {
             if (state.canUnlockCredentials) {
-                HorizontalDivider(Modifier.padding(bottom = 12.dp), thickness = 1.dp)
-                Text(
-                    "Wallet with stored credentials is locked.",
-                    modifier = Modifier.padding(bottom = 8.dp),
-                )
-                OutlinedButton(
-                    onClick = {
-                        walletOperationLaunchers.openUnlockWallet({
-                            state.onClose()
-                            onUnlock?.let { it() }
-                        })
-                    },
-                ) {
-                    Icon(
-                        TablerIcons.Lock,
-                        contentDescription = "Locked wallet",
-                        Modifier.size(20.dp),
+                Spacer(Modifier.size(12.dp))
+                SuccessAlert {
+                    Text(
+                        "Wallet with stored credentials is available.",
+                        modifier = Modifier.padding(bottom = 8.dp),
                     )
-                    Spacer(Modifier.width(12.dp))
+                    Text(
+                        "Open wallet to unlock repository, if its password is present there.",
+                        modifier = Modifier.padding(bottom = 12.dp),
+                    )
+                    OutlinedButton(
+                        onClick = {
+                            walletOperationLaunchers.openUnlockWallet({
+                                state.onClose()
+                                onUnlock?.let { it() }
+                            })
+                        },
+                    ) {
+                        Icon(
+                            TablerIcons.Lock,
+                            contentDescription = "Locked wallet",
+                            Modifier.size(20.dp),
+                        )
+                        Spacer(Modifier.width(12.dp))
 
-                    Text("Open wallet")
+                        Text("Open wallet")
+                    }
                 }
-                HorizontalDivider(Modifier.padding(vertical = 12.dp), thickness = 1.dp)
+                Spacer(Modifier.size(24.dp))
             }
         }
 
@@ -326,6 +332,10 @@ class UnlockRepositoryDialog(
                     )
                     Spacer(Modifier.height(12.dp))
                     WalletOpenBlock()
+                    Text(
+                        "Enter password to unlock repository:",
+                        modifier = Modifier.padding(bottom = 8.dp),
+                    )
                     PasswordField(
                         state.password,
                         onValueChange = { state.password = it },
