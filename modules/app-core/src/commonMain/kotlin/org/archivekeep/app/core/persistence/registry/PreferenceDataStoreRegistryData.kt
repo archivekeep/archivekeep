@@ -66,6 +66,12 @@ class PreferenceDataStoreRegistryData(
         }
     }
 
+    override suspend fun forgetStorage(uri: StorageURI) {
+        updateFileSystemStorages { storages ->
+            storages.filter { it.uri != uri }.toSet()
+        }
+    }
+
     override suspend fun updateRepositories(fn: (old: Set<RegisteredRepository>) -> Set<RegisteredRepository>) {
         datastore.edit { preferences ->
             val old = getRepositoriesFromPreferences(preferences)

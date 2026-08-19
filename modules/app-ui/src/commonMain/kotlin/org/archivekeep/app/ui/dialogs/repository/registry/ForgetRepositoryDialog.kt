@@ -13,9 +13,9 @@ import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.CoroutineScope
 import org.archivekeep.app.core.domain.repositories.Repository
+import org.archivekeep.app.core.domain.repositories.RepositoryRegistryService
 import org.archivekeep.app.core.domain.storages.StorageRepository
 import org.archivekeep.app.core.domain.storages.StorageService
-import org.archivekeep.app.core.persistence.registry.RegistryDataStore
 import org.archivekeep.app.core.utils.identifiers.RepositoryURI
 import org.archivekeep.app.ui.components.feature.dialogs.SimpleActionDialogControlButtons
 import org.archivekeep.app.ui.components.feature.dialogs.operations.LaunchableExecutionErrorIfPresent
@@ -35,7 +35,7 @@ class ForgetRepositoryDialog(
     class VM(
         val scope: CoroutineScope,
         storageService: StorageService,
-        val registry: RegistryDataStore,
+        val repositoryRegistryService: RepositoryRegistryService,
         val uri: RepositoryURI,
         val _onClose: () -> Unit,
     ) : IVM {
@@ -43,9 +43,7 @@ class ForgetRepositoryDialog(
 
         val launchable =
             simpleLaunchable(scope) {
-                registry.updateRepositories { old ->
-                    old.filter { it.uri != this@VM.uri }.toSet()
-                }
+                repositoryRegistryService.forgetRepository(uri)
                 onClose()
             }
 
@@ -74,10 +72,10 @@ class ForgetRepositoryDialog(
         onClose: () -> Unit,
     ): VM {
         val storageService = LocalApplicationServices.current.storageService
-        val registry = LocalApplicationServices.current.registry
+        val repositoryRegistryService = LocalApplicationServices.current.repositoryRegistryService
 
         return remember {
-            VM(scope, storageService, registry, uri, onClose)
+            VM(scope, storageService, repositoryRegistryService, uri, onClose)
         }
     }
 
@@ -103,7 +101,7 @@ class ForgetRepositoryDialog(
             },
         )
         Text(
-            remember(state.currentRepo) {
+            remember {
                 buildAnnotatedString {
                     append("Data will not be deleted.")
                 }

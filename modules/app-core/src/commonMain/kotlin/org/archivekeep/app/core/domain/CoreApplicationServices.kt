@@ -3,6 +3,7 @@ package org.archivekeep.app.core.domain
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import org.archivekeep.app.core.domain.archives.ArchiveService
+import org.archivekeep.app.core.domain.repositories.RepositoryRegistryService
 import org.archivekeep.app.core.domain.repositories.RepositoryService
 import org.archivekeep.app.core.domain.storages.KnownStorageService
 import org.archivekeep.app.core.domain.storages.StorageDriver
@@ -36,11 +37,12 @@ interface CoreApplicationServices {
 
     val storageDrivers: Map<String, StorageDriver>
 
-    val storageRegistry: StorageRegistry
-
     val archiveService: ArchiveService
     val storageService: StorageService
     val repositoryService: RepositoryService
+
+    val storageRegistry: StorageRegistry
+    val repositoryRegistryService: RepositoryRegistryService
 
     val syncService: RepoToRepoSyncService
     val addPushService: AddAndPushProcedureService

@@ -1,5 +1,6 @@
 package org.archivekeep.app.ui.domain.wiring
 
+import org.archivekeep.app.ui.dialogs.storages.ForgetStorageDialog
 import org.archivekeep.app.ui.dialogs.storages.MarkAsExternalDialog
 import org.archivekeep.app.ui.dialogs.storages.MarkAsLocalDialog
 import org.archivekeep.app.ui.dialogs.storages.RenameStorageDialog
@@ -9,4 +10,5 @@ fun storageOperationsLaunchersAsDialogs(dialogRenderer: OverlayDialogRenderer) =
         openRename = dialogRenderer.openFn(::RenameStorageDialog),
         openMarkAsLocal = dialogRenderer.openFn(::MarkAsLocalDialog),
         openMarkAsExternal = dialogRenderer.openFn(::MarkAsExternalDialog),
+        openForget = dialogRenderer.openFn(::ForgetStorageDialog),
     )

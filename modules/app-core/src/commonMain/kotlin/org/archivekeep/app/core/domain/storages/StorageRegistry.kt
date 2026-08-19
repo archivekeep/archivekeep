@@ -5,4 +5,6 @@ import org.archivekeep.app.core.utils.identifiers.StorageURI
 
 interface StorageRegistry {
     suspend fun getStorageByURI(storageURI: StorageURI): RegisteredStorage?
+
+    suspend fun forgetStorage(storageURI: StorageURI)
 }

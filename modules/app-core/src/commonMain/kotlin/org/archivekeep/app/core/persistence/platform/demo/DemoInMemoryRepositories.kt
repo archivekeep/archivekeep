@@ -231,6 +231,15 @@ class DemoInMemoryRepositories(
         }
     }
 
+    override suspend fun forgetStorage(uri: StorageURI) {
+        mediaMapped.update { old ->
+            old
+                .filterValues { value ->
+                    value.first.registeredStorage.uri != uri
+                }
+        }
+    }
+
     fun repo(uri: RepositoryURI): MockedRepository? {
         mediaMapped
             .value

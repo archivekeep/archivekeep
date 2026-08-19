@@ -76,6 +76,10 @@ fun StorageDropdownIconLaunched(uri: StorageURI) {
                         isDropdownExpanded = false
                     }, text = { Text("Mark as external") })
                 }
+                DropdownMenuItem(onClick = {
+                    operationsLaunchers.openForget(uri)
+                    isDropdownExpanded = false
+                }, text = { Text("Forget") })
             }
         }
     }

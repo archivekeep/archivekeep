@@ -7,6 +7,7 @@ data class StorageOperationsLaunchers(
     val openRename: (storageURI: StorageURI) -> Unit,
     val openMarkAsLocal: (storageURI: StorageURI) -> Unit,
     val openMarkAsExternal: (storageURI: StorageURI) -> Unit,
+    val openForget: (storageURI: StorageURI) -> Unit,
 )
 
 val LocalStorageOperationsLaunchers =
@@ -15,7 +16,8 @@ val LocalStorageOperationsLaunchers =
             openRename = { invalidUseOfContext("openRename") },
             openMarkAsLocal = { invalidUseOfContext("openMarkAsLocal") },
             openMarkAsExternal = { invalidUseOfContext("openMarkAsExternal") },
+            openForget = { invalidUseOfContext("openForget") },
         )
     }
 
-private fun invalidUseOfContext(name: String): Nothing = throw Error("Context must be present to call $name")
+private fun invalidUseOfContext(name: String): Nothing = throw Error("Context for StorageOperationsLaunchers must be present to call $name")

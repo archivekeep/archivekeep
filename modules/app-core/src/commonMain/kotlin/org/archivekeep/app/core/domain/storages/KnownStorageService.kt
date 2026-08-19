@@ -9,6 +9,7 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flatMapLatest
 import org.archivekeep.app.core.domain.CoreApplicationServiceScope
+import org.archivekeep.app.core.domain.repositories.RepositoryRegistryService
 import org.archivekeep.app.core.persistence.drivers.filesystem.FileStores
 import org.archivekeep.app.core.persistence.registry.RegisteredStorage
 import org.archivekeep.app.core.persistence.registry.RegistryDataStore
@@ -24,6 +25,7 @@ import org.archivekeep.utils.loading.stateIn
 @ContributesBinding(CoreApplicationServiceScope::class)
 class KnownStorageService(
     val scope: CoroutineScope,
+    val repositoryRegistryService: RepositoryRegistryService,
     val dataStore: RegistryDataStore,
     val fileStores: FileStores,
 ) : StorageRegistry {
@@ -64,4 +66,17 @@ class KnownStorageService(
             .firstOrNull {
                 it.storageURI == storageURI
             }?.registeredStorage
+
+    override suspend fun forgetStorage(storageURI: StorageURI) {
+        val knownStorage =
+            knownStorages
+                .firstLoadedOrFailure()
+                .firstOrNull {
+                    it.storageURI == storageURI
+                } ?: return
+
+        knownStorage.registeredRepositories.forEach { repositoryRegistryService.forgetRepository(it.uri) }
+
+        dataStore.forgetStorage(storageURI)
+    }
 }
