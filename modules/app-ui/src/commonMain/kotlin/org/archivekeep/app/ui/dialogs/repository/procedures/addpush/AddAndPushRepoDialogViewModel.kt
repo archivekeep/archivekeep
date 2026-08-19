@@ -103,7 +103,7 @@ class AddAndPushRepoDialogViewModel(
                             selections.value.all { selection ->
                                 candidates
                                     .first { it.uri == selection }
-                                    .repositoryState.connectionState.isConnected
+                                    .repositoryState.connectionState.isAccessible
                             }
 
                     DialogOperationControlState.NotRunning(

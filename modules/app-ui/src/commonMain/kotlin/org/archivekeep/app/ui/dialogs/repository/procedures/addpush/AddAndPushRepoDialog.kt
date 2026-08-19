@@ -64,7 +64,7 @@ class AddAndPushRepoDialog(
                     if (v is Loadable.Loaded) {
                         selectedDestinationRepositories.value =
                             v.value
-                                .filter { it.repositoryState.connectionState.isConnected }
+                                .filter { it.repositoryState.connectionState.isAccessible }
                                 .map { it.uri }
                                 .toSet()
                     }

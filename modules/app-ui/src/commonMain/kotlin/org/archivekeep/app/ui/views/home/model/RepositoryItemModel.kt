@@ -62,12 +62,12 @@ class RepositoryItemModel(
 
             val canPushLoadable =
                 syncStatus?.mapLoadedData {
-                    (it.missingBaseInOther != 0 || it.relocations > 0) && connectionStatus.isConnected
+                    (it.missingBaseInOther != 0 || it.relocations > 0) && connectionStatus.isAccessible
                 } ?: OptionalLoadable.NotAvailable()
 
             val canPullLoadable =
                 syncStatus?.mapLoadedData {
-                    (it.missingOtherInBase != 0 || it.relocations > 0) && connectionStatus.isConnected
+                    (it.missingOtherInBase != 0 || it.relocations > 0) && connectionStatus.isAccessible
                 } ?: OptionalLoadable.NotAvailable()
 
             val syncTexts = syncStatus?.mapLoadedData(::textTags) ?: OptionalLoadable.NotAvailable()

@@ -10,6 +10,7 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
 import compose.icons.TablerIcons
 import compose.icons.tablericons.Lock
+import org.archivekeep.app.core.domain.repositories.RepositoryConnectionState
 import org.archivekeep.app.ui.components.designsystem.sections.SectionCardBottomListItem
 import org.archivekeep.app.ui.components.designsystem.sections.SectionCardBottomListItemIconAvailableActions
 import org.archivekeep.app.ui.components.feature.InArchiveRepositoryDropdownIconLaunched
@@ -22,8 +23,7 @@ import org.archivekeep.utils.loading.optional.OptionalLoadable
 fun RepositoryRow(
     statusText: OptionalLoadable<String>,
     isLoading: Boolean,
-    isConnected: Boolean,
-    needsUnlock: Boolean,
+    connectionStatus: RepositoryConnectionState,
     icon: ImageVector,
     name: String,
     iconActions: List<Loadable<Action>>,
@@ -33,14 +33,14 @@ fun RepositoryRow(
     SectionCardBottomListItem(
         title = name,
         statusText = statusText,
-        modifier = if (!isConnected) Modifier.alpha(0.6f) else Modifier,
+        modifier = if (!connectionStatus.isAccessible) Modifier.alpha(0.6f) else Modifier,
         icon = {
             if (isLoading) {
                 CircularProgressIndicator(
                     strokeWidth = 2.dp,
                     color = LocalContentColor.current.let { it.copy(alpha = it.alpha * 0.7f) },
                 )
-            } else if (needsUnlock) {
+            } else if (connectionStatus.isLocked) {
                 Icon(TablerIcons.Lock, "Locked")
             } else {
                 Icon(icon, "Storage")

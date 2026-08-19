@@ -66,7 +66,7 @@ data class MockedRepository(
                     associationId,
                     displayName,
                 ),
-                RepositoryConnectionState.Connected,
+                RepositoryConnectionState.Accessible,
             ),
         )
 }

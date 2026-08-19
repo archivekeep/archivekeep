@@ -124,7 +124,7 @@ class HomeViewModel(
                             a.repositories
                                 .map { (storage, repo) ->
                                     HomeExternalArchiveModel.OtherRepositoryDetails(
-                                        repo.namedReference,
+                                        repo,
                                         storage.namedReference,
                                         repositoryService.getRepository(repo.namedReference.uri),
                                     )

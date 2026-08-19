@@ -6,9 +6,8 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
 import org.archivekeep.app.core.domain.archives.AssociatedArchive
 import org.archivekeep.app.core.domain.repositories.Repository
+import org.archivekeep.app.core.domain.repositories.ResolvedRepositoryState
 import org.archivekeep.app.core.domain.storages.StorageNamedReference
-import org.archivekeep.app.core.domain.storages.needsUnlock
-import org.archivekeep.app.core.utils.identifiers.NamedRepositoryReference
 import org.archivekeep.utils.loading.optional.OptionalLoadable
 import org.archivekeep.utils.loading.optional.mapLoadedData
 import org.archivekeep.utils.safeCombine
@@ -22,10 +21,12 @@ class HomeExternalArchiveModel(
     val isAssociated = archive.associationId != null
 
     class OtherRepositoryDetails(
-        val reference: NamedRepositoryReference,
+        val repo: ResolvedRepositoryState,
         val storageReference: StorageNamedReference,
         val repository: Repository,
-    )
+    ) {
+        val reference = repo.namedReference
+    }
 
     val state =
         safeCombine(
@@ -45,9 +46,18 @@ class HomeExternalArchiveModel(
                                         ""
                                     }
                                 ),
-                            statusText = OptionalLoadable.LoadedAvailable(""), // TODO: implement status text
+                            statusText =
+                                OptionalLoadable.LoadedAvailable(
+                                    if (repo.repo.connectionState.isLocked) {
+                                        "Locked"
+                                    } else if (!repo.repo.connectionState.isAccessible) {
+                                        "Disconnected"
+                                    } else {
+                                        ""
+                                    },
+                                ),
                             isLoading = false, // TODO: implement loading indication
-                            needsUnlock = accessor.needsUnlock(),
+                            connectionStatus = repo.repo.connectionState,
                             repositoryOperationalState =
                                 RepositoryOperationalState(
                                     accessor,

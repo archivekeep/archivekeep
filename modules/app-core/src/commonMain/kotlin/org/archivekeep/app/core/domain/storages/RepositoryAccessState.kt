@@ -19,16 +19,19 @@ fun RepositoryAccessState.asStatus(): RepositoryConnectionState =
         }
 
         is OptionalLoadable.LoadedAvailable -> {
-            RepositoryConnectionState.Connected
+            RepositoryConnectionState.Accessible
         }
 
         OptionalLoadable.Loading -> {
             RepositoryConnectionState.Disconnected
         }
 
-        // TODO: better
         is OptionalLoadable.NotAvailable -> {
-            RepositoryConnectionState.ConnectedLocked
+            if (this.needsUnlock()) {
+                RepositoryConnectionState.ConnectedLocked
+            } else {
+                RepositoryConnectionState.Disconnected
+            }
         }
     }
 

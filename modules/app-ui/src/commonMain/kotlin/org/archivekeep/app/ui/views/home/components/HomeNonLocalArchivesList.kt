@@ -55,8 +55,7 @@ fun HomeNonLocalArchivesList(otherArchivesLoadable: Loadable<List<HomeExternalAr
                         RepositoryRow(
                             statusText = repo.statusText,
                             isLoading = repo.isLoading,
-                            isConnected = true,
-                            needsUnlock = repo.needsUnlock,
+                            connectionStatus = repo.connectionStatus,
                             name = repo.name,
                             icon = CIcons.Repository,
                             iconActions = ra.iconActions(),

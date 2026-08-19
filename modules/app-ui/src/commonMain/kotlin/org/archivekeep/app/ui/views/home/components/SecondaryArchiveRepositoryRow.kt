@@ -4,7 +4,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.vector.ImageVector
 import org.archivekeep.app.ui.domain.wiring.LocalArchiveOperationLaunchers
 import org.archivekeep.app.ui.views.home.model.RepositoryItemUiState
-import org.archivekeep.utils.loading.mapIfLoadedOrDefault
 
 @Composable
 fun SecondaryArchiveRepositoryRow(
@@ -19,8 +18,7 @@ fun SecondaryArchiveRepositoryRow(
     RepositoryRow(
         statusText = nonPrimaryRepository.texts,
         isLoading = nonPrimaryRepository.isLoading,
-        isConnected = nonPrimaryRepository.connectionStatus.isConnected,
-        needsUnlock = nonPrimaryRepository.repositoryOperationalState.needsUnlock.mapIfLoadedOrDefault(false) { it },
+        connectionStatus = nonPrimaryRepository.connectionStatus,
         name = name,
         icon = icon,
         iconActions = actions.iconActions(),

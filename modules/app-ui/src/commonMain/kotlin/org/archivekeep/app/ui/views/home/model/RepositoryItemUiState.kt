@@ -40,7 +40,13 @@ data class RepositoryItemUiState(
     val texts: OptionalLoadable<String> =
         combineTexts(
             OptionalLoadable.LoadedAvailable(
-                if (!connectionStatus.isConnected) listOf("Disconnected") else emptyList(),
+                if (connectionStatus.isLocked) {
+                    listOf("Locked")
+                } else if (!connectionStatus.isAccessible) {
+                    listOf("Disconnected")
+                } else {
+                    emptyList()
+                },
             ),
             addTexts,
             syncTexts,
