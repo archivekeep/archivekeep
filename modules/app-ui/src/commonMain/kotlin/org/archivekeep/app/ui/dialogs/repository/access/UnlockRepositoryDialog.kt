@@ -156,6 +156,8 @@ class UnlockRepositoryDialog(
                         request.providePassword(passwordState.value, rememberPasswordState.value)
                     }
                 }
+
+                onClose()
             }
 
         override fun onClose() {
