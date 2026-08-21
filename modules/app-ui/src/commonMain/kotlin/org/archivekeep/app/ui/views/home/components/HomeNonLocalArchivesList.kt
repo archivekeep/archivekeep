@@ -18,6 +18,7 @@ import org.archivekeep.app.ui.components.designsystem.sections.sectionCardHorizo
 import org.archivekeep.app.ui.components.designsystem.theme.CIcons
 import org.archivekeep.app.ui.components.feature.LoadableGuard
 import org.archivekeep.app.ui.domain.wiring.LocalArchiveOperationLaunchers
+import org.archivekeep.app.ui.views.home.components.util.baseActions
 import org.archivekeep.app.ui.views.home.model.HomeExternalArchiveModel
 import org.archivekeep.utils.loading.Loadable
 
@@ -58,7 +59,7 @@ fun HomeNonLocalArchivesList(otherArchivesLoadable: Loadable<List<HomeExternalAr
                             connectionStatus = repo.connectionStatus,
                             name = repo.name,
                             icon = CIcons.Repository,
-                            iconActions = ra.iconActions(),
+                            iconActions = ra.baseActions(),
                             secondaryRepositoryActions = emptyList(),
                             repositoryActions = ra,
                         )
