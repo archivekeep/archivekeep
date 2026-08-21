@@ -62,6 +62,27 @@
     <content_rating type="oars-1.1" />
 
     <releases>
+        <release version="0.6.4" date="2026-08-21">
+            <description>
+                <p>Added:</p>
+                <ul>
+                    <li>icon buttons for repositories in external archives,</li>
+                    <li>warning badge for unassociated repositories in external archives,</li>
+                    <li>ability to forget repositories from the Storages view,</li>
+                    <li>ability to forget storages.</li>
+                </ul>
+                <p>Changed:</p>
+                <ul>
+                    <li>Add and push action is shown before Add action,</li>
+                    <li>suggestion to unlock a wallet as a green alert,</li>
+                    <li>the repository unlock dialog is automatically closed on success (instead of success message).</li>
+                </ul>
+                <p>Fixed:</p>
+                <ul>
+                    <li>a connected but locked repository was shown as Locked instead of Disconnected.</li>
+                </ul>
+            </description>
+        </release>
         <release version="0.6.3" date="2026-08-12">
             <description>
                 <p>Added:</p>

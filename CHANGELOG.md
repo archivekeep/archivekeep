@@ -1,6 +1,23 @@
 # Changelog
 
-## Unreleased
+## 0.6.4 - 2026-08-21
+
+### Added
+
+- icon buttons for repositories in external archives,
+- warning badge for unassociated repositories in external archives,
+- ability to forget repositories from the Storages view,
+- ability to forget storages.
+
+### Changed
+
+- Add and push action is shown before Add action,
+- suggestion to unlock a wallet as a green alert,
+- the repository unlock dialog is automatically closed on success (instead of success message).
+
+### Fixed
+
+- a connected but locked repository was shown as Locked instead of Disconnected.
 
 ## 0.6.3 - 2026-08-12
 
