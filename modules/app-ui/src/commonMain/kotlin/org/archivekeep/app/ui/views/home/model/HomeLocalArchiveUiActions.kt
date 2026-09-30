@@ -13,9 +13,9 @@ interface HomeLocalArchiveUiActions : RepositoryBaseUiActions {
             associate,
             unassociate,
             reindex,
-            cleanupFiles,
             addPush,
             add,
+            cleanupFiles,
             push,
         )
 }
