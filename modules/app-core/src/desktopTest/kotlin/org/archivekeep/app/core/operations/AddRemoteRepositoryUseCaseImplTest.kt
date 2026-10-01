@@ -1,6 +1,7 @@
 package org.archivekeep.app.core.operations
 
 import aws.sdk.kotlin.runtime.auth.credentials.StaticCredentialsProvider
+import com.adobe.testing.s3mock.testcontainers.S3MockContainer
 import dev.zacsweers.metro.createGraphFactory
 import io.kotest.assertions.nondeterministic.eventually
 import io.kotest.matchers.collections.shouldContainExactly
@@ -28,9 +29,9 @@ import org.archivekeep.utils.loading.optional.OptionalLoadable
 import org.archivekeep.utils.loading.optional.firstLoadedOrNullOnFailedOrNotAvailable
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.io.TempDir
-import org.testcontainers.containers.MinIOContainer
 import org.testcontainers.junit.jupiter.Container
 import org.testcontainers.junit.jupiter.Testcontainers
+import org.testcontainers.utility.DockerImageName
 import java.io.File
 import java.net.URI
 import kotlin.time.Duration
@@ -40,24 +41,25 @@ import kotlin.time.Duration.Companion.seconds
 @Testcontainers
 class AddRemoteRepositoryUseCaseImplTest {
     private val bucketName = "test-bucket"
+    private val accessKey = "foo"
+    private val secretKey = "bar"
+    private val region = "us-east-1"
 
     @Container
-    var minio: MinIOContainer =
-        MinIOContainer("minio/minio:RELEASE.2023-09-04T19-57-37Z")
-            .withUserName("testuser")
-            .withPassword("testpassword")
+    var s3Mock: S3MockContainer =
+        S3MockContainer(DockerImageName.parse("adobe/s3mock:4.3.0"))
 
     @Test
     fun `repository should be auto re-opened after added (even without credentials preservation)`(
         @TempDir t: File,
     ) = runTest {
-        createTestBucket(minio, bucketName)
+        createTestBucket(s3Mock, bucketName)
         S3Repository.create(
-            URI.create(minio.s3URL),
-            "aa",
+            URI.create(s3Mock.httpEndpoint),
+            region,
             StaticCredentialsProvider {
-                accessKeyId = "testuser"
-                secretAccessKey = "testpassword"
+                accessKeyId = accessKey
+                secretAccessKey = secretKey
             },
             bucketName,
         )
@@ -85,9 +87,9 @@ class AddRemoteRepositoryUseCaseImplTest {
                 drivers,
             )
 
-        useCase.addS3(minio.s3URL, "test-bucket", minio.userName, minio.password, false)
+        useCase.addS3(s3Mock.httpEndpoint, "test-bucket", accessKey, secretKey, false)
 
-        val expectedResultURI = RepositoryURI("s3", "${minio.s3URL}|test-bucket")
+        val expectedResultURI = RepositoryURI("s3", "${s3Mock.httpEndpoint}|test-bucket")
 
         env.registry.registeredRepositories.first() shouldContainExactly
             setOf(
@@ -96,7 +98,7 @@ class AddRemoteRepositoryUseCaseImplTest {
 
         env.credentialsStore.inMemoryCredentials.first() shouldContainExactly
             mapOf(
-                expectedResultURI to BasicAuthCredentials(minio.userName, minio.password),
+                expectedResultURI to BasicAuthCredentials(accessKey, secretKey),
             )
 
         // assume slow refresh and re-subscribe
@@ -127,13 +129,13 @@ class AddRemoteRepositoryUseCaseImplTest {
     fun `credentials should be preserved`(
         @TempDir t: File,
     ) = runTest {
-        createTestBucket(minio, bucketName)
+        createTestBucket(s3Mock, bucketName)
         S3Repository.create(
-            URI.create(minio.s3URL),
-            "aa",
+            URI.create(s3Mock.httpEndpoint),
+            region,
             StaticCredentialsProvider {
-                accessKeyId = "testuser"
-                secretAccessKey = "testpassword"
+                accessKeyId = accessKey
+                secretAccessKey = secretKey
             },
             bucketName,
         )
@@ -163,9 +165,9 @@ class AddRemoteRepositoryUseCaseImplTest {
 
         env.passwordProtectedWalletDataStore.create("wallet-password")
 
-        useCase.addS3(minio.s3URL, "test-bucket", minio.userName, minio.password, true)
+        useCase.addS3(s3Mock.httpEndpoint, "test-bucket", accessKey, secretKey, true)
 
-        val expectedResultURI = RepositoryURI("s3", "${minio.s3URL}|test-bucket")
+        val expectedResultURI = RepositoryURI("s3", "${s3Mock.httpEndpoint}|test-bucket")
 
         env.registry.registeredRepositories.first() shouldContainExactly
             setOf(
@@ -182,8 +184,8 @@ class AddRemoteRepositoryUseCaseImplTest {
                             expectedResultURI,
                             Json.encodeToString(
                                 BasicAuthCredentials(
-                                    minio.userName,
-                                    minio.password,
+                                    accessKey,
+                                    secretKey,
                                 ),
                             ),
                         ),

@@ -17,6 +17,7 @@ class S3RepositoryTestRepo(
     val bucketName: String,
     val accessKey: String = "NONE",
     val secretKey: String = "NONE",
+    val region: String = "us-east-1",
 ) : RepoContractTest.TestRepo<S3Repository> {
     private val credentialsProvider =
         StaticCredentialsProvider {
@@ -27,7 +28,7 @@ class S3RepositoryTestRepo(
     suspend fun create(): S3Repository =
         S3Repository.create(
             URI.create(s3URL),
-            "aa",
+            region,
             credentialsProvider,
             bucketName,
         )
@@ -35,7 +36,7 @@ class S3RepositoryTestRepo(
     override suspend fun open(testDispatcher: CoroutineDispatcher): S3Repository =
         S3Repository.open(
             URI.create(s3URL),
-            "aa",
+            region,
             credentialsProvider,
             bucketName,
             sharingDispatcher = testDispatcher,
@@ -46,7 +47,7 @@ class S3RepositoryTestRepo(
         S3Client
             .fromEnvironment {
                 endpointUrl = Url.parse(s3URL)
-                region = "TODO"
+                region = this@S3RepositoryTestRepo.region
                 credentialsProvider = this@S3RepositoryTestRepo.credentialsProvider
                 forcePathStyle = true
             }.use { s3 ->
@@ -67,7 +68,7 @@ class S3RepositoryTestRepo(
         S3Client
             .fromEnvironment {
                 endpointUrl = Url.parse(s3URL)
-                region = "TODO"
+                region = this@S3RepositoryTestRepo.region
                 credentialsProvider = this@S3RepositoryTestRepo.credentialsProvider
                 forcePathStyle = true
             }.use { s3 ->

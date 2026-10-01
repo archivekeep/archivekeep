@@ -196,7 +196,7 @@ class S3StorageDriver(
                             open(
                                 uri,
                                 endpoint = URI.create(repoData.endpoint),
-                                region = "TODO",
+                                region = "us-east-1",
                                 credentialsProvider =
                                     StaticCredentialsProvider {
                                         accessKeyId = basicAuthCredentials.username

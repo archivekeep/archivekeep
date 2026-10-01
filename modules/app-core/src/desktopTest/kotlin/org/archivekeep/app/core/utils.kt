@@ -4,20 +4,20 @@ import aws.sdk.kotlin.runtime.auth.credentials.StaticCredentialsProvider
 import aws.sdk.kotlin.services.s3.S3Client
 import aws.sdk.kotlin.services.s3.createBucket
 import aws.smithy.kotlin.runtime.net.url.Url
-import org.testcontainers.containers.MinIOContainer
+import com.adobe.testing.s3mock.testcontainers.S3MockContainer
 
 suspend fun createTestBucket(
-    minio: MinIOContainer,
+    s3Mock: S3MockContainer,
     bucketName: String,
 ) {
     S3Client
         .fromEnvironment {
-            endpointUrl = Url.parse(minio.s3URL)
-            region = "TODO"
+            endpointUrl = Url.parse(s3Mock.httpEndpoint)
+            region = "us-east-1"
             credentialsProvider =
                 StaticCredentialsProvider {
-                    accessKeyId = minio.userName
-                    secretAccessKey = minio.password
+                    accessKeyId = "foo"
+                    secretAccessKey = "bar"
                 }
             forcePathStyle = true
         }.use { s3 ->

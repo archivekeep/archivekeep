@@ -37,7 +37,7 @@ class EncryptedS3RepositoryTestRepo private constructor(
             ).apply {
                 EncryptedS3Repository.create(
                     URI.create(s3URL),
-                    "aa",
+                    "us-east-1",
                     credentialsProvider,
                     bucketName,
                     password,
@@ -50,7 +50,7 @@ class EncryptedS3RepositoryTestRepo private constructor(
         EncryptedS3Repository
             .openAndUnlock(
                 URI.create(s3URL),
-                "aa",
+                "us-east-1",
                 credentialsProvider,
                 bucketName,
                 password,
