@@ -3,6 +3,12 @@ package org.archivekeep.app.core.persistence.drivers.filesystem.operations.add
 import kotlinx.coroutines.flow.StateFlow
 import org.archivekeep.app.core.utils.generics.Execution
 
+enum class PlainRepositoryType {
+    OBJECTBOX,
+    SQLITE,
+    CHECKSUM_FILES,
+}
+
 sealed interface AddFileSystemRepositoryOperation {
     sealed interface Invalid : AddFileSystemRepositoryOperation {
         data object AlreadyRegistered : Invalid
@@ -50,7 +56,7 @@ sealed interface AddFileSystemRepositoryOperation {
 
         suspend fun startInitAsPlain(
             storageRegistrationInput: StorageRegistrationInput?,
-            sqliteDB: Boolean = true,
+            repoType: PlainRepositoryType = PlainRepositoryType.OBJECTBOX,
         )
 
         suspend fun startInitAsEncrypted(

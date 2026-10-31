@@ -24,6 +24,19 @@ internal fun safeSubPath(path: Path): Path {
     return p
 }
 
+/**
+ * Compares two millisecond timestamps with second-granularity precision.
+ *
+ * On FAT/exFAT USB flash drives, Android's VFS layer adds sub-second noise
+ * (e.g., 940ms) when reading timestamps, while Linux reads them cleanly.
+ * Both platforms agree on the seconds part, so comparing at second granularity
+ * eliminates the cross-platform noise.
+ */
+internal fun areTimestampsDifferent(
+    fileMtimeMillis: Long,
+    indexedMtimeMillis: Long,
+): Boolean = fileMtimeMillis / 1000 != indexedMtimeMillis / 1000
+
 internal fun computeChecksum(path: Path): String {
     val md = MessageDigest.getInstance("SHA-256")
 

@@ -92,14 +92,13 @@ jobs:
           arch: ${{ matrix.architecture }}
 
       - name: 'Upload artifact: Flatpak Bundle'
-        if: github.ref == 'refs/heads/main'
         uses: actions/upload-artifact@v4
         with:
           name: archivekeep-desktop.${{ matrix.architecture }}.flatpak
           path: archivekeep-desktop.${{ matrix.architecture }}.flatpak
           if-no-files-found: error
           compression-level: 0
-          retention-days: 45
+          retention-days: ${{ github.ref == 'refs/heads/main' && 45 || 2 }}
 
   merge-sources:
     name: "Merge multi-arch Flatpak sources"

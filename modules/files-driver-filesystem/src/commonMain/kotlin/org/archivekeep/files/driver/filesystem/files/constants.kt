@@ -1,4 +1,4 @@
-package org.archivekeep.files.driver.filesystem.files.sqlite
+package org.archivekeep.files.driver.filesystem.files
 
 import kotlin.time.Duration.Companion.seconds
 

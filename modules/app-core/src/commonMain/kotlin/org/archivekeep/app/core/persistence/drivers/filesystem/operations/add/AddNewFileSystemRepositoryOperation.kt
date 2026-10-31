@@ -10,6 +10,7 @@ import org.archivekeep.app.core.utils.generics.perform
 import org.archivekeep.files.driver.filesystem.encryptedfiles.EncryptedFileSystemRepository
 import org.archivekeep.files.driver.filesystem.files.FilesRepo
 import org.archivekeep.files.driver.filesystem.files.FilesSqliteRepo
+import org.archivekeep.files.driver.filesystem.files.objectbox.FilesObjectBoxRepo
 
 class AddNewFileSystemRepositoryOperation(
     scope: CoroutineScope,
@@ -35,15 +36,15 @@ class AddNewFileSystemRepositoryOperation(
 
     override suspend fun startInitAsPlain(
         storageRegistrationInput: StorageRegistrationInput?,
-        sqliteDB: Boolean,
+        repoType: PlainRepositoryType,
     ) {
         checkInput(storageRegistration, storageRegistrationInput)
 
         initMutableStateFlow.perform {
-            if (sqliteDB) {
-                FilesSqliteRepo.create(pathPath)
-            } else {
-                FilesRepo.create(pathPath)
+            when (repoType) {
+                PlainRepositoryType.OBJECTBOX -> FilesObjectBoxRepo.create(pathPath).also { it.close() }
+                PlainRepositoryType.SQLITE -> FilesSqliteRepo.create(pathPath)
+                PlainRepositoryType.CHECKSUM_FILES -> FilesRepo.create(pathPath)
             }
         }
 

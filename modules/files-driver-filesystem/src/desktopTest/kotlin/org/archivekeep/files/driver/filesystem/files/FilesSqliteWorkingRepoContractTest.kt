@@ -8,11 +8,14 @@ import org.archivekeep.files.utils.runBlockingTest
 import org.archivekeep.utils.io.WatchDefaults
 import org.junit.jupiter.api.io.TempDir
 import java.nio.file.Path
+import java.nio.file.attribute.FileTime
 import java.util.UUID
 import kotlin.io.path.createDirectory
 import kotlin.io.path.deleteIfExists
 import kotlin.io.path.outputStream
+import kotlin.io.path.setLastModifiedTime
 import kotlin.time.Duration.Companion.milliseconds
+import kotlin.time.Duration.Companion.seconds
 
 class FilesSqliteWorkingRepoContractTest : WorkingRepoContractTest<FilesSqliteRepo>() {
     init {
@@ -52,10 +55,18 @@ class FilesSqliteWorkingRepoContractTest : WorkingRepoContractTest<FilesSqliteRe
                 bytes: ByteArray,
                 preserveTimestamp: Boolean,
             ) {
-                path
-                    .resolve(filename)
-                    .outputStream()
-                    .use { it.write(bytes) }
+                val file = path.resolve(filename)
+                file.outputStream().use { it.write(bytes) }
+
+                if (!preserveTimestamp) {
+                    // Ensure the timestamp changes by at least 2 seconds so the
+                    // second-granularity comparison in FilesDatabaseRepo detects it.
+                    file.setLastModifiedTime(
+                        FileTime.fromMillis(
+                            System.currentTimeMillis() + 2.seconds.inWholeMilliseconds,
+                        ),
+                    )
+                }
             }
 
             override fun deleteFile(filename: String) {

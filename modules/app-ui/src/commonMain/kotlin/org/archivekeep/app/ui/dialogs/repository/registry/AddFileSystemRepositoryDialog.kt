@@ -33,6 +33,7 @@ import kotlinx.coroutines.plus
 import org.archivekeep.app.core.persistence.drivers.filesystem.FileSystemStorageType
 import org.archivekeep.app.core.persistence.drivers.filesystem.operations.add.AddFileSystemRepositoryOperation
 import org.archivekeep.app.core.persistence.drivers.filesystem.operations.add.AddFileSystemRepositoryUseCase
+import org.archivekeep.app.core.persistence.drivers.filesystem.operations.add.PlainRepositoryType
 import org.archivekeep.app.core.persistence.drivers.filesystem.operations.add.StorageRegistrationInput
 import org.archivekeep.app.core.persistence.drivers.filesystem.operations.add.StorageRegistrationState
 import org.archivekeep.app.core.utils.generics.Execution
@@ -205,7 +206,7 @@ private fun AddRepositoryDialogContents(
     var createEncrypted by remember { mutableStateOf(false) }
     var createPassword by remember { mutableStateOf("") }
     var createPassword2 by remember { mutableStateOf("") }
-    var createSQLite by remember { mutableStateOf(true) }
+    var createRepoType by remember { mutableStateOf(PlainRepositoryType.OBJECTBOX) }
 
     var password by remember { mutableStateOf("") }
     val coroutineScope = rememberCoroutineScope()
@@ -305,13 +306,19 @@ private fun AddRepositoryDialogContents(
                                     extra = {
                                         if (!createEncrypted) {
                                             Column {
+                                                RadioWithText(
+                                                    selected = createRepoType == PlainRepositoryType.OBJECTBOX,
+                                                    onClick = { createRepoType = PlainRepositoryType.OBJECTBOX },
+                                                    text = "ObjectBox Index DB (recommended, fastest)",
+                                                    enabled = canEdit,
+                                                )
                                                 RadioWithTextAndExtra(
-                                                    selected = createSQLite,
-                                                    onClick = { createSQLite = true },
-                                                    text = "SQLite Index DB (recommended in most cases)",
+                                                    selected = createRepoType == PlainRepositoryType.SQLITE,
+                                                    onClick = { createRepoType = PlainRepositoryType.SQLITE },
+                                                    text = "SQLite Index DB",
                                                     enabled = canEdit,
                                                 ) {
-                                                    if (createSQLite) {
+                                                    if (createRepoType == PlainRepositoryType.SQLITE) {
                                                         Column {
                                                             WarningAlert {
                                                                 Text("SQLite Index DB repositories located on external media are not supported on Android.")
@@ -321,8 +328,8 @@ private fun AddRepositoryDialogContents(
                                                     }
                                                 }
                                                 RadioWithText(
-                                                    selected = !createSQLite,
-                                                    onClick = { createSQLite = false },
+                                                    selected = createRepoType == PlainRepositoryType.CHECKSUM_FILES,
+                                                    onClick = { createRepoType = PlainRepositoryType.CHECKSUM_FILES },
                                                     text = "Individual checksum files (needed for sharing with Android devices via external media)",
                                                     enabled = canEdit,
                                                 )
@@ -460,7 +467,7 @@ private fun AddRepositoryDialogContents(
                                             onLaunch = {
                                                 if (!createEncrypted) {
                                                     singleLaunchGuard.launch {
-                                                        option.startInitAsPlain(storageRegistrationInput, createSQLite)
+                                                        option.startInitAsPlain(storageRegistrationInput, createRepoType)
                                                     }
                                                 } else {
                                                     singleLaunchGuard.launch {

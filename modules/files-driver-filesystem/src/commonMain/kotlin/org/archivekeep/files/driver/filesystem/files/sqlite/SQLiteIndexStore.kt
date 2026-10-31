@@ -1,85 +1,118 @@
 package org.archivekeep.files.driver.filesystem.files.sqlite
 
-import kotlinx.coroutines.NonCancellable
-import kotlinx.coroutines.coroutineScope
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
+import kotlinx.coroutines.flow.map
+import org.archivekeep.files.driver.filesystem.files.DatabaseIndexStore
+import org.archivekeep.files.driver.filesystem.files.durationToDeath
 import java.util.*
 
 class SQLiteIndexStore(
-    val sqliteDataSource: SQLiteDataSource,
-) {
-    suspend fun getDeadIncomingFiles() = sqliteDataSource.getIncomingFilesAliveBefore(Date(Date().time - durationToDeath.inWholeMilliseconds))
+    private val sqliteDataSource: SQLiteDataSource,
+) : DatabaseIndexStore {
+    override val files =
+        sqliteDataSource.files.map { list ->
+            list.map {
+                DatabaseIndexStore.DatabaseFileRecord(
+                    path = it.path,
+                    size = it.size,
+                    checksumSha256 = it.checksumSha256,
+                    lastModified = it.lastModified,
+                )
+            }
+        }
 
-    suspend inline fun incomingFile(
+    override suspend fun file(path: String): DatabaseIndexStore.DatabaseFileRecord? =
+        sqliteDataSource.file(path)?.let {
+            DatabaseIndexStore.DatabaseFileRecord(
+                path = it.path,
+                size = it.size,
+                checksumSha256 = it.checksumSha256,
+                lastModified = it.lastModified,
+            )
+        }
+
+    override suspend fun storeFile(
+        path: String,
+        size: Long,
+        lastModified: Date,
+        checksumSha256: String,
+        dropIncomingFile: Boolean,
+        reindex: Boolean,
+    ) {
+        sqliteDataSource.storeFile(path, size, lastModified, checksumSha256, dropIncomingFile, reindex)
+    }
+
+    override suspend fun remove(path: String) {
+        sqliteDataSource.remove(path)
+    }
+
+    override suspend fun storeIncomingFile(
         path: String,
         tmpWritePath: String,
         size: Long,
         checksumSha256: String,
-        crossinline block: suspend () -> Date,
+        lastAlive: Date,
     ) {
-        sqliteDataSource.storeIncomingFile(path, tmpWritePath, size, checksumSha256, Date())
-
-        val lastModified =
-            try {
-                coroutineScope {
-                    val lastAliveKeeper =
-                        launch {
-                            sqliteDataSource.updateIncomingFileLastAlive(path, Date())
-                            delay(aliveUpdateFrequency)
-                        }
-
-                    try {
-                        block()
-                    } finally {
-                        lastAliveKeeper.cancel()
-                    }
-                }
-            } catch (e: Throwable) {
-                withContext(NonCancellable) {
-                    sqliteDataSource.removeIncomingFile(path)
-                }
-
-                throw e
-            }
-
-        sqliteDataSource.storeFile(
-            path,
-            size,
-            lastModified,
-            checksumSha256,
-            dropIncomingFile = true,
-        )
+        sqliteDataSource.storeIncomingFile(path, tmpWritePath, size, checksumSha256, lastAlive)
     }
 
-    suspend fun getDeadPendingMoves() = sqliteDataSource.getMovesAliveBefore(Date(Date().time - durationToDeath.inWholeMilliseconds))
+    override suspend fun updateIncomingFileLastAlive(
+        path: String,
+        date: Date,
+    ) {
+        sqliteDataSource.updateIncomingFileLastAlive(path, date)
+    }
 
-    suspend inline fun moveFile(
+    override suspend fun removeIncomingFile(path: String) {
+        sqliteDataSource.removeIncomingFile(path)
+    }
+
+    override suspend fun getDeadIncomingFiles(): List<DatabaseIndexStore.IncomingFileRecord> =
+        sqliteDataSource.getIncomingFilesAliveBefore(Date(Date().time - durationToDeath.inWholeMilliseconds)).map {
+            DatabaseIndexStore.IncomingFileRecord(
+                path = it.path,
+                tmpWritePath = it.tmpWritePath,
+                size = it.size,
+                checksumSha256 = it.checksumSha256,
+            )
+        }
+
+    override suspend fun getDeadPendingMoves(): List<DatabaseIndexStore.PendingMoveRecord> =
+        sqliteDataSource.getMovesAliveBefore(Date(Date().time - durationToDeath.inWholeMilliseconds)).map {
+            DatabaseIndexStore.PendingMoveRecord(
+                from = it.from,
+                to = it.to,
+                size = it.size,
+                checksumSha256 = it.checksumSha256,
+            )
+        }
+
+    override suspend fun beginMove(
         from: String,
         to: String,
-        crossinline block: suspend () -> Date,
-    ) {
-        val move = sqliteDataSource.beginMove(from, to, Date())
+        lastAlive: Date,
+    ): DatabaseIndexStore.PendingMove {
+        val move = sqliteDataSource.beginMove(from, to, lastAlive)
+        return object : DatabaseIndexStore.PendingMove {
+            override val from: String = move.from
+            override val to: String = move.to
+            override val size: Long = move.size
+            override val checksumSha256: String = move.checksumSha256
 
-        val lastModified =
-            try {
-                coroutineScope {
-                    launch {
-                        move.updateMoveLastAlive(Date())
-                        delay(aliveUpdateFrequency)
-                    }
-
-                    block()
-                }
-            } catch (e: Throwable) {
-                withContext(NonCancellable) {
-                    move.failed()
-                }
-
-                throw e
+            override suspend fun updateMoveLastAlive(date: Date) {
+                move.updateMoveLastAlive(date)
             }
 
-        move.completed(lastModified)
+            override suspend fun failed() {
+                move.failed()
+            }
+
+            override suspend fun completed(lastModified: Date) {
+                move.completed(lastModified)
+            }
+        }
+    }
+
+    override suspend fun removePendingMove(to: String) {
+        sqliteDataSource.removePendingMove(to)
     }
 }

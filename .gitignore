@@ -48,6 +48,9 @@ local.properties
 ### Mac OS ###
 .DS_Store
 
+### Native libraries
+*.so
+
 ### Flatpak
 .flatpak-builder
 distribution/flatpak/gradle-sources*

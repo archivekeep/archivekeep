@@ -11,7 +11,17 @@ import org.archivekeep.app.ui.domain.wiring.ApplicationProviders
 import org.archivekeep.app.ui.domain.wiring.ApplicationServices
 import org.archivekeep.app.ui.utils.PropertiesApplicationMetadata
 
+private fun loadObjectBoxNativeLibrary() {
+    val libDir = System.getenv("OBJECTBOX_NATIVE_LIB_DIR") ?: return
+    val dir = java.io.File(libDir)
+    val lib = dir.listFiles()?.firstOrNull { it.name.startsWith("libobjectbox-jni-linux-") && it.name.endsWith(".so") } ?: return
+    System.load(lib.absolutePath)
+}
+
 fun main(args: Array<String>) {
+    // In Flatpak, manually load the ObjectBox native library before any ObjectBox class
+    // is initialized, bypassing NativeLibraryLoader which fails in the sandbox.
+    loadObjectBoxNativeLibrary()
     application {
         val applicationServices: (scope: CoroutineScope, serviceWorkDispatcher: CoroutineDispatcher) -> ApplicationServices =
             remember {

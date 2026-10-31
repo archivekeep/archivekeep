@@ -2,7 +2,7 @@
 
 mkdir -p ~/opt/flatpak/repo/org.archivekeep
 
-flatpak-builder \
+flatpak run org.flatpak.Builder \
   --force-clean \
   --user \
   --install-deps-from=flathub \

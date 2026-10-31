@@ -1,6 +1,39 @@
 # TODO: cleanup this and document why which rules are added
 
 # ########################################### #
+#                ObjectBox                    #
+# ########################################### #
+
+# Keep ALL ObjectBox classes and their native JNI methods unobfuscated.
+# The native .so library expects exact method names (with hash suffixes like
+# nativeSetBoxStoreForEntities$e883c0b). If ProGuard renames these classes or
+# methods, the JNI binding breaks with UnsatisfiedLinkError.
+-keep class io.objectbox.** { *; }
+-keepclassmembers class io.objectbox.** { native <methods>; }
+
+# Keep entity classes annotated with @Entity
+-keep class * extends io.objectbox.BoxStore { *; }
+-keep class * implements io.objectbox.relations.ToMany { *; }
+-keepclassmembers class ** { @io.objectbox.annotation.Id *; }
+-keepclassmembers class ** { @io.objectbox.annotation.Index *; }
+-keepclassmembers class ** { @io.objectbox.annotation.Name *; }
+-keepclassmembers class ** { @io.objectbox.annotation.Transient *; }
+-keepclassmembers class ** { @io.objectbox.annotation.Property *; }
+-keepclassmembers class ** { @io.objectbox.annotation.Backlink *; }
+-keepclassmembers class ** { @io.objectbox.annotation.Unique *; }
+
+# Keep generated property metadata classes (Entity_)
+-keep class **_* { *; }
+
+# Keep MyObjectBox generated class
+-keep class io.objectbox.MyObjectBox { *; }
+
+# Suppress warnings for ObjectBox internals
+-dontwarn io.objectbox.**
+-dontwarn io.objectbox.android.**
+-dontwarn sun.misc.Unsafe
+
+# ########################################### #
 #                SQLite Bundled               #
 # ########################################### #
 

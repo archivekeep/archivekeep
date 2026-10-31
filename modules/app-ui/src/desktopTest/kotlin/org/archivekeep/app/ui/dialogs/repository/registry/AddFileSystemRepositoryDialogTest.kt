@@ -27,6 +27,7 @@ import org.archivekeep.app.ui.utils.screenshots.setContentInDialogScreenshotCont
 import org.archivekeep.files.driver.filesystem.encryptedfiles.EncryptedFileSystemRepository
 import org.archivekeep.files.driver.filesystem.files.FilesRepo
 import org.archivekeep.files.driver.filesystem.files.FilesSqliteRepo
+import org.archivekeep.files.driver.filesystem.files.objectbox.FilesObjectBoxRepo
 import org.junit.Rule
 import org.junit.Test
 import org.junit.rules.TemporaryFolder
@@ -48,6 +49,59 @@ class AddFileSystemRepositoryDialogTest {
                 "/",
             ),
         )
+
+    @OptIn(ExperimentalTestApi::class)
+    @Test
+    fun testHappyInitObjectBoxFlow() {
+        runHighDensityComposeUiTestWithDemoEnv(
+            physicalMediaData = listOf(phone, usbStickAll, usbStickDocuments, usbStickMusic),
+            mountPoints = mountPoints(),
+        ) { env ->
+            setContentInDialogScreenshotContainer {
+                ApplicationProviders(env.services) {
+                    CompositionLocalProvider(
+                        LocalFilesystemDirectoryPicker provides
+                            fixedFilesystemDirectoryPicker(testTempDir.newFolder("local-archives/test-repo").path),
+                    ) {
+                        AddFileSystemRepositoryDialog().render(onClose = {})
+                    }
+                }
+            }
+
+            run {
+                saveTestingContainerBitmap("dialogs/add-filesystem-repository/init-plain-objectbox-01-selection.png")
+
+                onNodeWithText("local-archives/test-repo", true).assertExists()
+                onNodeWithText("The directory is not a repository, yet. Continue to initialize it as an archive repository.").assertExists()
+                onNodeWithText("Storage is not registered yet. It will be registered.").assertExists()
+                onNodeWithText("ObjectBox Index DB", substring = true).assertExists()
+            }
+
+            run {
+                onNodeWithText("Local - this device").performClick()
+
+                saveTestingContainerBitmap("dialogs/add-filesystem-repository/init-plain-objectbox-02-confirm-local.png")
+
+                onNodeWithText("Init").assertIsEnabled()
+            }
+
+            runBlocking {
+                onNodeWithText("Init").performClick()
+
+                eventually(2.seconds) {
+                    saveTestingContainerBitmap("dialogs/add-filesystem-repository/init-plain-objectbox-03-finished.png")
+
+                    onNodeWithText("Directory initialized successfully as repository.").assertExists()
+                    onNodeWithText("Added successfully.").assertExists()
+                    onNodeWithText("Init").assertDoesNotExist()
+                    onNodeWithText("Close").assertIsEnabled()
+                }
+
+                // should not fail
+                FilesObjectBoxRepo.isRepo(testTempDir.root.resolve("local-archives/test-repo").toPath()) shouldBe true
+            }
+        }
+    }
 
     @OptIn(ExperimentalTestApi::class)
     @Test
@@ -75,10 +129,11 @@ class AddFileSystemRepositoryDialogTest {
                 onNodeWithText("Storage is not registered yet. It will be registered.").assertExists()
             }
 
-            run {
+            runBlocking {
                 onNodeWithText("Local - this device").performClick()
+                onNodeWithText("SQLite Index DB", substring = true).performClick()
 
-                saveTestingContainerBitmap("dialogs/add-filesystem-repository/init-plain-sqlite-02-confirm-local.png")
+                saveTestingContainerBitmap("dialogs/add-filesystem-repository/init-plain-sqlite-02-sqlite-selected.png")
 
                 onNodeWithText("Init").assertIsEnabled()
             }

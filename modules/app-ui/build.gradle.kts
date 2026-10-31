@@ -60,6 +60,8 @@ kotlin {
 
                 implementation(libs.s3.mock)
                 implementation(libs.s3.mock.testcontainers)
+
+                implementation(project(":files-driver-filesystem"))
             }
         }
     }
