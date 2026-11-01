@@ -5,7 +5,6 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material.Divider
 import androidx.compose.material3.Button
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
@@ -33,17 +32,18 @@ import kotlinx.coroutines.plus
 import org.archivekeep.app.core.persistence.drivers.filesystem.FileSystemStorageType
 import org.archivekeep.app.core.persistence.drivers.filesystem.operations.add.AddFileSystemRepositoryOperation
 import org.archivekeep.app.core.persistence.drivers.filesystem.operations.add.AddFileSystemRepositoryUseCase
-import org.archivekeep.files.driver.filesystem.files.PlainRepositoryType
 import org.archivekeep.app.core.persistence.drivers.filesystem.operations.add.StorageRegistrationInput
 import org.archivekeep.app.core.persistence.drivers.filesystem.operations.add.StorageRegistrationState
 import org.archivekeep.app.core.utils.generics.Execution
 import org.archivekeep.app.core.utils.generics.ExecutionOutcome
+import org.archivekeep.app.ui.components.base.layout.keepSize
 import org.archivekeep.app.ui.components.designsystem.dialog.DialogButtonContainer
 import org.archivekeep.app.ui.components.designsystem.dialog.DialogCard
 import org.archivekeep.app.ui.components.designsystem.dialog.DialogFilePicker
 import org.archivekeep.app.ui.components.designsystem.dialog.DialogInnerContainer
 import org.archivekeep.app.ui.components.designsystem.dialog.DialogInputLabel
 import org.archivekeep.app.ui.components.designsystem.dialog.DialogOverlay
+import org.archivekeep.app.ui.components.designsystem.elements.InfoAlert
 import org.archivekeep.app.ui.components.designsystem.elements.WarningAlert
 import org.archivekeep.app.ui.components.designsystem.input.PasswordField
 import org.archivekeep.app.ui.components.designsystem.input.RadioWithText
@@ -61,6 +61,7 @@ import org.archivekeep.app.ui.utils.SingleLaunchGuard
 import org.archivekeep.app.ui.utils.appendBoldSpan
 import org.archivekeep.app.ui.utils.filesystem.LocalFilesystemDirectoryPicker
 import org.archivekeep.app.ui.utils.filesystem.PickResult
+import org.archivekeep.files.driver.filesystem.files.PlainRepositoryType
 import org.archivekeep.utils.loading.Loadable
 
 class AddFileSystemRepositoryDialog : Dialog {
@@ -560,21 +561,28 @@ private fun StorageMark(
     setLabel: (newValue: String) -> Unit,
 ) {
     if (storageRegistrationState is StorageRegistrationState.Unregistered) {
-        Divider(Modifier.padding(top = 16.dp, bottom = 12.dp))
-        Text("Storage is not registered yet. It will be registered.", Modifier.padding(bottom = 8.dp))
-        Text("Select storage type:", Modifier.padding(bottom = 8.dp))
-        RadioWithText(
-            storageType == FileSystemStorageType.LOCAL,
-            onClick = { setStorageType(FileSystemStorageType.LOCAL) },
-            text = "Local - this device",
-        )
-        RadioWithText(
-            storageType == FileSystemStorageType.EXTERNAL,
-            onClick = { setStorageType(FileSystemStorageType.EXTERNAL) },
-            text = "External - media device",
-        )
-        TextField(value = label, onValueChange = { setLabel(it) }, placeholder = { Text("Enter device label ...") }, modifier = Modifier.padding(top = 8.dp))
-        Divider(Modifier.padding(top = 12.dp, bottom = 8.dp))
+        Spacer(Modifier.height(12.dp))
+        InfoAlert {
+            Text("Storage is used for the first time.", Modifier.padding(bottom = 16.dp))
+            Text("Select storage type:", Modifier.padding(bottom = 4.dp))
+            RadioWithText(
+                storageType == FileSystemStorageType.LOCAL,
+                onClick = { setStorageType(FileSystemStorageType.LOCAL) },
+                text = "Local - this device",
+            )
+            RadioWithText(
+                storageType == FileSystemStorageType.EXTERNAL,
+                onClick = { setStorageType(FileSystemStorageType.EXTERNAL) },
+                text = "External - media device",
+            )
+            Text("Enter storage label:", Modifier.padding(top = 12.dp))
+            TextField(
+                value = label,
+                onValueChange = { setLabel(it) },
+                placeholder = { Text("Enter device label ...") },
+                modifier = Modifier.padding(top = 8.dp),
+            )
+        }
     }
 }
 

@@ -73,7 +73,7 @@ class AddFileSystemRepositoryDialogTest {
 
                 onNodeWithText("local-archives/test-repo", true).assertExists()
                 onNodeWithText("The directory is not a repository, yet. Continue to initialize it as an archive repository.").assertExists()
-                onNodeWithText("Storage is not registered yet. It will be registered.").assertExists()
+                onNodeWithText("Storage is used for the first time.").assertExists()
                 onNodeWithText("ObjectBox Index DB", substring = true).assertExists()
             }
 
@@ -126,7 +126,7 @@ class AddFileSystemRepositoryDialogTest {
 
                 onNodeWithText("local-archives/test-repo", true).assertExists()
                 onNodeWithText("The directory is not a repository, yet. Continue to initialize it as an archive repository.").assertExists()
-                onNodeWithText("Storage is not registered yet. It will be registered.").assertExists()
+                onNodeWithText("Storage is used for the first time.").assertExists()
             }
 
             runBlocking {
@@ -179,7 +179,7 @@ class AddFileSystemRepositoryDialogTest {
 
                 onNodeWithText("local-archives/test-repo", true).assertExists()
                 onNodeWithText("The directory is not a repository, yet. Continue to initialize it as an archive repository.").assertExists()
-                onNodeWithText("Storage is not registered yet. It will be registered.").assertExists()
+                onNodeWithText("Storage is used for the first time.").assertExists()
                 onNodeWithText("Individual checksum files", substring = true).assertExists()
             }
 
@@ -235,7 +235,7 @@ class AddFileSystemRepositoryDialogTest {
 
                 onNodeWithText("local-archives/test-repo", true).assertExists()
                 onNodeWithText("The directory is not a repository, yet. Continue to initialize it as an archive repository.").assertExists()
-                onNodeWithText("Storage is not registered yet. It will be registered.").assertExists()
+                onNodeWithText("Storage is used for the first time.").assertExists()
             }
 
             run {
@@ -327,7 +327,7 @@ class AddFileSystemRepositoryDialogTest {
 
                 onNodeWithText("local-archives/test-repo", true).assertExists()
                 onNodeWithText("Repository can be added.").assertExists()
-                onNodeWithText("Storage is not registered yet. It will be registered.").assertExists()
+                onNodeWithText("Storage is used for the first time.").assertExists()
             }
 
             run {

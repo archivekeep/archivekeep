@@ -28,6 +28,11 @@ fun SuccessAlert(content: @Composable ColumnScope.() -> Unit) {
 }
 
 @Composable
+fun InfoAlert(content: @Composable ColumnScope.() -> Unit) {
+    Alert(Color.Blue, Color.Blue.copy(alpha = 0.1f), content)
+}
+
+@Composable
 private fun Alert(
     borderColor: Color,
     surfaceColor: Color,
