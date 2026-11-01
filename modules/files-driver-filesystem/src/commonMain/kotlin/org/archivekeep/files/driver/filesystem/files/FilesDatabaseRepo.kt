@@ -35,6 +35,8 @@ import org.archivekeep.files.api.repository.ArchiveFileInfo
 import org.archivekeep.files.api.repository.RepoIndex
 import org.archivekeep.files.api.repository.RepositoryMetadata
 import org.archivekeep.files.api.repository.operations.StatusOperation
+import org.archivekeep.files.procedures.indexupdate.RepoPerformanceTracker
+import org.archivekeep.files.procedures.indexupdate.measure
 import org.archivekeep.utils.coroutines.InProgressHandler
 import org.archivekeep.utils.coroutines.flowScopedToThisJob
 import org.archivekeep.utils.flows.logLoadableResourceLoad
@@ -302,13 +304,16 @@ abstract class FilesDatabaseRepo(
     override suspend fun add(
         path: String,
         reindex: Boolean,
+        performanceTracker: RepoPerformanceTracker,
     ) {
         val fullPath = root.resolve(safeSubPath(path))
         val size = fullPath.fileSize()
         val lastModified = Date(fullPath.getLastModifiedTime().toMillis())
-        val checksum = computeChecksum(fullPath)
+        val checksum = performanceTracker.measure(ChecksumOperationIds.COMPUTE_CHECKSUM) { computeChecksum(fullPath) }
 
-        indexStore.storeFile(path, size, lastModified, checksum, reindex = reindex)
+        performanceTracker.measure(DatabaseIndexStoreOperationIds.STORE_FILE) {
+            indexStore.storeFile(path, size, lastModified, checksum, reindex = reindex)
+        }
     }
 
     override suspend fun delete(filename: String) {
@@ -322,8 +327,13 @@ abstract class FilesDatabaseRepo(
         indexStore.remove(filename)
     }
 
-    override suspend fun remove(path: String) {
-        indexStore.remove(path)
+    override suspend fun remove(
+        path: String,
+        performanceTracker: RepoPerformanceTracker,
+    ) {
+        performanceTracker.measure(DatabaseIndexStoreOperationIds.REMOVE) {
+            indexStore.remove(path)
+        }
     }
 
     override suspend fun move(

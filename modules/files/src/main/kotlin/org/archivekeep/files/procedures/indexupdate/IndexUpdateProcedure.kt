@@ -175,15 +175,22 @@ class IndexUpdateProcedure(
             repo: Repo,
             movesSubsetLimit: Set<Move>? = null,
             addFilesSubsetLimit: Set<String>? = null,
+            out: java.io.PrintWriter? = null,
             vararg progressTrackers: IndexUpdateProgressTracker,
         ) {
-            executeMovesReindex(repo, movesSubsetLimit, *progressTrackers)
-            executeAddNewFiles(repo, addFilesSubsetLimit, *progressTrackers)
+            val performanceTracker = RepoPerformanceTracker.DefaultImpl()
+            try {
+                executeMovesReindex(repo, movesSubsetLimit, performanceTracker, *progressTrackers)
+                executeAddNewFiles(repo, addFilesSubsetLimit, performanceTracker, *progressTrackers)
+            } finally {
+                performanceTracker.dump(out)
+            }
         }
 
         suspend fun executeMovesReindex(
             repo: Repo,
             movesSubsetLimit: Set<Move>? = null,
+            performanceTracker: RepoPerformanceTracker = RepoPerformanceTracker.NoOp,
             vararg progressTrackers: IndexUpdateProgressTracker,
         ) {
             val localRepo = repo as? LocalRepo ?: throw RuntimeException("not local repo")
@@ -193,8 +200,8 @@ class IndexUpdateProcedure(
                     return@forEach
                 }
 
-                localRepo.add(move.to)
-                localRepo.remove(move.from)
+                localRepo.add(move.to, performanceTracker = performanceTracker)
+                localRepo.remove(move.from, performanceTracker = performanceTracker)
 
                 progressTrackers.forEach { it.onMoveCompleted(move) }
             }
@@ -205,6 +212,7 @@ class IndexUpdateProcedure(
         suspend fun executeAddNewFiles(
             repo: Repo,
             addFilesSubsetLimit: Set<String>? = null,
+            performanceTracker: RepoPerformanceTracker = RepoPerformanceTracker.NoOp,
             vararg progressTrackers: IndexUpdateProgressTracker,
         ) {
             val localRepo = repo as? LocalRepo ?: throw RuntimeException("not local repo")
@@ -214,7 +222,7 @@ class IndexUpdateProcedure(
                     return@forEach
                 }
 
-                localRepo.add(newFile)
+                localRepo.add(newFile, performanceTracker = performanceTracker)
 
                 progressTrackers.forEach { it.onAddCompleted(newFile) }
             }

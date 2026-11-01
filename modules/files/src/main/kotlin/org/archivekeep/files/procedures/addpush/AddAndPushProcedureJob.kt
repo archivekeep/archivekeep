@@ -119,6 +119,7 @@ class AddAndPushProcedureJob<ID>(
             repo,
             movesToExecute,
             filesToAdd.map { it.fileName }.toSet(),
+            null,
             structuredProgressTracker,
         )
 

@@ -5,6 +5,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.Transient
 import org.archivekeep.files.api.repository.operations.StatusOperation
+import org.archivekeep.files.procedures.indexupdate.RepoPerformanceTracker
 import org.archivekeep.utils.loading.Loadable
 import java.io.InputStream
 import java.nio.file.Path
@@ -94,9 +95,13 @@ interface LocalRepo : Repo {
     suspend fun add(
         path: String,
         reindex: Boolean = false,
+        performanceTracker: RepoPerformanceTracker = RepoPerformanceTracker.NoOp,
     )
 
-    suspend fun remove(path: String)
+    suspend fun remove(
+        path: String,
+        performanceTracker: RepoPerformanceTracker = RepoPerformanceTracker.NoOp,
+    )
 
     fun getFileSize(filename: String): Long?
 }

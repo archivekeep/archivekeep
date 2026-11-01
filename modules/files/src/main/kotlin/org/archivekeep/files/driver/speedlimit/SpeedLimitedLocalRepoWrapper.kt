@@ -5,6 +5,7 @@ import org.archivekeep.files.api.repository.ArchiveFileInfo
 import org.archivekeep.files.api.repository.LocalRepo
 import org.archivekeep.files.api.repository.RepoIndex
 import org.archivekeep.files.api.repository.RepositoryMetadata
+import org.archivekeep.files.procedures.indexupdate.RepoPerformanceTracker
 import java.io.InputStream
 import java.nio.file.Path
 import kotlin.math.log10
@@ -90,14 +91,17 @@ class SpeedLimitedLocalRepoWrapper(
     override suspend fun add(
         path: String,
         reindex: Boolean,
+        performanceTracker: RepoPerformanceTracker,
     ) = delayed(1000) {
-        base.add(path, reindex)
+        base.add(path, reindex, performanceTracker)
     }
 
-    override suspend fun remove(path: String) =
-        delayed(100) {
-            base.remove(path)
-        }
+    override suspend fun remove(
+        path: String,
+        performanceTracker: RepoPerformanceTracker,
+    ) = delayed(100) {
+        base.remove(path, performanceTracker)
+    }
 
     private suspend fun <T> delayed(
         duration: Long,

@@ -143,6 +143,7 @@ class IndexUpdateProcedureSupervisorServiceImpl(
                         repositoryAccess,
                         launchOptions.movesSubsetLimit,
                         launchOptions.addFilesSubsetLimit,
+                        writer.out,
                         writer,
                         indexUpdateProgressTracker,
                     )

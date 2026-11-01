@@ -8,6 +8,7 @@ import org.archivekeep.files.api.repository.LocalRepo
 import org.archivekeep.files.api.repository.RepositoryMetadata
 import org.archivekeep.files.api.repository.operations.StatusOperation
 import org.archivekeep.files.driver.fixtures.FixtureRepo
+import org.archivekeep.files.procedures.indexupdate.RepoPerformanceTracker
 import org.archivekeep.utils.hashing.sha256
 import org.archivekeep.utils.loading.Loadable
 import org.archivekeep.utils.loading.mapToLoadable
@@ -50,6 +51,7 @@ open class InMemoryLocalRepo(
     override suspend fun add(
         path: String,
         reindex: Boolean,
+        performanceTracker: RepoPerformanceTracker,
     ) {
         val c = this.unindexedFiles.value[path] ?: throw FileDoesntExist(path)
 
@@ -64,7 +66,10 @@ open class InMemoryLocalRepo(
         }
     }
 
-    override suspend fun remove(path: String) {
+    override suspend fun remove(
+        path: String,
+        performanceTracker: RepoPerformanceTracker,
+    ) {
         val c = this.contentsFlow.value[path]
 
         if (c != null) {
