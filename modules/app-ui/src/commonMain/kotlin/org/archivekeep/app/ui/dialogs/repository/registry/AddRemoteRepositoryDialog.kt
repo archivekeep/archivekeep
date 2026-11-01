@@ -318,13 +318,11 @@ class AddRemoteRepositoryDialog : Dialog {
                                     text = "Plain objects (unencrypted, normal access)",
                                     enabled = initIsEditble,
                                     extra = {
-                                        if (vm.initType.value == InitType.PLAIN) {
-                                            WarningAlert {
-                                                Column {
-                                                    Text("Your data could be accessed be server owner (service provider).")
-                                                    Spacer(Modifier.height(8.dp))
-                                                    Text("Do not use for sensitive data with servers (service providers) you don't trust.")
-                                                }
+                                        WarningAlert {
+                                            Column {
+                                                Text("Your data could be accessed be server owner (service provider).")
+                                                Spacer(Modifier.height(8.dp))
+                                                Text("Do not use for sensitive data with servers (service providers) you don't trust.")
                                             }
                                         }
                                     },
@@ -335,32 +333,30 @@ class AddRemoteRepositoryDialog : Dialog {
                                     text = "Encrypted (custom format)",
                                     enabled = initIsEditble,
                                     extra = {
-                                        if (vm.initType.value == InitType.ENCRYPTED) {
-                                            Column {
-                                                WarningAlert {
-                                                    Text("Contents are E2E encrypted. Filenames are not.")
-                                                    Spacer(Modifier.height(8.dp))
-                                                    Text("Do not have sensitive data in filenames with servers (service providers) you don't trust.")
-                                                }
-
+                                        Column {
+                                            WarningAlert {
+                                                Text("Contents are E2E encrypted. Filenames are not.")
                                                 Spacer(Modifier.height(8.dp))
-
-                                                PasswordField(
-                                                    vm.initPassword.value,
-                                                    onValueChange = { vm.initPassword.value = it },
-                                                    placeholder = { Text("Enter password ...") },
-                                                    modifier = Modifier.padding(bottom = 8.dp).testTag("Enter password ..."),
-                                                    enabled = initIsEditble,
-                                                )
-
-                                                PasswordField(
-                                                    vm.initPasswordCheck.value,
-                                                    onValueChange = { vm.initPasswordCheck.value = it },
-                                                    placeholder = { Text("Verify password ...") },
-                                                    modifier = Modifier.testTag("Verify password ..."),
-                                                    enabled = initIsEditble,
-                                                )
+                                                Text("Do not have sensitive data in filenames with servers (service providers) you don't trust.")
                                             }
+
+                                            Spacer(Modifier.height(8.dp))
+
+                                            PasswordField(
+                                                vm.initPassword.value,
+                                                onValueChange = { vm.initPassword.value = it },
+                                                placeholder = { Text("Enter password ...") },
+                                                modifier = Modifier.padding(bottom = 8.dp).testTag("Enter password ..."),
+                                                enabled = initIsEditble,
+                                            )
+
+                                            PasswordField(
+                                                vm.initPasswordCheck.value,
+                                                onValueChange = { vm.initPasswordCheck.value = it },
+                                                placeholder = { Text("Verify password ...") },
+                                                modifier = Modifier.testTag("Verify password ..."),
+                                                enabled = initIsEditble,
+                                            )
                                         }
                                     },
                                 )

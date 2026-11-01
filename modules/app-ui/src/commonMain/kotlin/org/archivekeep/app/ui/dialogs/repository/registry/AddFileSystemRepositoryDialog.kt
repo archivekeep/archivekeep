@@ -305,35 +305,42 @@ private fun AddRepositoryDialogContents(
                                     text = "Plain files (unencrypted, normal access)",
                                     enabled = canEdit,
                                     extra = {
-                                        if (!createEncrypted) {
-                                            Column {
-                                                RadioWithText(
-                                                    selected = createRepoType == PlainRepositoryType.OBJECTBOX,
-                                                    onClick = { createRepoType = PlainRepositoryType.OBJECTBOX },
-                                                    text = "ObjectBox Index DB (recommended, fastest)",
-                                                    enabled = canEdit,
-                                                )
-                                                RadioWithTextAndExtra(
-                                                    selected = createRepoType == PlainRepositoryType.SQLITE,
-                                                    onClick = { createRepoType = PlainRepositoryType.SQLITE },
-                                                    text = "SQLite Index DB",
-                                                    enabled = canEdit,
-                                                ) {
-                                                    if (createRepoType == PlainRepositoryType.SQLITE) {
-                                                        Column {
-                                                            WarningAlert {
-                                                                Text("SQLite Index DB repositories located on external media are not supported on Android.")
-                                                            }
-                                                            Spacer(Modifier.height(12.dp))
-                                                        }
+                                        Column {
+                                            RadioWithText(
+                                                selected = createRepoType == PlainRepositoryType.OBJECTBOX,
+                                                onClick = { createRepoType = PlainRepositoryType.OBJECTBOX },
+                                                text = "ObjectBox Index DB (recommended)",
+                                                enabled = canEdit,
+                                            )
+                                            RadioWithTextAndExtra(
+                                                selected = createRepoType == PlainRepositoryType.SQLITE,
+                                                onClick = { createRepoType = PlainRepositoryType.SQLITE },
+                                                text = "SQLite Index DB (fastest)",
+                                                enabled = canEdit,
+                                            ) {
+                                                Column {
+                                                    WarningAlert {
+                                                        Text("Not supported for external media on Android.")
                                                     }
+                                                    Spacer(Modifier.height(8.dp))
+                                                    InfoAlert {
+                                                        Text("Recommended for HDD with thousands of files in repository.")
+                                                    }
+                                                    Spacer(Modifier.height(8.dp))
                                                 }
-                                                RadioWithText(
-                                                    selected = createRepoType == PlainRepositoryType.CHECKSUM_FILES,
-                                                    onClick = { createRepoType = PlainRepositoryType.CHECKSUM_FILES },
-                                                    text = "Individual checksum files (needed for sharing with Android devices via external media)",
-                                                    enabled = canEdit,
-                                                )
+                                            }
+                                            RadioWithTextAndExtra(
+                                                selected = createRepoType == PlainRepositoryType.CHECKSUM_FILES,
+                                                onClick = { createRepoType = PlainRepositoryType.CHECKSUM_FILES },
+                                                text = "Individual checksum files",
+                                                enabled = canEdit,
+                                            ) {
+                                                Column {
+                                                    WarningAlert {
+                                                        Text("The worst performance when used on HDD.")
+                                                    }
+                                                    Spacer(Modifier.height(8.dp))
+                                                }
                                             }
                                         }
                                     },
@@ -344,24 +351,22 @@ private fun AddRepositoryDialogContents(
                                     text = "Encrypted (custom format)",
                                     enabled = canEdit,
                                     extra = {
-                                        if (createEncrypted) {
-                                            Column {
-                                                PasswordField(
-                                                    createPassword,
-                                                    onValueChange = { createPassword = it },
-                                                    placeholder = { Text("Enter password ...") },
-                                                    modifier = Modifier.padding(bottom = 8.dp).testTag("Enter password ..."),
-                                                    enabled = canEdit,
-                                                )
+                                        Column {
+                                            PasswordField(
+                                                createPassword,
+                                                onValueChange = { createPassword = it },
+                                                placeholder = { Text("Enter password ...") },
+                                                modifier = Modifier.padding(bottom = 8.dp).testTag("Enter password ..."),
+                                                enabled = canEdit,
+                                            )
 
-                                                PasswordField(
-                                                    createPassword2,
-                                                    onValueChange = { createPassword2 = it },
-                                                    placeholder = { Text("Verify password ...") },
-                                                    modifier = Modifier.padding(bottom = 8.dp).testTag("Verify password ..."),
-                                                    enabled = canEdit,
-                                                )
-                                            }
+                                            PasswordField(
+                                                createPassword2,
+                                                onValueChange = { createPassword2 = it },
+                                                placeholder = { Text("Verify password ...") },
+                                                modifier = Modifier.padding(bottom = 8.dp).testTag("Verify password ..."),
+                                                enabled = canEdit,
+                                            )
                                         }
                                     },
                                 )

@@ -61,7 +61,9 @@ fun RadioWithTextAndExtra(
         }
 
         Box(Modifier.padding(start = with(LocalDensity.current) { radioWidth.toDp() })) {
-            extra()
+            if (selected) {
+                extra()
+            }
         }
     }
 }
