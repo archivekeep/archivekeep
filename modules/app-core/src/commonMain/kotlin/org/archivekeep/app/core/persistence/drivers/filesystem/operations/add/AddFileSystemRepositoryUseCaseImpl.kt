@@ -7,9 +7,7 @@ import org.archivekeep.app.core.persistence.drivers.filesystem.FileSystemStorage
 import org.archivekeep.app.core.persistence.drivers.filesystem.getFileSystemForPath
 import org.archivekeep.app.core.persistence.registry.RegistryDataStore
 import org.archivekeep.files.driver.filesystem.encryptedfiles.EncryptedFileSystemRepository
-import org.archivekeep.files.driver.filesystem.files.FilesRepo
-import org.archivekeep.files.driver.filesystem.files.FilesSqliteRepo
-import org.archivekeep.files.driver.filesystem.files.objectbox.FilesObjectBoxRepo
+import org.archivekeep.files.driver.filesystem.files.FileSystemRepositoryFactory
 import java.nio.file.Path
 import kotlin.io.path.Path
 import kotlin.io.path.exists
@@ -49,7 +47,7 @@ class AddFileSystemRepositoryUseCaseImpl(
             )
         }
 
-        if (FilesObjectBoxRepo.isRepo(pathPath) || FilesSqliteRepo.isRepo(pathPath) || FilesRepo.openOrNull(pathPath) != null) {
+        if (FileSystemRepositoryFactory.isPlainRepository(pathPath)) {
             val storageMarking = getStorageState(path)
 
             return (
@@ -61,7 +59,7 @@ class AddFileSystemRepositoryUseCaseImpl(
                     var tryPath: Path? = pathPath.parent
 
                     while (tryPath != null) {
-                        val archive = FilesObjectBoxRepo.openOrNull(tryPath) ?: FilesSqliteRepo.openOrNull(tryPath) ?: FilesRepo.openOrNull(tryPath)
+                        val archive = FileSystemRepositoryFactory.openPlainRepositoryOrNull(tryPath)
 
                         if (archive != null) {
                             return@run tryPath

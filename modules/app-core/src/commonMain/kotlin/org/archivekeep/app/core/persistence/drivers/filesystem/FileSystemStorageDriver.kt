@@ -26,9 +26,7 @@ import org.archivekeep.app.core.utils.identifiers.RepositoryURI
 import org.archivekeep.app.core.utils.identifiers.StorageURI
 import org.archivekeep.files.api.repository.Repo
 import org.archivekeep.files.driver.filesystem.encryptedfiles.EncryptedFileSystemRepository
-import org.archivekeep.files.driver.filesystem.files.FilesRepo
-import org.archivekeep.files.driver.filesystem.files.FilesSqliteRepo
-import org.archivekeep.files.driver.filesystem.files.objectbox.FilesObjectBoxRepo
+import org.archivekeep.files.driver.filesystem.files.FileSystemRepositoryFactory
 import org.archivekeep.utils.loading.mapLoadedData
 import org.archivekeep.utils.loading.optional.OptionalLoadable
 import org.archivekeep.utils.loading.optional.OptionalLoadable.LoadedAvailable
@@ -131,20 +129,8 @@ class FileSystemStorageDriver(
                 .mapLoaded { pathInFilesystem ->
                     println("Open $uriDATA")
 
-                    FilesObjectBoxRepo
-                        .openOrNull(pathInFilesystem)
-                        ?.let {
-                            return@mapLoaded LoadedAvailable(FileSystemRepoLocation(it))
-                        }
-
-                    FilesSqliteRepo
-                        .openOrNull(pathInFilesystem)
-                        ?.let {
-                            return@mapLoaded LoadedAvailable(FileSystemRepoLocation(it))
-                        }
-
-                    FilesRepo
-                        .openOrNull(pathInFilesystem)
+                    FileSystemRepositoryFactory
+                        .openPlainRepositoryOrNull(pathInFilesystem)
                         ?.let {
                             return@mapLoaded LoadedAvailable(FileSystemRepoLocation(it))
                         }

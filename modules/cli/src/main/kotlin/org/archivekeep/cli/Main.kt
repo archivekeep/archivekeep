@@ -18,7 +18,7 @@ import org.archivekeep.cli.workingarchive.WorkingArchive
 import org.archivekeep.cli.workingarchive.openWorkingArchive
 import org.archivekeep.files.api.repository.Repo
 import org.archivekeep.files.api.repository.auth.BasicAuthCredentials
-import org.archivekeep.files.driver.filesystem.files.FilesRepo
+import org.archivekeep.files.driver.filesystem.files.FileSystemRepositoryFactory
 import org.archivekeep.files.driver.grpc.Options
 import org.archivekeep.files.driver.grpc.grpcPrefix
 import org.archivekeep.files.driver.grpc.isNotAuthorized
@@ -99,7 +99,7 @@ class MainCommand(
             }
         }
 
-        return FilesRepo.openOrNull(workingDirectory.resolve(otherArchiveLocation))
+        return FileSystemRepositoryFactory.openPlainRepositoryOrNull(workingDirectory.resolve(otherArchiveLocation))
             ?: throw RuntimeException("not an archive")
     }
 

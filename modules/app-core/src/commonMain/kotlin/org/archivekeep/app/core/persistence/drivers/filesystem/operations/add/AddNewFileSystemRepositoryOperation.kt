@@ -8,9 +8,8 @@ import org.archivekeep.app.core.persistence.registry.RegistryDataStore
 import org.archivekeep.app.core.utils.generics.Execution
 import org.archivekeep.app.core.utils.generics.perform
 import org.archivekeep.files.driver.filesystem.encryptedfiles.EncryptedFileSystemRepository
-import org.archivekeep.files.driver.filesystem.files.FilesRepo
-import org.archivekeep.files.driver.filesystem.files.FilesSqliteRepo
-import org.archivekeep.files.driver.filesystem.files.objectbox.FilesObjectBoxRepo
+import org.archivekeep.files.driver.filesystem.files.FileSystemRepositoryFactory
+import org.archivekeep.files.driver.filesystem.files.PlainRepositoryType
 
 class AddNewFileSystemRepositoryOperation(
     scope: CoroutineScope,
@@ -41,11 +40,7 @@ class AddNewFileSystemRepositoryOperation(
         checkInput(storageRegistration, storageRegistrationInput)
 
         initMutableStateFlow.perform {
-            when (repoType) {
-                PlainRepositoryType.OBJECTBOX -> FilesObjectBoxRepo.create(pathPath).also { it.close() }
-                PlainRepositoryType.SQLITE -> FilesSqliteRepo.create(pathPath)
-                PlainRepositoryType.CHECKSUM_FILES -> FilesRepo.create(pathPath)
-            }
+            FileSystemRepositoryFactory.createPlainRepositoryAndClose(pathPath, repoType)
         }
 
         runAdd(addMutableStateFlow, storageMarkMutableStateFlow, storageRegistrationInput)

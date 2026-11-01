@@ -1,7 +1,7 @@
 package org.archivekeep.cli.workingarchive
 
 import org.archivekeep.files.api.repository.Repo
-import org.archivekeep.files.driver.filesystem.files.FilesRepo
+import org.archivekeep.files.driver.filesystem.files.FileSystemRepositoryFactory
 import java.nio.file.Path
 import kotlin.io.path.relativeTo
 
@@ -35,7 +35,7 @@ private fun tryOpen(
     cwd: Path,
     tryPath: Path,
 ): WorkingArchive? {
-    val filesRepo = FilesRepo.openOrNull(tryPath)
+    val filesRepo = FileSystemRepositoryFactory.openPlainRepositoryOrNull(tryPath)
 
     if (filesRepo != null) {
         return WorkingArchive(

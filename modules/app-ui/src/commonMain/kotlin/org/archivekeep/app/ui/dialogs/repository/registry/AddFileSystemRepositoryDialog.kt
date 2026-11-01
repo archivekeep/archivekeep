@@ -33,7 +33,7 @@ import kotlinx.coroutines.plus
 import org.archivekeep.app.core.persistence.drivers.filesystem.FileSystemStorageType
 import org.archivekeep.app.core.persistence.drivers.filesystem.operations.add.AddFileSystemRepositoryOperation
 import org.archivekeep.app.core.persistence.drivers.filesystem.operations.add.AddFileSystemRepositoryUseCase
-import org.archivekeep.app.core.persistence.drivers.filesystem.operations.add.PlainRepositoryType
+import org.archivekeep.files.driver.filesystem.files.PlainRepositoryType
 import org.archivekeep.app.core.persistence.drivers.filesystem.operations.add.StorageRegistrationInput
 import org.archivekeep.app.core.persistence.drivers.filesystem.operations.add.StorageRegistrationState
 import org.archivekeep.app.core.utils.generics.Execution

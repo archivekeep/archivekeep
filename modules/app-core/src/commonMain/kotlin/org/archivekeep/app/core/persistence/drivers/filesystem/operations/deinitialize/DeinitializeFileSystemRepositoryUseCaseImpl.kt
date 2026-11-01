@@ -1,9 +1,7 @@
 package org.archivekeep.app.core.persistence.drivers.filesystem.operations.deinitialize
 
 import kotlinx.coroutines.CoroutineScope
-import org.archivekeep.files.driver.filesystem.files.FilesRepo
-import org.archivekeep.files.driver.filesystem.files.FilesSqliteRepo
-import org.archivekeep.files.driver.filesystem.files.objectbox.FilesObjectBoxRepo
+import org.archivekeep.files.driver.filesystem.files.FileSystemRepositoryFactory
 import kotlin.io.path.Path
 import kotlin.io.path.exists
 import kotlin.io.path.isDirectory
@@ -19,7 +17,7 @@ class DeinitializeFileSystemRepositoryUseCaseImpl : DeinitializeFileSystemReposi
             return DeinitializeFileSystemRepositoryPreparation.DirectoryNotRepository
         }
 
-        val filesystemWorkingRepository = FilesObjectBoxRepo.openOrNull(pathPath) ?: FilesSqliteRepo.openOrNull(pathPath) ?: FilesRepo.openOrNull(pathPath)
+        val filesystemWorkingRepository = FileSystemRepositoryFactory.openPlainRepositoryOrNull(pathPath)
 
         if (filesystemWorkingRepository != null) {
             return object : DeinitializeFileSystemRepositoryPreparation.PlainFileSystemRepository {

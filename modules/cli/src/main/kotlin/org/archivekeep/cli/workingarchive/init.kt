@@ -1,8 +1,10 @@
 package org.archivekeep.cli.workingarchive
 
-import org.archivekeep.files.driver.filesystem.files.FilesRepo
+import org.archivekeep.files.driver.filesystem.files.FileSystemRepositoryFactory
+import org.archivekeep.files.driver.filesystem.files.PlainRepositoryType
 import java.nio.file.Path
 
 suspend fun init(baseDirectory: Path) {
-    FilesRepo.create(baseDirectory)
+    // TODO: add support for other types
+    FileSystemRepositoryFactory.createPlainRepositoryAndClose(baseDirectory, PlainRepositoryType.CHECKSUM_FILES)
 }
