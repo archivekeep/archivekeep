@@ -3,6 +3,7 @@ package org.archivekeep.app.ui.views.home.model
 import androidx.compose.runtime.Composable
 import compose.icons.TablerIcons
 import compose.icons.tablericons.Folder
+import compose.icons.tablericons.InfoCircle
 import compose.icons.tablericons.LockOpen
 import compose.icons.tablericons.Plus
 import compose.icons.tablericons.RefreshAlert
@@ -50,6 +51,18 @@ class RepositoryOperationalState(
                         onLaunch = openRepository ?: {},
                     )
                 }
+
+            override val details: Loadable<Action> =
+                Loadable.Loaded(
+                    Action(
+                        icon = TablerIcons.InfoCircle,
+                        title = "Repository details",
+                        isPending = false,
+                        onLaunch = {
+                            launchers.openRepositoryDetails(uri)
+                        },
+                    ),
+                )
 
             override val unlock =
                 needsUnlock.mapLoadedData {

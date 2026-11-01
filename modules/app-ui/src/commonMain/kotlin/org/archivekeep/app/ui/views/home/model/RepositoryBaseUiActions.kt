@@ -5,6 +5,7 @@ import org.archivekeep.utils.loading.Loadable
 
 interface RepositoryBaseUiActions {
     val open: Loadable<Action>
+    val details: Loadable<Action>
     val unlock: Loadable<Action>
     val add: Loadable<Action>
     val cleanupFiles: Loadable<Action>

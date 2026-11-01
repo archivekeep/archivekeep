@@ -55,6 +55,7 @@ fun InArchiveRepositoryDropdownIconLaunched(
                 ActionDropdownMenuItem(unassociate, ::closeDropdown)
                 ActionDropdownMenuItem(forget, ::closeDropdown)
                 ActionDropdownMenuItem(deinitialize, ::closeDropdown)
+                ActionDropdownMenuItem(details, ::closeDropdown)
             }
         }
     }

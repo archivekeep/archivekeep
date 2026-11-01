@@ -22,6 +22,7 @@ data class ArchiveOperationLaunchers(
     val pullAllFromStorage: (storageURI: StorageURI) -> Unit,
     val pushToRepo: (repositoryURI: RepositoryURI, from: RepositoryURI) -> Unit,
     val pullFromRepo: (from: RepositoryURI, to: RepositoryURI) -> Unit,
+    val openRepositoryDetails: (repositoryURI: RepositoryURI) -> Unit,
 )
 
 val LocalArchiveOperationLaunchers =
@@ -44,6 +45,7 @@ val LocalArchiveOperationLaunchers =
             pullAllFromStorage = { invalidUseOfContext("pullAllFromStorage") },
             pushToRepo = { _, _ -> invalidUseOfContext("pushToRepo") },
             pullFromRepo = { _, _ -> invalidUseOfContext("pullFromRepo") },
+            openRepositoryDetails = { invalidUseOfContext("openRepositoryDetails") },
         )
     }
 

@@ -11,6 +11,7 @@ import org.archivekeep.app.ui.dialogs.repository.procedures.pushrepo.PushRepoDia
 import org.archivekeep.app.ui.dialogs.repository.procedures.reindex.FileReindexProcedureDialog
 import org.archivekeep.app.ui.dialogs.repository.procedures.sync.DownloadFromRepoDialog
 import org.archivekeep.app.ui.dialogs.repository.procedures.sync.UploadToRepoDialog
+import org.archivekeep.app.ui.dialogs.repository.details.RepositoryDetailsDialog
 import org.archivekeep.app.ui.dialogs.repository.registry.AddFileSystemRepositoryDialog
 import org.archivekeep.app.ui.dialogs.repository.registry.AddRemoteRepositoryDialog
 import org.archivekeep.app.ui.dialogs.repository.registry.DeinitializeFileSystemRepositoryByPathDialog
@@ -36,4 +37,5 @@ fun archiveOperationLaunchersAsDialogs(dialogRenderer: OverlayDialogRenderer) =
         pullAllFromStorage = { dialogRenderer.openDialog(UnsupportedFeatureDialog()) },
         pushToRepo = dialogRenderer.openFn(::UploadToRepoDialog),
         pullFromRepo = dialogRenderer.openFn(::DownloadFromRepoDialog),
+        openRepositoryDetails = dialogRenderer.openFn(::RepositoryDetailsDialog),
     )

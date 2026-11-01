@@ -10,13 +10,12 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import compose.icons.TablerIcons
 import compose.icons.tablericons.DotsVertical
+import compose.icons.tablericons.InfoCircle
 import org.archivekeep.app.core.utils.identifiers.RepositoryURI
 import org.archivekeep.app.ui.components.designsystem.dropdownmenu.ActionDropdownMenuItem
 import org.archivekeep.app.ui.components.designsystem.sections.SectionCardBottomListItemIconButton
 import org.archivekeep.app.ui.domain.wiring.LocalArchiveOperationLaunchers
 import org.archivekeep.app.ui.utils.Action
-import org.archivekeep.app.ui.views.home.model.RepositoryBaseUiActions
-import org.archivekeep.utils.loading.Loadable
 
 @Composable
 fun InStorageRepositoryDropdownIconLaunched(uri: RepositoryURI) {
@@ -52,6 +51,17 @@ fun InStorageRepositoryDropdownIconLaunched(uri: RepositoryURI) {
                     isPending = false,
                     onLaunch = {
                         launchers.openForgetRepository(uri)
+                    },
+                ),
+                ::closeDropdown,
+            )
+            ActionDropdownMenuItem(
+                Action(
+                    icon = TablerIcons.InfoCircle,
+                    title = "Repository details",
+                    isPending = false,
+                    onLaunch = {
+                        launchers.openRepositoryDetails(uri)
                     },
                 ),
                 ::closeDropdown,

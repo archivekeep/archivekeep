@@ -47,6 +47,7 @@ fun ArchiveDropdownIconLaunched(actions: HomeLocalArchiveUiActions) {
                 ActionDropdownMenuItem(unassociate, ::closeDropdown)
                 ActionDropdownMenuItem(forget, ::closeDropdown)
                 ActionDropdownMenuItem(deinitialize, ::closeDropdown)
+                ActionDropdownMenuItem(details, ::closeDropdown)
             }
         }
     }
