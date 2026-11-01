@@ -10,8 +10,12 @@ import org.archivekeep.app.core.utils.identifiers.RepositoryURI
 @SingleIn(AppScope::class)
 class RepositoryRegistryService(
     val registry: RegistryDataStore,
+    val repositoryAccessService: RepositoryAccessService,
 ) {
     suspend fun forgetRepository(uri: RepositoryURI) {
+        val accessor = repositoryAccessService.repositoryAccessor[uri]
+        accessor.close()
+        repositoryAccessService.repositoryAccessor.invalidate(uri)
         registry.updateRepositories { old ->
             old.filter { it.uri != uri }.toSet()
         }

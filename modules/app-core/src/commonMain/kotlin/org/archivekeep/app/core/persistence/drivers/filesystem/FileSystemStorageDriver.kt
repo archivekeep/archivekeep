@@ -126,6 +126,11 @@ class FileSystemStorageDriver(
     ) : RepositoryLocationAccessor {
         private val currentPlainRepo = MutableStateFlow<FilesystemWorkingRepository?>(null)
 
+        override suspend fun close() {
+            currentPlainRepo.value?.close()
+            currentPlainRepo.value = null
+        }
+
         override val contentsStateFlow: Flow<OptionalLoadable<RepositoryLocationContentsState>> =
             getPathInFileSystem(uriDATA)
                 .distinctUntilChanged()

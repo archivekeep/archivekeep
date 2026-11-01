@@ -35,6 +35,11 @@ interface RepositoryLocationAccessor {
      * Should use [NeedsUnlock] to signal [OptionalLoadable.NotAvailable] due to pending authentication request.
      */
     val contentsStateFlow: Flow<OptionalLoadable<RepositoryLocationContentsState>>
+
+    /**
+     * Close this accessor, releasing any held resources (e.g., open database connections).
+     */
+    suspend fun close() {}
 }
 
 @OptIn(ExperimentalCoroutinesApi::class)
