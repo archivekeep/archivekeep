@@ -9,7 +9,7 @@ object FileSystemRepositoryFactory {
             ?: FilesSqliteRepo.openOrNull(path)
             ?: FilesRepo.openOrNull(path)
 
-    fun isPlainRepository(path: Path): Boolean = openPlainRepositoryOrNull(path) != null
+    suspend fun isPlainRepository(path: Path): Boolean = openPlainRepositoryOrNull(path)?.also { it.close() } != null
 
     suspend fun createPlainRepositoryAndClose(
         path: Path,
@@ -17,8 +17,8 @@ object FileSystemRepositoryFactory {
     ) {
         when (type) {
             PlainRepositoryType.OBJECTBOX -> FilesObjectBoxRepo.create(path).also { it.close() }
-            PlainRepositoryType.SQLITE -> FilesSqliteRepo.create(path)
-            PlainRepositoryType.CHECKSUM_FILES -> FilesRepo.create(path)
+            PlainRepositoryType.SQLITE -> FilesSqliteRepo.create(path).also { it.close() }
+            PlainRepositoryType.CHECKSUM_FILES -> FilesRepo.create(path).also { it.close() }
         }
     }
 }

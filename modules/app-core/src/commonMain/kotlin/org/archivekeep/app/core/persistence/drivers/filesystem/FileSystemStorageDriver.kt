@@ -27,6 +27,7 @@ import org.archivekeep.app.core.utils.identifiers.StorageURI
 import org.archivekeep.files.api.repository.Repo
 import org.archivekeep.files.driver.filesystem.encryptedfiles.EncryptedFileSystemRepository
 import org.archivekeep.files.driver.filesystem.files.FileSystemRepositoryFactory
+import org.archivekeep.files.driver.filesystem.files.FilesystemWorkingRepository
 import org.archivekeep.utils.loading.mapLoadedData
 import org.archivekeep.utils.loading.optional.OptionalLoadable
 import org.archivekeep.utils.loading.optional.OptionalLoadable.LoadedAvailable
@@ -123,17 +124,20 @@ class FileSystemStorageDriver(
         val uri: RepositoryURI,
         val uriDATA: FileSystemRepositoryURIData,
     ) : RepositoryLocationAccessor {
+        private val currentPlainRepo = MutableStateFlow<FilesystemWorkingRepository?>(null)
+
         override val contentsStateFlow: Flow<OptionalLoadable<RepositoryLocationContentsState>> =
             getPathInFileSystem(uriDATA)
                 .distinctUntilChanged()
                 .mapLoaded { pathInFilesystem ->
                     println("Open $uriDATA")
 
-                    FileSystemRepositoryFactory
-                        .openPlainRepositoryOrNull(pathInFilesystem)
-                        ?.let {
-                            return@mapLoaded LoadedAvailable(FileSystemRepoLocation(it))
-                        }
+                    val plainRepo = FileSystemRepositoryFactory.openPlainRepositoryOrNull(pathInFilesystem)
+                    if (plainRepo != null) {
+                        currentPlainRepo.value?.close()
+                        currentPlainRepo.value = plainRepo
+                        return@mapLoaded LoadedAvailable(FileSystemRepoLocation(plainRepo))
+                    }
 
                     if (EncryptedFileSystemRepository.isRepository(pathInFilesystem)) {
                         return@mapLoaded LoadedAvailable(
@@ -147,6 +151,13 @@ class FileSystemStorageDriver(
                     }
 
                     return@mapLoaded OptionalLoadable.Failed(RuntimeException("Path $uriDATA is not repository"))
+                }.onEach {
+                    if (it !is LoadedAvailable<RepositoryLocationContentsState> ||
+                        it.value !is FileSystemRepoLocation
+                    ) {
+                        currentPlainRepo.value?.close()
+                        currentPlainRepo.value = null
+                    }
                 }.stateIn(scope)
     }
 

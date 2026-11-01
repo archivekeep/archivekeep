@@ -59,9 +59,7 @@ class AddFileSystemRepositoryUseCaseImpl(
                     var tryPath: Path? = pathPath.parent
 
                     while (tryPath != null) {
-                        val archive = FileSystemRepositoryFactory.openPlainRepositoryOrNull(tryPath)
-
-                        if (archive != null) {
+                        if (FileSystemRepositoryFactory.isPlainRepository(tryPath)) {
                             return@run tryPath
                         }
 

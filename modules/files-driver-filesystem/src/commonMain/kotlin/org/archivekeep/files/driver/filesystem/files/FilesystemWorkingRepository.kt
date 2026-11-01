@@ -7,4 +7,6 @@ interface FilesystemWorkingRepository : LocalRepo {
     val root: Path
 
     suspend fun deinitialize()
+
+    suspend fun close()
 }

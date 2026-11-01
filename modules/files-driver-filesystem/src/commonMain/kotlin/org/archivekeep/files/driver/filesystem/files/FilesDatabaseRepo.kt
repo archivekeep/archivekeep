@@ -547,7 +547,12 @@ abstract class FilesDatabaseRepo(
                 }
             }
 
-    protected fun cancelScope() {
+    protected suspend fun cancelScope() {
         scope.cancel()
+        job.join()
+    }
+
+    override suspend fun close() {
+        cancelScope()
     }
 }

@@ -30,7 +30,7 @@ class FilesObjectBoxRepo(
         startAutoRepair()
     }
 
-    fun close() {
+    override suspend fun close() {
         cancelScope()
         store.close()
     }
@@ -47,7 +47,7 @@ class FilesObjectBoxRepo(
             return null
         }
 
-        fun isRepo(path: Path) = openOrNull(path)?.also { it.close() } != null
+        suspend fun isRepo(path: Path) = openOrNull(path)?.also { it.close() } != null
 
         suspend fun create(
             path: Path,

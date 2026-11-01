@@ -420,6 +420,11 @@ class FilesRepo(
         }
     }
 
+    override suspend fun close() {
+        job.cancel()
+        job.join()
+    }
+
     companion object {
         fun openOrNull(path: Path): FilesRepo? {
             val checksumDir = path.resolve(".archive").resolve(checksumsSubDir)

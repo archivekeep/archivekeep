@@ -31,7 +31,7 @@ class FilesSqliteRepo(
         startAutoRepair()
     }
 
-    private fun close() {
+    override suspend fun close() {
         cancelScope()
         database.close()
     }
@@ -48,7 +48,7 @@ class FilesSqliteRepo(
             return null
         }
 
-        fun isRepo(path: Path) = openOrNull(path)?.also { it.close() } != null
+        suspend fun isRepo(path: Path) = openOrNull(path)?.also { it.close() } != null
 
         suspend fun create(
             path: Path,

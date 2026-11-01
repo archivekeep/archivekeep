@@ -27,7 +27,10 @@ class DeinitializeFileSystemRepositoryByPathUseCaseImpl : DeinitializeFileSystem
             return object : DeinitializeFileSystemRepositoryPreparation.PlainFileSystemRepository {
                 override val path: String = path
 
-                override suspend fun runDeinitialize() = filesystemWorkingRepository.deinitialize()
+                override suspend fun runDeinitialize() {
+                    filesystemWorkingRepository.deinitialize()
+                    filesystemWorkingRepository.close()
+                }
             }
         }
 
