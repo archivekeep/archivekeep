@@ -20,8 +20,9 @@ import kotlinx.coroutines.cancel
 import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.plus
+import org.archivekeep.app.core.persistence.drivers.filesystem.operations.deinitialize.DeinitializeFileSystemRepositoryByPathUseCase
+import org.archivekeep.app.core.persistence.drivers.filesystem.operations.deinitialize.DeinitializeFileSystemRepositoryByUriUseCase
 import org.archivekeep.app.core.persistence.drivers.filesystem.operations.deinitialize.DeinitializeFileSystemRepositoryPreparation
-import org.archivekeep.app.core.persistence.drivers.filesystem.operations.deinitialize.DeinitializeFileSystemRepositoryUseCase
 import org.archivekeep.app.core.utils.generics.ExecutionOutcome
 import org.archivekeep.app.core.utils.identifiers.RepositoryURI
 import org.archivekeep.app.ui.components.designsystem.dialog.DialogButtonContainer
@@ -41,10 +42,14 @@ import org.archivekeep.app.ui.utils.SingleLaunchGuard
 import org.archivekeep.app.ui.utils.appendBoldSpan
 import org.archivekeep.utils.loading.Loadable
 
-class DeinitializeFileSystemRepositoryDialog(
-    val repositoryURI: RepositoryURI?,
-    val path: String,
+abstract class DeinitializeFileSystemRepositoryDialog(
+    protected open val repositoryURI: RepositoryURI?,
 ) : Dialog {
+    protected abstract suspend fun prepare(
+        scope: CoroutineScope,
+        operationFactory1: OperationFactory,
+    ): DeinitializeFileSystemRepositoryPreparation
+
     inner class VM(
         val coroutineScope: CoroutineScope,
         val operationFactory: OperationFactory,
@@ -61,14 +66,7 @@ class DeinitializeFileSystemRepositoryDialog(
         init {
             preparationScope.launch {
                 try {
-                    val newOperation =
-                        operationFactory
-                            .get(DeinitializeFileSystemRepositoryUseCase::class.java)
-                            .prepare(
-                                preparationScope,
-                                path,
-                            )
-
+                    val newOperation = this@DeinitializeFileSystemRepositoryDialog.prepare(preparationScope, operationFactory)
                     ensureActive()
                     deinitializePreparation = Loadable.Loaded(newOperation)
                 } catch (e: Throwable) {
@@ -109,12 +107,17 @@ class DeinitializeFileSystemRepositoryDialog(
                     },
                     content = {
                         LoadableGuard(vm.deinitializePreparation) { preparation ->
+                            val repoPath =
+                                when (preparation) {
+                                    is DeinitializeFileSystemRepositoryPreparation.PlainFileSystemRepository -> preparation.path
+                                    is DeinitializeFileSystemRepositoryPreparation.DirectoryNotRepository -> ""
+                                }
                             Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
                                 Text(
-                                    remember(path) {
+                                    remember(repoPath) {
                                         buildAnnotatedString {
                                             append("Repository stored in ")
-                                            appendBoldSpan(path)
+                                            appendBoldSpan(repoPath)
                                             append(" will be deinitialized.")
                                         }
                                     },
@@ -124,10 +127,10 @@ class DeinitializeFileSystemRepositoryDialog(
                                 }
                                 Text("Data will not be deleted.")
                                 Text(
-                                    remember(path) {
+                                    remember(repoPath) {
                                         buildAnnotatedString {
                                             append("Metadata stored in ")
-                                            appendBoldSpan(path + "/.archive")
+                                            appendBoldSpan(repoPath + "/.archive")
                                             append(" will be ")
                                             appendBoldSpan("completely deleted")
                                             append(".")
@@ -185,6 +188,7 @@ class DeinitializeFileSystemRepositoryDialog(
                                                         vm.deinitializeLaunchGuard.launch {
                                                             option.runDeinitialize()
 
+                                                            // TODO: what if it's discovered by path (add dialog), but already registered?
                                                             if (repositoryURI != null) {
                                                                 registry.updateRepositories { old ->
                                                                     old.filter { it.uri != repositoryURI }.toSet()
@@ -207,4 +211,28 @@ class DeinitializeFileSystemRepositoryDialog(
             }
         }
     }
+}
+
+class DeinitializeFileSystemRepositoryByPathDialog(
+    val path: String,
+) : DeinitializeFileSystemRepositoryDialog(repositoryURI = null) {
+    override suspend fun prepare(
+        scope: CoroutineScope,
+        operationFactory: OperationFactory,
+    ): DeinitializeFileSystemRepositoryPreparation =
+        operationFactory
+            .get(DeinitializeFileSystemRepositoryByPathUseCase::class.java)
+            .prepare(scope, path)
+}
+
+class DeinitializeFileSystemRepositoryByUriDialog(
+    override val repositoryURI: RepositoryURI,
+) : DeinitializeFileSystemRepositoryDialog(repositoryURI = repositoryURI) {
+    override suspend fun prepare(
+        scope: CoroutineScope,
+        operationFactory: OperationFactory,
+    ): DeinitializeFileSystemRepositoryPreparation =
+        operationFactory
+            .get(DeinitializeFileSystemRepositoryByUriUseCase::class.java)
+            .prepare(scope, repositoryURI)
 }

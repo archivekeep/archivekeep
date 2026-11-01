@@ -20,7 +20,6 @@ import org.archivekeep.utils.loading.mapLoadedData
 import org.archivekeep.utils.loading.optional.OptionalLoadable
 import org.archivekeep.utils.loading.optional.mapLoadedData
 import org.archivekeep.utils.loading.optional.mapToLoadable
-import kotlin.io.path.absolutePathString
 
 class RepositoryOperationalState(
     repositoryAccessState: RepositoryAccessState,
@@ -144,7 +143,7 @@ class RepositoryOperationalState(
                         isPending = false,
                         isAvailable = it != null,
                         onLaunch = {
-                            launchers.openDeinitializeFilesystemRepository(uri, it!!.root.absolutePathString())
+                            launchers.openDeinitializeFilesystemRepositoryByUri(uri)
                         },
                     )
                 }

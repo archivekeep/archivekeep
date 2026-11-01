@@ -277,7 +277,7 @@ private fun AddRepositoryDialogContents(
 
                                         OutlinedButton(onClick = {
                                             onClose()
-                                            l.openDeinitializeFilesystemRepository(null, option.rootPath)
+                                            l.openDeinitializeFilesystemRepositoryByPath(option.rootPath)
                                         }) {
                                             Text("Deinitialize existing repository")
                                         }

@@ -16,8 +16,10 @@ import org.archivekeep.app.core.operations.AssociateRepositoryOperation
 import org.archivekeep.app.core.operations.AssociateRepositoryOperationImpl
 import org.archivekeep.app.core.persistence.drivers.filesystem.operations.add.AddFileSystemRepositoryUseCase
 import org.archivekeep.app.core.persistence.drivers.filesystem.operations.add.AddFileSystemRepositoryUseCaseImpl
-import org.archivekeep.app.core.persistence.drivers.filesystem.operations.deinitialize.DeinitializeFileSystemRepositoryUseCase
-import org.archivekeep.app.core.persistence.drivers.filesystem.operations.deinitialize.DeinitializeFileSystemRepositoryUseCaseImpl
+import org.archivekeep.app.core.persistence.drivers.filesystem.operations.deinitialize.DeinitializeFileSystemRepositoryByPathUseCase
+import org.archivekeep.app.core.persistence.drivers.filesystem.operations.deinitialize.DeinitializeFileSystemRepositoryByPathUseCaseImpl
+import org.archivekeep.app.core.persistence.drivers.filesystem.operations.deinitialize.DeinitializeFileSystemRepositoryByUriUseCase
+import org.archivekeep.app.core.persistence.drivers.filesystem.operations.deinitialize.DeinitializeFileSystemRepositoryByUriUseCaseImpl
 import org.archivekeep.app.core.utils.identifiers.RepositoryURI
 
 @SingleIn(AppScope::class)
@@ -62,8 +64,11 @@ class OperationFactory private constructor(
                         )
                 },
             ).put(
-                DeinitializeFileSystemRepositoryUseCase::class.java,
-                DeinitializeFileSystemRepositoryUseCaseImpl(),
+                DeinitializeFileSystemRepositoryByPathUseCase::class.java,
+                DeinitializeFileSystemRepositoryByPathUseCaseImpl(),
+            ).put(
+                DeinitializeFileSystemRepositoryByUriUseCase::class.java,
+                DeinitializeFileSystemRepositoryByUriUseCaseImpl(repositoryService),
             ).build(),
     )
 

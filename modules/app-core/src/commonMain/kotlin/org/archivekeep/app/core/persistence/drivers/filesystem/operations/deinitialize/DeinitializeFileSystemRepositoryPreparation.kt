@@ -4,6 +4,8 @@ sealed interface DeinitializeFileSystemRepositoryPreparation {
     data object DirectoryNotRepository : DeinitializeFileSystemRepositoryPreparation
 
     interface PlainFileSystemRepository : DeinitializeFileSystemRepositoryPreparation {
+        val path: String
+
         suspend fun runDeinitialize()
     }
 }
