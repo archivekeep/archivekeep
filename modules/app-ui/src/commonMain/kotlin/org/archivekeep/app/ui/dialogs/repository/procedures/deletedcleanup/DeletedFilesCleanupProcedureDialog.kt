@@ -2,14 +2,19 @@ package org.archivekeep.app.ui.dialogs.repository.procedures.deletedcleanup
 
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.RowScope
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.height
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
@@ -20,7 +25,10 @@ import org.archivekeep.app.core.procedures.deletedcleanup.DeletedFilesCleanupPro
 import org.archivekeep.app.core.procedures.deletedcleanup.DeletedFilesCleanupProcedureSupervisorService
 import org.archivekeep.app.core.utils.identifiers.RepositoryURI
 import org.archivekeep.app.ui.components.base.layout.ScrollableLazyColumnWithGuessedWidth
+import org.archivekeep.app.ui.components.designsystem.dialog.LabelText
 import org.archivekeep.app.ui.components.designsystem.dialog.fullWidthDialogWidthModifier
+import org.archivekeep.app.ui.components.designsystem.elements.InfoAlert
+import org.archivekeep.app.ui.components.designsystem.sections.SectionCardSecondaryButton
 import org.archivekeep.app.ui.components.feature.dialogs.operations.DialogOperationControlButtons
 import org.archivekeep.app.ui.components.feature.dialogs.operations.DialogOperationControlState
 import org.archivekeep.app.ui.components.feature.dialogs.operations.toDialogOperationControlState
@@ -29,12 +37,16 @@ import org.archivekeep.app.ui.components.feature.operations.DeletedFilesCleanupP
 import org.archivekeep.app.ui.components.feature.operations.OperationProgressTabs
 import org.archivekeep.app.ui.dialogs.repository.AbstractRepositoryDialog
 import org.archivekeep.app.ui.domain.wiring.LocalApplicationServices
+import org.archivekeep.app.ui.domain.wiring.LocalArchiveOperationLaunchers
 import org.archivekeep.app.ui.utils.appendBoldSpan
 import org.archivekeep.app.ui.utils.collectAsLoadable
 import org.archivekeep.app.ui.utils.stickToFirstNotNull
 import org.archivekeep.files.procedures.deletedcleanup.DeletedFilesCleanupProcedure
 import org.archivekeep.utils.loading.Loadable
 import org.archivekeep.utils.loading.mapToLoadable
+import org.archivekeep.utils.loading.optional.OptionalLoadable
+import org.archivekeep.utils.loading.optional.mapIfLoadedOrNull
+import org.archivekeep.utils.loading.optional.mapLoadedData
 import org.archivekeep.utils.loading.waitLoadedValue
 
 class DeletedFilesCleanupProcedureDialog(
@@ -45,6 +57,7 @@ class DeletedFilesCleanupProcedureDialog(
         // TODO: this should be Loadable - show loading of contents
         val operationState: DeletedFilesCleanupProcedureSupervisor.State,
         val selectedFilesToReindex: MutableState<Set<String>>,
+        val canAdd: Boolean,
         val onClose: () -> Unit,
     ) : IState {
         override val title =
@@ -87,6 +100,7 @@ class DeletedFilesCleanupProcedureDialog(
         val scope: CoroutineScope,
         val repository: SharedFlow<RepositoryInformation>,
         val deletedFilesCleanupProcedureSupervisorService: DeletedFilesCleanupProcedureSupervisorService,
+        val canAddFlow: Flow<OptionalLoadable<Boolean>>,
         val _onClose: () -> Unit,
     ) : IVM {
         val operation = deletedFilesCleanupProcedureSupervisorService.getDeletedFilesCleanupOperation(uri)
@@ -112,12 +126,17 @@ class DeletedFilesCleanupProcedureDialog(
         onClose: () -> Unit,
     ): VM {
         val deletedFilesCleanupProcedureSupervisorService = LocalApplicationServices.current.deletedFilesCleanupProcedureSupervisorService
+        val canAddFlow =
+            remember(repository) {
+                repository.localRepoStatus.mapLoadedData { it.summary.canAdd }
+            }
 
         return remember {
             VM(
                 scope,
                 repository.informationFlow,
                 deletedFilesCleanupProcedureSupervisorService,
+                canAddFlow = canAddFlow,
                 _onClose = onClose,
             )
         }
@@ -129,11 +148,13 @@ class DeletedFilesCleanupProcedureDialog(
             combine(
                 vm.repository,
                 vm.operationStateFlow.waitLoadedValue(),
-            ) { repository, operationState ->
+                vm.canAddFlow,
+            ) { repository, operationState, canAdd ->
                 State(
                     archiveName = repository.displayName,
                     operationState = operationState,
                     selectedFilesToReindex = mutableStateOf(emptySet()),
+                    canAdd = canAdd.mapIfLoadedOrNull { it } ?: false,
                     onClose = vm::onClose,
                 )
             }
@@ -153,6 +174,25 @@ class DeletedFilesCleanupProcedureDialog(
                         allItemsLabel = { "All missing/deleted files ($it)" },
                         itemLabelText = { it },
                     )
+
+                if (state.canAdd) {
+                    val launchers = LocalArchiveOperationLaunchers.current
+
+                    InfoAlert {
+                        Text("Files may have been moved or renamed instead of removed.")
+                        Spacer(Modifier.height(8.dp))
+                        Text("It is recommended to proceed with addition of new/moved files first.")
+                        Spacer(Modifier.height(8.dp))
+                        SectionCardSecondaryButton(
+                            onClick = {
+                                launchers.openIndexUpdateOperation(uri)
+                                state.onClose()
+                            },
+                            text = "Open index update",
+                        )
+                    }
+                    Spacer(Modifier.height(12.dp))
+                }
 
                 ScrollableLazyColumnWithGuessedWidth(filesManySelect.guessedWidth) {
                     if (preparationState.missingFiles.isNotEmpty()) {

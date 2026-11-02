@@ -53,6 +53,8 @@ class StatusOperation(
             val totalNewFiles: Int,
             val totalModifiedIndexedFiles: Int,
             val totalMissingFiles: Int,
-        )
+        ) {
+            val canAdd: Boolean = totalNewFiles > 0
+        }
     }
 }

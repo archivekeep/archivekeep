@@ -27,7 +27,7 @@ class RepositoryOperationalState(
     val isAssociated: Boolean,
     localRepoStatus: OptionalLoadable<StatusOperation.Result.Summary>,
 ) {
-    val canAdd = localRepoStatus.mapLoadedData { it.totalNewFiles > 0 }.mapToLoadable(false)
+    val canAdd = localRepoStatus.mapLoadedData { it.canAdd }.mapToLoadable(false)
     val canReindex = localRepoStatus.mapLoadedData { it.totalModifiedIndexedFiles > 0 }.mapToLoadable(false)
     val canCleanupDeletedFiles = localRepoStatus.mapLoadedData { it.totalMissingFiles > 0 }.mapToLoadable(false)
 
