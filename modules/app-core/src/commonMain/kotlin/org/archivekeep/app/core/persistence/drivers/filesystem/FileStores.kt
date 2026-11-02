@@ -10,6 +10,8 @@ interface FileStores {
     val mountedFileSystems: Flow<Loadable<List<MountedFileSystem>>>
 
     suspend fun loadFreshMountPoints(): List<MountedFileSystem.MountPoint>
+
+    fun onFileSystemRemoved(callback: (fsUUID: String) -> Unit): () -> Unit
 }
 
 fun List<MountedFileSystem.MountPoint>.getFileSystemForPath(path: String): MountedFileSystem.MountPoint? =

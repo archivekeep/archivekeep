@@ -9,4 +9,6 @@ interface FilesystemWorkingRepository : LocalRepo {
     suspend fun deinitialize()
 
     suspend fun close()
+
+    fun closeSync()
 }

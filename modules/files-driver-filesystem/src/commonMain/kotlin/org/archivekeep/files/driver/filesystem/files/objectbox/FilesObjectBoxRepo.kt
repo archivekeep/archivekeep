@@ -30,9 +30,14 @@ class FilesObjectBoxRepo(
         startAutoRepair()
     }
 
-    override suspend fun close() {
-        cancelScope()
+    override fun closeSync() {
         store.close()
+        super.closeSync()
+    }
+
+    override suspend fun close() {
+        closeSync()
+        job.join()
     }
 
     companion object {

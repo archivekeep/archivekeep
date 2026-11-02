@@ -425,8 +425,12 @@ class FilesRepo(
         }
     }
 
-    override suspend fun close() {
+    override fun closeSync() {
         job.cancel()
+    }
+
+    override suspend fun close() {
+        closeSync()
         job.join()
     }
 

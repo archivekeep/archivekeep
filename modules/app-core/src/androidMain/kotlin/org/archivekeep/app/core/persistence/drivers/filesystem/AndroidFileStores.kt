@@ -1,6 +1,7 @@
 package org.archivekeep.app.core.persistence.drivers.filesystem
 
 import android.content.Context
+import android.os.Environment
 import android.os.storage.StorageManager
 import android.os.storage.StorageVolume
 import dev.zacsweers.metro.AppScope
@@ -18,6 +19,7 @@ import org.archivekeep.utils.io.debounceAndRepeatAfterDelay
 import org.archivekeep.utils.loading.Loadable
 import org.archivekeep.utils.loading.ResourceLoader
 import org.archivekeep.utils.loading.mapLoadedData
+import java.util.Collections
 import java.util.Date
 import java.util.concurrent.Executor
 
@@ -34,6 +36,8 @@ class AndroidFileStores(
 
     // TODO: trigger on permission grant
     private val changes = Channel<Date>(capacity = 1)
+
+    private val fileSystemRemovedCallbacks = Collections.synchronizedList(mutableListOf<(String) -> Unit>())
 
     private val autoRefreshMountPoints =
         ResourceLoader(
@@ -94,9 +98,36 @@ class AndroidFileStores(
     private val storageVolumeCallback =
         object : StorageManager.StorageVolumeCallback() {
             override fun onStateChanged(volume: StorageVolume) {
+                notifyFileSystemRemovedCallbacksIfRemoved(volume)
                 changes.trySendBlocking(Date())
             }
+
+            private fun notifyFileSystemRemovedCallbacksIfRemoved(volume: StorageVolume) {
+                val uuid = volume.uuid ?: return
+                val state = volume.state
+                val directory = volume.directory
+                val isRemoved =
+                    state == Environment.MEDIA_UNMOUNTED ||
+                        state == Environment.MEDIA_REMOVED ||
+                        state == Environment.MEDIA_BAD_REMOVAL ||
+                        directory == null
+
+                if (isRemoved) {
+                    fileSystemRemovedCallbacks.forEach { callback ->
+                        try {
+                            callback(uuid)
+                        } catch (e: Throwable) {
+                            println("Error in filesystem removed callback: ${e.message}")
+                        }
+                    }
+                }
+            }
         }
+
+    override fun onFileSystemRemoved(callback: (fsUUID: String) -> Unit): () -> Unit {
+        fileSystemRemovedCallbacks.add(callback)
+        return { fileSystemRemovedCallbacks.remove(callback) }
+    }
 
     init {
         storageManager.registerStorageVolumeCallback(executor, storageVolumeCallback)

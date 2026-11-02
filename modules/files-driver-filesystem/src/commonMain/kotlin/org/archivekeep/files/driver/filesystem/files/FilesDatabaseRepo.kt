@@ -177,7 +177,7 @@ abstract class FilesDatabaseRepo(
             .stateIn(scope)
     }
 
-    private val job = SupervisorJob(parentJob)
+    protected val job = SupervisorJob(parentJob)
     private val scope = CoroutineScope(job + CoroutineName("FilesDatabaseRepo: $root") + stateDispatcher)
 
     private val metadataPath = root.resolve(".archive").resolve("metadata.json")
@@ -557,12 +557,20 @@ abstract class FilesDatabaseRepo(
                 }
             }
 
-    protected suspend fun cancelScope() {
+    protected fun cancelScopeSync() {
         scope.cancel()
+    }
+
+    protected suspend fun cancelScope() {
+        cancelScopeSync()
         job.join()
     }
 
     override suspend fun close() {
         cancelScope()
+    }
+
+    override fun closeSync() {
+        cancelScopeSync()
     }
 }

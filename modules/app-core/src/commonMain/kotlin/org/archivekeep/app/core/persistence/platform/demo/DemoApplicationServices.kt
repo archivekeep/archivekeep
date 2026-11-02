@@ -67,6 +67,8 @@ interface DemoApplicationServices : CoreApplicationServicesGraph {
                 }
 
             override suspend fun loadFreshMountPoints(): List<MountedFileSystem.MountPoint> = mountPoints
+
+            override fun onFileSystemRemoved(callback: (fsUUID: String) -> Unit): () -> Unit = { }
         }
 
     @Provides

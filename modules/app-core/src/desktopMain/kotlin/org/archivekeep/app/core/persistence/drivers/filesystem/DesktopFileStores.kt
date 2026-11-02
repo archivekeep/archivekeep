@@ -157,4 +157,6 @@ class DesktopFileStores(
                     )
                 }
         }
+
+    override fun onFileSystemRemoved(callback: (fsUUID: String) -> Unit): () -> Unit = { }
 }
