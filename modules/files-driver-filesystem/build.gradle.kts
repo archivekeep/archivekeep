@@ -44,6 +44,7 @@ kotlin {
         val desktopMain by getting {
             dependencies {
                 implementation(libs.objectbox.linux)
+                implementation(libs.objectbox.linux.arm64)
             }
         }
         val desktopTest by getting {

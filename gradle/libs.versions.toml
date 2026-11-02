@@ -88,6 +88,7 @@ objectbox-kotlin = { group = "io.objectbox", name = "objectbox-kotlin", version.
 objectbox-java = { group = "io.objectbox", name = "objectbox-java", version.ref = "objectbox" }
 objectbox-processor = { group = "io.objectbox", name = "objectbox-processor", version.ref = "objectbox" }
 objectbox-linux = { group = "io.objectbox", name = "objectbox-linux", version.ref = "objectbox" }
+objectbox-linux-arm64 = { group = "io.objectbox", name = "objectbox-linux-arm64", version.ref = "objectbox" }
 
 [plugins]
 kotlin-compose = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }

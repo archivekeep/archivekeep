@@ -45,8 +45,9 @@ modules:
         # Pre-extract ObjectBox native libraries to /app/lib so the app can find them
         # by searching the directory. Then remove them from the JAR so
         # NativeLibraryLoader's checkUnpackLib finds no resource and skips extraction.
-        OBJECTBOX_JAR=$(find /app/lib -name "objectbox-linux-*.jar" | head -1)
-        if [ -n "$OBJECTBOX_JAR" ]; then
+        # Iterate over ALL matching JARs (both x86_64 and arm64) to extract both architectures.
+        for OBJECTBOX_JAR in /app/lib/objectbox-linux-*.jar; do
+          [ -f "$OBJECTBOX_JAR" ] || continue
           for so in $(unzip -l "$OBJECTBOX_JAR" | grep 'native/libobjectbox-jni-linux-.*\.so' | awk '{print $4}'); do
             basename=$(basename "$so")
             unzip -p "$OBJECTBOX_JAR" "$so" > "/app/lib/$basename"
@@ -55,7 +56,7 @@ modules:
           # Remove native .so files from the JAR to prevent NativeLibraryLoader from
           # extracting them to CWD at runtime, which would cause symbol conflicts
           zip -d "$OBJECTBOX_JAR" 'native/libobjectbox-jni-linux-*.so'
-        fi
+        done
       - install -Dm644 modules/app-desktop/src/main/composeResources/drawable/ic_app.svg /app/share/icons/hicolor/scalable/apps/$FLATPAK_ID.svg
       - install -Dm644 distribution/resources/$FLATPAK_ID.metainfo.xml /app/share/metainfo/$FLATPAK_ID.metainfo.xml
       - install -Dm644 distribution/resources/$FLATPAK_ID.desktop /app/share/applications/$FLATPAK_ID.desktop
