@@ -54,7 +54,10 @@ class DeinitializeFileSystemRepositoryByUriUseCaseImpl(
         return object : DeinitializeFileSystemRepositoryPreparation.PlainFileSystemRepository {
             override val path: String = filesystemWorkingRepository.root.toAbsolutePath().toString()
 
-            override suspend fun runDeinitialize() = filesystemWorkingRepository.deinitialize()
+            override suspend fun runDeinitialize() {
+                filesystemWorkingRepository.deinitialize()
+                filesystemWorkingRepository.close()
+            }
         }
     }
 }
