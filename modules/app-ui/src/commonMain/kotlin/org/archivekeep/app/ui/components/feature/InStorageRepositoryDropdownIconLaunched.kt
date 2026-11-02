@@ -58,7 +58,7 @@ fun InStorageRepositoryDropdownIconLaunched(uri: RepositoryURI) {
             ActionDropdownMenuItem(
                 Action(
                     icon = TablerIcons.InfoCircle,
-                    title = "Repository details",
+                    title = "Details",
                     isPending = false,
                     onLaunch = {
                         launchers.openRepositoryDetails(uri)
