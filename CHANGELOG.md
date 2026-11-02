@@ -2,6 +2,22 @@
 
 ## Unreleased
 
+## 0.7.0 - 2026-11-02
+
+### Added
+
+- filesystem repository implementation with ObjectBox-backed index (recommended by default),
+- dialogs showing repository details: showing name, type, storage, file count, and total size,
+- performance tracking for index update procedure,
+- description of index types on repository init with compatibility and performance notes,
+- alert in cleanup dialog when files may have been moved or renamed, with recommendation to run index update first.
+
+### Changed
+
+- storage registration section in add repository dialog changed to alert,
+- cleanup action is placed after add action in repository row actions (since cleanup may involve moves, not only deletions),
+- Flatpak runtime updated to 26.08 with ObjectBox native library support.
+
 ## 0.6.4 - 2026-08-21
 
 ### Added
