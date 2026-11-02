@@ -5,6 +5,7 @@ import com.google.common.cache.CacheLoader
 import com.google.common.cache.LoadingCache
 
 class UniqueInstanceManager<T : Any, V : Any>(
+    val closeCallback: suspend (V) -> Unit = {},
     val factory: (key: T) -> V,
 ) {
     private val values: LoadingCache<T, V> =
@@ -21,7 +22,10 @@ class UniqueInstanceManager<T : Any, V : Any>(
 
     fun get(keys: Collection<T>): List<V> = keys.map { get(it) }
 
-    fun invalidate(key: T) {
+    suspend fun invalidate(key: T) {
+        values.getIfPresent(key)?.let { old ->
+            closeCallback(old)
+        }
         values.invalidate(key)
     }
 }

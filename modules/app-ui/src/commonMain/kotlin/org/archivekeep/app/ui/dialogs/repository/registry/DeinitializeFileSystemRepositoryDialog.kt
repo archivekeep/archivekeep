@@ -92,8 +92,6 @@ abstract class DeinitializeFileSystemRepositoryDialog(
         val operationFactory = LocalApplicationServices.current.operationFactory
         val coroutineScope = rememberCoroutineScope()
 
-        val registry = LocalApplicationServices.current.registry
-
         val vm =
             remember(coroutineScope, operationFactory) {
                 VM(coroutineScope, operationFactory)
@@ -187,13 +185,6 @@ abstract class DeinitializeFileSystemRepositoryDialog(
                                                     onLaunch = {
                                                         vm.deinitializeLaunchGuard.launch {
                                                             option.runDeinitialize()
-
-                                                            // TODO: what if it's discovered by path (add dialog), but already registered?
-                                                            if (repositoryURI != null) {
-                                                                registry.updateRepositories { old ->
-                                                                    old.filter { it.uri != repositoryURI }.toSet()
-                                                                }
-                                                            }
                                                         }
                                                     },
                                                     onClose = onClose,

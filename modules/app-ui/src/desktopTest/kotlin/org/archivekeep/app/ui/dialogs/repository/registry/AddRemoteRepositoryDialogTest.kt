@@ -10,6 +10,7 @@ import dev.zacsweers.metro.Provides
 import dev.zacsweers.metro.SingleIn
 import dev.zacsweers.metro.createDynamicGraphFactory
 import org.archivekeep.app.core.domain.CoreApplicationServices
+import org.archivekeep.app.core.domain.repositories.RepositoryRegistryService
 import org.archivekeep.app.core.domain.repositories.RepositoryService
 import org.archivekeep.app.core.domain.storages.StorageDriver
 import org.archivekeep.app.core.domain.storages.StorageRegistry
@@ -37,11 +38,12 @@ class NoOpAddRemoteRepositoryContainer {
     @SingleIn(AppScope::class)
     fun operationFactory(
         repositoryService: RepositoryService,
+        repositoryRegistryService: RepositoryRegistryService,
         env: CoreApplicationServices,
         storageRegistry: StorageRegistry,
         drivers: Map<String, StorageDriver>,
     ): OperationFactory =
-        OperationFactory(repositoryService, env, storageRegistry, drivers).override(
+        OperationFactory(repositoryService, repositoryRegistryService, env, storageRegistry, drivers).override(
             AddRemoteRepositoryUseCase::class.java,
             NoOpAddRemoteRepositoryUseCase(),
         )

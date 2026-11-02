@@ -7,6 +7,7 @@ import dev.zacsweers.metro.Inject
 import dev.zacsweers.metro.SingleIn
 import kotlinx.coroutines.CoroutineScope
 import org.archivekeep.app.core.domain.CoreApplicationServices
+import org.archivekeep.app.core.domain.repositories.RepositoryRegistryService
 import org.archivekeep.app.core.domain.repositories.RepositoryService
 import org.archivekeep.app.core.domain.storages.StorageDriver
 import org.archivekeep.app.core.domain.storages.StorageRegistry
@@ -29,6 +30,7 @@ class OperationFactory private constructor(
     @Inject
     constructor(
         repositoryService: RepositoryService,
+        repositoryRegistryService: RepositoryRegistryService,
         env: CoreApplicationServices,
         storageRegistry: StorageRegistry,
         drivers: Map<String, StorageDriver>,
@@ -68,7 +70,7 @@ class OperationFactory private constructor(
                 DeinitializeFileSystemRepositoryByPathUseCaseImpl(),
             ).put(
                 DeinitializeFileSystemRepositoryByUriUseCase::class.java,
-                DeinitializeFileSystemRepositoryByUriUseCaseImpl(repositoryService),
+                DeinitializeFileSystemRepositoryByUriUseCaseImpl(repositoryService, repositoryRegistryService),
             ).build(),
     )
 

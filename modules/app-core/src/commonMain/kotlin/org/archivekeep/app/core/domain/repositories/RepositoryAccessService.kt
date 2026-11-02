@@ -23,7 +23,7 @@ class RepositoryAccessService(
     private val storageDrivers: Map<String, StorageDriver>,
     private val credentialsStore: CredentialsStore,
 ) {
-    val repositoryAccessor = UniqueInstanceManager(factory = ::createBase)
+    val repositoryAccessor = UniqueInstanceManager(factory = ::createBase, closeCallback = { it.close() })
 
     val autoUnlockRepositoryAccessor =
         UniqueInstanceManager { uri: RepositoryURI ->

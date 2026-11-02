@@ -1,6 +1,7 @@
 package org.archivekeep.app.core.persistence.drivers.filesystem.operations.deinitialize
 
 import kotlinx.coroutines.CoroutineScope
+import org.archivekeep.app.core.domain.repositories.RepositoryRegistryService
 import org.archivekeep.app.core.domain.repositories.RepositoryService
 import org.archivekeep.app.core.utils.identifiers.RepositoryURI
 import org.archivekeep.files.driver.filesystem.files.FileSystemRepositoryFactory
@@ -40,6 +41,7 @@ class DeinitializeFileSystemRepositoryByPathUseCaseImpl : DeinitializeFileSystem
 
 class DeinitializeFileSystemRepositoryByUriUseCaseImpl(
     private val repositoryService: RepositoryService,
+    private val repositoryRegistryService: RepositoryRegistryService,
 ) : DeinitializeFileSystemRepositoryByUriUseCase {
     override suspend fun prepare(
         scope: CoroutineScope,
@@ -56,7 +58,7 @@ class DeinitializeFileSystemRepositoryByUriUseCaseImpl(
 
             override suspend fun runDeinitialize() {
                 filesystemWorkingRepository.deinitialize()
-                filesystemWorkingRepository.close()
+                repositoryRegistryService.forgetRepository(repositoryURI)
             }
         }
     }
