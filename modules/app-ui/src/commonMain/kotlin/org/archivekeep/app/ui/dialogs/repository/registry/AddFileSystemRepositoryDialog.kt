@@ -498,6 +498,7 @@ private fun AddRepositoryDialogContents(
                                                                 createPassword.isNotBlank() && createPassword == createPassword2
                                                             )
                                                     ),
+                                            isRunning = singleLaunchGuard.state is SingleLaunchGuard.State.Running,
                                         )
                                     }
                                 }
@@ -520,6 +521,7 @@ private fun AddRepositoryDialogContents(
                                                         option.storageRegistration is StorageRegistrationState.Registered ||
                                                             (storageType != null && label.isNotBlank())
                                                     ),
+                                            isRunning = singleLaunchGuard.state is SingleLaunchGuard.State.Running,
                                         )
                                     }
                                 }
@@ -548,6 +550,7 @@ private fun AddRepositoryDialogContents(
                                                         option.storageRegistration is StorageRegistrationState.Registered ||
                                                             (storageType != null && label.isNotBlank())
                                                     ),
+                                            isRunning = singleLaunchGuard.state is SingleLaunchGuard.State.Running,
                                         )
                                     }
                                 }

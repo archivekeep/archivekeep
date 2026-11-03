@@ -190,6 +190,7 @@ abstract class DeinitializeFileSystemRepositoryDialog(
                                                     onClose = onClose,
                                                     canLaunch =
                                                         vm.metadataDestructionConfirmed && vm.deinitializeLaunchGuard.state !is SingleLaunchGuard.State.Running,
+                                                    isRunning = vm.deinitializeLaunchGuard.state is SingleLaunchGuard.State.Running,
                                                 )
                                             }
                                         }

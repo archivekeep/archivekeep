@@ -5,9 +5,11 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.job
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import org.archivekeep.app.core.utils.generics.ExecutionOutcome
 
 class SingleLaunchGuard(
@@ -38,7 +40,9 @@ class SingleLaunchGuard(
             try {
                 state = State.Running(coroutineContext.job)
 
-                fn()
+                withContext(Dispatchers.Default) {
+                    fn()
+                }
 
                 state = State.Completed(ExecutionOutcome.Success())
             } catch (e: Throwable) {
