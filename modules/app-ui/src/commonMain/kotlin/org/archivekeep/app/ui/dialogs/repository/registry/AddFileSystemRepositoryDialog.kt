@@ -207,7 +207,7 @@ private fun AddRepositoryDialogContents(
     var createEncrypted by remember { mutableStateOf(false) }
     var createPassword by remember { mutableStateOf("") }
     var createPassword2 by remember { mutableStateOf("") }
-    var createRepoType by remember { mutableStateOf(PlainRepositoryType.OBJECTBOX) }
+    var createRepoType by remember { mutableStateOf(PlainRepositoryType.SQLITE) }
 
     var password by remember { mutableStateOf("") }
     val coroutineScope = rememberCoroutineScope()
@@ -306,16 +306,10 @@ private fun AddRepositoryDialogContents(
                                     enabled = canEdit,
                                     extra = {
                                         Column {
-                                            RadioWithText(
-                                                selected = createRepoType == PlainRepositoryType.OBJECTBOX,
-                                                onClick = { createRepoType = PlainRepositoryType.OBJECTBOX },
-                                                text = "ObjectBox Index DB (recommended)",
-                                                enabled = canEdit,
-                                            )
                                             RadioWithTextAndExtra(
                                                 selected = createRepoType == PlainRepositoryType.SQLITE,
                                                 onClick = { createRepoType = PlainRepositoryType.SQLITE },
-                                                text = "SQLite Index DB (fastest)",
+                                                text = "SQLite Index DB (recommended)",
                                                 enabled = canEdit,
                                             ) {
                                                 Column {

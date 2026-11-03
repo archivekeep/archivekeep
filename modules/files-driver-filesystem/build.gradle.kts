@@ -7,7 +7,6 @@ plugins {
     id("com.android.library")
 
     alias(libs.plugins.ktlint)
-    alias(libs.plugins.objectbox)
 }
 
 val gradleOfflineBuildExtra by
@@ -34,19 +33,11 @@ kotlin {
                 implementation(libs.androidx.room.runtime)
                 implementation(libs.androidx.sqlite.bundled)
 
-                implementation(libs.objectbox.kotlin)
-                implementation(libs.objectbox.java)
-
                 compileOnly(libs.apache.tomcat.annotations)
             }
         }
         val androidMain by getting {}
-        val desktopMain by getting {
-            dependencies {
-                implementation(libs.objectbox.linux)
-                implementation(libs.objectbox.linux.arm64)
-            }
-        }
+        val desktopMain by getting {}
         val desktopTest by getting {
             dependencies {
                 implementation(project(":files-test"))
@@ -61,17 +52,11 @@ kotlin {
 
 dependencies {
     add("kspAndroid", libs.androidx.room.compiler)
-    add("kspAndroid", libs.objectbox.processor)
     add("kspDesktop", libs.androidx.room.compiler)
-    add("kspDesktop", libs.objectbox.processor)
 
     // for kspKotlinDesktop
     gradleOfflineBuildExtra("com.google.devtools.ksp:symbol-processing-aa-embeddable:2.3.7")
     gradleOfflineBuildExtra("org.jetbrains.kotlinx:kotlinx-coroutines-core-jvm:1.10.2")
-}
-
-ksp {
-    arg("objectbox.modelPath", "$projectDir/src/main/resources/objectbox.json")
 }
 
 tasks.withType<Test> {

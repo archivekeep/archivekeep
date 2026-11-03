@@ -51,7 +51,7 @@ sealed interface AddFileSystemRepositoryOperation {
 
         suspend fun startInitAsPlain(
             storageRegistrationInput: StorageRegistrationInput?,
-            repoType: PlainRepositoryType = PlainRepositoryType.OBJECTBOX,
+            repoType: PlainRepositoryType = PlainRepositoryType.SQLITE,
         )
 
         suspend fun startInitAsEncrypted(

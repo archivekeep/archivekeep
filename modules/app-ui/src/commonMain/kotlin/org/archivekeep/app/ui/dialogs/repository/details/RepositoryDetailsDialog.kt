@@ -131,7 +131,6 @@ private fun getFilesystemRepoType(repo: Repo): String? {
 
     return when {
         className.contains("Encrypted") -> "Encrypted files"
-        className.contains("ObjectBox") -> "ObjectBox index"
         className.contains("Sqlite") -> "SQLite index"
         className.contains("FilesRepo") -> "Plain files with checksum files"
         else -> null
