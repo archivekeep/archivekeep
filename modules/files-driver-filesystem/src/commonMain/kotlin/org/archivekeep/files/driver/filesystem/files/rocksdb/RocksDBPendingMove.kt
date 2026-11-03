@@ -13,22 +13,22 @@ internal class RocksDBPendingMove(
     override val checksumSha256: String,
 ) : DatabaseIndexStore.PendingMove {
     override suspend fun updateMoveLastAlive(date: Date) {
-        val bytes = store.db.get(store.cfPendingMoves, to.encodeToByteArray())
-        if (bytes == null) return
-        val model = rocksDbJson.decodeFromString(PendingMoveModel.serializer(), String(bytes, Charsets.UTF_8))
-        val updated = model.copy(lastAlive = date.time)
-        val json = rocksDbJson.encodeToString(PendingMoveModel.serializer(), updated)
-        store.db.put(store.cfPendingMoves, to.encodeToByteArray(), json.encodeToByteArray())
+        store.withDbAccess {
+            val bytes = get(store.cfPendingMoves, to.encodeToByteArray()) ?: return@withDbAccess
+            val model = rocksDbJson.decodeFromString(PendingMoveModel.serializer(), String(bytes, Charsets.UTF_8))
+            val updated = model.copy(lastAlive = date.time)
+            val json = rocksDbJson.encodeToString(PendingMoveModel.serializer(), updated)
+            put(store.cfPendingMoves, to.encodeToByteArray(), json.encodeToByteArray())
+        }
     }
 
     override suspend fun failed() {
-        store.db.delete(store.cfPendingMoves, to.encodeToByteArray())
+        store.withDbAccess {
+            delete(store.cfPendingMoves, to.encodeToByteArray())
+        }
     }
 
     override suspend fun completed(lastModified: Date) {
-        store.db.delete(store.cfFiles, from.encodeToByteArray())
-        store.db.delete(store.cfPendingMoves, to.encodeToByteArray())
-
         val newFileModel =
             FileModel(
                 path = to,
@@ -37,8 +37,12 @@ internal class RocksDBPendingMove(
                 lastModified = lastModified.time,
             )
         val json = rocksDbJson.encodeToString(FileModel.serializer(), newFileModel)
-        store.db.put(store.cfFiles, to.encodeToByteArray(), json.encodeToByteArray())
-        store.flush()
+        store.withDbAccess {
+            delete(store.cfFiles, from.encodeToByteArray())
+            delete(store.cfPendingMoves, to.encodeToByteArray())
+            put(store.cfFiles, to.encodeToByteArray(), json.encodeToByteArray())
+            store.flush()
+        }
         store.notifyFilesChanged()
     }
 }

@@ -10,6 +10,7 @@ build/
 /archivekeep-server
 /coverage.out
 /internal/buildinfo/archivekeep-version.json
+hs_err_pid*.log
 
 # server data
 /data

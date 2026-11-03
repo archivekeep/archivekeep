@@ -11,15 +11,20 @@ import maryk.rocksdb.ColumnFamilyHandle
 import maryk.rocksdb.RocksDB
 import maryk.rocksdb.RocksDBException
 import org.rocksdb.FlushOptions
+import java.util.concurrent.locks.ReentrantReadWriteLock
+import kotlin.concurrent.read
+import kotlin.concurrent.write
 
 class RocksDBStore(
-    val db: RocksDB,
+    private val db: RocksDB,
     val cfFiles: ColumnFamilyHandle,
     val cfIncomingFiles: ColumnFamilyHandle,
     val cfPendingMoves: ColumnFamilyHandle,
     scope: CoroutineScope = CoroutineScope(Dispatchers.IO),
     dispatcher: CoroutineDispatcher = Dispatchers.IO,
 ) {
+    private val lifecycleLock = ReentrantReadWriteLock()
+    private var closed = false
     private val _filesChanged =
         MutableSharedFlow<Unit>(
             replay = 0,
@@ -47,7 +52,11 @@ class RocksDBStore(
         scope.launch(dispatcher) {
             flushRequested.collect {
                 try {
-                    db.flush(flushOptions, allCfHandles)
+                    lifecycleLock.read {
+                        if (!closed) {
+                            db.flush(flushOptions, allCfHandles)
+                        }
+                    }
                 } catch (e: RocksDBException) {
                     println("[$storeTag] flush: FAILED — ${e.message}")
                     e.printStackTrace()
@@ -63,9 +72,27 @@ class RocksDBStore(
         _filesChanged.tryEmit(Unit)
     }
 
+    internal fun <T> withDbAccess(action: RocksDB.() -> T): T =
+        lifecycleLock.read {
+            check(!closed) { "RocksDB store is closed" }
+            db.action()
+        }
+
     fun close() {
         flushJob.cancel()
-        flushOptions.close()
-        db.close()
+        lifecycleLock.write {
+            if (closed) return@write
+
+            closed = true
+            try {
+                allCfHandles.forEach { it.close() }
+            } finally {
+                try {
+                    flushOptions.close()
+                } finally {
+                    db.close()
+                }
+            }
+        }
     }
 }

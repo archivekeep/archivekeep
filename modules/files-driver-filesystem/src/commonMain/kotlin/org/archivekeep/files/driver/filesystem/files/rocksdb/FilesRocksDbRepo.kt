@@ -30,8 +30,8 @@ class FilesRocksDbRepo(
     }
 
     override fun closeSync() {
-        rocksDBStore.close()
         super.closeSync()
+        rocksDBStore.close()
     }
 
     override suspend fun close() {

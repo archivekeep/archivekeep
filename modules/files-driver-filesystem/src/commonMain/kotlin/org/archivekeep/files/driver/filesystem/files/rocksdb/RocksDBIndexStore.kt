@@ -16,22 +16,24 @@ import org.archivekeep.files.driver.filesystem.files.rocksdb.model.toPendingMove
 import java.util.*
 import kotlin.time.Duration.Companion.seconds
 
-private val tag = "RocksDBIndexStore"
-
-private fun loadAllFiles(store: RocksDBStore): List<DatabaseIndexStore.DatabaseFileRecord> {
-    val records = mutableMapOf<String, DatabaseIndexStore.DatabaseFileRecord>()
-    val iterator: RocksIterator = store.db.newIterator(store.cfFiles)
-    iterator.seekToFirst()
-    while (iterator.isValid()) {
-        val key = String(iterator.key(), Charsets.UTF_8)
-        val value = iterator.value()
-        val fileModel = rocksDbJson.decodeFromString(FileModel.serializer(), String(value, Charsets.UTF_8))
-        records[key] = fileModel.toDatabaseFileRecord()
-        iterator.next()
+private fun loadAllFiles(store: RocksDBStore): List<DatabaseIndexStore.DatabaseFileRecord> =
+    store.withDbAccess {
+        val records = mutableMapOf<String, DatabaseIndexStore.DatabaseFileRecord>()
+        val iterator: RocksIterator = newIterator(store.cfFiles)
+        try {
+            iterator.seekToFirst()
+            while (iterator.isValid()) {
+                val key = String(iterator.key(), Charsets.UTF_8)
+                val value = iterator.value()
+                val fileModel = rocksDbJson.decodeFromString(FileModel.serializer(), String(value, Charsets.UTF_8))
+                records[key] = fileModel.toDatabaseFileRecord()
+                iterator.next()
+            }
+        } finally {
+            iterator.close()
+        }
+        records.values.toList()
     }
-    iterator.close()
-    return records.values.toList()
-}
 
 class RocksDBIndexStore(
     private val store: RocksDBStore,
@@ -53,17 +55,16 @@ class RocksDBIndexStore(
             awaitClose()
         }
 
-    override suspend fun file(path: String): DatabaseIndexStore.DatabaseFileRecord? {
-        val bytes = store.db.get(store.cfFiles, path.encodeToByteArray())
-        val result =
+    override suspend fun file(path: String): DatabaseIndexStore.DatabaseFileRecord? =
+        store.withDbAccess {
+            val bytes = get(store.cfFiles, path.encodeToByteArray())
             if (bytes == null) {
                 null
             } else {
                 val fileModel = rocksDbJson.decodeFromString(FileModel.serializer(), String(bytes, Charsets.UTF_8))
                 fileModel.toDatabaseFileRecord()
             }
-        return result
-    }
+        }
 
     override suspend fun storeFile(
         path: String,
@@ -81,8 +82,10 @@ class RocksDBIndexStore(
                 lastModified = lastModified.time,
             )
         val json = rocksDbJson.encodeToString(FileModel.serializer(), fileModel)
-        store.db.put(store.cfFiles, path.encodeToByteArray(), json.encodeToByteArray())
-        store.flush()
+        store.withDbAccess {
+            put(store.cfFiles, path.encodeToByteArray(), json.encodeToByteArray())
+            store.flush()
+        }
         store.notifyFilesChanged()
 
         if (dropIncomingFile) {
@@ -91,8 +94,10 @@ class RocksDBIndexStore(
     }
 
     override suspend fun remove(path: String) {
-        store.db.delete(store.cfFiles, path.encodeToByteArray())
-        store.flush()
+        store.withDbAccess {
+            delete(store.cfFiles, path.encodeToByteArray())
+            store.flush()
+        }
         store.notifyFilesChanged()
     }
 
@@ -112,59 +117,74 @@ class RocksDBIndexStore(
                 lastAlive = lastAlive.time,
             )
         val json = rocksDbJson.encodeToString(IncomingFileModel.serializer(), model)
-        store.db.put(store.cfIncomingFiles, path.encodeToByteArray(), json.encodeToByteArray())
+        store.withDbAccess {
+            put(store.cfIncomingFiles, path.encodeToByteArray(), json.encodeToByteArray())
+        }
     }
 
     override suspend fun updateIncomingFileLastAlive(
         path: String,
         date: Date,
     ) {
-        val bytes = store.db.get(store.cfIncomingFiles, path.encodeToByteArray())
-        if (bytes == null) return
-        val model = rocksDbJson.decodeFromString(IncomingFileModel.serializer(), String(bytes, Charsets.UTF_8))
-        val updated = model.copy(lastAlive = date.time)
-        val json = rocksDbJson.encodeToString(IncomingFileModel.serializer(), updated)
-        store.db.put(store.cfIncomingFiles, path.encodeToByteArray(), json.encodeToByteArray())
+        store.withDbAccess {
+            val bytes = get(store.cfIncomingFiles, path.encodeToByteArray()) ?: return@withDbAccess
+            val model = rocksDbJson.decodeFromString(IncomingFileModel.serializer(), String(bytes, Charsets.UTF_8))
+            val updated = model.copy(lastAlive = date.time)
+            val json = rocksDbJson.encodeToString(IncomingFileModel.serializer(), updated)
+            put(store.cfIncomingFiles, path.encodeToByteArray(), json.encodeToByteArray())
+        }
     }
 
     override suspend fun removeIncomingFile(path: String) {
-        store.db.delete(store.cfIncomingFiles, path.encodeToByteArray())
+        store.withDbAccess {
+            delete(store.cfIncomingFiles, path.encodeToByteArray())
+        }
     }
 
     override suspend fun getDeadIncomingFiles(): List<DatabaseIndexStore.IncomingFileRecord> {
         val cutoff = Date().time - durationToDeath.inWholeMilliseconds
 
-        val iterator: RocksIterator = store.db.newIterator(store.cfIncomingFiles)
-        iterator.seekToFirst()
-        val result = mutableListOf<DatabaseIndexStore.IncomingFileRecord>()
-        while (iterator.isValid()) {
-            val value = iterator.value()
-            val model = rocksDbJson.decodeFromString(IncomingFileModel.serializer(), String(value, Charsets.UTF_8))
-            if (model.lastAlive < cutoff) {
-                result.add(model.toIncomingFileRecord())
+        return store.withDbAccess {
+            val iterator: RocksIterator = newIterator(store.cfIncomingFiles)
+            try {
+                iterator.seekToFirst()
+                val result = mutableListOf<DatabaseIndexStore.IncomingFileRecord>()
+                while (iterator.isValid()) {
+                    val value = iterator.value()
+                    val model = rocksDbJson.decodeFromString(IncomingFileModel.serializer(), String(value, Charsets.UTF_8))
+                    if (model.lastAlive < cutoff) {
+                        result.add(model.toIncomingFileRecord())
+                    }
+                    iterator.next()
+                }
+                result
+            } finally {
+                iterator.close()
             }
-            iterator.next()
         }
-        iterator.close()
-        return result
     }
 
     override suspend fun getDeadPendingMoves(): List<DatabaseIndexStore.PendingMoveRecord> {
         val cutoff = Date().time - durationToDeath.inWholeMilliseconds
 
-        val iterator: RocksIterator = store.db.newIterator(store.cfPendingMoves)
-        iterator.seekToFirst()
-        val result = mutableListOf<DatabaseIndexStore.PendingMoveRecord>()
-        while (iterator.isValid()) {
-            val value = iterator.value()
-            val model = rocksDbJson.decodeFromString(PendingMoveModel.serializer(), String(value, Charsets.UTF_8))
-            if (model.lastAlive < cutoff) {
-                result.add(model.toPendingMoveRecord())
+        return store.withDbAccess {
+            val iterator: RocksIterator = newIterator(store.cfPendingMoves)
+            try {
+                iterator.seekToFirst()
+                val result = mutableListOf<DatabaseIndexStore.PendingMoveRecord>()
+                while (iterator.isValid()) {
+                    val value = iterator.value()
+                    val model = rocksDbJson.decodeFromString(PendingMoveModel.serializer(), String(value, Charsets.UTF_8))
+                    if (model.lastAlive < cutoff) {
+                        result.add(model.toPendingMoveRecord())
+                    }
+                    iterator.next()
+                }
+                result
+            } finally {
+                iterator.close()
             }
-            iterator.next()
         }
-        iterator.close()
-        return result
     }
 
     override suspend fun beginMove(
@@ -185,7 +205,9 @@ class RocksDBIndexStore(
                 lastAlive = lastAlive.time,
             )
         val json = rocksDbJson.encodeToString(PendingMoveModel.serializer(), moveModel)
-        store.db.put(store.cfPendingMoves, to.encodeToByteArray(), json.encodeToByteArray())
+        store.withDbAccess {
+            put(store.cfPendingMoves, to.encodeToByteArray(), json.encodeToByteArray())
+        }
 
         return RocksDBPendingMove(
             store = store,
@@ -197,6 +219,8 @@ class RocksDBIndexStore(
     }
 
     override suspend fun removePendingMove(to: String) {
-        store.db.delete(store.cfPendingMoves, to.encodeToByteArray())
+        store.withDbAccess {
+            delete(store.cfPendingMoves, to.encodeToByteArray())
+        }
     }
 }
