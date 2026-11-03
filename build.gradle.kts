@@ -35,6 +35,18 @@ subprojects {
         // for Flatpak offline no-network-access build
         maven(uri(rootDir.resolve("offline-repository")))
     }
+
+    // Force kotlinx-datetime 0.6.1 — Maryk 0.6.0 uses kotlinx.datetime.Clock.System internally,
+    // which was removed in kotlinx-datetime 0.7.0+ (replaced by kotlin.time.Clock).
+    // Compose Multiplatform 1.11.1 transitively depends on 0.8.0, so we must force the older version.
+    configurations.all {
+        resolutionStrategy.eachDependency {
+            if (requested.group == "org.jetbrains.kotlinx" && requested.name == "kotlinx-datetime") {
+                useVersion("0.6.1")
+                because("Maryk 0.6.0 requires kotlinx-datetime 0.6.x for kotlinx.datetime.Clock.System")
+            }
+        }
+    }
 }
 
 subprojects {

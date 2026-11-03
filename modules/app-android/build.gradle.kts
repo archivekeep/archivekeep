@@ -19,6 +19,7 @@ kotlin {
                 implementation(project(":app-ui"))
 
                 implementation(libs.kotlinx.serialization.json)
+                implementation(libs.kotlinx.datetime)
 
                 implementation(libs.compose.foundation)
                 implementation(libs.compose.ui)

@@ -25,6 +25,7 @@ dependencies {
     implementation(project(":app-core"))
     implementation(project(":app-ui"))
 
+    implementation(libs.kotlinx.datetime)
     implementation(libs.kotlinx.serialization.json)
 
     implementation(libs.compose.components.resources)

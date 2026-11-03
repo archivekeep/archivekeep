@@ -207,7 +207,7 @@ private fun AddRepositoryDialogContents(
     var createEncrypted by remember { mutableStateOf(false) }
     var createPassword by remember { mutableStateOf("") }
     var createPassword2 by remember { mutableStateOf("") }
-    var createRepoType by remember { mutableStateOf(PlainRepositoryType.SQLITE) }
+    var createRepoType by remember { mutableStateOf(PlainRepositoryType.ROCKS_DB) }
 
     var password by remember { mutableStateOf("") }
     val coroutineScope = rememberCoroutineScope()
@@ -307,18 +307,27 @@ private fun AddRepositoryDialogContents(
                                     extra = {
                                         Column {
                                             RadioWithTextAndExtra(
+                                                selected = createRepoType == PlainRepositoryType.ROCKS_DB,
+                                                onClick = { createRepoType = PlainRepositoryType.ROCKS_DB },
+                                                text = "RocksDB Index DB (recommended)",
+                                                enabled = canEdit,
+                                            ) {
+                                                Column {
+                                                    InfoAlert {
+                                                        Text("Recommended for most use cases.")
+                                                    }
+                                                    Spacer(Modifier.height(8.dp))
+                                                }
+                                            }
+                                            RadioWithTextAndExtra(
                                                 selected = createRepoType == PlainRepositoryType.SQLITE,
                                                 onClick = { createRepoType = PlainRepositoryType.SQLITE },
-                                                text = "SQLite Index DB (recommended)",
+                                                text = "SQLite Index DB",
                                                 enabled = canEdit,
                                             ) {
                                                 Column {
                                                     WarningAlert {
                                                         Text("Not supported for external media on Android.")
-                                                    }
-                                                    Spacer(Modifier.height(8.dp))
-                                                    InfoAlert {
-                                                        Text("Recommended for HDD with thousands of files in repository.")
                                                     }
                                                     Spacer(Modifier.height(8.dp))
                                                 }

@@ -1,6 +1,23 @@
 # TODO: cleanup this and document why which rules are added
 
 # ########################################### #
+#                RocksDB (Maryk)              #
+# ########################################### #
+
+# Keep RocksDB JNI classes — the native library expects exact method names.
+-keep class org.rocksdb.** { *; }
+-keepclassmembers class org.rocksdb.** { native <methods>; }
+-dontwarn org.rocksdb.**
+
+# Keep Maryk RocksDB data store
+-keep class maryk.datastore.rocksdb.** { *; }
+-dontwarn maryk.datastore.rocksdb.**
+
+# Keep kotlinx-datetime — Maryk's HLC clock uses Clock.System internally
+-keep class kotlinx.datetime.** { *; }
+-dontwarn kotlinx.datetime.**
+
+# ########################################### #
 #                SQLite Bundled               #
 # ########################################### #
 

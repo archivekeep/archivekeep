@@ -30,6 +30,10 @@ kotlin {
 
                 implementation(libs.kfswatch)
 
+                implementation(libs.maryk.core)
+                implementation(libs.maryk.rocksdb)
+                implementation(libs.kotlinx.datetime)
+
                 implementation(libs.androidx.room.runtime)
                 implementation(libs.androidx.sqlite.bundled)
 

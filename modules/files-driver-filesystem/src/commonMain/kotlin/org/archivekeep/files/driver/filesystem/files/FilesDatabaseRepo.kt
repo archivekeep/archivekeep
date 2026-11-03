@@ -87,7 +87,7 @@ private const val ignorePatternsFileName = ".archivekeepignore"
 
 /**
  * Shared repository implementation for database-backed file repositories.
- * Uses [DatabaseIndexStore] to abstract the storage layer (SQLite, etc.).
+ * Uses [DatabaseIndexStore] to abstract the storage layer (RocksDB, SQLite, etc.).
  */
 abstract class FilesDatabaseRepo(
     override val root: Path,
