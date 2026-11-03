@@ -87,7 +87,7 @@ private const val ignorePatternsFileName = ".archivekeepignore"
 
 /**
  * Shared repository implementation for database-backed file repositories.
- * Uses [DatabaseIndexStore] to abstract the storage layer (SQLite, etc.).
+ * Uses [DatabaseIndexStore] to abstract the storage layer (RocksDB, SQLite, etc.).
  */
 abstract class FilesDatabaseRepo(
     override val root: Path,
@@ -178,7 +178,7 @@ abstract class FilesDatabaseRepo(
     }
 
     protected val job = SupervisorJob(parentJob)
-    private val scope = CoroutineScope(job + CoroutineName("FilesDatabaseRepo: $root") + stateDispatcher)
+    protected val scope = CoroutineScope(job + CoroutineName("FilesDatabaseRepo: $root") + stateDispatcher)
 
     private val metadataPath = root.resolve(".archive").resolve("metadata.json")
 

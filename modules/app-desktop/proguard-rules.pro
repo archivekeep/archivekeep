@@ -1,6 +1,15 @@
 # TODO: cleanup this and document why which rules are added
 
 # ########################################### #
+#                RocksDB                      #
+# ########################################### #
+
+# Keep RocksDB JNI classes — the native library expects exact method names.
+-keep class org.rocksdb.** { *; }
+-keepclassmembers class org.rocksdb.** { native <methods>; }
+-dontwarn org.rocksdb.**
+
+# ########################################### #
 #                SQLite Bundled               #
 # ########################################### #
 

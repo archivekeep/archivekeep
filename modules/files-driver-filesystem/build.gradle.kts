@@ -30,14 +30,16 @@ kotlin {
 
                 implementation(libs.kfswatch)
 
+                implementation(libs.kotlinx.serialization.json)
+
                 implementation(libs.androidx.room.runtime)
                 implementation(libs.androidx.sqlite.bundled)
+
+                implementation(libs.rocksdb.multiplatform)
 
                 compileOnly(libs.apache.tomcat.annotations)
             }
         }
-        val androidMain by getting {}
-        val desktopMain by getting {}
         val desktopTest by getting {
             dependencies {
                 implementation(project(":files-test"))
