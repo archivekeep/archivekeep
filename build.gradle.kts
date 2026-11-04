@@ -12,6 +12,7 @@ plugins {
     alias(libs.plugins.flatpak.gradle.generator)
     alias(libs.plugins.svg2ico) apply false
     alias(libs.plugins.protobuf) apply false
+    alias(libs.plugins.kotlinx.protobuf) apply false
     alias(libs.plugins.ksp) apply false
     alias(libs.plugins.ktlint) apply false
 
@@ -140,6 +141,10 @@ allprojects {
                 "protobufToolsLocator_grpc",
                 "protobufToolsLocator_grpckt",
                 "protobufToolsLocator_protoc",
+                "kotlinxProtobufProtoc",
+                "kotlinxProtobufCommonMainProtoPath",
+                "kotlinxProtobufCommonMainKotlinGenerator",
+                "kotlinxProtobufCommonMainJavaProtocPlugin",
                 "gradleOfflineBuildExtra",
             )
         excludeConfigurations = setOf("kotlinNativeBundleConfiguration")

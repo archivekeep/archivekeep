@@ -15,10 +15,9 @@ internal class RocksDBPendingMove(
     override suspend fun updateMoveLastAlive(date: Date) {
         store.withDbAccess {
             val bytes = get(store.cfPendingMoves, to.encodeToByteArray()) ?: return@withDbAccess
-            val model = rocksDbJson.decodeFromString(PendingMoveModel.serializer(), String(bytes, Charsets.UTF_8))
-            val updated = model.copy(lastAlive = date.time)
-            val json = rocksDbJson.encodeToString(PendingMoveModel.serializer(), updated)
-            put(store.cfPendingMoves, to.encodeToByteArray(), json.encodeToByteArray())
+            val model = PendingMoveModel.parseFrom(bytes)
+            val updated = model.toBuilder().setLastAlive(date.time).build()
+            put(store.cfPendingMoves, to.encodeToByteArray(), updated.toByteArray())
         }
     }
 
@@ -30,17 +29,17 @@ internal class RocksDBPendingMove(
 
     override suspend fun completed(lastModified: Date) {
         val newFileModel =
-            FileModel(
-                path = to,
-                fileSize = size,
-                checksumSha256 = checksumSha256,
-                lastModified = lastModified.time,
-            )
-        val json = rocksDbJson.encodeToString(FileModel.serializer(), newFileModel)
+            FileModel
+                .newBuilder()
+                .setPath(to)
+                .setFileSize(size)
+                .setChecksumSha256(checksumSha256)
+                .setLastModified(lastModified.time)
+                .build()
         store.withDbAccess {
             delete(store.cfFiles, from.encodeToByteArray())
             delete(store.cfPendingMoves, to.encodeToByteArray())
-            put(store.cfFiles, to.encodeToByteArray(), json.encodeToByteArray())
+            put(store.cfFiles, to.encodeToByteArray(), newFileModel.toByteArray())
             store.flush()
         }
         store.notifyFilesChanged()

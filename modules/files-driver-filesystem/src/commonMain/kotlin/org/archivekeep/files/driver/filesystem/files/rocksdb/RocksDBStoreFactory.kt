@@ -3,7 +3,6 @@ package org.archivekeep.files.driver.filesystem.files.rocksdb
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.serialization.json.Json
 import maryk.rocksdb.ColumnFamilyDescriptor
 import maryk.rocksdb.ColumnFamilyHandle
 import maryk.rocksdb.ColumnFamilyOptions
@@ -16,8 +15,6 @@ import maryk.rocksdb.openRocksDB
 import org.archivekeep.files.driver.filesystem.files.rocksdb.model.FileColumnFamily
 import org.archivekeep.files.driver.filesystem.files.rocksdb.model.IncomingFileColumnFamily
 import org.archivekeep.files.driver.filesystem.files.rocksdb.model.PendingMoveColumnFamily
-
-internal val rocksDbJson = Json { ignoreUnknownKeys = true }
 
 const val storeTag = "RocksDBStore"
 

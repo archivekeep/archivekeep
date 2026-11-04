@@ -4,6 +4,7 @@ import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.channels.BufferOverflow
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.launch
@@ -52,6 +53,7 @@ class RocksDBStore(
         scope.launch(dispatcher) {
             flushRequested.collect {
                 try {
+                    delay(rocksDbFlushDelay)
                     lifecycleLock.read {
                         if (!closed) {
                             db.flush(flushOptions, allCfHandles)

@@ -13,6 +13,7 @@ grpc-kotlin = "1.4.1"
 ksp = "2.3.7"
 oshi = "6.8.0"
 picocli = "4.7.5"
+kotlinx-protobuf = "0.7.0-beta.1"
 protobuf = "0.9.4"
 protobuf-kotlin = "3.25.5"
 room = "2.8.4"
@@ -105,6 +106,7 @@ ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
 
 metro = { id = "dev.zacsweers.metro", version.ref = "metro" }
 
+kotlinx-protobuf = { id = "kim.jade.kotlinx-protobuf", version.ref = "kotlinx-protobuf" }
 protobuf = { id = "com.google.protobuf", version.ref = "protobuf" }
 
 svg2ico = { id = "com.gitlab.svg2ico", version.ref = "svg2ico" }

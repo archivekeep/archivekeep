@@ -1,0 +1,29 @@
+syntax = "proto3";
+
+package archivekeep.rocksdb;
+
+option java_package = "org.archivekeep.files.driver.filesystem.files.rocksdb.model";
+option java_multiple_files = true;
+
+message FileModel {
+  string path = 1;
+  int64 fileSize = 2;
+  string checksumSha256 = 3;
+  int64 lastModified = 4;
+}
+
+message IncomingFileModel {
+  string path = 1;
+  string tmpWritePath = 2;
+  int64 fileSize = 3;
+  string checksumSha256 = 4;
+  int64 lastAlive = 5;
+}
+
+message PendingMoveModel {
+  string to = 1;
+  string from = 2;
+  int64 fileSize = 3;
+  string checksumSha256 = 4;
+  int64 lastAlive = 5;
+}

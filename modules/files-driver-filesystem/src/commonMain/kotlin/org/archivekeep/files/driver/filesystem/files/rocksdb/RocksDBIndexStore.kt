@@ -25,7 +25,7 @@ private fun loadAllFiles(store: RocksDBStore): List<DatabaseIndexStore.DatabaseF
             while (iterator.isValid()) {
                 val key = String(iterator.key(), Charsets.UTF_8)
                 val value = iterator.value()
-                val fileModel = rocksDbJson.decodeFromString(FileModel.serializer(), String(value, Charsets.UTF_8))
+                val fileModel = FileModel.parseFrom(value)
                 records[key] = fileModel.toDatabaseFileRecord()
                 iterator.next()
             }
@@ -61,7 +61,7 @@ class RocksDBIndexStore(
             if (bytes == null) {
                 null
             } else {
-                val fileModel = rocksDbJson.decodeFromString(FileModel.serializer(), String(bytes, Charsets.UTF_8))
+                val fileModel = FileModel.parseFrom(bytes)
                 fileModel.toDatabaseFileRecord()
             }
         }
@@ -75,15 +75,15 @@ class RocksDBIndexStore(
         reindex: Boolean,
     ) {
         val fileModel =
-            FileModel(
-                path = path,
-                fileSize = size,
-                checksumSha256 = checksumSha256,
-                lastModified = lastModified.time,
-            )
-        val json = rocksDbJson.encodeToString(FileModel.serializer(), fileModel)
+            FileModel
+                .newBuilder()
+                .setPath(path)
+                .setFileSize(size)
+                .setChecksumSha256(checksumSha256)
+                .setLastModified(lastModified.time)
+                .build()
         store.withDbAccess {
-            put(store.cfFiles, path.encodeToByteArray(), json.encodeToByteArray())
+            put(store.cfFiles, path.encodeToByteArray(), fileModel.toByteArray())
             store.flush()
         }
         store.notifyFilesChanged()
@@ -109,16 +109,16 @@ class RocksDBIndexStore(
         lastAlive: Date,
     ) {
         val model =
-            IncomingFileModel(
-                path = path,
-                tmpWritePath = tmpWritePath,
-                fileSize = size,
-                checksumSha256 = checksumSha256,
-                lastAlive = lastAlive.time,
-            )
-        val json = rocksDbJson.encodeToString(IncomingFileModel.serializer(), model)
+            IncomingFileModel
+                .newBuilder()
+                .setPath(path)
+                .setTmpWritePath(tmpWritePath)
+                .setFileSize(size)
+                .setChecksumSha256(checksumSha256)
+                .setLastAlive(lastAlive.time)
+                .build()
         store.withDbAccess {
-            put(store.cfIncomingFiles, path.encodeToByteArray(), json.encodeToByteArray())
+            put(store.cfIncomingFiles, path.encodeToByteArray(), model.toByteArray())
         }
     }
 
@@ -128,10 +128,9 @@ class RocksDBIndexStore(
     ) {
         store.withDbAccess {
             val bytes = get(store.cfIncomingFiles, path.encodeToByteArray()) ?: return@withDbAccess
-            val model = rocksDbJson.decodeFromString(IncomingFileModel.serializer(), String(bytes, Charsets.UTF_8))
-            val updated = model.copy(lastAlive = date.time)
-            val json = rocksDbJson.encodeToString(IncomingFileModel.serializer(), updated)
-            put(store.cfIncomingFiles, path.encodeToByteArray(), json.encodeToByteArray())
+            val model = IncomingFileModel.parseFrom(bytes)
+            val updated = model.toBuilder().setLastAlive(date.time).build()
+            put(store.cfIncomingFiles, path.encodeToByteArray(), updated.toByteArray())
         }
     }
 
@@ -151,7 +150,7 @@ class RocksDBIndexStore(
                 val result = mutableListOf<DatabaseIndexStore.IncomingFileRecord>()
                 while (iterator.isValid()) {
                     val value = iterator.value()
-                    val model = rocksDbJson.decodeFromString(IncomingFileModel.serializer(), String(value, Charsets.UTF_8))
+                    val model = IncomingFileModel.parseFrom(value)
                     if (model.lastAlive < cutoff) {
                         result.add(model.toIncomingFileRecord())
                     }
@@ -174,7 +173,7 @@ class RocksDBIndexStore(
                 val result = mutableListOf<DatabaseIndexStore.PendingMoveRecord>()
                 while (iterator.isValid()) {
                     val value = iterator.value()
-                    val model = rocksDbJson.decodeFromString(PendingMoveModel.serializer(), String(value, Charsets.UTF_8))
+                    val model = PendingMoveModel.parseFrom(value)
                     if (model.lastAlive < cutoff) {
                         result.add(model.toPendingMoveRecord())
                     }
@@ -197,16 +196,16 @@ class RocksDBIndexStore(
                 ?: throw IllegalStateException("File not found: $from")
 
         val moveModel =
-            PendingMoveModel(
-                to = to,
-                from = from,
-                fileSize = originalFile.size,
-                checksumSha256 = originalFile.checksumSha256,
-                lastAlive = lastAlive.time,
-            )
-        val json = rocksDbJson.encodeToString(PendingMoveModel.serializer(), moveModel)
+            PendingMoveModel
+                .newBuilder()
+                .setTo(to)
+                .setFrom(from)
+                .setFileSize(originalFile.size)
+                .setChecksumSha256(originalFile.checksumSha256)
+                .setLastAlive(lastAlive.time)
+                .build()
         store.withDbAccess {
-            put(store.cfPendingMoves, to.encodeToByteArray(), json.encodeToByteArray())
+            put(store.cfPendingMoves, to.encodeToByteArray(), moveModel.toByteArray())
         }
 
         return RocksDBPendingMove(
