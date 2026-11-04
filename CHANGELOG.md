@@ -2,6 +2,21 @@
 
 ## Unreleased
 
+## 0.8.0 - 2026-11-04
+
+### BREAKING CHANGES
+
+- dropped ObjectBox-based repository implementation (ObjectBox was not fully FOSS and doesn't meet F-Droid requirements),
+
+### Added
+
+- filesystem repository implementation with RocksDB-backed index using Protobuf for serialization,
+- spinner indicator while add and deinitialize operations are running.
+
+### Fixed
+
+- add and deinitialize operations no longer freeze the UI.
+
 ## 0.7.0 - 2026-11-02
 
 ### Added

@@ -62,6 +62,23 @@
     <content_rating type="oars-1.1" />
 
     <releases>
+        <release version="0.8.0" date="2026-11-04">
+            <description>
+                <p>Breaking changes:</p>
+                <ul>
+                    <li>dropped ObjectBox-based repository implementation (ObjectBox was not fully FOSS and doesn't meet F-Droid requirements),</li>
+                </ul>
+                <p>Added:</p>
+                <ul>
+                    <li>filesystem repository implementation with RocksDB-backed index using Protobuf for serialization,</li>
+                    <li>spinner indicator while add and deinitialize operations are running.</li>
+                </ul>
+                <p>Fixed:</p>
+                <ul>
+                    <li>add and deinitialize operations no longer freeze the UI.</li>
+                </ul>
+            </description>
+        </release>
         <release version="0.7.0" date="2026-11-02">
             <description>
                 <p>Added:</p>
