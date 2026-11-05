@@ -7,7 +7,6 @@ import androidx.compose.runtime.setValue
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.job
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.archivekeep.app.core.utils.generics.ExecutionOutcome
@@ -31,28 +30,30 @@ class SingleLaunchGuard(
     val runningJob by derivedStateOf { (state as? State.Running)?.job }
     val executionOutcome = derivedStateOf { (state as? State.Completed)?.outcome }
 
+    @Synchronized
     fun launch(fn: suspend () -> Unit) {
         if (state is State.Running) {
             throw IllegalStateException("Already running")
         }
 
-        scope.launch {
-            try {
-                state = State.Running(coroutineContext.job)
+        val job =
+            scope.launch {
+                try {
+                    withContext(Dispatchers.Default) {
+                        fn()
+                    }
 
-                withContext(Dispatchers.Default) {
-                    fn()
+                    state = State.Completed(ExecutionOutcome.Success())
+                } catch (e: Throwable) {
+                    println("Execution failed")
+                    e.printStackTrace()
+                    state = State.Completed(ExecutionOutcome.Failed(e))
                 }
-
-                state = State.Completed(ExecutionOutcome.Success())
-            } catch (e: Throwable) {
-                println("Execution failed")
-                e.printStackTrace()
-                state = State.Completed(ExecutionOutcome.Failed(e))
             }
-        }
+        state = State.Running(job)
     }
 
+    @Synchronized
     fun reset() {
         if (state !is State.Completed) {
             throw IllegalStateException("Not completed")
