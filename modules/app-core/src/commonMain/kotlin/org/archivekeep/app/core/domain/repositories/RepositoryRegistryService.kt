@@ -13,10 +13,11 @@ class RepositoryRegistryService(
     val repositoryAccessService: RepositoryAccessService,
 ) {
     suspend fun forgetRepository(uri: RepositoryURI) {
-        repositoryAccessService.autoUnlockRepositoryAccessor.invalidate(uri)
-        repositoryAccessService.repositoryAccessor.invalidate(uri)
         registry.updateRepositories { old ->
             old.filter { it.uri != uri }.toSet()
         }
+
+        repositoryAccessService.autoUnlockRepositoryAccessor.invalidate(uri)
+        repositoryAccessService.repositoryAccessor.invalidate(uri)
     }
 }

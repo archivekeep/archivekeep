@@ -1,14 +1,22 @@
 package org.archivekeep.app.core.persistence.drivers.filesystem
 
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.conflate
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.onCompletion
 import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.flow.transform
 import kotlinx.coroutines.plus
+import kotlinx.coroutines.withContext
 import kotlinx.serialization.json.JsonPrimitive
 import org.archivekeep.app.core.api.repository.location.PasswordRequest
 import org.archivekeep.app.core.api.repository.location.RepositoryLocationAccessor
@@ -21,6 +29,7 @@ import org.archivekeep.app.core.domain.storages.StorageDriver
 import org.archivekeep.app.core.domain.storages.StorageInformation
 import org.archivekeep.app.core.persistence.credentials.ContentEncryptionPassword
 import org.archivekeep.app.core.persistence.credentials.CredentialsStore
+import org.archivekeep.app.core.utils.generics.UniqueInstanceManager
 import org.archivekeep.app.core.utils.generics.UniqueSharedFlowInstanceManager
 import org.archivekeep.app.core.utils.identifiers.RepositoryURI
 import org.archivekeep.app.core.utils.identifiers.StorageURI
@@ -32,13 +41,13 @@ import org.archivekeep.utils.loading.mapLoadedData
 import org.archivekeep.utils.loading.optional.OptionalLoadable
 import org.archivekeep.utils.loading.optional.OptionalLoadable.LoadedAvailable
 import org.archivekeep.utils.loading.optional.OptionalLoadable.NotAvailable
+import org.archivekeep.utils.loading.optional.autoCatch
 import org.archivekeep.utils.loading.optional.mapLoaded
 import org.archivekeep.utils.loading.optional.mapLoadedData
 import org.archivekeep.utils.loading.optional.mapLoadedDataAsOptional
 import org.archivekeep.utils.loading.optional.mapToOptionalLoadable
 import org.archivekeep.utils.loading.optional.stateIn
 import java.nio.file.Path
-import java.util.Collections
 import kotlin.io.path.Path
 
 class FileSystemStorageDriver(
@@ -46,7 +55,13 @@ class FileSystemStorageDriver(
     val fileStores: FileStores,
     val credentialsStore: CredentialsStore,
 ) : StorageDriver(FileSystemRepositoryURIData.ID) {
-    private val openProviders = Collections.synchronizedList(mutableListOf<Provider>())
+    val providers =
+        UniqueInstanceManager(
+            factory = { key: Pair<RepositoryURI, FileSystemRepositoryURIData> ->
+                Provider(key.first, key.second)
+            },
+            closeCallback = { it.close() },
+        )
 
     init {
         fileStores.onFileSystemRemoved { fsUUID ->
@@ -55,10 +70,12 @@ class FileSystemStorageDriver(
     }
 
     private fun closeAffectedProvidersOnFileSystemRemoved(fsUUID: String) {
-        val affected = openProviders.filter { it.uriDATA.fsUUID == fsUUID }
+        val affected = providers.instances.filter { it.uriDATA.fsUUID == fsUUID }
         for (provider in affected) {
             try {
+                // TODO: here's responsibility for close sync / coroutines lifecycle is split to call-site and manager
                 provider.closeSync()
+                providers.invalidateSync(provider)
             } catch (e: Throwable) {
                 println("Error closing provider for ${provider.uri}: ${e.message}")
             }
@@ -105,11 +122,7 @@ class FileSystemStorageDriver(
             liveStatusFlowManager[storageURI],
         )
 
-    override fun openLocation(uri: RepositoryURI): RepositoryLocationAccessor {
-        val provider = Provider(uri, uri.typedRepoURIData as FileSystemRepositoryURIData)
-        openProviders.add(provider)
-        return provider
-    }
+    override fun openLocation(uri: RepositoryURI): RepositoryLocationAccessor = providers[Pair(uri, uri.typedRepoURIData as FileSystemRepositoryURIData)]
 
     class FileSystemRepoLocation(
         repo: Repo,
@@ -156,69 +169,71 @@ class FileSystemStorageDriver(
         val currentEncryptedRepo = MutableStateFlow<EncryptedFileSystemRepoLocation?>(null)
 
         override suspend fun close() {
-            closeSync()
-            currentPlainRepo.value = null
-            currentEncryptedRepo.value = null
-            openProviders.remove(this)
+            closeCurrentRepositories()
         }
 
         fun closeSync() {
             currentPlainRepo.value?.closeSync()
+            currentPlainRepo.value = null
             currentEncryptedRepo.value?.close()
+            currentEncryptedRepo.value = null
         }
 
-        override val contentsStateFlow: Flow<OptionalLoadable<RepositoryLocationContentsState>> =
+        override val contentsStateFlow: StateFlow<OptionalLoadable<RepositoryLocationContentsState>> =
             getPathInFileSystem(uriDATA)
                 .distinctUntilChanged()
-                .mapLoaded { pathInFilesystem ->
-                    println("Open $uriDATA")
+                .conflate()
+                .transform { pathState ->
+                    emit(OptionalLoadable.Loading)
+                    closeCurrentRepositories()
 
-                    val plainRepo = FileSystemRepositoryFactory.openPlainRepositoryOrNull(pathInFilesystem)
-                    if (plainRepo != null) {
-                        currentPlainRepo.value?.close()
-                        currentPlainRepo.value = plainRepo
-                        currentEncryptedRepo.value = null
-                        return@mapLoaded LoadedAvailable(FileSystemRepoLocation(plainRepo))
+                    emit(
+                        when (pathState) {
+                            is LoadedAvailable -> openRepository(pathState.value)
+                            is NotAvailable -> pathState
+                            is OptionalLoadable.Failed -> pathState
+                            is OptionalLoadable.Loading -> OptionalLoadable.Loading
+                        },
+                    )
+                }.autoCatch()
+                .onCompletion {
+                    withContext(NonCancellable) {
+                        closeCurrentRepositories()
                     }
+                }.stateIn(
+                    scope,
+                    SharingStarted.WhileSubscribed(stopTimeoutMillis = 0, replayExpirationMillis = 0),
+                    OptionalLoadable.Loading,
+                )
 
-                    if (EncryptedFileSystemRepository.isRepository(pathInFilesystem)) {
-                        currentPlainRepo.value?.close()
-                        currentPlainRepo.value = null
-                        val encryptedLocation =
-                            EncryptedFileSystemRepoLocation(
-                                uri,
-                                pathInFilesystem,
-                                credentialsStore,
-                                scope + SupervisorJob(),
-                            )
-                        currentEncryptedRepo.value = encryptedLocation
-                        return@mapLoaded LoadedAvailable(encryptedLocation)
-                    }
+        private suspend fun openRepository(pathInFilesystem: Path): OptionalLoadable<RepositoryLocationContentsState> {
+            val plainRepo = FileSystemRepositoryFactory.openPlainRepositoryOrNull(pathInFilesystem)
+            if (plainRepo != null) {
+                currentPlainRepo.value = plainRepo
+                return LoadedAvailable(FileSystemRepoLocation(plainRepo))
+            }
 
-                    return@mapLoaded OptionalLoadable.Failed(RuntimeException("Path $uriDATA is not repository"))
-                }.onEach {
-                    if (it !is LoadedAvailable<RepositoryLocationContentsState>) {
-                        currentPlainRepo.value?.close()
-                        currentPlainRepo.value = null
-                        currentEncryptedRepo.value?.close()
-                        currentEncryptedRepo.value = null
-                    } else {
-                        when (val value = it.value) {
-                            is FileSystemRepoLocation -> {
-                                currentEncryptedRepo.value?.close()
-                                currentEncryptedRepo.value = null
-                            }
+            if (EncryptedFileSystemRepository.isRepository(pathInFilesystem)) {
+                val encryptedLocation =
+                    EncryptedFileSystemRepoLocation(
+                        uri,
+                        pathInFilesystem,
+                        credentialsStore,
+                        scope + SupervisorJob(),
+                    )
+                currentEncryptedRepo.value = encryptedLocation
+                return LoadedAvailable(encryptedLocation)
+            }
 
-                            is EncryptedFileSystemRepoLocation -> {
-                                currentPlainRepo.value?.close()
-                                currentPlainRepo.value = null
-                            }
+            return OptionalLoadable.Failed(RuntimeException("Path $uriDATA is not repository"))
+        }
 
-                            else -> {
-                            }
-                        }
-                    }
-                }.stateIn(scope)
+        private suspend fun closeCurrentRepositories() {
+            currentPlainRepo.value?.close()
+            currentPlainRepo.value = null
+            currentEncryptedRepo.value?.close()
+            currentEncryptedRepo.value = null
+        }
     }
 
     fun getPathInFileSystem(repo: FileSystemRepositoryURIData): Flow<OptionalLoadable<Path>> {

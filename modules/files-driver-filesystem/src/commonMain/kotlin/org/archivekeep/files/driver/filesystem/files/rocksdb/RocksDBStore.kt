@@ -3,6 +3,8 @@ package org.archivekeep.files.driver.filesystem.files.rocksdb
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.cancelAndJoin
 import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -49,7 +51,7 @@ class RocksDBStore(
             onBufferOverflow = BufferOverflow.DROP_OLDEST,
         )
 
-    private val flushJob =
+    val flushJob: Job =
         scope.launch(dispatcher) {
             flushRequested.collect {
                 try {
@@ -96,5 +98,9 @@ class RocksDBStore(
                 }
             }
         }
+    }
+
+    suspend fun waitForClose() {
+        flushJob.cancelAndJoin()
     }
 }

@@ -75,6 +75,8 @@ interface Repo {
     suspend fun getMetadata(): RepositoryMetadata
 
     suspend fun updateMetadata(transform: (old: RepositoryMetadata) -> RepositoryMetadata)
+
+    suspend fun close()
 }
 
 interface LocalRepo : Repo {

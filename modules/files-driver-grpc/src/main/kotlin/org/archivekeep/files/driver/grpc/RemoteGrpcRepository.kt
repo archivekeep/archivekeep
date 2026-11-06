@@ -31,7 +31,6 @@ import org.archivekeep.files.internal.grpc.uploadArchiveFileRequest
 import org.archivekeep.utils.loading.Loadable
 import org.archivekeep.utils.loading.mapToLoadable
 import org.archivekeep.utils.loading.stateIn
-import java.io.Closeable
 import java.io.InputStream
 import java.io.PipedInputStream
 import java.io.PipedOutputStream
@@ -47,11 +46,10 @@ class RemoteGrpcRepository(
     private val scope: CoroutineScope = CoroutineScope(Dispatchers.IO),
     // TODO: subscription to remote
     private val modifChannel: MutableSharedFlow<Date> = MutableStateFlow(Date()),
-) : Repo,
-    Closeable {
+) : Repo {
     private val remoteService = ArchiveServiceGrpcKt.ArchiveServiceCoroutineStub(channel)
 
-    override fun close() {
+    override suspend fun close() {
         channel.shutdown().awaitTermination(30, TimeUnit.SECONDS)
     }
 

@@ -18,9 +18,16 @@ class UniqueInstanceManager<T : Any, V : Any>(
                 },
             )
 
+    val instances
+        get() = values.asMap().values.toList()
+
     operator fun get(key: T): V = values.get(key)
 
     fun get(keys: Collection<T>): List<V> = keys.map { get(it) }
+
+    fun invalidateSync(v: V) {
+        values.invalidate(v)
+    }
 
     suspend fun invalidate(key: T) {
         values.getIfPresent(key)?.let { old ->

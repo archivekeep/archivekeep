@@ -29,14 +29,13 @@ class FilesRocksDbRepo(
         startAutoRepair()
     }
 
-    override fun closeSync() {
-        super.closeSync()
+    override fun closeSyncInternal() {
         rocksDBStore.close()
+        super.closeSyncInternal()
     }
 
-    override suspend fun close() {
-        closeSync()
-        job.join()
+    override suspend fun suspendClose() {
+        rocksDBStore.waitForClose()
     }
 
     companion object {

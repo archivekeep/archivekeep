@@ -31,14 +31,9 @@ class FilesSqliteRepo(
         startAutoRepair()
     }
 
-    override fun closeSync() {
+    override fun closeSyncInternal() {
         database.close()
-        super.closeSync()
-    }
-
-    override suspend fun close() {
-        closeSync()
-        job.join()
+        super.closeSyncInternal()
     }
 
     companion object {

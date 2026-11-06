@@ -58,6 +58,8 @@ abstract class RepoContractTest<T : Repo> {
                 "test-file.txt",
                 "TEST CONTENTS",
             )
+
+            repoAccessor.close()
         }
 
     @RepeatedTest(4)
@@ -89,6 +91,8 @@ abstract class RepoContractTest<T : Repo> {
                 "test-file.txt",
                 "ORIGINAL CONTENTS",
             )
+
+            repoAccessor.close()
         }
 
     @RepeatedTest(4)
@@ -121,6 +125,8 @@ abstract class RepoContractTest<T : Repo> {
                         RepoIndex.File.forStringContents("test-file.txt", "RIGHT CONTENTS"),
                     )
             }
+
+            repoAccessor.close()
         }
 
     @RepeatedTest(4)
@@ -145,6 +151,8 @@ abstract class RepoContractTest<T : Repo> {
                         RepoIndex.File.forStringContents(path = "NEW/A/01.txt", stringContents = "A/01.txt"),
                     )
             }
+
+            repoAccessor.close()
         }
 
     @RepeatedTest(4)
@@ -165,6 +173,8 @@ abstract class RepoContractTest<T : Repo> {
                         RepoIndex.File.forStringContents(path = "B/03.txt"),
                     )
             }
+
+            repoAccessor.close()
         }
 
     @RepeatedTest(4)
@@ -191,6 +201,8 @@ abstract class RepoContractTest<T : Repo> {
                         RepoIndex.File.forStringContents(path = "B/03.txt"),
                     )
             }
+
+            repoAccessor.close()
         }
 
     @RepeatedTest(4)
@@ -228,6 +240,8 @@ abstract class RepoContractTest<T : Repo> {
                         RepoIndex.File.forStringContents(path = "C/04.txt"),
                     )
             }
+
+            repoAccessor.close()
         }
 
     @RepeatedTest(4)
@@ -262,6 +276,7 @@ abstract class RepoContractTest<T : Repo> {
                 }
 
                 collectScope.cancel()
+                repoAccessor.close()
             }
 
             run {
@@ -279,6 +294,7 @@ abstract class RepoContractTest<T : Repo> {
                 }
 
                 collectScope.cancel()
+                repoAccessor.close()
             }
         }
 
@@ -305,6 +321,8 @@ abstract class RepoContractTest<T : Repo> {
             )
 
             repoAccessor shouldHaveCommittedContentsOf testContents01
+
+            repoAccessor.close()
         }
 
     open fun runTest(testBody: suspend GenericTestScope.() -> Unit) = standardRunTest(testBody)

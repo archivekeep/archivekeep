@@ -85,4 +85,7 @@ class FixtureRepo(
     override val indexFlow = MutableStateFlow(Loadable.Loaded(index))
 
     override val metadataFlow: Flow<Loadable<RepositoryMetadata>> = flow { TODO() }
+
+    override suspend fun close() {
+    }
 }

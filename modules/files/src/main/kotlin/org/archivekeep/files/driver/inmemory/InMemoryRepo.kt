@@ -136,6 +136,9 @@ open class InMemoryRepo(
     override suspend fun updateMetadata(transform: (old: RepositoryMetadata) -> RepositoryMetadata) {
         _metadataFlow.update { transform(it) }
     }
+
+    override suspend fun close() {
+    }
 }
 
 fun FixtureRepo.toInMemoryRepo(): InMemoryRepo = InMemoryRepo(this.contents.mapValues { (_, v) -> v.toByteArray() })

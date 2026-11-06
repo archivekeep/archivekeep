@@ -365,4 +365,7 @@ class EncryptedFileSystemRepository private constructor(
                 .map { it !is PasswordProtectedJoseStorageInFile.State.NotExisting }
                 .first()
     }
+
+    override suspend fun close() {
+    }
 }

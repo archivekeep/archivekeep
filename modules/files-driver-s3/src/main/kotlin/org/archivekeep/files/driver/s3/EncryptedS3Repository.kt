@@ -492,6 +492,10 @@ class EncryptedS3Repository private constructor(
             null
         }
 
+    override suspend fun close() {
+        // TODO: implement close
+    }
+
     companion object {
         private const val SIGNED_METADATA_OBJECT_PROPERTY = "signed-metadata"
 

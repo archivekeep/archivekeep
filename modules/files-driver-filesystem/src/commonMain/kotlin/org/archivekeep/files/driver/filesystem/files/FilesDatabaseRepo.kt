@@ -90,12 +90,12 @@ private const val ignorePatternsFileName = ".archivekeepignore"
  * Uses [DatabaseIndexStore] to abstract the storage layer (RocksDB, SQLite, etc.).
  */
 abstract class FilesDatabaseRepo(
-    override val root: Path,
+    root: Path,
     parentJob: Job? = null,
     internal val archiveRoot: Path = root.resolve(".archive"),
     stateDispatcher: CoroutineDispatcher = Dispatchers.Default,
     val ioDispatcher: CoroutineDispatcher = Dispatchers.IO,
-) : FilesystemWorkingRepository {
+) : AbstractFilesystemWorkingRepository(root) {
     abstract val indexStore: DatabaseIndexStore
 
     private fun initIndexFlow(): StateFlow<Loadable<RepoIndex>> =
@@ -561,16 +561,11 @@ abstract class FilesDatabaseRepo(
         scope.cancel()
     }
 
-    protected suspend fun cancelScope() {
+    override fun closeSyncInternal() {
         cancelScopeSync()
+    }
+
+    override suspend fun suspendClose() {
         job.join()
-    }
-
-    override suspend fun close() {
-        cancelScope()
-    }
-
-    override fun closeSync() {
-        cancelScopeSync()
     }
 }

@@ -290,6 +290,10 @@ class S3Repository private constructor(
             null
         }
 
+    override suspend fun close() {
+        // TODO: implement close
+    }
+
     companion object {
         private const val FILES_PREFIX = "files/"
 

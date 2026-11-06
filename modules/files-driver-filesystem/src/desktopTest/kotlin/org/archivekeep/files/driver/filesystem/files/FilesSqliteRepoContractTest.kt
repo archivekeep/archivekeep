@@ -18,7 +18,7 @@ class FilesSqliteRepoContractTest : RepoContractTest<FilesSqliteRepo>() {
     override suspend fun createNew(): TestRepo<FilesSqliteRepo> {
         val path = tempPath.resolve(UUID.randomUUID().toString()).createDirectory()
 
-        FilesSqliteRepo.create(path)
+        FilesSqliteRepo.create(path).close()
 
         return object : TestRepo<FilesSqliteRepo> {
             override suspend fun open(testDispatcher: CoroutineDispatcher): FilesSqliteRepo =
