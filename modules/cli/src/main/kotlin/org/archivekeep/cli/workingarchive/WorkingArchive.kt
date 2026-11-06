@@ -15,7 +15,7 @@ class WorkingArchive(
     fun fromArchiveToRelativePath(path: String): Path = Path.of(path).relativeTo(workingSubDirectory)
 }
 
-fun openWorkingArchive(cwd: Path): WorkingArchive {
+suspend fun openWorkingArchive(cwd: Path): WorkingArchive {
     var tryPath: Path? = cwd
 
     while (tryPath != null) {
@@ -31,7 +31,7 @@ fun openWorkingArchive(cwd: Path): WorkingArchive {
     throw RuntimeException("Current working directory `$cwd` is not an archive")
 }
 
-private fun tryOpen(
+private suspend fun tryOpen(
     cwd: Path,
     tryPath: Path,
 ): WorkingArchive? {

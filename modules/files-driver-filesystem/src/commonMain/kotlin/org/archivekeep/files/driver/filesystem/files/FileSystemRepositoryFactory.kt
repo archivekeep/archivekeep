@@ -4,7 +4,7 @@ import org.archivekeep.files.driver.filesystem.files.rocksdb.FilesRocksDbRepo
 import java.nio.file.Path
 
 object FileSystemRepositoryFactory {
-    fun openPlainRepositoryOrNull(path: Path): FilesystemWorkingRepository? =
+    suspend fun openPlainRepositoryOrNull(path: Path): FilesystemWorkingRepository? =
         FilesRocksDbRepo.openOrNull(path)
             ?: FilesSqliteRepo.openOrNull(path)
             ?: FilesRepo.openOrNull(path)

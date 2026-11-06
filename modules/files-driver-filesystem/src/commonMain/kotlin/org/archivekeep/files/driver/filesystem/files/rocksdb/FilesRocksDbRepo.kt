@@ -4,6 +4,7 @@ import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import org.archivekeep.files.api.repository.PLAIN_REPOSITORY_TYPE
+import org.archivekeep.files.driver.filesystem.files.DatabaseIndexStore
 import org.archivekeep.files.driver.filesystem.files.FilesDatabaseRepo
 import java.nio.file.Path
 import kotlin.io.path.createDirectory
@@ -13,38 +14,50 @@ import kotlin.io.path.pathString
 
 private const val dbDirName = "rocksdb"
 
-class FilesRocksDbRepo(
+class FilesRocksDbRepo private constructor(
     root: Path,
     parentJob: Job? = null,
     archiveRoot: Path = root.resolve(".archive"),
-    dbPath: Path = archiveRoot.resolve(dbDirName),
+    val dbPath: Path = archiveRoot.resolve(dbDirName),
     stateDispatcher: CoroutineDispatcher = Dispatchers.Default,
     ioDispatcher: CoroutineDispatcher = Dispatchers.IO,
 ) : FilesDatabaseRepo(root, parentJob, archiveRoot, stateDispatcher, ioDispatcher) {
-    private val rocksDBStore = openRocksDBStore(dbPath.pathString, scope, ioDispatcher)
-    override val indexStore: org.archivekeep.files.driver.filesystem.files.DatabaseIndexStore =
-        RocksDBIndexStore(rocksDBStore)
+    private var rocksDBStore: RocksDBStore? = null
+    override lateinit var indexStore: DatabaseIndexStore
 
-    init {
+    private fun init() {
+        this.rocksDBStore = openRocksDBStore(dbPath.pathString, scope, ioDispatcher)
+        this.indexStore = RocksDBIndexStore(rocksDBStore!!)
+
         startAutoRepair()
     }
 
+    private suspend fun initOrCloseOnFailure() {
+        try {
+            init()
+        } catch (e: Throwable) {
+            // needs to be unregistered from AbstractFilesystemWorkingRepository.openRepositories
+            this.close()
+            throw e
+        }
+    }
+
     override fun closeSyncInternal() {
-        rocksDBStore.close()
+        rocksDBStore?.close()
         super.closeSyncInternal()
     }
 
     override suspend fun suspendClose() {
-        rocksDBStore.waitForClose()
+        rocksDBStore?.waitForClose()
     }
 
     companion object {
-        fun openOrNull(path: Path): FilesRocksDbRepo? {
+        suspend fun openOrNull(path: Path): FilesRocksDbRepo? {
             val archiveDir = path.resolve(".archive")
             val dbPath = archiveDir.resolve(dbDirName)
 
             if (dbPath.exists()) {
-                return FilesRocksDbRepo(path)
+                return FilesRocksDbRepo(path).apply { initOrCloseOnFailure() }
             }
 
             return null
@@ -65,6 +78,7 @@ class FilesRocksDbRepo(
             dbPath.createDirectory()
 
             return FilesRocksDbRepo(path, parentJob).apply {
+                initOrCloseOnFailure()
                 updateMetadata { it.copy(repositoryType = PLAIN_REPOSITORY_TYPE) }
             }
         }

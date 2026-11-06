@@ -41,7 +41,6 @@ import org.archivekeep.utils.loading.mapLoadedData
 import org.archivekeep.utils.loading.optional.OptionalLoadable
 import org.archivekeep.utils.loading.optional.OptionalLoadable.LoadedAvailable
 import org.archivekeep.utils.loading.optional.OptionalLoadable.NotAvailable
-import org.archivekeep.utils.loading.optional.autoCatch
 import org.archivekeep.utils.loading.optional.mapLoaded
 import org.archivekeep.utils.loading.optional.mapLoadedData
 import org.archivekeep.utils.loading.optional.mapLoadedDataAsOptional
@@ -189,14 +188,18 @@ class FileSystemStorageDriver(
 
                     emit(
                         when (pathState) {
-                            is LoadedAvailable -> openRepository(pathState.value)
+                            is LoadedAvailable ->
+                                try {
+                                    openRepository(pathState.value)
+                                } catch (e: Throwable) {
+                                    OptionalLoadable.Failed(e)
+                                }
                             is NotAvailable -> pathState
                             is OptionalLoadable.Failed -> pathState
                             is OptionalLoadable.Loading -> OptionalLoadable.Loading
                         },
                     )
-                }.autoCatch()
-                .onCompletion {
+                }.onCompletion {
                     withContext(NonCancellable) {
                         closeCurrentRepositories()
                     }

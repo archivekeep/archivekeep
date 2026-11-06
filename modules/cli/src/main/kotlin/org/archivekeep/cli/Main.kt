@@ -70,7 +70,7 @@ class MainCommand(
     // used for ascii doctor
     internal constructor() : this(Path.of("."), EmptyCoroutineContext)
 
-    fun openCurrentArchive(): WorkingArchive = openWorkingArchive(workingDirectory)
+    suspend fun openCurrentArchive(): WorkingArchive = openWorkingArchive(workingDirectory)
 
     suspend fun openOtherArchive(otherArchiveLocation: String): Repo {
         if (otherArchiveLocation.startsWith(grpcPrefix)) {
