@@ -20,8 +20,6 @@ dependencies {
     implementation(libs.grpc.stub)
     implementation(libs.grpc.okhttp)
 
-    implementation(libs.jose.jwt)
-
     implementation(libs.guava.jre)
     implementation(libs.guava.android)
 
