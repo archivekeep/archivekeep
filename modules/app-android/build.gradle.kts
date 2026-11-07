@@ -1,6 +1,5 @@
 plugins {
     alias(libs.plugins.kotlin.compose)
-    alias(libs.plugins.kotlin.multiplatform)
     alias(libs.plugins.kotlin.serialization)
 
     alias(libs.plugins.android.application)
@@ -10,27 +9,20 @@ plugins {
     alias(libs.plugins.metro)
 }
 
-kotlin {
-    androidTarget()
-    sourceSets {
-        val androidMain by getting {
-            dependencies {
-                implementation(project(":app-core"))
-                implementation(project(":app-ui"))
+dependencies {
+    implementation(project(":app-core"))
+    implementation(project(":app-ui"))
 
-                implementation(libs.kotlinx.serialization.json)
+    implementation(libs.kotlinx.serialization.json)
 
-                implementation(libs.compose.foundation)
-                implementation(libs.compose.ui)
-                implementation(libs.compose.material)
-                implementation(libs.compose.components.resources)
-            }
-        }
-    }
+    implementation(libs.compose.foundation)
+    implementation(libs.compose.ui)
+    implementation(libs.compose.material)
+    implementation(libs.compose.components.resources)
 }
 
 android {
-    compileSdk = 35
+    compileSdk = 37
     namespace = "org.archivekeep.app.android"
 
     defaultConfig {

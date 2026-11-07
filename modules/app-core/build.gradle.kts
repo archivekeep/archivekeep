@@ -2,7 +2,7 @@ plugins {
     alias(libs.plugins.kotlin.multiplatform)
     alias(libs.plugins.kotlin.serialization)
 
-    id("com.android.library")
+    id("com.android.kotlin.multiplatform.library")
 
     alias(libs.plugins.metro)
 
@@ -10,11 +10,14 @@ plugins {
 }
 
 kotlin {
-    androidTarget()
+    jvmToolchain(21)
+
+    android {
+        compileSdk = 37
+        namespace = "org.archivekeep.app.core"
+    }
 
     jvm("desktop")
-
-    jvmToolchain(21)
 
     sourceSets {
         val commonMain by getting {
@@ -41,11 +44,11 @@ kotlin {
         }
         val androidMain by getting {
             dependencies {
-                api("androidx.activity:activity-compose:1.7.2")
-                api("androidx.appcompat:appcompat:1.6.1")
-                api("androidx.core:core-ktx:1.10.1")
+                api("androidx.activity:activity-compose:1.10.1")
+                api("androidx.appcompat:appcompat:1.7.0")
+                api("androidx.core:core-ktx:1.15.0")
 
-                implementation("com.google.accompanist:accompanist-permissions:0.37.2")
+                implementation("com.google.accompanist:accompanist-permissions:0.37.3")
             }
         }
         val desktopMain by getting {
@@ -81,24 +84,6 @@ tasks.withType<ProcessResources> {
 
 tasks.withType<Test> {
     useJUnitPlatform()
-}
-
-android {
-    compileSdk = 35
-    namespace = "org.archivekeep.app.core"
-
-    sourceSets["main"].manifest.srcFile("src/androidMain/AndroidManifest.xml")
-
-    defaultConfig {
-        minSdk = 30
-    }
-    compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_21
-        targetCompatibility = JavaVersion.VERSION_21
-    }
-    kotlin {
-        jvmToolchain(21)
-    }
 }
 
 // publishing {

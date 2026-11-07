@@ -9,13 +9,13 @@ plugins {
 
     alias(libs.plugins.ksp)
 
-    id("com.android.library")
+    id("com.android.kotlin.multiplatform.library")
 
     alias(libs.plugins.ktlint)
 }
 
 extensions.configure<KotlinxProtobufExtension> {
-    protocVersion = "3.25.5"
+    protocVersion = "4.36.2"
 }
 
 val gradleOfflineBuildExtra by
@@ -25,11 +25,21 @@ val gradleOfflineBuildExtra by
     }
 
 kotlin {
-    androidTarget()
+    jvmToolchain(21)
+
+    android {
+        compileSdk = 37
+        namespace = "org.archivekeep.files.driver.filesystem"
+        minSdk = 30
+
+        withJava()
+
+        androidResources {
+            enable = true
+        }
+    }
 
     jvm("desktop")
-
-    jvmToolchain(21)
 
     sourceSets {
         val commonMain by getting {
@@ -88,24 +98,8 @@ tasks.withType<Test> {
     useJUnitPlatform()
 }
 
-android {
-    compileSdk = 35
-    namespace = "org.archivekeep.files.driver.filesystem"
-
-    defaultConfig {
-        minSdk = 30
-    }
-    compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_21
-        targetCompatibility = JavaVersion.VERSION_21
-    }
-    kotlin {
-        jvmToolchain(21)
-    }
-}
-
 tasks.configureEach {
-    if (name.startsWith("compile") || name.startsWith("ksp") || name.startsWith("runKtlint")) {
+    if (name.startsWith("compile") || name.startsWith("ksp") || name.startsWith("runKtlint") || name.startsWith("prepareAndroid")) {
         dependsOn("generateCommonMainProtoDescriptorSet")
         dependsOn("generateCommonMainProto")
     }
@@ -117,12 +111,4 @@ tasks.named<JavaCompile>("compileDesktopMainJava") {
         layout.buildDirectory.dir("generated/sources/kotlinx-protobuf-protoc/commonMain/java"),
     )
     classpath += configurations.getByName("desktopCompileClasspath")
-}
-
-android {
-    sourceSets {
-        getByName("main") {
-            java.srcDir(layout.buildDirectory.dir("generated/sources/kotlinx-protobuf-protoc/commonMain/java"))
-        }
-    }
 }

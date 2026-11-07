@@ -23,11 +23,11 @@ import org.archivekeep.utils.io.listFilesFlow
 import org.archivekeep.utils.loading.ResourceLoader
 import org.archivekeep.utils.loading.mapLoadedData
 import oshi.SystemInfo
+import oshi.software.common.os.linux.LinuxFileSystem
 import oshi.software.os.OSFileStore
-import oshi.software.os.linux.LinuxFileSystem
 import oshi.util.GlobalConfig
-import oshi.util.platform.linux.DevPath
-import oshi.util.platform.linux.ProcPath
+import oshi.util.linux.DevPath
+import oshi.util.linux.ProcPath
 import java.io.File
 import kotlin.coroutines.coroutineContext
 import kotlin.io.path.Path

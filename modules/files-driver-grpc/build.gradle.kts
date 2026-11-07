@@ -47,7 +47,7 @@ kotlin {
 }
 
 protobuf {
-    protoc { artifact = "com.google.protobuf:protoc:3.25.3" }
+    protoc { artifact = "com.google.protobuf:protoc:4.36.2" }
 
     plugins {
         create("grpc") {

@@ -12,7 +12,7 @@ class S3RepositoryContractTest : RepoContractTest<S3Repository>() {
 
     @Container
     private val s3Mock =
-        S3MockContainer(DockerImageName.parse("adobe/s3mock:4.3.0"))
+        S3MockContainer(DockerImageName.parse("adobe/s3mock:4.12.4"))
             .withEnv("initialBuckets", bucketName)
 
     override suspend fun createNew(): TestRepo<S3Repository> = S3RepositoryTestRepo(s3Mock.httpEndpoint, bucketName).apply { create() }

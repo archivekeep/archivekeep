@@ -30,7 +30,7 @@ dependencies {
     implementation(libs.compose.components.resources)
     implementation(compose.desktop.currentOs)
 
-    gradleOfflineBuildExtra("com.guardsquare:proguard-gradle:7.7.0")
+    gradleOfflineBuildExtra("com.guardsquare:proguard-gradle:7.8.0")
     gradleOfflineBuildExtra("org.jetbrains.compose:gradle-plugin-internal-jdk-version-probe:${libs.versions.compose.get()}")
 }
 

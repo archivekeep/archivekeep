@@ -23,7 +23,7 @@ class S3RepositoryTest {
 
     @Container
     var s3Mock: S3MockContainer =
-        S3MockContainer(DockerImageName.parse("adobe/s3mock:4.3.0"))
+        S3MockContainer(DockerImageName.parse("adobe/s3mock:4.12.4"))
 
     @Test
     fun `contents should not be affected by objects outside files directory`() =

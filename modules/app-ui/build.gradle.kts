@@ -1,13 +1,23 @@
 plugins {
     alias(libs.plugins.kotlin.multiplatform)
     alias(libs.plugins.kotlin.compose)
-    id("com.android.library")
+    id("com.android.kotlin.multiplatform.library")
     id("org.jetbrains.compose")
     alias(libs.plugins.metro)
 }
 
 kotlin {
-    androidTarget()
+    jvmToolchain(21)
+
+    android {
+        compileSdk = 37
+        namespace = "org.archivekeep.app.ui"
+        minSdk = 30
+
+        androidResources {
+            enable = true
+        }
+    }
 
     jvm("desktop")
 
@@ -63,6 +73,12 @@ kotlin {
     }
 }
 
+androidComponents {
+    onVariants { variant ->
+        variant.sources.res?.addStaticSourceDirectory("src/commonMain/composeResources")
+    }
+}
+
 tasks.withType<Test> {
     environment["SCREENSHOTS_BUILD_OUTPUT"] = "${project.layout.buildDirectory.get()}/generated-ui-screenshots"
 }
@@ -73,23 +89,3 @@ compose.resources {
     generateResClass = always
 }
 
-android {
-    compileSdk = 35
-    namespace = "org.archivekeep.app.ui"
-
-    sourceSets["main"].res.srcDirs("src/androidMain/res")
-    sourceSets["main"].res.srcDirs("src/commonMain/composeResources")
-    sourceSets["main"].manifest.srcFile("src/androidMain/AndroidManifest.xml")
-    sourceSets["main"].resources.srcDirs("src/commonMain/composeResources")
-
-    defaultConfig {
-        minSdk = 30
-    }
-    compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_21
-        targetCompatibility = JavaVersion.VERSION_21
-    }
-    kotlin {
-        jvmToolchain(21)
-    }
-}

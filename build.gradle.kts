@@ -142,6 +142,7 @@ allprojects {
                 "protobufToolsLocator_grpckt",
                 "protobufToolsLocator_protoc",
                 "kotlinxProtobufProtoc",
+                "kotlinxProtobufProtoPath",
                 "kotlinxProtobufCommonMainProtoPath",
                 "kotlinxProtobufCommonMainKotlinGenerator",
                 "kotlinxProtobufCommonMainJavaProtocPlugin",
