@@ -1,6 +1,9 @@
 Archivekeep
 ===========
 
+[![Flatpak](https://img.shields.io/badge/Linux-Flatpak-498bd1)](https://flathub.org/apps/org.archivekeep.ArchiveKeep)
+[![F-Droid](https://img.shields.io/badge/Android-F--Droid-1f74c9)](https://f-droid.org/packages/org.archivekeep.ArchiveKeep/)
+
 _Keep your files archived on multiple places, in a reliable and simple way._
 
 The primary requirements and priorities of ArchiveKeep are to make process of **reliable archivation** to be simple and easy:
