@@ -245,11 +245,13 @@ class UnlockRepositoryDialogTestWithEncryptedFileSystemRepository {
 
             fun onSubmitNode() = onNodeWithText("Authenticate")
 
-            run {
-                saveTestingContainerBitmap("dialogs/unlock-repository/provide-incorrect-password-01-initial.png")
+            runBlocking {
+                eventually(1.seconds) {
+                    saveTestingContainerBitmap("dialogs/unlock-repository/provide-incorrect-password-01-initial.png")
 
-                onNodeWithText("Password is needed to access encrypted-repo repository.").assertExists()
-                onSubmitNode().assertIsNotEnabled()
+                    onNodeWithText("Password is needed to access encrypted-repo repository.").assertExists()
+                    onSubmitNode().assertIsNotEnabled()
+                }
             }
 
             run {
