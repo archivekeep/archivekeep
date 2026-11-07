@@ -1,5 +1,6 @@
 package org.archivekeep.files.driver.filesystem.files
 
+import kotlinx.coroutines.CompletableJob
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineName
 import kotlinx.coroutines.CoroutineScope
@@ -89,14 +90,38 @@ private const val ignorePatternsFileName = ".archivekeepignore"
  * Shared repository implementation for database-backed file repositories.
  * Uses [DatabaseIndexStore] to abstract the storage layer (RocksDB, SQLite, etc.).
  */
-abstract class FilesDatabaseRepo(
+class FilesDatabaseRepo private constructor(
     root: Path,
-    parentJob: Job? = null,
     internal val archiveRoot: Path = root.resolve(".archive"),
-    stateDispatcher: CoroutineDispatcher = Dispatchers.Default,
-    val ioDispatcher: CoroutineDispatcher = Dispatchers.IO,
+    private val scope: CoroutineScope,
+    private val job: CompletableJob,
+    private val ioDispatcher: CoroutineDispatcher = Dispatchers.IO,
+    private val indexStore: DatabaseIndexStore,
 ) : AbstractFilesystemWorkingRepository(root) {
-    abstract val indexStore: DatabaseIndexStore
+    companion object {
+        suspend fun open(
+            root: Path,
+            parentJob: Job? = null,
+            stateDispatcher: CoroutineDispatcher = Dispatchers.Default,
+            ioDispatcher: CoroutineDispatcher = Dispatchers.IO,
+            indexStoreFactory: (scope: CoroutineScope, ioDispatcher: CoroutineDispatcher) -> DatabaseIndexStore,
+        ): FilesDatabaseRepo {
+            val job = SupervisorJob(parentJob)
+            val scope = CoroutineScope(job + CoroutineName("FilesDatabaseRepo: $root") + stateDispatcher)
+            val indexStore =
+                withContext(Dispatchers.IO) {
+                    indexStoreFactory(scope, ioDispatcher)
+                }
+
+            return FilesDatabaseRepo(
+                root,
+                job = job,
+                scope = scope,
+                ioDispatcher = ioDispatcher,
+                indexStore = indexStore,
+            )
+        }
+    }
 
     private fun initIndexFlow(): StateFlow<Loadable<RepoIndex>> =
         indexStore.files
@@ -176,9 +201,6 @@ abstract class FilesDatabaseRepo(
             .flowOn(ioDispatcher)
             .stateIn(scope)
     }
-
-    protected val job = SupervisorJob(parentJob)
-    protected val scope = CoroutineScope(job + CoroutineName("FilesDatabaseRepo: $root") + stateDispatcher)
 
     private val metadataPath = root.resolve(".archive").resolve("metadata.json")
 
@@ -557,15 +579,17 @@ abstract class FilesDatabaseRepo(
                 }
             }
 
-    protected fun cancelScopeSync() {
+    override fun closeSyncInternal() {
+        indexStore.closeSync()
         scope.cancel()
     }
 
-    override fun closeSyncInternal() {
-        cancelScopeSync()
+    override suspend fun suspendClose() {
+        indexStore.waitForClose()
+        job.join()
     }
 
-    override suspend fun suspendClose() {
-        job.join()
+    init {
+        startAutoRepair()
     }
 }

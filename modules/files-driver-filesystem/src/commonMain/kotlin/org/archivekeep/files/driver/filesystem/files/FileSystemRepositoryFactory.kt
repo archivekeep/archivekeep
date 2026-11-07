@@ -1,12 +1,13 @@
 package org.archivekeep.files.driver.filesystem.files
 
-import org.archivekeep.files.driver.filesystem.files.rocksdb.FilesRocksDbRepo
+import org.archivekeep.files.driver.filesystem.files.rocksdb.FilesRocksDbRepoFactory
+import org.archivekeep.files.driver.filesystem.files.sqlite.FilesSqliteRepoFactory
 import java.nio.file.Path
 
 object FileSystemRepositoryFactory {
     suspend fun openPlainRepositoryOrNull(path: Path): FilesystemWorkingRepository? =
-        FilesRocksDbRepo.openOrNull(path)
-            ?: FilesSqliteRepo.openOrNull(path)
+        FilesRocksDbRepoFactory.openOrNull(path)
+            ?: FilesSqliteRepoFactory.openOrNull(path)
             ?: FilesRepo.openOrNull(path)
 
     suspend fun isPlainRepository(path: Path): Boolean = openPlainRepositoryOrNull(path)?.also { it.close() } != null
@@ -16,8 +17,8 @@ object FileSystemRepositoryFactory {
         type: PlainRepositoryType,
     ) {
         when (type) {
-            PlainRepositoryType.ROCKS_DB -> FilesRocksDbRepo.create(path).also { it.close() }
-            PlainRepositoryType.SQLITE -> FilesSqliteRepo.create(path).also { it.close() }
+            PlainRepositoryType.ROCKS_DB -> FilesRocksDbRepoFactory.create(path).also { it.close() }
+            PlainRepositoryType.SQLITE -> FilesSqliteRepoFactory.create(path).also { it.close() }
             PlainRepositoryType.CHECKSUM_FILES -> FilesRepo.create(path).also { it.close() }
         }
     }

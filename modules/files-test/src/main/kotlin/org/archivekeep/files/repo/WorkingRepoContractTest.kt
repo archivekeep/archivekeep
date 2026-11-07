@@ -21,7 +21,7 @@ import org.junit.jupiter.api.RepeatedTest
 @OptIn(ExperimentalStdlibApi::class)
 abstract class WorkingRepoContractTest<T : LocalRepo> {
     interface TestRepo<T : LocalRepo> {
-        fun open(
+        suspend fun open(
             scope: GenericTestScope,
             testDispatcher: CoroutineDispatcher,
         ): T

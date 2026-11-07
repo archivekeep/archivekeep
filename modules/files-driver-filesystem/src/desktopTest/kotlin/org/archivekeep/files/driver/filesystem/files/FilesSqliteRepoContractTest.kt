@@ -1,6 +1,7 @@
 package org.archivekeep.files.driver.filesystem.files
 
 import kotlinx.coroutines.CoroutineDispatcher
+import org.archivekeep.files.driver.filesystem.files.sqlite.FilesSqliteRepoFactory
 import org.archivekeep.files.repo.RepoContractTest
 import org.archivekeep.files.utils.GenericTestScope
 import org.archivekeep.files.utils.runBlockingTest
@@ -11,18 +12,18 @@ import java.nio.file.Path
 import java.util.UUID
 import kotlin.io.path.createDirectory
 
-class FilesSqliteRepoContractTest : RepoContractTest<FilesSqliteRepo>() {
+class FilesSqliteRepoContractTest : RepoContractTest<FilesDatabaseRepo>() {
     @field:TempDir
     lateinit var tempPath: Path
 
-    override suspend fun createNew(): TestRepo<FilesSqliteRepo> {
+    override suspend fun createNew(): TestRepo<FilesDatabaseRepo> {
         val path = tempPath.resolve(UUID.randomUUID().toString()).createDirectory()
 
-        FilesSqliteRepo.create(path).close()
+        FilesSqliteRepoFactory.create(path).close()
 
-        return object : TestRepo<FilesSqliteRepo> {
-            override suspend fun open(testDispatcher: CoroutineDispatcher): FilesSqliteRepo =
-                FilesSqliteRepo(path, stateDispatcher = testDispatcher, ioDispatcher = testDispatcher)
+        return object : TestRepo<FilesDatabaseRepo> {
+            override suspend fun open(testDispatcher: CoroutineDispatcher): FilesDatabaseRepo =
+                FilesSqliteRepoFactory.openOrNull(path, stateDispatcher = testDispatcher, ioDispatcher = testDispatcher)!!
         }
     }
 

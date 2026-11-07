@@ -26,7 +26,7 @@ import org.archivekeep.app.ui.utils.screenshots.saveTestingContainerBitmap
 import org.archivekeep.app.ui.utils.screenshots.setContentInDialogScreenshotContainer
 import org.archivekeep.files.driver.filesystem.encryptedfiles.EncryptedFileSystemRepository
 import org.archivekeep.files.driver.filesystem.files.FilesRepo
-import org.archivekeep.files.driver.filesystem.files.FilesSqliteRepo
+import org.archivekeep.files.driver.filesystem.files.sqlite.FilesSqliteRepoFactory
 import org.junit.Rule
 import org.junit.Test
 import org.junit.rules.TemporaryFolder
@@ -97,7 +97,7 @@ class AddFileSystemRepositoryDialogTest {
                 }
 
                 // should not fail
-                FilesSqliteRepo.isRepo(testTempDir.root.resolve("local-archives/test-repo").toPath()) shouldBe true
+                FilesSqliteRepoFactory.isRepo(testTempDir.root.resolve("local-archives/test-repo").toPath()) shouldBe true
             }
         }
     }

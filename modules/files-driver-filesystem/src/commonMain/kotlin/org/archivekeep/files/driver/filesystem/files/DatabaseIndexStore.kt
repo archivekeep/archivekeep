@@ -82,4 +82,8 @@ interface DatabaseIndexStore {
     ): PendingMove
 
     suspend fun removePendingMove(to: String)
+
+    fun closeSync()
+
+    suspend fun waitForClose()
 }

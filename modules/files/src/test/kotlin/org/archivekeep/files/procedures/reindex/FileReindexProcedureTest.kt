@@ -5,7 +5,7 @@ import io.kotest.matchers.shouldBe
 import kotlinx.coroutines.flow.filterIsInstance
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.job
-import org.archivekeep.files.driver.filesystem.files.FilesSqliteRepo
+import org.archivekeep.files.driver.filesystem.files.sqlite.FilesSqliteRepoFactory
 import org.archivekeep.files.testContents01
 import org.archivekeep.files.utils.runBlockingTest
 import org.archivekeep.files.withContentsFrom
@@ -22,7 +22,7 @@ class FileReindexProcedureTest {
         @TempDir archiveDir: File,
     ) = runBlockingTest {
         val repo =
-            FilesSqliteRepo
+            FilesSqliteRepoFactory
                 .create(archiveDir.toPath(), this@runBlockingTest.backgroundScope.coroutineContext.job)
                 .withContentsFrom(testContents01)
 
@@ -53,7 +53,7 @@ class FileReindexProcedureTest {
         @TempDir archiveDir: File,
     ) = runBlockingTest {
         val repo =
-            FilesSqliteRepo
+            FilesSqliteRepoFactory
                 .create(archiveDir.toPath(), this@runBlockingTest.backgroundScope.coroutineContext.job)
                 .withContentsFrom(testContents01)
 

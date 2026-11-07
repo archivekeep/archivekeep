@@ -2,6 +2,7 @@ package org.archivekeep.files.driver.filesystem.files.sqlite
 
 import androidx.room.immediateTransaction
 import androidx.room.useWriterConnection
+import kotlinx.coroutines.CancellationException
 import java.util.Date
 
 class SQLiteDataSource(
@@ -145,5 +146,14 @@ class SQLiteDataSource(
 
     suspend fun removePendingMove(to: String) {
         database.pendingMoveDAO().removePendingMove(to)
+    }
+
+    fun closeSync() {
+        try {
+            database.close()
+        } catch (e: CancellationException) {
+            println("Error closing database (probably still in use): $e")
+            e.printStackTrace()
+        }
     }
 }

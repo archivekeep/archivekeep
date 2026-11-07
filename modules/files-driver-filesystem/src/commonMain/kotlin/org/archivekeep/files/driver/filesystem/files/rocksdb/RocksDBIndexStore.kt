@@ -222,4 +222,12 @@ class RocksDBIndexStore(
             delete(store.cfPendingMoves, to.encodeToByteArray())
         }
     }
+
+    override fun closeSync() {
+        store.close()
+    }
+
+    override suspend fun waitForClose() {
+        store.waitForClose()
+    }
 }

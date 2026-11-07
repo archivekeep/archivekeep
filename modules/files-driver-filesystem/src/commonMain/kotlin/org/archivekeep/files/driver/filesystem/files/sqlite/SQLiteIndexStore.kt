@@ -115,4 +115,11 @@ class SQLiteIndexStore(
     override suspend fun removePendingMove(to: String) {
         sqliteDataSource.removePendingMove(to)
     }
+
+    override fun closeSync() {
+        sqliteDataSource.closeSync()
+    }
+
+    override suspend fun waitForClose() {
+    }
 }

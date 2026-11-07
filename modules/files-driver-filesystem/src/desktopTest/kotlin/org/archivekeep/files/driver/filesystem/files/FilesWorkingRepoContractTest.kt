@@ -30,7 +30,7 @@ class FilesWorkingRepoContractTest : WorkingRepoContractTest<FilesRepo>() {
         object : TestRepo<FilesRepo> {
             val path = tempPath.resolve(UUID.randomUUID().toString()).createDirectory()
 
-            override fun open(
+            override suspend fun open(
                 scope: GenericTestScope,
                 testDispatcher: CoroutineDispatcher,
             ): FilesRepo =

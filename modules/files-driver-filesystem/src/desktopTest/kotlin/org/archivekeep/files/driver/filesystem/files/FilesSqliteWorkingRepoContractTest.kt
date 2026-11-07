@@ -2,6 +2,7 @@ package org.archivekeep.files.driver.filesystem.files
 
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.job
+import org.archivekeep.files.driver.filesystem.files.sqlite.FilesSqliteRepoFactory
 import org.archivekeep.files.repo.WorkingRepoContractTest
 import org.archivekeep.files.utils.GenericTestScope
 import org.archivekeep.files.utils.runBlockingTest
@@ -17,7 +18,7 @@ import kotlin.io.path.setLastModifiedTime
 import kotlin.time.Duration.Companion.milliseconds
 import kotlin.time.Duration.Companion.seconds
 
-class FilesSqliteWorkingRepoContractTest : WorkingRepoContractTest<FilesSqliteRepo>() {
+class FilesSqliteWorkingRepoContractTest : WorkingRepoContractTest<FilesDatabaseRepo>() {
     init {
         WatchDefaults.watchDelay = 10.milliseconds
     }
@@ -25,15 +26,15 @@ class FilesSqliteWorkingRepoContractTest : WorkingRepoContractTest<FilesSqliteRe
     @field:TempDir
     lateinit var tempPath: Path
 
-    override fun createNew(): TestRepo<FilesSqliteRepo> =
-        object : TestRepo<FilesSqliteRepo> {
+    override fun createNew(): TestRepo<FilesDatabaseRepo> =
+        object : TestRepo<FilesDatabaseRepo> {
             val path = tempPath.resolve(UUID.randomUUID().toString()).createDirectory()
 
-            override fun open(
+            override suspend fun open(
                 scope: GenericTestScope,
                 testDispatcher: CoroutineDispatcher,
-            ): FilesSqliteRepo =
-                FilesSqliteRepo(
+            ): FilesDatabaseRepo =
+                FilesSqliteRepoFactory.create(
                     path,
                     parentJob = scope.backgroundScope.coroutineContext.job,
                     stateDispatcher = testDispatcher,
