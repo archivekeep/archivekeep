@@ -2,6 +2,22 @@
 
 ## Unreleased
 
+## 0.8.1 - 2026-11-08
+
+### Changed
+
+- upgraded Kotlin to 2.4.21, Compose to 1.12.2, Android Gradle Plugin to 9, and other libraries (gRPC, Protobuf, RocksDB, AWS S3 SDK, etc.),
+- reduced Android APK build size by enabling minification (without obfuscation).
+
+### Fixed
+
+- repository metadata (association) corruption is now detected and automatically recovered,
+- stale repository index/sync/association state after deinitialize and re-add,
+- RocksDB repository could not be reopened after a failed open (e.g., filesystem disconnect),
+- RocksDB repository could not be reopened after forget and re-add,
+- clicking an action button twice in a repository dialog could start the operation twice,
+- performance: unnecessary local status updates caused by index or metadata file changes in the archive directory.
+
 ## 0.8.0 - 2026-11-04
 
 ### BREAKING CHANGES
