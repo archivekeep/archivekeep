@@ -54,6 +54,7 @@ import java.nio.file.PathMatcher
 import java.util.Collections.singletonList
 import kotlin.io.path.ExperimentalPathApi
 import kotlin.io.path.Path
+import kotlin.io.path.absolute
 import kotlin.io.path.absolutePathString
 import kotlin.io.path.createDirectory
 import kotlin.io.path.createParentDirectories
@@ -355,8 +356,11 @@ class FilesRepo(
     @OptIn(FlowPreview::class)
     private val calculationCause =
         root
-            .watchRecursively(ioDispatcher, ioDispatcher)
-            .map { "update" }
+            .watchRecursively(
+                ioDispatcher,
+                ioDispatcher,
+                pathIgnore = { path -> path.absolute().startsWith(archiveRoot) },
+            ).map { "update" }
             .debounce(100.milliseconds)
             .shareIn(scope, SharingStarted.WhileSubscribed(), 0)
             .onStart { emit("start on index change") }

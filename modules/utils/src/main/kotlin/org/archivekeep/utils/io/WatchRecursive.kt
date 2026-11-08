@@ -27,6 +27,7 @@ object WatchDefaults {
 fun (Path).watchRecursively(
     ioDispatcher: CoroutineDispatcher,
     pollDispatcher: CoroutineDispatcher,
+    pathIgnore: (Path) -> Boolean = { false },
     log: Boolean = false,
 ): Flow<List<CustomWatchEvent>> =
     flow {
@@ -57,7 +58,7 @@ fun (Path).watchRecursively(
                 this@registerRecursive.register()
 
                 this@registerRecursive.toFile().walk().forEach {
-                    if (it.isDirectory) {
+                    if (it.isDirectory && !pathIgnore(it.toPath())) {
                         it.toPath().register()
                     }
                 }
