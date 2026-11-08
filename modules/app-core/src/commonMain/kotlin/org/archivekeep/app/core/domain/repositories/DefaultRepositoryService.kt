@@ -46,4 +46,8 @@ class DefaultRepositoryService(
             old + setOf(RegisteredRepository(uri = repositoryURI))
         }
     }
+
+    override suspend fun invalidateRepository(repositoryURI: RepositoryURI) {
+        repositoryStates.invalidate(repositoryURI)
+    }
 }

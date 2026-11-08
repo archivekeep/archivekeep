@@ -15,6 +15,10 @@ interface MemorizedRepositoryMetadataRepository {
 
     suspend fun updateRepositoryMemorizedMetadataIfDiffers(
         uri: RepositoryURI,
-        metadata: RepositoryMetadata,
+        metadata: RepositoryMetadata?,
     )
+
+    suspend fun removeRepositoryMemorizedMetadata(uri: RepositoryURI) {
+        updateRepositoryMemorizedMetadataIfDiffers(uri, null)
+    }
 }

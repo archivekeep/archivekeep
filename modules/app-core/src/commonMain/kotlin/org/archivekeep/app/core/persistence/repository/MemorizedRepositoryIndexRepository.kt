@@ -24,6 +24,10 @@ interface MemorizedRepositoryIndexRepository {
         accessedIndex: RepoIndex?,
     )
 
+    suspend fun removeRepositoryMemorizedIndex(uri: RepositoryURI) {
+        updateRepositoryMemorizedIndexIfDiffers(uri, null)
+    }
+
     companion object {
         @OptIn(ExperimentalCoroutinesApi::class)
         fun MemorizedRepositoryIndexRepository.memorizingCachingIndexFlow(

@@ -43,7 +43,7 @@ class MemorizedRepositoryMetadataRepositoryInDataStore(
 
     override suspend fun updateRepositoryMemorizedMetadataIfDiffers(
         uri: RepositoryURI,
-        metadata: RepositoryMetadata,
+        metadata: RepositoryMetadata?,
     ) {
         val rememberedMetadata = rememberedRepositoriesMetadata.first()[uri]
 
@@ -58,7 +58,11 @@ class MemorizedRepositoryMetadataRepositoryInDataStore(
         datastore.edit { preferences ->
             val theSet = getRememberedRepositoriesMetadataFromPreferences(preferences).toMutableMap()
 
-            theSet[uri] = metadata
+            if (metadata != null) {
+                theSet[uri] = metadata
+            } else {
+                theSet.remove(uri)
+            }
 
             preferences[REMEMBERED_REPOSITORY_METADATA_KEY] =
                 theSet.entries

@@ -19,10 +19,14 @@ class InMemoryMemorizedRepositoryMetadataRepository : MemorizedRepositoryMetadat
 
     override suspend fun updateRepositoryMemorizedMetadataIfDiffers(
         uri: RepositoryURI,
-        metadata: RepositoryMetadata,
+        metadata: RepositoryMetadata?,
     ) {
         repositoryMetadataFlowManager[uri].update {
-            OptionalLoadable.LoadedAvailable(metadata)
+            if (metadata != null) {
+                OptionalLoadable.LoadedAvailable(metadata)
+            } else {
+                OptionalLoadable.NotAvailable()
+            }
         }
     }
 }

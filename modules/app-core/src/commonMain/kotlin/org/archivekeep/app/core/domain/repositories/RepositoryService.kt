@@ -6,4 +6,6 @@ interface RepositoryService {
     fun getRepository(repositoryURI: RepositoryURI): Repository
 
     suspend fun registerRepository(repositoryURI: RepositoryURI)
+
+    suspend fun invalidateRepository(repositoryURI: RepositoryURI)
 }
