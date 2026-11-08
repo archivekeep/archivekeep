@@ -20,9 +20,7 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.runInterruptible
 import kotlinx.coroutines.withContext
-import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.json.Json
-import kotlinx.serialization.json.decodeFromStream
 import kotlinx.serialization.serializer
 import org.archivekeep.files.api.exceptions.DestinationExists
 import org.archivekeep.files.api.exceptions.FileDoesntExist
@@ -39,6 +37,7 @@ import org.archivekeep.files.crypto.file.EncryptedFileMetadata
 import org.archivekeep.files.crypto.file.readCryptoStream
 import org.archivekeep.files.crypto.file.writeCryptoStream
 import org.archivekeep.files.crypto.verifyingStreamViaBackgroundCoroutine
+import org.archivekeep.files.driver.filesystem.FileBasedRepositoryMetadataStore
 import org.archivekeep.files.driver.filesystem.files.safeSubPath
 import org.archivekeep.utils.coroutines.InProgressHandler
 import org.archivekeep.utils.coroutines.flowScopedToThisJob
@@ -52,9 +51,7 @@ import org.archivekeep.utils.io.watchRecursively
 import org.archivekeep.utils.loading.Loadable
 import org.archivekeep.utils.loading.optional.firstLoadedOrNullOnFailedOrNotAvailable
 import org.archivekeep.utils.loading.produceLoadable
-import org.archivekeep.utils.loading.produceLoadableStateIn
 import org.archivekeep.utils.loading.stateIn
-import org.archivekeep.utils.safeFileReadWrite
 import java.io.InputStream
 import java.nio.file.Files
 import java.nio.file.Path
@@ -67,7 +64,6 @@ import kotlin.io.path.inputStream
 import kotlin.io.path.invariantSeparatorsPathString
 import kotlin.io.path.isRegularFile
 import kotlin.io.path.moveTo
-import kotlin.io.path.readText
 import kotlin.io.path.relativeTo
 import kotlin.streams.asSequence
 import kotlin.time.Duration
@@ -85,7 +81,15 @@ class EncryptedFileSystemRepository private constructor(
 
     private val encryptedFilesRoot = root.resolve(ENCRYPTED_FILES_DIRECTORY)
     private val vaultPath = root.resolve(VAULT_FILENAME)
-    private val metadataPath = root.resolve(ARCHIVE_METADATA_FILENAME)
+
+    private val metadataStore =
+        FileBasedRepositoryMetadataStore(
+            metadataPath = root.resolve(ARCHIVE_METADATA_FILENAME),
+            rootExists = { root.exists() },
+            scope = scope,
+            ioDispatcher = ioDispatcher,
+            throttlePauseDuration = throttlePauseDuration,
+        )
 
     private val inProgressHandler = InProgressHandler(scope)
 
@@ -117,25 +121,7 @@ class EncryptedFileSystemRepository private constructor(
             .logLoadableResourceLoad("Repository index: $root")
             .stateIn(scope)
 
-    override val metadataFlow: Flow<Loadable<RepositoryMetadata>> =
-        metadataPath
-            .produceLoadableStateIn(
-                scope,
-                watchDispatcher = ioDispatcher,
-                workDispatcher = ioDispatcher,
-                message = "Repository metadata: $root",
-                throttle = throttlePauseDuration,
-            ) {
-                if (metadataPath.exists()) {
-                    Json.decodeFromString<RepositoryMetadata>(metadataPath.readText())
-                } else {
-                    if (root.exists()) {
-                        RepositoryMetadata()
-                    } else {
-                        throw RuntimeException("Something went wrong")
-                    }
-                }
-            }
+    override val metadataFlow: Flow<Loadable<RepositoryMetadata>> = metadataStore.metadataFlow
 
     override suspend fun index(): RepoIndex {
         val vaultContents = vault.data.firstLoadedOrNullOnFailedOrNotAvailable()!!
@@ -289,28 +275,10 @@ class EncryptedFileSystemRepository private constructor(
         dstPath.deleteExisting()
     }
 
-    @OptIn(ExperimentalSerializationApi::class)
-    override suspend fun getMetadata(): RepositoryMetadata =
-        withContext(Dispatchers.IO) {
-            if (metadataPath.exists()) {
-                metadataPath.inputStream().use {
-                    Json.decodeFromStream<RepositoryMetadata>(it)
-                }
-            } else {
-                if (root.exists()) {
-                    RepositoryMetadata()
-                } else {
-                    throw RuntimeException("Something went wrong")
-                }
-            }
-        }
+    override suspend fun getMetadata(): RepositoryMetadata = metadataStore.getMetadata()
 
     override suspend fun updateMetadata(transform: (old: RepositoryMetadata) -> RepositoryMetadata) {
-        safeFileReadWrite(metadataPath) { oldString ->
-            val old = oldString?.let { Json.decodeFromString(oldString) } ?: RepositoryMetadata()
-
-            Json.encodeToString(transform(old))
-        }
+        metadataStore.updateMetadata(transform)
     }
 
     companion object {

@@ -26,9 +26,6 @@ import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.shareIn
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import kotlinx.serialization.ExperimentalSerializationApi
-import kotlinx.serialization.json.Json
-import kotlinx.serialization.json.decodeFromStream
 import org.archivekeep.files.api.exceptions.ChecksumMismatch
 import org.archivekeep.files.api.exceptions.DestinationExists
 import org.archivekeep.files.api.exceptions.NotRegularFilePath
@@ -36,6 +33,7 @@ import org.archivekeep.files.api.repository.ArchiveFileInfo
 import org.archivekeep.files.api.repository.RepoIndex
 import org.archivekeep.files.api.repository.RepositoryMetadata
 import org.archivekeep.files.api.repository.operations.StatusOperation
+import org.archivekeep.files.driver.filesystem.FileBasedRepositoryMetadataStore
 import org.archivekeep.files.procedures.indexupdate.RepoPerformanceTracker
 import org.archivekeep.files.procedures.indexupdate.measure
 import org.archivekeep.utils.coroutines.InProgressHandler
@@ -50,9 +48,7 @@ import org.archivekeep.utils.loading.firstLoadedOrFailure
 import org.archivekeep.utils.loading.flatMapLoadableFlow
 import org.archivekeep.utils.loading.mapToLoadable
 import org.archivekeep.utils.loading.produceLoadable
-import org.archivekeep.utils.loading.produceLoadableStateIn
 import org.archivekeep.utils.loading.stateIn
-import org.archivekeep.utils.safeFileReadWrite
 import java.io.InputStream
 import java.nio.ByteBuffer
 import java.nio.channels.FileChannel
@@ -206,7 +202,14 @@ class FilesDatabaseRepo private constructor(
             .stateIn(scope)
     }
 
-    private val metadataPath = root.resolve(".archive").resolve("metadata.json")
+    private val metadataStore =
+        FileBasedRepositoryMetadataStore(
+            metadataPath = root.resolve(".archive").resolve("metadata.json"),
+            rootExists = { archiveRoot.exists() },
+            scope = scope,
+            ioDispatcher = ioDispatcher,
+            throttlePauseDuration = 500.milliseconds,
+        )
 
     private val inProgressHandler =
         InProgressHandler<Path>(scope, transform = { it.absolutePathString() })
@@ -509,28 +512,10 @@ class FilesDatabaseRepo private constructor(
         }
     }
 
-    @OptIn(ExperimentalSerializationApi::class)
-    override suspend fun getMetadata(): RepositoryMetadata =
-        withContext(Dispatchers.IO) {
-            if (metadataPath.exists()) {
-                metadataPath.inputStream().use {
-                    Json.decodeFromStream<RepositoryMetadata>(it)
-                }
-            } else {
-                if (archiveRoot.exists()) {
-                    RepositoryMetadata()
-                } else {
-                    throw RuntimeException("Something went wrong")
-                }
-            }
-        }
+    override suspend fun getMetadata(): RepositoryMetadata = metadataStore.getMetadata()
 
     override suspend fun updateMetadata(transform: (old: RepositoryMetadata) -> RepositoryMetadata) {
-        safeFileReadWrite(metadataPath) { oldString ->
-            val old = oldString?.let { Json.decodeFromString(oldString) } ?: RepositoryMetadata()
-
-            Json.encodeToString(transform(old))
-        }
+        metadataStore.updateMetadata(transform)
     }
 
     override suspend fun contains(path: String): Boolean =
@@ -563,25 +548,7 @@ class FilesDatabaseRepo private constructor(
 
     override val localIndex: Flow<Loadable<StatusOperation.Result>> by lazy { initLocalIndex() }
 
-    override val metadataFlow: Flow<Loadable<RepositoryMetadata>> =
-        metadataPath
-            .produceLoadableStateIn(
-                scope,
-                watchDispatcher = ioDispatcher,
-                workDispatcher = ioDispatcher,
-                message = "Repository metadata: $root",
-                throttle = throttlePauseDuration,
-            ) {
-                if (metadataPath.exists()) {
-                    Json.decodeFromString<RepositoryMetadata>(metadataPath.readText())
-                } else {
-                    if (archiveRoot.exists()) {
-                        RepositoryMetadata()
-                    } else {
-                        throw RuntimeException("Something went wrong")
-                    }
-                }
-            }
+    override val metadataFlow: Flow<Loadable<RepositoryMetadata>> = metadataStore.metadataFlow
 
     override fun closeSyncInternal() {
         indexStore.closeSync()

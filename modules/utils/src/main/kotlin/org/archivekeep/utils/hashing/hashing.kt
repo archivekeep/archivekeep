@@ -2,7 +2,7 @@ package org.archivekeep.utils.hashing
 
 import java.security.MessageDigest
 
-fun String.sha256(): String = hashString(this.toByteArray(), "SHA-256")
+fun String.sha256(): String = hashString(this.toByteArray(Charsets.UTF_8), "SHA-256")
 
 fun ByteArray.sha256(): String = hashString(this, "SHA-256")
 
