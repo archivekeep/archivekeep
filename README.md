@@ -1,8 +1,8 @@
 Archivekeep
 ===========
 
-[![Flatpak](https://img.shields.io/badge/Linux-Flatpak-498bd1)](https://flathub.org/apps/org.archivekeep.ArchiveKeep)
-[![F-Droid](https://img.shields.io/badge/Android-F--Droid-1f74c9)](https://f-droid.org/packages/org.archivekeep.ArchiveKeep/)
+[![Get it on Flathub](https://img.shields.io/flathub/v/org.archivekeep.ArchiveKeep?logo=flathub&logoColor=white&color=4A86CF)](https://flathub.org/apps/org.archivekeep.ArchiveKeep)
+[![Get it on F-Droid](https://img.shields.io/f-droid/v/org.archivekeep.ArchiveKeep?logo=f-droid&logoColor=white&color=1976D2)](https://f-droid.org/packages/org.archivekeep.ArchiveKeep/)
 
 _Keep your files archived on multiple places, in a reliable and simple way._
 
