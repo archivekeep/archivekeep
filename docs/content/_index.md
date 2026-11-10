@@ -127,8 +127,8 @@ _**Note:** there's no dedicated application for self-hosting._
 </div>
 </div>
 
-<div class="three-col-section-wrapper">
-<div class="three-col-section">
+<div class="two-col-section-wrapper">
+<div class="two-col-section">
 <div class="section-title"><h2>Download</h2></div>
 <div><div>
 
@@ -153,17 +153,45 @@ _**Note:** there's no dedicated application for self-hosting._
 </div></div>
 </div></div>
 
+<div class="two-col-section-wrapper">
+<div class="two-col-section">
+<div class="section-title"><h2>Support the Project</h2></div>
+<div><div>
+
+ArchiveKeep is an independent open-source project developed by **Miroslav Kravec**.
+
+If you find it useful and want to support its development, you can donate via:
+
+<div class="links">
+<a href='https://ko-fi.com/kravemir'><img alt="Ko-Fi" src="https://img.shields.io/badge/-Ko--Fi-orange?style=for-the-badge&logo=ko-fi&logoColor=white"/></a>
+<a href='https://buymeacoffee.com/kravemir'><img alt="BuyMeACoffee" src="https://img.shields.io/badge/-Buy%20Me%20a%20Coffee-FFDD00?style=for-the-badge&logo=buy-me-a-coffee&logoColor=black"/></a>
+</div>
+
+_Ko-fi is the preferred platform._
+
+</div></div>
+<div><div>
+
+Alternatively, you can donate via **SEPA bank transfer**:
+
+- **Account holder:** Miroslav Kravec
+- **IBAN:** `SK47 8330 0000 0028 0313 2698`
+- **BIC/SWIFT:** `FIOZSKBAXXX`
+
+_Please add your name and purpose (donation) in the description of the transfer._
+
+</div></div>
+</div></div>
+
 <div class="three-col-section-wrapper">
 <div class="three-col-section">
 <div><div>
-
 
 ## Pricing
 
 This is an open-source software, and it is free and will be free, to use the tool and self-host a server.
 
 The source code is available on [github](https://github.com/archivekeep/archivekeep).
-
 
 </div></div>
 <div><div>

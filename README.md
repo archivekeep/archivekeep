@@ -95,6 +95,21 @@ flatpak run org.archivekeep.ArchiveKeep
 
 See [docs/features.md](docs/content/about/features/index.md) for overview. To be documented later.
 
+## Support the Project
+
+ArchiveKeep is an independent open-source project developed by Miroslav Kravec. If you find it useful and want to support its development, you can donate via:
+
+[![Ko-Fi](https://img.shields.io/badge/-Ko--Fi-orange?logo=ko-fi&logoColor=white)](https://ko-fi.com/kravemir)
+[![BuyMeACoffee](https://img.shields.io/badge/-Buy%20Me%20a%20Coffee-FFDD00?logo=buy-me-a-coffee&logoColor=black)](https://buymeacoffee.com/kravemir)
+
+Or via SEPA bank transfer:
+
+- **Account holder:** Miroslav Kravec
+- **IBAN:** `SK47 8330 0000 0028 0313 2698`
+- **BIC/SWIFT:** `FIOZSKBAXXX`
+
+_Please add your name and purpose (donation) in the description of the transfer._
+
 ## Warranty
 
 Although author desires to make system 100% bulletproof to prevent loss of own data. This is open-source software accessible for free, and comes with no warranty.
