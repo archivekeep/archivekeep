@@ -337,6 +337,10 @@ div.home-page {
       margin-left: 0;
       margin-right: 0;
       max-width: 100%;
+
+      &:nth-child(odd) {
+        background: #f8f8f8;
+      }
     }
 
     .three-col-section {
@@ -346,18 +350,35 @@ div.home-page {
       display: flex;
       flex-direction: row;
       flex-wrap: wrap;
-      justify-content: center;
+      justify-content: flex-start;
 
-      padding: 2.5rem 0 1rem;
+      padding: 2.5rem ($horizontal-inner-padding - 1rem) 1rem;
 
       @media screen and (max-width: $home-page-mobile-breakpoint) {
         padding: 1.25rem 0 0.5rem;
+      }
+
+      > div.section-title {
+        flex: 100% 0 0;
+        padding: 0.75rem 1rem 1rem;
+
+        @media screen and (max-width: $home-page-mobile-breakpoint) {
+          padding: 0.75rem 0 0.5rem;
+        }
+
+        h2 {
+          font-size: 2rem;
+          margin-top: 0.5rem;
+          margin-bottom: 1rem;
+          letter-spacing: 0.051rem;
+        }
       }
 
       > div {
         flex: 33.33% 0 0;
         padding: 0.75rem 1rem;
         font-size: 1rem;
+        text-align: left;
 
         > div > :first-child {
           margin-top: 0;
@@ -366,6 +387,24 @@ div.home-page {
         > div > :last-child,
         > div > :last-child > :last-child{
           margin-bottom: 0;
+        }
+
+        .links {
+          display: flex;
+          flex-wrap: wrap;
+          align-items: center;
+          gap: 0.875rem;
+          padding: 0.75rem 0 1rem;
+
+          a {
+            display: flex;
+            flex-grow: 0;
+          }
+        }
+
+        .links a > img {
+          height: 40px;
+          width: auto;
         }
 
         @media screen and (max-width: $home-page-mobile-breakpoint) {

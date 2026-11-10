@@ -127,23 +127,31 @@ _**Note:** there's no dedicated application for self-hosting._
 </div>
 </div>
 
-<div class="sub-display-container">
-<div class="sub-display-inner-container">
-<div class="text">
+<div class="three-col-section-wrapper">
+<div class="three-col-section">
+<div class="section-title"><h2>Download</h2></div>
+<div><div>
 
-## Android platform
+### Linux platform
+
+<p>Install on your Linux desktop.</p>
+<div class="links">
+<a href='https://flathub.org/apps/org.archivekeep.ArchiveKeep'><img alt="Flathub" src="https://img.shields.io/flathub/v/org.archivekeep.ArchiveKeep?style=for-the-badge&logo=flathub&logoColor=white&color=4A86CF"/></a>
+</div>
+
+</div></div>
+<div><div>
+
+### Android platform
 
 <p>Carry a copy of data in mobile.</p>
-<p><a class="other-link" href="https://f-droid.org/packages/org.archivekeep.ArchiveKeep">Get it on F-Droid.</a></p>
-<p><a class="other-link" href="https://github.com/archivekeep/archivekeep/releases/">Or, download from releases.</a></p>
+<div class="links">
+<a href='https://f-droid.org/packages/org.archivekeep.ArchiveKeep'><img alt="F-Droid" src="https://img.shields.io/f-droid/v/org.archivekeep.ArchiveKeep?style=for-the-badge&logo=f-droid&logoColor=white&color=1976D2"/></a>
+<a href='https://github.com/archivekeep/archivekeep/releases'><img alt="GitHub" src="https://img.shields.io/github/v/release/archivekeep/archivekeep?style=for-the-badge&logo=github&logoColor=white&color=181717&label=github"/></a>
+</div>
 
-
-</div>
-<div class="other small">
-{{< home-image "/generated_screenshots/mobile/main-window.png" "" >}}
-</div>
-</div>
-</div>
+</div></div>
+</div></div>
 
 <div class="three-col-section-wrapper">
 <div class="three-col-section">
