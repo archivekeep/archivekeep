@@ -1,5 +1,7 @@
 package org.archivekeep.app.ui.components.base.layout
 
+import androidx.compose.foundation.ScrollState
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -14,6 +16,7 @@ actual fun ScrollableLazyColumn(
     modifier: Modifier,
     columnModifier: Modifier,
     state: LazyListState,
+    horizontalScrollState: ScrollState?,
     scrollbarPadding: PaddingValues,
     content: LazyListScope.() -> Unit,
 ) {
@@ -21,7 +24,16 @@ actual fun ScrollableLazyColumn(
         modifier = modifier,
     ) {
         LazyColumn(
-            modifier = columnModifier.fillMaxWidth(),
+            modifier =
+                columnModifier
+                    .fillMaxWidth()
+                    .then(
+                        if (horizontalScrollState != null) {
+                            Modifier.horizontalScroll(horizontalScrollState)
+                        } else {
+                            Modifier
+                        },
+                    ),
             state = state,
             content = content,
         )

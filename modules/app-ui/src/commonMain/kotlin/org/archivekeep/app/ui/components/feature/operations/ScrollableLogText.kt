@@ -52,7 +52,7 @@ fun ScrollableLogTextInDialog(textLines: List<String>) {
         color = Color.Black.copy(0.05f),
     ) {
         SelectionContainer(Modifier.padding(start = 10.dp, end = 10.dp, top = 6.dp, bottom = 10.dp)) {
-            ScrollableLazyColumnWithGuessedWidth(guessedWidth) {
+            ScrollableLazyColumnWithGuessedWidth(guessedWidth, enableHorizontalScroll = true) {
                 item { LabelText("Log") }
                 item { Spacer(Modifier.height(4.dp)) }
 

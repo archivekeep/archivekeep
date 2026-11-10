@@ -1,8 +1,11 @@
 package org.archivekeep.app.ui.components.base.layout
 
+import androidx.compose.foundation.HorizontalScrollbar
+import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.VerticalScrollbar
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.v2.ScrollbarAdapter
@@ -25,6 +28,7 @@ fun ScrollableContainer(
     modifier: Modifier,
     scrollbarPadding: PaddingValues,
     scrollbarAdapter: ScrollbarAdapter,
+    horizontalScrollState: ScrollState? = null,
     content: @Composable (modifier: Modifier) -> Unit,
 ) {
     var columnSize by remember { mutableStateOf<IntSize?>(null) }
@@ -43,6 +47,16 @@ fun ScrollableContainer(
                             .height(with(LocalDensity.current) { size.height.toDp() })
                             .padding(scrollbarPadding),
                     adapter = scrollbarAdapter,
+                )
+            }
+
+            if (horizontalScrollState != null) {
+                HorizontalScrollbar(
+                    modifier =
+                        Modifier
+                            .align(Alignment.BottomCenter)
+                            .fillMaxWidth(),
+                    adapter = androidx.compose.foundation.rememberScrollbarAdapter(horizontalScrollState),
                 )
             }
         }

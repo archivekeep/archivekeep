@@ -48,9 +48,11 @@ fun IntrinsicSizeWrapperLayout(
                     measurables: List<Measurable>,
                     constraints: Constraints,
                 ): MeasureResult {
-                    val placeable = measurables.first().measure(constraints)
+                    val childConstraints = constraints.copy(minWidth = 0)
+                    val placeable = measurables.first().measure(childConstraints)
 
-                    return layout(constraints.maxWidth, placeable.height) {
+                    val width = maxOf(placeable.width, constraints.minWidth).coerceAtMost(constraints.maxWidth)
+                    return layout(width, placeable.height) {
                         placeable.place(0, 0)
                     }
                 }
