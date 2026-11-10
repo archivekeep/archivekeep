@@ -4,7 +4,7 @@
     {{ partial "docs/html-head" . }}
     {{ partial "docs/inject/head" . }}
 </head>
-<body dir="{{ default "ltr" .Site.Language.LanguageDirection }}" class="home-page">
+<body dir="{{ default "ltr" .Site.Language.LanguageDirection }}" class="home-page" style="--home-hero-background-image: url('{{ "images/sky_sunshine_hero_bg.svg" | relURL }}');">
 <input type="checkbox" class="hidden toggle" id="menu-control" />
 <input type="checkbox" class="hidden toggle" id="toc-control" />
 <main class="home-page-container">

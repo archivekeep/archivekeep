@@ -41,6 +41,44 @@ div.home-page {
       padding-right: $horizontal-inner-padding;
     }
 
+    .hero-section {
+      max-width: 100%;
+      margin-left: 0;
+      margin-right: 0;
+      padding: 0 0 2rem;
+      box-sizing: border-box;
+      min-height: 41vw;
+      display: flex;
+      flex-direction: column;
+      background-color: #edf6fd;
+      background-image: var(--home-hero-background-image);
+      background-position: center;
+      background-size: cover;
+      background-repeat: no-repeat;
+
+      .header {
+        flex-shrink: 0;
+        display: flex;
+        flex-direction: row;
+        align-items: baseline;
+        max-width: $home-page-container-max-width;
+        margin: 0 auto;
+        width: 100%;
+        box-sizing: border-box;
+        padding-left: $horizontal-inner-padding;
+        padding-right: $horizontal-inner-padding;
+      }
+
+      .main-display-container {
+        flex-grow: 1;
+        width: 100%;
+
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+      }
+    }
+
     .header {
       display: flex;
       flex-direction: row;
@@ -174,8 +212,16 @@ div.home-page {
     }
 
     .main-display-container {
-      background: white;
-      padding: 2rem 0 2.5rem;
+      background: transparent;
+      padding: 2rem 0 0;
+
+      .main-display-inner-container {
+        padding: 2.5rem $horizontal-inner-padding 2rem;
+
+        @media screen and (max-width: $home-page-mobile-breakpoint) {
+          padding: 1.5rem $horizontal-inner-padding 1.5rem;
+        }
+      }
 
       p, div.links {
         margin-block-end: 1.25rem;
@@ -218,21 +264,18 @@ div.home-page {
         font-weight: 500;
       }
 
-      .main-display-inner-container {
-        padding: 3rem $horizontal-inner-padding 0.75rem;
-      }
-
       @media screen and (max-width: $home-page-mobile-breakpoint) {
-        padding: 2rem 0 1.5rem;
-
-        .main-display-inner-container {
-          padding: 1rem $horizontal-inner-padding 0;
-        }
+        padding: 1.5rem 0 0;
       }
     }
 
     .sub-display-container {
+      background: white;
       padding: 1rem 0 2rem;
+
+      &:nth-child(odd) {
+        background: #f8f8f8;
+      }
 
       h2 {
         line-height: 1.15;
@@ -294,6 +337,10 @@ div.home-page {
       margin-left: 0;
       margin-right: 0;
       max-width: 100%;
+
+      &:nth-child(odd) {
+        background: #f8f8f8;
+      }
     }
 
     .three-col-section {
@@ -303,18 +350,35 @@ div.home-page {
       display: flex;
       flex-direction: row;
       flex-wrap: wrap;
-      justify-content: center;
+      justify-content: flex-start;
 
-      padding: 2.5rem 0 1rem;
+      padding: 2.5rem ($horizontal-inner-padding - 1rem) 1rem;
 
       @media screen and (max-width: $home-page-mobile-breakpoint) {
         padding: 1.25rem 0 0.5rem;
+      }
+
+      > div.section-title {
+        flex: 100% 0 0;
+        padding: 0.75rem 1rem 1rem;
+
+        @media screen and (max-width: $home-page-mobile-breakpoint) {
+          padding: 0.75rem 0 0.5rem;
+        }
+
+        h2 {
+          font-size: 2rem;
+          margin-top: 0.5rem;
+          margin-bottom: 1rem;
+          letter-spacing: 0.051rem;
+        }
       }
 
       > div {
         flex: 33.33% 0 0;
         padding: 0.75rem 1rem;
         font-size: 1rem;
+        text-align: left;
 
         > div > :first-child {
           margin-top: 0;
@@ -323,6 +387,106 @@ div.home-page {
         > div > :last-child,
         > div > :last-child > :last-child{
           margin-bottom: 0;
+        }
+
+        .links {
+          display: flex;
+          flex-wrap: wrap;
+          align-items: center;
+          gap: 0.875rem;
+          padding: 0.75rem 0 1rem;
+
+          a {
+            display: flex;
+            flex-grow: 0;
+          }
+        }
+
+        .links a > img {
+          height: 40px;
+          width: auto;
+        }
+
+        @media screen and (max-width: $home-page-mobile-breakpoint) {
+          padding: 1rem 0;
+          flex: 100% 0 0;
+        }
+      }
+    }
+
+    .two-col-section-wrapper {
+      background: white;
+      margin-left: 0;
+      margin-right: 0;
+      max-width: 100%;
+
+      &:nth-child(odd) {
+        background: #f8f8f8;
+      }
+    }
+
+    .two-col-section {
+      max-width: $home-page-container-max-width;
+      margin-left: auto;
+      margin-right: auto;
+      display: flex;
+      flex-direction: row;
+      flex-wrap: wrap;
+      justify-content: flex-start;
+
+      padding: 2.5rem ($horizontal-inner-padding - 1rem) 1rem;
+
+      @media screen and (max-width: $home-page-mobile-breakpoint) {
+        padding: 1.25rem 0 0.5rem;
+      }
+
+      > div.section-title {
+        flex: 100% 0 0;
+        padding: 0.75rem 1rem 1rem;
+
+        @media screen and (max-width: $home-page-mobile-breakpoint) {
+          padding: 0.75rem 0 0.5rem;
+        }
+
+        h2 {
+          font-size: 2rem;
+          margin-top: 0.5rem;
+          margin-bottom: 1rem;
+          letter-spacing: 0.051rem;
+        }
+      }
+
+      > div {
+        flex: 50% 0 0;
+        padding: 0.75rem 1rem;
+        font-size: 1rem;
+        text-align: left;
+
+        > div > :first-child {
+          margin-top: 0;
+        }
+
+        > div > :last-child,
+        > div > :last-child > :last-child{
+          margin-bottom: 0;
+        }
+
+        .links {
+          display: flex;
+          flex-wrap: wrap;
+          align-items: center;
+          gap: 0.875rem;
+          padding: 0.75rem 0 1rem;
+
+          a {
+            display: flex;
+            flex-grow: 0;
+          }
+        }
+
+        .links a > img {
+          height: 40px;
+          width: auto;
         }
 
         @media screen and (max-width: $home-page-mobile-breakpoint) {

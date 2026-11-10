@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="5120" height="2880" viewBox="0 0 2400 1350">
+    <defs>
+        <linearGradient id="sky" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0" stop-color="#B8E2FC"/>
+            <stop offset=".42" stop-color="#EAF6FF"/>
+            <stop offset=".76" stop-color="#FFFDF7"/>
+            <stop offset="1" stop-color="#FFE9C7"/>
+        </linearGradient>
+        <linearGradient id="blueWave" x1="0" y1="0" x2="1" y2=".35">
+            <stop offset="0" stop-color="#4A9BD5" stop-opacity=".92"/>
+            <stop offset=".52" stop-color="#80BCE8" stop-opacity=".76"/>
+            <stop offset="1" stop-color="#DDF1FE" stop-opacity=".30"/>
+        </linearGradient>
+        <linearGradient id="blueLight" x1="0" y1="0" x2="1" y2="0">
+            <stop offset="0" stop-color="#8CCAF2" stop-opacity=".68"/>
+            <stop offset=".55" stop-color="#D7EEFF" stop-opacity=".58"/>
+            <stop offset="1" stop-color="#FFFFFF" stop-opacity=".20"/>
+        </linearGradient>
+        <linearGradient id="goldWave" x1="0" y1="0" x2="1" y2="0">
+            <stop offset="0" stop-color="#FFF5DE" stop-opacity=".12"/>
+            <stop offset=".52" stop-color="#F3D28E" stop-opacity=".50"/>
+            <stop offset="1" stop-color="#E5B65E" stop-opacity=".62"/>
+        </linearGradient>
+        <linearGradient id="whiteRibbon" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0" stop-color="#FFFFFF" stop-opacity=".76"/>
+            <stop offset="1" stop-color="#FFFFFF" stop-opacity=".10"/>
+        </linearGradient>
+        <radialGradient id="sunGlow">
+            <stop offset="0" stop-color="#FFF9E9" stop-opacity=".98"/>
+            <stop offset=".35" stop-color="#FFE8BF" stop-opacity=".48"/>
+            <stop offset="1" stop-color="#FFE8BF" stop-opacity="0"/>
+        </radialGradient>
+        <radialGradient id="coolGlow">
+            <stop offset="0" stop-color="#FFFFFF" stop-opacity=".75"/>
+            <stop offset="1" stop-color="#D8EEFF" stop-opacity="0"/>
+        </radialGradient>
+        <radialGradient id="centerWhite" cx="50%" cy="40%" r="60%">
+            <stop offset="0" stop-color="#FFFFFF" stop-opacity="1"/>
+            <stop offset=".45" stop-color="#FFFFFF" stop-opacity=".92"/>
+            <stop offset=".75" stop-color="#FFFFFF" stop-opacity=".40"/>
+            <stop offset="1" stop-color="#FFFFFF" stop-opacity="0"/>
+        </radialGradient>
+        <filter id="blur40" x="-30%" y="-30%" width="160%" height="160%">
+            <feGaussianBlur stdDeviation="40"/>
+        </filter>
+        <filter id="blur16" x="-30%" y="-30%" width="160%" height="160%">
+            <feGaussianBlur stdDeviation="16"/>
+        </filter>
+    </defs>
+
+    <rect width="2400" height="1350" fill="url(#sky)"/>
+    <ellipse cx="1940" cy="390" rx="570" ry="440" fill="url(#sunGlow)" filter="url(#blur40)"/>
+    <ellipse cx="410" cy="310" rx="560" ry="350" fill="url(#coolGlow)" filter="url(#blur40)"/>
+    <ellipse cx="1220" cy="770" rx="700" ry="220" fill="#FFFFFF" opacity=".34" filter="url(#blur40)"/>
+
+    <!-- Soft distant cloud-like layers -->
+    <path d="M0 470 C260 340 470 385 690 470 C920 560 1120 520 1320 410 C1550 280 1740 300 1930 405 C2110 505 2260 500 2400 425 L2400 920 L0 920Z"
+          fill="#FFFFFF" opacity=".22" filter="url(#blur16)"/>
+    <path d="M0 760 C250 640 450 650 660 735 C900 830 1080 815 1290 700 C1510 580 1740 590 1950 700 C2150 800 2280 770 2400 690"
+          fill="none" stroke="#FFFFFF" stroke-width="110" opacity=".22" filter="url(#blur16)"/>
+
+    <!-- Main flowing blue forms -->
+    <path d="M0 585 C250 430 450 420 680 520 C930 630 1080 790 1320 760 C1560 730 1700 560 1920 555 C2110 550 2250 680 2400 650 L2400 1350 L0 1350Z"
+          fill="url(#blueWave)"/>
+    <path d="M0 760 C260 570 475 575 710 690 C950 810 1110 940 1360 900 C1590 865 1750 700 1950 700 C2140 700 2280 820 2400 795 L2400 1350 L0 1350Z"
+          fill="url(#blueLight)" opacity=".88"/>
+    <path d="M0 965 C270 790 500 785 740 880 C990 980 1160 1100 1400 1050 C1640 1000 1790 855 1990 860 C2170 865 2300 960 2400 940 L2400 1350 L0 1350Z"
+          fill="#D8EEFF" opacity=".62"/>
+
+    <!-- Warm light flowing from the right -->
+    <path d="M980 780 C1250 680 1430 520 1650 500 C1900 480 2090 650 2400 525 L2400 1110 C2140 1170 1940 1010 1730 930 C1470 830 1260 910 980 1020Z"
+          fill="url(#goldWave)"/>
+    <path d="M1280 665 C1510 545 1690 430 1890 455 C2100 480 2240 610 2400 550"
+          fill="none" stroke="#FFFDF7" stroke-width="82" opacity=".62" filter="url(#blur16)"/>
+
+    <!-- Fine translucent ribbons -->
+    <path d="M-80 570 C300 365 490 430 760 610 C1010 780 1190 840 1450 760 C1720 675 1900 450 2150 470 C2270 480 2350 530 2480 565"
+          fill="none" stroke="url(#whiteRibbon)" stroke-width="34"/>
+    <path d="M-60 840 C230 640 460 630 700 750 C980 890 1140 1030 1430 955 C1700 885 1900 710 2130 740 C2260 755 2350 820 2470 840"
+          fill="none" stroke="#FFFFFF" stroke-width="9" opacity=".74"/>
+    <path d="M-60 1020 C240 835 470 825 720 930 C1000 1048 1170 1160 1450 1090 C1720 1020 1900 875 2140 900 C2280 915 2360 970 2470 990"
+          fill="none" stroke="#FFFFFF" stroke-width="5" opacity=".62"/>
+
+    <!-- Delicate golden orbital curves -->
+    <path d="M-80 520 C260 330 520 385 790 595 C1030 780 1200 885 1440 810 C1700 730 1880 510 2130 500 C2260 495 2370 545 2480 590"
+          fill="none" stroke="#E5B65E" stroke-width="3.5" opacity=".82"/>
+    <path d="M900 1120 C1190 1010 1400 850 1640 825 C1880 800 2100 930 2460 790"
+          fill="none" stroke="#F3D28E" stroke-width="4" opacity=".7"/>
+
+    <!-- Soft highlight along the central horizon -->
+    <path d="M0 700 C280 565 490 575 735 690 C980 805 1140 900 1390 850 C1640 800 1790 650 2010 660 C2190 670 2300 750 2400 730"
+          fill="none" stroke="#FFFFFF" stroke-width="13" opacity=".66" filter="url(#blur16)"/>
+    <path d="M0 700 C280 565 490 575 735 690 C980 805 1140 900 1390 850 C1640 800 1790 650 2010 660 C2190 670 2300 750 2400 730"
+          fill="none" stroke="#FFFFFF" stroke-width="3" opacity=".88"/>
+
+    <!-- Bright warm glint -->
+    <circle cx="1740" cy="825" r="150" fill="url(#sunGlow)" opacity=".85"/>
+
+    <!-- White fade in the center for text readability -->
+    <rect width="2400" height="1350" fill="url(#centerWhite)"/>
+</svg>

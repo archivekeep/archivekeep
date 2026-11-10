@@ -1,6 +1,7 @@
 ---
 ---
 
+<div class="hero-section">
 <div class="header">
 
 <h1>Archive Keep</h1>
@@ -27,15 +28,9 @@
     </div>
 <div>
 
-{{< hint warning >}}
-<p><strong>This software is under development.</strong></p>
-<p>It serves <a href="https://kravemir.org">author's</a> needs. However, there's still a room for improvement.
-<p>Consider buying author a coffee to support the development.</p>
-{{< /hint >}}
-
 </div>
 </div>
-
+</div>
 
 <div class="sub-display-container">
 <div class="sub-display-inner-container">
@@ -84,7 +79,7 @@ The contents of files stored in repositories are verifiable using digistal check
 </div>
 </div>
 
-<div class="sub-display-container" style="background: white">
+<div class="sub-display-container">
 <div class="sub-display-inner-container">
 <div class="text">
 
@@ -132,35 +127,71 @@ _**Note:** there's no dedicated application for self-hosting._
 </div>
 </div>
 
-<div class="sub-display-container">
-<div class="sub-display-inner-container">
-<div class="text">
+<div class="two-col-section-wrapper">
+<div class="two-col-section">
+<div class="section-title"><h2>Download</h2></div>
+<div><div>
 
-## Android platform
+### Linux platform
+
+<p>Install on your Linux desktop.</p>
+<div class="links">
+<a href='https://flathub.org/apps/org.archivekeep.ArchiveKeep'><img alt="Flathub" src="https://img.shields.io/flathub/v/org.archivekeep.ArchiveKeep?style=for-the-badge&logo=flathub&logoColor=white&color=4A86CF"/></a>
+</div>
+
+</div></div>
+<div><div>
+
+### Android platform
 
 <p>Carry a copy of data in mobile.</p>
-<p><a class="other-link" href="https://f-droid.org/packages/org.archivekeep.ArchiveKeep">Get it on F-Droid.</a></p>
-<p><a class="other-link" href="https://github.com/archivekeep/archivekeep/releases/">Or, download from releases.</a></p>
+<div class="links">
+<a href='https://f-droid.org/packages/org.archivekeep.ArchiveKeep'><img alt="F-Droid" src="https://img.shields.io/f-droid/v/org.archivekeep.ArchiveKeep?style=for-the-badge&logo=f-droid&logoColor=white&color=1976D2"/></a>
+<a href='https://github.com/archivekeep/archivekeep/releases'><img alt="GitHub" src="https://img.shields.io/github/v/release/archivekeep/archivekeep?style=for-the-badge&logo=github&logoColor=white&color=181717&label=github"/></a>
+</div>
 
+</div></div>
+</div></div>
 
+<div class="two-col-section-wrapper">
+<div class="two-col-section">
+<div class="section-title"><h2>Support the Project</h2></div>
+<div><div>
+
+ArchiveKeep is an independent open-source project developed by **Miroslav Kravec**.
+
+If you find it useful and want to support its development, you can donate via:
+
+<div class="links">
+<a href='https://ko-fi.com/kravemir'><img alt="Ko-Fi" src="https://img.shields.io/badge/-Ko--Fi-orange?style=for-the-badge&logo=ko-fi&logoColor=white"/></a>
+<a href='https://buymeacoffee.com/kravemir'><img alt="BuyMeACoffee" src="https://img.shields.io/badge/-Buy%20Me%20a%20Coffee-FFDD00?style=for-the-badge&logo=buy-me-a-coffee&logoColor=black"/></a>
 </div>
-<div class="other small">
-{{< home-image "/generated_screenshots/mobile/main-window.png" "" >}}
-</div>
-</div>
-</div>
+
+_Ko-fi is the preferred platform._
+
+</div></div>
+<div><div>
+
+Alternatively, you can donate via **SEPA bank transfer**:
+
+- **Account holder:** Miroslav Kravec
+- **IBAN:** `SK47 8330 0000 0028 0313 2698`
+- **BIC/SWIFT:** `FIOZSKBAXXX`
+
+_Please add your name and purpose (donation) in the description of the transfer._
+
+</div></div>
+</div></div>
 
 <div class="three-col-section-wrapper">
 <div class="three-col-section">
 <div><div>
-
 
 ## Pricing
 
 This is an open-source software, and it is free and will be free, to use the tool and self-host a server.
 
 The source code is available on [github](https://github.com/archivekeep/archivekeep).
-
 
 </div></div>
 <div><div>
