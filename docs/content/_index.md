@@ -1,6 +1,7 @@
 ---
 ---
 
+<div class="hero-section">
 <div class="header">
 
 <h1>Archive Keep</h1>
@@ -27,15 +28,9 @@
     </div>
 <div>
 
-{{< hint warning >}}
-<p><strong>This software is under development.</strong></p>
-<p>It serves <a href="https://kravemir.org">author's</a> needs. However, there's still a room for improvement.
-<p>Consider buying author a coffee to support the development.</p>
-{{< /hint >}}
-
 </div>
 </div>
-
+</div>
 
 <div class="sub-display-container">
 <div class="sub-display-inner-container">
@@ -84,7 +79,7 @@ The contents of files stored in repositories are verifiable using digistal check
 </div>
 </div>
 
-<div class="sub-display-container" style="background: white">
+<div class="sub-display-container">
 <div class="sub-display-inner-container">
 <div class="text">
 
