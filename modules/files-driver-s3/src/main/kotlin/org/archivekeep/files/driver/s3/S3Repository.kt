@@ -38,6 +38,7 @@ import org.archivekeep.files.api.repository.PLAIN_REPOSITORY_TYPE
 import org.archivekeep.files.api.repository.Repo
 import org.archivekeep.files.api.repository.RepoIndex
 import org.archivekeep.files.api.repository.RepositoryMetadata
+import org.archivekeep.files.procedures.indexupdate.RepoPerformanceTracker
 import org.archivekeep.utils.exceptions.WrongCredentialsException
 import org.archivekeep.utils.fromBase64ToHex
 import org.archivekeep.utils.fromHexToBase64
@@ -165,6 +166,7 @@ class S3Repository private constructor(
     override suspend fun move(
         from: String,
         to: String,
+        performanceTracker: RepoPerformanceTracker,
     ) {
         try {
             checkNotExists(to)
@@ -208,6 +210,7 @@ class S3Repository private constructor(
         info: ArchiveFileInfo,
         stream: InputStream,
         monitor: (copiedBytes: Long) -> Unit,
+        performanceTracker: RepoPerformanceTracker,
     ) {
         val digest = MessageDigest.getInstance("SHA-256")
         val digestInputStream = DigestInputStream(stream, digest)

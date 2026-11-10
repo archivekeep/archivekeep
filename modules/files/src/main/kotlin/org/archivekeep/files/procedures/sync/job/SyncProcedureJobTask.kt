@@ -3,6 +3,7 @@ package org.archivekeep.files.procedures.sync.job
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.yield
 import org.archivekeep.files.api.repository.Repo
+import org.archivekeep.files.procedures.indexupdate.RepoPerformanceTracker
 import org.archivekeep.files.procedures.sync.discovery.DiscoveredSyncOperationsGroup
 import org.archivekeep.files.procedures.sync.job.observation.SyncExecutionObserver
 import org.archivekeep.files.procedures.sync.operations.SyncOperation
@@ -37,6 +38,7 @@ class SyncProcedureJobTask<T : SyncOperation>(
         val dst: Repo,
         val observer: SyncExecutionObserver,
         val prompter: suspend (step: DiscoveredSyncOperationsGroup<*>) -> Boolean,
+        val performanceTracker: RepoPerformanceTracker = RepoPerformanceTracker.NoOp,
     )
 
     fun createProgress(completed: List<T>) =
@@ -59,11 +61,11 @@ class SyncProcedureJobTask<T : SyncOperation>(
             throw RuntimeException("abandoned")
         }
 
-        val (parentProcedureContext, base, dst, logger) = context
+        val (parentProcedureContext, base, dst, logger, _, performanceTracker) = context
 
         tracker.runOverride(parentProcedureContext) { modifiedContext, reportCompleted ->
             operationsToExecute.forEach { operation ->
-                val result = operation.apply(modifiedContext, base, dst, logger)
+                val result = operation.apply(modifiedContext, base, dst, logger, performanceTracker)
 
                 when (result) {
                     SUCCESS -> reportCompleted(operation)

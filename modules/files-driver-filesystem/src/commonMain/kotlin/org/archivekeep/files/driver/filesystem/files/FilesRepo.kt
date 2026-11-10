@@ -199,6 +199,7 @@ class FilesRepo(
     override suspend fun move(
         from: String,
         to: String,
+        performanceTracker: RepoPerformanceTracker,
     ) {
         withContext(Dispatchers.IO) {
             val dstPath = root.resolve(safeSubPath(to))
@@ -238,6 +239,7 @@ class FilesRepo(
         info: ArchiveFileInfo,
         stream: InputStream,
         monitor: (copiedBytes: Long) -> Unit,
+        performanceTracker: RepoPerformanceTracker,
     ) {
         val dstPath = root.resolve(safeSubPath(filename))
 

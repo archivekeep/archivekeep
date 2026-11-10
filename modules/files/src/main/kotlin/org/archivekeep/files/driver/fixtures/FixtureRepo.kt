@@ -7,6 +7,7 @@ import org.archivekeep.files.api.repository.ArchiveFileInfo
 import org.archivekeep.files.api.repository.Repo
 import org.archivekeep.files.api.repository.RepoIndex
 import org.archivekeep.files.api.repository.RepositoryMetadata
+import org.archivekeep.files.procedures.indexupdate.RepoPerformanceTracker
 import org.archivekeep.utils.hashing.sha256
 import org.archivekeep.utils.loading.Loadable
 import java.io.InputStream
@@ -44,6 +45,7 @@ class FixtureRepo(
     override suspend fun move(
         from: String,
         to: String,
+        performanceTracker: RepoPerformanceTracker,
     ) {
         TODO("Not yet implemented")
     }
@@ -55,11 +57,13 @@ class FixtureRepo(
         TODO("Not yet implemented")
     }
 
+    // TODO: merge monitor functionality into performanceTracker
     override suspend fun save(
         filename: String,
         info: ArchiveFileInfo,
         stream: InputStream,
         monitor: (copiedBytes: Long) -> Unit,
+        performanceTracker: RepoPerformanceTracker,
     ) {
         TODO("Not yet implemented")
     }
@@ -87,5 +91,6 @@ class FixtureRepo(
     override val metadataFlow: Flow<Loadable<RepositoryMetadata>> = flow { TODO() }
 
     override suspend fun close() {
+        // nothing to close for FixtureRepo
     }
 }

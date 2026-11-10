@@ -3,6 +3,7 @@ package org.archivekeep.files.procedures.sync.operations
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.archivekeep.files.api.repository.Repo
+import org.archivekeep.files.procedures.indexupdate.RepoPerformanceTracker
 import org.archivekeep.files.procedures.progress.CopyOperationProgress
 import org.archivekeep.files.procedures.sync.job.observation.SyncExecutionObserver
 import org.archivekeep.utils.procedures.operations.OperationContext
@@ -15,6 +16,7 @@ suspend fun copyFile(
     filename: String,
     dst: Repo,
     progressReport: (progress: CopyOperationProgress) -> Unit,
+    performanceTracker: RepoPerformanceTracker = RepoPerformanceTracker.NoOp,
 ) {
     withContext(Dispatchers.IO) {
         val timeStarted = LocalDateTime.now()
@@ -46,6 +48,7 @@ suspend fun copyFile(
                 info,
                 stream,
                 monitor = monitor,
+                performanceTracker = performanceTracker,
             )
         }
     }
@@ -57,9 +60,10 @@ internal suspend fun copyFileAndLog(
     base: Repo,
     filename: String,
     logger: SyncExecutionObserver,
+    performanceTracker: RepoPerformanceTracker = RepoPerformanceTracker.NoOp,
 ): Boolean {
     try {
-        copyFile(base, filename, dst, context::progressReport)
+        copyFile(base, filename, dst, context::progressReport, performanceTracker)
 
         logger.onFileStored(filename)
 

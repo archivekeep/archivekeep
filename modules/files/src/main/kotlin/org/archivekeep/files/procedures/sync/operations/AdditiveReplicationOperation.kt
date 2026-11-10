@@ -2,6 +2,7 @@ package org.archivekeep.files.procedures.sync.operations
 
 import org.archivekeep.files.api.repository.Repo
 import org.archivekeep.files.api.repository.operations.CompareOperation
+import org.archivekeep.files.procedures.indexupdate.RepoPerformanceTracker
 import org.archivekeep.files.procedures.sync.job.observation.SyncExecutionObserver
 import org.archivekeep.utils.procedures.ProcedureExecutionContext
 
@@ -15,12 +16,13 @@ data class AdditiveReplicationOperation(
         base: Repo,
         dst: Repo,
         logger: SyncExecutionObserver,
+        performanceTracker: RepoPerformanceTracker,
     ): SyncOperation.ExecutionResult {
         var result = SyncOperation.ExecutionResult.SUCCESS
 
         relocation.extraBaseLocations.forEach { extraBaseLocation ->
             context.runOperation { context ->
-                val success = copyFileAndLog(context, dst, base, extraBaseLocation, logger)
+                val success = copyFileAndLog(context, dst, base, extraBaseLocation, logger, performanceTracker)
 
                 if (!success) {
                     result = SyncOperation.ExecutionResult.FAIL

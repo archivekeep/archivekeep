@@ -368,6 +368,7 @@ class FilesDatabaseRepo private constructor(
     override suspend fun move(
         from: String,
         to: String,
+        performanceTracker: RepoPerformanceTracker,
     ) {
         withContext(Dispatchers.IO) {
             val dstPath = root.resolve(safeSubPath(to))
@@ -415,6 +416,7 @@ class FilesDatabaseRepo private constructor(
         info: ArchiveFileInfo,
         stream: InputStream,
         monitor: (copiedBytes: Long) -> Unit,
+        performanceTracker: RepoPerformanceTracker,
     ) {
         val dstPath = root.resolve(safeSubPath(filename))
 
@@ -471,7 +473,7 @@ class FilesDatabaseRepo private constructor(
                                     monitor(total)
                                 }
 
-                                val realChecksum = computeChecksum(dstTmpFilePath)
+                                val realChecksum = performanceTracker.measure(ChecksumOperationIds.COMPUTE_CHECKSUM) { computeChecksum(dstTmpFilePath) }
 
                                 if (realChecksum != info.checksumSha256) {
                                     throw ChecksumMismatch(expected = info.checksumSha256, actual = realChecksum)
@@ -497,13 +499,15 @@ class FilesDatabaseRepo private constructor(
                         throw e
                     }
 
-                indexStore.storeFile(
-                    filename,
-                    info.length,
-                    lastModified,
-                    info.checksumSha256,
-                    dropIncomingFile = true,
-                )
+                performanceTracker.measure(DatabaseIndexStoreOperationIds.STORE_FILE) {
+                    indexStore.storeFile(
+                        filename,
+                        info.length,
+                        lastModified,
+                        info.checksumSha256,
+                        dropIncomingFile = true,
+                    )
+                }
             } finally {
                 withContext(NonCancellable) {
                     inProgressHandler.onEnd(dstPath)

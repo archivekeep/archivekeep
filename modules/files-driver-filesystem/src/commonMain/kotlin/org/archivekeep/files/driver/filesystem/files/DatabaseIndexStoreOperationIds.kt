@@ -6,4 +6,5 @@ package org.archivekeep.files.driver.filesystem.files
 object DatabaseIndexStoreOperationIds {
     const val STORE_FILE = "indexStore.storeFile"
     const val REMOVE = "indexStore.remove"
+    const val BEGIN_MOVE = "indexStore.beginMove"
 }

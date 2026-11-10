@@ -2,6 +2,7 @@ package org.archivekeep.files.procedures.sync.operations
 
 import org.archivekeep.files.api.repository.Repo
 import org.archivekeep.files.api.repository.operations.CompareOperation
+import org.archivekeep.files.procedures.indexupdate.RepoPerformanceTracker
 import org.archivekeep.files.procedures.sync.job.observation.SyncExecutionObserver
 import org.archivekeep.utils.procedures.ProcedureExecutionContext
 import kotlin.math.min
@@ -16,6 +17,7 @@ data class RelocationApplyOperation(
         base: Repo,
         dst: Repo,
         logger: SyncExecutionObserver,
+        performanceTracker: RepoPerformanceTracker,
     ): SyncOperation.ExecutionResult {
         var result = SyncOperation.ExecutionResult.SUCCESS
 
@@ -26,7 +28,7 @@ data class RelocationApplyOperation(
                     relocation.extraBaseLocations.size,
                 ).forEach { extraBaseLocation ->
                     context.runOperation { operationContext ->
-                        val success = copyFileAndLog(operationContext, dst, base, extraBaseLocation, logger)
+                        val success = copyFileAndLog(operationContext, dst, base, extraBaseLocation, logger, performanceTracker)
 
                         if (!success) {
                             result = SyncOperation.ExecutionResult.FAIL
@@ -53,7 +55,7 @@ data class RelocationApplyOperation(
             val to = relocation.extraBaseLocations[i]
 
             try {
-                dst.move(from, to)
+                dst.move(from, to, performanceTracker)
                 logger.onFileMoved(from, to)
             } catch (e: Throwable) {
                 logger.onFileMoveFailed(from, to, e)

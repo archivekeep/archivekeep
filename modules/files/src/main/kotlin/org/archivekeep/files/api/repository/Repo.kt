@@ -56,6 +56,7 @@ interface Repo {
     suspend fun move(
         from: String,
         to: String,
+        performanceTracker: RepoPerformanceTracker = RepoPerformanceTracker.NoOp,
     )
 
     suspend fun <T> open(
@@ -68,6 +69,7 @@ interface Repo {
         info: ArchiveFileInfo,
         stream: InputStream,
         monitor: (copiedBytes: Long) -> Unit = {},
+        performanceTracker: RepoPerformanceTracker = RepoPerformanceTracker.NoOp,
     )
 
     suspend fun delete(filename: String)

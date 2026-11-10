@@ -175,7 +175,7 @@ class IndexUpdateProcedure(
             repo: Repo,
             movesSubsetLimit: Set<Move>? = null,
             addFilesSubsetLimit: Set<String>? = null,
-            out: java.io.PrintWriter? = null,
+            out: PrintWriter? = null,
             vararg progressTrackers: IndexUpdateProgressTracker,
         ) {
             val performanceTracker = RepoPerformanceTracker.DefaultImpl()

@@ -32,6 +32,7 @@ import org.archivekeep.app.core.utils.generics.singleInstanceWeakValueMap
 import org.archivekeep.app.core.utils.identifiers.RepositoryURI
 import org.archivekeep.files.api.repository.Repo
 import org.archivekeep.files.api.repository.operations.CompareOperation
+import org.archivekeep.files.procedures.indexupdate.RepoPerformanceTracker
 import org.archivekeep.files.procedures.sync.discovery.DiscoveredSync
 import org.archivekeep.files.procedures.sync.discovery.RelocationSyncMode
 import org.archivekeep.files.procedures.sync.discovery.SyncProcedureDiscovery
@@ -281,6 +282,7 @@ class RepoToRepoSyncServiceImpl(
         JobWrapper<JobState> {
         private val executionLog = SyncFlowTextLinesWriter()
         private val executionErrorLog = SyncFlowTextLinesWriter()
+        private val performanceTracker = RepoPerformanceTracker.DefaultImpl()
 
         val job =
             discoveredSync.createJob(
@@ -289,6 +291,7 @@ class RepoToRepoSyncServiceImpl(
                 prompter = { true },
                 limitToSubset = limitToSubset,
                 observer = WriterSyncLogger(executionLog.writer, executionErrorLog.writer),
+                performanceTracker = performanceTracker,
             )
 
         override val state: Flow<JobState> =
@@ -304,7 +307,11 @@ class RepoToRepoSyncServiceImpl(
                 }
 
         override suspend fun execute() {
-            job.run()
+            try {
+                job.run()
+            } finally {
+                performanceTracker.dump(executionLog.writer)
+            }
         }
     }
 }

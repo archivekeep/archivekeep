@@ -18,9 +18,13 @@ sealed interface RepoPerformanceTracker {
         override fun track(
             operationId: String,
             duration: Duration,
-        ) {}
+        ) {
+            // not tracking anything
+        }
 
-        override fun dump(out: PrintWriter?) {}
+        override fun dump(out: PrintWriter?) {
+            // nothing tracked, nothing to dump
+        }
     }
 
     class DefaultImpl : RepoPerformanceTracker {

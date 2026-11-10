@@ -1,6 +1,7 @@
 package org.archivekeep.files.procedures.sync.discovery
 
 import org.archivekeep.files.api.repository.Repo
+import org.archivekeep.files.procedures.indexupdate.RepoPerformanceTracker
 import org.archivekeep.files.procedures.sync.job.SyncProcedureJobTask
 import org.archivekeep.files.procedures.sync.job.observation.SyncExecutionObserver
 import org.archivekeep.files.procedures.sync.operations.SyncOperation
@@ -17,6 +18,7 @@ class DiscoveredSync internal constructor(
         prompter: suspend (step: DiscoveredSyncOperationsGroup<*>) -> Boolean,
         observer: SyncExecutionObserver,
         limitToSubset: Set<SyncOperation>? = null,
+        performanceTracker: RepoPerformanceTracker = RepoPerformanceTracker.NoOp,
     ) = TaskProcedureJob(
         SequentialProcedureJobTaskGroup(
             subTasks = groups.map { it.createJobTask(limitToSubset) },
@@ -28,6 +30,7 @@ class DiscoveredSync internal constructor(
                         dst,
                         observer,
                         prompter,
+                        performanceTracker,
                     )
                 },
         ),

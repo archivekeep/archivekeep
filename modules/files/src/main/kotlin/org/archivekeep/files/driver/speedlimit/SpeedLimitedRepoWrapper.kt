@@ -5,6 +5,7 @@ import org.archivekeep.files.api.repository.ArchiveFileInfo
 import org.archivekeep.files.api.repository.Repo
 import org.archivekeep.files.api.repository.RepoIndex
 import org.archivekeep.files.api.repository.RepositoryMetadata
+import org.archivekeep.files.procedures.indexupdate.RepoPerformanceTracker
 import java.io.InputStream
 import kotlin.math.log10
 import kotlin.math.nextUp
@@ -24,8 +25,9 @@ class SpeedLimitedRepoWrapper(
     override suspend fun move(
         from: String,
         to: String,
+        performanceTracker: RepoPerformanceTracker,
     ) = delayed(50) {
-        base.move(from, to)
+        base.move(from, to, performanceTracker)
     }
 
     override suspend fun <T> open(
@@ -41,8 +43,9 @@ class SpeedLimitedRepoWrapper(
         info: ArchiveFileInfo,
         stream: InputStream,
         monitor: (copiedBytes: Long) -> Unit,
+        performanceTracker: RepoPerformanceTracker,
     ) = delayed(200) {
-        base.save(filename, info, stream)
+        base.save(filename, info, stream, monitor, performanceTracker)
     }
 
     override suspend fun delete(filename: String) =

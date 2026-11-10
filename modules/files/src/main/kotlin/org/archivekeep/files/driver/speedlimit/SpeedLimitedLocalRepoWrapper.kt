@@ -22,8 +22,9 @@ class SpeedLimitedLocalRepoWrapper(
     override suspend fun move(
         from: String,
         to: String,
+        performanceTracker: RepoPerformanceTracker,
     ) = delayed(50) {
-        base.move(from, to)
+        base.move(from, to, performanceTracker)
     }
 
     override suspend fun <T> open(
@@ -39,8 +40,9 @@ class SpeedLimitedLocalRepoWrapper(
         info: ArchiveFileInfo,
         stream: InputStream,
         monitor: (copiedBytes: Long) -> Unit,
+        performanceTracker: RepoPerformanceTracker,
     ) = delayed(200) {
-        base.save(filename, info, stream)
+        base.save(filename, info, stream, monitor, performanceTracker)
     }
 
     override suspend fun delete(filename: String) =

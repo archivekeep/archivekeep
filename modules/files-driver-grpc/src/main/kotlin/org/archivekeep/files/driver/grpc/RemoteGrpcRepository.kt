@@ -28,6 +28,7 @@ import org.archivekeep.files.internal.grpc.chunkOrNull
 import org.archivekeep.files.internal.grpc.headOrNull
 import org.archivekeep.files.internal.grpc.listArchiveFilesRequest
 import org.archivekeep.files.internal.grpc.uploadArchiveFileRequest
+import org.archivekeep.files.procedures.indexupdate.RepoPerformanceTracker
 import org.archivekeep.utils.loading.Loadable
 import org.archivekeep.utils.loading.mapToLoadable
 import org.archivekeep.utils.loading.stateIn
@@ -76,6 +77,7 @@ class RemoteGrpcRepository(
     override suspend fun move(
         from: String,
         to: String,
+        performanceTracker: RepoPerformanceTracker,
     ) {
         reportOnCompletion {
             remoteService.moveArchiveFile(
@@ -171,6 +173,7 @@ class RemoteGrpcRepository(
         info: ArchiveFileInfo,
         stream: InputStream,
         monitor: (copiedBytes: Long) -> Unit,
+        performanceTracker: RepoPerformanceTracker,
     ) {
         reportOnCompletion {
             remoteService.uploadArchiveFile(

@@ -61,6 +61,7 @@ import org.archivekeep.files.crypto.file.writeCryptoStream
 import org.archivekeep.files.crypto.parseVerifyDecodeJWS
 import org.archivekeep.files.crypto.signAsJWS
 import org.archivekeep.files.crypto.verifyingStreamViaBackgroundCoroutine
+import org.archivekeep.files.procedures.indexupdate.RepoPerformanceTracker
 import org.archivekeep.utils.coroutines.InProgressHandler
 import org.archivekeep.utils.datastore.passwordprotected.PasswordProtectedCustomJoseStorage
 import org.archivekeep.utils.exceptions.WrongCredentialsException
@@ -279,6 +280,7 @@ class EncryptedS3Repository private constructor(
     override suspend fun move(
         from: String,
         to: String,
+        performanceTracker: RepoPerformanceTracker,
     ) {
         try {
             checkNotExists(to)
@@ -332,6 +334,7 @@ class EncryptedS3Repository private constructor(
         info: ArchiveFileInfo,
         stream: InputStream,
         monitor: (copiedBytes: Long) -> Unit,
+        performanceTracker: RepoPerformanceTracker,
     ) {
         val cleanup = AutomaticFileCleanup()
 

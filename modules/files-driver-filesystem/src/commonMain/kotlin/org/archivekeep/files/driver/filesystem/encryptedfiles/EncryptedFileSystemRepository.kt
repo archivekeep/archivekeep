@@ -39,6 +39,7 @@ import org.archivekeep.files.crypto.file.writeCryptoStream
 import org.archivekeep.files.crypto.verifyingStreamViaBackgroundCoroutine
 import org.archivekeep.files.driver.filesystem.FileBasedRepositoryMetadataStore
 import org.archivekeep.files.driver.filesystem.files.safeSubPath
+import org.archivekeep.files.procedures.indexupdate.RepoPerformanceTracker
 import org.archivekeep.utils.coroutines.InProgressHandler
 import org.archivekeep.utils.coroutines.flowScopedToThisJob
 import org.archivekeep.utils.coroutines.shareResourceIn
@@ -159,6 +160,7 @@ class EncryptedFileSystemRepository private constructor(
     override suspend fun move(
         from: String,
         to: String,
+        performanceTracker: RepoPerformanceTracker,
     ) {
         val fromEnc = encryptedFilesRoot.resolve(safeSubPath("$from.enc"))
         val toEnc = encryptedFilesRoot.resolve(safeSubPath("$to.enc"))
@@ -204,6 +206,7 @@ class EncryptedFileSystemRepository private constructor(
         info: ArchiveFileInfo,
         stream: InputStream,
         monitor: (copiedBytes: Long) -> Unit,
+        performanceTracker: RepoPerformanceTracker,
     ) {
         withContext(ioDispatcher) {
             val cleanup = AutomaticFileCleanup()
