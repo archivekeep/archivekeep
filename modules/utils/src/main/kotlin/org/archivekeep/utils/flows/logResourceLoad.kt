@@ -11,6 +11,6 @@ fun <T> (Flow<Loadable<T>>).logLoadableResourceLoad(name: String): Flow<Loadable
         when (it) {
             is Loadable.Failed -> println("Resource failed to load: $name")
             is Loadable.Loaded -> println("Resource loaded: $name")
-            Loadable.Loading -> {}
+            Loadable.Loading -> { /* ignore loading */ }
         }
     }

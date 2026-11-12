@@ -129,7 +129,9 @@ suspend inline fun <T> Flow<OptionalLoadable<T>>.firstFinished(): T? =
                     throw it.cause
                 }
 
-                OptionalLoadable.Loading -> {}
+                OptionalLoadable.Loading -> {
+                    // ignore loading
+                }
 
                 is OptionalLoadable.LoadedAvailable -> {
                     emit(it.value)
@@ -149,7 +151,9 @@ suspend inline fun <T> Flow<OptionalLoadable<T>>.firstLoadedOrNullOnFailedOrNotA
                     emit(null)
                 }
 
-                OptionalLoadable.Loading -> {}
+                OptionalLoadable.Loading -> {
+                    // ignore loading
+                }
 
                 is OptionalLoadable.LoadedAvailable -> {
                     emit(it.value)

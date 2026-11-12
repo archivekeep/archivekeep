@@ -31,17 +31,22 @@ suspend fun executeSync(
 
     preparedSync.groups.filterIsInstance<DiscoveredRelocationsMoveApplyGroup>().forEach { relocationStep ->
         if (relocationStep.toIgnore.isNotEmpty()) {
-            if (syncOptions.syncMode == RelocationSyncMode.Disabled) {
-                out.println("Relocations disabled but present.")
-                out.println("Enable relocations with --resolve-moves, or switch to --additive-duplicating mode")
-            } else if (relocationStep.toIgnore.any { it.isIncreasingDuplicates }) {
-                out.println("Duplicate increase is not enabled.")
-                out.println("Enable duplication increase with --allow-duplicate-increase, or switch to --additive-duplicating mode")
-            } else if (relocationStep.toIgnore.any { it.isDecreasingDuplicates }) {
-                out.println("Duplicate decrease is not enabled.")
-                out.println("Enable duplication decrease with --allow-duplicate-reduction, or switch to --additive-duplicating mode")
-            } else {
-                out.println("Ignored relocations detected.")
+            when {
+                syncOptions.syncMode == RelocationSyncMode.Disabled -> {
+                    out.println("Relocations disabled but present.")
+                    out.println("Enable relocations with --resolve-moves, or switch to --additive-duplicating mode")
+                }
+                relocationStep.toIgnore.any { it.isIncreasingDuplicates } -> {
+                    out.println("Duplicate increase is not enabled.")
+                    out.println("Enable duplication increase with --allow-duplicate-increase, or switch to --additive-duplicating mode")
+                }
+                relocationStep.toIgnore.any { it.isDecreasingDuplicates } -> {
+                    out.println("Duplicate decrease is not enabled.")
+                    out.println("Enable duplication decrease with --allow-duplicate-reduction, or switch to --additive-duplicating mode")
+                }
+                else -> {
+                    out.println("Ignored relocations detected.")
+                }
             }
 
             return 1

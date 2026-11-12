@@ -110,7 +110,9 @@ suspend fun <T> Flow<Loadable<T>>.firstLoadedOrFailure(): T =
         when (it) {
             is Loadable.Loaded ->
                 emit(it.value)
-            is Loadable.Loading -> {}
+            is Loadable.Loading -> {
+                // ignore loading
+            }
             is Loadable.Failed ->
                 throw RuntimeException("Wait first loaded failed: ${it.throwable}", it.throwable)
         }
