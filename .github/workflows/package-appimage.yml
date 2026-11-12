@@ -1,0 +1,86 @@
+name: Package AppImage
+
+on:
+  workflow_dispatch:
+
+jobs:
+  assemble:
+    name: "Assemble"
+    runs-on: ubuntu-22.04
+    permissions:
+      contents: read
+
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@v5
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v5
+
+      - name: Assemble
+        run: ./gradlew app-desktop:assemble
+
+      - name: Upload build outputs
+        uses: actions/upload-artifact@v6
+        with:
+          name: build-outputs
+          path: |
+            **/build/
+          retention-days: 1
+
+  package-appimage:
+    name: "Package AppImage (${{ matrix.architecture }})"
+    needs: assemble
+    strategy:
+      matrix:
+        architecture: [x86_64, aarch64]
+        include:
+          - architecture: x86_64
+            runner: ubuntu-22.04
+          - architecture: aarch64
+            runner: ubuntu-22.04-arm
+      fail-fast: false
+    runs-on: ${{ matrix.runner }}
+    permissions:
+      contents: read
+
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@v5
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v5
+
+      - name: Download build outputs
+        uses: actions/download-artifact@v6
+        with:
+          name: build-outputs
+
+      - name: Create Release Distributable
+        run: ./gradlew app-desktop:createReleaseDistributable
+
+      - name: Download appimagetool
+        run: |
+          wget -q https://github.com/AppImage/appimagetool/releases/download/continuous/appimagetool-${{ matrix.architecture }}.AppImage
+          chmod +x appimagetool-${{ matrix.architecture }}.AppImage
+
+      - name: Package AppImage
+        run: ./bin/package-appimage.sh ./appimagetool-${{ matrix.architecture }}.AppImage ${{ matrix.architecture }}
+
+      - name: Upload AppImage
+        uses: actions/upload-artifact@v6
+        with:
+          name: archivekeep-appimage-${{ matrix.architecture }}
+          path: |
+            ArchiveKeep-*.AppImage
+          retention-days: 7
