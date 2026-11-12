@@ -17,7 +17,6 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.unit.dp
 import compose.icons.TablerIcons
@@ -65,6 +64,7 @@ import org.archivekeep.ui.resources.dialog_unlock_enter_credentials
 import org.archivekeep.ui.resources.dialog_unlock_enter_password
 import org.archivekeep.ui.resources.dialog_unlock_not_locked
 import org.archivekeep.ui.resources.dialog_unlock_password_needed
+import org.archivekeep.ui.resources.dialog_unlock_repository_title
 import org.archivekeep.ui.resources.dialog_unlock_success
 import org.archivekeep.ui.resources.dialog_unlock_wallet_available
 import org.archivekeep.ui.resources.dialog_unlock_wallet_hint
@@ -89,7 +89,7 @@ class UnlockRepositoryDialog(
         val basicAuthCredentialsState: MutableState<BasicAuthCredentials?>,
         val unlockOptionsState: MutableState<UnlockOptions>,
         val onClose: () -> Unit,
-    ) : IState {
+    ) {
         val unlockRequest = accessState.asLoadableUnlockRequest()
 
         val needsUnlock = unlockRequest.mapIfLoadedOrDefault(false) { it != null }
@@ -119,11 +119,13 @@ class UnlockRepositoryDialog(
             },
         )
 
-        override val title: AnnotatedString =
-            buildAnnotatedString {
-                append("Unlock Repository")
-            }
     }
+
+    @Composable
+    override fun title(state: State) =
+        buildAnnotatedString {
+            append(stringResource(Res.string.dialog_unlock_repository_title))
+        }
 
     inner class VM(
         val coroutineScope: CoroutineScope,

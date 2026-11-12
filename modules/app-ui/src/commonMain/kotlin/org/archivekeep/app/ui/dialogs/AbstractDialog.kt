@@ -13,13 +13,7 @@ import org.archivekeep.app.ui.components.designsystem.dialog.DialogOverlayWithLo
 import org.archivekeep.app.ui.components.designsystem.dialog.defaultDialogWidthModifier
 import org.archivekeep.utils.loading.Loadable
 
-abstract class AbstractDialog<T_State : AbstractDialog.IState, T_VM : AbstractDialog.IVM> : Dialog {
-    interface IState {
-        val title: AnnotatedString
-
-        fun dialogWidthModifier(): Modifier = defaultDialogWidthModifier
-    }
-
+abstract class AbstractDialog<T_State : Any, T_VM : AbstractDialog.IVM> : Dialog {
     interface IVM {
         fun onClose()
     }
@@ -32,6 +26,11 @@ abstract class AbstractDialog<T_State : AbstractDialog.IState, T_VM : AbstractDi
 
     @Composable
     protected abstract fun rememberState(vm: T_VM): Loadable<T_State>
+
+    protected open fun dialogWidthModifier(state: T_State): Modifier = defaultDialogWidthModifier
+
+    @Composable
+    protected abstract fun title(state: T_State): AnnotatedString
 
     @Composable
     protected abstract fun ColumnScope.renderContent(state: T_State)
@@ -50,8 +49,8 @@ abstract class AbstractDialog<T_State : AbstractDialog.IState, T_VM : AbstractDi
             onDismissRequest = vm::onClose,
         ) { state ->
             DialogCardWithDialogInnerContainer(
-                state.title,
-                widthModifier = state.dialogWidthModifier(),
+                title(state),
+                widthModifier = dialogWidthModifier(state),
                 content = {
                     renderContent(state)
                 },

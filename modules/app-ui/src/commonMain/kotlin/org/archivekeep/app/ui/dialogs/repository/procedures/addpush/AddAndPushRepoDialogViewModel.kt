@@ -5,8 +5,6 @@ import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.buildAnnotatedString
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
@@ -23,13 +21,11 @@ import org.archivekeep.app.core.procedures.addpush.AddAndPushProcedure.JobState
 import org.archivekeep.app.core.procedures.addpush.AddAndPushProcedure.LaunchOptions
 import org.archivekeep.app.core.procedures.addpush.AddAndPushProcedure.ReadyAddPushProcess
 import org.archivekeep.app.core.utils.identifiers.RepositoryURI
-import org.archivekeep.app.ui.components.designsystem.dialog.fullWidthDialogWidthModifier
 import org.archivekeep.app.ui.components.feature.dialogs.operations.DialogOperationControlState
 import org.archivekeep.app.ui.components.feature.dialogs.operations.toDialogOperationControlState
 import org.archivekeep.app.ui.dialogs.AbstractDialog
 import org.archivekeep.app.ui.domain.data.getSyncCandidates
 import org.archivekeep.app.ui.domain.wiring.LocalApplicationServices
-import org.archivekeep.app.ui.utils.appendBoldSpan
 import org.archivekeep.app.ui.utils.stickToFirstNotNullAsState
 import org.archivekeep.files.procedures.indexupdate.IndexUpdateProcedure
 import org.archivekeep.utils.loading.Loadable
@@ -70,14 +66,7 @@ class AddAndPushRepoDialogViewModel(
         val otherRepositoryCandidates: Loadable<List<StorageRepository>>,
         val onCancel: () -> Unit,
         val onClose: () -> Unit,
-    ) : AbstractDialog.IState {
-        override val title =
-            buildAnnotatedString {
-                appendBoldSpan(repoName)
-                append(" - ")
-                append("add and push")
-            }
-
+    ) {
         val controlState: DialogOperationControlState by derivedStateOf {
             when (state) {
                 is JobState -> {
@@ -129,7 +118,6 @@ class AddAndPushRepoDialogViewModel(
             )
         }
 
-        override fun dialogWidthModifier(): Modifier = fullWidthDialogWidthModifier
     }
 
     override fun onClose() {

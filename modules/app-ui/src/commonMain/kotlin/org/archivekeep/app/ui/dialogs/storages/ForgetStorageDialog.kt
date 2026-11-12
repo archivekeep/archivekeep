@@ -8,6 +8,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.CoroutineScope
@@ -19,12 +20,14 @@ import org.archivekeep.app.ui.components.feature.dialogs.SimpleActionDialogContr
 import org.archivekeep.app.ui.components.feature.dialogs.operations.LaunchableExecutionErrorIfPresent
 import org.archivekeep.app.ui.domain.wiring.LocalApplicationServices
 import org.archivekeep.app.ui.utils.Launchable
-import org.archivekeep.app.ui.utils.appendBoldSpan
 import org.archivekeep.app.ui.utils.asAction
 import org.archivekeep.app.ui.utils.collectLoadableFlow
 import org.archivekeep.app.ui.utils.simpleLaunchable
 import org.archivekeep.ui.resources.Res
 import org.archivekeep.ui.resources.common_forget
+import org.archivekeep.ui.resources.dialog_forget_storage_data_not_deleted
+import org.archivekeep.ui.resources.dialog_forget_storage_message
+import org.archivekeep.ui.resources.dialog_forget_storage_title
 import org.archivekeep.utils.loading.Loadable
 import org.archivekeep.utils.loading.mapLoadedData
 import org.jetbrains.compose.resources.stringResource
@@ -48,12 +51,7 @@ class ForgetStorageDialog(
     class State(
         val storage: KnownStorage,
         val launchable: Launchable<Unit>,
-    ) : IState {
-        override val title =
-            buildAnnotatedString {
-                append("Forget Storage")
-            }
-
+    ) {
         val action by launchable.asAction(
             onLaunch = { onLaunch(Unit) },
         )
@@ -88,22 +86,21 @@ class ForgetStorageDialog(
     }
 
     @Composable
+    override fun title(state: State): AnnotatedString {
+        return buildAnnotatedString {
+            append(stringResource(Res.string.dialog_forget_storage_title))
+        }
+    }
+
+    @Composable
     override fun renderContent(state: State) {
         Text(
-            remember(state.storage) {
                 buildAnnotatedString {
-                    append("Storage ")
-                    appendBoldSpan(state.storage.label)
-                    append(" will be removed from local registry of known storages.")
+                    append(stringResource(Res.string.dialog_forget_storage_message, state.storage.label))
                 }
-            },
         )
         Text(
-            remember {
-                buildAnnotatedString {
-                    append("Data will not be deleted.")
-                }
-            },
+            stringResource(Res.string.dialog_forget_storage_data_not_deleted),
             modifier = Modifier.padding(top = 10.dp),
         )
         LaunchableExecutionErrorIfPresent(state.launchable)

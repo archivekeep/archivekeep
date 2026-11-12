@@ -16,7 +16,7 @@ private val ItemManySelectCheckboxContentType = "ItemManySelect -> Checkbox"
 
 fun <I, I_S> LazyListScope.itemManySelect(
     label: String,
-    allItemsLabel: (count: Int) -> String,
+    allItemsLabel: String,
     itemLabelText: (item: I) -> String,
     state: ManySelectState<I, I, I_S>,
 ) where I : I_S {
@@ -30,7 +30,7 @@ fun <I, I_S> LazyListScope.itemManySelect(
 
 fun <I, I_S> LazyListScope.itemManySelect(
     label: String,
-    allItemsLabel: (count: Int) -> String,
+    allItemsLabel: String,
     itemLabel: @Composable (item: I) -> Unit,
     state: ManySelectState<I, I, I_S>,
 ) where I : I_S {
@@ -41,7 +41,7 @@ fun <I, I_S> LazyListScope.itemManySelect(
     item {
         TriStateCheckboxWithText(
             state.selectAllState,
-            text = allItemsLabel(state.allItems.size),
+            text = allItemsLabel,
             onClick = state.onSelectAllChange,
             modifier =
                 Modifier

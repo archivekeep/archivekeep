@@ -26,6 +26,7 @@ import org.archivekeep.ui.resources.common_password
 import org.archivekeep.ui.resources.dialog_create_wallet_enter_password
 import org.archivekeep.ui.resources.dialog_create_wallet_message
 import org.archivekeep.ui.resources.dialog_create_wallet_password_verify
+import org.archivekeep.ui.resources.dialog_create_wallet_title
 import org.archivekeep.ui.resources.dialog_create_wallet_verify_password
 import org.archivekeep.utils.datastore.passwordprotected.PasswordProtectedDataStore
 import org.archivekeep.utils.loading.Loadable
@@ -53,7 +54,7 @@ class CreateWalletDialog : AbstractDialog<CreateWalletDialog.State, CreateWallet
         val onClose: () -> Unit,
         val passwordState: MutableState<String?> = mutableStateOf(null),
         val passwordState2: MutableState<String?> = mutableStateOf(null),
-    ) : IState {
+    ) {
         var password by passwordState
         var password2 by passwordState2
 
@@ -67,11 +68,13 @@ class CreateWalletDialog : AbstractDialog<CreateWalletDialog.State, CreateWallet
                 canLaunch = { (password?.isNotBlank() ?: false) && password == password2 },
             )
 
-        override val title =
-            buildAnnotatedString {
-                append("Create Wallet")
-            }
     }
+
+    @Composable
+    override fun title(state: State) =
+        buildAnnotatedString {
+            append(stringResource(Res.string.dialog_create_wallet_title))
+        }
 
     @Composable
     override fun rememberVM(

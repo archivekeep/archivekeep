@@ -19,10 +19,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import kotlinx.coroutines.CoroutineScope
@@ -51,7 +48,11 @@ import org.archivekeep.app.ui.utils.simpleLaunchable
 import org.archivekeep.files.api.repository.RepositoryAssociationGroupId
 import org.archivekeep.ui.resources.Res
 import org.archivekeep.ui.resources.common_associate
+import org.archivekeep.ui.resources.dialog_associate_message
 import org.archivekeep.ui.resources.dialog_associate_new_archive
+import org.archivekeep.ui.resources.dialog_associate_re_message
+import org.archivekeep.ui.resources.dialog_associate_repository_title
+import org.archivekeep.ui.resources.dialog_reassociate_repository_title
 import org.archivekeep.utils.loading.Loadable
 import org.archivekeep.utils.loading.mapLoadedData
 import org.jetbrains.compose.resources.stringResource
@@ -75,16 +76,7 @@ class AssociateRepositoryDialog(
             val selectedItem: MutableState<Target?>,
             val launchable: Launchable<Unit>,
             val onClose: () -> Unit,
-        ) : IState {
-            override val title =
-                buildAnnotatedString {
-                    if (currentAssociationId != null) {
-                        append("Re-associate Repository")
-                    } else {
-                        append("Associate Repository")
-                    }
-                }
-
+        ) {
             val action by launchable.asAction(
                 onLaunch = { onLaunch(Unit) },
                 canLaunch = { selectedItem.value != null },
@@ -125,6 +117,16 @@ class AssociateRepositoryDialog(
                 }
             }
     }
+
+    @Composable
+    override fun title(state: State) =
+        buildAnnotatedString {
+            if (state.currentAssociationId != null) {
+                append(stringResource(Res.string.dialog_reassociate_repository_title))
+            } else {
+                append(stringResource(Res.string.dialog_associate_repository_title))
+            }
+        }
 
     @Composable
     override fun rememberVM(
@@ -183,23 +185,13 @@ class AssociateRepositoryDialog(
         val (syncCandidates, currentAssociationId, currentRepoStorage, currentRepoInformation) = state
 
         Text(
-            remember(currentAssociationId, currentRepoStorage, currentRepoInformation) {
-                buildAnnotatedString {
-                    if (currentAssociationId != null) {
-                        append("Re-associate repository ")
-                    } else {
-                        append("Associate repository ")
-                    }
-                    withStyle(style = SpanStyle(fontWeight = FontWeight.Bold)) {
-                        append(currentRepoInformation.displayName)
-                    }
-                    append(" in storage ")
-                    withStyle(style = SpanStyle(fontWeight = FontWeight.Bold)) {
-                        append(currentRepoStorage.label)
-                    }
-                    append(" to:")
+            buildAnnotatedString {
+                if (currentAssociationId != null) {
+                    append(stringResource(Res.string.dialog_associate_re_message, currentRepoInformation.displayName, currentRepoStorage.label))
+                } else {
+                    append(stringResource(Res.string.dialog_associate_message, currentRepoInformation.displayName, currentRepoStorage.label))
                 }
-            },
+            }
         )
 
         ScrollableColumn {

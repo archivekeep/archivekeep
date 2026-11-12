@@ -6,7 +6,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.buildAnnotatedString
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -33,9 +32,15 @@ import org.archivekeep.app.ui.utils.appendBoldSpan
 import org.archivekeep.app.ui.utils.collectAsLoadable
 import org.archivekeep.app.ui.utils.stickToFirstNotNull
 import org.archivekeep.files.procedures.reindex.FileReindexProcedure
+import org.archivekeep.ui.resources.Res
+import org.archivekeep.ui.resources.dialog_reindex_title
+import org.archivekeep.ui.resources.manyselect_modified_files
+import org.archivekeep.ui.resources.manyselect_modified_files_all
+import org.archivekeep.ui.resources.procedure_execute_index_update
 import org.archivekeep.utils.loading.Loadable
 import org.archivekeep.utils.loading.mapToLoadable
 import org.archivekeep.utils.loading.waitLoadedValue
+import org.jetbrains.compose.resources.stringResource
 
 class FileReindexProcedureDialog(
     repositoryURI: RepositoryURI,
@@ -46,13 +51,7 @@ class FileReindexProcedureDialog(
         val operationState: FileReindexProcedureSupervisor.State,
         val selectedFilesToReindex: MutableState<Set<String>>,
         val onClose: () -> Unit,
-    ) : IState {
-        override val title =
-            buildAnnotatedString {
-                appendBoldSpan(archiveName)
-                append(" - reindex changed files")
-            }
-
+    ) {
         val controlState: DialogOperationControlState =
             when (val opState = operationState) {
                 is FileReindexProcedureSupervisor.JobState -> {
@@ -80,8 +79,17 @@ class FileReindexProcedureDialog(
             )
         }
 
-        override fun dialogWidthModifier(): Modifier = fullWidthDialogWidthModifier
     }
+
+    override fun dialogWidthModifier(state: State) = fullWidthDialogWidthModifier
+
+    @Composable
+    override fun title(state: State) =
+        buildAnnotatedString {
+            appendBoldSpan(state.archiveName)
+            append(" - ")
+            append(stringResource(Res.string.dialog_reindex_title))
+        }
 
     inner class VM(
         val scope: CoroutineScope,
@@ -149,8 +157,8 @@ class FileReindexProcedureDialog(
                     rememberManySelectForRender(
                         preparationState.modifiedIndexedFiles,
                         state.selectedFilesToReindex,
-                        "Modified files",
-                        allItemsLabel = { "All modified files ($it)" },
+                        stringResource(Res.string.manyselect_modified_files),
+                        allItemsLabel = { stringResource(Res.string.manyselect_modified_files_all, it.toString()) },
                         itemLabelText = { it },
                     )
 
@@ -171,7 +179,7 @@ class FileReindexProcedureDialog(
     override fun RowScope.renderButtons(state: State) {
         DialogOperationControlButtons(
             state.controlState,
-            launchText = "Execute index update",
+            launchText = stringResource(Res.string.procedure_execute_index_update),
         )
     }
 }

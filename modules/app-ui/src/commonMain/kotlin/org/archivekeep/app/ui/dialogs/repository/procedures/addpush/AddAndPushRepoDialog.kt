@@ -8,6 +8,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.max
 import kotlinx.coroutines.CoroutineScope
@@ -22,6 +23,7 @@ import org.archivekeep.app.core.utils.identifiers.RepositoryURI
 import org.archivekeep.app.ui.components.base.layout.ScrollableColumn
 import org.archivekeep.app.ui.components.base.layout.ScrollableLazyColumnWithGuessedWidth
 import org.archivekeep.app.ui.components.designsystem.dialog.LabelText
+import org.archivekeep.app.ui.components.designsystem.dialog.fullWidthDialogWidthModifier
 import org.archivekeep.app.ui.components.feature.LoadableGuard
 import org.archivekeep.app.ui.components.feature.dialogs.operations.DialogOperationControlButtons
 import org.archivekeep.app.ui.components.feature.dialogs.operations.ExecutionErrorIfPresent
@@ -33,13 +35,20 @@ import org.archivekeep.app.ui.components.feature.operations.LocalIndexUpdateProg
 import org.archivekeep.app.ui.components.feature.operations.SyncProgress
 import org.archivekeep.app.ui.dialogs.repository.AbstractRepositoryDialog
 import org.archivekeep.app.ui.dialogs.repository.procedures.addpush.AddAndPushRepoDialogViewModel.VMState
+import org.archivekeep.app.ui.utils.appendBoldSpan
 import org.archivekeep.app.ui.utils.asMutableState
 import org.archivekeep.app.ui.utils.collectAsLoadable
 import org.archivekeep.app.ui.utils.contextualStorageReference
 import org.archivekeep.ui.resources.Res
 import org.archivekeep.ui.resources.common_loading
 import org.archivekeep.ui.resources.common_preparing
+import org.archivekeep.ui.resources.dialog_add_and_push_title
 import org.archivekeep.ui.resources.dialog_push_title
+import org.archivekeep.ui.resources.manyselect_files_to_add_and_push
+import org.archivekeep.ui.resources.manyselect_files_to_add_and_push_all
+import org.archivekeep.ui.resources.manyselect_moves
+import org.archivekeep.ui.resources.manyselect_moves_all
+import org.archivekeep.ui.resources.sync_push_to
 import org.archivekeep.utils.collections.ifNotEmpty
 import org.archivekeep.utils.loading.Loadable
 import org.archivekeep.utils.loading.mapIfLoadedOrDefault
@@ -48,6 +57,16 @@ import org.jetbrains.compose.resources.stringResource
 class AddAndPushRepoDialog(
     uri: RepositoryURI,
 ) : AbstractRepositoryDialog<VMState, AddAndPushRepoDialogViewModel>(uri) {
+    override fun dialogWidthModifier(state: VMState) = fullWidthDialogWidthModifier
+
+    @Composable
+    override fun title(state: VMState) =
+        buildAnnotatedString {
+            appendBoldSpan(state.repoName)
+            append(" - ")
+            append(stringResource(Res.string.dialog_add_and_push_title))
+        }
+
     @Composable
     override fun rememberVM(
         scope: CoroutineScope,
@@ -106,16 +125,16 @@ class AddAndPushRepoDialog(
                     rememberManySelectForRender(
                         status.addPreprationResult.moves,
                         state.selectedMoves,
-                        "Moves",
-                        allItemsLabel = { "All moves ($it)" },
+                        stringResource(Res.string.manyselect_moves),
+                        allItemsLabel = { stringResource(Res.string.manyselect_moves_all, it.toString()) },
                         itemLabelText = { "${it.from} -> ${it.to}" },
                     )
                 val filesManySelect =
                     rememberManySelectForRender(
                         status.addPreprationResult.newFiles,
                         state.selectedFilenames,
-                        "Files to add and push",
-                        allItemsLabel = { "All new files ($it)" },
+                        stringResource(Res.string.manyselect_files_to_add_and_push),
+                        allItemsLabel = { stringResource(Res.string.manyselect_files_to_add_and_push_all, it.toString()) },
                         itemLabelText = { it.fileName },
                     )
 
@@ -168,11 +187,14 @@ class AddAndPushRepoDialog(
                             }
 
                         Text(
-                            if (storageRepository != null) {
-                                "Push to ${contextualStorageReference(state.repoName, storageRepository)}"
-                            } else {
-                                "Push to $repo"
-                            },
+                            stringResource(
+                                Res.string.sync_push_to,
+                                if (storageRepository != null) {
+                                    contextualStorageReference(state.repoName, storageRepository)
+                                } else {
+                                    repo.toString()
+                                },
+                            ),
                         )
                         SyncProgress(progress.subTasks)
 

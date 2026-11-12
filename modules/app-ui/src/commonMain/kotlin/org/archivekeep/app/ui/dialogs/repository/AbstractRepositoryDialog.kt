@@ -8,7 +8,7 @@ import org.archivekeep.app.core.utils.identifiers.RepositoryURI
 import org.archivekeep.app.ui.dialogs.AbstractDialog
 import org.archivekeep.app.ui.domain.wiring.LocalApplicationServices
 
-abstract class AbstractRepositoryDialog<T_State : AbstractDialog.IState, T_VM : AbstractDialog.IVM>(
+abstract class AbstractRepositoryDialog<T_State : Any, T_VM : AbstractDialog.IVM>(
     val uri: RepositoryURI,
 ) : AbstractDialog<T_State, T_VM>() {
     @Composable

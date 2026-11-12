@@ -42,6 +42,12 @@ import org.archivekeep.files.procedures.indexupdate.IndexUpdateProcedure
 import org.archivekeep.files.procedures.indexupdate.IndexUpdateProcedure.PreparationResult.Move
 import org.archivekeep.ui.resources.Res
 import org.archivekeep.ui.resources.common_preparing
+import org.archivekeep.ui.resources.dialog_index_update_title
+import org.archivekeep.ui.resources.manyselect_moves
+import org.archivekeep.ui.resources.manyselect_moves_all
+import org.archivekeep.ui.resources.manyselect_new_files
+import org.archivekeep.ui.resources.manyselect_new_files_all
+import org.archivekeep.ui.resources.procedure_execute_index_update
 import org.archivekeep.utils.loading.Loadable
 import org.archivekeep.utils.loading.mapToLoadable
 import org.archivekeep.utils.loading.waitLoadedValue
@@ -57,13 +63,7 @@ class IndexUpdateProcedureDialog(
         val selectedFilesToAdd: MutableState<Set<String>>,
         val selectedMovesToExecute: MutableState<Set<Move>>,
         val onClose: () -> Unit,
-    ) : IState {
-        override val title =
-            buildAnnotatedString {
-                appendBoldSpan(archiveName)
-                append(" - index update")
-            }
-
+    ) {
         val controlState: DialogOperationControlState =
             when (val opState = operationState) {
                 is IndexUpdateProcedureSupervisor.JobState -> {
@@ -92,8 +92,17 @@ class IndexUpdateProcedureDialog(
             )
         }
 
-        override fun dialogWidthModifier(): Modifier = fullWidthDialogWidthModifier
     }
+
+    override fun dialogWidthModifier(state: State) = fullWidthDialogWidthModifier
+
+    @Composable
+    override fun title(state: State) =
+        buildAnnotatedString {
+            appendBoldSpan(state.archiveName)
+            append(" - ")
+            append(stringResource(Res.string.dialog_index_update_title))
+        }
 
     inner class VM(
         val scope: CoroutineScope,
@@ -167,16 +176,16 @@ class IndexUpdateProcedureDialog(
                             rememberManySelectForRender(
                                 preparationState.moves,
                                 state.selectedMovesToExecute,
-                                "Moves",
-                                allItemsLabel = { "All moves ($it)" },
+                                stringResource(Res.string.manyselect_moves),
+                                allItemsLabel = { stringResource(Res.string.manyselect_moves_all, it.toString()) },
                                 itemLabelText = { "${it.from} -> ${it.to}" },
                             )
                         val filesManySelect =
                             rememberManySelectForRender(
                                 preparationState.newFileNames,
                                 state.selectedFilesToAdd,
-                                "New files",
-                                allItemsLabel = { "All new files ($it)" },
+                                stringResource(Res.string.manyselect_new_files),
+                                allItemsLabel = { stringResource(Res.string.manyselect_new_files_all, it.toString()) },
                                 itemLabelText = { it },
                             )
 
@@ -206,7 +215,7 @@ class IndexUpdateProcedureDialog(
     override fun RowScope.renderButtons(state: State) {
         DialogOperationControlButtons(
             state.controlState,
-            launchText = "Execute index update",
+            launchText = stringResource(Res.string.procedure_execute_index_update),
         )
     }
 }

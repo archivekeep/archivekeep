@@ -15,6 +15,14 @@ import org.archivekeep.files.procedures.sync.discovery.DiscoveredAdditiveRelocat
 import org.archivekeep.files.procedures.sync.discovery.DiscoveredNewFilesGroup
 import org.archivekeep.files.procedures.sync.discovery.DiscoveredRelocationsMoveApplyGroup
 import org.archivekeep.files.procedures.sync.discovery.DiscoveredSyncOperationsGroup
+import org.archivekeep.ui.resources.Res
+import org.archivekeep.ui.resources.manyselect_existing_files_replicate
+import org.archivekeep.ui.resources.manyselect_existing_files_replicate_all
+import org.archivekeep.ui.resources.manyselect_new_files_copy
+import org.archivekeep.ui.resources.manyselect_new_files_copy_all
+import org.archivekeep.ui.resources.manyselect_relocations
+import org.archivekeep.ui.resources.manyselect_relocations_all
+import org.jetbrains.compose.resources.stringResource
 
 @Composable
 internal fun ColumnScope.SyncPreparedState(
@@ -34,8 +42,8 @@ internal fun ColumnScope.SyncPreparedState(
 
                         rememberManySelectForRenderFromState(
                             state,
-                            "Existing files to replicate:",
-                            allItemsLabel = { "All $it replications" },
+                            stringResource(Res.string.manyselect_existing_files_replicate),
+                            allItemsLabel = { stringResource(Res.string.manyselect_existing_files_replicate_all, it.toString()) },
                             itemLabelText = { it.describe() },
                         )
                     }
@@ -49,8 +57,8 @@ internal fun ColumnScope.SyncPreparedState(
 
                         rememberManySelectForRenderFromState(
                             state,
-                            "New files to copy:",
-                            allItemsLabel = { "All $it new files" },
+                            stringResource(Res.string.manyselect_new_files_copy),
+                            allItemsLabel = { stringResource(Res.string.manyselect_new_files_copy_all, it.toString()) },
                             itemLabelText = { it.unmatchedBaseExtra.filenames.let { if (it.size == 1) it[0] else it.toString() } },
                         )
                     }
@@ -64,8 +72,8 @@ internal fun ColumnScope.SyncPreparedState(
 
                         rememberManySelectForRenderFromStateAnnotated(
                             state = state,
-                            label = "Relocations to execute:",
-                            allItemsLabel = { "All relocations ($it)" },
+                            label = stringResource(Res.string.manyselect_relocations),
+                            allItemsLabel = { stringResource(Res.string.manyselect_relocations_all, it.toString()) },
                             itemAnnotatedLabel = { it.describe() },
                         )
                     }

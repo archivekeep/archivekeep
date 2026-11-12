@@ -5,7 +5,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.text.AnnotatedString
-import androidx.compose.ui.text.buildAnnotatedString
 import kotlinx.coroutines.CoroutineScope
 import org.archivekeep.app.core.domain.storages.Storage
 import org.archivekeep.app.core.utils.identifiers.StorageURI
@@ -17,13 +16,9 @@ import org.archivekeep.app.ui.dialogs.Dialog
 import org.archivekeep.app.ui.domain.wiring.LocalApplicationServices
 import org.archivekeep.utils.loading.Loadable
 
-abstract class AbstractStorageDialog<T_State : AbstractStorageDialog.IState, T_VM : Any>(
+abstract class AbstractStorageDialog<T_State : Any, T_VM : Any>(
     val uri: StorageURI,
 ) : Dialog {
-    interface IState {
-        val title: AnnotatedString
-    }
-
     @Composable
     abstract fun rememberVM(
         scope: CoroutineScope,
@@ -36,6 +31,9 @@ abstract class AbstractStorageDialog<T_State : AbstractStorageDialog.IState, T_V
 
     @Composable
     abstract fun renderContent(state: T_State)
+
+    @Composable
+    abstract fun title(state: T_State): AnnotatedString
 
     @Composable
     abstract fun RowScope.renderButtons(
@@ -57,11 +55,7 @@ abstract class AbstractStorageDialog<T_State : AbstractStorageDialog.IState, T_V
 
             LoadableGuard(rememberState(vm)) { state ->
                 DialogInnerContainer(
-                    remember {
-                        buildAnnotatedString {
-                            append(state.title)
-                        }
-                    },
+                    title(state),
                     content = { renderContent(state) },
                     bottomContent = {
                         DialogButtonContainer {

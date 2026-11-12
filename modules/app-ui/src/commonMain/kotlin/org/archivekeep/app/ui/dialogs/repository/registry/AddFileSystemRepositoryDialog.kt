@@ -65,6 +65,7 @@ import org.archivekeep.ui.resources.common_add
 import org.archivekeep.ui.resources.common_added_successfully
 import org.archivekeep.ui.resources.common_adding
 import org.archivekeep.ui.resources.common_enter_password
+import org.archivekeep.ui.resources.common_error
 import org.archivekeep.ui.resources.common_init
 import org.archivekeep.ui.resources.common_initializing
 import org.archivekeep.ui.resources.common_preparing
@@ -98,6 +99,7 @@ import org.archivekeep.ui.resources.dialog_add_repo_storage_first_time
 import org.archivekeep.ui.resources.dialog_add_repo_storage_local
 import org.archivekeep.ui.resources.dialog_add_repo_subdir_not_supported
 import org.archivekeep.ui.resources.dialog_add_repo_successfully_unlocked
+import org.archivekeep.ui.resources.dialog_add_repo_title
 import org.archivekeep.utils.loading.Loadable
 import org.jetbrains.compose.resources.stringResource
 
@@ -255,7 +257,7 @@ private fun AddRepositoryDialogContents(
 
     DialogCard {
         DialogInnerContainer(
-            remember { buildAnnotatedString { append("Add Repository") } },
+             buildAnnotatedString { append(stringResource(Res.string.dialog_add_repo_title)) } ,
             content = {
                 when (permissionFulfilment) {
                     PlatformSpecificPermissionFulfilment.IsFine -> {
@@ -264,7 +266,7 @@ private fun AddRepositoryDialogContents(
                         DialogFilePicker(
                             pick?.let {
                                 when (pick) {
-                                    is PickResult.Failure -> "ERROR"
+                                    is PickResult.Failure -> stringResource(Res.string.common_error, "")
                                     is PickResult.Success -> pick.path
                                 }
                             },
@@ -322,7 +324,7 @@ private fun AddRepositoryDialogContents(
                             }
 
                             is AddFileSystemRepositoryOperation.Invalid -> {
-                                ProgressText("Error $option")
+                                ProgressText(stringResource(Res.string.common_error, option.toString()))
                             }
 
                             is AddFileSystemRepositoryOperation.DirectoryNotRepository -> {

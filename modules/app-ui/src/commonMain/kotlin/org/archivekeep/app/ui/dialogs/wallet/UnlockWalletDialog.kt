@@ -8,7 +8,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.buildAnnotatedString
 import kotlinx.coroutines.CoroutineScope
 import org.archivekeep.app.core.persistence.credentials.WalletPO
@@ -25,6 +24,7 @@ import org.archivekeep.ui.resources.common_authenticate
 import org.archivekeep.ui.resources.common_enter_password
 import org.archivekeep.ui.resources.common_password
 import org.archivekeep.ui.resources.dialog_unlock_wallet_message
+import org.archivekeep.ui.resources.dialog_unlock_wallet_title
 import org.archivekeep.utils.datastore.passwordprotected.PasswordProtectedDataStore
 import org.archivekeep.utils.loading.Loadable
 import org.jetbrains.compose.resources.stringResource
@@ -58,13 +58,8 @@ class UnlockWalletDialog(
     class State(
         val launchable: Launchable<String>,
         val onClose: () -> Unit,
-    ) : IState {
+    ) {
         var password by mutableStateOf<String?>(null)
-
-        override val title: AnnotatedString =
-            buildAnnotatedString {
-                append("Unlock Wallet")
-            }
 
         val action =
             launchable.asAction(
@@ -72,6 +67,12 @@ class UnlockWalletDialog(
                 canLaunch = { password?.isNotBlank() ?: false },
             )
     }
+
+    @Composable
+    override fun title(state: State) =
+        buildAnnotatedString {
+            append(stringResource(Res.string.dialog_unlock_wallet_title))
+        }
 
     @Composable
     override fun rememberVM(

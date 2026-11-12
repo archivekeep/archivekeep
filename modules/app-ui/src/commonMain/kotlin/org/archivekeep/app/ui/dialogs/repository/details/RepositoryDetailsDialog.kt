@@ -9,7 +9,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
-import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.CoroutineScope
@@ -30,6 +29,7 @@ import org.archivekeep.ui.resources.dialog_repo_details_name
 import org.archivekeep.ui.resources.dialog_repo_details_size
 import org.archivekeep.ui.resources.dialog_repo_details_storage
 import org.archivekeep.ui.resources.dialog_repo_details_type
+import org.archivekeep.ui.resources.dialog_repository_details_title
 import org.archivekeep.utils.loading.Loadable
 import org.archivekeep.utils.loading.optional.OptionalLoadable
 import org.jetbrains.compose.resources.stringResource
@@ -54,12 +54,13 @@ class RepositoryDetailsDialog(
         val totalSize: Long?,
         val filesystemRepoType: String?,
         val onClose: () -> Unit,
-    ) : IState {
-        override val title: AnnotatedString =
-            buildAnnotatedString {
-                append("Repository Details")
-            }
-    }
+    )
+
+    @Composable
+    override fun title(state: State) =
+        buildAnnotatedString {
+            append(stringResource(Res.string.dialog_repository_details_title))
+        }
 
     @Composable
     override fun rememberVM(

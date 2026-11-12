@@ -8,7 +8,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.CoroutineScope
@@ -28,6 +27,9 @@ import org.archivekeep.app.ui.utils.collectLoadableFlow
 import org.archivekeep.app.ui.utils.simpleLaunchable
 import org.archivekeep.ui.resources.Res
 import org.archivekeep.ui.resources.common_forget
+import org.archivekeep.ui.resources.dialog_forget_repository_title
+import org.archivekeep.ui.resources.dialog_forget_repository_message
+import org.archivekeep.ui.resources.dialog_forget_repository_data_not_deleted
 import org.archivekeep.utils.loading.Loadable
 import org.archivekeep.utils.loading.mapToLoadable
 import org.jetbrains.compose.resources.stringResource
@@ -59,14 +61,15 @@ class ForgetRepositoryDialog(
         val currentRepo: StorageRepository,
         val launchable: Launchable<Unit>,
         val onClose: () -> Unit,
-    ) : IState {
-        override val title: AnnotatedString =
-            buildAnnotatedString {
-                append("Forget Repository")
-            }
-
+    ) {
         val action by launchable.asTrivialAction()
     }
+
+    @Composable
+    override fun title(state: State) =
+        buildAnnotatedString {
+            append(stringResource(Res.string.dialog_forget_repository_title))
+        }
 
     @Composable
     override fun rememberVM(
@@ -93,22 +96,14 @@ class ForgetRepositoryDialog(
     @Composable
     override fun ColumnScope.renderContent(state: State) {
         Text(
-            remember(state.currentRepo) {
-                buildAnnotatedString {
-                    append("Repository ")
-                    appendBoldSpan(state.currentRepo.repositoryState.displayName)
-                    append(" stored in ")
-                    appendBoldSpan(state.currentRepo.storage.displayName)
-                    append(" will be removed from local registry of known repositories.")
-                }
-            },
+            stringResource(
+                Res.string.dialog_forget_repository_message,
+                state.currentRepo.repositoryState.displayName,
+                state.currentRepo.storage.displayName,
+            ),
         )
         Text(
-            remember {
-                buildAnnotatedString {
-                    append("Data files are not deleted")
-                }
-            },
+            stringResource(Res.string.dialog_forget_repository_data_not_deleted),
             modifier = Modifier.padding(top = 10.dp),
         )
         LaunchableExecutionErrorIfPresent(state.launchable)

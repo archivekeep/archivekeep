@@ -6,7 +6,6 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
-import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.buildAnnotatedString
 import kotlinx.coroutines.CoroutineScope
 import org.archivekeep.app.core.domain.archives.ArchiveService
@@ -26,6 +25,8 @@ import org.archivekeep.app.ui.utils.collectLoadableFlow
 import org.archivekeep.app.ui.utils.simpleLaunchable
 import org.archivekeep.ui.resources.Res
 import org.archivekeep.ui.resources.common_unassociate
+import org.archivekeep.ui.resources.dialog_unassociate_repository_title
+import org.archivekeep.ui.resources.dialog_unassociate_message
 import org.archivekeep.utils.loading.Loadable
 import org.archivekeep.utils.loading.mapLoadedData
 import org.jetbrains.compose.resources.stringResource
@@ -38,12 +39,7 @@ class UnassociateRepositoryDialog(
         val currentRepoInformation: RepositoryInformation,
         val launchable: Launchable<Unit>,
         val onClose: () -> Unit,
-    ) : IState {
-        override val title: AnnotatedString =
-            buildAnnotatedString {
-                append("Unassociate Repository")
-            }
-
+    ) {
         val action by launchable.asTrivialAction()
     }
 
@@ -70,6 +66,12 @@ class UnassociateRepositoryDialog(
             _onClose()
         }
     }
+
+    @Composable
+    override fun title(state: State) =
+        buildAnnotatedString {
+            append(stringResource(Res.string.dialog_unassociate_repository_title))
+        }
 
     @Composable
     override fun rememberVM(
@@ -116,15 +118,11 @@ class UnassociateRepositoryDialog(
     @Composable
     override fun ColumnScope.renderContent(state: State) {
         Text(
-            remember(state.currentRepoStorage, state.currentRepoInformation) {
-                buildAnnotatedString {
-                    append("Repository ")
-                    appendBoldSpan(state.currentRepoInformation.displayName)
-                    append(" stored in ")
-                    appendBoldSpan(state.currentRepoStorage.label)
-                    append(" will be unassociated from its archive.")
-                }
-            },
+            stringResource(
+                Res.string.dialog_unassociate_message,
+                state.currentRepoInformation.displayName,
+                state.currentRepoStorage.label,
+            ),
         )
 
         // TODO: add associated repositories with the archive - list them for information

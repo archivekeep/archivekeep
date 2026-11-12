@@ -42,8 +42,13 @@ import org.archivekeep.app.ui.utils.SingleLaunchGuard
 import org.archivekeep.ui.resources.Res
 import org.archivekeep.ui.resources.common_deinitialize
 import org.archivekeep.ui.resources.dialog_deinitialize_confirm
+import org.archivekeep.ui.resources.dialog_deinitialize_data_not_deleted
+import org.archivekeep.ui.resources.dialog_deinitialize_metadata_destroyed
+import org.archivekeep.ui.resources.dialog_deinitialize_metadata_path
+import org.archivekeep.ui.resources.dialog_deinitialize_question
 import org.archivekeep.ui.resources.dialog_deinitialize_reinit_needed
 import org.archivekeep.ui.resources.dialog_deinitialize_success
+import org.archivekeep.ui.resources.dialog_deinitialize_title
 import org.archivekeep.utils.loading.Loadable
 import org.jetbrains.compose.resources.stringResource
 
@@ -105,7 +110,7 @@ abstract class DeinitializeFileSystemRepositoryDialog(
         DialogOverlay(onDismissRequest = onClose) {
             DialogCard {
                 DialogInnerContainer(
-                    remember { buildAnnotatedString { append("Deinitialize Repository") } },
+                     buildAnnotatedString { append(stringResource(Res.string.dialog_deinitialize_title)) } ,
                     content = {
                         LoadableGuard(vm.deinitializePreparation) { preparation ->
                             val repoPath =
@@ -115,22 +120,14 @@ abstract class DeinitializeFileSystemRepositoryDialog(
                                 }
                             Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
                                 Text(
-                                    remember(repoPath) {
-                                        buildAnnotatedString {
-                                            append("Deinitialize $repoPath?")
-                                        }
-                                    },
+                                    stringResource(Res.string.dialog_deinitialize_question, repoPath),
                                 )
                                 WarningAlert {
-                                    Text("Metadata will be destroyed")
+                                    Text(stringResource(Res.string.dialog_deinitialize_metadata_destroyed))
                                 }
-                                Text("Data files are not deleted")
+                                Text(stringResource(Res.string.dialog_deinitialize_data_not_deleted))
                                 Text(
-                                    remember(repoPath) {
-                                        buildAnnotatedString {
-                                            append("Metadata is stored in $repoPath/.archive")
-                                        }
-                                    },
+                                    stringResource(Res.string.dialog_deinitialize_metadata_path, repoPath),
                                 )
                                 Text(stringResource(Res.string.dialog_deinitialize_reinit_needed))
                                 CheckboxWithText(

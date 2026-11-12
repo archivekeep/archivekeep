@@ -44,7 +44,11 @@ import org.archivekeep.files.procedures.deletedcleanup.DeletedFilesCleanupProced
 import org.archivekeep.ui.resources.Res
 import org.archivekeep.ui.resources.cleanup_moved_or_renamed
 import org.archivekeep.ui.resources.cleanup_proceed_with_addition
+import org.archivekeep.ui.resources.dialog_cleanup_title
 import org.archivekeep.ui.resources.dialog_reindex_title
+import org.archivekeep.ui.resources.manyselect_deleted_files
+import org.archivekeep.ui.resources.manyselect_deleted_files_all
+import org.archivekeep.ui.resources.procedure_execute_removal
 import org.archivekeep.utils.loading.Loadable
 import org.archivekeep.utils.loading.mapToLoadable
 import org.archivekeep.utils.loading.optional.OptionalLoadable
@@ -63,13 +67,7 @@ class DeletedFilesCleanupProcedureDialog(
         val selectedFilesToReindex: MutableState<Set<String>>,
         val canAdd: Boolean,
         val onClose: () -> Unit,
-    ) : IState {
-        override val title =
-            buildAnnotatedString {
-                appendBoldSpan(archiveName)
-                append(" - remove deleted files from index")
-            }
-
+    ) {
         val controlState: DialogOperationControlState =
             when (val opState = operationState) {
                 is DeletedFilesCleanupProcedureSupervisor.JobState -> {
@@ -97,8 +95,17 @@ class DeletedFilesCleanupProcedureDialog(
             )
         }
 
-        override fun dialogWidthModifier(): Modifier = fullWidthDialogWidthModifier
     }
+
+    override fun dialogWidthModifier(state: State) = fullWidthDialogWidthModifier
+
+    @Composable
+    override fun title(state: State) =
+        buildAnnotatedString {
+            appendBoldSpan(state.archiveName)
+            append(" - ")
+            append(stringResource(Res.string.dialog_cleanup_title))
+        }
 
     inner class VM(
         val scope: CoroutineScope,
@@ -174,8 +181,8 @@ class DeletedFilesCleanupProcedureDialog(
                     rememberManySelectForRender(
                         preparationState.missingFiles,
                         state.selectedFilesToReindex,
-                        "Deleted files to remove from index",
-                        allItemsLabel = { "All missing/deleted files ($it)" },
+                        stringResource(Res.string.manyselect_deleted_files),
+                        allItemsLabel = { stringResource(Res.string.manyselect_deleted_files_all, it.toString()) },
                         itemLabelText = { it },
                     )
 
@@ -215,7 +222,7 @@ class DeletedFilesCleanupProcedureDialog(
     override fun RowScope.renderButtons(state: State) {
         DialogOperationControlButtons(
             state.controlState,
-            launchText = "Execute removal from index",
+            launchText = stringResource(Res.string.procedure_execute_removal),
         )
     }
 }

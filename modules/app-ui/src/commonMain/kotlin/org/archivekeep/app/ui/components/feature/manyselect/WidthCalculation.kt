@@ -28,7 +28,7 @@ fun <I> rememberManySelectForRender(
     allItems: List<I>,
     selectionState: MutableState<Set<I>>,
     label: String,
-    allItemsLabel: (count: Int) -> String,
+    allItemsLabel: @Composable (count: Int) -> String,
     itemLabelText: (item: I) -> String,
 ): ManySelectForRender<I, I, I> {
     val state = rememberManySelect(allItems, selectionState)
@@ -45,10 +45,11 @@ fun <I> rememberManySelectForRender(
 fun <O_I, O_S> rememberManySelectForRenderFromState(
     state: ManySelectState<O_I, O_I, O_S>,
     label: String,
-    allItemsLabel: (count: Int) -> String,
+    allItemsLabel: @Composable (count: Int) -> String,
     itemLabelText: (item: O_I) -> String,
 ): ManySelectForRender<O_I, O_I, O_S> where O_I : O_S {
-    val guessedWidth = guessAndRememberManySelectWidth(state.allItems, allItemsLabel, itemLabelText)
+    val allItemsLabelValue = allItemsLabel(state.allItems.size)
+    val guessedWidth = guessAndRememberManySelectWidth(state.allItems, allItemsLabelValue, itemLabelText)
 
     return ManySelectForRender(
         state,
@@ -56,7 +57,7 @@ fun <O_I, O_S> rememberManySelectForRenderFromState(
         render = {
             itemManySelect(
                 label,
-                allItemsLabel = allItemsLabel,
+                allItemsLabel = allItemsLabelValue,
                 itemLabelText = itemLabelText,
                 state = state,
             )
@@ -68,11 +69,12 @@ fun <O_I, O_S> rememberManySelectForRenderFromState(
 fun <O_I, O_S> rememberManySelectForRenderFromStateAnnotated(
     state: ManySelectState<O_I, O_I, O_S>,
     label: String,
-    allItemsLabel: (count: Int) -> String,
+    allItemsLabel: @Composable (count: Int) -> String,
     itemAnnotatedLabel: (item: O_I) -> AnnotatedString,
 ): ManySelectForRender<O_I, O_I, O_S> where O_I : O_S {
+    val allItemsLabelValue = allItemsLabel(state.allItems.size)
     val guessedWidth =
-        guessAndRememberManySelectWidthAnnotated(state.allItems, allItemsLabel, itemAnnotatedLabel)
+        guessAndRememberManySelectWidthAnnotated(state.allItems, allItemsLabelValue, itemAnnotatedLabel)
 
     return ManySelectForRender(
         state,
@@ -80,7 +82,7 @@ fun <O_I, O_S> rememberManySelectForRenderFromStateAnnotated(
         render = {
             itemManySelect(
                 label,
-                allItemsLabel = allItemsLabel,
+                allItemsLabel = allItemsLabelValue,
                 itemLabel = { Text(itemAnnotatedLabel(it)) },
                 state = state,
             )
@@ -91,7 +93,7 @@ fun <O_I, O_S> rememberManySelectForRenderFromStateAnnotated(
 @Composable
 fun <I> guessAndRememberManySelectWidth(
     allItems: List<I>,
-    allItemsLabel: (size: Int) -> String,
+    allItemsLabel: String,
     itemLabelText: (item: I) -> String,
 ): Dp {
     val textMeasurer = rememberTextMeasurer()
@@ -100,7 +102,7 @@ fun <I> guessAndRememberManySelectWidth(
     val width =
         remember(allItems, textStyle) {
             max(
-                textMeasurer.measure(allItemsLabel(allItems.size), style = textStyle).size.width,
+                textMeasurer.measure(allItemsLabel, style = textStyle).size.width,
                 allItems
                     .limitSize(itemsToConsider)
                     .map { itemLabelText(it) }
@@ -117,7 +119,7 @@ fun <I> guessAndRememberManySelectWidth(
 @Composable
 fun <I> guessAndRememberManySelectWidthAnnotated(
     allItems: List<I>,
-    allItemsLabel: (size: Int) -> String,
+    allItemsLabel: String,
     itemLabelAnnotatedString: (item: I) -> AnnotatedString,
 ): Dp {
     val textMeasurer = rememberTextMeasurer()
@@ -126,7 +128,7 @@ fun <I> guessAndRememberManySelectWidthAnnotated(
     val width =
         remember(allItems, textStyle) {
             max(
-                textMeasurer.measure(allItemsLabel(allItems.size), style = textStyle).size.width,
+                textMeasurer.measure(allItemsLabel, style = textStyle).size.width,
                 allItems
                     .limitSize(itemsToConsider)
                     .map { itemLabelAnnotatedString(it) }

@@ -5,8 +5,6 @@ import androidx.compose.foundation.layout.RowScope
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.buildAnnotatedString
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.combine
@@ -21,7 +19,12 @@ import org.archivekeep.app.ui.dialogs.repository.procedures.sync.parts.RepoToRep
 import org.archivekeep.app.ui.domain.wiring.LocalApplicationServices
 import org.archivekeep.app.ui.utils.appendBoldSpan
 import org.archivekeep.app.ui.utils.collectAsLoadable
+import org.archivekeep.ui.resources.Res
+import org.archivekeep.ui.resources.dialog_copy_to_title
+import org.archivekeep.ui.resources.dialog_upload_message
+import org.archivekeep.ui.resources.dialog_upload_message_with_repo
 import org.archivekeep.utils.loading.Loadable
+import org.jetbrains.compose.resources.stringResource
 
 data class UploadToRepoDialog(
     val repositoryURI: RepositoryURI,
@@ -34,15 +37,17 @@ data class UploadToRepoDialog(
         val onLaunch: () -> Unit,
         val onCancel: () -> Unit,
         val onClose: () -> Unit,
-    ) : IState {
-        override val title: AnnotatedString =
-            buildAnnotatedString {
-                appendBoldSpan(sourceRepository.displayName)
-                append(" - copy to")
-            }
+    )
 
-        override fun dialogWidthModifier(): Modifier = fullWidthDialogWidthModifier
-    }
+    override fun dialogWidthModifier(state: State) = fullWidthDialogWidthModifier
+
+    @Composable
+    override fun title(state: State) =
+        buildAnnotatedString {
+            appendBoldSpan(state.sourceRepository.displayName)
+            append(" - ")
+            append(stringResource(Res.string.dialog_copy_to_title))
+        }
 
     inner class VM(
         val storageService: StorageService,
@@ -93,21 +98,19 @@ data class UploadToRepoDialog(
     @Composable
     override fun ColumnScope.renderContent(state: State) {
         Text(
-            remember(state.targetRepository, state.sourceRepository) {
-                buildAnnotatedString {
-                    append("Copy changes from ")
-                    appendBoldSpan(state.sourceRepository.storage.displayName)
-                    append(" to ")
-
-                    if (state.targetRepository.displayName != state.sourceRepository.displayName) {
-                        append(" repository ")
-                        appendBoldSpan(state.targetRepository.displayName)
-                        append(" stored in ")
-                    }
-
-                    appendBoldSpan(state.targetRepository.storage.displayName)
-                    append(".")
-                }
+            if (state.targetRepository.displayName != state.sourceRepository.displayName) {
+                stringResource(
+                    Res.string.dialog_upload_message_with_repo,
+                    state.sourceRepository.storage.displayName,
+                    state.targetRepository.displayName,
+                    state.targetRepository.storage.displayName,
+                )
+            } else {
+                stringResource(
+                    Res.string.dialog_upload_message,
+                    state.sourceRepository.storage.displayName,
+                    state.targetRepository.storage.displayName,
+                )
             },
         )
 

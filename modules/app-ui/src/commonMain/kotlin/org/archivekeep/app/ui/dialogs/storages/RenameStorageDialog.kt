@@ -10,6 +10,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.CoroutineScope
@@ -30,7 +31,9 @@ import org.archivekeep.ui.resources.common_submit
 import org.archivekeep.ui.resources.dialog_rename_enter_name
 import org.archivekeep.ui.resources.dialog_rename_new_name
 import org.archivekeep.ui.resources.dialog_rename_storage_message
+import org.archivekeep.ui.resources.dialog_rename_storage_title
 import org.archivekeep.ui.resources.dialog_set_storage_name_message
+import org.archivekeep.ui.resources.dialog_set_storage_name_title
 import org.archivekeep.utils.loading.Loadable
 import org.archivekeep.utils.loading.mapLoadedData
 import org.jetbrains.compose.resources.stringResource
@@ -58,7 +61,7 @@ class RenameStorageDialog(
     class State(
         val storage: KnownStorage,
         val launchable: Launchable<String>,
-    ) : IState {
+    ) {
         val isNewName = storage.registeredStorage?.let { it.label != null } != true
 
         val initialValue = storage.registeredStorage?.label ?: ""
@@ -69,17 +72,6 @@ class RenameStorageDialog(
             onLaunch = { onLaunch(newName.trim()) },
             canLaunch = { newName.trim() != initialValue && newName.isNotBlank() },
         )
-
-        override val title =
-            buildAnnotatedString {
-                append(
-                    if (isNewName) {
-                        "Set Storage Name"
-                    } else {
-                        "Rename Storage"
-                    },
-                )
-            }
     }
 
     @Composable
@@ -107,6 +99,19 @@ class RenameStorageDialog(
                     vm.launchable,
                 )
             }
+        }
+    }
+
+    @Composable
+    override fun title(state: State): AnnotatedString {
+        return buildAnnotatedString {
+            append(
+                if (state.isNewName) {
+                    stringResource(Res.string.dialog_set_storage_name_title)
+                } else {
+                    stringResource(Res.string.dialog_rename_storage_title)
+                },
+            )
         }
     }
 

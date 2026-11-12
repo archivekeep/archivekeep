@@ -52,6 +52,10 @@
     <string name="common_open">Otvoriť</string>
     <string name="common_pull">Stiahnuť</string>
     <string name="common_push">Odoslať</string>
+    <string name="common_push_short">odoslať</string>
+    <string name="common_copy_from">kopírovať z</string>
+    <string name="common_copy_to">kopírovať do</string>
+    <string name="common_in">v</string>
     <string name="common_reindex">Preindexovať</string>
     <string name="common_unassociate">Odpojiť</string>
 
@@ -224,14 +228,18 @@
 
     <!-- ==================== DIALOG: DEINITIALIZE REPOSITORY ==================== -->
 
-    <string name="dialog_deinitialize_data_not_deleted">Údaje nebudú vymazané.</string>
+    <string name="dialog_deinitialize_title">Deinicializovať repozitár</string>
+    <string name="dialog_deinitialize_question">Deinicializovať %1$s?</string>
+    <string name="dialog_deinitialize_metadata_destroyed">Metadáta budú zničené</string>
+    <string name="dialog_deinitialize_data_not_deleted">Datové súbory nebudú vymazané</string>
+    <string name="dialog_deinitialize_metadata_path">Metadáta sú uložené v %1$s/.archive</string>
     <string name="dialog_deinitialize_reinit_needed">Na opätovné použitie ako archivačný repozitár bude potrebná reinicializácia a preindexovanie.</string>
     <string name="dialog_deinitialize_confirm">Áno, zničiť metadáta</string>
     <string name="dialog_deinitialize_success">Úspešne deinicializované</string>
 
     <!-- ==================== DIALOG: UNLOCK REPOSITORY ==================== -->
 
-    <string name="dialog_unlock_repo_title">Odomknúť repozitár</string>
+    <string name="dialog_unlock_repository_title">Odomknúť repozitár</string>
     <string name="dialog_unlock_success">Repozitár %1$s je teraz odomknutý.</string>
     <string name="dialog_unlock_wallet_available">Peňaženka s uloženými povereniami je dostupná.</string>
     <string name="dialog_unlock_wallet_hint">Otvorte peňaženku na odomknutie repozitára, ak je jeho heslo uložené tam.</string>
@@ -245,7 +253,7 @@
 
     <!-- ==================== DIALOG: REPOSITORY DETAILS ==================== -->
 
-    <string name="dialog_repo_details_title">Detaily repozitára</string>
+    <string name="dialog_repository_details_title">Detaily repozitára</string>
     <string name="dialog_repo_details_name">Názov</string>
     <string name="dialog_repo_details_type">Typ</string>
     <string name="dialog_repo_details_storage">Úložisko</string>
@@ -258,30 +266,43 @@
 
     <!-- ==================== DIALOG: ASSOCIATE REPOSITORY ==================== -->
 
-    <string name="dialog_associate_title">Pripojiť repozitár</string>
-    <string name="dialog_re_associate_title">Opätovne pripojiť repozitár</string>
+    <string name="dialog_associate_repository_title">Pripojiť repozitár</string>
+    <string name="dialog_reassociate_repository_title">Opätovne pripojiť repozitár</string>
     <string name="dialog_associate_message">Pripojiť repozitár %1$s v úložisku %2$s k:</string>
     <string name="dialog_associate_re_message">Opätovne pripojiť repozitár %1$s v úložisku %2$s k:</string>
     <string name="dialog_associate_new_archive">Alebo vytvoriť nový archív pripojením k nepripojenému repozitáru: </string>
 
     <!-- ==================== DIALOG: UNASSOCIATE REPOSITORY ==================== -->
 
-    <string name="dialog_unassociate_title">Odpojiť repozitár</string>
+    <string name="dialog_unassociate_repository_title">Odpojiť repozitár</string>
     <string name="dialog_unassociate_message">Repozitár %1$s uložený v %2$s bude odpojený od svojho archívu.</string>
+
+    <!-- ==================== DIALOG: FORGET REPOSITORY ==================== -->
+
+    <string name="dialog_forget_repository_title">Zabudnúť repozitár</string>
+    <string name="dialog_forget_repository_message">Repozitár %1$s uložený v %2$s bude odstránený z lokálneho registru známých repozitárov.</string>
+    <string name="dialog_forget_repository_data_not_deleted">Datové súbory nebudú vymazané</string>
 
     <!-- ==================== DIALOG: FORGET STORAGE ==================== -->
 
+    <string name="dialog_forget_storage_title">Zabudnúť úložisko</string>
+    <string name="dialog_forget_storage_message">Úložisko %1$s bude odstránené z lokálneho registru známých úložísk.</string>
+    <string name="dialog_forget_storage_data_not_deleted">Údaje nebudú vymazané.</string>
 
     <!-- ==================== DIALOG: MARK STORAGE AS EXTERNAL ==================== -->
 
+    <string name="dialog_mark_external_title">Označiť ako externé</string>
     <string name="dialog_mark_external_message">Označiť úložisko %1$s ako externé</string>
 
     <!-- ==================== DIALOG: MARK STORAGE AS LOCAL ==================== -->
 
+    <string name="dialog_mark_local_title">Označiť ako lokálne</string>
     <string name="dialog_mark_local_message">Označiť úložisko %1$s ako lokálne.</string>
 
     <!-- ==================== DIALOG: RENAME STORAGE ==================== -->
 
+    <string name="dialog_set_storage_name_title">Nastaviť názov úložiska</string>
+    <string name="dialog_rename_storage_title">Premenovať úložisko</string>
     <string name="dialog_rename_storage_message">Úložisko %1$s bude premenované na nové meno:</string>
     <string name="dialog_set_storage_name_message">Úložisko %1$s bude pomenované ako:</string>
     <string name="dialog_rename_new_name">Nové meno</string>
@@ -289,6 +310,7 @@
 
     <!-- ==================== DIALOG: CREATE WALLET ==================== -->
 
+    <string name="dialog_create_wallet_title">Vytvoriť peňaženku</string>
     <string name="dialog_create_wallet_message">Peňaženka musí byť vytvorená na ukladanie a pamätanie hesiel a relácií pre repozitár. Peňaženka je uložená lokálne a je chránená heslom</string>
     <string name="dialog_create_wallet_password_verify">Overenie hesla</string>
     <string name="dialog_create_wallet_enter_password">Zadajte heslo  ...</string>
@@ -296,6 +318,7 @@
 
     <!-- ==================== DIALOG: UNLOCK WALLET ==================== -->
 
+    <string name="dialog_unlock_wallet_title">Odomknúť peňaženku</string>
     <string name="dialog_unlock_wallet_message">Peňaženka je zamknutá, odomknite ju na pripojenie k repozitárom s zapamätanými povereniami alebo uloženými reláciami.</string>
 
     <!-- ==================== DIALOG: UNSUPPORTED FEATURE ==================== -->
@@ -305,11 +328,13 @@
 
     <!-- ==================== DIALOG: SYNC (UPLOAD/DOWNLOAD) ==================== -->
 
-    <string name="dialog_upload_title">%1$s - kópovať do</string>
-    <string name="dialog_upload_message">Kópovať zmeny z %1$s do %2$s.</string>
-    <string name="dialog_upload_message_with_repo">Kópovať zmeny z %1$s do repozitára %2$s uloženého v %3$s.</string>
-    <string name="dialog_download_title">%1$s v %2$s - kópovať z</string>
-    <string name="dialog_download_message">Kópovať zmeny z repozitára %1$s v úložisku %2$s.</string>
+    <string name="dialog_copy_from_title">kopírovať z</string>
+    <string name="dialog_copy_to_title">kopírovať do</string>
+    <string name="dialog_upload_title">%1$s - kopírovať do</string>
+    <string name="dialog_upload_message">Kopírovať zmeny z %1$s do %2$s.</string>
+    <string name="dialog_upload_message_with_repo">Kopírovať zmeny z %1$s do repozitára %2$s uloženého v %3$s.</string>
+    <string name="dialog_download_title">%1$s v %2$s - kopírovať z</string>
+    <string name="dialog_download_message">Kopírovať zmeny z repozitára %1$s v úložisku %2$s.</string>
 
     <!-- ==================== DIALOG: SYNC PREPARED ==================== -->
 
@@ -321,7 +346,7 @@
 
     <!-- ==================== DIALOG: ASSOCIATE/PUSH REPO ==================== -->
 
-    <string name="dialog_add_push_title">Pridať a odoslať</string>
+    <string name="dialog_add_and_push_title">Pridať a odoslať</string>
     <string name="dialog_push_title">Odoslať</string>
 
     <!-- ==================== DIALOG: DELETED FILES CLEANUP ==================== -->
@@ -353,6 +378,34 @@
     <!-- ==================== MANY SELECT ==================== -->
 
     <string name="manyselect_repositories_push">Repozitáre na odoslanie:</string>
+
+    <!-- Many-select labels for procedure dialogs -->
+    <string name="manyselect_moves">Presuny</string>
+    <string name="manyselect_moves_all">Všetky presuny (%1$s)</string>
+    <string name="manyselect_new_files">Nové súbory</string>
+    <string name="manyselect_new_files_all">Všetky nové súbory (%1$s)</string>
+    <string name="manyselect_files_to_add_and_push">Súbory na pridanie a odoslanie</string>
+    <string name="manyselect_files_to_add_and_push_all">Všetky nové súbory (%1$s)</string>
+    <string name="manyselect_deleted_files">Zmazané súbory k odstráneniu z indexu</string>
+    <string name="manyselect_deleted_files_all">Všetky chýbajúce/zmazané súbory (%1$s)</string>
+    <string name="manyselect_modified_files">Zmenené súbory</string>
+    <string name="manyselect_modified_files_all">Všetky zmenené súbory (%1$s)</string>
+    <string name="manyselect_existing_files_replicate">Existujúce súbory k replikácii:</string>
+    <string name="manyselect_existing_files_replicate_all">Všetky %1$s replikácie</string>
+    <string name="manyselect_new_files_copy">Nové súbory na kópiu:</string>
+    <string name="manyselect_new_files_copy_all">Všetky %1$s nové súbory</string>
+    <string name="manyselect_relocations">Presuny k vykonaniu:</string>
+    <string name="manyselect_relocations_all">Všetky presuny (%1$s)</string>
+
+    <!-- ==================== PROCEDURE BUTTONS ==================== -->
+
+    <string name="procedure_start_all">Spustiť všetko</string>
+    <string name="procedure_execute_index_update">Vykonať aktualizáciu indexu</string>
+    <string name="procedure_execute_removal">Vykonať odstránenie z indexu</string>
+
+    <!-- ==================== SYNC PROGRESS ==================== -->
+
+    <string name="sync_push_to">Odoslať do %1$s</string>
 
     <!-- ==================== SETTINGS ==================== -->
 

@@ -5,8 +5,6 @@ import androidx.compose.foundation.layout.RowScope
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.buildAnnotatedString
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.combine
@@ -21,7 +19,12 @@ import org.archivekeep.app.ui.dialogs.repository.procedures.sync.parts.RepoToRep
 import org.archivekeep.app.ui.domain.wiring.LocalApplicationServices
 import org.archivekeep.app.ui.utils.appendBoldSpan
 import org.archivekeep.app.ui.utils.collectAsLoadable
+import org.archivekeep.ui.resources.Res
+import org.archivekeep.ui.resources.common_in
+import org.archivekeep.ui.resources.dialog_copy_from_title
+import org.archivekeep.ui.resources.dialog_download_message
 import org.archivekeep.utils.loading.Loadable
+import org.jetbrains.compose.resources.stringResource
 
 data class DownloadFromRepoDialog(
     val from: RepositoryURI,
@@ -34,17 +37,21 @@ data class DownloadFromRepoDialog(
         val onLaunch: () -> Unit,
         val onCancel: () -> Unit,
         val onClose: () -> Unit,
-    ) : IState {
-        override val title: AnnotatedString =
-            buildAnnotatedString {
-                appendBoldSpan(toRepository.displayName)
-                append(" in ")
-                appendBoldSpan(toRepository.storage.displayName)
-                append(" - copy from")
-            }
+    )
 
-        override fun dialogWidthModifier(): Modifier = fullWidthDialogWidthModifier
-    }
+    override fun dialogWidthModifier(state: State) = fullWidthDialogWidthModifier
+
+    @Composable
+    override fun title(state: State) =
+        buildAnnotatedString {
+            appendBoldSpan(state.toRepository.displayName)
+            append(" ")
+            append(stringResource(Res.string.common_in))
+            append(" ")
+            appendBoldSpan(state.toRepository.storage.displayName)
+            append(" - ")
+            append(stringResource(Res.string.dialog_copy_from_title))
+        }
 
     inner class VM(
         val storageService: StorageService,
@@ -95,15 +102,11 @@ data class DownloadFromRepoDialog(
     @Composable
     override fun ColumnScope.renderContent(state: State) {
         Text(
-            remember(state.fromRepository) {
-                buildAnnotatedString {
-                    append("Copy changes from repository ")
-                    appendBoldSpan(state.fromRepository.displayName)
-                    append(" in storage ")
-                    appendBoldSpan(state.fromRepository.storage.displayName)
-                    append(".")
-                }
-            },
+            stringResource(
+                Res.string.dialog_download_message,
+                state.fromRepository.displayName,
+                state.fromRepository.storage.displayName,
+            ),
         )
 
         RepoToRepoSyncMainContents(
