@@ -11,7 +11,13 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import org.archivekeep.app.core.domain.storages.NeedsUnlock
 import org.archivekeep.app.ui.components.designsystem.sections.sectionCardHorizontalPadding
+import org.archivekeep.ui.resources.Res
+import org.archivekeep.ui.resources.common_error
+import org.archivekeep.ui.resources.common_loading_dots
+import org.archivekeep.ui.resources.common_locked
+import org.archivekeep.ui.resources.home_card_status_unavailable
 import org.archivekeep.utils.loading.optional.OptionalLoadable
+import org.jetbrains.compose.resources.stringResource
 
 @Composable
 fun HomeCardStateText(loadable: OptionalLoadable<String>) {
@@ -28,10 +34,10 @@ fun HomeCardStateText(loadable: OptionalLoadable<String>) {
     ) {
         val statusText =
             when (loadable) {
-                is NeedsUnlock -> "Locked"
-                is OptionalLoadable.NotAvailable -> "Status unavailable: ${loadable.cause?.message ?: loadable.javaClass.name}"
-                is OptionalLoadable.Failed -> "ERROR: ${loadable.cause.message}"
-                is OptionalLoadable.Loading -> "Loading ..."
+                is NeedsUnlock -> stringResource(Res.string.common_locked)
+                is OptionalLoadable.NotAvailable -> stringResource(Res.string.home_card_status_unavailable, loadable.cause?.message ?: loadable.javaClass.name)
+                is OptionalLoadable.Failed -> stringResource(Res.string.common_error, loadable.cause.message ?: "Unknown error")
+                is OptionalLoadable.Loading -> stringResource(Res.string.common_loading_dots)
                 is OptionalLoadable.LoadedAvailable -> loadable.value
             }
         Text(

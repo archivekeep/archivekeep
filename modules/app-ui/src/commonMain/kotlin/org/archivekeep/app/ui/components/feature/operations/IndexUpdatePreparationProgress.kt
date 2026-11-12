@@ -5,7 +5,11 @@ import androidx.compose.runtime.Composable
 import org.archivekeep.app.ui.components.designsystem.progress.ProgressRow
 import org.archivekeep.app.ui.components.designsystem.progress.ProgressRowList
 import org.archivekeep.files.procedures.indexupdate.IndexUpdateProcedure
+import org.archivekeep.ui.resources.Res
+import org.archivekeep.ui.resources.dialog_index_update_found_moved
+import org.archivekeep.ui.resources.dialog_index_update_found_new
 import org.archivekeep.utils.text.filesAutoPlural
+import org.jetbrains.compose.resources.stringResource
 
 @Composable
 fun IndexUpdatePreparationProgress(progress: IndexUpdateProcedure.PreparationProgress) {
@@ -15,10 +19,10 @@ fun IndexUpdatePreparationProgress(progress: IndexUpdateProcedure.PreparationPro
             "Checked ${progress.checkedFiles.size} of ${filesAutoPlural(progress.filesToCheck, "unindexed ")}",
         ) {
             if (progress.newFiles.isNotEmpty()) {
-                Text("Found ${filesAutoPlural(progress.newFiles, "new ")}")
+                Text(stringResource(Res.string.dialog_index_update_found_new, filesAutoPlural(progress.newFiles, "")))
             }
             if (progress.moves.isNotEmpty()) {
-                Text("Found ${filesAutoPlural(progress.moves, "moved ")}")
+                Text(stringResource(Res.string.dialog_index_update_found_moved, filesAutoPlural(progress.moves, "")))
             }
         }
     }

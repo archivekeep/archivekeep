@@ -17,7 +17,15 @@ import org.archivekeep.app.ui.components.designsystem.sections.SectionCardTitleI
 import org.archivekeep.app.ui.domain.wiring.LocalApplicationServices
 import org.archivekeep.app.ui.domain.wiring.LocalStorageOperationsLaunchers
 import org.archivekeep.app.ui.utils.collectLoadableFlow
+import org.archivekeep.ui.resources.Res
+import org.archivekeep.ui.resources.common_error
+import org.archivekeep.ui.resources.common_forget
+import org.archivekeep.ui.resources.common_rename
+import org.archivekeep.ui.resources.storage_dropdown_mark_as_external
+import org.archivekeep.ui.resources.storage_dropdown_mark_as_local
+import org.archivekeep.ui.resources.storage_dropdown_set_name
 import org.archivekeep.utils.loading.mapLoadedData
+import org.jetbrains.compose.resources.stringResource
 
 @Composable
 fun StorageDropdownIconLaunched(uri: StorageURI) {
@@ -55,31 +63,31 @@ fun StorageDropdownIconLaunched(uri: StorageURI) {
         ) {
             LoadableGuard(storageLoadable) { storage ->
                 if (storage == null) {
-                    Text("ERROR")
+                    Text(stringResource(Res.string.common_error, "Storage not found"))
                     return@LoadableGuard
                 }
 
                 DropdownMenuItem(onClick = {
                     operationsLaunchers.openRename(uri)
                     isDropdownExpanded = false
-                }, text = { Text(if (storage.knownStorage.registeredStorage?.label != null) "Rename" else "Set name") })
+                }, text = { Text(if (storage.knownStorage.registeredStorage?.label != null) stringResource(Res.string.common_rename) else stringResource(Res.string.storage_dropdown_set_name)) })
 
                 if (!storage.isLocal) {
                     DropdownMenuItem(onClick = {
                         operationsLaunchers.openMarkAsLocal(uri)
                         isDropdownExpanded = false
-                    }, text = { Text("Mark as local") })
+                    }, text = { Text(stringResource(Res.string.storage_dropdown_mark_as_local)) })
                 }
                 if (storage.isLocal) {
                     DropdownMenuItem(onClick = {
                         operationsLaunchers.openMarkAsExternal(uri)
                         isDropdownExpanded = false
-                    }, text = { Text("Mark as external") })
+                    }, text = { Text(stringResource(Res.string.storage_dropdown_mark_as_external)) })
                 }
                 DropdownMenuItem(onClick = {
                     operationsLaunchers.openForget(uri)
                     isDropdownExpanded = false
-                }, text = { Text("Forget") })
+                }, text = { Text(stringResource(Res.string.common_forget)) })
             }
         }
     }

@@ -19,6 +19,10 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import org.archivekeep.app.core.persistence.platform.demo.fullComplexPreset
+import org.archivekeep.ui.resources.Res
+import org.archivekeep.ui.resources.settings_demo
+import org.archivekeep.ui.resources.settings_preset
+import org.jetbrains.compose.resources.stringResource
 
 val presets =
     listOf(
@@ -34,7 +38,7 @@ fun PresetSettings() {
     Column(
         verticalArrangement = Arrangement.spacedBy(8.dp),
     ) {
-        Text("Demo", style = MaterialTheme.typography.titleMedium)
+        Text(stringResource(Res.string.settings_demo), style = MaterialTheme.typography.titleMedium)
 
         ExposedDropdownMenuBox(
             expanded = expanded,
@@ -48,7 +52,7 @@ fun PresetSettings() {
                 readOnly = true,
                 trailingIcon = { TrailingIcon(expanded = expanded) },
                 label = {
-                    Text("Preset")
+                    Text(stringResource(Res.string.settings_preset))
                 },
                 modifier = Modifier.menuAnchor(type = ExposedDropdownMenuAnchorType.PrimaryNotEditable).heightIn(min = 4.dp),
             )

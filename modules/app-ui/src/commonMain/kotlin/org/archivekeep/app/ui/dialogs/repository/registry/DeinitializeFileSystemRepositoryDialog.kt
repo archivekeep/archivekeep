@@ -39,8 +39,13 @@ import org.archivekeep.app.ui.dialogs.Dialog
 import org.archivekeep.app.ui.domain.wiring.LocalApplicationServices
 import org.archivekeep.app.ui.domain.wiring.OperationFactory
 import org.archivekeep.app.ui.utils.SingleLaunchGuard
-import org.archivekeep.app.ui.utils.appendBoldSpan
+import org.archivekeep.ui.resources.Res
+import org.archivekeep.ui.resources.common_deinitialize
+import org.archivekeep.ui.resources.dialog_deinitialize_confirm
+import org.archivekeep.ui.resources.dialog_deinitialize_reinit_needed
+import org.archivekeep.ui.resources.dialog_deinitialize_success
 import org.archivekeep.utils.loading.Loadable
+import org.jetbrains.compose.resources.stringResource
 
 abstract class DeinitializeFileSystemRepositoryDialog(
     protected open val repositoryURI: RepositoryURI?,
@@ -100,9 +105,7 @@ abstract class DeinitializeFileSystemRepositoryDialog(
         DialogOverlay(onDismissRequest = onClose) {
             DialogCard {
                 DialogInnerContainer(
-                    remember {
-                        buildAnnotatedString { append("Deinitialize filesystem repository") }
-                    },
+                    remember { buildAnnotatedString { append("Deinitialize Repository") } },
                     content = {
                         LoadableGuard(vm.deinitializePreparation) { preparation ->
                             val repoPath =
@@ -114,37 +117,31 @@ abstract class DeinitializeFileSystemRepositoryDialog(
                                 Text(
                                     remember(repoPath) {
                                         buildAnnotatedString {
-                                            append("Repository stored in ")
-                                            appendBoldSpan(repoPath)
-                                            append(" will be deinitialized.")
+                                            append("Deinitialize $repoPath?")
                                         }
                                     },
                                 )
                                 WarningAlert {
-                                    Text("All archive metadata will be destroyed.")
+                                    Text("Metadata will be destroyed")
                                 }
-                                Text("Data will not be deleted.")
+                                Text("Data files are not deleted")
                                 Text(
                                     remember(repoPath) {
                                         buildAnnotatedString {
-                                            append("Metadata stored in ")
-                                            appendBoldSpan(repoPath + "/.archive")
-                                            append(" will be ")
-                                            appendBoldSpan("completely deleted")
-                                            append(".")
+                                            append("Metadata is stored in $repoPath/.archive")
                                         }
                                     },
                                 )
-                                Text("To use it against as an archive repository, reinitialization and reindexing will be needed.")
+                                Text(stringResource(Res.string.dialog_deinitialize_reinit_needed))
                                 CheckboxWithText(
                                     vm.metadataDestructionConfirmed,
-                                    text = "Yes, destroy metadata",
+                                    text = stringResource(Res.string.dialog_deinitialize_confirm),
                                     onValueChange = { vm.metadataDestructionConfirmed = it },
                                     enabled = vm.deinitializeLaunchGuard.state == null,
                                 )
                                 ExecutionErrorIfPresent(vm.deinitializeLaunchGuard.executionOutcome.value)
                                 if (vm.deinitializeLaunchGuard.executionOutcome.value is ExecutionOutcome.Success) {
-                                    Text("Successfully deinitialized", modifier = Modifier.padding(top = 10.dp))
+                                    Text(stringResource(Res.string.dialog_deinitialize_success), modifier = Modifier.padding(top = 10.dp))
                                 }
                             }
                         }
@@ -154,7 +151,7 @@ abstract class DeinitializeFileSystemRepositoryDialog(
                             when (val op = vm.deinitializePreparation) {
                                 is Loadable.Failed, Loadable.Loading -> {
                                     SimpleActionDialogControlButtons(
-                                        "Deinitialize",
+                                        stringResource(Res.string.common_deinitialize),
                                         onLaunch = {},
                                         onClose = onClose,
                                         canLaunch = false,
@@ -166,7 +163,7 @@ abstract class DeinitializeFileSystemRepositoryDialog(
                                         is DeinitializeFileSystemRepositoryPreparation.DirectoryNotRepository,
                                         -> {
                                             SimpleActionDialogControlButtons(
-                                                "Deinitialize",
+                                                stringResource(Res.string.common_deinitialize),
                                                 onLaunch = {},
                                                 onClose = onClose,
                                                 canLaunch = false,
@@ -181,7 +178,7 @@ abstract class DeinitializeFileSystemRepositoryDialog(
                                                 SimpleActionDialogDoneButtons(onClose)
                                             } else {
                                                 SimpleActionDialogControlButtons(
-                                                    "Deinitialize",
+                                                    stringResource(Res.string.common_deinitialize),
                                                     onLaunch = {
                                                         vm.deinitializeLaunchGuard.launch {
                                                             option.runDeinitialize()

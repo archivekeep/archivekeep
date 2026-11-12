@@ -19,8 +19,11 @@ import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import org.archivekeep.app.ui.utils.Action
+import org.archivekeep.ui.resources.Res
+import org.archivekeep.ui.resources.common_loading_dots
 import org.archivekeep.utils.loading.Loadable
 import org.archivekeep.utils.loading.isLoading
+import org.jetbrains.compose.resources.stringResource
 
 @Composable
 fun SectionCardActionsRow(
@@ -46,7 +49,7 @@ fun SectionCardActionsRow(
             if (actions.none { it.isLoading }) {
                 SectionCardActionsRowText(noActionsText, modifier = Modifier.fillMaxWidth())
             } else {
-                SectionCardActionsRowText("Loading.", modifier = Modifier.fillMaxWidth())
+                SectionCardActionsRowText(stringResource(Res.string.common_loading_dots), modifier = Modifier.fillMaxWidth())
             }
         } else {
             val firstAction = pendingActions.first()

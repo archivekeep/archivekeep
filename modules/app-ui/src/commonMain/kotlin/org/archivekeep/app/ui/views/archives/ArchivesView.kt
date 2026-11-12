@@ -11,6 +11,9 @@ import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.CoroutineScope
 import org.archivekeep.app.ui.components.designsystem.theme.CColors
 import org.archivekeep.app.ui.views.View
+import org.archivekeep.ui.resources.Res
+import org.archivekeep.ui.resources.common_not_available
+import org.jetbrains.compose.resources.stringResource
 
 class ArchivesView : View<String> {
     @Composable
@@ -26,7 +29,7 @@ class ArchivesView : View<String> {
             color = CColors.cardsGridBackground,
         ) {
             Box(modifier.padding(32.dp), contentAlignment = Alignment.Center) {
-                Text("To be implemented ...")
+                Text(stringResource(Res.string.common_not_available))
             }
         }
     }

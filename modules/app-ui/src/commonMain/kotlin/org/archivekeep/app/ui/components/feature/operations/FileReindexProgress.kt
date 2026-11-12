@@ -5,11 +5,14 @@ import org.archivekeep.app.core.procedures.reindex.FileReindexProcedureSuperviso
 import org.archivekeep.app.ui.components.designsystem.dialog.LabelText
 import org.archivekeep.app.ui.components.designsystem.progress.ProgressRow
 import org.archivekeep.app.ui.components.designsystem.progress.ProgressRowList
+import org.archivekeep.ui.resources.Res
+import org.archivekeep.ui.resources.dialog_reindex_title
 import org.archivekeep.utils.text.filesAutoPlural
+import org.jetbrains.compose.resources.stringResource
 
 @Composable
 fun FileReindexProgress(jobState: FileReindexProcedureSupervisor.JobState) {
-    LabelText("Local index update")
+    LabelText(stringResource(Res.string.dialog_reindex_title))
 
     ProgressRowList {
         val selectedFilesToReindex = jobState.reindexProgress.filesToReindex

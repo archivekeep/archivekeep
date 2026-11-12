@@ -18,12 +18,15 @@ import org.archivekeep.app.ui.components.feature.dialogs.SimpleActionDialogContr
 import org.archivekeep.app.ui.components.feature.dialogs.operations.LaunchableExecutionErrorIfPresent
 import org.archivekeep.app.ui.domain.wiring.LocalApplicationServices
 import org.archivekeep.app.ui.utils.Launchable
-import org.archivekeep.app.ui.utils.appendBoldSpan
 import org.archivekeep.app.ui.utils.asTrivialAction
 import org.archivekeep.app.ui.utils.collectLoadableFlow
 import org.archivekeep.app.ui.utils.simpleLaunchable
+import org.archivekeep.ui.resources.Res
+import org.archivekeep.ui.resources.dialog_mark_local_message
+import org.archivekeep.ui.resources.storage_dropdown_mark_as_local
 import org.archivekeep.utils.loading.Loadable
 import org.archivekeep.utils.loading.mapLoadedData
+import org.jetbrains.compose.resources.stringResource
 
 class MarkAsLocalDialog(
     uri: StorageURI,
@@ -49,7 +52,7 @@ class MarkAsLocalDialog(
         val storage: KnownStorage,
         val launchable: Launchable<Unit>,
     ) : IState {
-        override val title = buildAnnotatedString { append("Mark storage as local") }
+        override val title = buildAnnotatedString { append("Mark as Local") }
 
         val action = launchable.asTrivialAction()
     }
@@ -88,9 +91,7 @@ class MarkAsLocalDialog(
             modifier = Modifier.padding(bottom = 4.dp),
             text =
                 buildAnnotatedString {
-                    append("Mark storage ")
-                    appendBoldSpan(state.storage.label)
-                    append(" as local.")
+                    append(stringResource(Res.string.dialog_mark_local_message, state.storage.label))
                 },
         )
         LaunchableExecutionErrorIfPresent(state.launchable)
@@ -102,7 +103,7 @@ class MarkAsLocalDialog(
         state: State,
     ) {
         SimpleActionDialogControlButtons(
-            "Mark as local",
+            stringResource(Res.string.storage_dropdown_mark_as_local),
             actionState = state.action.value,
             onClose = onClose,
         )

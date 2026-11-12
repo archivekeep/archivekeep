@@ -16,6 +16,11 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
+import org.archivekeep.ui.resources.Res
+import org.archivekeep.ui.resources.common_change
+import org.archivekeep.ui.resources.common_no_directory_selected
+import org.archivekeep.ui.resources.common_select
+import org.jetbrains.compose.resources.stringResource
 
 @Composable
 fun DialogFilePicker(
@@ -43,7 +48,7 @@ fun DialogFilePicker(
                 path.let {
                     if (it == null) {
                         Text(
-                            "No directory selected",
+                            stringResource(Res.string.common_no_directory_selected),
                             color = Color.Black.copy(alpha = 0.4f),
                             softWrap = true,
                         )
@@ -60,7 +65,7 @@ fun DialogFilePicker(
             modifier = Modifier.fillMaxHeight(),
             shape = RoundedCornerShape(topEnd = rounding, bottomEnd = rounding),
         ) {
-            Text(if (path != null) "Change" else "Select")
+            Text(if (path != null) stringResource(Res.string.common_change) else stringResource(Res.string.common_select))
         }
     }
 }

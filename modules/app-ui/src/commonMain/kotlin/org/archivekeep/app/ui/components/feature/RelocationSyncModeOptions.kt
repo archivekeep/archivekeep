@@ -11,6 +11,14 @@ import org.archivekeep.app.ui.components.designsystem.dialog.LabelText
 import org.archivekeep.app.ui.components.designsystem.input.CheckboxWithText
 import org.archivekeep.app.ui.components.designsystem.input.RadioWithText
 import org.archivekeep.files.procedures.sync.discovery.RelocationSyncMode
+import org.archivekeep.ui.resources.Res
+import org.archivekeep.ui.resources.sync_allow_duplication_increase
+import org.archivekeep.ui.resources.sync_allow_duplication_reduction
+import org.archivekeep.ui.resources.sync_relocation_allowed
+import org.archivekeep.ui.resources.sync_relocation_disabled
+import org.archivekeep.ui.resources.sync_relocation_duplicate_as_new
+import org.archivekeep.ui.resources.sync_relocation_mode_label
+import org.jetbrains.compose.resources.stringResource
 
 @Composable
 fun RelocationSyncModeOptions(
@@ -18,7 +26,7 @@ fun RelocationSyncModeOptions(
     onRelocationSyncModeChange: (RelocationSyncMode) -> Unit,
 ) {
     Column {
-        LabelText("Relocations resolution mode:")
+        LabelText(stringResource(Res.string.sync_relocation_mode_label))
         Row(
             Modifier.selectableGroup(),
             horizontalArrangement = Arrangement.spacedBy(4.dp),
@@ -26,17 +34,17 @@ fun RelocationSyncModeOptions(
             RadioWithText(
                 selected = relocationSyncMode is RelocationSyncMode.Move,
                 onClick = { onRelocationSyncModeChange(RelocationSyncMode.Move(false, false)) },
-                text = "Allowed",
+                text = stringResource(Res.string.sync_relocation_allowed),
             )
             RadioWithText(
                 selected = relocationSyncMode is RelocationSyncMode.Disabled,
                 onClick = { onRelocationSyncModeChange(RelocationSyncMode.Disabled) },
-                text = "Disabled",
+                text = stringResource(Res.string.sync_relocation_disabled),
             )
             RadioWithText(
                 selected = relocationSyncMode is RelocationSyncMode.AdditiveDuplicating,
                 onClick = { onRelocationSyncModeChange(RelocationSyncMode.AdditiveDuplicating) },
-                text = "Duplicate as new",
+                text = stringResource(Res.string.sync_relocation_duplicate_as_new),
             )
         }
         if (relocationSyncMode is RelocationSyncMode.Move) {
@@ -52,7 +60,7 @@ fun RelocationSyncModeOptions(
                             ),
                         )
                     },
-                    text = "Allow duplication increase",
+                    text = stringResource(Res.string.sync_allow_duplication_increase),
                 )
                 CheckboxWithText(
                     value = relocationSyncMode.allowDuplicateReduction,
@@ -63,7 +71,7 @@ fun RelocationSyncModeOptions(
                             ),
                         )
                     },
-                    text = "Allow duplication reduction",
+                    text = stringResource(Res.string.sync_allow_duplication_reduction),
                 )
             }
         }

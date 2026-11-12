@@ -4,12 +4,16 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import org.archivekeep.app.ui.components.feature.errors.AutomaticErrorMessage
+import org.archivekeep.ui.resources.Res
+import org.archivekeep.ui.resources.common_failed
+import org.archivekeep.ui.resources.common_loading
 import org.archivekeep.utils.loading.Loadable
+import org.jetbrains.compose.resources.stringResource
 
 @Composable
 fun <T> LoadableGuard(
     loadable: Loadable<T>,
-    loadingContent: @Composable () -> Unit = { Text("Loading") },
+    loadingContent: @Composable () -> Unit = { Text(stringResource(Res.string.common_loading)) },
     content: @Composable (value: T) -> Unit,
 ) {
     when (loadable) {
@@ -41,11 +45,11 @@ fun <T1, T2> LoadableGuard(
 
     when (loadable1) {
         is Loadable.Failed -> {
-            Text("Failed")
+            Text(stringResource(Res.string.common_failed))
             return
         }
         is Loadable.Loading -> {
-            Text("Loading")
+            Text(stringResource(Res.string.common_loading))
             return
         }
         is Loadable.Loaded ->
@@ -54,11 +58,11 @@ fun <T1, T2> LoadableGuard(
 
     when (loadable2) {
         is Loadable.Failed -> {
-            Text("Failed")
+            Text(stringResource(Res.string.common_failed))
             return
         }
         is Loadable.Loading -> {
-            Text("Loading")
+            Text(stringResource(Res.string.common_loading))
             return
         }
         is Loadable.Loaded ->

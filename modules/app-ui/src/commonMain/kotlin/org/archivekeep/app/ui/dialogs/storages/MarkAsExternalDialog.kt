@@ -19,12 +19,15 @@ import org.archivekeep.app.ui.components.feature.dialogs.SimpleActionDialogContr
 import org.archivekeep.app.ui.components.feature.dialogs.operations.LaunchableExecutionErrorIfPresent
 import org.archivekeep.app.ui.domain.wiring.LocalApplicationServices
 import org.archivekeep.app.ui.utils.Launchable
-import org.archivekeep.app.ui.utils.appendBoldSpan
 import org.archivekeep.app.ui.utils.asAction
 import org.archivekeep.app.ui.utils.collectLoadableFlow
 import org.archivekeep.app.ui.utils.simpleLaunchable
+import org.archivekeep.ui.resources.Res
+import org.archivekeep.ui.resources.dialog_mark_external_message
+import org.archivekeep.ui.resources.storage_dropdown_mark_as_external
 import org.archivekeep.utils.loading.Loadable
 import org.archivekeep.utils.loading.mapLoadedData
+import org.jetbrains.compose.resources.stringResource
 
 class MarkAsExternalDialog(
     uri: StorageURI,
@@ -54,7 +57,7 @@ class MarkAsExternalDialog(
     ) : IState {
         override val title =
             buildAnnotatedString {
-                append("Mark storage as external")
+                append("Mark as External")
             }
 
         val action by launchable.asAction(
@@ -96,9 +99,7 @@ class MarkAsExternalDialog(
             modifier = Modifier.padding(bottom = 4.dp),
             text =
                 buildAnnotatedString {
-                    append("Mark storage ")
-                    appendBoldSpan(state.storage.label)
-                    append(" as external")
+                    append(stringResource(Res.string.dialog_mark_external_message, state.storage.label))
                 },
         )
         LaunchableExecutionErrorIfPresent(state.launchable)
@@ -110,7 +111,7 @@ class MarkAsExternalDialog(
         state: State,
     ) {
         SimpleActionDialogControlButtons(
-            "Mark as external",
+            stringResource(Res.string.storage_dropdown_mark_as_external),
             actionState = state.action,
             onClose = onClose,
         )

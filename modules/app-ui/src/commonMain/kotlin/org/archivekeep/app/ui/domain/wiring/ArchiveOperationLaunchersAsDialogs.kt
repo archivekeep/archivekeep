@@ -2,6 +2,7 @@ package org.archivekeep.app.ui.domain.wiring
 
 import org.archivekeep.app.ui.dialogs.other.UnsupportedFeatureDialog
 import org.archivekeep.app.ui.dialogs.repository.access.UnlockRepositoryDialog
+import org.archivekeep.app.ui.dialogs.repository.details.RepositoryDetailsDialog
 import org.archivekeep.app.ui.dialogs.repository.management.AssociateRepositoryDialog
 import org.archivekeep.app.ui.dialogs.repository.management.UnassociateRepositoryDialog
 import org.archivekeep.app.ui.dialogs.repository.procedures.addpush.AddAndPushRepoDialog
@@ -11,7 +12,6 @@ import org.archivekeep.app.ui.dialogs.repository.procedures.pushrepo.PushRepoDia
 import org.archivekeep.app.ui.dialogs.repository.procedures.reindex.FileReindexProcedureDialog
 import org.archivekeep.app.ui.dialogs.repository.procedures.sync.DownloadFromRepoDialog
 import org.archivekeep.app.ui.dialogs.repository.procedures.sync.UploadToRepoDialog
-import org.archivekeep.app.ui.dialogs.repository.details.RepositoryDetailsDialog
 import org.archivekeep.app.ui.dialogs.repository.registry.AddFileSystemRepositoryDialog
 import org.archivekeep.app.ui.dialogs.repository.registry.AddRemoteRepositoryDialog
 import org.archivekeep.app.ui.dialogs.repository.registry.DeinitializeFileSystemRepositoryByPathDialog

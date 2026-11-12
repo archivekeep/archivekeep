@@ -1,0 +1,393 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <!-- ==================== COMMON STRINGS ==================== -->
+
+    <!-- Common button labels -->
+    <string name="common_add">Pridať</string>
+    <string name="common_cancel">Zrušiť</string>
+    <string name="common_close">Zavrieť</string>
+    <string name="common_change">Zmeniť</string>
+    <string name="common_delete">Odstrániť</string>
+    <string name="common_dismiss">Zavrieť</string>
+    <string name="common_hide">Skryť</string>
+    <string name="common_launch">Spustiť</string>
+    <string name="common_ok">OK</string>
+    <string name="common_remove">Odstrániť</string>
+    <string name="common_rename">Premenovať</string>
+    <string name="common_save">Uložiť</string>
+    <string name="common_select">Vybrať</string>
+    <string name="common_submit">Odoslať</string>
+    <string name="common_stop">Zastaviť</string>
+    <string name="common_unlock">Odomknúť</string>
+
+    <!-- Common status messages -->
+    <string name="common_added_successfully">Úspešne pridané.</string>
+    <string name="common_added">Pridané</string>
+    <string name="common_authenticate">Overiť</string>
+    <string name="common_cancelled">Zrušené</string>
+    <string name="common_completed">Dokončené</string>
+    <string name="common_disconnected">Odpojené</string>
+    <string name="common_error">CHYBA: %1$s</string>
+    <string name="common_failed">Zlyhalo</string>
+    <string name="common_finished">Dokončené</string>
+    <string name="common_loading">Načítava sa</string>
+    <string name="common_loading_dots">Načítava sa ...</string>
+    <string name="common_loading_ellipsis">Načítava sa…</string>
+    <string name="common_more">Viac</string>
+    <string name="common_more_actions">Viac akcií</string>
+    <string name="common_no_directory_selected">Žiadny adresár nie je vybraný</string>
+    <string name="common_no_items">Žiadne položky</string>
+    <string name="common_not_available">Nedostupné ...</string>
+    <string name="common_online">Online</string>
+    <string name="common_running">Beží …</string>
+    <string name="common_unknown">Neznáme</string>
+
+    <!-- Common action labels -->
+    <string name="common_associate">Pripojiť</string>
+    <string name="common_deinitialize">Deinicializovať</string>
+    <string name="common_details">Detaily</string>
+    <string name="common_forget">Zabudnúť</string>
+    <string name="common_init">Inicializovať</string>
+    <string name="common_open">Otvoriť</string>
+    <string name="common_pull">Stiahnuť</string>
+    <string name="common_push">Odoslať</string>
+    <string name="common_reindex">Preindexovať</string>
+    <string name="common_unassociate">Odpojiť</string>
+
+    <!-- Common progress states -->
+    <string name="common_adding">Pridáva sa…</string>
+    <string name="common_initializing">Inicializuje sa…</string>
+    <string name="common_preparing">Prípravuje sa…</string>
+    <string name="common_starting">Spúšťa sa</string>
+    <string name="common_unlocking">Odomknutie…</string>
+
+    <!-- Common labels -->
+    <string name="common_log">Protokol</string>
+    <string name="common_errors">Chyby</string>
+    <string name="common_summary">Súhrn</string>
+    <string name="common_progress">Priebeh</string>
+    <string name="common_password">Heslo</string>
+    <string name="common_enter_password">Zadajte heslo …</string>
+    <string name="common_verify_password">Overte heslo …</string>
+    <string name="common_remember_password">Zapamätať heslo</string>
+    <string name="common_remember_credentials">Zapamätať poverenia</string>
+    <string name="common_remember_session">Zapamätať reláciu</string>
+    <string name="common_enter_username">Zadajte používateľské meno …</string>
+    <string name="common_locked">Zamknuté</string>
+    <string name="common_menu">Menu</string>
+    <string name="common_version">Verzia</string>
+
+    <!-- ==================== NAVIGATION ==================== -->
+
+    <string name="nav_home">Domov</string>
+    <string name="nav_archives">Archívy</string>
+    <string name="nav_storages">Úložiská</string>
+    <string name="nav_info">Info</string>
+    <string name="nav_settings">Nastavenia</string>
+
+    <!-- ==================== APP BAR ==================== -->
+
+    <string name="appbar_title">ArchiveKeep</string>
+    <string name="appbar_close">Zavrieť aplikáciu</string>
+    <string name="appbar_unlock_credentials">Odomknúť poverenia …</string>
+
+    <!-- ==================== WELCOME ==================== -->
+
+    <string name="welcome_title">Vitajte v ArchiveKeep</string>
+    <string name="welcome_subtitle">Osobná archivácia - synchronizácia a replikácia súborov medzi viacerými úložiskami (repozitármi)</string>
+
+    <!-- ==================== HOME VIEW ==================== -->
+
+    <!-- HomeViewContent -->
+    <string name="home_section_introduction">Úvod</string>
+    <string name="home_section_local_archives">Lokálne archívy</string>
+    <string name="home_section_external_archives">Externé archívy</string>
+    <string name="home_section_external_storages">Externé úložiská</string>
+
+    <!-- HomeArchivesIntro -->
+    <string name="home_archives_intro_title">1. nastavenie lokálneho úložiska</string>
+    <string name="home_archives_intro_description">Začte pridaním lokálneho repozitára, ktorý bude obsahovať údaje, ktoré chcete archivovať.</string>
+    <string name="home_archives_intro_description_existing">Môže už obsahovať existujúce údaje.</string>
+    <string name="home_archives_intro_add_button">Pridať lokálny repozitár…</string>
+
+    <!-- HomeStoragesIntro -->
+    <string name="home_storages_intro_title">2. pridať externé úložiská</string>
+    <string name="home_storages_intro_description">Externé úložiská budú obsahovať kópiu vašich údajov.</string>
+    <string name="home_storages_intro_description_details">Môžu to byť externé disky, hostované servery (služby) alebo vlastný NAS server, …</string>
+    <string name="home_storages_intro_add_directory_button">Pridať adresár (v externom úložisku)…</string>
+    <string name="home_storages_intro_add_url_button">Pridať URL…</string>
+
+    <!-- HomeArchivesList -->
+    <string name="home_archives_list_empty">nič tu nie je …</string>
+
+    <!-- HomeArchivesListEntry -->
+    <string name="home_archive_unassociated">Nepripojené</string>
+    <string name="home_archive_copies_out_of_sync">Kópie sú mimo synchronizácie.</string>
+    <string name="home_archive_no_actions">Žiadne dostupné akcie.</string>
+    <string name="home_archive_no_repositories">Žiadne pripojené repozitáre …</string>
+
+    <!-- HomeNonLocalArchivesList -->
+    <string name="home_non_local_archives_empty">Prázdne</string>
+
+    <!-- HomeStoragesList -->
+    <string name="home_storages_list_empty">Nič tu nie je …</string>
+    <string name="home_storage_unnamed">Nepomenované úložisko</string>
+
+    <!-- HomeCard -->
+    <string name="home_card_status_unavailable">Stav nedostupný: %1$s</string>
+
+    <!-- RepositoryRow -->
+    <string name="repository_row_storage_content_description">Úložisko</string>
+
+    <!-- Home model actions -->
+    <string name="home_action_add_and_push">Pridať a odoslať</string>
+    <string name="home_action_push_to_all">Odoslať všade</string>
+
+    <!-- ==================== MAIN MENU ==================== -->
+
+    <string name="main_menu">Hlavné menu</string>
+    <string name="main_menu_add_file_repository">Pridať súborový repozitár …</string>
+    <string name="main_menu_add_remote_repository">Pridať vzdialený repozitár …</string>
+
+    <!-- ==================== STORAGE DROPDOWN ==================== -->
+
+    <string name="storage_dropdown_set_name">Nastaviť meno</string>
+    <string name="storage_dropdown_mark_as_local">Označiť ako lokálne</string>
+    <string name="storage_dropdown_mark_as_external">Označiť ako externé</string>
+
+    <!-- ==================== RELOCATION SYNC MODE ==================== -->
+
+    <string name="sync_relocation_mode_label">Režim riešenia presunov:</string>
+    <string name="sync_relocation_allowed">Povolené</string>
+    <string name="sync_relocation_disabled">Zakázané</string>
+    <string name="sync_relocation_duplicate_as_new">Duplikovať ako nové</string>
+    <string name="sync_allow_duplication_increase">Povoliť zvýšenie duplikácie</string>
+    <string name="sync_allow_duplication_reduction">Povoliť zníženie duplikácie</string>
+
+    <!-- ==================== DIALOG: ADD FILE SYSTEM REPOSITORY ==================== -->
+
+    <string name="dialog_add_repo_title">Pridať repozitár</string>
+    <string name="dialog_add_repo_directory_label">Adresár repozitára:</string>
+    <string name="dialog_add_repo_preparing">Prípravuje sa…</string>
+    <string name="dialog_add_repo_parent_is_repo">Rodičovský adresár %1$s je archivačný repozitár.</string>
+    <string name="dialog_add_repo_subdir_not_supported">Vytváranie repozitárov v podadresári existujúceho repozitára nie je podporované.</string>
+    <string name="dialog_add_repo_select_location">Vyberte umiestnenie, ktoré nie je vnútri repozitára.</string>
+    <string name="dialog_add_repo_deinitialize_alternative">Alebo deinicializujte existujúci rodičovský adresár, aby prestal byť repozitárom.</string>
+    <string name="dialog_add_repo_deinitialize_button">Deinicializovať existujúci repozitár</string>
+    <string name="dialog_add_repo_not_repo_yet">Adresár ešte nie je repozitár. Pokračujte inicializáciou ako archivačný repozitár.</string>
+    <string name="dialog_add_repo_plain_files">Obyčajné súbory (nešifrované, normálny prístup)</string>
+    <string name="dialog_add_repo_rocksdb">RocksDB Index DB (odporúčané)</string>
+    <string name="dialog_add_repo_rocksdb_info">Odporúčané pre väčšinu prípadov.</string>
+    <string name="dialog_add_repo_sqlite">SQLite Index DB</string>
+    <string name="dialog_add_repo_sqlite_warning">Nie je podporované pre externé médiá na Androide.</string>
+    <string name="dialog_add_repo_checksum_files">Samostatné kontrolné súbory</string>
+    <string name="dialog_add_repo_checksum_warning">Najhorší výkon pri použití na HDD.</string>
+    <string name="dialog_add_repo_encrypted">Šifrované (vlastný formát)</string>
+    <string name="dialog_add_repo_directory_initialized">Adresár bol úspešne inicializovaný ako repozitár.</string>
+    <string name="dialog_add_repo_can_be_added">Repozitár môže byť pridaný.</string>
+    <string name="dialog_add_repo_encrypted_password_protected">Repozitár je šifrovaný a chránený heslom.</string>
+    <string name="dialog_add_repo_enter_password_access">Zadajte heslo pre prístup:</string>
+    <string name="dialog_add_repo_successfully_unlocked">Úspešne odomknuté.</string>
+    <string name="dialog_add_repo_select_directory">Prosím, vyberte adresár.</string>
+    <string name="dialog_add_repo_storage_first_time">Úložisko sa používa prvýkrát.</string>
+    <string name="dialog_add_repo_select_storage_type">Vyberte typ úložiska:</string>
+    <string name="dialog_add_repo_storage_local">Lokálne - toto zariadenie</string>
+    <string name="dialog_add_repo_storage_external">Externé - mediálne zariadenie</string>
+    <string name="dialog_add_repo_enter_label">Zadajte označenie úložiska:</string>
+    <string name="dialog_add_repo_enter_device_label">Zadajte označenie zariadenia ...</string>
+
+    <!-- ==================== DIALOG: ADD REMOTE REPOSITORY ==================== -->
+
+    <string name="dialog_add_remote_title">Pridať vzdialený repozitár</string>
+    <string name="dialog_add_remote_tab_s3">S3</string>
+    <string name="dialog_add_remote_tab_other">Iné</string>
+    <string name="dialog_add_remote_s3_connection">Podrobnosti pripojenia pre S3 bucket:</string>
+    <string name="dialog_add_remote_s3_endpoint">URL koncového bodu</string>
+    <string name="dialog_add_remote_s3_insecure">Používa sa nebezpečný protokol pre koncový bod. To znamená, že údaje sa odosielajú v otvorenom texte, ktorý môže čítať ktokoľvek.</string>
+    <string name="dialog_add_remote_s3_vpn_recommended">Dôrazne sa odporúča pripojiť sa k tomuto serveru pomocou VPN, ktorej úplne dôverujete.</string>
+    <string name="dialog_add_remote_s3_bucket">Názov bucketu</string>
+    <string name="dialog_add_remote_s3_access_key">Prístupový kľúč</string>
+    <string name="dialog_add_remote_s3_secret_key">Tajný kľúč</string>
+    <string name="dialog_add_remote_self_hosted_wip">Server pre vlastné hostovanie je v príprave (existuje stará ukončená implementácia napísaná v Go)...</string>
+    <string name="dialog_add_remote_url_label">URL vzdialeného repozitára</string>
+    <string name="dialog_add_remote_uri_placeholder">Zadajte URI repozitára na pridanie ...</string>
+    <string name="dialog_add_remote_auth_needed">Vyžaduje sa overenie</string>
+    <string name="dialog_add_remote_success">Vzdialený repozitár bol úspešne pridaný</string>
+    <string name="dialog_add_remote_needs_init">Vyžaduje inicializáciu</string>
+    <string name="dialog_add_remote_plain_objects">Obyčajné objekty (nešifrované, normálny prístup)</string>
+    <string name="dialog_add_remote_plain_warning">Vaše údaje môžu byť prístupné pre vlastníka servera (poskytovateľa služby).</string>
+    <string name="dialog_add_remote_plain_warning2">Nepoužívajte pre citlivé údaje so servermi (poskytovateľmi služieb), ktorým nedôverujete.</string>
+    <string name="dialog_add_remote_encrypted_custom">Šifrované (vlastný formát)</string>
+    <string name="dialog_add_remote_encrypted_warning">Obsah je šifrovaný E2E. Názvy súborov nie.</string>
+    <string name="dialog_add_remote_encrypted_warning2">Nemajte citlivé údaje v názvoch súborov so servermi (poskytovateľmi služieb), ktorým nedôverujete.</string>
+
+    <!-- ==================== DIALOG: DEINITIALIZE REPOSITORY ==================== -->
+
+    <string name="dialog_deinitialize_data_not_deleted">Údaje nebudú vymazané.</string>
+    <string name="dialog_deinitialize_reinit_needed">Na opätovné použitie ako archivačný repozitár bude potrebná reinicializácia a preindexovanie.</string>
+    <string name="dialog_deinitialize_confirm">Áno, zničiť metadáta</string>
+    <string name="dialog_deinitialize_success">Úspešne deinicializované</string>
+
+    <!-- ==================== DIALOG: UNLOCK REPOSITORY ==================== -->
+
+    <string name="dialog_unlock_repo_title">Odomknúť repozitár</string>
+    <string name="dialog_unlock_success">Repozitár %1$s je teraz odomknutý.</string>
+    <string name="dialog_unlock_wallet_available">Peňaženka s uloženými povereniami je dostupná.</string>
+    <string name="dialog_unlock_wallet_hint">Otvorte peňaženku na odomknutie repozitára, ak je jeho heslo uložené tam.</string>
+    <string name="dialog_unlock_wallet_locked">Zamknutá peňaženka</string>
+    <string name="dialog_unlock_wallet_open">Otvoriť peňaženku</string>
+    <string name="dialog_unlock_not_locked">Repozitár %1$s nie je zamknutý. Žiadna akcia nie je potrebná.</string>
+    <string name="dialog_unlock_auth_needed">Pre prístup k repozitáru %1$s je potrebné overenie.</string>
+    <string name="dialog_unlock_enter_credentials">Zadajte poverenia na overenie:</string>
+    <string name="dialog_unlock_password_needed">Pre prístup k repozitáru %1$s je potrebné heslo.</string>
+    <string name="dialog_unlock_enter_password">Zadajte heslo na odomknutie repozitára:</string>
+
+    <!-- ==================== DIALOG: REPOSITORY DETAILS ==================== -->
+
+    <string name="dialog_repo_details_title">Detaily repozitára</string>
+    <string name="dialog_repo_details_name">Názov</string>
+    <string name="dialog_repo_details_type">Typ</string>
+    <string name="dialog_repo_details_storage">Úložisko</string>
+    <string name="dialog_repo_details_files">Súbory</string>
+    <string name="dialog_repo_details_size">Veľkosť</string>
+    <string name="dialog_repo_details_encrypted">Šifrované súbory</string>
+    <string name="dialog_repo_details_rocksdb">RocksDB index</string>
+    <string name="dialog_repo_details_sqlite">SQLite index</string>
+    <string name="dialog_repo_details_plain">Obyčajné súbory s kontrolnými súbormi</string>
+
+    <!-- ==================== DIALOG: ASSOCIATE REPOSITORY ==================== -->
+
+    <string name="dialog_associate_title">Pripojiť repozitár</string>
+    <string name="dialog_re_associate_title">Opätovne pripojiť repozitár</string>
+    <string name="dialog_associate_message">Pripojiť repozitár %1$s v úložisku %2$s k:</string>
+    <string name="dialog_associate_re_message">Opätovne pripojiť repozitár %1$s v úložisku %2$s k:</string>
+    <string name="dialog_associate_new_archive">Alebo vytvoriť nový archív pripojením k nepripojenému repozitáru: </string>
+
+    <!-- ==================== DIALOG: UNASSOCIATE REPOSITORY ==================== -->
+
+    <string name="dialog_unassociate_title">Odpojiť repozitár</string>
+    <string name="dialog_unassociate_message">Repozitár %1$s uložený v %2$s bude odpojený od svojho archívu.</string>
+
+    <!-- ==================== DIALOG: FORGET STORAGE ==================== -->
+
+
+    <!-- ==================== DIALOG: MARK STORAGE AS EXTERNAL ==================== -->
+
+    <string name="dialog_mark_external_message">Označiť úložisko %1$s ako externé</string>
+
+    <!-- ==================== DIALOG: MARK STORAGE AS LOCAL ==================== -->
+
+    <string name="dialog_mark_local_message">Označiť úložisko %1$s ako lokálne.</string>
+
+    <!-- ==================== DIALOG: RENAME STORAGE ==================== -->
+
+    <string name="dialog_rename_storage_message">Úložisko %1$s bude premenované na nové meno:</string>
+    <string name="dialog_set_storage_name_message">Úložisko %1$s bude pomenované ako:</string>
+    <string name="dialog_rename_new_name">Nové meno</string>
+    <string name="dialog_rename_enter_name">Zadajte meno</string>
+
+    <!-- ==================== DIALOG: CREATE WALLET ==================== -->
+
+    <string name="dialog_create_wallet_message">Peňaženka musí byť vytvorená na ukladanie a pamätanie hesiel a relácií pre repozitár. Peňaženka je uložená lokálne a je chránená heslom</string>
+    <string name="dialog_create_wallet_password_verify">Overenie hesla</string>
+    <string name="dialog_create_wallet_enter_password">Zadajte heslo  ...</string>
+    <string name="dialog_create_wallet_verify_password">Zadajte heslo na overenie...</string>
+
+    <!-- ==================== DIALOG: UNLOCK WALLET ==================== -->
+
+    <string name="dialog_unlock_wallet_message">Peňaženka je zamknutá, odomknite ju na pripojenie k repozitárom s zapamätanými povereniami alebo uloženými reláciami.</string>
+
+    <!-- ==================== DIALOG: UNSUPPORTED FEATURE ==================== -->
+
+    <string name="dialog_unsupported_title">Funkcia nie je implementovaná</string>
+    <string name="dialog_unsupported_message">Táto funkcia nie je implementovaná</string>
+
+    <!-- ==================== DIALOG: SYNC (UPLOAD/DOWNLOAD) ==================== -->
+
+    <string name="dialog_upload_title">%1$s - kópovať do</string>
+    <string name="dialog_upload_message">Kópovať zmeny z %1$s do %2$s.</string>
+    <string name="dialog_upload_message_with_repo">Kópovať zmeny z %1$s do repozitára %2$s uloženého v %3$s.</string>
+    <string name="dialog_download_title">%1$s v %2$s - kópovať z</string>
+    <string name="dialog_download_message">Kópovať zmeny z repozitára %1$s v úložisku %2$s.</string>
+
+    <!-- ==================== DIALOG: SYNC PREPARED ==================== -->
+
+    <string name="dialog_sync_nothing_to_do">Nič na vykonanie</string>
+    <string name="dialog_sync_duplicate_files">Duplikovať %1$s súborov.</string>
+    <string name="dialog_sync_move_files">Presunúť %1$s súborov.</string>
+    <string name="dialog_sync_ignore_relocations">Ignorovať %1$s presunov.</string>
+    <string name="dialog_sync_upload_files">Nahrať %1$s súborov.</string>
+
+    <!-- ==================== DIALOG: ASSOCIATE/PUSH REPO ==================== -->
+
+    <string name="dialog_add_push_title">Pridať a odoslať</string>
+    <string name="dialog_push_title">Odoslať</string>
+
+    <!-- ==================== DIALOG: DELETED FILES CLEANUP ==================== -->
+
+    <string name="dialog_cleanup_title">Vyčistenie zmazaných súborov</string>
+    <string name="dialog_cleanup_removed">Odstránených %1$s z %2$s</string>
+
+    <!-- ==================== DIALOG: FILE REINDEX ==================== -->
+
+    <string name="dialog_reindex_title">Aktualizácia lokálneho indexu</string>
+    <string name="dialog_reindex_reindexed">Preindexovaných %1$s z %2$s</string>
+
+    <!-- ==================== DIALOG: INDEX UPDATE ==================== -->
+
+    <string name="dialog_index_update_title">Aktualizácia lokálneho indexu</string>
+    <string name="dialog_index_update_checked">Skontrolovaných %1$s z %2$s</string>
+    <string name="dialog_index_update_found_new">Nájdených %1$s nových</string>
+    <string name="dialog_index_update_found_moved">Nájdených %1$s presunutých</string>
+    <string name="dialog_index_update_moved">Presunutých %1$s z %2$s</string>
+    <string name="dialog_index_update_added">Pridaných %1$s z %2$s</string>
+
+    <!-- ==================== ERROR MESSAGES ==================== -->
+
+    <string name="error_credentials_required">Pre prístup k repozitáru sú potrebné poverenia, alebo repozitár neexistuje.</string>
+    <string name="error_incorrect_password">Zadané heslo nie je správne.</string>
+    <string name="error_repository_locked">Repozitár %1$s je zamknutý</string>
+    <string name="error_wallet_not_available">Peňaženka nie je dostupná</string>
+
+    <!-- ==================== MANY SELECT ==================== -->
+
+    <string name="manyselect_repositories_push">Repozitáre na odoslanie:</string>
+
+    <!-- ==================== SETTINGS ==================== -->
+
+    <string name="settings_title">Nastavenia</string>
+    <string name="settings_demo">Demo</string>
+    <string name="settings_preset">Predvolba</string>
+
+    <!-- ==================== STORAGES VIEW ==================== -->
+
+    <string name="storages_local">Lokálne úložiská</string>
+    <string name="storages_external">Externé úložiská</string>
+    <string name="storages_online">Online úložiská</string>
+    <string name="storages_no_local">Žiadne lokálne úložiská nie sú registrované. Pridajte repozitár patriaci k lokálnemu úložisku.</string>
+    <string name="storages_no_external">Žiadne externé úložiská nie sú registrované. Pridajte repozitár patriaci k externému úložisku.</string>
+    <string name="storages_no_online">Žiadne online úložiská nie sú registrované. Pridajte repozitár z online úložiska.</string>
+
+    <!-- ==================== INFO VIEW ==================== -->
+
+    <string name="info_function_title">Ako ArchiveKeep funguje?</string>
+    <string name="info_function_fingerprint">Pre každý súbor pridaný do archívu sa vytvorí odtlačok. Používa sa na:</string>
+    <string name="info_function_ensure">- zabezpečenie, že súbor zostane nezmenený a presne taký, aký bol, keď ste sa rozhodli ho archivovať.</string>
+    <string name="info_function_verify">- overenie, že súbor sa nezmenil (nebol poškodený), keď sa kopíruje do iného úložiska.</string>
+    <string name="info_function_integrity">- overenie integrity súborov v archíve a detekcia poškodenia, ktoré je potrebné vyriešiť. (toto je funkcia v príprave)</string>
+
+    <!-- ==================== CONNECTION STATUS ==================== -->
+
+    <string name="connection_connected">Pripojené</string>
+
+    <!-- ==================== SYNC PROGRESS ==================== -->
+
+    <string name="sync_remaining">zostáva %1$s</string>
+
+    <!-- ==================== DELETED FILES CLEANUP ==================== -->
+
+    <string name="cleanup_moved_or_renamed">Súbory mohli byť presunuté alebo premenované namiesto odstránenia.</string>
+    <string name="cleanup_proceed_with_addition">Odporúča sa najprv pokračovať s pridaním nových/presunutých súborov.</string>
+
+ </resources>

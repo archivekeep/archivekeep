@@ -50,7 +50,30 @@ import org.archivekeep.app.ui.domain.wiring.LocalWalletOperationLaunchers
 import org.archivekeep.app.ui.domain.wiring.WalletOperationLaunchers
 import org.archivekeep.app.ui.utils.SingleLaunchGuard
 import org.archivekeep.files.api.repository.auth.BasicAuthCredentials
+import org.archivekeep.ui.resources.Res
+import org.archivekeep.ui.resources.common_add
+import org.archivekeep.ui.resources.common_enter_password
+import org.archivekeep.ui.resources.common_enter_username
+import org.archivekeep.ui.resources.common_init
+import org.archivekeep.ui.resources.common_remember_credentials
+import org.archivekeep.ui.resources.common_verify_password
+import org.archivekeep.ui.resources.dialog_add_remote_auth_needed
+import org.archivekeep.ui.resources.dialog_add_remote_encrypted_custom
+import org.archivekeep.ui.resources.dialog_add_remote_encrypted_warning
+import org.archivekeep.ui.resources.dialog_add_remote_encrypted_warning2
+import org.archivekeep.ui.resources.dialog_add_remote_needs_init
+import org.archivekeep.ui.resources.dialog_add_remote_plain_objects
+import org.archivekeep.ui.resources.dialog_add_remote_plain_warning
+import org.archivekeep.ui.resources.dialog_add_remote_plain_warning2
+import org.archivekeep.ui.resources.dialog_add_remote_self_hosted_wip
+import org.archivekeep.ui.resources.dialog_add_remote_success
+import org.archivekeep.ui.resources.dialog_add_remote_tab_other
+import org.archivekeep.ui.resources.dialog_add_remote_tab_s3
+import org.archivekeep.ui.resources.dialog_add_remote_title
+import org.archivekeep.ui.resources.dialog_add_remote_uri_placeholder
+import org.archivekeep.ui.resources.dialog_add_remote_url_label
 import org.archivekeep.utils.exceptions.WrongCredentialsException
+import org.jetbrains.compose.resources.stringResource
 
 class AddRemoteRepositoryDialog : Dialog {
     enum class InitType {
@@ -206,7 +229,7 @@ class AddRemoteRepositoryDialog : Dialog {
 
             DialogInnerContainer(
                 buildAnnotatedString {
-                    append("Add remote repository")
+                    append(stringResource(Res.string.dialog_add_remote_title))
                 },
                 content = {
                     SecondaryTabRow(
@@ -217,7 +240,7 @@ class AddRemoteRepositoryDialog : Dialog {
                             selected = selectedTab == Input.RemoteType.S3,
                             onClick = { vm.input.selectedRemoteType.value = Input.RemoteType.S3 },
                             text = {
-                                Text(text = "S3", maxLines = 1, overflow = TextOverflow.Ellipsis)
+                                Text(text = stringResource(Res.string.dialog_add_remote_tab_s3), maxLines = 1, overflow = TextOverflow.Ellipsis)
                             },
                             enabled = isEditable,
                         )
@@ -225,7 +248,7 @@ class AddRemoteRepositoryDialog : Dialog {
                             selected = selectedTab == Input.RemoteType.OTHER,
                             onClick = { vm.input.selectedRemoteType.value = Input.RemoteType.OTHER },
                             text = {
-                                Text(text = "Other", maxLines = 1, overflow = TextOverflow.Ellipsis)
+                                Text(text = stringResource(Res.string.dialog_add_remote_tab_other), maxLines = 1, overflow = TextOverflow.Ellipsis)
                             },
                             enabled = isEditable,
                         )
@@ -245,21 +268,21 @@ class AddRemoteRepositoryDialog : Dialog {
                                         basicAuthCredentials != null
 
                                 Text(
-                                    "Self-hostable server is work in progress (there's an old discontinued server implementation written in Go)...",
+                                    stringResource(Res.string.dialog_add_remote_self_hosted_wip),
                                 )
                                 Spacer(Modifier.height(4.dp))
                                 TextField(
                                     uriText,
                                     onValueChange = { uriText = it },
-                                    label = { Text("Remote repository URL") },
-                                    placeholder = { Text("Enter URI of repository to add ...") },
+                                    label = { Text(stringResource(Res.string.dialog_add_remote_url_label)) },
+                                    placeholder = { Text(stringResource(Res.string.dialog_add_remote_uri_placeholder)) },
                                     singleLine = true,
                                     enabled = isEditable,
                                     modifier = Modifier.fillMaxWidth(),
                                 )
                                 if (authNeededOrWasNeeded) {
                                     Spacer(Modifier.height(12.dp))
-                                    Text("Authentication needed")
+                                    Text(stringResource(Res.string.dialog_add_remote_auth_needed))
                                     OutlinedTextField(
                                         basicAuthCredentials?.username ?: "",
                                         onValueChange = {
@@ -270,7 +293,7 @@ class AddRemoteRepositoryDialog : Dialog {
                                                 )
                                         },
                                         placeholder = {
-                                            Text("Enter username ...")
+                                            Text(stringResource(Res.string.common_enter_username))
                                         },
                                         singleLine = true,
                                     )
@@ -285,7 +308,7 @@ class AddRemoteRepositoryDialog : Dialog {
                                         },
                                         visualTransformation = PasswordVisualTransformation(),
                                         placeholder = {
-                                            Text("Enter password ...")
+                                            Text(stringResource(Res.string.common_enter_password))
                                         },
                                         singleLine = true,
                                     )
@@ -294,7 +317,7 @@ class AddRemoteRepositoryDialog : Dialog {
                                         onValueChange = {
                                             vm.input.otherInput.rememberCredentials.value = it
                                         },
-                                        text = "Remember credentials",
+                                        text = stringResource(Res.string.common_remember_credentials),
                                     )
                                 }
                             }
@@ -307,22 +330,22 @@ class AddRemoteRepositoryDialog : Dialog {
                         if (isSuccess) {
                             if (!initializationNeeded) {
                                 Spacer(Modifier.height(12.dp))
-                                Text("Remote repository successfully added")
+                                Text(stringResource(Res.string.dialog_add_remote_success))
                             } else {
-                                Text("Needs init")
+                                Text(stringResource(Res.string.dialog_add_remote_needs_init))
 
                                 Spacer(Modifier.height(12.dp))
                                 RadioWithTextAndExtra(
                                     selected = vm.initType.value == InitType.PLAIN,
                                     onClick = { vm.initType.value = InitType.PLAIN },
-                                    text = "Plain objects (unencrypted, normal access)",
+                                    text = stringResource(Res.string.dialog_add_remote_plain_objects),
                                     enabled = initIsEditble,
                                     extra = {
                                         WarningAlert {
                                             Column {
-                                                Text("Your data could be accessed be server owner (service provider).")
+                                                Text(stringResource(Res.string.dialog_add_remote_plain_warning))
                                                 Spacer(Modifier.height(8.dp))
-                                                Text("Do not use for sensitive data with servers (service providers) you don't trust.")
+                                                Text(stringResource(Res.string.dialog_add_remote_plain_warning2))
                                             }
                                         }
                                     },
@@ -330,14 +353,14 @@ class AddRemoteRepositoryDialog : Dialog {
                                 RadioWithTextAndExtra(
                                     selected = vm.initType.value == InitType.ENCRYPTED,
                                     onClick = { vm.initType.value = InitType.ENCRYPTED },
-                                    text = "Encrypted (custom format)",
+                                    text = stringResource(Res.string.dialog_add_remote_encrypted_custom),
                                     enabled = initIsEditble,
                                     extra = {
                                         Column {
                                             WarningAlert {
-                                                Text("Contents are E2E encrypted. Filenames are not.")
+                                                Text(stringResource(Res.string.dialog_add_remote_encrypted_warning))
                                                 Spacer(Modifier.height(8.dp))
-                                                Text("Do not have sensitive data in filenames with servers (service providers) you don't trust.")
+                                                Text(stringResource(Res.string.dialog_add_remote_encrypted_warning2))
                                             }
 
                                             Spacer(Modifier.height(8.dp))
@@ -345,16 +368,16 @@ class AddRemoteRepositoryDialog : Dialog {
                                             PasswordField(
                                                 vm.initPassword.value,
                                                 onValueChange = { vm.initPassword.value = it },
-                                                placeholder = { Text("Enter password ...") },
-                                                modifier = Modifier.padding(bottom = 8.dp).testTag("Enter password ..."),
+                                                placeholder = { Text(stringResource(Res.string.common_enter_password)) },
+                                                modifier = Modifier.padding(bottom = 8.dp).testTag("Enter password …"),
                                                 enabled = initIsEditble,
                                             )
 
                                             PasswordField(
                                                 vm.initPasswordCheck.value,
                                                 onValueChange = { vm.initPasswordCheck.value = it },
-                                                placeholder = { Text("Verify password ...") },
-                                                modifier = Modifier.testTag("Verify password ..."),
+                                                placeholder = { Text(stringResource(Res.string.common_verify_password)) },
+                                                modifier = Modifier.testTag("Verify password …"),
                                                 enabled = initIsEditble,
                                             )
                                         }
@@ -371,7 +394,7 @@ class AddRemoteRepositoryDialog : Dialog {
                                 SimpleActionDialogDoneButtons(onClose)
                             } else {
                                 SimpleActionDialogControlButtons(
-                                    "Init",
+                                    stringResource(Res.string.common_init),
                                     onLaunch = vm::launchCreate,
                                     onClose = onClose,
                                     canLaunch = vm.canLaunchInit.value,
@@ -380,7 +403,7 @@ class AddRemoteRepositoryDialog : Dialog {
                             }
                         } else {
                             SimpleActionDialogControlButtons(
-                                "Add",
+                                stringResource(Res.string.common_add),
                                 onLaunch = vm::launchAdd,
                                 onClose = onClose,
                                 canLaunch =

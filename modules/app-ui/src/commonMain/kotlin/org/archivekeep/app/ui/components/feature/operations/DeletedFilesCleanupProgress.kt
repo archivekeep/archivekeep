@@ -5,11 +5,14 @@ import org.archivekeep.app.core.procedures.deletedcleanup.DeletedFilesCleanupPro
 import org.archivekeep.app.ui.components.designsystem.dialog.LabelText
 import org.archivekeep.app.ui.components.designsystem.progress.ProgressRow
 import org.archivekeep.app.ui.components.designsystem.progress.ProgressRowList
+import org.archivekeep.ui.resources.Res
+import org.archivekeep.ui.resources.dialog_cleanup_title
 import org.archivekeep.utils.text.filesAutoPlural
+import org.jetbrains.compose.resources.stringResource
 
 @Composable
 fun DeletedFilesCleanupProgress(jobState: DeletedFilesCleanupProcedureSupervisor.JobState) {
-    LabelText("Deleted files cleanup")
+    LabelText(stringResource(Res.string.dialog_cleanup_title))
 
     ProgressRowList {
         val selectedFilesToRemove = jobState.deletedFilesCleanupProgress.filesToRemove

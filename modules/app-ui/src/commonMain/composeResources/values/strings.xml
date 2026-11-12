@@ -1,0 +1,393 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <!-- ==================== COMMON STRINGS ==================== -->
+
+    <!-- Common button labels -->
+    <string name="common_add">Add</string>
+    <string name="common_cancel">Cancel</string>
+    <string name="common_close">Close</string>
+    <string name="common_change">Change</string>
+    <string name="common_delete">Delete</string>
+    <string name="common_dismiss">Dismiss</string>
+    <string name="common_hide">Hide</string>
+    <string name="common_launch">Launch</string>
+    <string name="common_ok">OK</string>
+    <string name="common_remove">Remove</string>
+    <string name="common_rename">Rename</string>
+    <string name="common_save">Save</string>
+    <string name="common_select">Select</string>
+    <string name="common_submit">Submit</string>
+    <string name="common_stop">Stop</string>
+    <string name="common_unlock">Unlock</string>
+
+    <!-- Common status messages -->
+    <string name="common_added_successfully">Added successfully.</string>
+    <string name="common_added">Added</string>
+    <string name="common_authenticate">Authenticate</string>
+    <string name="common_cancelled">Cancelled</string>
+    <string name="common_completed">Completed</string>
+    <string name="common_disconnected">Disconnected</string>
+    <string name="common_error">ERROR: %1$s</string>
+    <string name="common_failed">Failed</string>
+    <string name="common_finished">Finished</string>
+    <string name="common_loading">Loading</string>
+    <string name="common_loading_dots">Loading ...</string>
+    <string name="common_loading_ellipsis">Loading…</string>
+    <string name="common_more">More</string>
+    <string name="common_more_actions">More actions</string>
+    <string name="common_no_directory_selected">No directory selected</string>
+    <string name="common_no_items">No items</string>
+    <string name="common_not_available">Not available ...</string>
+    <string name="common_online">Online</string>
+    <string name="common_running">Running …</string>
+    <string name="common_unknown">Unknown</string>
+
+    <!-- Common action labels -->
+    <string name="common_associate">Associate</string>
+    <string name="common_deinitialize">Deinitialize</string>
+    <string name="common_details">Details</string>
+    <string name="common_forget">Forget</string>
+    <string name="common_init">Init</string>
+    <string name="common_open">Open</string>
+    <string name="common_pull">Pull</string>
+    <string name="common_push">Push</string>
+    <string name="common_reindex">Reindex</string>
+    <string name="common_unassociate">Unassociate</string>
+
+    <!-- Common progress states -->
+    <string name="common_adding">Adding…</string>
+    <string name="common_initializing">Initializing…</string>
+    <string name="common_preparing">Preparing…</string>
+    <string name="common_starting">Starting</string>
+    <string name="common_unlocking">Unlocking…</string>
+
+    <!-- Common labels -->
+    <string name="common_log">Log</string>
+    <string name="common_errors">Errors</string>
+    <string name="common_summary">Summary</string>
+    <string name="common_progress">Progress</string>
+    <string name="common_password">Password</string>
+    <string name="common_enter_password">Enter password …</string>
+    <string name="common_verify_password">Verify password …</string>
+    <string name="common_remember_password">Remember password</string>
+    <string name="common_remember_credentials">Remember credentials</string>
+    <string name="common_remember_session">Remember session</string>
+    <string name="common_enter_username">Enter username …</string>
+    <string name="common_locked">Locked</string>
+    <string name="common_menu">Menu</string>
+    <string name="common_version">Version</string>
+
+    <!-- ==================== NAVIGATION ==================== -->
+
+    <string name="nav_home">Home</string>
+    <string name="nav_archives">Archives</string>
+    <string name="nav_storages">Storages</string>
+    <string name="nav_info">Info</string>
+    <string name="nav_settings">Settings</string>
+
+    <!-- ==================== APP BAR ==================== -->
+
+    <string name="appbar_title">ArchiveKeep</string>
+    <string name="appbar_close">Close application</string>
+    <string name="appbar_unlock_credentials">Unlock credentials …</string>
+
+    <!-- ==================== WELCOME ==================== -->
+
+    <string name="welcome_title">Welcome to ArchiveKeep</string>
+    <string name="welcome_subtitle">Personal archivation - file synchronization and replication across multiple storages (repositories)</string>
+
+    <!-- ==================== HOME VIEW ==================== -->
+
+    <!-- HomeViewContent -->
+    <string name="home_section_introduction">Introduction</string>
+    <string name="home_section_local_archives">Local archives</string>
+    <string name="home_section_external_archives">External archives</string>
+    <string name="home_section_external_storages">External storages</string>
+
+    <!-- HomeArchivesIntro -->
+    <string name="home_archives_intro_title">1. setup local storage</string>
+    <string name="home_archives_intro_description">Begin by adding an local repository to contain data you want to have archived.</string>
+    <string name="home_archives_intro_description_existing">It can already contain existing data.</string>
+    <string name="home_archives_intro_add_button">Add local repository…</string>
+
+    <!-- HomeStoragesIntro -->
+    <string name="home_storages_intro_title">2. add external storages</string>
+    <string name="home_storages_intro_description">External storages will contain a copy of your data.</string>
+    <string name="home_storages_intro_description_details">These can be external drives, hosted servers (services), or self-hosted NAS server,...</string>
+    <string name="home_storages_intro_add_directory_button">Add directory (in external storage)…</string>
+    <string name="home_storages_intro_add_url_button">Add URL…</string>
+
+    <!-- HomeArchivesList -->
+    <string name="home_archives_list_empty">nothing here ...</string>
+
+    <!-- HomeArchivesListEntry -->
+    <string name="home_archive_unassociated">Unassociated</string>
+    <string name="home_archive_copies_out_of_sync">Copies out of sync.</string>
+    <string name="home_archive_no_actions">No available actions.</string>
+    <string name="home_archive_no_repositories">No repositories associated …</string>
+
+    <!-- HomeNonLocalArchivesList -->
+    <string name="home_non_local_archives_empty">Empty</string>
+
+    <!-- HomeStoragesList -->
+    <string name="home_storages_list_empty">Nothing here ...</string>
+    <string name="home_storage_unnamed">Unnamed storage</string>
+
+    <!-- HomeCard -->
+    <string name="home_card_status_unavailable">Status unavailable: %1$s</string>
+
+    <!-- RepositoryRow -->
+    <string name="repository_row_storage_content_description">Storage</string>
+
+    <!-- Home model actions -->
+    <string name="home_action_add_and_push">Add and push</string>
+    <string name="home_action_push_to_all">Push to all</string>
+
+    <!-- ==================== MAIN MENU ==================== -->
+
+    <string name="main_menu">Main menu</string>
+    <string name="main_menu_add_file_repository">Add file repository …</string>
+    <string name="main_menu_add_remote_repository">Add remote repository …</string>
+
+    <!-- ==================== STORAGE DROPDOWN ==================== -->
+
+    <string name="storage_dropdown_set_name">Set name</string>
+    <string name="storage_dropdown_mark_as_local">Mark as local</string>
+    <string name="storage_dropdown_mark_as_external">Mark as external</string>
+
+    <!-- ==================== RELOCATION SYNC MODE ==================== -->
+
+    <string name="sync_relocation_mode_label">Relocations resolution mode:</string>
+    <string name="sync_relocation_allowed">Allowed</string>
+    <string name="sync_relocation_disabled">Disabled</string>
+    <string name="sync_relocation_duplicate_as_new">Duplicate as new</string>
+    <string name="sync_allow_duplication_increase">Allow duplication increase</string>
+    <string name="sync_allow_duplication_reduction">Allow duplication reduction</string>
+
+    <!-- ==================== DIALOG: ADD FILE SYSTEM REPOSITORY ==================== -->
+
+    <string name="dialog_add_repo_title">Add repository</string>
+    <string name="dialog_add_repo_directory_label">Repository directory:</string>
+    <string name="dialog_add_repo_preparing">Preparing...</string>
+    <string name="dialog_add_repo_parent_is_repo">The parent directory %1$s is a archive repository.</string>
+    <string name="dialog_add_repo_subdir_not_supported">Creation of repositories in a sub-directory of existing repository is not supported.</string>
+    <string name="dialog_add_repo_select_location">Select a location, which is not inside of a repository.</string>
+    <string name="dialog_add_repo_deinitialize_alternative">Alternatively, deinitialize the existing parent directory to not be a repository.</string>
+    <string name="dialog_add_repo_deinitialize_button">Deinitialize existing repository</string>
+    <string name="dialog_add_repo_not_repo_yet">The directory is not a repository, yet. Continue to initialize it as an archive repository.</string>
+    <string name="dialog_add_repo_plain_files">Plain files (unencrypted, normal access)</string>
+    <string name="dialog_add_repo_rocksdb">RocksDB Index DB (recommended)</string>
+    <string name="dialog_add_repo_rocksdb_info">Recommended for most use cases.</string>
+    <string name="dialog_add_repo_sqlite">SQLite Index DB</string>
+    <string name="dialog_add_repo_sqlite_warning">Not supported for external media on Android.</string>
+    <string name="dialog_add_repo_checksum_files">Individual checksum files</string>
+    <string name="dialog_add_repo_checksum_warning">The worst performance when used on HDD.</string>
+    <string name="dialog_add_repo_encrypted">Encrypted (custom format)</string>
+    <string name="dialog_add_repo_directory_initialized">Directory initialized successfully as repository.</string>
+    <string name="dialog_add_repo_can_be_added">Repository can be added.</string>
+    <string name="dialog_add_repo_encrypted_password_protected">The repository is encrypted, and password protected.</string>
+    <string name="dialog_add_repo_enter_password_access">Enter password to access it:</string>
+    <string name="dialog_add_repo_successfully_unlocked">Successfully unlocked.</string>
+    <string name="dialog_add_repo_select_directory">Please, select directory.</string>
+    <string name="dialog_add_repo_storage_first_time">Storage is used for the first time.</string>
+    <string name="dialog_add_repo_select_storage_type">Select storage type:</string>
+    <string name="dialog_add_repo_storage_local">Local - this device</string>
+    <string name="dialog_add_repo_storage_external">External - media device</string>
+    <string name="dialog_add_repo_enter_label">Enter storage label:</string>
+    <string name="dialog_add_repo_enter_device_label">Enter device label ...</string>
+
+    <!-- ==================== DIALOG: ADD REMOTE REPOSITORY ==================== -->
+
+    <string name="dialog_add_remote_title">Add remote repository</string>
+    <string name="dialog_add_remote_tab_s3">S3</string>
+    <string name="dialog_add_remote_tab_other">Other</string>
+    <string name="dialog_add_remote_s3_connection">Connection details for S3 bucket:</string>
+    <string name="dialog_add_remote_s3_endpoint">Endpoint URL</string>
+    <string name="dialog_add_remote_s3_insecure">Insecure protocol is used for endpoint. This results in plain data being sent over network, that is readable by anyone.</string>
+    <string name="dialog_add_remote_s3_vpn_recommended">It is strongly recommended to connect to this server using a VPN you absolutely trust.</string>
+    <string name="dialog_add_remote_s3_bucket">Bucket name</string>
+    <string name="dialog_add_remote_s3_access_key">Access key</string>
+    <string name="dialog_add_remote_s3_secret_key">Secret key</string>
+    <string name="dialog_add_remote_self_hosted_wip">Self-hostable server is work in progress (there is an old discontinued server implementation written in Go)...</string>
+    <string name="dialog_add_remote_url_label">Remote repository URL</string>
+    <string name="dialog_add_remote_uri_placeholder">Enter URI of repository to add ...</string>
+    <string name="dialog_add_remote_auth_needed">Authentication needed</string>
+    <string name="dialog_add_remote_success">Remote repository successfully added</string>
+    <string name="dialog_add_remote_needs_init">Needs init</string>
+    <string name="dialog_add_remote_plain_objects">Plain objects (unencrypted, normal access)</string>
+    <string name="dialog_add_remote_plain_warning">Your data could be accessed be server owner (service provider).</string>
+    <string name="dialog_add_remote_plain_warning2">Do not use for sensitive data with servers (service providers) you do not trust.</string>
+    <string name="dialog_add_remote_encrypted_custom">Encrypted (custom format)</string>
+    <string name="dialog_add_remote_encrypted_warning">Contents are E2E encrypted. Filenames are not.</string>
+    <string name="dialog_add_remote_encrypted_warning2">Do not have sensitive data in filenames with servers (service providers) you do not trust.</string>
+
+    <!-- ==================== DIALOG: DEINITIALIZE REPOSITORY ==================== -->
+
+    <string name="dialog_deinitialize_data_not_deleted">Data will not be deleted.</string>
+    <string name="dialog_deinitialize_reinit_needed">To use it against as an archive repository, reinitialization and reindexing will be needed.</string>
+    <string name="dialog_deinitialize_confirm">Yes, destroy metadata</string>
+    <string name="dialog_deinitialize_success">Successfully deinitialized</string>
+
+    <!-- ==================== DIALOG: UNLOCK REPOSITORY ==================== -->
+
+    <string name="dialog_unlock_repo_title">Unlock repository</string>
+    <string name="dialog_unlock_success">Repository %1$s is now unlocked.</string>
+    <string name="dialog_unlock_wallet_available">Wallet with stored credentials is available.</string>
+    <string name="dialog_unlock_wallet_hint">Open wallet to unlock repository, if its password is present there.</string>
+    <string name="dialog_unlock_wallet_locked">Locked wallet</string>
+    <string name="dialog_unlock_wallet_open">Open wallet</string>
+    <string name="dialog_unlock_not_locked">Repository %1$s is not locked. No Action needed.</string>
+    <string name="dialog_unlock_auth_needed">Authentication is needed to access %1$s repository.</string>
+    <string name="dialog_unlock_enter_credentials">Enter credentials to authenticate with:</string>
+    <string name="dialog_unlock_password_needed">Password is needed to access %1$s repository.</string>
+    <string name="dialog_unlock_enter_password">Enter password to unlock repository:</string>
+
+    <!-- ==================== DIALOG: REPOSITORY DETAILS ==================== -->
+
+    <string name="dialog_repo_details_title">Repository details</string>
+    <string name="dialog_repo_details_name">Name</string>
+    <string name="dialog_repo_details_type">Type</string>
+    <string name="dialog_repo_details_storage">Storage</string>
+    <string name="dialog_repo_details_files">Files</string>
+    <string name="dialog_repo_details_size">Size</string>
+    <string name="dialog_repo_details_encrypted">Encrypted files</string>
+    <string name="dialog_repo_details_rocksdb">RocksDB index</string>
+    <string name="dialog_repo_details_sqlite">SQLite index</string>
+    <string name="dialog_repo_details_plain">Plain files with checksum files</string>
+
+    <!-- ==================== DIALOG: ASSOCIATE REPOSITORY ==================== -->
+
+    <string name="dialog_associate_title">Associate repository</string>
+    <string name="dialog_re_associate_title">Re-associate repository</string>
+    <string name="dialog_associate_message">Associate repository %1$s in storage %2$s to:</string>
+    <string name="dialog_associate_re_message">Re-associate repository %1$s in storage %2$s to:</string>
+    <string name="dialog_associate_new_archive">Or, create a new archive by association with unassociated repository: </string>
+
+    <!-- ==================== DIALOG: UNASSOCIATE REPOSITORY ==================== -->
+
+    <string name="dialog_unassociate_title">Unassociate repository</string>
+    <string name="dialog_unassociate_message">Repository %1$s stored in %2$s will be unassociated from its archive.</string>
+
+    <!-- ==================== DIALOG: FORGET STORAGE ==================== -->
+
+
+    <!-- ==================== DIALOG: MARK STORAGE AS EXTERNAL ==================== -->
+
+    <string name="dialog_mark_external_message">Mark storage %1$s as external</string>
+
+    <!-- ==================== DIALOG: MARK STORAGE AS LOCAL ==================== -->
+
+    <string name="dialog_mark_local_message">Mark storage %1$s as local.</string>
+
+    <!-- ==================== DIALOG: RENAME STORAGE ==================== -->
+
+    <string name="dialog_rename_storage_message">Storage %1$s will be renamed to new name:</string>
+    <string name="dialog_set_storage_name_message">Storage %1$s will be named as:</string>
+    <string name="dialog_rename_new_name">New name</string>
+    <string name="dialog_rename_enter_name">Enter name</string>
+
+    <!-- ==================== DIALOG: CREATE WALLET ==================== -->
+
+    <string name="dialog_create_wallet_message">Wallet needs to be created to store and remember passwords and sessions for repository. The wallet is stored locally and is password protected</string>
+    <string name="dialog_create_wallet_password_verify">Password verify</string>
+    <string name="dialog_create_wallet_enter_password">Enter password  ...</string>
+    <string name="dialog_create_wallet_verify_password">Enter password to verify...</string>
+
+    <!-- ==================== DIALOG: UNLOCK WALLET ==================== -->
+
+    <string name="dialog_unlock_wallet_message">Wallet is locked, unlock it to connect to repositories with remembered credentials or stored sessions.</string>
+
+    <!-- ==================== DIALOG: UNSUPPORTED FEATURE ==================== -->
+
+    <string name="dialog_unsupported_title">Feature not implemented</string>
+    <string name="dialog_unsupported_message">This feature is not implemented</string>
+
+    <!-- ==================== DIALOG: SYNC (UPLOAD/DOWNLOAD) ==================== -->
+
+    <string name="dialog_upload_title">%1$s - copy to</string>
+    <string name="dialog_upload_message">Copy changes from %1$s to %2$s.</string>
+    <string name="dialog_upload_message_with_repo">Copy changes from %1$s to repository %2$s stored in %3$s.</string>
+    <string name="dialog_download_title">%1$s in %2$s - copy from</string>
+    <string name="dialog_download_message">Copy changes from repository %1$s in storage %2$s.</string>
+
+    <!-- ==================== DIALOG: SYNC PREPARED ==================== -->
+
+    <string name="dialog_sync_nothing_to_do">Nothing to do</string>
+    <string name="dialog_sync_duplicate_files">Duplicate %1$s files.</string>
+    <string name="dialog_sync_move_files">Move %1$s files.</string>
+    <string name="dialog_sync_ignore_relocations">Ignore %1$s relocations.</string>
+    <string name="dialog_sync_upload_files">Upload %1$s files.</string>
+
+    <!-- ==================== DIALOG: ASSOCIATE/PUSH REPO ==================== -->
+
+    <string name="dialog_add_push_title">Add and push</string>
+    <string name="dialog_push_title">Push</string>
+
+    <!-- ==================== DIALOG: DELETED FILES CLEANUP ==================== -->
+
+    <string name="dialog_cleanup_title">Deleted files cleanup</string>
+    <string name="dialog_cleanup_removed">Removed %1$s of %2$s</string>
+
+    <!-- ==================== DIALOG: FILE REINDEX ==================== -->
+
+    <string name="dialog_reindex_title">Local index update</string>
+    <string name="dialog_reindex_reindexed">Reindexed %1$s of %2$s</string>
+
+    <!-- ==================== DIALOG: INDEX UPDATE ==================== -->
+
+    <string name="dialog_index_update_title">Local index update</string>
+    <string name="dialog_index_update_checked">Checked %1$s of %2$s</string>
+    <string name="dialog_index_update_found_new">Found %1$s new</string>
+    <string name="dialog_index_update_found_moved">Found %1$s moved</string>
+    <string name="dialog_index_update_moved">Moved %1$s of %2$s</string>
+    <string name="dialog_index_update_added">Added %1$s of %2$s</string>
+
+    <!-- ==================== ERROR MESSAGES ==================== -->
+
+    <string name="error_credentials_required">Credentials are required to access repository, or repository does not exist.</string>
+    <string name="error_incorrect_password">Entered password is not correct.</string>
+    <string name="error_repository_locked">Repository %1$s is locked</string>
+    <string name="error_wallet_not_available">Wallet not available</string>
+
+    <!-- ==================== MANY SELECT ==================== -->
+
+    <string name="manyselect_repositories_push">Repositories to push to:</string>
+
+    <!-- ==================== SETTINGS ==================== -->
+
+    <string name="settings_title">Settings</string>
+    <string name="settings_demo">Demo</string>
+    <string name="settings_preset">Preset</string>
+
+    <!-- ==================== STORAGES VIEW ==================== -->
+
+    <string name="storages_local">Local storages</string>
+    <string name="storages_external">External storages</string>
+    <string name="storages_online">Online storages</string>
+    <string name="storages_no_local">No local storages registered. Add repository belonging to a local storage.</string>
+    <string name="storages_no_external">No external storages registered. Add repository belonging to an external storage.</string>
+    <string name="storages_no_online">No online storages registered. Add repository from online storage.</string>
+
+    <!-- ==================== INFO VIEW ==================== -->
+
+    <string name="info_function_title">How ArchiveKeep functions?</string>
+    <string name="info_function_fingerprint">Fingerprint is created for each file added to an archive. This is used to:</string>
+    <string name="info_function_ensure">- ensure file remains unchanged and exactly as it was when you decided to archive it.</string>
+    <string name="info_function_verify">- verify file is not changed (corrupted), when it is being copied to other storage.</string>
+    <string name="info_function_integrity">- verify integrity of files in an archive and detect corruption, that needs to be sorted out. (this is WIP feature)</string>
+
+    <!-- ==================== CONNECTION STATUS ==================== -->
+
+    <string name="connection_connected">Connected</string>
+
+    <!-- ==================== SYNC PROGRESS ==================== -->
+
+    <string name="sync_remaining">remaining %1$s</string>
+
+    <!-- ==================== DELETED FILES CLEANUP ==================== -->
+
+    <string name="cleanup_moved_or_renamed">Files may have been moved or renamed instead of removed.</string>
+    <string name="cleanup_proceed_with_addition">It is recommended to proceed with addition of new/moved files first.</string>
+
+ </resources>

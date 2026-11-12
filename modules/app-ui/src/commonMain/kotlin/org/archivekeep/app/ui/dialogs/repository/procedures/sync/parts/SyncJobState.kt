@@ -11,7 +11,14 @@ import org.archivekeep.app.ui.components.designsystem.dialog.LabelText
 import org.archivekeep.app.ui.components.feature.operations.InProgressOperationsList
 import org.archivekeep.app.ui.components.feature.operations.OperationProgressTabs
 import org.archivekeep.app.ui.components.feature.operations.SyncProgress
+import org.archivekeep.ui.resources.Res
+import org.archivekeep.ui.resources.common_cancelled
+import org.archivekeep.ui.resources.common_failed
+import org.archivekeep.ui.resources.common_finished
+import org.archivekeep.ui.resources.common_progress
+import org.archivekeep.ui.resources.common_starting
 import org.archivekeep.utils.procedures.ProcedureExecutionState
+import org.jetbrains.compose.resources.stringResource
 
 @Composable
 internal fun SyncJobState(operation: RepoToRepoSync.JobState) {
@@ -22,20 +29,20 @@ internal fun SyncJobState(operation: RepoToRepoSync.JobState) {
             LabelText(
                 when (val executionState = operation.executionState) {
                     ProcedureExecutionState.NotStarted -> {
-                        "Starting"
+                        stringResource(Res.string.common_starting)
                     }
 
                     ProcedureExecutionState.Running -> {
-                        "Progress"
+                        stringResource(Res.string.common_progress)
                     }
 
                     is ProcedureExecutionState.Finished -> {
                         if (executionState.success) {
-                            "Finished"
+                            stringResource(Res.string.common_finished)
                         } else if (executionState.cancelled) {
-                            "Cancelled"
+                            stringResource(Res.string.common_cancelled)
                         } else {
-                            "Failed"
+                            stringResource(Res.string.common_failed)
                         }
                     }
                 },

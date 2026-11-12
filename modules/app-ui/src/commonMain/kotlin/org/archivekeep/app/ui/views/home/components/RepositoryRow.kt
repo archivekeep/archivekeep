@@ -16,8 +16,12 @@ import org.archivekeep.app.ui.components.designsystem.sections.SectionCardBottom
 import org.archivekeep.app.ui.components.feature.InArchiveRepositoryDropdownIconLaunched
 import org.archivekeep.app.ui.utils.Action
 import org.archivekeep.app.ui.views.home.model.RepositoryBaseUiActions
+import org.archivekeep.ui.resources.Res
+import org.archivekeep.ui.resources.common_locked
+import org.archivekeep.ui.resources.repository_row_storage_content_description
 import org.archivekeep.utils.loading.Loadable
 import org.archivekeep.utils.loading.optional.OptionalLoadable
+import org.jetbrains.compose.resources.stringResource
 
 @Composable
 fun RepositoryRow(
@@ -41,9 +45,9 @@ fun RepositoryRow(
                     color = LocalContentColor.current.let { it.copy(alpha = it.alpha * 0.7f) },
                 )
             } else if (connectionStatus.isLocked) {
-                Icon(TablerIcons.Lock, "Locked")
+                Icon(TablerIcons.Lock, stringResource(Res.string.common_locked))
             } else {
-                Icon(icon, "Storage")
+                Icon(icon, stringResource(Res.string.repository_row_storage_content_description))
             }
         },
         actions = {

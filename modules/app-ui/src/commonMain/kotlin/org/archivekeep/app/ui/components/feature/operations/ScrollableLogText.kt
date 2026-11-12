@@ -19,7 +19,10 @@ import androidx.compose.ui.unit.dp
 import org.archivekeep.app.ui.components.base.layout.ScrollableLazyColumnWithGuessedWidth
 import org.archivekeep.app.ui.components.designsystem.dialog.LabelText
 import org.archivekeep.app.ui.components.designsystem.dialog.labelTextStyle
+import org.archivekeep.ui.resources.Res
+import org.archivekeep.ui.resources.common_log
 import org.archivekeep.utils.collections.limitSize
+import org.jetbrains.compose.resources.stringResource
 import kotlin.math.max
 
 private const val itemsToConsider = 500
@@ -53,7 +56,7 @@ fun ScrollableLogTextInDialog(textLines: List<String>) {
     ) {
         SelectionContainer(Modifier.padding(start = 10.dp, end = 10.dp, top = 6.dp, bottom = 10.dp)) {
             ScrollableLazyColumnWithGuessedWidth(guessedWidth, enableHorizontalScroll = true) {
-                item { LabelText("Log") }
+                item { LabelText(stringResource(Res.string.common_log)) }
                 item { Spacer(Modifier.height(4.dp)) }
 
                 items(textLines) { text ->

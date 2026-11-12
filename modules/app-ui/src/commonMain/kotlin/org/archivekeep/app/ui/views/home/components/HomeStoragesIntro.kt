@@ -18,9 +18,15 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import org.archivekeep.app.core.persistence.drivers.filesystem.FileSystemStorageType
 import org.archivekeep.app.ui.components.designsystem.sections.SectionCard
 import org.archivekeep.app.ui.domain.wiring.LocalArchiveOperationLaunchers
+import org.archivekeep.ui.resources.Res
+import org.archivekeep.ui.resources.home_storages_intro_add_directory_button
+import org.archivekeep.ui.resources.home_storages_intro_add_url_button
+import org.archivekeep.ui.resources.home_storages_intro_description
+import org.archivekeep.ui.resources.home_storages_intro_description_details
+import org.archivekeep.ui.resources.home_storages_intro_title
+import org.jetbrains.compose.resources.stringResource
 
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
@@ -35,17 +41,17 @@ fun HomeStoragesIntro() {
             modifier = Modifier.padding(32.dp),
         ) {
             Text(
-                "2. add external storages",
+                stringResource(Res.string.home_storages_intro_title),
                 style = MaterialTheme.typography.titleMedium,
                 modifier = Modifier.padding(bottom = 4.dp),
             )
             Text(
-                "External storages will contain a copy of your data.",
+                stringResource(Res.string.home_storages_intro_description),
                 color = Color.DarkGray,
                 fontSize = 14.sp,
             )
             Text(
-                "These can be external drives, hosted servers (services), or self-hosted NAS server,...",
+                stringResource(Res.string.home_storages_intro_description_details),
                 color = Color.DarkGray,
                 fontSize = 14.sp,
             )
@@ -60,7 +66,7 @@ fun HomeStoragesIntro() {
                     },
                     modifier = Modifier.defaultMinSize(120.dp),
                 ) {
-                    Text("Add directory (in external storage)…")
+                    Text(stringResource(Res.string.home_storages_intro_add_directory_button))
                 }
                 TextButton(
                     onClick = {
@@ -68,7 +74,7 @@ fun HomeStoragesIntro() {
                     },
                     modifier = Modifier.defaultMinSize(120.dp),
                 ) {
-                    Text("Add URL…")
+                    Text(stringResource(Res.string.home_storages_intro_add_url_button))
                 }
             }
         }

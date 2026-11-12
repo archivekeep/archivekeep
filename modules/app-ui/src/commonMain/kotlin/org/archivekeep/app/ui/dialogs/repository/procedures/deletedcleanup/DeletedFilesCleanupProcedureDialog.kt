@@ -25,7 +25,6 @@ import org.archivekeep.app.core.procedures.deletedcleanup.DeletedFilesCleanupPro
 import org.archivekeep.app.core.procedures.deletedcleanup.DeletedFilesCleanupProcedureSupervisorService
 import org.archivekeep.app.core.utils.identifiers.RepositoryURI
 import org.archivekeep.app.ui.components.base.layout.ScrollableLazyColumnWithGuessedWidth
-import org.archivekeep.app.ui.components.designsystem.dialog.LabelText
 import org.archivekeep.app.ui.components.designsystem.dialog.fullWidthDialogWidthModifier
 import org.archivekeep.app.ui.components.designsystem.elements.InfoAlert
 import org.archivekeep.app.ui.components.designsystem.sections.SectionCardSecondaryButton
@@ -42,12 +41,17 @@ import org.archivekeep.app.ui.utils.appendBoldSpan
 import org.archivekeep.app.ui.utils.collectAsLoadable
 import org.archivekeep.app.ui.utils.stickToFirstNotNull
 import org.archivekeep.files.procedures.deletedcleanup.DeletedFilesCleanupProcedure
+import org.archivekeep.ui.resources.Res
+import org.archivekeep.ui.resources.cleanup_moved_or_renamed
+import org.archivekeep.ui.resources.cleanup_proceed_with_addition
+import org.archivekeep.ui.resources.dialog_reindex_title
 import org.archivekeep.utils.loading.Loadable
 import org.archivekeep.utils.loading.mapToLoadable
 import org.archivekeep.utils.loading.optional.OptionalLoadable
 import org.archivekeep.utils.loading.optional.mapIfLoadedOrNull
 import org.archivekeep.utils.loading.optional.mapLoadedData
 import org.archivekeep.utils.loading.waitLoadedValue
+import org.jetbrains.compose.resources.stringResource
 
 class DeletedFilesCleanupProcedureDialog(
     repositoryURI: RepositoryURI,
@@ -179,16 +183,16 @@ class DeletedFilesCleanupProcedureDialog(
                     val launchers = LocalArchiveOperationLaunchers.current
 
                     InfoAlert {
-                        Text("Files may have been moved or renamed instead of removed.")
+                        Text(stringResource(Res.string.cleanup_moved_or_renamed))
                         Spacer(Modifier.height(8.dp))
-                        Text("It is recommended to proceed with addition of new/moved files first.")
+                        Text(stringResource(Res.string.cleanup_proceed_with_addition))
                         Spacer(Modifier.height(8.dp))
                         SectionCardSecondaryButton(
                             onClick = {
                                 launchers.openIndexUpdateOperation(uri)
                                 state.onClose()
                             },
-                            text = "Open index update",
+                            text = stringResource(Res.string.dialog_reindex_title),
                         )
                     }
                     Spacer(Modifier.height(12.dp))

@@ -20,8 +20,16 @@ import org.archivekeep.app.ui.domain.wiring.LocalApplicationServices
 import org.archivekeep.app.ui.utils.Launchable
 import org.archivekeep.app.ui.utils.asAction
 import org.archivekeep.app.ui.utils.simpleLaunchable
+import org.archivekeep.ui.resources.Res
+import org.archivekeep.ui.resources.common_authenticate
+import org.archivekeep.ui.resources.common_password
+import org.archivekeep.ui.resources.dialog_create_wallet_enter_password
+import org.archivekeep.ui.resources.dialog_create_wallet_message
+import org.archivekeep.ui.resources.dialog_create_wallet_password_verify
+import org.archivekeep.ui.resources.dialog_create_wallet_verify_password
 import org.archivekeep.utils.datastore.passwordprotected.PasswordProtectedDataStore
 import org.archivekeep.utils.loading.Loadable
+import org.jetbrains.compose.resources.stringResource
 
 class CreateWalletDialog : AbstractDialog<CreateWalletDialog.State, CreateWalletDialog.VM>() {
     class VM(
@@ -61,7 +69,7 @@ class CreateWalletDialog : AbstractDialog<CreateWalletDialog.State, CreateWallet
 
         override val title =
             buildAnnotatedString {
-                append("Create wallet")
+                append("Create Wallet")
             }
     }
 
@@ -89,8 +97,7 @@ class CreateWalletDialog : AbstractDialog<CreateWalletDialog.State, CreateWallet
 //                    }
 
         Text(
-            "Wallet needs to be created to store and remember passwords and sessions for repository. " +
-                "The wallet is stored locally and is password protected",
+            stringResource(Res.string.dialog_create_wallet_message),
         )
 
         PasswordField(
@@ -98,16 +105,16 @@ class CreateWalletDialog : AbstractDialog<CreateWalletDialog.State, CreateWallet
             onValueChange = {
                 state.password = it
             },
-            label = { Text("Password") },
-            placeholder = { Text("Enter password  ...") },
+            label = { Text(stringResource(Res.string.common_password)) },
+            placeholder = { Text(stringResource(Res.string.dialog_create_wallet_enter_password)) },
         )
         PasswordField(
             state.password2 ?: "",
             onValueChange = {
                 state.password2 = it
             },
-            label = { Text("Password verify") },
-            placeholder = { Text("Enter password to verify...") },
+            label = { Text(stringResource(Res.string.dialog_create_wallet_password_verify)) },
+            placeholder = { Text(stringResource(Res.string.dialog_create_wallet_verify_password)) },
         )
         LaunchableExecutionErrorIfPresent(state.launchable)
     }
@@ -115,7 +122,7 @@ class CreateWalletDialog : AbstractDialog<CreateWalletDialog.State, CreateWallet
     @Composable
     override fun RowScope.renderButtons(state: State) {
         SimpleActionDialogControlButtons(
-            "Authenticate",
+            stringResource(Res.string.common_authenticate),
             actionState = state.action.value,
             onClose = state.onClose,
         )

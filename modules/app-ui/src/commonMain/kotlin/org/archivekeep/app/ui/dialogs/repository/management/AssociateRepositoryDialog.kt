@@ -49,8 +49,12 @@ import org.archivekeep.app.ui.utils.asAction
 import org.archivekeep.app.ui.utils.collectLoadableFlow
 import org.archivekeep.app.ui.utils.simpleLaunchable
 import org.archivekeep.files.api.repository.RepositoryAssociationGroupId
+import org.archivekeep.ui.resources.Res
+import org.archivekeep.ui.resources.common_associate
+import org.archivekeep.ui.resources.dialog_associate_new_archive
 import org.archivekeep.utils.loading.Loadable
 import org.archivekeep.utils.loading.mapLoadedData
+import org.jetbrains.compose.resources.stringResource
 
 class AssociateRepositoryDialog(
     uri: RepositoryURI,
@@ -75,9 +79,9 @@ class AssociateRepositoryDialog(
             override val title =
                 buildAnnotatedString {
                     if (currentAssociationId != null) {
-                        append("Re-associate repository")
+                        append("Re-associate Repository")
                     } else {
-                        append("Associate repository")
+                        append("Associate Repository")
                     }
                 }
 
@@ -259,7 +263,7 @@ class AssociateRepositoryDialog(
                     .filter { it.associationId == null }
 
             if (unAssociatedRepositories.isNotEmpty()) {
-                Text("Or, create a new archive by association with unassociated repository: ")
+                Text(stringResource(Res.string.dialog_associate_new_archive))
             }
 
             unAssociatedRepositories
@@ -317,7 +321,7 @@ class AssociateRepositoryDialog(
     @Composable
     override fun RowScope.renderButtons(state: VM.State) {
         SimpleActionDialogControlButtons(
-            "Associate",
+            stringResource(Res.string.common_associate),
             actionState = state.action,
             onClose = state.onClose,
         )

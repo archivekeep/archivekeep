@@ -10,6 +10,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.graphics.Color
 import kotlinx.coroutines.launch
+import org.archivekeep.ui.resources.Res
+import org.archivekeep.ui.resources.common_menu
+import org.jetbrains.compose.resources.stringResource
 
 fun drawerIconButton(drawerState: DrawerState?): @Composable (() -> Unit)? =
     drawerState?.let { drawerState ->
@@ -27,7 +30,7 @@ fun drawerIconButton(drawerState: DrawerState?): @Composable (() -> Unit)? =
             }) {
                 Icon(
                     Icons.Default.Menu,
-                    contentDescription = "Menu",
+                    contentDescription = stringResource(Res.string.common_menu),
                     tint = Color.White.copy(alpha = LocalContentAlpha.current),
                 )
             }

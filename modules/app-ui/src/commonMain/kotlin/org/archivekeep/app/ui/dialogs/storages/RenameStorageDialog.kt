@@ -22,12 +22,18 @@ import org.archivekeep.app.ui.components.feature.dialogs.SimpleActionDialogContr
 import org.archivekeep.app.ui.components.feature.dialogs.operations.LaunchableExecutionErrorIfPresent
 import org.archivekeep.app.ui.domain.wiring.LocalApplicationServices
 import org.archivekeep.app.ui.utils.Launchable
-import org.archivekeep.app.ui.utils.appendBoldSpan
 import org.archivekeep.app.ui.utils.asAction
 import org.archivekeep.app.ui.utils.collectLoadableFlow
 import org.archivekeep.app.ui.utils.simpleLaunchable
+import org.archivekeep.ui.resources.Res
+import org.archivekeep.ui.resources.common_submit
+import org.archivekeep.ui.resources.dialog_rename_enter_name
+import org.archivekeep.ui.resources.dialog_rename_new_name
+import org.archivekeep.ui.resources.dialog_rename_storage_message
+import org.archivekeep.ui.resources.dialog_set_storage_name_message
 import org.archivekeep.utils.loading.Loadable
 import org.archivekeep.utils.loading.mapLoadedData
+import org.jetbrains.compose.resources.stringResource
 
 class RenameStorageDialog(
     uri: StorageURI,
@@ -68,9 +74,9 @@ class RenameStorageDialog(
             buildAnnotatedString {
                 append(
                     if (isNewName) {
-                        "Set name for storage"
+                        "Set Storage Name"
                     } else {
-                        "Rename storage"
+                        "Rename Storage"
                     },
                 )
             }
@@ -110,13 +116,10 @@ class RenameStorageDialog(
             modifier = Modifier.padding(bottom = 4.dp),
             text =
                 buildAnnotatedString {
-                    append("Storage ")
-                    appendBoldSpan(state.storage.label)
-
                     if (state.isNewName) {
-                        append(" will be named as:")
+                        append(stringResource(Res.string.dialog_set_storage_name_message, state.storage.label))
                     } else {
-                        append(" will be renamed to new name:")
+                        append(stringResource(Res.string.dialog_rename_storage_message, state.storage.label))
                     }
                 },
         )
@@ -124,10 +127,10 @@ class RenameStorageDialog(
             state.newName,
             onValueChange = { state.newName = it },
             label = {
-                Text("New name")
+                Text(stringResource(Res.string.dialog_rename_new_name))
             },
             placeholder = {
-                Text("Enter name")
+                Text(stringResource(Res.string.dialog_rename_enter_name))
             },
             singleLine = true,
         )
@@ -140,7 +143,7 @@ class RenameStorageDialog(
         state: State,
     ) {
         SimpleActionDialogControlButtons(
-            "Submit",
+            stringResource(Res.string.common_submit),
             actionState = state.action,
             onClose = onClose,
         )

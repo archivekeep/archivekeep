@@ -14,6 +14,9 @@ import org.archivekeep.app.ui.components.designsystem.layout.views.ViewScrollabl
 import org.archivekeep.app.ui.components.designsystem.theme.CColors
 import org.archivekeep.app.ui.components.feature.demo.PresetSettings
 import org.archivekeep.app.ui.views.View
+import org.archivekeep.ui.resources.Res
+import org.archivekeep.ui.resources.settings_title
+import org.jetbrains.compose.resources.stringResource
 
 class SettingsView : View<String> {
     @Composable
@@ -33,7 +36,7 @@ class SettingsView : View<String> {
                     modifier = Modifier.padding(vertical = 12.dp),
                     verticalArrangement = Arrangement.spacedBy(12.dp),
                 ) {
-                    Text("Settings", style = MaterialTheme.typography.titleLarge)
+                    Text(stringResource(Res.string.settings_title), style = MaterialTheme.typography.titleLarge)
                     PresetSettings()
                 }
             }

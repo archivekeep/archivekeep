@@ -19,7 +19,13 @@ import org.archivekeep.app.ui.domain.data.canUnlock
 import org.archivekeep.app.ui.domain.wiring.LocalApplicationServices
 import org.archivekeep.app.ui.domain.wiring.LocalArchiveOperationLaunchers
 import org.archivekeep.app.ui.domain.wiring.LocalWalletOperationLaunchers
+import org.archivekeep.ui.resources.Res
+import org.archivekeep.ui.resources.common_unlock
+import org.archivekeep.ui.resources.dialog_unlock_wallet_locked
+import org.archivekeep.ui.resources.dialog_unlock_wallet_open
+import org.archivekeep.ui.resources.error_repository_locked
 import org.archivekeep.utils.datastore.passwordprotected.PasswordProtectedDataStore
+import org.jetbrains.compose.resources.stringResource
 
 @Composable
 fun RepositoryLockedError(
@@ -30,7 +36,7 @@ fun RepositoryLockedError(
     val walletOperationLaunchers = LocalWalletOperationLaunchers.current
     val credentialStorage = LocalApplicationServices.current.walletDataStore as? PasswordProtectedDataStore
 
-    Text("Repository ${cause.uri} is locked")
+    Text(stringResource(Res.string.error_repository_locked, cause.uri))
 
     Spacer(Modifier.height(8.dp))
 
@@ -41,19 +47,19 @@ fun RepositoryLockedError(
             ) {
                 Icon(
                     TablerIcons.Lock,
-                    contentDescription = "Locked wallet",
+                    contentDescription = stringResource(Res.string.dialog_unlock_wallet_locked),
                     Modifier.size(20.dp),
                 )
                 Spacer(Modifier.width(12.dp))
 
-                Text("Open wallet")
+                Text(stringResource(Res.string.dialog_unlock_wallet_open))
             }
         }
 
         OutlinedButton(onClick = {
             repoOperationLaunchers.unlockRepository(cause.uri, onResolve)
         }) {
-            Text("Unlock")
+            Text(stringResource(Res.string.common_unlock))
         }
     }
 }

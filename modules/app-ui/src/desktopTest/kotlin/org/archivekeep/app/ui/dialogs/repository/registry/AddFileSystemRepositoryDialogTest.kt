@@ -190,13 +190,13 @@ class AddFileSystemRepositoryDialogTest {
 
                 saveTestingContainerBitmap("dialogs/add-filesystem-repository/init-encrypted-02-switch-to-encrypted.png")
 
-                onNodeWithText("Enter password ...").assertExists()
-                onNodeWithText("Verify password ...").assertExists()
+                onNodeWithText("Enter password …").assertExists()
+                onNodeWithText("Verify password …").assertExists()
                 onInitSubmitButton().assertIsNotEnabled()
             }
 
             run {
-                onNodeWithText("Enter password ...").performClickTextInput("test-create-password")
+                onNodeWithText("Enter password …").performClickTextInput("test-create-password")
 
                 saveTestingContainerBitmap("dialogs/add-filesystem-repository/init-encrypted-03-1-first-password.png")
 
@@ -204,7 +204,7 @@ class AddFileSystemRepositoryDialogTest {
             }
 
             run {
-                onNodeWithText("Verify password ...").performClickTextInput("wrong-password")
+                onNodeWithText("Verify password …").performClickTextInput("wrong-password")
 
                 saveTestingContainerBitmap("dialogs/add-filesystem-repository/init-encrypted-03-2-wrong-password.png")
 
@@ -212,7 +212,7 @@ class AddFileSystemRepositoryDialogTest {
             }
 
             run {
-                onNodeWithTag("Verify password ...").run {
+                onNodeWithTag("Verify password …").run {
                     performClick()
                     performTextClearance()
                     performTextInput("test-create-password")
@@ -231,8 +231,8 @@ class AddFileSystemRepositoryDialogTest {
 
                     onNodeWithText("Directory initialized successfully as repository.").assertExists()
                     onNodeWithText("Added successfully.").assertExists()
-                    onNodeWithTag("Enter password ...").assertIsNotEnabled()
-                    onNodeWithTag("Verify password ...").assertIsNotEnabled()
+                    onNodeWithTag("Enter password …").assertIsNotEnabled()
+                    onNodeWithTag("Verify password …").assertIsNotEnabled()
                     onNodeWithText("Init").assertDoesNotExist()
                     onNodeWithText("Close").assertIsEnabled()
                 }
@@ -332,7 +332,7 @@ class AddFileSystemRepositoryDialogTest {
             }
 
             run {
-                onNodeWithText("Enter password ...").performClickTextInput("test-add-password")
+                onNodeWithText("Enter password …").performClickTextInput("test-add-password")
 
                 saveTestingContainerBitmap("dialogs/add-filesystem-repository/add-encrypted-02-input-password.png")
 
@@ -398,7 +398,7 @@ class AddFileSystemRepositoryDialogTest {
             }
 
             run {
-                onNodeWithText("Enter password ...").performClickTextInput("some-wrong-password")
+                onNodeWithText("Enter password …").performClickTextInput("some-wrong-password")
 
                 saveTestingContainerBitmap("dialogs/add-filesystem-repository/add-wrong-password-encrypted-02-input-password.png")
 
@@ -412,7 +412,7 @@ class AddFileSystemRepositoryDialogTest {
                 eventually(2.seconds) {
                     saveTestingContainerBitmap("dialogs/add-filesystem-repository/add-wrong-password-encrypted-03-failed.png")
 
-                    onNodeWithText("Entered password isn't correct.").assertExists()
+                    onNodeWithText("Entered password is not correct.").assertExists()
                     onNodeWithText("Unlock").assertIsEnabled()
                     onNodeWithText("Add").assertIsNotEnabled()
                 }

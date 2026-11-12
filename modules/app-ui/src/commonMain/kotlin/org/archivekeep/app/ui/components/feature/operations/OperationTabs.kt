@@ -21,16 +21,22 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import org.archivekeep.app.core.procedures.utils.BaseJobState
 import org.archivekeep.app.ui.components.feature.dialogs.operations.ExecutionErrorIfPresent
+import org.archivekeep.ui.resources.Res
+import org.archivekeep.ui.resources.common_errors
+import org.archivekeep.ui.resources.common_log
+import org.archivekeep.ui.resources.common_summary
+import org.jetbrains.compose.resources.stringResource
 
 private const val TAB_SUMMARY = "summary"
 private const val TAB_LOG = "log"
 private const val TAB_ERROR_LOG = "error-log"
 
-private val tabOptions =
+@Composable
+private fun getTabOptions(): List<Pair<String, @Composable () -> String>> =
     listOf(
-        TAB_SUMMARY to "Summary",
-        TAB_LOG to "Log",
-        TAB_ERROR_LOG to "Errors",
+        TAB_SUMMARY to { stringResource(Res.string.common_summary) },
+        TAB_LOG to { stringResource(Res.string.common_log) },
+        TAB_ERROR_LOG to { stringResource(Res.string.common_errors) },
     )
 
 @Composable
@@ -41,6 +47,7 @@ fun <S : BaseJobState> OperationProgressTabs(
 ) {
     var selectedTab by remember { mutableStateOf(TAB_SUMMARY) }
 
+    val tabOptions = getTabOptions()
     val validTabOptions = tabOptions.filter { it.first != TAB_ERROR_LOG || errorLog != null }
 
     SingleChoiceSegmentedButtonRow {
@@ -55,7 +62,7 @@ fun <S : BaseJobState> OperationProgressTabs(
                 selected = selectedTab == tab.first,
                 label = {
                     Row {
-                        Text(tab.second)
+                        Text(tab.second())
 
                         if (tab.first == TAB_ERROR_LOG && errorLog?.value?.isNotEmpty() == true) {
                             Text(

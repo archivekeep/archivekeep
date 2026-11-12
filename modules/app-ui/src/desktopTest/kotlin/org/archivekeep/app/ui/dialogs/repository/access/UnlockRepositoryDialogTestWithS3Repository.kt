@@ -5,11 +5,11 @@ import androidx.compose.ui.test.assertIsEnabled
 import androidx.compose.ui.test.assertIsNotEnabled
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
+import com.adobe.testing.s3mock.testcontainers.S3MockContainer
 import io.kotest.assertions.nondeterministic.eventually
 import io.kotest.matchers.shouldBe
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.runBlocking
-import com.adobe.testing.s3mock.testcontainers.S3MockContainer
 import org.archivekeep.app.core.persistence.drivers.s3.S3RepositoryURIData
 import org.archivekeep.app.core.persistence.registry.RegisteredRepository
 import org.archivekeep.app.ui.domain.wiring.ApplicationProviders
@@ -70,8 +70,8 @@ class UnlockRepositoryDialogTestWithS3Repository {
             }
 
             run {
-                onNodeWithText("Enter username ...").performClickTextInput(testRepo.accessKey)
-                onNodeWithText("Enter password ...").performClickTextInput(testRepo.secretKey)
+                onNodeWithText("Enter username …").performClickTextInput(testRepo.accessKey)
+                onNodeWithText("Enter password …").performClickTextInput(testRepo.secretKey)
 
                 saveTestingContainerBitmap("dialogs/unlock-repository/02-input-provided.png")
 

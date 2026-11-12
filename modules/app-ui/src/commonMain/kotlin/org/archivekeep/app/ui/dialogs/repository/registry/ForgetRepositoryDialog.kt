@@ -26,8 +26,11 @@ import org.archivekeep.app.ui.utils.appendBoldSpan
 import org.archivekeep.app.ui.utils.asTrivialAction
 import org.archivekeep.app.ui.utils.collectLoadableFlow
 import org.archivekeep.app.ui.utils.simpleLaunchable
+import org.archivekeep.ui.resources.Res
+import org.archivekeep.ui.resources.common_forget
 import org.archivekeep.utils.loading.Loadable
 import org.archivekeep.utils.loading.mapToLoadable
+import org.jetbrains.compose.resources.stringResource
 
 class ForgetRepositoryDialog(
     uri: RepositoryURI,
@@ -59,7 +62,7 @@ class ForgetRepositoryDialog(
     ) : IState {
         override val title: AnnotatedString =
             buildAnnotatedString {
-                append("Forget repository")
+                append("Forget Repository")
             }
 
         val action by launchable.asTrivialAction()
@@ -103,7 +106,7 @@ class ForgetRepositoryDialog(
         Text(
             remember {
                 buildAnnotatedString {
-                    append("Data will not be deleted.")
+                    append("Data files are not deleted")
                 }
             },
             modifier = Modifier.padding(top = 10.dp),
@@ -114,7 +117,7 @@ class ForgetRepositoryDialog(
     @Composable
     override fun RowScope.renderButtons(state: State) {
         SimpleActionDialogControlButtons(
-            "Forget",
+            stringResource(Res.string.common_forget),
             actionState = state.action,
             onClose = state.onClose,
         )

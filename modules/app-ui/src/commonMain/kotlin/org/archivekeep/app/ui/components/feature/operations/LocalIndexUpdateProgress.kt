@@ -7,7 +7,10 @@ import org.archivekeep.app.ui.components.designsystem.progress.ProgressRow
 import org.archivekeep.app.ui.components.designsystem.progress.ProgressRowList
 import org.archivekeep.files.procedures.indexupdate.IndexUpdateAddProgress
 import org.archivekeep.files.procedures.indexupdate.IndexUpdateMoveProgress
+import org.archivekeep.ui.resources.Res
+import org.archivekeep.ui.resources.dialog_index_update_title
 import org.archivekeep.utils.text.filesAutoPlural
+import org.jetbrains.compose.resources.stringResource
 
 @Composable
 fun LocalIndexUpdateProgress(state: JobState) {
@@ -19,7 +22,7 @@ fun LocalIndexUpdateProgress(
     moveProgress: IndexUpdateMoveProgress,
     addProgress: IndexUpdateAddProgress,
 ) {
-    LabelText("Local index update")
+    LabelText(stringResource(Res.string.dialog_index_update_title))
 
     ProgressRowList {
         val selectedMoves = moveProgress.movesToExecute

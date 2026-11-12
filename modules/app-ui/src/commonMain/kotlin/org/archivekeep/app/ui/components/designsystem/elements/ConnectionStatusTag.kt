@@ -11,14 +11,19 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import org.archivekeep.app.core.domain.storages.Storage
+import org.archivekeep.ui.resources.Res
+import org.archivekeep.ui.resources.common_disconnected
+import org.archivekeep.ui.resources.common_online
+import org.archivekeep.ui.resources.connection_connected
+import org.jetbrains.compose.resources.stringResource
 
 @Composable
 fun ConnectionStatusTag(connectionStatus: Storage.ConnectionStatus) {
     val (color, text) =
         when (connectionStatus) {
-            Storage.ConnectionStatus.ONLINE -> Pair(Color(190, 235, 225), "Online")
-            Storage.ConnectionStatus.CONNECTED -> Pair(Color(244, 211, 160), "Connected")
-            Storage.ConnectionStatus.DISCONNECTED -> Pair(Color(221, 232, 221), "Disconnected")
+            Storage.ConnectionStatus.ONLINE -> Pair(Color(190, 235, 225), stringResource(Res.string.common_online))
+            Storage.ConnectionStatus.CONNECTED -> Pair(Color(244, 211, 160), stringResource(Res.string.connection_connected))
+            Storage.ConnectionStatus.DISCONNECTED -> Pair(Color(221, 232, 221), stringResource(Res.string.common_disconnected))
         }
 
     Surface(

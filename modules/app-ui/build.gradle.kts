@@ -81,6 +81,9 @@ androidComponents {
 
 tasks.withType<Test> {
     environment["SCREENSHOTS_BUILD_OUTPUT"] = "${project.layout.buildDirectory.get()}/generated-ui-screenshots"
+
+    systemProperty("user.language", "en")
+    systemProperty("user.country", "US")
 }
 
 compose.resources {

@@ -52,6 +52,13 @@ import org.archivekeep.app.ui.views.archives.ArchivesView
 import org.archivekeep.app.ui.views.home.HomeView
 import org.archivekeep.app.ui.views.settings.SettingsView
 import org.archivekeep.app.ui.views.storages.StoragesView
+import org.archivekeep.ui.resources.Res
+import org.archivekeep.ui.resources.nav_archives
+import org.archivekeep.ui.resources.nav_home
+import org.archivekeep.ui.resources.nav_info
+import org.archivekeep.ui.resources.nav_settings
+import org.archivekeep.ui.resources.nav_storages
+import org.jetbrains.compose.resources.stringResource
 
 @Composable
 fun MainWindowLayout(
@@ -146,7 +153,7 @@ private fun AppDrawerNavigation(
         onSelect: () -> Unit,
     ) {
         NavigationDrawerItem(
-            label = { Text(it.title) },
+            label = { Text(it.title()) },
             icon = { Icon(it.icon, contentDescription = null) },
             selected = selectedItem.value == it,
             onClick = {
@@ -181,7 +188,7 @@ private fun AppBarNavigation(selectedItem: MutableState<NavigableView<View<*>>>)
         it: NavigableView<View<*>>,
     ) {
         NavigationTopBarItem(
-            text = it.title,
+            text = it.title(),
             icon = it.icon,
             selected = selectedItem.value == it,
             onClick = { selectedItem.value = it },
@@ -205,7 +212,7 @@ fun renderItem(
     selectedBackground: Color = Color(60, 92, 154),
 ) {
     NavigationRailBarItem(
-        text = it.title,
+        text = it.title(),
         icon = it.icon,
         selected = selectedItem.value == it,
         onClick = { selectedItem.value = it },
@@ -251,7 +258,7 @@ private fun BottomBar(selectedItem: MutableState<NavigableView<View<*>>>) {
 
 data class NavigableView<out V : View<*>>(
     val key: String,
-    val title: String,
+    val title: @Composable () -> String,
     val icon: ImageVector,
     val view: V,
 )
@@ -260,14 +267,14 @@ private val navigables =
     listOfNotNull(
         NavigableView(
             key = "home",
-            title = "Home",
+            title = { stringResource(Res.string.nav_home) },
             icon = Icons.Default.Home,
             view = HomeView(),
         ),
         if (enableUnfinishedFeatures) {
             NavigableView(
                 key = "archives",
-                title = "Archives",
+                title = { stringResource(Res.string.nav_archives) },
                 icon = TablerIcons.Folders,
                 view = ArchivesView(),
             )
@@ -276,7 +283,7 @@ private val navigables =
         },
         NavigableView(
             key = "storages",
-            title = "Storages",
+            title = { stringResource(Res.string.nav_storages) },
             icon = TablerIcons.Database,
             view = StoragesView(),
         ),
@@ -286,14 +293,14 @@ private val navigablesEnd =
     listOfNotNull(
         NavigableView(
             key = "info",
-            title = "Info",
+            title = { stringResource(Res.string.nav_info) },
             icon = TablerIcons.InfoSquare,
             view = InfoView(),
         ),
         if (enableUnfinishedFeatures) {
             NavigableView(
                 key = "settings",
-                title = "Settings",
+                title = { stringResource(Res.string.nav_settings) },
                 icon = Icons.Default.Settings,
                 view = SettingsView(),
             )

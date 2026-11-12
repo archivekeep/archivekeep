@@ -20,8 +20,14 @@ import org.archivekeep.app.ui.domain.wiring.LocalApplicationServices
 import org.archivekeep.app.ui.utils.Launchable
 import org.archivekeep.app.ui.utils.asAction
 import org.archivekeep.app.ui.utils.simpleLaunchable
+import org.archivekeep.ui.resources.Res
+import org.archivekeep.ui.resources.common_authenticate
+import org.archivekeep.ui.resources.common_enter_password
+import org.archivekeep.ui.resources.common_password
+import org.archivekeep.ui.resources.dialog_unlock_wallet_message
 import org.archivekeep.utils.datastore.passwordprotected.PasswordProtectedDataStore
 import org.archivekeep.utils.loading.Loadable
+import org.jetbrains.compose.resources.stringResource
 
 class UnlockWalletDialog(
     val onUnlock: (() -> Unit)?,
@@ -57,7 +63,7 @@ class UnlockWalletDialog(
 
         override val title: AnnotatedString =
             buildAnnotatedString {
-                append("Open wallet")
+                append("Unlock Wallet")
             }
 
         val action =
@@ -95,15 +101,15 @@ class UnlockWalletDialog(
 //                        return@DialogInnerContainer
 //                    }
 
-        Text("Wallet is locked, unlock it to connect to repositories with remembered credentials or stored sessions.")
+        Text(stringResource(Res.string.dialog_unlock_wallet_message))
 
         PasswordField(
             state.password ?: "",
             onValueChange = {
                 state.password = it
             },
-            label = { Text("Password") },
-            placeholder = { Text("Enter password  ...") },
+            label = { Text(stringResource(Res.string.common_password)) },
+            placeholder = { Text(stringResource(Res.string.common_enter_password)) },
         )
 
         LaunchableExecutionErrorIfPresent(state.launchable)
@@ -112,7 +118,7 @@ class UnlockWalletDialog(
     @Composable
     override fun RowScope.renderButtons(state: State) {
         SimpleActionDialogControlButtons(
-            "Authenticate",
+            stringResource(Res.string.common_authenticate),
             actionState = state.action.value,
             onClose = state.onClose,
         )

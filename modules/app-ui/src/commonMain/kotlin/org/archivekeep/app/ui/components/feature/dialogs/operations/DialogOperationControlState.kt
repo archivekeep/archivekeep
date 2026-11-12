@@ -18,7 +18,7 @@ sealed interface DialogOperationControlState {
     ) : DialogOperationControlState
 
     data class Completed(
-        val outcome: String = "Completed",
+        val outcome: String,
         val onClose: () -> Unit,
     ) : DialogOperationControlState
 }

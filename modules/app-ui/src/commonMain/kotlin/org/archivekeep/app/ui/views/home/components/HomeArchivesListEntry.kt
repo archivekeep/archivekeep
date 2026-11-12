@@ -18,8 +18,14 @@ import org.archivekeep.app.ui.components.designsystem.theme.CIcons
 import org.archivekeep.app.ui.components.feature.ArchiveDropdownIconLaunched
 import org.archivekeep.app.ui.domain.wiring.ArchiveOperationLaunchers
 import org.archivekeep.app.ui.views.home.model.HomeLocalArchiveModel
+import org.archivekeep.ui.resources.Res
+import org.archivekeep.ui.resources.home_archive_copies_out_of_sync
+import org.archivekeep.ui.resources.home_archive_no_actions
+import org.archivekeep.ui.resources.home_archive_no_repositories
+import org.archivekeep.ui.resources.home_archive_unassociated
 import org.archivekeep.utils.loading.Loadable
 import org.archivekeep.utils.loading.mapIfLoadedOrDefault
+import org.jetbrains.compose.resources.stringResource
 
 @Composable
 fun HomeArchivesListEntry(
@@ -51,7 +57,7 @@ fun HomeArchivesListEntry(
 
         if (!localArchive.isAssociated) {
             Row(Modifier.padding(horizontal = sectionCardHorizontalPadding, vertical = 4.dp)) {
-                WarningBadge { Text("Unassociated") }
+                WarningBadge { Text(stringResource(Res.string.home_archive_unassociated)) }
             }
         }
 
@@ -59,15 +65,15 @@ fun HomeArchivesListEntry(
             actions.asList(),
             noActionsText =
                 if (state.canPush.mapIfLoadedOrDefault(false) { it }) {
-                    "Copies out of sync."
+                    stringResource(Res.string.home_archive_copies_out_of_sync)
                 } else {
-                    "No available actions."
+                    stringResource(Res.string.home_archive_no_actions)
                 },
         )
 
         SectionCardBottomList(
             localArchive.secondaryRepositories.collectAsState().value,
-            noItemsText = "No repositories associated …",
+            noItemsText = stringResource(Res.string.home_archive_no_repositories),
         ) { (storage, it) ->
             SecondaryArchiveRepositoryRow(
                 it,

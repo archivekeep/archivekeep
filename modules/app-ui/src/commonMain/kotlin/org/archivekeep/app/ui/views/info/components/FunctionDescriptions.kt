@@ -16,6 +16,13 @@ import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import org.archivekeep.app.ui.components.designsystem.sections.SectionCard
+import org.archivekeep.ui.resources.Res
+import org.archivekeep.ui.resources.info_function_ensure
+import org.archivekeep.ui.resources.info_function_fingerprint
+import org.archivekeep.ui.resources.info_function_integrity
+import org.archivekeep.ui.resources.info_function_title
+import org.archivekeep.ui.resources.info_function_verify
+import org.jetbrains.compose.resources.stringResource
 
 @Composable
 fun HomeArchiveKeepFunctionDescription() {
@@ -27,20 +34,22 @@ fun HomeArchiveKeepFunctionDescription() {
             modifier = Modifier.padding(32.dp),
         ) {
             Text(
-                "How ArchiveKeep functions?",
+                stringResource(Res.string.info_function_title),
                 style = MaterialTheme.typography.titleMedium,
                 modifier = Modifier.padding(bottom = 4.dp),
             )
+            val fingerprintText = stringResource(Res.string.info_function_fingerprint)
+            val ensureText = stringResource(Res.string.info_function_ensure)
+            val verifyText = stringResource(Res.string.info_function_verify)
+            val integrityText = stringResource(Res.string.info_function_integrity)
             Text(
                 buildAnnotatedString {
                     withStyle(ParagraphStyle(lineBreak = LineBreak.Paragraph)) {
-                        appendLine("Fingerprint is created for each file added to an archive. This is used to:")
+                        appendLine(fingerprintText)
                     }
-                    appendLine("- ensure file remains unchanged and exactly as it was when you decided to archive it.")
-                    appendLine("- verify file is not changed (corrupted), when it is being copied to other storage.")
-                    append(
-                        "- verify integrity of files in an archive and detect corruption, that needs to be sorted out. (this is WIP feature)",
-                    )
+                    appendLine(ensureText)
+                    appendLine(verifyText)
+                    append(integrityText)
                 },
                 color = Color.DarkGray,
                 fontSize = 14.sp,

@@ -40,9 +40,12 @@ import org.archivekeep.app.ui.utils.collectAsLoadable
 import org.archivekeep.app.ui.utils.stickToFirstNotNull
 import org.archivekeep.files.procedures.indexupdate.IndexUpdateProcedure
 import org.archivekeep.files.procedures.indexupdate.IndexUpdateProcedure.PreparationResult.Move
+import org.archivekeep.ui.resources.Res
+import org.archivekeep.ui.resources.common_preparing
 import org.archivekeep.utils.loading.Loadable
 import org.archivekeep.utils.loading.mapToLoadable
 import org.archivekeep.utils.loading.waitLoadedValue
+import org.jetbrains.compose.resources.stringResource
 
 class IndexUpdateProcedureDialog(
     repositoryURI: RepositoryURI,
@@ -155,7 +158,7 @@ class IndexUpdateProcedureDialog(
             is IndexUpdateProcedureSupervisor.Preparation -> {
                 when (val preparationState = operationState.result) {
                     is IndexUpdateProcedure.PreparationProgress -> {
-                        LabelText("Preparing index update operation:")
+                        LabelText(stringResource(Res.string.common_preparing))
                         IndexUpdatePreparationProgress(preparationState)
                     }
 

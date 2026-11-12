@@ -16,6 +16,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import org.archivekeep.ui.resources.Res
+import org.archivekeep.ui.resources.common_cancel
+import org.jetbrains.compose.resources.stringResource
 
 @Composable
 fun DialogButtonContainer(content: @Composable RowScope.() -> Unit) {
@@ -62,7 +65,7 @@ fun (RowScope).DialogSecondaryButton(
 
 @Composable
 fun (RowScope).DialogDismissButton(
-    text: String = "Cancel",
+    text: String = stringResource(Res.string.common_cancel),
     onClick: () -> Unit,
     enabled: Boolean = true,
 ) {

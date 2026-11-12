@@ -16,6 +16,9 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import org.archivekeep.app.ui.utils.ApplicationMetadata
+import org.archivekeep.ui.resources.Res
+import org.archivekeep.ui.resources.common_version
+import org.jetbrains.compose.resources.stringResource
 
 @Composable
 fun VersionText() {
@@ -28,7 +31,7 @@ fun VersionText() {
         verticalArrangement = Arrangement.spacedBy(2.dp),
     ) {
         Text(
-            "Version",
+            stringResource(Res.string.common_version),
             fontSize = 9.sp,
             lineHeight = 11.sp,
             textAlign = TextAlign.Center,

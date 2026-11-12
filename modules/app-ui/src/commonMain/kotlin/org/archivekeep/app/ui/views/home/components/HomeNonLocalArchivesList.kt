@@ -20,14 +20,18 @@ import org.archivekeep.app.ui.components.feature.LoadableGuard
 import org.archivekeep.app.ui.domain.wiring.LocalArchiveOperationLaunchers
 import org.archivekeep.app.ui.views.home.components.util.baseActions
 import org.archivekeep.app.ui.views.home.model.HomeExternalArchiveModel
+import org.archivekeep.ui.resources.Res
+import org.archivekeep.ui.resources.home_archive_unassociated
+import org.archivekeep.ui.resources.home_non_local_archives_empty
 import org.archivekeep.utils.loading.Loadable
+import org.jetbrains.compose.resources.stringResource
 
 @Composable
 fun HomeNonLocalArchivesList(otherArchivesLoadable: Loadable<List<HomeExternalArchiveModel>>) {
     LoadableGuard(otherArchivesLoadable) { nonLocalArchives ->
         SectionCardGrid {
             if (nonLocalArchives.isEmpty()) {
-                Text("Empty")
+                Text(stringResource(Res.string.home_non_local_archives_empty))
             }
 
             nonLocalArchives.forEach { nonLocalArchive ->
@@ -43,7 +47,7 @@ fun HomeNonLocalArchivesList(otherArchivesLoadable: Loadable<List<HomeExternalAr
 
                     if (!nonLocalArchive.isAssociated) {
                         Row(Modifier.padding(horizontal = sectionCardHorizontalPadding, vertical = 4.dp)) {
-                            WarningBadge { Text("Unassociated") }
+                            WarningBadge { Text(stringResource(Res.string.home_archive_unassociated)) }
                         }
                     }
 

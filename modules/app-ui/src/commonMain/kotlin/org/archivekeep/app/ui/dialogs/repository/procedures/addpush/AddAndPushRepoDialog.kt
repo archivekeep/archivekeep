@@ -36,9 +36,14 @@ import org.archivekeep.app.ui.dialogs.repository.procedures.addpush.AddAndPushRe
 import org.archivekeep.app.ui.utils.asMutableState
 import org.archivekeep.app.ui.utils.collectAsLoadable
 import org.archivekeep.app.ui.utils.contextualStorageReference
+import org.archivekeep.ui.resources.Res
+import org.archivekeep.ui.resources.common_loading
+import org.archivekeep.ui.resources.common_preparing
+import org.archivekeep.ui.resources.dialog_push_title
 import org.archivekeep.utils.collections.ifNotEmpty
 import org.archivekeep.utils.loading.Loadable
 import org.archivekeep.utils.loading.mapIfLoadedOrDefault
+import org.jetbrains.compose.resources.stringResource
 
 class AddAndPushRepoDialog(
     uri: RepositoryURI,
@@ -88,11 +93,11 @@ class AddAndPushRepoDialog(
     override fun ColumnScope.renderContent(state: VMState) {
         when (val status = state.state) {
             is NotReadyAddPushProcess -> {
-                Text("Loading")
+                Text(stringResource(Res.string.common_loading))
             }
 
             is PreparingAddPushProcess -> {
-                LabelText("Preparing add and push operation:")
+                LabelText(stringResource(Res.string.common_preparing))
                 IndexUpdatePreparationProgress(status.addPreparationProgress)
             }
 
@@ -150,7 +155,7 @@ class AddAndPushRepoDialog(
 
                     Spacer(Modifier.height(4.dp))
 
-                    LabelText("Push progress")
+                    LabelText(stringResource(Res.string.dialog_push_title))
 
                     Spacer(Modifier.height(12.dp))
 

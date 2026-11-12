@@ -28,8 +28,12 @@ import org.archivekeep.app.ui.utils.appendBoldSpan
 import org.archivekeep.app.ui.utils.asMutableState
 import org.archivekeep.app.ui.utils.collectLoadableFlow
 import org.archivekeep.files.procedures.sync.discovery.RelocationSyncMode
+import org.archivekeep.ui.resources.Res
+import org.archivekeep.ui.resources.common_starting
+import org.archivekeep.ui.resources.manyselect_repositories_push
 import org.archivekeep.utils.loading.Loadable
 import org.archivekeep.utils.loading.mapToLoadable
+import org.jetbrains.compose.resources.stringResource
 
 class PushRepoDialog(
     uri: RepositoryURI,
@@ -97,7 +101,7 @@ class PushRepoDialog(
 
         Spacer(Modifier.height(4.dp))
 
-        LabelText("Repositories to sync:")
+        LabelText(stringResource(Res.string.manyselect_repositories_push))
 
         state.otherRepositoryCandidates.value.forEach {
             SplitRow(
@@ -106,7 +110,7 @@ class PushRepoDialog(
                     SectionCardItemStateText(it.statusText.collectLoadableFlow())
                 },
                 rightContent = {
-                    Text("Start")
+                    Text(stringResource(Res.string.common_starting))
                 },
             )
         }

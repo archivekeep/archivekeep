@@ -10,11 +10,19 @@ import org.archivekeep.app.ui.components.designsystem.dialog.DialogButtonsStatus
 import org.archivekeep.app.ui.components.designsystem.dialog.DialogDismissButton
 import org.archivekeep.app.ui.components.designsystem.dialog.DialogPrimaryButton
 import org.archivekeep.app.ui.components.designsystem.dialog.DialogSecondaryButton
+import org.archivekeep.ui.resources.Res
+import org.archivekeep.ui.resources.common_cancel
+import org.archivekeep.ui.resources.common_dismiss
+import org.archivekeep.ui.resources.common_hide
+import org.archivekeep.ui.resources.common_launch
+import org.archivekeep.ui.resources.common_running
+import org.archivekeep.ui.resources.common_stop
+import org.jetbrains.compose.resources.stringResource
 
 @Composable
 fun (RowScope).DialogOperationControlButtons(
     state: DialogOperationControlState,
-    launchText: String = "Launch",
+    launchText: String = stringResource(Res.string.common_launch),
 ) {
     when (state) {
         is DialogOperationControlState.NotRunning -> {
@@ -28,18 +36,18 @@ fun (RowScope).DialogOperationControlButtons(
         is DialogOperationControlState.Running -> {
             if (state.onCancel != null) {
                 DialogSecondaryButton(
-                    "Stop",
+                    stringResource(Res.string.common_stop),
                     onClick = state.onCancel,
                 )
             } else {
                 DialogPrimaryButton(
-                    "Launch",
+                    stringResource(Res.string.common_launch),
                     onClick = {},
                     enabled = false,
                 )
             }
 
-            DialogButtonsStatusText("Running …", modifier = Modifier.padding(start = 8.dp))
+            DialogButtonsStatusText(stringResource(Res.string.common_running), modifier = Modifier.padding(start = 8.dp))
         }
 
         is DialogOperationControlState.Completed -> {
@@ -52,7 +60,7 @@ fun (RowScope).DialogOperationControlButtons(
     when (state) {
         is DialogOperationControlState.NotRunning -> {
             DialogDismissButton(
-                "Cancel",
+                stringResource(Res.string.common_cancel),
                 onClick = state.onClose,
             )
         }
@@ -60,7 +68,7 @@ fun (RowScope).DialogOperationControlButtons(
         is DialogOperationControlState.Running -> {
             if (state.onHide != null) {
                 DialogDismissButton(
-                    "Hide",
+                    stringResource(Res.string.common_hide),
                     onClick = state.onHide,
                 )
             }
@@ -68,7 +76,7 @@ fun (RowScope).DialogOperationControlButtons(
 
         is DialogOperationControlState.Completed -> {
             DialogDismissButton(
-                "Dismiss",
+                stringResource(Res.string.common_dismiss),
                 onClick = state.onClose,
             )
         }

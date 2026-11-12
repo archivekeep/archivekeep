@@ -19,6 +19,10 @@ import org.archivekeep.app.core.utils.identifiers.RepositoryURI
 import org.archivekeep.app.ui.components.designsystem.dialog.LabelText
 import org.archivekeep.app.ui.components.designsystem.input.CheckboxWithText
 import org.archivekeep.app.ui.domain.wiring.LocalArchiveOperationLaunchers
+import org.archivekeep.ui.resources.Res
+import org.archivekeep.ui.resources.common_unlock
+import org.archivekeep.ui.resources.manyselect_repositories_push
+import org.jetbrains.compose.resources.stringResource
 
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
@@ -31,7 +35,7 @@ fun ColumnScope.DestinationManySelect(
     val repositoryManySelect =
         rememberManySelect(allFiles, selectedFilenames, keyMapper = { it.uri })
 
-    LabelText("Repositories to push to:")
+    LabelText(stringResource(Res.string.manyselect_repositories_push))
 
     Spacer(modifier = Modifier.height(6.dp))
 
@@ -52,7 +56,7 @@ fun ColumnScope.DestinationManySelect(
                     extraItems = {
                         if (repository.repositoryState.connectionState.isLocked) {
                             OutlinedButton(onClick = { launchers.unlockRepository(repository.uri, null) }) {
-                                Text("Unlock")
+                                Text(stringResource(Res.string.common_unlock))
                             }
                         }
                     },

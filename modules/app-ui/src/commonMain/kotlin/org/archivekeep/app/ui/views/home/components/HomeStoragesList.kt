@@ -27,7 +27,13 @@ import org.archivekeep.app.ui.components.feature.StorageDropdownIconLaunched
 import org.archivekeep.app.ui.domain.wiring.LocalArchiveOperationLaunchers
 import org.archivekeep.app.ui.enableUnfinishedFeatures
 import org.archivekeep.app.ui.views.home.model.HomeStorageUiState
+import org.archivekeep.ui.resources.Res
+import org.archivekeep.ui.resources.common_pull
+import org.archivekeep.ui.resources.common_push
+import org.archivekeep.ui.resources.home_storage_unnamed
+import org.archivekeep.ui.resources.home_storages_list_empty
 import org.archivekeep.utils.loading.Loadable
+import org.jetbrains.compose.resources.stringResource
 
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
@@ -35,7 +41,7 @@ fun HomeStoragesList(allStoragesFlow: Loadable<List<HomeStorageUiState>>) {
     LoadableGuard(allStoragesFlow) { allStorages ->
         SectionCardGrid {
             if (allStorages.isEmpty()) {
-                Text("Nothing here ...")
+                Text(stringResource(Res.string.home_storages_list_empty))
             }
 
             allStorages.forEach { storage ->
@@ -45,7 +51,7 @@ fun HomeStoragesList(allStoragesFlow: Loadable<List<HomeStorageUiState>>) {
                     SectionCardTitle(
                         // TODO
                         false,
-                        storage.name ?: "Unnamed storage",
+                        storage.name ?: stringResource(Res.string.home_storage_unnamed),
                         grayOutText = storage.name == null || !storageState.isConnected,
                         subtitle =
                             if (storage.name == null) {
@@ -88,7 +94,7 @@ fun HomeStoragesList(allStoragesFlow: Loadable<List<HomeStorageUiState>>) {
                                                 it.pushAllToStorage(storage.reference.uri)
                                             }
                                         },
-                                    text = "Push",
+                                    text = stringResource(Res.string.common_push),
                                 )
                             }
 
@@ -100,7 +106,7 @@ fun HomeStoragesList(allStoragesFlow: Loadable<List<HomeStorageUiState>>) {
                                                 it.pullAllFromStorage(storage.reference.uri)
                                             }
                                         },
-                                    text = "Pull",
+                                    text = stringResource(Res.string.common_pull),
                                 )
                             }
                         }

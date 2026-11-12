@@ -12,7 +12,15 @@ import org.archivekeep.app.ui.domain.wiring.LocalApplicationServices
 import org.archivekeep.app.ui.utils.collectLoadableFlow
 import org.archivekeep.app.ui.views.View
 import org.archivekeep.app.ui.views.storages.components.StoragesList
+import org.archivekeep.ui.resources.Res
+import org.archivekeep.ui.resources.storages_external
+import org.archivekeep.ui.resources.storages_local
+import org.archivekeep.ui.resources.storages_no_external
+import org.archivekeep.ui.resources.storages_no_local
+import org.archivekeep.ui.resources.storages_no_online
+import org.archivekeep.ui.resources.storages_online
 import org.archivekeep.utils.loading.mapLoadedData
+import org.jetbrains.compose.resources.stringResource
 
 class StoragesView : View<StoragesViewModel> {
     @Composable
@@ -39,22 +47,22 @@ class StoragesView : View<StoragesViewModel> {
             color = CColors.cardsGridBackground,
         ) {
             ViewScrollableContainer {
-                SectionBlock("Local storages") {
+                SectionBlock(stringResource(Res.string.storages_local)) {
                     StoragesList(
                         state.mapLoadedData { it.localStorages },
-                        emptyText = "No local storages registered. Add repository belonging to a local storage.",
+                        emptyText = stringResource(Res.string.storages_no_local),
                     )
                 }
-                SectionBlock("External storages") {
+                SectionBlock(stringResource(Res.string.storages_external)) {
                     StoragesList(
                         state.mapLoadedData { it.externalStorages },
-                        emptyText = "No external storages registered. Add repository belonging to an external storage.",
+                        emptyText = stringResource(Res.string.storages_no_external),
                     )
                 }
-                SectionBlock("Online storages") {
+                SectionBlock(stringResource(Res.string.storages_online)) {
                     StoragesList(
                         state.mapLoadedData { it.onlineStorages },
-                        emptyText = "No online storages registered. Add repository from online storage.",
+                        emptyText = stringResource(Res.string.storages_no_online),
                     )
                 }
             }

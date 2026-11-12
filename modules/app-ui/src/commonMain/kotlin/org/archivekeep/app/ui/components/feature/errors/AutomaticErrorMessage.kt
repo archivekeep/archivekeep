@@ -11,7 +11,11 @@ import org.archivekeep.app.core.operations.RequiresCredentialsException
 import org.archivekeep.app.core.utils.exceptions.RepositoryLockedException
 import org.archivekeep.app.core.utils.generics.ExecutionOutcome
 import org.archivekeep.app.ui.components.designsystem.elements.ErrorAlert
+import org.archivekeep.ui.resources.Res
+import org.archivekeep.ui.resources.error_credentials_required
+import org.archivekeep.ui.resources.error_incorrect_password
 import org.archivekeep.utils.exceptions.IncorrectPasswordException
+import org.jetbrains.compose.resources.stringResource
 
 @Composable
 fun AutomaticErrorMessage(
@@ -37,8 +41,8 @@ fun AutomaticErrorMessage(
         ) {
             when (cause) {
                 is RepositoryLockedException -> RepositoryLockedError(cause, onResolve)
-                is RequiresCredentialsException -> Text("Credentials are required to access repository, or repository doesn't exist.")
-                is IncorrectPasswordException -> Text("Entered password isn't correct.")
+                is RequiresCredentialsException -> Text(stringResource(Res.string.error_credentials_required))
+                is IncorrectPasswordException -> Text(stringResource(Res.string.error_incorrect_password))
                 else -> GeneralErrorMessage(cause)
             }
         }

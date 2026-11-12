@@ -30,7 +30,11 @@ import org.archivekeep.app.ui.components.feature.buttons.drawerIconButton
 import org.archivekeep.app.ui.domain.data.canUnlock
 import org.archivekeep.app.ui.domain.wiring.LocalApplicationServices
 import org.archivekeep.app.ui.domain.wiring.LocalWalletOperationLaunchers
+import org.archivekeep.ui.resources.Res
+import org.archivekeep.ui.resources.appbar_close
+import org.archivekeep.ui.resources.appbar_title
 import org.archivekeep.utils.datastore.passwordprotected.PasswordProtectedDataStore
+import org.jetbrains.compose.resources.stringResource
 
 @Composable
 fun AppBar(
@@ -51,7 +55,7 @@ fun AppBar(
                 navigationIcon = drawerIconButton(drawerState),
                 title = {
                     Row(verticalAlignment = Alignment.CenterVertically) {
-                        Text("ArchiveKeep", modifier = Modifier.padding(start = 12.dp, end = 8.dp))
+                        Text(stringResource(Res.string.appbar_title), modifier = Modifier.padding(start = 12.dp, end = 8.dp))
                         Spacer(Modifier.width(20.dp))
                         content()
                     }
@@ -74,7 +78,7 @@ fun AppBar(
                         onCloseRequest?.let {
                             AppBarIconButton(
                                 icon = Icons.Default.Close,
-                                contentDescription = "Close application",
+                                contentDescription = stringResource(Res.string.appbar_close),
                                 onClick = it,
                             )
                         }

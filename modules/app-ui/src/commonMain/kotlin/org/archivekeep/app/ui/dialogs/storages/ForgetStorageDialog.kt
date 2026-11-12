@@ -23,8 +23,11 @@ import org.archivekeep.app.ui.utils.appendBoldSpan
 import org.archivekeep.app.ui.utils.asAction
 import org.archivekeep.app.ui.utils.collectLoadableFlow
 import org.archivekeep.app.ui.utils.simpleLaunchable
+import org.archivekeep.ui.resources.Res
+import org.archivekeep.ui.resources.common_forget
 import org.archivekeep.utils.loading.Loadable
 import org.archivekeep.utils.loading.mapLoadedData
+import org.jetbrains.compose.resources.stringResource
 
 class ForgetStorageDialog(
     uri: StorageURI,
@@ -48,7 +51,7 @@ class ForgetStorageDialog(
     ) : IState {
         override val title =
             buildAnnotatedString {
-                append("Forget storage")
+                append("Forget Storage")
             }
 
         val action by launchable.asAction(
@@ -112,7 +115,7 @@ class ForgetStorageDialog(
         state: State,
     ) {
         SimpleActionDialogControlButtons(
-            "Forget",
+            stringResource(Res.string.common_forget),
             actionState = state.action,
             onClose = onClose,
         )

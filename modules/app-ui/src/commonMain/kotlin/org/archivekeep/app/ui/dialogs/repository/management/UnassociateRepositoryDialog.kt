@@ -24,8 +24,11 @@ import org.archivekeep.app.ui.utils.appendBoldSpan
 import org.archivekeep.app.ui.utils.asTrivialAction
 import org.archivekeep.app.ui.utils.collectLoadableFlow
 import org.archivekeep.app.ui.utils.simpleLaunchable
+import org.archivekeep.ui.resources.Res
+import org.archivekeep.ui.resources.common_unassociate
 import org.archivekeep.utils.loading.Loadable
 import org.archivekeep.utils.loading.mapLoadedData
+import org.jetbrains.compose.resources.stringResource
 
 class UnassociateRepositoryDialog(
     uri: RepositoryURI,
@@ -38,7 +41,7 @@ class UnassociateRepositoryDialog(
     ) : IState {
         override val title: AnnotatedString =
             buildAnnotatedString {
-                append("Unassociate repository")
+                append("Unassociate Repository")
             }
 
         val action by launchable.asTrivialAction()
@@ -132,7 +135,7 @@ class UnassociateRepositoryDialog(
     @Composable
     override fun RowScope.renderButtons(state: State) {
         SimpleActionDialogControlButtons(
-            "Unassociate",
+            stringResource(Res.string.common_unassociate),
             actionState = state.action,
             onClose = state.onClose,
         )

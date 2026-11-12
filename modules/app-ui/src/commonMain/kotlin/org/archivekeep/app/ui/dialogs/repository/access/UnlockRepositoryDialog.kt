@@ -50,14 +50,30 @@ import org.archivekeep.app.ui.domain.wiring.LocalApplicationServices
 import org.archivekeep.app.ui.domain.wiring.LocalWalletOperationLaunchers
 import org.archivekeep.app.ui.domain.wiring.WalletOperationLaunchers
 import org.archivekeep.app.ui.utils.Launchable
-import org.archivekeep.app.ui.utils.appendBoldSpan
 import org.archivekeep.app.ui.utils.asAction
 import org.archivekeep.app.ui.utils.collectAsLoadable
 import org.archivekeep.app.ui.utils.simpleLaunchable
 import org.archivekeep.files.api.repository.auth.BasicAuthCredentials
+import org.archivekeep.ui.resources.Res
+import org.archivekeep.ui.resources.common_authenticate
+import org.archivekeep.ui.resources.common_enter_password
+import org.archivekeep.ui.resources.common_enter_username
+import org.archivekeep.ui.resources.common_remember_password
+import org.archivekeep.ui.resources.common_remember_session
+import org.archivekeep.ui.resources.dialog_unlock_auth_needed
+import org.archivekeep.ui.resources.dialog_unlock_enter_credentials
+import org.archivekeep.ui.resources.dialog_unlock_enter_password
+import org.archivekeep.ui.resources.dialog_unlock_not_locked
+import org.archivekeep.ui.resources.dialog_unlock_password_needed
+import org.archivekeep.ui.resources.dialog_unlock_success
+import org.archivekeep.ui.resources.dialog_unlock_wallet_available
+import org.archivekeep.ui.resources.dialog_unlock_wallet_hint
+import org.archivekeep.ui.resources.dialog_unlock_wallet_locked
+import org.archivekeep.ui.resources.dialog_unlock_wallet_open
 import org.archivekeep.utils.datastore.passwordprotected.PasswordProtectedDataStore
 import org.archivekeep.utils.loading.Loadable
 import org.archivekeep.utils.loading.mapIfLoadedOrDefault
+import org.jetbrains.compose.resources.stringResource
 
 class UnlockRepositoryDialog(
     uri: RepositoryURI,
@@ -105,7 +121,7 @@ class UnlockRepositoryDialog(
 
         override val title: AnnotatedString =
             buildAnnotatedString {
-                append("Unlock repository")
+                append("Unlock Repository")
             }
     }
 
@@ -212,9 +228,7 @@ class UnlockRepositoryDialog(
         if (state.launchable.executionOutcome.value is ExecutionOutcome.Success) {
             Text(
                 buildAnnotatedString {
-                    append("Repository ")
-                    appendBoldSpan(state.repositoryInfo.displayName)
-                    append(" is now unlocked.")
+                    append(stringResource(Res.string.dialog_unlock_success, state.repositoryInfo.displayName))
                 },
             )
             return
@@ -228,11 +242,11 @@ class UnlockRepositoryDialog(
                 Spacer(Modifier.size(12.dp))
                 SuccessAlert {
                     Text(
-                        "Wallet with stored credentials is available.",
+                        stringResource(Res.string.dialog_unlock_wallet_available),
                         modifier = Modifier.padding(bottom = 8.dp),
                     )
                     Text(
-                        "Open wallet to unlock repository, if its password is present there.",
+                        stringResource(Res.string.dialog_unlock_wallet_hint),
                         modifier = Modifier.padding(bottom = 12.dp),
                     )
                     OutlinedButton(
@@ -245,12 +259,12 @@ class UnlockRepositoryDialog(
                     ) {
                         Icon(
                             TablerIcons.Lock,
-                            contentDescription = "Locked wallet",
+                            contentDescription = stringResource(Res.string.dialog_unlock_wallet_locked),
                             Modifier.size(20.dp),
                         )
                         Spacer(Modifier.width(12.dp))
 
-                        Text("Open wallet")
+                        Text(stringResource(Res.string.dialog_unlock_wallet_open))
                     }
                 }
                 Spacer(Modifier.size(24.dp))
@@ -262,9 +276,7 @@ class UnlockRepositoryDialog(
                 null -> {
                     Text(
                         buildAnnotatedString {
-                            append("Repository ")
-                            appendBoldSpan(state.repositoryInfo.displayName)
-                            append(" is not locked. No Action needed.")
+                            append(stringResource(Res.string.dialog_unlock_not_locked, state.repositoryInfo.displayName))
                         },
                     )
                 }
@@ -272,15 +284,13 @@ class UnlockRepositoryDialog(
                 is UserCredentialsRequest -> {
                     Text(
                         buildAnnotatedString {
-                            append("Authentication is needed to access ")
-                            appendBoldSpan(state.repositoryInfo.displayName)
-                            append(" repository.")
+                            append(stringResource(Res.string.dialog_unlock_auth_needed, state.repositoryInfo.displayName))
                         },
                     )
                     Spacer(Modifier.height(12.dp))
                     WalletOpenBlock()
                     Text(
-                        "Enter credentials to authenticate with:",
+                        stringResource(Res.string.dialog_unlock_enter_credentials),
                         modifier = Modifier.padding(bottom = 8.dp),
                     )
                     TextField(
@@ -293,7 +303,7 @@ class UnlockRepositoryDialog(
                                 )
                         },
                         placeholder = {
-                            Text("Enter username ...")
+                            Text(stringResource(Res.string.common_enter_username))
                         },
                         singleLine = true,
                     )
@@ -308,7 +318,7 @@ class UnlockRepositoryDialog(
                                 )
                         },
                         placeholder = {
-                            Text("Enter password ...")
+                            Text(stringResource(Res.string.common_enter_password))
                         },
                     )
                     Spacer(Modifier.height(12.dp))
@@ -320,29 +330,27 @@ class UnlockRepositoryDialog(
                                     permanentCredentialsPreserve = it,
                                 )
                         },
-                        text = "Remember session",
+                        text = stringResource(Res.string.common_remember_session),
                     )
                 }
 
                 is PasswordRequest -> {
                     Text(
                         buildAnnotatedString {
-                            append("Password is needed to access ")
-                            appendBoldSpan(state.repositoryInfo.displayName)
-                            append(" repository.")
+                            append(stringResource(Res.string.dialog_unlock_password_needed, state.repositoryInfo.displayName))
                         },
                     )
                     Spacer(Modifier.height(12.dp))
                     WalletOpenBlock()
                     Text(
-                        "Enter password to unlock repository:",
+                        stringResource(Res.string.dialog_unlock_enter_password),
                         modifier = Modifier.padding(bottom = 8.dp),
                     )
                     PasswordField(
                         state.password,
                         onValueChange = { state.password = it },
                         placeholder = {
-                            Text("Enter password ...")
+                            Text(stringResource(Res.string.common_enter_password))
                         },
                     )
                     Spacer(Modifier.height(12.dp))
@@ -351,7 +359,7 @@ class UnlockRepositoryDialog(
                         onValueChange = {
                             state.rememberPassword = !state.rememberPassword
                         },
-                        text = "Remember password",
+                        text = stringResource(Res.string.common_remember_password),
                     )
                 }
             }
@@ -366,7 +374,7 @@ class UnlockRepositoryDialog(
             SimpleActionDialogDoneButtons(onClose = state.onClose)
         } else {
             SimpleActionDialogControlButtons(
-                "Authenticate",
+                stringResource(Res.string.common_authenticate),
                 actionState = state.action,
                 onClose = state.onClose,
             )

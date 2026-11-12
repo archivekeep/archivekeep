@@ -36,7 +36,6 @@ import org.archivekeep.app.core.persistence.drivers.filesystem.operations.add.St
 import org.archivekeep.app.core.persistence.drivers.filesystem.operations.add.StorageRegistrationState
 import org.archivekeep.app.core.utils.generics.Execution
 import org.archivekeep.app.core.utils.generics.ExecutionOutcome
-import org.archivekeep.app.ui.components.base.layout.keepSize
 import org.archivekeep.app.ui.components.designsystem.dialog.DialogButtonContainer
 import org.archivekeep.app.ui.components.designsystem.dialog.DialogCard
 import org.archivekeep.app.ui.components.designsystem.dialog.DialogFilePicker
@@ -58,11 +57,49 @@ import org.archivekeep.app.ui.domain.wiring.LocalApplicationServices
 import org.archivekeep.app.ui.domain.wiring.LocalArchiveOperationLaunchers
 import org.archivekeep.app.ui.domain.wiring.OperationFactory
 import org.archivekeep.app.ui.utils.SingleLaunchGuard
-import org.archivekeep.app.ui.utils.appendBoldSpan
 import org.archivekeep.app.ui.utils.filesystem.LocalFilesystemDirectoryPicker
 import org.archivekeep.app.ui.utils.filesystem.PickResult
 import org.archivekeep.files.driver.filesystem.files.PlainRepositoryType
+import org.archivekeep.ui.resources.Res
+import org.archivekeep.ui.resources.common_add
+import org.archivekeep.ui.resources.common_added_successfully
+import org.archivekeep.ui.resources.common_adding
+import org.archivekeep.ui.resources.common_enter_password
+import org.archivekeep.ui.resources.common_init
+import org.archivekeep.ui.resources.common_initializing
+import org.archivekeep.ui.resources.common_preparing
+import org.archivekeep.ui.resources.common_unlock
+import org.archivekeep.ui.resources.common_unlocking
+import org.archivekeep.ui.resources.common_verify_password
+import org.archivekeep.ui.resources.dialog_add_repo_can_be_added
+import org.archivekeep.ui.resources.dialog_add_repo_checksum_files
+import org.archivekeep.ui.resources.dialog_add_repo_checksum_warning
+import org.archivekeep.ui.resources.dialog_add_repo_deinitialize_alternative
+import org.archivekeep.ui.resources.dialog_add_repo_deinitialize_button
+import org.archivekeep.ui.resources.dialog_add_repo_directory_initialized
+import org.archivekeep.ui.resources.dialog_add_repo_directory_label
+import org.archivekeep.ui.resources.dialog_add_repo_encrypted
+import org.archivekeep.ui.resources.dialog_add_repo_encrypted_password_protected
+import org.archivekeep.ui.resources.dialog_add_repo_enter_device_label
+import org.archivekeep.ui.resources.dialog_add_repo_enter_label
+import org.archivekeep.ui.resources.dialog_add_repo_enter_password_access
+import org.archivekeep.ui.resources.dialog_add_repo_not_repo_yet
+import org.archivekeep.ui.resources.dialog_add_repo_parent_is_repo
+import org.archivekeep.ui.resources.dialog_add_repo_plain_files
+import org.archivekeep.ui.resources.dialog_add_repo_rocksdb
+import org.archivekeep.ui.resources.dialog_add_repo_rocksdb_info
+import org.archivekeep.ui.resources.dialog_add_repo_select_directory
+import org.archivekeep.ui.resources.dialog_add_repo_select_location
+import org.archivekeep.ui.resources.dialog_add_repo_select_storage_type
+import org.archivekeep.ui.resources.dialog_add_repo_sqlite
+import org.archivekeep.ui.resources.dialog_add_repo_sqlite_warning
+import org.archivekeep.ui.resources.dialog_add_repo_storage_external
+import org.archivekeep.ui.resources.dialog_add_repo_storage_first_time
+import org.archivekeep.ui.resources.dialog_add_repo_storage_local
+import org.archivekeep.ui.resources.dialog_add_repo_subdir_not_supported
+import org.archivekeep.ui.resources.dialog_add_repo_successfully_unlocked
 import org.archivekeep.utils.loading.Loadable
+import org.jetbrains.compose.resources.stringResource
 
 class AddFileSystemRepositoryDialog : Dialog {
     class VM(
@@ -218,11 +255,11 @@ private fun AddRepositoryDialogContents(
 
     DialogCard {
         DialogInnerContainer(
-            remember { buildAnnotatedString { append("Add repository") } },
+            remember { buildAnnotatedString { append("Add Repository") } },
             content = {
                 when (permissionFulfilment) {
                     PlatformSpecificPermissionFulfilment.IsFine -> {
-                        DialogInputLabel("Repository directory:")
+                        DialogInputLabel(stringResource(Res.string.dialog_add_repo_directory_label))
 
                         DialogFilePicker(
                             pick?.let {
@@ -255,7 +292,7 @@ private fun AddRepositoryDialogContents(
                     LoadableGuard(
                         optionLoadable,
                         loadingContent = {
-                            ProgressText("Preparing...")
+                            ProgressText(stringResource(Res.string.common_preparing))
                         },
                     ) { option ->
                         when (option) {
@@ -264,23 +301,21 @@ private fun AddRepositoryDialogContents(
                                     Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                                         Text(
                                             buildAnnotatedString {
-                                                append("The parent directory ")
-                                                appendBoldSpan(option.rootPath)
-                                                append(" is a archive repository.")
+                                                append(stringResource(Res.string.dialog_add_repo_parent_is_repo, option.rootPath))
                                             },
                                         )
-                                        Text("Creation of repositories in a sub-directory of existing repository isn't supported.")
-                                        Text("Select a location, which is not inside of a repository.")
+                                        Text(stringResource(Res.string.dialog_add_repo_subdir_not_supported))
+                                        Text(stringResource(Res.string.dialog_add_repo_select_location))
 
                                         HorizontalDivider()
 
-                                        Text("Alternatively, deinitialize the existing parent directory to not be a repository.")
+                                        Text(stringResource(Res.string.dialog_add_repo_deinitialize_alternative))
 
                                         OutlinedButton(onClick = {
                                             onClose()
                                             l.openDeinitializeFilesystemRepositoryByPath(option.rootPath)
                                         }) {
-                                            Text("Deinitialize existing repository")
+                                            Text(stringResource(Res.string.dialog_add_repo_deinitialize_button))
                                         }
                                     }
                                 }
@@ -296,25 +331,25 @@ private fun AddRepositoryDialogContents(
 
                                 val canEdit = option.initStatus.collectAsState().value == Execution.NotRunning
 
-                                ProgressText("The directory is not a repository, yet. Continue to initialize it as an archive repository.")
+                                ProgressText(stringResource(Res.string.dialog_add_repo_not_repo_yet))
 
                                 Spacer(Modifier.height(12.dp))
                                 RadioWithTextAndExtra(
                                     selected = !createEncrypted,
                                     onClick = { createEncrypted = false },
-                                    text = "Plain files (unencrypted, normal access)",
+                                    text = stringResource(Res.string.dialog_add_repo_plain_files),
                                     enabled = canEdit,
                                     extra = {
                                         Column {
                                             RadioWithTextAndExtra(
                                                 selected = createRepoType == PlainRepositoryType.ROCKS_DB,
                                                 onClick = { createRepoType = PlainRepositoryType.ROCKS_DB },
-                                                text = "RocksDB Index DB (recommended)",
+                                                text = stringResource(Res.string.dialog_add_repo_rocksdb),
                                                 enabled = canEdit,
                                             ) {
                                                 Column {
                                                     InfoAlert {
-                                                        Text("Recommended for most use cases.")
+                                                        Text(stringResource(Res.string.dialog_add_repo_rocksdb_info))
                                                     }
                                                     Spacer(Modifier.height(8.dp))
                                                 }
@@ -322,12 +357,12 @@ private fun AddRepositoryDialogContents(
                                             RadioWithTextAndExtra(
                                                 selected = createRepoType == PlainRepositoryType.SQLITE,
                                                 onClick = { createRepoType = PlainRepositoryType.SQLITE },
-                                                text = "SQLite Index DB",
+                                                text = stringResource(Res.string.dialog_add_repo_sqlite),
                                                 enabled = canEdit,
                                             ) {
                                                 Column {
                                                     WarningAlert {
-                                                        Text("Not supported for external media on Android.")
+                                                        Text(stringResource(Res.string.dialog_add_repo_sqlite_warning))
                                                     }
                                                     Spacer(Modifier.height(8.dp))
                                                 }
@@ -335,12 +370,12 @@ private fun AddRepositoryDialogContents(
                                             RadioWithTextAndExtra(
                                                 selected = createRepoType == PlainRepositoryType.CHECKSUM_FILES,
                                                 onClick = { createRepoType = PlainRepositoryType.CHECKSUM_FILES },
-                                                text = "Individual checksum files",
+                                                text = stringResource(Res.string.dialog_add_repo_checksum_files),
                                                 enabled = canEdit,
                                             ) {
                                                 Column {
                                                     WarningAlert {
-                                                        Text("The worst performance when used on HDD.")
+                                                        Text(stringResource(Res.string.dialog_add_repo_checksum_warning))
                                                     }
                                                     Spacer(Modifier.height(8.dp))
                                                 }
@@ -351,23 +386,23 @@ private fun AddRepositoryDialogContents(
                                 RadioWithTextAndExtra(
                                     selected = createEncrypted,
                                     onClick = { createEncrypted = true },
-                                    text = "Encrypted (custom format)",
+                                    text = stringResource(Res.string.dialog_add_repo_encrypted),
                                     enabled = canEdit,
                                     extra = {
                                         Column {
                                             PasswordField(
                                                 createPassword,
                                                 onValueChange = { createPassword = it },
-                                                placeholder = { Text("Enter password ...") },
-                                                modifier = Modifier.padding(bottom = 8.dp).testTag("Enter password ..."),
+                                                placeholder = { Text(stringResource(Res.string.common_enter_password)) },
+                                                modifier = Modifier.padding(bottom = 8.dp).testTag("Enter password …"),
                                                 enabled = canEdit,
                                             )
 
                                             PasswordField(
                                                 createPassword2,
                                                 onValueChange = { createPassword2 = it },
-                                                placeholder = { Text("Verify password ...") },
-                                                modifier = Modifier.padding(bottom = 8.dp).testTag("Verify password ..."),
+                                                placeholder = { Text(stringResource(Res.string.common_verify_password)) },
+                                                modifier = Modifier.padding(bottom = 8.dp).testTag("Verify password …"),
                                                 enabled = canEdit,
                                             )
                                         }
@@ -385,7 +420,7 @@ private fun AddRepositoryDialogContents(
                             is AddFileSystemRepositoryOperation.PlainFileSystemRepository -> {
                                 val addStatus = option.addStatus.collectAsState().value
 
-                                AddStatus(addStatus, notRunningStatus = { ProgressText("Repository can be added.") })
+                                AddStatus(addStatus, notRunningStatus = { ProgressText(stringResource(Res.string.dialog_add_repo_can_be_added)) })
 
                                 if (addStatus == Execution.NotRunning) {
                                     StorageMark(option.storageRegistration, storageType, setStorageType, label, setLabel)
@@ -395,22 +430,22 @@ private fun AddRepositoryDialogContents(
                             is AddFileSystemRepositoryOperation.EncryptedFileSystemRepository -> {
                                 val addStatus = option.addStatus.collectAsState().value
 
-                                ProgressText("The repository is encrypted, and password protected.")
+                                ProgressText(stringResource(Res.string.dialog_add_repo_encrypted_password_protected))
 
                                 option.unlockStatus.collectAsState().value.let {
                                     if (it is Execution.InProgress) {
-                                        ProgressText("Unlocking...")
+                                        ProgressText(stringResource(Res.string.common_unlocking))
                                     } else if (it is Execution.Finished && it.outcome is ExecutionOutcome.Success) {
-                                        ProgressText("Successfully unlocked.")
+                                        ProgressText(stringResource(Res.string.dialog_add_repo_successfully_unlocked))
                                     } else {
                                         Text(
-                                            "Enter password to access it:",
+                                            stringResource(Res.string.dialog_add_repo_enter_password_access),
                                             modifier = Modifier.padding(top = 16.dp, bottom = 8.dp),
                                         )
                                         PasswordField(
                                             password,
                                             onValueChange = { password = it },
-                                            placeholder = { Text("Enter password ...") },
+                                            placeholder = { Text(stringResource(Res.string.common_enter_password)) },
                                             modifier = Modifier.padding(bottom = 8.dp),
                                         )
                                         Button(
@@ -419,7 +454,7 @@ private fun AddRepositoryDialogContents(
                                             shape = MaterialTheme.shapes.small,
                                             modifier = Modifier.padding(bottom = 8.dp),
                                         ) {
-                                            Text("Unlock")
+                                            Text(stringResource(Res.string.common_unlock))
                                         }
 
                                         passwordLaunchGuard.executionOutcome.value.let {
@@ -439,7 +474,7 @@ private fun AddRepositoryDialogContents(
                         }
                     }
                 } else {
-                    Text("Please, select directory.")
+                    Text(stringResource(Res.string.dialog_add_repo_select_directory))
                 }
             },
             bottomContent = {
@@ -447,7 +482,7 @@ private fun AddRepositoryDialogContents(
                     when (optionLoadable) {
                         is Loadable.Failed, null, Loadable.Loading -> {
                             SimpleActionDialogControlButtons(
-                                "Add",
+                                stringResource(Res.string.common_add),
                                 onLaunch = {},
                                 onClose = onClose,
                                 canLaunch = false,
@@ -458,7 +493,7 @@ private fun AddRepositoryDialogContents(
                             when (val option = optionLoadable.value) {
                                 is AddFileSystemRepositoryOperation.Invalid -> {
                                     SimpleActionDialogControlButtons(
-                                        "Add",
+                                        stringResource(Res.string.common_add),
                                         onLaunch = {},
                                         onClose = onClose,
                                         canLaunch = false,
@@ -472,7 +507,7 @@ private fun AddRepositoryDialogContents(
                                         SimpleActionDialogDoneButtons(onClose)
                                     } else {
                                         SimpleActionDialogControlButtons(
-                                            "Init",
+                                            stringResource(Res.string.common_init),
                                             onLaunch = {
                                                 if (!createEncrypted) {
                                                     singleLaunchGuard.launch {
@@ -510,7 +545,7 @@ private fun AddRepositoryDialogContents(
                                         SimpleActionDialogDoneButtons(onClose)
                                     } else {
                                         SimpleActionDialogControlButtons(
-                                            "Add",
+                                            stringResource(Res.string.common_add),
                                             onLaunch = {
                                                 singleLaunchGuard.launch { option.executeAdd(storageRegistrationInput) }
                                             },
@@ -539,7 +574,7 @@ private fun AddRepositoryDialogContents(
                                             }
 
                                         SimpleActionDialogControlButtons(
-                                            "Add",
+                                            stringResource(Res.string.common_add),
                                             onLaunch = {
                                                 singleLaunchGuard.launch { option.executeAdd(storageRegistrationInput) }
                                             },
@@ -574,23 +609,23 @@ private fun StorageMark(
     if (storageRegistrationState is StorageRegistrationState.Unregistered) {
         Spacer(Modifier.height(12.dp))
         InfoAlert {
-            Text("Storage is used for the first time.", Modifier.padding(bottom = 16.dp))
-            Text("Select storage type:", Modifier.padding(bottom = 4.dp))
+            Text(stringResource(Res.string.dialog_add_repo_storage_first_time), Modifier.padding(bottom = 16.dp))
+            Text(stringResource(Res.string.dialog_add_repo_select_storage_type), Modifier.padding(bottom = 4.dp))
             RadioWithText(
                 storageType == FileSystemStorageType.LOCAL,
                 onClick = { setStorageType(FileSystemStorageType.LOCAL) },
-                text = "Local - this device",
+                text = stringResource(Res.string.dialog_add_repo_storage_local),
             )
             RadioWithText(
                 storageType == FileSystemStorageType.EXTERNAL,
                 onClick = { setStorageType(FileSystemStorageType.EXTERNAL) },
-                text = "External - media device",
+                text = stringResource(Res.string.dialog_add_repo_storage_external),
             )
-            Text("Enter storage label:", Modifier.padding(top = 12.dp))
+            Text(stringResource(Res.string.dialog_add_repo_enter_label), Modifier.padding(top = 12.dp))
             TextField(
                 value = label,
                 onValueChange = { setLabel(it) },
-                placeholder = { Text("Enter device label ...") },
+                placeholder = { Text(stringResource(Res.string.dialog_add_repo_enter_device_label)) },
                 modifier = Modifier.padding(top = 8.dp),
             )
         }
@@ -603,12 +638,12 @@ private fun InitStatus(initStatus: Execution) {
         is Execution.Finished -> {
             when (val outcome = initStatus.outcome) {
                 is ExecutionOutcome.Failed -> AutomaticErrorMessage(outcome, onResolve = {})
-                is ExecutionOutcome.Success -> ProgressText("Directory initialized successfully as repository.")
+                is ExecutionOutcome.Success -> ProgressText(stringResource(Res.string.dialog_add_repo_directory_initialized))
             }
         }
 
         is Execution.InProgress -> {
-            ProgressText("Initializing...")
+            ProgressText(stringResource(Res.string.common_initializing))
         }
 
         Execution.NotRunning -> {}
@@ -624,12 +659,12 @@ private fun AddStatus(
         is Execution.Finished -> {
             when (val outcome = addStatus.outcome) {
                 is ExecutionOutcome.Failed -> AutomaticErrorMessage(outcome, onResolve = {})
-                is ExecutionOutcome.Success -> ProgressText("Added successfully.")
+                is ExecutionOutcome.Success -> ProgressText(stringResource(Res.string.common_added_successfully))
             }
         }
 
         is Execution.InProgress -> {
-            ProgressText("Adding...")
+            ProgressText(stringResource(Res.string.common_adding))
         }
 
         Execution.NotRunning -> {

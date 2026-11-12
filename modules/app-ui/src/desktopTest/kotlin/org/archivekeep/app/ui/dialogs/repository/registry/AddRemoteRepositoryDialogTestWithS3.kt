@@ -11,6 +11,7 @@ import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import aws.sdk.kotlin.runtime.auth.credentials.StaticCredentialsProvider
+import com.adobe.testing.s3mock.testcontainers.S3MockContainer
 import io.kotest.matchers.collections.shouldContain
 import io.kotest.matchers.collections.shouldNotContain
 import kotlinx.coroutines.flow.first
@@ -30,7 +31,6 @@ import org.archivekeep.app.ui.utils.S3RepositoryTestRepo
 import org.archivekeep.app.ui.utils.env.runHighDensityComposeUiTestWithDemoEnv
 import org.archivekeep.app.ui.utils.screenshots.saveTestingContainerBitmap
 import org.archivekeep.app.ui.utils.screenshots.setContentInDialogScreenshotContainer
-import com.adobe.testing.s3mock.testcontainers.S3MockContainer
 import org.archivekeep.files.driver.s3.EncryptedS3Repository
 import org.archivekeep.files.driver.s3.S3Repository
 import org.junit.Ignore
@@ -171,14 +171,14 @@ class AddRemoteRepositoryDialogTestWithS3 {
 
             saveTestingDialogContainerBitmap("dialogs/add-remote-repository/s3-test/init-as-encrypted/input-s3-05-before-password.png")
 
-            onNodeWithText("Enter password ...").assertExists()
-            onNodeWithText("Verify password ...").assertExists()
+            onNodeWithText("Enter password …").assertExists()
+            onNodeWithText("Verify password …").assertExists()
 
-            onNodeWithText("Enter password ...").performClickTextInput("test-create-password")
+            onNodeWithText("Enter password …").performClickTextInput("test-create-password")
 
             saveTestingDialogContainerBitmap("dialogs/add-remote-repository/s3-test/init-as-encrypted/input-s3-06-first-password.png")
 
-            onNodeWithText("Verify password ...").performClickTextInput("test-create-password")
+            onNodeWithText("Verify password …").performClickTextInput("test-create-password")
 
             saveTestingDialogContainerBitmap("dialogs/add-remote-repository/s3-test/init-as-encrypted/input-s3-07-second-password.png")
 

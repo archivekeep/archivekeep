@@ -89,7 +89,7 @@ class UnlockRepositoryDialogTestWithEncryptedFileSystemRepository {
             }
 
             run {
-                onNodeWithText("Enter password ...").performClickTextInput("test-password-123")
+                onNodeWithText("Enter password …").performClickTextInput("test-password-123")
 
                 saveTestingContainerBitmap("dialogs/unlock-repository/provide-password-02-input-provided.png")
 
@@ -170,7 +170,7 @@ class UnlockRepositoryDialogTestWithEncryptedFileSystemRepository {
             }
 
             runBlocking {
-                onNodeWithText("Enter password ...").performClickTextInput("test-password-123")
+                onNodeWithText("Enter password …").performClickTextInput("test-password-123")
                 onNodeWithText("Remember password").performClick()
 
                 saveTestingContainerBitmap("dialogs/unlock-repository/provide-and-remember-password-02-input-provided.png")
@@ -255,7 +255,7 @@ class UnlockRepositoryDialogTestWithEncryptedFileSystemRepository {
             }
 
             run {
-                onNodeWithText("Enter password ...").performClickTextInput("test-password-wrong")
+                onNodeWithText("Enter password …").performClickTextInput("test-password-wrong")
 
                 saveTestingContainerBitmap("dialogs/unlock-repository/provide-incorrect-password-02-input-provided.png")
 
@@ -268,7 +268,7 @@ class UnlockRepositoryDialogTestWithEncryptedFileSystemRepository {
                 eventually(2.seconds) {
                     saveTestingContainerBitmap("dialogs/unlock-repository/provide-incorrect-password-03-final.png")
 
-                    onNodeWithText("Entered password isn't correct.").assertExists()
+                    onNodeWithText("Entered password is not correct.").assertExists()
                     onSubmitNode().assertIsEnabled()
                 }
             }

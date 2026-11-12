@@ -12,6 +12,10 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import compose.icons.TablerIcons
 import compose.icons.tablericons.Lock
+import org.archivekeep.ui.resources.Res
+import org.archivekeep.ui.resources.appbar_unlock_credentials
+import org.archivekeep.ui.resources.common_locked
+import org.jetbrains.compose.resources.stringResource
 
 @Composable
 fun AppBarCredentialsUnlockButton(onClick: () -> Unit) {
@@ -21,11 +25,11 @@ fun AppBarCredentialsUnlockButton(onClick: () -> Unit) {
         Icon(
             TablerIcons.Lock,
             tint = Color(233, 66, 66),
-            contentDescription = "Locked",
+            contentDescription = stringResource(Res.string.common_locked),
             modifier = Modifier.size(16.dp),
         )
         Spacer(Modifier.width(8.dp))
 
-        Text("Unlock credentials …")
+        Text(stringResource(Res.string.appbar_unlock_credentials))
     }
 }

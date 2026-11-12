@@ -17,9 +17,14 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import org.archivekeep.app.core.persistence.drivers.filesystem.FileSystemStorageType
 import org.archivekeep.app.ui.components.designsystem.sections.SectionCard
 import org.archivekeep.app.ui.domain.wiring.LocalArchiveOperationLaunchers
+import org.archivekeep.ui.resources.Res
+import org.archivekeep.ui.resources.home_archives_intro_add_button
+import org.archivekeep.ui.resources.home_archives_intro_description
+import org.archivekeep.ui.resources.home_archives_intro_description_existing
+import org.archivekeep.ui.resources.home_archives_intro_title
+import org.jetbrains.compose.resources.stringResource
 
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
@@ -34,17 +39,17 @@ fun HomeArchivesIntro() {
             modifier = Modifier.padding(32.dp),
         ) {
             Text(
-                "1. setup local storage",
+                stringResource(Res.string.home_archives_intro_title),
                 style = MaterialTheme.typography.titleMedium,
                 modifier = Modifier.padding(bottom = 4.dp),
             )
             Text(
-                "Begin by adding an local repository to contain data you want to have archived.",
+                stringResource(Res.string.home_archives_intro_description),
                 color = Color.DarkGray,
                 fontSize = 14.sp,
             )
             Text(
-                "It can already contain existing data.",
+                stringResource(Res.string.home_archives_intro_description_existing),
                 color = Color.DarkGray,
                 fontSize = 14.sp,
             )
@@ -59,7 +64,7 @@ fun HomeArchivesIntro() {
                     },
                     modifier = Modifier.defaultMinSize(120.dp),
                 ) {
-                    Text("Add local repository…")
+                    Text(stringResource(Res.string.home_archives_intro_add_button))
                 }
             }
         }

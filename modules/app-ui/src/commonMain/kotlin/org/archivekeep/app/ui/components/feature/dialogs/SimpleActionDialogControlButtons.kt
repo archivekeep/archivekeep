@@ -12,6 +12,9 @@ import androidx.compose.ui.unit.dp
 import org.archivekeep.app.ui.components.designsystem.dialog.DialogDismissButton
 import org.archivekeep.app.ui.components.designsystem.dialog.DialogPrimaryButton
 import org.archivekeep.app.ui.utils.ActionTriggerState
+import org.archivekeep.ui.resources.Res
+import org.archivekeep.ui.resources.common_cancel
+import org.jetbrains.compose.resources.stringResource
 
 @Composable
 fun RowScope.SimpleActionDialogControlButtons(
@@ -54,7 +57,7 @@ fun RowScope.SimpleActionDialogControlButtons(
     Spacer(modifier = Modifier.weight(1f))
 
     DialogDismissButton(
-        "Cancel",
+        stringResource(Res.string.common_cancel),
         onClick = onClose,
     )
 }

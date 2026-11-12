@@ -21,8 +21,12 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import compose.icons.TablerIcons
 import compose.icons.tablericons.DotsVertical
-import org.archivekeep.app.core.persistence.drivers.filesystem.FileSystemStorageType
 import org.archivekeep.app.ui.domain.wiring.LocalArchiveOperationLaunchers
+import org.archivekeep.ui.resources.Res
+import org.archivekeep.ui.resources.common_menu
+import org.archivekeep.ui.resources.main_menu_add_file_repository
+import org.archivekeep.ui.resources.main_menu_add_remote_repository
+import org.jetbrains.compose.resources.stringResource
 
 @Composable
 fun MainMenuDropdownIconLaunched(modifier: Modifier = Modifier) {
@@ -43,7 +47,7 @@ fun MainMenuDropdownIconLaunched(modifier: Modifier = Modifier) {
         Icon(
             TablerIcons.DotsVertical,
             tint = Color(200, 210, 240),
-            contentDescription = "Main menu",
+            contentDescription = stringResource(Res.string.common_menu),
             modifier =
                 Modifier
                     .padding(6.dp)
@@ -58,13 +62,13 @@ fun MainMenuDropdownIconLaunched(modifier: Modifier = Modifier) {
                 operationsLaunchers.openAddFileSystemRepository()
                 isDropdownExpanded = false
             }, text = {
-                Text("Add file repository …")
+                Text(stringResource(Res.string.main_menu_add_file_repository))
             })
             DropdownMenuItem(onClick = {
                 operationsLaunchers.openAddRemoteRepository()
                 isDropdownExpanded = false
             }, text = {
-                Text("Add remote repository …")
+                Text(stringResource(Res.string.main_menu_add_remote_repository))
             })
         }
     }

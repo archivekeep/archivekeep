@@ -15,6 +15,16 @@ import org.archivekeep.app.ui.components.designsystem.elements.WarningAlert
 import org.archivekeep.app.ui.components.designsystem.input.CheckboxWithText
 import org.archivekeep.app.ui.components.designsystem.input.PasswordField
 import org.archivekeep.app.ui.components.designsystem.input.TextField
+import org.archivekeep.ui.resources.Res
+import org.archivekeep.ui.resources.common_remember_credentials
+import org.archivekeep.ui.resources.dialog_add_remote_s3_access_key
+import org.archivekeep.ui.resources.dialog_add_remote_s3_bucket
+import org.archivekeep.ui.resources.dialog_add_remote_s3_connection
+import org.archivekeep.ui.resources.dialog_add_remote_s3_endpoint
+import org.archivekeep.ui.resources.dialog_add_remote_s3_insecure
+import org.archivekeep.ui.resources.dialog_add_remote_s3_secret_key
+import org.archivekeep.ui.resources.dialog_add_remote_s3_vpn_recommended
+import org.jetbrains.compose.resources.stringResource
 
 @Composable
 fun S3Form(
@@ -22,14 +32,14 @@ fun S3Form(
     isEditable: Boolean,
 ) {
     Text(
-        "Connection details for S3 bucket:",
+        stringResource(Res.string.dialog_add_remote_s3_connection),
     )
     Spacer(Modifier.height(4.dp))
     TextField(
         s3input.endpoint.value,
         onValueChange = { s3input.endpoint.value = it },
-        label = { Text("Endpoint URL") },
-        placeholder = { Text("Endpoint URL") },
+        label = { Text(stringResource(Res.string.dialog_add_remote_s3_endpoint)) },
+        placeholder = { Text(stringResource(Res.string.dialog_add_remote_s3_endpoint)) },
         singleLine = true,
         enabled = isEditable,
         modifier = Modifier.fillMaxWidth(),
@@ -47,19 +57,18 @@ fun S3Form(
         WarningAlert {
             Column {
                 Text(
-                    "Insecure protocol is used for endpoint. " +
-                        "This results in plain data being sent over network, that is readable by anyone.",
+                    stringResource(Res.string.dialog_add_remote_s3_insecure),
                 )
                 Spacer(Modifier.height(8.dp))
-                Text("It is strongly recommended to connect to this server using a VPN you absolutely trust.")
+                Text(stringResource(Res.string.dialog_add_remote_s3_vpn_recommended))
             }
         }
     }
     TextField(
         s3input.bucket.value,
         onValueChange = { s3input.bucket.value = it },
-        label = { Text("Bucket name") },
-        placeholder = { Text("Bucket name") },
+        label = { Text(stringResource(Res.string.dialog_add_remote_s3_bucket)) },
+        placeholder = { Text(stringResource(Res.string.dialog_add_remote_s3_bucket)) },
         singleLine = true,
         enabled = isEditable,
         modifier = Modifier.fillMaxWidth(),
@@ -67,8 +76,8 @@ fun S3Form(
     TextField(
         s3input.accessKey.value,
         onValueChange = { s3input.accessKey.value = it },
-        label = { Text("Access key") },
-        placeholder = { Text("Access key") },
+        label = { Text(stringResource(Res.string.dialog_add_remote_s3_access_key)) },
+        placeholder = { Text(stringResource(Res.string.dialog_add_remote_s3_access_key)) },
         singleLine = true,
         enabled = isEditable,
         modifier = Modifier.fillMaxWidth(),
@@ -76,8 +85,8 @@ fun S3Form(
     PasswordField(
         s3input.secretKey.value,
         onValueChange = { s3input.secretKey.value = it },
-        label = { Text("Secret key") },
-        placeholder = { Text("Secret key") },
+        label = { Text(stringResource(Res.string.dialog_add_remote_s3_secret_key)) },
+        placeholder = { Text(stringResource(Res.string.dialog_add_remote_s3_secret_key)) },
         enabled = isEditable,
         modifier = Modifier.fillMaxWidth(),
     )
@@ -86,7 +95,7 @@ fun S3Form(
         onValueChange = {
             s3input.rememberCredentials.value = it
         },
-        text = "Remember credentials",
+        text = stringResource(Res.string.common_remember_credentials),
     )
 
     Spacer(Modifier.height(12.dp))

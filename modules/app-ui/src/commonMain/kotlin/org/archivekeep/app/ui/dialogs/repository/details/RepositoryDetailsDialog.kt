@@ -22,8 +22,17 @@ import org.archivekeep.app.ui.dialogs.repository.AbstractRepositoryDialog
 import org.archivekeep.app.ui.utils.collectAsLoadable
 import org.archivekeep.files.api.repository.Repo
 import org.archivekeep.files.api.repository.RepoIndex
+import org.archivekeep.ui.resources.Res
+import org.archivekeep.ui.resources.common_close
+import org.archivekeep.ui.resources.common_unknown
+import org.archivekeep.ui.resources.dialog_repo_details_files
+import org.archivekeep.ui.resources.dialog_repo_details_name
+import org.archivekeep.ui.resources.dialog_repo_details_size
+import org.archivekeep.ui.resources.dialog_repo_details_storage
+import org.archivekeep.ui.resources.dialog_repo_details_type
 import org.archivekeep.utils.loading.Loadable
 import org.archivekeep.utils.loading.optional.OptionalLoadable
+import org.jetbrains.compose.resources.stringResource
 
 class RepositoryDetailsDialog(
     uri: RepositoryURI,
@@ -48,7 +57,7 @@ class RepositoryDetailsDialog(
     ) : IState {
         override val title: AnnotatedString =
             buildAnnotatedString {
-                append("Repository details")
+                append("Repository Details")
             }
     }
 
@@ -75,7 +84,7 @@ class RepositoryDetailsDialog(
             val totalSize = files.sumOf { it.size ?: 0L }
 
             val accessor = (vm.repository.optionalAccessorFlow.value as? OptionalLoadable.LoadedAvailable<Repo>)?.value
-            val filesystemRepoType = accessor?.let { getFilesystemRepoType(it) }
+            val filesystemRepoType = accessor?.let { getFilesystemRepoTypeKey(it) }
 
             State(
                 displayName = (information as? Loadable.Loaded)?.value?.displayName ?: vm.uri.data,
@@ -91,15 +100,15 @@ class RepositoryDetailsDialog(
     @Composable
     override fun ColumnScope.renderContent(state: State) {
         Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
-            InfoRow("Name", state.displayName)
-            InfoRow("Type", state.repositoryType)
+            InfoRow(stringResource(Res.string.dialog_repo_details_name), state.displayName)
+            InfoRow(stringResource(Res.string.dialog_repo_details_type), state.repositoryType)
             state.filesystemRepoType?.let {
-                InfoRow("Storage", it)
+                InfoRow(stringResource(Res.string.dialog_repo_details_storage), it)
             }
-            InfoRow("Files", state.fileCount?.toString() ?: "Unknown")
+            InfoRow(stringResource(Res.string.dialog_repo_details_files), state.fileCount?.toString() ?: stringResource(Res.string.common_unknown))
             InfoRow(
-                "Size",
-                state.totalSize?.let { formatBytes(it) } ?: "Unknown",
+                stringResource(Res.string.dialog_repo_details_size),
+                state.totalSize?.let { formatBytes(it) } ?: stringResource(Res.string.common_unknown),
             )
         }
     }
@@ -108,7 +117,7 @@ class RepositoryDetailsDialog(
     override fun RowScope.renderButtons(state: State) {
         DialogButtonContainer {
             DialogDismissButton(
-                "Close",
+                stringResource(Res.string.common_close),
                 onClick = state.onClose,
             )
         }
@@ -126,14 +135,14 @@ class RepositoryDetailsDialog(
     }
 }
 
-private fun getFilesystemRepoType(repo: Repo): String? {
+private fun getFilesystemRepoTypeKey(repo: Repo): String? {
     val className = repo::class.simpleName ?: return null
 
     return when {
-        className.contains("Encrypted") -> "Encrypted files"
-        className.contains("RocksDb") -> "RocksDB index"
-        className.contains("Sqlite") -> "SQLite index"
-        className.contains("FilesRepo") -> "Plain files with checksum files"
+        className.contains("Encrypted") -> "encrypted"
+        className.contains("RocksDb") -> "rocksdb"
+        className.contains("Sqlite") -> "sqlite"
+        className.contains("FilesRepo") -> "plain"
         else -> null
     }
 }

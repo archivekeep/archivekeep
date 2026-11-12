@@ -16,6 +16,11 @@ import org.archivekeep.app.ui.components.designsystem.dropdownmenu.ActionDropdow
 import org.archivekeep.app.ui.components.designsystem.sections.SectionCardBottomListItemIconButton
 import org.archivekeep.app.ui.domain.wiring.LocalArchiveOperationLaunchers
 import org.archivekeep.app.ui.utils.Action
+import org.archivekeep.ui.resources.Res
+import org.archivekeep.ui.resources.common_details
+import org.archivekeep.ui.resources.common_forget
+import org.archivekeep.ui.resources.common_more_actions
+import org.jetbrains.compose.resources.stringResource
 
 @Composable
 fun InStorageRepositoryDropdownIconLaunched(uri: RepositoryURI) {
@@ -35,7 +40,7 @@ fun InStorageRepositoryDropdownIconLaunched(uri: RepositoryURI) {
 
         SectionCardBottomListItemIconButton(
             icon = TablerIcons.DotsVertical,
-            contentDescription = "More",
+            contentDescription = stringResource(Res.string.common_more_actions),
             onClick = {
                 isDropdownExpanded = !isDropdownExpanded
             },
@@ -47,7 +52,7 @@ fun InStorageRepositoryDropdownIconLaunched(uri: RepositoryURI) {
             ActionDropdownMenuItem(
                 Action(
                     null,
-                    "Forget",
+                    stringResource(Res.string.common_forget),
                     isPending = false,
                     onLaunch = {
                         launchers.openForgetRepository(uri)
@@ -58,7 +63,7 @@ fun InStorageRepositoryDropdownIconLaunched(uri: RepositoryURI) {
             ActionDropdownMenuItem(
                 Action(
                     icon = TablerIcons.InfoCircle,
-                    title = "Details",
+                    title = stringResource(Res.string.common_details),
                     isPending = false,
                     onLaunch = {
                         launchers.openRepositoryDetails(uri)
