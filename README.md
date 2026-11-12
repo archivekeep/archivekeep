@@ -95,6 +95,14 @@ flatpak run org.archivekeep.ArchiveKeep
 
 See [docs/features.md](docs/content/about/features/index.md) for overview. To be documented later.
 
+## Contributing translations
+
+This project uses [Weblate] for language translations. Contributions are welcome.
+
+[![Translation status](https://hosted.weblate.org/widget/archivekeep/multi-auto.svg)](https://hosted.weblate.org/engage/archivekeep/)
+
+Code contributions are currently not accepted.
+
 ## Support the Project
 
 ArchiveKeep is an independent open-source project developed by Miroslav Kravec. If you find it useful and want to support its development, you can donate via:
@@ -123,3 +131,4 @@ The whole project is licensed under GNU General Public License, version 3. See [
 [BorgBackup]: https://www.borgbackup.org/
 [restic]: https://restic.net/
 [LUKS]: https://en.wikipedia.org/wiki/Linux_Unified_Key_Setup
+[Weblate]: https://hosted.weblate.org/engage/archivekeep/
