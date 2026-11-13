@@ -14,7 +14,6 @@ import org.archivekeep.files.driver.filesystem.files.rocksdb.model.toDatabaseFil
 import org.archivekeep.files.driver.filesystem.files.rocksdb.model.toIncomingFileRecord
 import org.archivekeep.files.driver.filesystem.files.rocksdb.model.toPendingMoveRecord
 import java.util.*
-import kotlin.time.Duration.Companion.seconds
 
 private fun loadAllFiles(store: RocksDBStore): List<DatabaseIndexStore.DatabaseFileRecord> =
     store.withDbAccess {
@@ -46,7 +45,7 @@ class RocksDBIndexStore(
 
             store
                 .filesChanged
-                .debounce(3.seconds)
+                .debounce(RocksDBDefaults.filesChangedDebounce)
                 .collect {
                     val updated = loadAllFiles(store)
                     trySend(updated)

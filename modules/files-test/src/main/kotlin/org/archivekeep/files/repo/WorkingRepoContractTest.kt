@@ -41,7 +41,7 @@ abstract class WorkingRepoContractTest<T : LocalRepo> {
 
         fun fileExists(filename: String): Boolean
 
-        fun directoryExists(path: String): Boolean
+        fun directoryExists(dirPath: String): Boolean
     }
 
     abstract fun createNew(): TestRepo<T>
