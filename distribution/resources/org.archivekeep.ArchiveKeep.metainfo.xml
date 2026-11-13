@@ -62,6 +62,24 @@
     <content_rating type="oars-1.1" />
 
     <releases>
+        <release version="0.8.2" date="2026-11-13">
+            <description>
+                <p>Added:</p>
+                <ul>
+                    <li>Slovak translation for the application,</li>
+                    <li>autofocus and Enter key confirmation in unlock repository and wallet dialogs,</li>
+                    <li>copy performance stats output to log on completion,</li>
+                    <li>ability to cancel index update (add files) procedure,</li>
+                    <li>build of native Linux packages (DEB, RPM, and AppImage) to in GitHub Actions.</li>
+                </ul>
+                <p>Changed:</p>
+                <ul>
+                    <li>dialog log output now scrolls horizontally when lines are too wide,</li>
+                    <li>empty parent directories are automatically removed after file moves,</li>
+                    <li>Android backup disabled to protect repository data security.</li>
+                </ul>
+            </description>
+        </release>
         <release version="0.8.1" date="2026-11-08">
             <description>
                 <p>Changed:</p>

@@ -2,6 +2,22 @@
 
 ## Unreleased
 
+## 0.8.2 - 2026-11-13
+
+### Added
+
+- Slovak translation for the application,
+- autofocus and Enter key confirmation in unlock repository and wallet dialogs,
+- copy performance stats output to log on completion,
+- ability to cancel index update (add files) procedure,
+- build of native Linux packages (DEB, RPM, and AppImage) to in GitHub Actions.
+
+### Changed
+
+- dialog log output now scrolls horizontally when lines are too wide,
+- empty parent directories are automatically removed after file moves,
+- Android backup disabled to protect repository data security.
+
 ## 0.8.1 - 2026-11-08
 
 ### Changed
