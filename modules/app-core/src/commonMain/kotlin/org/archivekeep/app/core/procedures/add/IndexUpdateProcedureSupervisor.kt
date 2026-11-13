@@ -15,6 +15,8 @@ interface IndexUpdateProcedureSupervisor {
 
     fun prepare(): Flow<Loadable<Preparation>>
 
+    fun cancel()
+
     sealed interface State
 
     data class JobState(

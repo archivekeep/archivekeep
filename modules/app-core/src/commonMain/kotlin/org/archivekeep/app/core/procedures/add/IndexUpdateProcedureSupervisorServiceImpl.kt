@@ -50,6 +50,10 @@ class IndexUpdateProcedureSupervisorServiceImpl(
     ) : IndexUpdateProcedureSupervisor {
         override val currentJobFlow: StateFlow<JobImpl?> = jobGuards.stateHoldersWeakReference[repositoryURI].asStateFlow()
 
+        override fun cancel() {
+            currentJobFlow.value?.cancel()
+        }
+
         @OptIn(ExperimentalCoroutinesApi::class)
         override fun prepare(): Flow<Loadable<IndexUpdateProcedureSupervisor.Preparation>> =
             repositoryService

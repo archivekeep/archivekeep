@@ -62,13 +62,14 @@ class IndexUpdateProcedureDialog(
         val operationState: IndexUpdateProcedureSupervisor.State,
         val selectedFilesToAdd: MutableState<Set<String>>,
         val selectedMovesToExecute: MutableState<Set<Move>>,
+        val onCancel: () -> Unit,
         val onClose: () -> Unit,
     ) {
         val controlState: DialogOperationControlState =
             when (val opState = operationState) {
                 is IndexUpdateProcedureSupervisor.JobState -> {
                     opState.executionState.toDialogOperationControlState(
-                        onCancel = null,
+                        onCancel = onCancel,
                         onHide = onClose,
                         onClose = onClose,
                     )
@@ -156,6 +157,7 @@ class IndexUpdateProcedureDialog(
                     operationState = operationState,
                     selectedFilesToAdd = mutableStateOf(emptySet()),
                     selectedMovesToExecute = mutableStateOf(emptySet()),
+                    onCancel = vm.operation::cancel,
                     onClose = vm::onClose,
                 )
             }
