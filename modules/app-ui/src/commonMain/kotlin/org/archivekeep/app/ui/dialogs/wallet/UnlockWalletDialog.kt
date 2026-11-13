@@ -2,13 +2,20 @@ package org.archivekeep.app.ui.dialogs.wallet
 
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.RowScope
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.input.ImeAction
 import kotlinx.coroutines.CoroutineScope
 import org.archivekeep.app.core.persistence.credentials.WalletPO
 import org.archivekeep.app.ui.components.designsystem.input.PasswordField
@@ -102,13 +109,29 @@ class UnlockWalletDialog(
 //                        return@DialogInnerContainer
 //                    }
 
+        val passwordFocusRequester = remember { FocusRequester() }
+        LaunchedEffect(Unit) {
+            passwordFocusRequester.requestFocus()
+        }
+
         Text(stringResource(Res.string.dialog_unlock_wallet_message))
 
         PasswordField(
-            state.password ?: "",
+            value = state.password ?: "",
             onValueChange = {
                 state.password = it
             },
+            modifier = Modifier.focusRequester(passwordFocusRequester),
+            keyboardOptions = KeyboardOptions(
+                imeAction = ImeAction.Done,
+            ),
+            keyboardActions = KeyboardActions(
+                onDone = {
+                    if (state.action.value.canLaunch) {
+                        state.action.value.onLaunch()
+                    }
+                },
+            ),
             label = { Text(stringResource(Res.string.common_password)) },
             placeholder = { Text(stringResource(Res.string.common_enter_password)) },
         )

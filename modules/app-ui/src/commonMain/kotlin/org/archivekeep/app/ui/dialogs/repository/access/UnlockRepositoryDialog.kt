@@ -1,5 +1,8 @@
 package org.archivekeep.app.ui.dialogs.repository.access
 
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.Spacer
@@ -11,11 +14,14 @@ import androidx.compose.material.Icon
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.unit.dp
@@ -236,6 +242,11 @@ class UnlockRepositoryDialog(
             return
         }
 
+        val passwordFocusRequester = remember { FocusRequester() }
+        LaunchedEffect(Unit) {
+            passwordFocusRequester.requestFocus()
+        }
+
         val walletOperationLaunchers = LocalWalletOperationLaunchers.current
 
         @Composable
@@ -311,7 +322,7 @@ class UnlockRepositoryDialog(
                     )
                     Spacer(Modifier.height(12.dp))
                     PasswordField(
-                        state.basicAuthCredentials?.password ?: "",
+                        value = state.basicAuthCredentials?.password ?: "",
                         onValueChange = {
                             state.basicAuthCredentials =
                                 BasicAuthCredentials(
@@ -319,6 +330,17 @@ class UnlockRepositoryDialog(
                                     username = state.basicAuthCredentials?.username ?: "",
                                 )
                         },
+                        modifier = Modifier.focusRequester(passwordFocusRequester),
+                        keyboardOptions = KeyboardOptions(
+                            imeAction = ImeAction.Done,
+                        ),
+                        keyboardActions = KeyboardActions(
+                            onDone = {
+                                if (state.action.canLaunch) {
+                                    state.action.onLaunch()
+                                }
+                            },
+                        ),
                         placeholder = {
                             Text(stringResource(Res.string.common_enter_password))
                         },
@@ -349,8 +371,19 @@ class UnlockRepositoryDialog(
                         modifier = Modifier.padding(bottom = 8.dp),
                     )
                     PasswordField(
-                        state.password,
+                        value = state.password,
                         onValueChange = { state.password = it },
+                        modifier = Modifier.focusRequester(passwordFocusRequester),
+                        keyboardOptions = KeyboardOptions(
+                            imeAction = ImeAction.Done,
+                        ),
+                        keyboardActions = KeyboardActions(
+                            onDone = {
+                                if (state.action.canLaunch) {
+                                    state.action.onLaunch()
+                                }
+                            },
+                        ),
                         placeholder = {
                             Text(stringResource(Res.string.common_enter_password))
                         },
