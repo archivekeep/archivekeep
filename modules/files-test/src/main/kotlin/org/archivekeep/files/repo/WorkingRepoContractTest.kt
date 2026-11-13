@@ -38,6 +38,10 @@ abstract class WorkingRepoContractTest<T : LocalRepo> {
         )
 
         fun deleteFile(filename: String)
+
+        fun fileExists(filename: String): Boolean
+
+        fun directoryExists(path: String): Boolean
     }
 
     abstract fun createNew(): TestRepo<T>
@@ -291,6 +295,61 @@ abstract class WorkingRepoContractTest<T : LocalRepo> {
                     modifiedIndexedFiles = emptyList(),
                     missingFiles = emptyList(),
                 )
+        }
+
+    @RepeatedTest(4)
+    open fun `move should remove empty parent directories`() =
+        runTest {
+            val testRepo = createNew()
+
+            val repoAccessor =
+                testRepo
+                    .open(this@runTest, getDispatcher())
+                    .withContentsFrom(testContents01)
+
+            val indexFlowState =
+                repoAccessor
+                    .localIndex
+                    .stateIn(backgroundScope, SharingStarted.Eagerly)
+
+            indexFlowState eventuallyShouldBeLoadedAndValueShouldBe testContents01InitialWorkingStatus
+
+            // Move A/01.txt out of directory A, leaving A/02.txt behind
+            repoAccessor.move("A/01.txt", "C/A/01.txt")
+
+            indexFlowState eventuallyShouldBeLoadedAndValueShouldBe
+                StatusOperation.Result(
+                    newFiles = emptyList(),
+                    indexedFiles =
+                        listOf(
+                            "A/02.txt",
+                            "B/03.txt",
+                            "C/A/01.txt",
+                        ),
+                    modifiedIndexedFiles = emptyList(),
+                    missingFiles = emptyList(),
+                )
+
+            assert(testRepo.fileExists("C/A/01.txt")) { "C/A/01.txt should exist after move" }
+            assert(testRepo.directoryExists("C/A")) { "C/A directory should exist after move" }
+
+            // Now move the last file out of A, so A should be removed
+            repoAccessor.move("A/02.txt", "C/A/02.txt")
+
+            indexFlowState eventuallyShouldBeLoadedAndValueShouldBe
+                StatusOperation.Result(
+                    newFiles = emptyList(),
+                    indexedFiles =
+                        listOf(
+                            "B/03.txt",
+                            "C/A/01.txt",
+                            "C/A/02.txt",
+                        ),
+                    modifiedIndexedFiles = emptyList(),
+                    missingFiles = emptyList(),
+                )
+
+            assert(!testRepo.directoryExists("A")) { "Directory A should be removed after last file is moved out" }
         }
 
     private fun GenericTestScope.getDispatcher() = coroutineContext[CoroutineDispatcher] ?: throw IllegalStateException("Dispatcher expected")

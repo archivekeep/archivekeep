@@ -10,9 +10,11 @@ import org.archivekeep.utils.io.WatchDefaults
 import org.junit.jupiter.api.io.TempDir
 import java.nio.file.Path
 import java.nio.file.attribute.FileTime
-import java.util.UUID
+import java.util.*
 import kotlin.io.path.createDirectory
 import kotlin.io.path.deleteIfExists
+import kotlin.io.path.exists
+import kotlin.io.path.isDirectory
 import kotlin.io.path.outputStream
 import kotlin.io.path.setLastModifiedTime
 import kotlin.time.Duration.Companion.milliseconds
@@ -73,6 +75,10 @@ class FilesSqliteWorkingRepoContractTest : WorkingRepoContractTest<FilesDatabase
             override fun deleteFile(filename: String) {
                 path.resolve(filename).deleteIfExists()
             }
+
+            override fun fileExists(filename: String): Boolean = path.resolve(filename).exists()
+
+            override fun directoryExists(dirPath: String): Boolean = path.resolve(dirPath).isDirectory()
         }
 
     override fun runTest(testBody: suspend GenericTestScope.() -> Unit) = runBlockingTest(testBody)

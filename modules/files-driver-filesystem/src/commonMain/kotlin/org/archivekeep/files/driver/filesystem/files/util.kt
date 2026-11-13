@@ -5,7 +5,9 @@ import org.archivekeep.files.api.exceptions.NotNormalizedPath
 import java.nio.file.Path
 import java.nio.file.Paths
 import java.security.MessageDigest
+import kotlin.io.path.exists
 import kotlin.io.path.invariantSeparatorsPathString
+import kotlin.io.path.isDirectory
 
 internal fun safeSubPath(path: String): Path = safeSubPath(Paths.get(path))
 
@@ -47,4 +49,20 @@ internal fun computeChecksum(path: Path): String {
     val digest = md.digest()
 
     return digest.joinToString("") { "%02x".format(it) }
+}
+
+internal fun removeEmptyParentDirectories(
+    startPath: Path,
+    root: Path,
+) {
+    val rootNameCount = root.nameCount
+
+    var current = startPath.parent
+    while (current != null && current.nameCount > rootNameCount) {
+        if (!current.isDirectory() || !current.exists() || current.toFile().list()?.isNotEmpty() == true) {
+            break
+        }
+        current.toFile().delete()
+        current = current.parent
+    }
 }

@@ -207,10 +207,12 @@ class FilesRepo(
                 throw DestinationExists(to)
             }
 
+            val srcPath = root.resolve(safeSubPath(from))
             val move = indexStore.beginMove(from, to)
 
             dstPath.createParentDirectories()
-            root.resolve(from).moveTo(dstPath)
+            srcPath.moveTo(dstPath)
+            removeEmptyParentDirectories(srcPath, root)
 
             move.completed()
         }

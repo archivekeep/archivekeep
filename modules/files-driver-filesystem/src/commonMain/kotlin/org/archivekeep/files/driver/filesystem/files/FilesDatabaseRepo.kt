@@ -376,11 +376,13 @@ class FilesDatabaseRepo private constructor(
                 throw DestinationExists(to)
             }
 
+            val srcPath = root.resolve(safeSubPath(from))
             indexStore.beginMove(from, to, Date()).run {
                 val lastModified =
                     try {
                         dstPath.createParentDirectories()
-                        root.resolve(from).moveTo(dstPath)
+                        srcPath.moveTo(dstPath)
+                        removeEmptyParentDirectories(srcPath, root)
                         Date(dstPath.getLastModifiedTime().toMillis())
                     } catch (e: Throwable) {
                         withContext(NonCancellable) {

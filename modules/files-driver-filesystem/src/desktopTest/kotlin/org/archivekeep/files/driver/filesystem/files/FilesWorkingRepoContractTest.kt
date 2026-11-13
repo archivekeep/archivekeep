@@ -9,10 +9,12 @@ import org.archivekeep.utils.io.WatchDefaults
 import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.io.TempDir
 import java.nio.file.Path
-import java.util.UUID
+import java.util.*
 import kotlin.io.path.createDirectory
 import kotlin.io.path.deleteIfExists
+import kotlin.io.path.exists
 import kotlin.io.path.getLastModifiedTime
+import kotlin.io.path.isDirectory
 import kotlin.io.path.outputStream
 import kotlin.io.path.setLastModifiedTime
 import kotlin.test.Test
@@ -69,6 +71,10 @@ class FilesWorkingRepoContractTest : WorkingRepoContractTest<FilesRepo>() {
             override fun deleteFile(filename: String) {
                 path.resolve(filename).deleteIfExists()
             }
+
+            override fun fileExists(filename: String): Boolean = path.resolve(filename).exists()
+
+            override fun directoryExists(dirPath: String): Boolean = path.resolve(dirPath).isDirectory()
         }
 
     @Test
