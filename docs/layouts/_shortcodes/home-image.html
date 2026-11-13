@@ -17,6 +17,7 @@
                         {{ with $img.Resize "fit 750x750 webp mitchellNetravali q50" }}{{.RelPermalink}} {{.Width}}w{{end}}"
         />
         <img style="height: auto; width: auto"
+             loading="lazy"
              srcset="{{ with $img.Resize "fit 300x300 mitchellNetravali q50" }}{{.RelPermalink}} {{.Width}}w{{end}},
         {{ with $img}}{{ .RelPermalink }} {{.Width}}w{{end}}"
         sizes="{{ $sizes }}"

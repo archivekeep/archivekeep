@@ -14,12 +14,10 @@
 <div class="main-display-container">
     <div class="main-display-inner-container">
         <div class="text">
-            <h2>ArchiveKeep<span class="sub">Personal files archivation</span></h2>
+            <h2>ArchiveKeep<span class="sub">Files archiving</span></h2>
             <p>Use your own <strong>SSD, HDD, USB flash-drives,...</strong> Rent <strong>cloud storages</strong> without vendor lock-in. Self-host. <strong>Combine</strong> storages.</p>
             <div class="links">
-                <a href='https://flathub.org/apps/org.archivekeep.ArchiveKeep'><img alt="Flathub" src="https://img.shields.io/flathub/v/org.archivekeep.ArchiveKeep?style=for-the-badge&logo=flathub&logoColor=white&color=4A86CF"/></a>
-                <a href='https://f-droid.org/packages/org.archivekeep.ArchiveKeep'><img alt="F-Droid" src="https://img.shields.io/f-droid/v/org.archivekeep.ArchiveKeep?style=for-the-badge&logo=f-droid&logoColor=white&color=1976D2"/></a>
-                <a href='https://github.com/archivekeep/archivekeep'><img alt="GitHub" src="https://img.shields.io/github/v/release/archivekeep/archivekeep?style=for-the-badge&logo=github&logoColor=white&color=181717&label=github"/></a>
+                <a href='#download'><img alt="Download" src="https://img.shields.io/badge/Download-4A86CF?style=for-the-badge&logo=arrow-down&logoColor=white"/></a>
             </div>
         </div>
         <div class="other">
@@ -42,7 +40,7 @@ Access files directly as ordinary files.
 
 Devices can read your files without having to install any extra software.
 
-The archivekeep only facilitates archivation process to help you replicate your data for preservation.
+The archivekeep only facilitates archiving process to help you replicate your data for preservation.
 </div>
 <div class="other small">
 {{< home-image "/generated_screenshots/dialogs/add-and-push/example.png" "" >}}
@@ -71,7 +69,7 @@ _**Note:** encrypt your drives if you want to [ensure privacy of your data at re
 
 The replication process prevents propagation of redactions, deletions, corruption or other destructive changes in files.
 
-The contents of files stored in repositories are verifiable using digistal checksums.
+The contents of files stored in repositories are verifiable using digital checksums.
 </div>
 <div class="other small">
 {{< home-image "/generated_screenshots/dialogs/sync/download-example.png" "" >}}
@@ -129,7 +127,11 @@ _**Note:** there's no dedicated application for self-hosting._
 
 <div class="two-col-section-wrapper">
 <div class="two-col-section">
-<div class="section-title"><h2>Download</h2></div>
+<div class="section-title">
+
+## Download
+
+</div>
 <div><div>
 
 ### Linux platform
@@ -137,6 +139,7 @@ _**Note:** there's no dedicated application for self-hosting._
 <p>Install on your Linux desktop.</p>
 <div class="links">
 <a href='https://flathub.org/apps/org.archivekeep.ArchiveKeep'><img alt="Flathub" src="https://img.shields.io/flathub/v/org.archivekeep.ArchiveKeep?style=for-the-badge&logo=flathub&logoColor=white&color=4A86CF"/></a>
+<a href='https://github.com/archivekeep/archivekeep/releases'><img alt="GitHub" src="https://img.shields.io/github/v/release/archivekeep/archivekeep?style=for-the-badge&logo=github&logoColor=white&color=181717&label=GitHub:%20AppImage,%20DEB,%20RPM"/></a>
 </div>
 
 </div></div>

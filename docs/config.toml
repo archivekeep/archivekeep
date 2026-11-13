@@ -1,6 +1,8 @@
 baseURL = "http://localhost"
-title = "archivekeep"
+title = "ArchiveKeep — Files Archiving"
 theme = "hugo-book"
+
+enableRobotsTXT = true
 
 disableKinds = ['taxonomy', 'term']
 
