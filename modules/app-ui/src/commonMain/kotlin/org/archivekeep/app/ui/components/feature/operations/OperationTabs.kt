@@ -1,12 +1,7 @@
 package org.archivekeep.app.ui.components.feature.operations
 
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.SegmentedButton
-import androidx.compose.material3.SegmentedButtonDefaults
-import androidx.compose.material3.SingleChoiceSegmentedButtonRow
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.State
@@ -19,6 +14,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import org.archivekeep.app.ui.components.designsystem.navigation.TabButton
+import org.archivekeep.app.ui.components.designsystem.navigation.TabRow
 import org.archivekeep.app.core.procedures.utils.BaseJobState
 import org.archivekeep.app.ui.components.feature.dialogs.operations.ExecutionErrorIfPresent
 import org.archivekeep.ui.resources.Res
@@ -40,7 +37,7 @@ private fun getTabOptions(
 ): List<Pair<String, @Composable () -> String>> = listOfNotNull(
     TAB_SUMMARY to { stringResource(Res.string.common_summary) },
     TAB_LOG to { stringResource(Res.string.common_log) },
-    trackerPresent?.let { TAB_PERFORMANCE to { stringResource(Res.string.common_performance) } },
+    if (trackerPresent) TAB_PERFORMANCE to { stringResource(Res.string.common_performance) } else null,
     TAB_ERROR_LOG to { stringResource(Res.string.common_errors) },
 )
 
@@ -55,29 +52,22 @@ fun <S : BaseJobState> OperationProgressTabs(
     val tabOptions = getTabOptions(state.performanceTracker!=null)
     val validTabOptions = tabOptions.filter { it.first != TAB_ERROR_LOG || errorLog != null }
 
-    SingleChoiceSegmentedButtonRow {
-        validTabOptions.forEachIndexed { index, tab ->
-            SegmentedButton(
-                shape =
-                    SegmentedButtonDefaults.itemShape(
-                        index = index,
-                        count = validTabOptions.size,
-                    ),
+    TabRow {
+        validTabOptions.forEach { tab ->
+            TabButton(
+                label = tab.second(),
+                isSelected = selectedTab == tab.first,
                 onClick = { selectedTab = tab.first },
-                selected = selectedTab == tab.first,
-                label = {
-                    Row {
-                        Text(tab.second())
-
-                        if (tab.first == TAB_ERROR_LOG && errorLog?.value?.isNotEmpty() == true) {
-                            Text(
-                                modifier = Modifier.padding(start = 8.dp),
-                                color = Color.Red,
-                                text = errorLog.value.size.toString(),
-                                fontWeight = FontWeight.SemiBold,
-                            )
-                        }
+                badge = if (tab.first == TAB_ERROR_LOG && errorLog?.value?.isNotEmpty() == true) {
+                    {
+                        Text(
+                            color = Color.Red,
+                            text = errorLog.value.size.toString(),
+                            fontWeight = FontWeight.SemiBold,
+                        )
                     }
+                } else {
+                    null
                 },
             )
         }
