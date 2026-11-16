@@ -85,9 +85,12 @@ class SpeedLimitedLocalRepoWrapper(
             base.fileChecksum(path)
         }
 
-    override suspend fun computeFileChecksum(path: Path): String =
+    override suspend fun computeFileChecksum(
+        path: String,
+        performanceTracker: RepoPerformanceTracker,
+    ): String =
         delayed(500) {
-            base.computeFileChecksum(path)
+            base.computeFileChecksum(path, performanceTracker)
         }
 
     override suspend fun add(

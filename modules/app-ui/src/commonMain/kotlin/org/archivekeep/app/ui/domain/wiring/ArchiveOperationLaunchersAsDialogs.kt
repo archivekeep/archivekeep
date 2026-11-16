@@ -10,6 +10,7 @@ import org.archivekeep.app.ui.dialogs.repository.procedures.deletedcleanup.Delet
 import org.archivekeep.app.ui.dialogs.repository.procedures.indexupdate.IndexUpdateProcedureDialog
 import org.archivekeep.app.ui.dialogs.repository.procedures.pushrepo.PushRepoDialog
 import org.archivekeep.app.ui.dialogs.repository.procedures.reindex.FileReindexProcedureDialog
+import org.archivekeep.app.ui.dialogs.repository.procedures.verify.VerifyContentsDialog
 import org.archivekeep.app.ui.dialogs.repository.procedures.sync.DownloadFromRepoDialog
 import org.archivekeep.app.ui.dialogs.repository.procedures.sync.UploadToRepoDialog
 import org.archivekeep.app.ui.dialogs.repository.registry.AddFileSystemRepositoryDialog
@@ -23,6 +24,7 @@ fun archiveOperationLaunchersAsDialogs(dialogRenderer: OverlayDialogRenderer) =
         openAddAndPushOperation = dialogRenderer.openFn(::AddAndPushRepoDialog),
         openIndexUpdateOperation = dialogRenderer.openFn(::IndexUpdateProcedureDialog),
         openReindexOperation = dialogRenderer.openFn(::FileReindexProcedureDialog),
+        openVerifyOperation = dialogRenderer.openFn(::VerifyContentsDialog),
         openDeletedFilesCleanupOperation = dialogRenderer.openFn(::DeletedFilesCleanupProcedureDialog),
         openAssociateRepository = dialogRenderer.openFn(::AssociateRepositoryDialog),
         openUnassociateRepository = dialogRenderer.openFn(::UnassociateRepositoryDialog),

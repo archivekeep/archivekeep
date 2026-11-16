@@ -61,6 +61,7 @@
     <string name="common_add_new_files">Pridať nové súbory</string>
     <string name="common_cleanup_deleted_files">Vyčistiť zmazané súbory</string>
     <string name="common_reindex_changed_files">Preindexovať zmenené súbory</string>
+    <string name="common_verify_contents">Overiť obsah</string>
 
     <!-- Common progress states -->
     <string name="common_adding">Pridáva sa…</string>
@@ -367,6 +368,15 @@
 
     <string name="dialog_reindex_title">Aktualizácia lokálneho indexu</string>
     <string name="dialog_reindex_reindexed">Preindexovaných %1$s z %2$s</string>
+
+    <!-- ==================== DIALOG: VERIFY CONTENTS ==================== -->
+
+    <string name="dialog_verify_title">Overenie obsahu</string>
+    <string name="dialog_verify_info">Vaše súbory sa mohli zmeniť alebo poškodiť v čase, hoci všetko vyzerá v poriadku — napríklad v dôsledku tichých chýb disku (bit rot) alebo zásahu malvéru. Táto kontrola porovná každý súbor s jeho uloženým otlačkom, aby ste poškodenie odhalili včas.</string>
+    <string name="dialog_verify_files_to_check">Skontroluje sa %1$s súborov</string>
+    <string name="dialog_verify_verified">Overených %1$s z %2$s</string>
+    <string name="dialog_verify_failed">Zlyhalo %1$s z %2$s</string>
+    <string name="procedure_execute_verify">Vykonať overenie</string>
 
     <!-- ==================== DIALOG: INDEX UPDATE ==================== -->
 

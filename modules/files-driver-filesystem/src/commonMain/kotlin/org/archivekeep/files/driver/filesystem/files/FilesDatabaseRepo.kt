@@ -325,10 +325,13 @@ class FilesDatabaseRepo private constructor(
 
     override suspend fun fileChecksum(path: String): String = indexStore.file(path)!!.checksumSha256
 
-    override suspend fun computeFileChecksum(path: Path): String {
+    override suspend fun computeFileChecksum(
+        path: String,
+        performanceTracker: RepoPerformanceTracker,
+    ): String {
         val fullPath = root.resolve(safeSubPath(path))
 
-        return computeChecksum(fullPath)
+        return performanceTracker.measure(ChecksumOperationIds.COMPUTE_CHECKSUM) { computeChecksum(fullPath) }
     }
 
     override suspend fun prepareAdd(

@@ -13,7 +13,6 @@ import org.archivekeep.utils.hashing.sha256
 import org.archivekeep.utils.loading.Loadable
 import org.archivekeep.utils.loading.mapToLoadable
 import java.nio.file.Path
-import kotlin.io.path.invariantSeparatorsPathString
 
 open class InMemoryLocalRepo(
     initialContents: Map<String, ByteArray> = mapOf(),
@@ -41,11 +40,14 @@ open class InMemoryLocalRepo(
 
     override suspend fun fileChecksum(path: String): String = (contents[path] ?: missingContentsFlow.value[path] ?: throw FileDoesntExist(path)).sha256()
 
-    override suspend fun computeFileChecksum(path: Path): String =
+    override suspend fun computeFileChecksum(
+        path: String,
+        performanceTracker: RepoPerformanceTracker,
+    ): String =
         (
-            contents[path.invariantSeparatorsPathString]
-                ?: unindexedFiles.value[path.invariantSeparatorsPathString]
-                ?: throw FileDoesntExist(path.toString())
+            contents[path]
+                ?: unindexedFiles.value[path]
+                ?: throw FileDoesntExist(path)
         ).sha256()
 
     override suspend fun prepareAdd(

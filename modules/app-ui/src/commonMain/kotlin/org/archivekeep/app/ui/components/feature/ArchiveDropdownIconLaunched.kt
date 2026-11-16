@@ -43,6 +43,7 @@ fun ArchiveDropdownIconLaunched(actions: HomeLocalArchiveUiActions) {
                 ActionDropdownMenuItem(add, ::closeDropdown)
                 ActionDropdownMenuItem(cleanupFiles, ::closeDropdown)
                 ActionDropdownMenuItem(reindex, ::closeDropdown)
+                ActionDropdownMenuItem(verify, ::closeDropdown)
                 ActionDropdownMenuItem(associate, ::closeDropdown)
                 ActionDropdownMenuItem(unassociate, ::closeDropdown)
                 ActionDropdownMenuItem(forget, ::closeDropdown)

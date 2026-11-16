@@ -10,6 +10,7 @@ interface RepositoryBaseUiActions {
     val add: Loadable<Action>
     val cleanupFiles: Loadable<Action>
     val reindex: Loadable<Action>
+    val verify: Loadable<Action>
     val associate: Loadable<Action>
     val unassociate: Loadable<Action>
     val forget: Loadable<Action>

@@ -19,7 +19,10 @@ interface LocalRepo : Repo {
 
     suspend fun fileChecksum(path: String): String
 
-    suspend fun computeFileChecksum(path: Path): String
+    suspend fun computeFileChecksum(
+        path: String,
+        performanceTracker: RepoPerformanceTracker = RepoPerformanceTracker.NoOp,
+    ): String
 
     suspend fun add(
         path: String,

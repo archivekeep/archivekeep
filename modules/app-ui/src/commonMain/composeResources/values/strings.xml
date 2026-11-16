@@ -61,6 +61,7 @@
     <string name="common_add_new_files">Add new files</string>
     <string name="common_cleanup_deleted_files">Cleanup deleted files</string>
     <string name="common_reindex_changed_files">Reindex changed files</string>
+    <string name="common_verify_contents">Verify contents</string>
 
     <!-- Common progress states -->
     <string name="common_adding">Adding…</string>
@@ -367,6 +368,15 @@
 
     <string name="dialog_reindex_title">Local index update</string>
     <string name="dialog_reindex_reindexed">Reindexed %1$s of %2$s</string>
+
+    <!-- ==================== DIALOG: VERIFY CONTENTS ==================== -->
+
+    <string name="dialog_verify_title">Verify contents</string>
+    <string name="dialog_verify_info">Your files might have changed or become corrupted over time, even if everything looks fine — for example, from silent disk errors (bit rot) or malware tampering. This check compares each file against its saved fingerprint so you can spot the damage early.</string>
+    <string name="dialog_verify_files_to_check">Will check %1$s files</string>
+    <string name="dialog_verify_verified">Verified %1$s of %2$s</string>
+    <string name="dialog_verify_failed">Failed %1$s of %2$s</string>
+    <string name="procedure_execute_verify">Execute verification</string>
 
     <!-- ==================== DIALOG: INDEX UPDATE ==================== -->
 

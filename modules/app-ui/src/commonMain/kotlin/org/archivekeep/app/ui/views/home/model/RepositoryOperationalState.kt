@@ -26,6 +26,7 @@ import org.archivekeep.ui.resources.common_forget
 import org.archivekeep.ui.resources.common_open
 import org.archivekeep.ui.resources.common_reindex_changed_files
 import org.archivekeep.ui.resources.common_unassociate
+import org.archivekeep.ui.resources.common_verify_contents
 import org.archivekeep.ui.resources.common_unlock
 import org.archivekeep.utils.loading.Loadable
 import org.archivekeep.utils.loading.mapLoadedData
@@ -58,6 +59,7 @@ class RepositoryOperationalState(
         val commonAddNewFiles = stringResource(Res.string.common_add_new_files)
         val commonCleanupDeletedFiles = stringResource(Res.string.common_cleanup_deleted_files)
         val commonReindexChangedFiles = stringResource(Res.string.common_reindex_changed_files)
+        val commonVerifyContents = stringResource(Res.string.common_verify_contents)
         val commonAssociate = stringResource(Res.string.common_associate)
         val commonUnassociate = stringResource(Res.string.common_unassociate)
         val commonForget = stringResource(Res.string.common_forget)
@@ -135,6 +137,18 @@ class RepositoryOperationalState(
                         },
                     )
                 }
+
+            override val verify: Loadable<Action> =
+                Loadable.Loaded(
+                    Action(
+                        null,
+                        commonVerifyContents,
+                        isPending = false,
+                        onLaunch = {
+                            launchers.openVerifyOperation(uri)
+                        },
+                    ),
+                )
 
             override val associate =
                 Loadable.Loaded(

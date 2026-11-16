@@ -20,6 +20,7 @@ import org.archivekeep.ui.resources.Res
 import org.archivekeep.ui.resources.common_details
 import org.archivekeep.ui.resources.common_forget
 import org.archivekeep.ui.resources.common_more_actions
+import org.archivekeep.ui.resources.common_verify_contents
 import org.jetbrains.compose.resources.stringResource
 
 @Composable
@@ -49,6 +50,17 @@ fun InStorageRepositoryDropdownIconLaunched(uri: RepositoryURI) {
             expanded = isDropdownExpanded,
             onDismissRequest = ::closeDropdown,
         ) {
+            ActionDropdownMenuItem(
+                Action(
+                    null,
+                    stringResource(Res.string.common_verify_contents),
+                    isPending = false,
+                    onLaunch = {
+                        launchers.openVerifyOperation(uri)
+                    },
+                ),
+                ::closeDropdown,
+            )
             ActionDropdownMenuItem(
                 Action(
                     null,

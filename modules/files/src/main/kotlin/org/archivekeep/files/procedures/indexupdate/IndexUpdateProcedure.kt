@@ -86,7 +86,7 @@ class IndexUpdateProcedure(
                 val unmatchedNewFiles = mutableListOf<String>()
 
                 unindexedFilesMatchingPattern.forEach { newUnindexedFile ->
-                    val checksum = localRepo.computeFileChecksum(newUnindexedFile)
+                    val checksum = localRepo.computeFileChecksum(newUnindexedFile.invariantSeparatorsPathString)
 
                     val missingFilePath = remainingMissingIndexedFilesByChecksum[checksum]
 

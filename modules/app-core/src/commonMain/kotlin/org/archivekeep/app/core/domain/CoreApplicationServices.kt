@@ -20,6 +20,7 @@ import org.archivekeep.app.core.procedures.addpush.AddAndPushProcedureService
 import org.archivekeep.app.core.procedures.deletedcleanup.DeletedFilesCleanupProcedureSupervisorService
 import org.archivekeep.app.core.procedures.reindex.FileReindexProcedureSupervisorService
 import org.archivekeep.app.core.procedures.sync.RepoToRepoSyncService
+import org.archivekeep.app.core.procedures.verify.VerifySupervisorService
 import org.archivekeep.utils.datastore.passwordprotected.ProtectedDataStore
 
 interface CoreApplicationServices {
@@ -49,6 +50,7 @@ interface CoreApplicationServices {
     val addOperationSupervisorService: IndexUpdateProcedureSupervisorService
     val deletedFilesCleanupProcedureSupervisorService: DeletedFilesCleanupProcedureSupervisorService
     val fileReindexProcedureSupervisorService: FileReindexProcedureSupervisorService
+    val verifySupervisorService: VerifySupervisorService
 
     val knownStorageService: KnownStorageService
 }

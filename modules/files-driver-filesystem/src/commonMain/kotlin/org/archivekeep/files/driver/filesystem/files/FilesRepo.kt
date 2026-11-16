@@ -162,7 +162,10 @@ class FilesRepo(
 
     override suspend fun fileChecksum(path: String): String = indexStore.fileChecksum(path)
 
-    override suspend fun computeFileChecksum(path: Path): String {
+    override suspend fun computeFileChecksum(
+        path: String,
+        performanceTracker: RepoPerformanceTracker,
+    ): String {
         val fullPath = root.resolve(safeSubPath(path))
 
         return computeChecksum(fullPath)
