@@ -9,6 +9,7 @@ import org.archivekeep.utils.io.WatchDefaults
 import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.io.TempDir
 import java.nio.file.Path
+import java.nio.file.attribute.FileTime
 import java.util.*
 import kotlin.io.path.createDirectory
 import kotlin.io.path.deleteIfExists
@@ -72,6 +73,13 @@ class FilesWorkingRepoContractTest : WorkingRepoContractTest<FilesRepo>() {
                 path.resolve(filename).deleteIfExists()
             }
 
+            override fun setFileTimestamp(
+                filename: String,
+                millis: Long,
+            ) {
+                path.resolve(filename).setLastModifiedTime(FileTime.fromMillis(millis))
+            }
+
             override fun fileExists(filename: String): Boolean = path.resolve(filename).exists()
 
             override fun directoryExists(dirPath: String): Boolean = path.resolve(dirPath).isDirectory()
@@ -87,6 +95,12 @@ class FilesWorkingRepoContractTest : WorkingRepoContractTest<FilesRepo>() {
     @Disabled("Feature not supported - not possible with checksum-only index")
     override fun shouldDetectSizeModificationOfIndexedFileAndSupportReAdd() {
         super.shouldDetectSizeModificationOfIndexedFileAndSupportReAdd()
+    }
+
+    @Test
+    @Disabled("Feature not supported - not possible with checksum-only index")
+    override fun `prepareAdd with file modified between prepare and add should detect modification`() {
+        super.`prepareAdd with file modified between prepare and add should detect modification`()
     }
 
     override fun runTest(testBody: suspend GenericTestScope.() -> Unit) = runBlockingTest(testBody)

@@ -39,6 +39,11 @@ abstract class WorkingRepoContractTest<T : LocalRepo> {
 
         fun deleteFile(filename: String)
 
+        fun setFileTimestamp(
+            filename: String,
+            millis: Long,
+        )
+
         fun fileExists(filename: String): Boolean
 
         fun directoryExists(dirPath: String): Boolean
@@ -278,6 +283,64 @@ abstract class WorkingRepoContractTest<T : LocalRepo> {
                             "B/03.txt",
                         ),
                     modifiedIndexedFiles = listOf("A/02.txt"),
+                    missingFiles = emptyList(),
+                )
+
+            repoAccessor.add("A/02.txt", reindex = true)
+
+            indexFlowState eventuallyShouldBeLoadedAndValueShouldBe
+                StatusOperation.Result(
+                    newFiles = emptyList(),
+                    indexedFiles =
+                        listOf(
+                            "A/01.txt",
+                            "A/02.txt",
+                            "B/03.txt",
+                        ),
+                    modifiedIndexedFiles = emptyList(),
+                    missingFiles = emptyList(),
+                )
+        }
+
+    @RepeatedTest(4)
+    open fun `prepareAdd with file modified between prepare and add should detect modification`() =
+        runTest {
+            val testRepo = createNew()
+
+            val repoAccessor =
+                testRepo
+                    .open(this@runTest, getDispatcher())
+                    .withContentsFrom(testContents01)
+
+            val indexFlowState =
+                repoAccessor
+                    .localIndex
+                    .stateIn(backgroundScope, SharingStarted.Eagerly)
+
+            indexFlowState eventuallyShouldBeLoadedAndValueShouldBe testContents01InitialWorkingStatus
+
+            val preparedAdd = repoAccessor.prepareAdd("A/02.txt")
+
+            testRepo.setFileTimestamp(
+                "A/02.txt",
+                System.currentTimeMillis() + 2000,
+            )
+
+            preparedAdd.add(reindex = true)
+
+            indexFlowState eventuallyShouldBeLoadedAndValueShouldBe
+                StatusOperation.Result(
+                    newFiles = emptyList(),
+                    indexedFiles =
+                        listOf(
+                            "A/01.txt",
+                            "A/02.txt",
+                            "B/03.txt",
+                        ),
+                    modifiedIndexedFiles =
+                        listOf(
+                            "A/02.txt",
+                        ),
                     missingFiles = emptyList(),
                 )
 

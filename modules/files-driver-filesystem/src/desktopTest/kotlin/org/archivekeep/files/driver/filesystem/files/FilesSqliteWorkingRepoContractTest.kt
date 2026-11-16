@@ -76,6 +76,13 @@ class FilesSqliteWorkingRepoContractTest : WorkingRepoContractTest<FilesDatabase
                 path.resolve(filename).deleteIfExists()
             }
 
+            override fun setFileTimestamp(
+                filename: String,
+                millis: Long,
+            ) {
+                path.resolve(filename).setLastModifiedTime(FileTime.fromMillis(millis))
+            }
+
             override fun fileExists(filename: String): Boolean = path.resolve(filename).exists()
 
             override fun directoryExists(dirPath: String): Boolean = path.resolve(dirPath).isDirectory()
