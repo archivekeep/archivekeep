@@ -58,13 +58,14 @@
     <string name="common_in">in</string>
     <string name="common_reindex">Reindex</string>
     <string name="common_unassociate">Unassociate</string>
-    <string name="common_add_new_files">Add new files</string>
+    <string name="common_update_index">Update index</string>
     <string name="common_cleanup_deleted_files">Cleanup deleted files</string>
     <string name="common_reindex_changed_files">Reindex changed files</string>
     <string name="common_verify_contents">Verify contents</string>
 
     <!-- Common progress states -->
     <string name="common_adding">Adding…</string>
+    <string name="common_updating_index">Updating index…</string>
     <string name="common_initializing">Initializing…</string>
     <string name="common_preparing">Preparing…</string>
     <string name="common_starting">Starting</string>
@@ -154,7 +155,7 @@
     <string name="repository_row_storage_content_description">Storage</string>
 
     <!-- Home model actions -->
-    <string name="home_action_add_and_push">Add and push</string>
+    <string name="home_action_update_index_and_push">Update index and push</string>
     <string name="home_action_push_to_all">Push to all</string>
 
     <!-- ==================== MAIN MENU ==================== -->
@@ -392,8 +393,8 @@
     <string name="dialog_index_update_moved">Moved %1$s of %2$s</string>
     <string name="dialog_index_update_added">Added %1$s of %2$s</string>
     <string name="dialog_index_update_checking_time">Checking for duplicates and moved files takes time, especially with many new files.</string>
-    <string name="dialog_index_update_quick_add_info">You can quick-add your new files now instead — duplicates and moved files will be skipped when detected.</string>
-    <string name="dialog_index_update_quick_add_button">Quick add</string>
+    <string name="dialog_index_update_quick_update_info">You can quick-update your index instead — duplicates and moved files will be skipped when detected.</string>
+    <string name="dialog_index_update_quick_update_button">Quick update</string>
 
     <!-- ==================== ERROR MESSAGES ==================== -->
 

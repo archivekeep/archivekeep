@@ -46,8 +46,8 @@ import org.archivekeep.files.procedures.indexupdate.IndexUpdateProcedure.Discove
 import org.archivekeep.ui.resources.Res
 import org.archivekeep.ui.resources.common_preparing
 import org.archivekeep.ui.resources.dialog_index_update_checking_time
-import org.archivekeep.ui.resources.dialog_index_update_quick_add_button
-import org.archivekeep.ui.resources.dialog_index_update_quick_add_info
+import org.archivekeep.ui.resources.dialog_index_update_quick_update_button
+import org.archivekeep.ui.resources.dialog_index_update_quick_update_info
 import org.archivekeep.ui.resources.dialog_index_update_title
 import org.archivekeep.ui.resources.manyselect_moves
 import org.archivekeep.ui.resources.manyselect_moves_all
@@ -185,10 +185,10 @@ class IndexUpdateProcedureDialog(
                         InfoAlert {
                             Text(stringResource(Res.string.dialog_index_update_checking_time))
                             Spacer(modifier = Modifier.height(8.dp))
-                            Text(stringResource(Res.string.dialog_index_update_quick_add_info))
+                            Text(stringResource(Res.string.dialog_index_update_quick_update_info))
                             Spacer(modifier = Modifier.height(8.dp))
                             Button(onClick = { state.onTriggerImmediate() }) {
-                                Text(stringResource(Res.string.dialog_index_update_quick_add_button))
+                                Text(stringResource(Res.string.dialog_index_update_quick_update_button))
                             }
                         }
                         Spacer(modifier = Modifier.height(8.dp))

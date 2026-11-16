@@ -7,7 +7,7 @@ import org.archivekeep.app.ui.enableUnfinishedFeatures
 import org.archivekeep.app.ui.utils.Action
 import org.archivekeep.files.api.repository.operations.StatusOperation
 import org.archivekeep.ui.resources.Res
-import org.archivekeep.ui.resources.home_action_add_and_push
+import org.archivekeep.ui.resources.home_action_update_index_and_push
 import org.archivekeep.ui.resources.home_action_push_to_all
 import org.archivekeep.utils.loading.Loadable
 import org.archivekeep.utils.loading.mapLoadedData
@@ -40,7 +40,7 @@ data class HomeLocalArchiveUiState(
         localArchive: HomeLocalArchiveModel,
     ): HomeLocalArchiveUiActions {
         val ra = repositoryOperationalState.actions(archiveOperationLaunchers, localArchive.primaryRepository.reference.uri)
-        val addAndPushTitle = stringResource(Res.string.home_action_add_and_push)
+        val updateIndexAndPushTitle = stringResource(Res.string.home_action_update_index_and_push)
         val pushToAllTitle = stringResource(Res.string.home_action_push_to_all)
 
         return object : HomeLocalArchiveUiActions, RepositoryBaseUiActions by ra {
@@ -52,7 +52,7 @@ data class HomeLocalArchiveUiState(
                                 localArchive.primaryRepository.reference.uri,
                             )
                         },
-                        title = addAndPushTitle,
+                        title = updateIndexAndPushTitle,
                         isPending = it,
                         running = addPushOperationRunning,
                     )

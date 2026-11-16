@@ -58,13 +58,14 @@
     <string name="common_in">v</string>
     <string name="common_reindex">Preindexovať</string>
     <string name="common_unassociate">Odpojiť</string>
-    <string name="common_add_new_files">Pridať nové súbory</string>
+    <string name="common_update_index">Aktualizovať index</string>
     <string name="common_cleanup_deleted_files">Vyčistiť zmazané súbory</string>
     <string name="common_reindex_changed_files">Preindexovať zmenené súbory</string>
     <string name="common_verify_contents">Overiť obsah</string>
 
     <!-- Common progress states -->
-    <string name="common_adding">Pridáva sa…</string>
+    <string name="common_adding">Pridáva se…</string>
+    <string name="common_updating_index">Aktualizuje sa index…</string>
     <string name="common_initializing">Inicializuje sa…</string>
     <string name="common_preparing">Prípravuje sa…</string>
     <string name="common_starting">Spúšťa sa</string>
@@ -154,7 +155,7 @@
     <string name="repository_row_storage_content_description">Úložisko</string>
 
     <!-- Home model actions -->
-    <string name="home_action_add_and_push">Pridať a odoslať</string>
+    <string name="home_action_update_index_and_push">Aktualizovať index a odoslať</string>
     <string name="home_action_push_to_all">Odoslať všade</string>
 
     <!-- ==================== MAIN MENU ==================== -->
@@ -392,8 +393,8 @@
     <string name="dialog_index_update_moved">Presunutých %1$s z %2$s</string>
     <string name="dialog_index_update_added">Pridaných %1$s z %2$s</string>
     <string name="dialog_index_update_checking_time">Kontrola duplicit a presunutých súborov trvá čas, najmä pri mnohých nových súboroch.</string>
-    <string name="dialog_index_update_quick_add_info">Nové súbory môžete rýchlo pridať teraz — duplikáty a presunuté súbory budú preskočené pri detekcii.</string>
-    <string name="dialog_index_update_quick_add_button">Rýchle pridanie</string>
+    <string name="dialog_index_update_quick_update_info">Index môžete rýchlo aktualizovať — duplikáty a presunuté súbory budú pri detekcii preskočené.</string>
+    <string name="dialog_index_update_quick_update_button">Rýchla aktualizácia</string>
 
     <!-- ==================== ERROR MESSAGES ==================== -->
 

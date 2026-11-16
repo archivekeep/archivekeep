@@ -17,7 +17,7 @@ import org.archivekeep.app.ui.utils.Action
 import org.archivekeep.files.api.repository.operations.StatusOperation
 import org.archivekeep.files.driver.filesystem.files.FilesystemWorkingRepository
 import org.archivekeep.ui.resources.Res
-import org.archivekeep.ui.resources.common_add_new_files
+import org.archivekeep.ui.resources.common_update_index
 import org.archivekeep.ui.resources.common_associate
 import org.archivekeep.ui.resources.common_cleanup_deleted_files
 import org.archivekeep.ui.resources.common_deinitialize
@@ -56,7 +56,7 @@ class RepositoryOperationalState(
         val commonOpen = stringResource(Res.string.common_open)
         val commonDetails = stringResource(Res.string.common_details)
         val commonUnlock = stringResource(Res.string.common_unlock)
-        val commonAddNewFiles = stringResource(Res.string.common_add_new_files)
+        val commonUpdateIndex = stringResource(Res.string.common_update_index)
         val commonCleanupDeletedFiles = stringResource(Res.string.common_cleanup_deleted_files)
         val commonReindexChangedFiles = stringResource(Res.string.common_reindex_changed_files)
         val commonVerifyContents = stringResource(Res.string.common_verify_contents)
@@ -106,7 +106,7 @@ class RepositoryOperationalState(
                 canAdd.mapLoadedData {
                     Action(
                         TablerIcons.Plus,
-                        commonAddNewFiles,
+                        commonUpdateIndex,
                         isAvailable = it,
                         onLaunch = {
                             launchers.openIndexUpdateOperation(uri)
