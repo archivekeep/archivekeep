@@ -5,7 +5,7 @@ import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.flow
 import org.archivekeep.files.api.repository.LocalRepo
 import org.archivekeep.files.api.repository.Repo
-import org.archivekeep.files.procedures.indexupdate.RepoPerformanceTracker
+import org.archivekeep.files.performance.RepoPerformanceTracker
 import org.archivekeep.utils.loading.Loadable
 import org.archivekeep.utils.loading.firstLoadedOrFailure
 import java.io.PrintWriter
@@ -39,10 +39,10 @@ class VerifyContentsProcedure {
         suspend fun execute(
             repo: Repo,
             out: PrintWriter? = null,
+            performanceTracker: RepoPerformanceTracker = RepoPerformanceTracker.DefaultImpl(),
             vararg progressTrackers: VerifyProgressTracker,
         ) {
             val localRepo = repo as? LocalRepo ?: throw RuntimeException("not local repo")
-            val performanceTracker = RepoPerformanceTracker.DefaultImpl()
 
             try {
                 filesToVerify.forEach { file ->

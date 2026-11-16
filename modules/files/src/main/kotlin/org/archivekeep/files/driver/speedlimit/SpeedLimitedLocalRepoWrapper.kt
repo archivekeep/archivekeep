@@ -5,7 +5,7 @@ import org.archivekeep.files.api.repository.ArchiveFileInfo
 import org.archivekeep.files.api.repository.LocalRepo
 import org.archivekeep.files.api.repository.RepoIndex
 import org.archivekeep.files.api.repository.RepositoryMetadata
-import org.archivekeep.files.procedures.indexupdate.RepoPerformanceTracker
+import org.archivekeep.files.performance.RepoPerformanceTracker
 import java.io.InputStream
 import java.nio.file.Path
 import kotlin.math.log10

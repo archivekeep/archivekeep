@@ -4,7 +4,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.Transient
-import org.archivekeep.files.procedures.indexupdate.RepoPerformanceTracker
+import org.archivekeep.files.performance.RepoPerformanceTracker
 import org.archivekeep.utils.loading.Loadable
 import org.archivekeep.utils.loading.firstLoadedOrFailure
 import java.io.InputStream

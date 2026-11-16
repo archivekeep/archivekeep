@@ -21,6 +21,7 @@ import org.archivekeep.app.core.utils.generics.SyncFlowTextLinesWriter
 import org.archivekeep.app.core.utils.generics.singleInstanceWeakValueMap
 import org.archivekeep.app.core.utils.identifiers.RepositoryURI
 import org.archivekeep.files.api.repository.Repo
+import org.archivekeep.files.performance.RepoPerformanceTracker
 import org.archivekeep.files.procedures.indexupdate.ImmediateIndexUpdateProcedure
 import org.archivekeep.files.procedures.indexupdate.ImmediateIndexUpdateStructuredProgressTracker
 import org.archivekeep.files.procedures.indexupdate.ImmediateIndexUpdateTextualProgressTracker
@@ -147,6 +148,7 @@ class IndexUpdateProcedureSupervisorServiceImpl(
         CurrentJobWrapper<IndexUpdateProcedureSupervisor.PreparedAddJobState> {
         private val executionLog = SyncFlowTextLinesWriter()
         private val writer = IndexUpdateTextualProgressTracker(PrintWriter(executionLog.writer, true))
+        private val performanceTracker = RepoPerformanceTracker.DefaultImpl()
 
         // TODO - this should be encapsulated into procedure's logic, not supervisor
         private val movesToExecute = (launchOptions.movesSubsetLimit?.intersect(preparationResult.moves.toSet()) ?: preparationResult.moves).toSet()
@@ -171,6 +173,7 @@ class IndexUpdateProcedureSupervisorServiceImpl(
                         launchOptions.movesSubsetLimit,
                         launchOptions.addFilesSubsetLimit,
                         writer.out,
+                        performanceTracker,
                         writer,
                         indexUpdateProgressTracker,
                     )
@@ -188,11 +191,16 @@ class IndexUpdateProcedureSupervisorServiceImpl(
                     moveProgress,
                     executionLog.lines,
                     jobState,
+                    performanceTracker,
                 )
             }
 
         override suspend fun execute() {
-            job.run()
+            try {
+                job.run()
+            } finally {
+                performanceTracker.dump(executionLog.writer)
+            }
         }
     }
 
@@ -203,6 +211,7 @@ class IndexUpdateProcedureSupervisorServiceImpl(
         CurrentJobWrapper<IndexUpdateProcedureSupervisor.ImmediateAddJobState> {
         private val executionLog = SyncFlowTextLinesWriter()
         private val writer = ImmediateIndexUpdateTextualProgressTracker(PrintWriter(executionLog.writer, true))
+        private val performanceTracker = RepoPerformanceTracker.DefaultImpl()
 
         // TODO - this should be encapsulated into procedure's logic, not supervisor
         private val indexUpdateProgressTracker =
@@ -217,6 +226,7 @@ class IndexUpdateProcedureSupervisorServiceImpl(
                         repositoryAccess,
                         filesToProcess,
                         writer.out,
+                        performanceTracker,
                         writer,
                         indexUpdateProgressTracker,
                     )
@@ -232,11 +242,16 @@ class IndexUpdateProcedureSupervisorServiceImpl(
                     progress,
                     executionLog.lines,
                     jobState,
+                    performanceTracker,
                 )
             }
 
         override suspend fun execute() {
-            job.run()
+            try {
+                job.run()
+            } finally {
+                performanceTracker.dump(executionLog.writer)
+            }
         }
     }
 }

@@ -38,7 +38,7 @@ class VerifyContentsProcedureTest {
         preparation.value.filesToVerify shouldBe listOf("A/01.txt", "A/02.txt", "B/03.txt")
 
         val tracker = VerifyProgressTrackerInMemory()
-        preparation.value.execute(repo, null, tracker)
+        preparation.value.execute(repo, null, progressTrackers = arrayOf(tracker))
 
         tracker.verifiedFiles shouldBe setOf("A/02.txt")
         tracker.failedFiles.keys shouldBe setOf("A/01.txt", "B/03.txt")
@@ -68,7 +68,7 @@ class VerifyContentsProcedureTest {
         preparation.value.filesToVerify shouldBe listOf("A/01.txt", "A/02.txt", "B/03.txt")
 
         val tracker = VerifyProgressTrackerInMemory()
-        preparation.value.execute(repo, null, tracker)
+        preparation.value.execute(repo, null, progressTrackers = arrayOf(tracker))
 
         tracker.verifiedFiles shouldBe setOf("B/03.txt")
         tracker.failedFiles.keys shouldBe setOf("A/01.txt", "A/02.txt")
@@ -98,7 +98,7 @@ class VerifyContentsProcedureTest {
                 .first()
 
         val tracker = VerifyProgressTrackerInMemory()
-        preparation.value.execute(repo, null, tracker)
+        preparation.value.execute(repo, null, progressTrackers = arrayOf(tracker))
 
         // Even though size and timestamp are unchanged, checksum mismatch should be detected
         tracker.verifiedFiles shouldBe setOf("A/02.txt", "B/03.txt")
@@ -128,7 +128,7 @@ class VerifyContentsProcedureTest {
                 .first()
 
         val tracker = VerifyProgressTrackerInMemory()
-        preparation.value.execute(repo, null, tracker)
+        preparation.value.execute(repo, null, progressTrackers = arrayOf(tracker))
 
         // Checksum mismatch detected regardless of size change
         tracker.verifiedFiles shouldBe setOf("A/01.txt", "A/02.txt")
@@ -154,7 +154,7 @@ class VerifyContentsProcedureTest {
                 .first()
 
         val tracker = VerifyProgressTrackerInMemory()
-        preparation.value.execute(repo, null, tracker)
+        preparation.value.execute(repo, null, progressTrackers = arrayOf(tracker))
 
         tracker.verifiedFiles shouldBe setOf("A/01.txt", "A/02.txt", "B/03.txt")
         tracker.failedFiles shouldBe emptyMap()

@@ -4,6 +4,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.StateFlow
 import org.archivekeep.app.core.procedures.utils.BaseJobState
 import org.archivekeep.app.core.procedures.utils.JobWrapper
+import org.archivekeep.files.performance.RepoPerformanceTracker
 import org.archivekeep.files.procedures.verify.VerifyContentsProcedure
 import org.archivekeep.files.procedures.verify.VerifyProgress
 import org.archivekeep.utils.loading.Loadable
@@ -20,6 +21,7 @@ interface VerifySupervisor {
         val verifyProgress: VerifyProgress,
         override val progressLog: StateFlow<List<String>>,
         override val executionState: ProcedureExecutionState,
+        override val performanceTracker: RepoPerformanceTracker,
     ) : State,
         BaseJobState
 

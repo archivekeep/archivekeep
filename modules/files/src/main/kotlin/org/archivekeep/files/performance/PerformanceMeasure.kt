@@ -1,4 +1,4 @@
-package org.archivekeep.files.procedures.indexupdate
+package org.archivekeep.files.performance
 
 import kotlin.time.Duration.Companion.nanoseconds
 

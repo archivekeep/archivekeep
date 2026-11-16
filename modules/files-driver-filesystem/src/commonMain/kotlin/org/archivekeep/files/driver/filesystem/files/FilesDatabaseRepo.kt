@@ -35,8 +35,8 @@ import org.archivekeep.files.api.repository.RepoIndex
 import org.archivekeep.files.api.repository.RepositoryMetadata
 import org.archivekeep.files.api.repository.operations.StatusOperation
 import org.archivekeep.files.driver.filesystem.FileBasedRepositoryMetadataStore
-import org.archivekeep.files.procedures.indexupdate.RepoPerformanceTracker
-import org.archivekeep.files.procedures.indexupdate.measure
+import org.archivekeep.files.performance.RepoPerformanceTracker
+import org.archivekeep.files.performance.measure
 import org.archivekeep.utils.coroutines.InProgressHandler
 import org.archivekeep.utils.coroutines.flowScopedToThisJob
 import org.archivekeep.utils.flows.logLoadableResourceLoad

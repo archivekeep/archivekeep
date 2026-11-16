@@ -2,7 +2,7 @@ package org.archivekeep.files.procedures.sync.operations
 
 import org.archivekeep.files.api.repository.Repo
 import org.archivekeep.files.api.repository.operations.CompareOperation
-import org.archivekeep.files.procedures.indexupdate.RepoPerformanceTracker
+import org.archivekeep.files.performance.RepoPerformanceTracker
 import org.archivekeep.files.procedures.sync.job.observation.SyncExecutionObserver
 import org.archivekeep.utils.procedures.ProcedureExecutionContext
 

@@ -61,7 +61,7 @@ import org.archivekeep.files.crypto.file.writeCryptoStream
 import org.archivekeep.files.crypto.parseVerifyDecodeJWS
 import org.archivekeep.files.crypto.signAsJWS
 import org.archivekeep.files.crypto.verifyingStreamViaBackgroundCoroutine
-import org.archivekeep.files.procedures.indexupdate.RepoPerformanceTracker
+import org.archivekeep.files.performance.RepoPerformanceTracker
 import org.archivekeep.utils.coroutines.InProgressHandler
 import org.archivekeep.utils.datastore.passwordprotected.PasswordProtectedCustomJoseStorage
 import org.archivekeep.utils.exceptions.WrongCredentialsException

@@ -24,20 +24,25 @@ import org.archivekeep.app.ui.components.feature.dialogs.operations.ExecutionErr
 import org.archivekeep.ui.resources.Res
 import org.archivekeep.ui.resources.common_errors
 import org.archivekeep.ui.resources.common_log
+import org.archivekeep.ui.resources.common_performance
 import org.archivekeep.ui.resources.common_summary
 import org.jetbrains.compose.resources.stringResource
+import kotlin.to
 
 private const val TAB_SUMMARY = "summary"
 private const val TAB_LOG = "log"
 private const val TAB_ERROR_LOG = "error-log"
+private const val TAB_PERFORMANCE = "performance"
 
 @Composable
-private fun getTabOptions(): List<Pair<String, @Composable () -> String>> =
-    listOf(
-        TAB_SUMMARY to { stringResource(Res.string.common_summary) },
-        TAB_LOG to { stringResource(Res.string.common_log) },
-        TAB_ERROR_LOG to { stringResource(Res.string.common_errors) },
-    )
+private fun getTabOptions(
+    trackerPresent: Boolean,
+): List<Pair<String, @Composable () -> String>> = listOfNotNull(
+    TAB_SUMMARY to { stringResource(Res.string.common_summary) },
+    TAB_LOG to { stringResource(Res.string.common_log) },
+    trackerPresent?.let { TAB_PERFORMANCE to { stringResource(Res.string.common_performance) } },
+    TAB_ERROR_LOG to { stringResource(Res.string.common_errors) },
+)
 
 @Composable
 fun <S : BaseJobState> OperationProgressTabs(
@@ -47,7 +52,7 @@ fun <S : BaseJobState> OperationProgressTabs(
 ) {
     var selectedTab by remember { mutableStateOf(TAB_SUMMARY) }
 
-    val tabOptions = getTabOptions()
+    val tabOptions = getTabOptions(state.performanceTracker!=null)
     val validTabOptions = tabOptions.filter { it.first != TAB_ERROR_LOG || errorLog != null }
 
     SingleChoiceSegmentedButtonRow {
@@ -88,6 +93,13 @@ fun <S : BaseJobState> OperationProgressTabs(
 
         TAB_LOG -> {
             ScrollableLogTextInDialog(state.progressLog.collectAsState().value)
+        }
+
+        TAB_PERFORMANCE -> {
+            state.performanceTracker?.let { tracker ->
+                val stats = tracker.statsSnapshot.collectAsState().value
+                PerformanceStatsView(stats)
+            }
         }
 
         TAB_ERROR_LOG -> {

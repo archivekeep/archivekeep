@@ -22,6 +22,7 @@ import org.archivekeep.app.core.utils.generics.SyncFlowTextLinesWriter
 import org.archivekeep.app.core.utils.generics.singleInstanceWeakValueMap
 import org.archivekeep.app.core.utils.identifiers.RepositoryURI
 import org.archivekeep.files.api.repository.Repo
+import org.archivekeep.files.performance.RepoPerformanceTracker
 import org.archivekeep.files.procedures.verify.VerifyContentsProcedure
 import org.archivekeep.files.procedures.verify.VerifyStructuredProgressTracker
 import org.archivekeep.files.procedures.verify.VerifyTextualProgressTracker
@@ -103,6 +104,7 @@ class VerifySupervisorServiceImpl(
         JobWrapper<VerifySupervisor.JobState> {
         private val executionLog = SyncFlowTextLinesWriter()
         private val writer = VerifyTextualProgressTracker(PrintWriter(executionLog.writer, true))
+        private val performanceTracker = RepoPerformanceTracker.DefaultImpl()
 
         private val filesToVerify = preparationResult.filesToVerify.toSet()
 
@@ -114,6 +116,7 @@ class VerifySupervisorServiceImpl(
                     preparationResult.execute(
                         repositoryAccess,
                         writer.out,
+                        performanceTracker,
                         writer,
                         verifyProgressTracker,
                     )
@@ -129,11 +132,16 @@ class VerifySupervisorServiceImpl(
                     verifyProgress,
                     executionLog.lines,
                     jobState,
+                    performanceTracker,
                 )
             }
 
         override suspend fun execute() {
-            job.run()
+            try {
+                job.run()
+            } finally {
+                performanceTracker.dump(executionLog.writer)
+            }
         }
     }
 }

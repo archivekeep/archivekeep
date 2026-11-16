@@ -1,5 +1,8 @@
-package org.archivekeep.files.procedures.indexupdate
+package org.archivekeep.files.performance
 
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import java.io.PrintWriter
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.atomic.AtomicLong
@@ -14,7 +17,11 @@ sealed interface RepoPerformanceTracker {
 
     fun dump(out: PrintWriter? = null)
 
+    val statsSnapshot: StateFlow<Map<String, OperationStats>>
+
     object NoOp : RepoPerformanceTracker {
+        override val statsSnapshot: StateFlow<Map<String, OperationStats>> = MutableStateFlow(emptyMap())
+
         override fun track(
             operationId: String,
             duration: Duration,
@@ -28,6 +35,9 @@ sealed interface RepoPerformanceTracker {
     }
 
     class DefaultImpl : RepoPerformanceTracker {
+        private val _statsSnapshot = MutableStateFlow(emptyMap<String, OperationStats>())
+
+        override val statsSnapshot: StateFlow<Map<String, OperationStats>> = _statsSnapshot.asStateFlow()
         private val stats = ConcurrentHashMap<String, StatEntry>()
 
         private data class StatEntry(
@@ -42,6 +52,7 @@ sealed interface RepoPerformanceTracker {
             val entry = stats.computeIfAbsent(operationId) { StatEntry() }
             entry.count.incrementAndGet()
             entry.totalNanos.addAndGet(duration.inWholeNanoseconds)
+            _statsSnapshot.value = buildSnapshot()
         }
 
         override fun dump(out: PrintWriter?) {
@@ -73,6 +84,17 @@ sealed interface RepoPerformanceTracker {
             print(output)
             out?.print(output)
             out?.flush()
+        }
+
+        private fun buildSnapshot(): Map<String, OperationStats> {
+            val sortedEntries = stats.entries.sortedBy { it.key }
+            return sortedEntries.associate { (operationId, entry) ->
+                val count = entry.count.get()
+                val totalNanos = entry.totalNanos.get()
+                val total = totalNanos.nanoseconds
+                val avg = if (count > 0) (totalNanos / count).nanoseconds else Duration.ZERO
+                operationId to OperationStats(operationId, count, total, avg)
+            }
         }
     }
 }

@@ -5,6 +5,7 @@ import kotlinx.coroutines.flow.StateFlow
 import org.archivekeep.app.core.procedures.utils.BaseJobState
 import org.archivekeep.app.core.procedures.utils.JobWrapper
 import org.archivekeep.files.api.repository.operations.CompareOperation
+import org.archivekeep.files.performance.RepoPerformanceTracker
 import org.archivekeep.files.procedures.sync.discovery.DiscoveredSync
 import org.archivekeep.files.procedures.sync.discovery.RelocationSyncMode
 import org.archivekeep.files.procedures.sync.operations.SyncOperation
@@ -48,6 +49,7 @@ interface RepoToRepoSync {
         override val progressLog: StateFlow<List<String>>,
         val errorLog: StateFlow<List<String>>,
         override val executionState: ProcedureExecutionState,
+        override val performanceTracker: RepoPerformanceTracker,
     ) : State,
         BaseJobState
 }

@@ -7,7 +7,7 @@ import org.archivekeep.files.api.repository.ArchiveFileInfo
 import org.archivekeep.files.api.repository.Repo
 import org.archivekeep.files.api.repository.RepoIndex
 import org.archivekeep.files.api.repository.RepositoryMetadata
-import org.archivekeep.files.procedures.indexupdate.RepoPerformanceTracker
+import org.archivekeep.files.performance.RepoPerformanceTracker
 import org.archivekeep.utils.hashing.sha256
 import org.archivekeep.utils.loading.Loadable
 import java.io.InputStream

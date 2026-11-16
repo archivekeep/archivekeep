@@ -3,6 +3,7 @@ package org.archivekeep.files.procedures.indexupdate
 import org.archivekeep.files.api.exceptions.InvalidFilename
 import org.archivekeep.files.api.repository.LocalRepo
 import org.archivekeep.files.api.repository.Repo
+import org.archivekeep.files.performance.RepoPerformanceTracker
 import java.io.PrintWriter
 
 class ImmediateIndexUpdateProcedure {
@@ -10,11 +11,10 @@ class ImmediateIndexUpdateProcedure {
         repo: Repo,
         filesToProcess: Set<String>,
         out: PrintWriter? = null,
+        performanceTracker: RepoPerformanceTracker = RepoPerformanceTracker.DefaultImpl(),
         vararg progressTrackers: ImmediateIndexUpdateProgressTracker,
     ) {
         val localRepo = repo as? LocalRepo ?: throw RuntimeException("not local repo")
-
-        val performanceTracker = RepoPerformanceTracker.DefaultImpl()
 
         try {
             // TODO: this can actually lead to bad reporting, because it can be lower than original filesToProcess

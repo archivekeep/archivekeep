@@ -6,6 +6,7 @@ import kotlinx.coroutines.flow.flow
 import org.archivekeep.files.api.exceptions.InvalidFilename
 import org.archivekeep.files.api.repository.LocalRepo
 import org.archivekeep.files.api.repository.Repo
+import org.archivekeep.files.performance.RepoPerformanceTracker
 import org.archivekeep.files.procedures.indexupdate.IndexUpdateProcedure.DiscoveryResult.Move
 import org.archivekeep.utils.loading.LoadableWithProgress
 import java.io.PrintWriter
@@ -176,9 +177,9 @@ class IndexUpdateProcedure(
             movesSubsetLimit: Set<Move>? = null,
             addFilesSubsetLimit: Set<String>? = null,
             out: PrintWriter? = null,
+            performanceTracker: RepoPerformanceTracker = RepoPerformanceTracker.DefaultImpl(),
             vararg progressTrackers: IndexUpdateProgressTracker,
         ) {
-            val performanceTracker = RepoPerformanceTracker.DefaultImpl()
             try {
                 executeMovesReindex(repo, movesSubsetLimit, performanceTracker, *progressTrackers)
                 executeAddNewFiles(repo, addFilesSubsetLimit, performanceTracker, *progressTrackers)

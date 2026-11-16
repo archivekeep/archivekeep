@@ -120,7 +120,7 @@ class AddAndPushProcedureJob<ID>(
             movesToExecute,
             filesToAdd.map { it.fileName }.toSet(),
             null,
-            structuredProgressTracker,
+            progressTrackers = arrayOf(structuredProgressTracker),
         )
 
         coroutineScope {

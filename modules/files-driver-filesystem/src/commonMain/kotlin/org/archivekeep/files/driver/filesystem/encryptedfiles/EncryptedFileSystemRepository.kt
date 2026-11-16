@@ -39,7 +39,7 @@ import org.archivekeep.files.crypto.file.writeCryptoStream
 import org.archivekeep.files.crypto.verifyingStreamViaBackgroundCoroutine
 import org.archivekeep.files.driver.filesystem.FileBasedRepositoryMetadataStore
 import org.archivekeep.files.driver.filesystem.files.safeSubPath
-import org.archivekeep.files.procedures.indexupdate.RepoPerformanceTracker
+import org.archivekeep.files.performance.RepoPerformanceTracker
 import org.archivekeep.utils.coroutines.InProgressHandler
 import org.archivekeep.utils.coroutines.flowScopedToThisJob
 import org.archivekeep.utils.coroutines.shareResourceIn

@@ -2,7 +2,7 @@ package org.archivekeep.files.api.repository
 
 import kotlinx.coroutines.flow.Flow
 import org.archivekeep.files.api.repository.operations.StatusOperation
-import org.archivekeep.files.procedures.indexupdate.RepoPerformanceTracker
+import org.archivekeep.files.performance.RepoPerformanceTracker
 import org.archivekeep.utils.loading.Loadable
 import java.nio.file.Path
 

@@ -3,7 +3,7 @@ package org.archivekeep.files.procedures.sync.job
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.yield
 import org.archivekeep.files.api.repository.Repo
-import org.archivekeep.files.procedures.indexupdate.RepoPerformanceTracker
+import org.archivekeep.files.performance.RepoPerformanceTracker
 import org.archivekeep.files.procedures.sync.discovery.DiscoveredSyncOperationsGroup
 import org.archivekeep.files.procedures.sync.job.observation.SyncExecutionObserver
 import org.archivekeep.files.procedures.sync.operations.SyncOperation

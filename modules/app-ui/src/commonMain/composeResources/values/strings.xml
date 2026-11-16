@@ -74,6 +74,11 @@
     <string name="common_log">Log</string>
     <string name="common_errors">Errors</string>
     <string name="common_summary">Summary</string>
+    <string name="common_performance">Performance</string>
+    <string name="common_performance_no_stats">No performance stats recorded yet.</string>
+    <string name="common_performance_count">Count</string>
+    <string name="common_performance_total">Total</string>
+    <string name="common_performance_avg">Avg</string>
     <string name="common_progress">Progress</string>
     <string name="common_password">Password</string>
     <string name="common_enter_password">Enter password …</string>

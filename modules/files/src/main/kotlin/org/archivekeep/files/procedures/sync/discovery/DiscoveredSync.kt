@@ -1,7 +1,7 @@
 package org.archivekeep.files.procedures.sync.discovery
 
 import org.archivekeep.files.api.repository.Repo
-import org.archivekeep.files.procedures.indexupdate.RepoPerformanceTracker
+import org.archivekeep.files.performance.RepoPerformanceTracker
 import org.archivekeep.files.procedures.sync.job.SyncProcedureJobTask
 import org.archivekeep.files.procedures.sync.job.observation.SyncExecutionObserver
 import org.archivekeep.files.procedures.sync.operations.SyncOperation

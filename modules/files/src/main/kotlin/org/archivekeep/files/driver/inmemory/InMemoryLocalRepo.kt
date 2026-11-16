@@ -8,7 +8,7 @@ import org.archivekeep.files.api.repository.LocalRepo
 import org.archivekeep.files.api.repository.RepositoryMetadata
 import org.archivekeep.files.api.repository.operations.StatusOperation
 import org.archivekeep.files.driver.fixtures.FixtureRepo
-import org.archivekeep.files.procedures.indexupdate.RepoPerformanceTracker
+import org.archivekeep.files.performance.RepoPerformanceTracker
 import org.archivekeep.utils.hashing.sha256
 import org.archivekeep.utils.loading.Loadable
 import org.archivekeep.utils.loading.mapToLoadable
