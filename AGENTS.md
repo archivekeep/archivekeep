@@ -28,6 +28,7 @@ ArchiveKeep is a **Kotlin Multiplatform** application for reliable file archivat
   - `feat:` — new user-visible feature or functionality
   - `fix:` — fixes a bug or incorrect behavior
   - `ui:` — presentation-layer changes with no new functionality or bug fix (restyling, visual polish, layout adjustments, theme changes)
+  - `docs:` — documentation changes (README, CHANGELOG, guides, agent instructions)
   - `refactor:` — internal code changes with **no user-visible effect** (do not use if the change looks different to the user)
   - `chore:` — maintenance tasks, dependencies, build config
 - **Wording rules**:
@@ -69,3 +70,9 @@ ArchiveKeep is a **Kotlin Multiplatform** application for reliable file archivat
 ## Licensing
 
 The project is licensed under **GNU General Public License v3**. All new code must be compatible with GPL-3.0. Avoid dependencies that are not fully FOSS (e.g., ObjectBox was dropped for this reason).
+
+---
+
+## Release preparation
+
+See `dev/prepare-new-release.md` for the step-by-step release workflow (changelog, version bump, Flatpak metainfo).
