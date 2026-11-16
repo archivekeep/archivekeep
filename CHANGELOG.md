@@ -1,6 +1,22 @@
 # Changelog
 
-## Unreleased
+## 0.8.3 - 2026-11-16
+
+### Added
+
+- repository verification dialog to check integrity of archived files on demand,
+- quick-add option in the index update dialog to let users add new files without waiting for the full scan,
+- live performance tab to show where time is spent during repository operations.
+
+### Changed
+
+- operation progress tabs replaced with button-style design for visual consistency across the app,
+- "committing" terminology replaced with "indexing" for clarity,
+- "adding" terminology replaced with "index updating" for clarity, including renaming "Add new files" to "Update index", "Add and push" to "Update index and push", and "Quick add" to "Quick update".
+
+### Fixed
+
+- reliability and security issues identified by static analysis.
 
 ## 0.8.2 - 2026-11-13
 

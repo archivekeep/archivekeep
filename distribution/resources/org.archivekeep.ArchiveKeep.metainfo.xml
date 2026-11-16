@@ -62,6 +62,26 @@
     <content_rating type="oars-1.1" />
 
     <releases>
+        <release version="0.8.3" date="2026-11-16">
+            <description>
+                <p>Added:</p>
+                <ul>
+                    <li>repository verification dialog to check integrity of archived files on demand,</li>
+                    <li>quick-add option in the index update dialog to let users add new files without waiting for the full scan,</li>
+                    <li>live performance tab to show where time is spent during repository operations.</li>
+                </ul>
+                <p>Changed:</p>
+                <ul>
+                    <li>operation progress tabs replaced with button-style design for visual consistency across the app,</li>
+                    <li>"committing" terminology replaced with "indexing" for clarity,</li>
+                    <li>"adding" terminology replaced with "index updating" for clarity, including renaming "Add new files" to "Update index", "Add and push" to "Update index and push", and "Quick add" to "Quick update".</li>
+                </ul>
+                <p>Fixed:</p>
+                <ul>
+                    <li>reliability and security issues identified by static analysis.</li>
+                </ul>
+            </description>
+        </release>
         <release version="0.8.2" date="2026-11-13">
             <description>
                 <p>Added:</p>
