@@ -6,7 +6,7 @@ import kotlinx.coroutines.flow.flow
 import org.archivekeep.files.api.exceptions.InvalidFilename
 import org.archivekeep.files.api.repository.LocalRepo
 import org.archivekeep.files.api.repository.Repo
-import org.archivekeep.files.procedures.indexupdate.IndexUpdateProcedure.PreparationResult.Move
+import org.archivekeep.files.procedures.indexupdate.IndexUpdateProcedure.DiscoveryResult.Move
 import org.archivekeep.utils.loading.LoadableWithProgress
 import java.io.PrintWriter
 import kotlin.io.path.invariantSeparatorsPathString
@@ -31,21 +31,21 @@ class IndexUpdateProcedure(
         val movesSubsetLimit: Set<Move>? = null,
     )
 
-    fun prepare(repo: Repo): Flow<LoadableWithProgress<PreparationResult, PreparationProgress>> =
+    fun prepare(repo: Repo): Flow<LoadableWithProgress<DiscoveryResult, DiscoveryProgress>> =
         flow {
             val localRepo = repo as? LocalRepo ?: throw RuntimeException("not local repo")
 
             val matchedFiles = localRepo.findAllFiles(subsetGlobs)
 
             var progress =
-                PreparationProgress(
+                DiscoveryProgress(
                     emptyList(),
                     emptyList(),
                     emptyList(),
                     emptyMap(),
                 )
 
-            suspend fun updateProgress(updater: (old: PreparationProgress) -> PreparationProgress) {
+            suspend fun updateProgress(updater: (old: DiscoveryProgress) -> DiscoveryProgress) {
                 progress = updater(progress)
                 emit(LoadableWithProgress.LoadingProgress(progress))
             }
@@ -82,7 +82,7 @@ class IndexUpdateProcedure(
                         }
 
                 val remainingMissingIndexedFilesByChecksum = missingIndexedFilesByChecksum.toMutableMap()
-                val moves = mutableListOf<PreparationResult.Move>()
+                val moves = mutableListOf<DiscoveryResult.Move>()
                 val unmatchedNewFiles = mutableListOf<String>()
 
                 unindexedFilesMatchingPattern.forEach { newUnindexedFile ->
@@ -92,7 +92,7 @@ class IndexUpdateProcedure(
 
                     if (missingFilePath != null) {
                         moves.add(
-                            PreparationResult.Move(
+                            DiscoveryResult.Move(
                                 checksum = checksum,
                                 fileSize = localRepo.getFileSize(newUnindexedFile.toString()),
                                 from = missingFilePath,
@@ -111,10 +111,10 @@ class IndexUpdateProcedure(
 
                 emit(
                     LoadableWithProgress.Loaded(
-                        PreparationResult(
+                        DiscoveryResult(
                             newFiles =
                                 unmatchedNewFiles.sorted().map {
-                                    PreparationResult.NewFile(it, repo.getFileSize(it))
+                                    DiscoveryResult.NewFile(it, repo.getFileSize(it))
                                 },
                             moves = moves,
                             missingFiles = remainingMissingIndexedFilesByChecksum.values.toList().sorted(),
@@ -125,9 +125,9 @@ class IndexUpdateProcedure(
             } else {
                 emit(
                     LoadableWithProgress.Loaded(
-                        PreparationResult(
+                        DiscoveryResult(
                             unindexedFilesMatchingPattern.map { it.invariantSeparatorsPathString }.sorted().map {
-                                PreparationResult.NewFile(it, repo.getFileSize(it))
+                                DiscoveryResult.NewFile(it, repo.getFileSize(it))
                             },
                             emptyList(),
                             emptyList(),
@@ -138,23 +138,23 @@ class IndexUpdateProcedure(
             }
         }.catch { e -> emit(LoadableWithProgress.Failed(e)) }
 
-    sealed interface Preparation
+    sealed interface Discovery
 
-    data class PreparationProgress(
+    data class DiscoveryProgress(
         val filesToCheck: List<String>,
         val newFiles: List<String>,
         val moves: List<Move>,
         val errorFiles: Map<String, Any>,
-    ) : Preparation {
+    ) : Discovery {
         val checkedFiles = newFiles + moves.map { it.from }
     }
 
-    data class PreparationResult(
+    data class DiscoveryResult(
         val newFiles: List<NewFile>,
         val moves: List<Move>,
         val missingFiles: List<String>,
         val errorFiles: Map<String, Any>,
-    ) : Preparation {
+    ) : Discovery {
         val newFileNames: List<String> = newFiles.map { it.fileName }
 
         data class NewFile(

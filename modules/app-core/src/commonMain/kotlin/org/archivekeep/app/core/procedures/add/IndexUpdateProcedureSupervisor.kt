@@ -4,6 +4,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.StateFlow
 import org.archivekeep.app.core.procedures.utils.BaseJobState
 import org.archivekeep.app.core.procedures.utils.JobWrapper
+import org.archivekeep.files.procedures.indexupdate.ImmediateIndexUpdateProgress
 import org.archivekeep.files.procedures.indexupdate.IndexUpdateAddProgress
 import org.archivekeep.files.procedures.indexupdate.IndexUpdateMoveProgress
 import org.archivekeep.files.procedures.indexupdate.IndexUpdateProcedure
@@ -13,22 +14,34 @@ import org.archivekeep.utils.procedures.ProcedureExecutionState
 interface IndexUpdateProcedureSupervisor {
     val currentJobFlow: StateFlow<JobWrapper<JobState>?>
 
-    fun prepare(): Flow<Loadable<Preparation>>
+    fun discover(): Flow<Loadable<Discovery>>
 
     fun cancel()
 
     sealed interface State
 
-    data class JobState(
+    sealed interface JobState :
+        State,
+        BaseJobState
+
+    data class PreparedAddJobState(
         val addProgress: IndexUpdateAddProgress,
         val moveProgress: IndexUpdateMoveProgress,
         override val progressLog: StateFlow<List<String>>,
         override val executionState: ProcedureExecutionState,
     ) : State,
-        BaseJobState
+        JobState
 
-    data class Preparation(
-        val result: IndexUpdateProcedure.Preparation,
+    data class ImmediateAddJobState(
+        val progress: ImmediateIndexUpdateProgress,
+        override val progressLog: StateFlow<List<String>>,
+        override val executionState: ProcedureExecutionState,
+    ) : State,
+        JobState
+
+    data class Discovery(
+        val result: IndexUpdateProcedure.Discovery,
         val launch: (launchOptions: IndexUpdateProcedure.LaunchOptions) -> Unit,
+        val startImmediate: () -> Unit,
     ) : State
 }

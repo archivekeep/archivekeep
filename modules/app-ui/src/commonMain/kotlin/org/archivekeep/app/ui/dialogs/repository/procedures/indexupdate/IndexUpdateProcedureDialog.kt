@@ -4,6 +4,8 @@ import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
+import androidx.compose.material3.Button
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
@@ -26,6 +28,7 @@ import org.archivekeep.app.core.utils.identifiers.RepositoryURI
 import org.archivekeep.app.ui.components.base.layout.ScrollableLazyColumnWithGuessedWidth
 import org.archivekeep.app.ui.components.designsystem.dialog.LabelText
 import org.archivekeep.app.ui.components.designsystem.dialog.fullWidthDialogWidthModifier
+import org.archivekeep.app.ui.components.designsystem.elements.InfoAlert
 import org.archivekeep.app.ui.components.feature.dialogs.operations.DialogOperationControlButtons
 import org.archivekeep.app.ui.components.feature.dialogs.operations.DialogOperationControlState
 import org.archivekeep.app.ui.components.feature.dialogs.operations.toDialogOperationControlState
@@ -39,9 +42,12 @@ import org.archivekeep.app.ui.utils.appendBoldSpan
 import org.archivekeep.app.ui.utils.collectAsLoadable
 import org.archivekeep.app.ui.utils.stickToFirstNotNull
 import org.archivekeep.files.procedures.indexupdate.IndexUpdateProcedure
-import org.archivekeep.files.procedures.indexupdate.IndexUpdateProcedure.PreparationResult.Move
+import org.archivekeep.files.procedures.indexupdate.IndexUpdateProcedure.DiscoveryResult.Move
 import org.archivekeep.ui.resources.Res
 import org.archivekeep.ui.resources.common_preparing
+import org.archivekeep.ui.resources.dialog_index_update_checking_time
+import org.archivekeep.ui.resources.dialog_index_update_quick_add_button
+import org.archivekeep.ui.resources.dialog_index_update_quick_add_info
 import org.archivekeep.ui.resources.dialog_index_update_title
 import org.archivekeep.ui.resources.manyselect_moves
 import org.archivekeep.ui.resources.manyselect_moves_all
@@ -75,22 +81,26 @@ class IndexUpdateProcedureDialog(
                     )
                 }
 
-                is IndexUpdateProcedureSupervisor.Preparation -> {
+                is IndexUpdateProcedureSupervisor.Discovery -> {
                     DialogOperationControlState.NotRunning(
                         onLaunch = ::onTriggerExecute,
                         onClose = onClose,
-                        canLaunch = opState.result is IndexUpdateProcedure.PreparationResult,
+                        canLaunch = opState.result is IndexUpdateProcedure.DiscoveryResult,
                     )
                 }
             }
 
         private fun onTriggerExecute() {
-            (operationState as IndexUpdateProcedureSupervisor.Preparation).launch(
+            (operationState as IndexUpdateProcedureSupervisor.Discovery).launch(
                 IndexUpdateProcedure.LaunchOptions(
                     selectedFilesToAdd.value,
                     selectedMovesToExecute.value,
                 ),
             )
+        }
+
+        fun onTriggerImmediate() {
+            (operationState as IndexUpdateProcedureSupervisor.Discovery).startImmediate()
         }
 
     }
@@ -119,7 +129,7 @@ class IndexUpdateProcedureDialog(
                 .stickToFirstNotNull()
                 .distinctUntilChanged()
                 .flatMapLatest { job ->
-                    job?.state?.mapToLoadable() ?: operation.prepare()
+                    job?.state?.mapToLoadable() ?: operation.discover()
                 }
 
         override fun onClose() {
@@ -166,14 +176,25 @@ class IndexUpdateProcedureDialog(
     @Composable
     override fun ColumnScope.renderContent(state: State) {
         when (val operationState = state.operationState) {
-            is IndexUpdateProcedureSupervisor.Preparation -> {
+            is IndexUpdateProcedureSupervisor.Discovery -> {
                 when (val preparationState = operationState.result) {
-                    is IndexUpdateProcedure.PreparationProgress -> {
+                    is IndexUpdateProcedure.DiscoveryProgress -> {
                         LabelText(stringResource(Res.string.common_preparing))
                         IndexUpdatePreparationProgress(preparationState)
+                        Spacer(modifier = Modifier.height(4.dp))
+                        InfoAlert {
+                            Text(stringResource(Res.string.dialog_index_update_checking_time))
+                            Spacer(modifier = Modifier.height(8.dp))
+                            Text(stringResource(Res.string.dialog_index_update_quick_add_info))
+                            Spacer(modifier = Modifier.height(8.dp))
+                            Button(onClick = { state.onTriggerImmediate() }) {
+                                Text(stringResource(Res.string.dialog_index_update_quick_add_button))
+                            }
+                        }
+                        Spacer(modifier = Modifier.height(8.dp))
                     }
 
-                    is IndexUpdateProcedure.PreparationResult -> {
+                    is IndexUpdateProcedure.DiscoveryResult -> {
                         val movesManySelect =
                             rememberManySelectForRender(
                                 preparationState.moves,
@@ -207,7 +228,11 @@ class IndexUpdateProcedureDialog(
                 }
             }
 
-            is IndexUpdateProcedureSupervisor.JobState -> {
+            is IndexUpdateProcedureSupervisor.PreparedAddJobState -> {
+                OperationProgressTabs(::LocalIndexUpdateProgress, operationState)
+            }
+
+            is IndexUpdateProcedureSupervisor.ImmediateAddJobState -> {
                 OperationProgressTabs(::LocalIndexUpdateProgress, operationState)
             }
         }

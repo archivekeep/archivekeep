@@ -4,7 +4,7 @@ import org.archivekeep.files.api.repository.operations.CompareOperation
 import org.archivekeep.files.procedures.indexupdate.IndexUpdateProcedure
 import org.archivekeep.files.procedures.sync.operations.RelocationApplyOperation
 
-fun IndexUpdateProcedure.PreparationResult.Move.toSyncRelocationOperation(): RelocationApplyOperation =
+fun IndexUpdateProcedure.DiscoveryResult.Move.toSyncRelocationOperation(): RelocationApplyOperation =
     RelocationApplyOperation(
         CompareOperation.Result.Relocation(
             checksum = this.checksum,

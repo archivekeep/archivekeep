@@ -1,6 +1,6 @@
 package org.archivekeep.files.procedures.indexupdate
 
-import org.archivekeep.files.procedures.indexupdate.IndexUpdateProcedure.PreparationResult.Move
+import org.archivekeep.files.procedures.indexupdate.IndexUpdateProcedure.DiscoveryResult.Move
 
 data class IndexUpdateMoveProgress(
     val movesToExecute: Set<Move>,

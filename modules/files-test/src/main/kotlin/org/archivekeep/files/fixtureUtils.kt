@@ -14,7 +14,7 @@ suspend fun (Repo).quickSave(
     save(name, ArchiveFileInfo(contentsBytes.size.toLong(), checksumSha256 = contentsBytes.sha256()), contentsBytes.inputStream())
 }
 
-fun IndexUpdateProcedure.PreparationResult.NewFile.Companion.fromStringContents(
+fun IndexUpdateProcedure.DiscoveryResult.NewFile.Companion.fromStringContents(
     path: String,
     contents: String = path,
-): IndexUpdateProcedure.PreparationResult.NewFile = IndexUpdateProcedure.PreparationResult.NewFile(path, contents.toByteArray().size.toLong())
+): IndexUpdateProcedure.DiscoveryResult.NewFile = IndexUpdateProcedure.DiscoveryResult.NewFile(path, contents.toByteArray().size.toLong())

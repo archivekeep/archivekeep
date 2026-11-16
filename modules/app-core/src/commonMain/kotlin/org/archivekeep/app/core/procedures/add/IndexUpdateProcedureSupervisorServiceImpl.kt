@@ -8,7 +8,6 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flowOn
@@ -22,6 +21,9 @@ import org.archivekeep.app.core.utils.generics.SyncFlowTextLinesWriter
 import org.archivekeep.app.core.utils.generics.singleInstanceWeakValueMap
 import org.archivekeep.app.core.utils.identifiers.RepositoryURI
 import org.archivekeep.files.api.repository.Repo
+import org.archivekeep.files.procedures.indexupdate.ImmediateIndexUpdateProcedure
+import org.archivekeep.files.procedures.indexupdate.ImmediateIndexUpdateStructuredProgressTracker
+import org.archivekeep.files.procedures.indexupdate.ImmediateIndexUpdateTextualProgressTracker
 import org.archivekeep.files.procedures.indexupdate.IndexUpdateProcedure
 import org.archivekeep.files.procedures.indexupdate.IndexUpdateStructuredProgressTracker
 import org.archivekeep.files.procedures.indexupdate.IndexUpdateTextualProgressTracker
@@ -41,21 +43,21 @@ class IndexUpdateProcedureSupervisorServiceImpl(
 ) : IndexUpdateProcedureSupervisorService {
     private val addPushOperations = singleInstanceWeakValueMap(::IndexUpdateProcedureImpl)
 
-    val jobGuards = UniqueJobGuard<RepositoryURI, JobImpl>()
+    val jobGuards = UniqueJobGuard<RepositoryURI, CurrentJobWrapper<*>>()
 
     override fun getAddOperation(repositoryURI: RepositoryURI): IndexUpdateProcedureSupervisor = addPushOperations[repositoryURI]
 
     inner class IndexUpdateProcedureImpl(
         val repositoryURI: RepositoryURI,
     ) : IndexUpdateProcedureSupervisor {
-        override val currentJobFlow: StateFlow<JobImpl?> = jobGuards.stateHoldersWeakReference[repositoryURI].asStateFlow()
+        override val currentJobFlow = jobGuards.stateHoldersWeakReference[repositoryURI].asStateFlow()
 
         override fun cancel() {
             currentJobFlow.value?.cancel()
         }
 
         @OptIn(ExperimentalCoroutinesApi::class)
-        override fun prepare(): Flow<Loadable<IndexUpdateProcedureSupervisor.Preparation>> =
+        override fun discover(): Flow<Loadable<IndexUpdateProcedureSupervisor.Discovery>> =
             repositoryService
                 .getRepository(repositoryURI)
                 .accessorFlow
@@ -75,11 +77,11 @@ class IndexUpdateProcedureSupervisorServiceImpl(
 
                                         is LoadableWithProgress.Loaded -> {
                                             Loadable.Loaded(
-                                                IndexUpdateProcedureSupervisor.Preparation(
+                                                IndexUpdateProcedureSupervisor.Discovery(
                                                     it.value,
                                                     launch = { launchOptions ->
                                                         val job =
-                                                            JobImpl(
+                                                            PreparedAddJobImpl(
                                                                 repositoryAccess,
                                                                 it.value,
                                                                 launchOptions,
@@ -92,6 +94,9 @@ class IndexUpdateProcedureSupervisorServiceImpl(
                                                             job,
                                                         )
                                                     },
+                                                    startImmediate = {
+                                                        throw IllegalStateException("Should not be called")
+                                                    },
                                                 ),
                                             )
                                         }
@@ -102,10 +107,24 @@ class IndexUpdateProcedureSupervisorServiceImpl(
 
                                         is LoadableWithProgress.LoadingProgress -> {
                                             Loadable.Loaded(
-                                                IndexUpdateProcedureSupervisor.Preparation(
+                                                IndexUpdateProcedureSupervisor.Discovery(
                                                     it.progress,
                                                     launch = {
                                                         throw IllegalStateException("Not prepared")
+                                                    },
+                                                    startImmediate = {
+                                                        val job =
+                                                            ImmediateAddJobImpl(
+                                                                repositoryAccess,
+                                                                it.progress.filesToCheck.toSet(),
+                                                            )
+
+                                                        jobGuards.launch(
+                                                            scope,
+                                                            Dispatchers.IO,
+                                                            repositoryURI,
+                                                            job,
+                                                        )
                                                     },
                                                 ),
                                             )
@@ -116,12 +135,16 @@ class IndexUpdateProcedureSupervisorServiceImpl(
                 }
     }
 
-    inner class JobImpl(
+    interface CurrentJobWrapper<out T : IndexUpdateProcedureSupervisor.JobState> :
+        JobWrapper<T>,
+        UniqueJobGuard.RunnableJob
+
+    class PreparedAddJobImpl(
         private val repositoryAccess: Repo,
-        val preparationResult: IndexUpdateProcedure.PreparationResult,
+        val preparationResult: IndexUpdateProcedure.DiscoveryResult,
         val launchOptions: IndexUpdateProcedure.LaunchOptions,
     ) : AbstractJobGuardRunnable(),
-        JobWrapper<IndexUpdateProcedureSupervisor.JobState> {
+        CurrentJobWrapper<IndexUpdateProcedureSupervisor.PreparedAddJobState> {
         private val executionLog = SyncFlowTextLinesWriter()
         private val writer = IndexUpdateTextualProgressTracker(PrintWriter(executionLog.writer, true))
 
@@ -154,15 +177,59 @@ class IndexUpdateProcedureSupervisorServiceImpl(
                 }
             }
 
-        override val state: Flow<IndexUpdateProcedureSupervisor.JobState> =
+        override val state: Flow<IndexUpdateProcedureSupervisor.PreparedAddJobState> =
             combine(
                 indexUpdateProgressTracker.addProgressFlow,
                 indexUpdateProgressTracker.moveProgressFlow,
                 job.executionState,
             ) { addProgress, moveProgress, jobState ->
-                IndexUpdateProcedureSupervisor.JobState(
+                IndexUpdateProcedureSupervisor.PreparedAddJobState(
                     addProgress,
                     moveProgress,
+                    executionLog.lines,
+                    jobState,
+                )
+            }
+
+        override suspend fun execute() {
+            job.run()
+        }
+    }
+
+    class ImmediateAddJobImpl(
+        private val repositoryAccess: Repo,
+        val filesToProcess: Set<String>,
+    ) : AbstractJobGuardRunnable(),
+        CurrentJobWrapper<IndexUpdateProcedureSupervisor.ImmediateAddJobState> {
+        private val executionLog = SyncFlowTextLinesWriter()
+        private val writer = ImmediateIndexUpdateTextualProgressTracker(PrintWriter(executionLog.writer, true))
+
+        // TODO - this should be encapsulated into procedure's logic, not supervisor
+        private val indexUpdateProgressTracker =
+            ImmediateIndexUpdateStructuredProgressTracker(
+                filesToProcess,
+            )
+
+        val job =
+            object : AbstractProcedureJob() {
+                override suspend fun execute(context: ProcedureExecutionContext) {
+                    ImmediateIndexUpdateProcedure().execute(
+                        repositoryAccess,
+                        filesToProcess,
+                        writer.out,
+                        writer,
+                        indexUpdateProgressTracker,
+                    )
+                }
+            }
+
+        override val state: Flow<IndexUpdateProcedureSupervisor.ImmediateAddJobState> =
+            combine(
+                indexUpdateProgressTracker.progressFlow,
+                job.executionState,
+            ) { progress, jobState ->
+                IndexUpdateProcedureSupervisor.ImmediateAddJobState(
+                    progress,
                     executionLog.lines,
                     jobState,
                 )

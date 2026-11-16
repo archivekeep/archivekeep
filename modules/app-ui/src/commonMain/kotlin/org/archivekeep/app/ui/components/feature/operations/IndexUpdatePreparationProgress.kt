@@ -12,7 +12,7 @@ import org.archivekeep.utils.text.filesAutoPlural
 import org.jetbrains.compose.resources.stringResource
 
 @Composable
-fun IndexUpdatePreparationProgress(progress: IndexUpdateProcedure.PreparationProgress) {
+fun IndexUpdatePreparationProgress(progress: IndexUpdateProcedure.DiscoveryProgress) {
     ProgressRowList {
         ProgressRow(
             progress = { progress.checkedFiles.size / progress.filesToCheck.size.toFloat() },

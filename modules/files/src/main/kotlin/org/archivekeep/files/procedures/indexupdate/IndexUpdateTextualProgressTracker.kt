@@ -7,7 +7,7 @@ class IndexUpdateTextualProgressTracker(
     val out: PrintWriter,
     val fromArchiveToRelativePath: (path: String) -> Path = { Path.of(it) },
 ) : IndexUpdateProgressTracker {
-    override fun onMoveCompleted(move: IndexUpdateProcedure.PreparationResult.Move) {
+    override fun onMoveCompleted(move: IndexUpdateProcedure.DiscoveryResult.Move) {
         out.println(
             "moved: ${fromArchiveToRelativePath(move.from)} to ${
                 fromArchiveToRelativePath(

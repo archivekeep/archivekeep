@@ -48,21 +48,26 @@ open class InMemoryLocalRepo(
                 ?: throw FileDoesntExist(path.toString())
         ).sha256()
 
-    override suspend fun add(
+    override suspend fun prepareAdd(
         path: String,
-        reindex: Boolean,
         performanceTracker: RepoPerformanceTracker,
-    ) {
+    ): LocalRepo.PreparedAdd {
         val c = this.unindexedFiles.value[path] ?: throw FileDoesntExist(path)
 
-        contentsFlow.update {
-            it + mapOf(path to c)
-        }
-        unindexedFiles.update {
-            it
-                .toMutableMap()
-                .apply { remove(path) }
-                .toMap()
+        return object : LocalRepo.PreparedAdd {
+            override val checksumSha256 = c.sha256()
+
+            override suspend fun add(reindex: Boolean) {
+                contentsFlow.update {
+                    it + mapOf(path to c)
+                }
+                unindexedFiles.update {
+                    it
+                        .toMutableMap()
+                        .apply { remove(path) }
+                        .toMap()
+                }
+            }
         }
     }
 

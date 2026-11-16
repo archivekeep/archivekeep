@@ -46,11 +46,11 @@ class AddAndPushProcedureJobTest {
 
             val fta =
                 listOf(
-                    IndexUpdateProcedure.PreparationResult.NewFile.fromStringContents("B/01.txt"),
+                    IndexUpdateProcedure.DiscoveryResult.NewFile.fromStringContents("B/01.txt"),
                 )
             val mta =
                 listOf(
-                    IndexUpdateProcedure.PreparationResult.Move(
+                    IndexUpdateProcedure.DiscoveryResult.Move(
                         "TODO",
                         "A/01.txt".toByteArray().size.toLong(),
                         "OLD/A/01.txt",
@@ -68,7 +68,7 @@ class AddAndPushProcedureJobTest {
                         )[it]!!
                     },
                     "base",
-                    IndexUpdateProcedure.PreparationResult(
+                    IndexUpdateProcedure.DiscoveryResult(
                         newFiles = fta,
                         moves = mta,
                         emptyList(),

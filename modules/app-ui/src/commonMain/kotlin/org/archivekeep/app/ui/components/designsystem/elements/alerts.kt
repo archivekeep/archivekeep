@@ -12,6 +12,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 
+val InfoColor = Color(0xFF4488FF);
+
 @Composable
 fun ErrorAlert(content: @Composable ColumnScope.() -> Unit) {
     Alert(Color.Red, Color.Red.copy(alpha = 0.1f), content)
@@ -29,7 +31,7 @@ fun SuccessAlert(content: @Composable ColumnScope.() -> Unit) {
 
 @Composable
 fun InfoAlert(content: @Composable ColumnScope.() -> Unit) {
-    Alert(Color.Blue, Color.Blue.copy(alpha = 0.1f), content)
+    Alert(InfoColor, InfoColor.copy(alpha = 0.1f), content)
 }
 
 @Composable

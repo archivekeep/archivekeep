@@ -6,8 +6,8 @@ import org.archivekeep.app.core.procedures.utils.JobWrapper
 import org.archivekeep.app.core.utils.identifiers.RepositoryURI
 import org.archivekeep.files.procedures.addpush.AddAndPushProcedureJob
 import org.archivekeep.files.procedures.indexupdate.IndexUpdateProcedure
-import org.archivekeep.files.procedures.indexupdate.IndexUpdateProcedure.PreparationResult.Move
-import org.archivekeep.files.procedures.indexupdate.IndexUpdateProcedure.PreparationResult.NewFile
+import org.archivekeep.files.procedures.indexupdate.IndexUpdateProcedure.DiscoveryResult.Move
+import org.archivekeep.files.procedures.indexupdate.IndexUpdateProcedure.DiscoveryResult.NewFile
 
 interface AddAndPushProcedure {
     val currentJobFlow: StateFlow<JobWrapper<JobState>?>
@@ -19,11 +19,11 @@ interface AddAndPushProcedure {
     data object NotReadyAddPushProcess : State
 
     data class PreparingAddPushProcess(
-        val addPreparationProgress: IndexUpdateProcedure.PreparationProgress,
+        val addPreparationProgress: IndexUpdateProcedure.DiscoveryProgress,
     ) : State
 
     data class ReadyAddPushProcess(
-        val addPreprationResult: IndexUpdateProcedure.PreparationResult,
+        val addPreprationResult: IndexUpdateProcedure.DiscoveryResult,
         val launch: (options: LaunchOptions) -> Unit,
     ) : State
 

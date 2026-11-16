@@ -3,7 +3,7 @@ package org.archivekeep.files.procedures.indexupdate
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
-import org.archivekeep.files.procedures.indexupdate.IndexUpdateProcedure.PreparationResult.Move
+import org.archivekeep.files.procedures.indexupdate.IndexUpdateProcedure.DiscoveryResult.Move
 
 class IndexUpdateStructuredProgressTracker(
     filesToAdd: Set<String>,

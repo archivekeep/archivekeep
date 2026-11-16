@@ -11,8 +11,8 @@ import org.archivekeep.files.api.repository.operations.CompareOperation
 import org.archivekeep.files.procedures.indexupdate.IndexUpdateAddProgress
 import org.archivekeep.files.procedures.indexupdate.IndexUpdateMoveProgress
 import org.archivekeep.files.procedures.indexupdate.IndexUpdateProcedure
-import org.archivekeep.files.procedures.indexupdate.IndexUpdateProcedure.PreparationResult.Move
-import org.archivekeep.files.procedures.indexupdate.IndexUpdateProcedure.PreparationResult.NewFile
+import org.archivekeep.files.procedures.indexupdate.IndexUpdateProcedure.DiscoveryResult.Move
+import org.archivekeep.files.procedures.indexupdate.IndexUpdateProcedure.DiscoveryResult.NewFile
 import org.archivekeep.files.procedures.indexupdate.IndexUpdateStructuredProgressTracker
 import org.archivekeep.files.procedures.sync.discovery.DiscoveredNewFilesGroup
 import org.archivekeep.files.procedures.sync.discovery.DiscoveredRelocationsMoveApplyGroup
@@ -27,7 +27,7 @@ import org.archivekeep.utils.procedures.tasks.TaskExecutionProgressSummary
 class AddAndPushProcedureJob<ID>(
     private val repositoryProvider: suspend (ID) -> Repo,
     val repositoryURI: ID,
-    val addPreparationResult: IndexUpdateProcedure.PreparationResult,
+    val addPreparationResult: IndexUpdateProcedure.DiscoveryResult,
     val filesToAdd: Set<NewFile>,
     val movesToExecute: Set<Move>,
     val selectedDestinationRepositories: Set<ID>,

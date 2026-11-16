@@ -367,6 +367,9 @@
     <string name="dialog_index_update_found_moved">Found %1$s moved</string>
     <string name="dialog_index_update_moved">Moved %1$s of %2$s</string>
     <string name="dialog_index_update_added">Added %1$s of %2$s</string>
+    <string name="dialog_index_update_checking_time">Checking for duplicates and moved files takes time, especially with many new files.</string>
+    <string name="dialog_index_update_quick_add_info">You can quick-add your new files now instead — duplicates and moved files will be skipped when detected.</string>
+    <string name="dialog_index_update_quick_add_button">Quick add</string>
 
     <!-- ==================== ERROR MESSAGES ==================== -->
 

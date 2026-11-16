@@ -41,7 +41,7 @@ class AddAndPushProcedureServiceImpl(
     class JobWrapperImpl(
         repositoryService: RepositoryService,
         repositoryURI: RepositoryURI,
-        addPreparationResult: IndexUpdateProcedure.PreparationResult,
+        addPreparationResult: IndexUpdateProcedure.DiscoveryResult,
         launchOptions: AddAndPushProcedure.LaunchOptions,
     ) : AbstractJobGuardRunnable(),
         JobWrapper<AddAndPushProcedure.JobState> {
@@ -123,7 +123,7 @@ class AddAndPushProcedureServiceImpl(
             }.flowOn(ioDispatcher)
 
         internal fun launch(
-            addPreparationResult: IndexUpdateProcedure.PreparationResult,
+            addPreparationResult: IndexUpdateProcedure.DiscoveryResult,
             launchOptions: AddAndPushProcedure.LaunchOptions,
         ) {
             val newOperation =

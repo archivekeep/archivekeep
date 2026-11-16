@@ -4,11 +4,10 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.Transient
-import org.archivekeep.files.api.repository.operations.StatusOperation
 import org.archivekeep.files.procedures.indexupdate.RepoPerformanceTracker
 import org.archivekeep.utils.loading.Loadable
+import org.archivekeep.utils.loading.firstLoadedOrFailure
 import java.io.InputStream
-import java.nio.file.Path
 
 @Serializable
 data class RepoIndex(
@@ -53,6 +52,11 @@ interface Repo {
 
     suspend fun index(): RepoIndex
 
+    suspend fun getFilesBySha256(checksumSha256: String): List<RepoIndex.File> =
+        indexFlow.firstLoadedOrFailure().files.filter {
+            it.checksumSha256 == checksumSha256
+        }
+
     suspend fun move(
         from: String,
         to: String,
@@ -79,33 +83,4 @@ interface Repo {
     suspend fun updateMetadata(transform: (old: RepositoryMetadata) -> RepositoryMetadata)
 
     suspend fun close()
-}
-
-interface LocalRepo : Repo {
-    val localIndex: Flow<Loadable<StatusOperation.Result>>
-
-    suspend fun contains(path: String): Boolean
-
-    suspend fun findAllFiles(globs: List<String>): List<Path>
-
-    suspend fun indexedFilenames(): List<String>
-
-    suspend fun verifyFileExists(path: String): Boolean
-
-    suspend fun fileChecksum(path: String): String
-
-    suspend fun computeFileChecksum(path: Path): String
-
-    suspend fun add(
-        path: String,
-        reindex: Boolean = false,
-        performanceTracker: RepoPerformanceTracker = RepoPerformanceTracker.NoOp,
-    )
-
-    suspend fun remove(
-        path: String,
-        performanceTracker: RepoPerformanceTracker = RepoPerformanceTracker.NoOp,
-    )
-
-    fun getFileSize(filename: String): Long?
 }

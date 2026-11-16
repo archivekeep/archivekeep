@@ -30,6 +30,7 @@ import org.archivekeep.files.api.exceptions.ChecksumMismatch
 import org.archivekeep.files.api.exceptions.DestinationExists
 import org.archivekeep.files.api.exceptions.NotRegularFilePath
 import org.archivekeep.files.api.repository.ArchiveFileInfo
+import org.archivekeep.files.api.repository.LocalRepo
 import org.archivekeep.files.api.repository.RepoIndex
 import org.archivekeep.files.api.repository.RepositoryMetadata
 import org.archivekeep.files.api.repository.operations.StatusOperation
@@ -330,18 +331,23 @@ class FilesDatabaseRepo private constructor(
         return computeChecksum(fullPath)
     }
 
-    override suspend fun add(
+    override suspend fun prepareAdd(
         path: String,
-        reindex: Boolean,
         performanceTracker: RepoPerformanceTracker,
-    ) {
+    ): LocalRepo.PreparedAdd {
         val fullPath = root.resolve(safeSubPath(path))
         val size = fullPath.fileSize()
         val lastModified = Date(fullPath.getLastModifiedTime().toMillis())
         val checksum = performanceTracker.measure(ChecksumOperationIds.COMPUTE_CHECKSUM) { computeChecksum(fullPath) }
 
-        performanceTracker.measure(DatabaseIndexStoreOperationIds.STORE_FILE) {
-            indexStore.storeFile(path, size, lastModified, checksum, reindex = reindex)
+        return object : LocalRepo.PreparedAdd {
+            override val checksumSha256 = checksum
+
+            override suspend fun add(reindex: Boolean) {
+                performanceTracker.measure(DatabaseIndexStoreOperationIds.STORE_FILE) {
+                    indexStore.storeFile(path, size, lastModified, checksum, reindex = reindex)
+                }
+            }
         }
     }
 
