@@ -141,9 +141,7 @@ private fun rotateBackups(path: Path) {
     if (!path.exists()) return
 
     val oldestBackup = path.backupPath(MaxBackupCount)
-    if (oldestBackup.exists()) {
-        oldestBackup.toFile().delete()
-    }
+    oldestBackup.deleteIfExists()
 
     for (i in MaxBackupCount - 1 downTo 1) {
         val from = path.backupPath(i)
@@ -173,9 +171,9 @@ private fun restoreFromBackup(path: Path): String? {
 }
 
 fun cleanupChecksumAndBackups(path: Path) {
-    path.checksumPath().toFile().delete()
+    path.checksumPath().deleteIfExists()
     for (i in 1..MaxBackupCount) {
-        path.backupPath(i).toFile().delete()
+        path.backupPath(i).deleteIfExists()
     }
 }
 
