@@ -32,11 +32,12 @@ private const val itemsToMeasure = 30
 fun ScrollableLogTextInDialog(textLines: List<String>) {
     val textMeasurer = rememberTextMeasurer()
     val textStyle = MaterialTheme.typography.bodyMedium
+    val logLabel = stringResource(Res.string.common_log)
 
     val width =
-        remember(textLines, textStyle) {
+        remember(textLines, textStyle, logLabel) {
             max(
-                textMeasurer.measure("Log", style = labelTextStyle).size.width,
+                textMeasurer.measure(logLabel, style = labelTextStyle).size.width,
                 textLines
                     .limitSize(itemsToConsider)
                     .map { it }

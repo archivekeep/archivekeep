@@ -21,9 +21,12 @@ import org.archivekeep.app.ui.domain.wiring.LocalArchiveOperationLaunchers
 import org.archivekeep.app.ui.views.home.components.util.baseActions
 import org.archivekeep.app.ui.views.home.model.HomeExternalArchiveModel
 import org.archivekeep.ui.resources.Res
+import org.archivekeep.ui.resources.common_disconnected
+import org.archivekeep.ui.resources.common_locked
 import org.archivekeep.ui.resources.home_archive_unassociated
 import org.archivekeep.ui.resources.home_non_local_archives_empty
 import org.archivekeep.utils.loading.Loadable
+import org.archivekeep.utils.loading.optional.OptionalLoadable
 import org.jetbrains.compose.resources.stringResource
 
 @Composable
@@ -57,8 +60,16 @@ fun HomeNonLocalArchivesList(otherArchivesLoadable: Loadable<List<HomeExternalAr
                         val launchers = LocalArchiveOperationLaunchers.current
                         val ra = repo.repositoryOperationalState.actions(launchers, repo.uri)
 
+                        val text = repo.statusText.value
+                        val translatedText = when (text) {
+                            "Locked" -> stringResource(Res.string.common_locked)
+                            "Disconnected" -> stringResource(Res.string.common_disconnected)
+                            else -> text
+                        }
+                        val translatedStatusText = OptionalLoadable.LoadedAvailable(translatedText)
+
                         RepositoryRow(
-                            statusText = repo.statusText,
+                            statusText = translatedStatusText,
                             isLoading = repo.isLoading,
                             connectionStatus = repo.connectionStatus,
                             name = repo.name,

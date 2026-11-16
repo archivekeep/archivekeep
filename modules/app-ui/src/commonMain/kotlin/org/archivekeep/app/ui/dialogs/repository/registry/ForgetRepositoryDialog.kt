@@ -21,15 +21,14 @@ import org.archivekeep.app.ui.components.feature.dialogs.operations.LaunchableEx
 import org.archivekeep.app.ui.dialogs.repository.AbstractRepositoryDialog
 import org.archivekeep.app.ui.domain.wiring.LocalApplicationServices
 import org.archivekeep.app.ui.utils.Launchable
-import org.archivekeep.app.ui.utils.appendBoldSpan
 import org.archivekeep.app.ui.utils.asTrivialAction
 import org.archivekeep.app.ui.utils.collectLoadableFlow
 import org.archivekeep.app.ui.utils.simpleLaunchable
 import org.archivekeep.ui.resources.Res
 import org.archivekeep.ui.resources.common_forget
-import org.archivekeep.ui.resources.dialog_forget_repository_title
-import org.archivekeep.ui.resources.dialog_forget_repository_message
 import org.archivekeep.ui.resources.dialog_forget_repository_data_not_deleted
+import org.archivekeep.ui.resources.dialog_forget_repository_message
+import org.archivekeep.ui.resources.dialog_forget_repository_title
 import org.archivekeep.utils.loading.Loadable
 import org.archivekeep.utils.loading.mapToLoadable
 import org.jetbrains.compose.resources.stringResource

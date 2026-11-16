@@ -12,11 +12,14 @@ import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import org.archivekeep.app.ui.components.designsystem.theme.CColors
+import org.archivekeep.ui.resources.Res
+import org.archivekeep.ui.resources.common_no_items
+import org.jetbrains.compose.resources.stringResource
 
 @Composable
 fun <T> SectionCardBottomList(
     items: List<T>,
-    noItemsText: String = "No items",
+    noItemsText: String = stringResource(Res.string.common_no_items),
     renderItem: @Composable ColumnScope.(item: T) -> Unit,
 ) {
     Column(

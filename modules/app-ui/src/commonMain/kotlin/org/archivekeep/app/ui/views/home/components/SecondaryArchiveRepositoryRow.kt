@@ -17,7 +17,7 @@ fun SecondaryArchiveRepositoryRow(
     val actions = nonPrimaryRepository.actions(launchers)
 
     RepositoryRow(
-        statusText = nonPrimaryRepository.texts,
+        statusText = nonPrimaryRepository.textsTranslated(),
         isLoading = nonPrimaryRepository.isLoading,
         connectionStatus = nonPrimaryRepository.connectionStatus,
         name = name,

@@ -19,10 +19,15 @@ import org.archivekeep.app.ui.dialogs.repository.procedures.sync.describePrepare
 import org.archivekeep.app.ui.domain.data.getSyncCandidates
 import org.archivekeep.app.ui.utils.stickToFirstNotNullAsState
 import org.archivekeep.files.procedures.sync.discovery.RelocationSyncMode
+import org.archivekeep.ui.resources.Res
+import org.archivekeep.ui.resources.common_finished
+import org.archivekeep.ui.resources.common_running
+import org.archivekeep.ui.resources.common_starting
 import org.archivekeep.utils.loading.Loadable
 import org.archivekeep.utils.loading.mapLoadedData
 import org.archivekeep.utils.loading.mapToLoadable
 import org.archivekeep.utils.procedures.ProcedureExecutionState
+import org.jetbrains.compose.resources.getString
 
 class PushRepoDialogViewModel(
     val scope: CoroutineScope,
@@ -93,9 +98,9 @@ class PushRepoDialogViewModel(
 
                         is JobState ->
                             when (it.executionState) {
-                                ProcedureExecutionState.NotStarted -> "Starting"
-                                ProcedureExecutionState.Running -> "Running"
-                                is ProcedureExecutionState.Finished -> "Finished"
+                                ProcedureExecutionState.NotStarted -> getString(Res.string.common_starting)
+                                ProcedureExecutionState.Running -> getString(Res.string.common_running)
+                                is ProcedureExecutionState.Finished -> getString(Res.string.common_finished)
                             }
                     }
                 }

@@ -16,11 +16,23 @@ import org.archivekeep.app.ui.domain.wiring.ArchiveOperationLaunchers
 import org.archivekeep.app.ui.utils.Action
 import org.archivekeep.files.api.repository.operations.StatusOperation
 import org.archivekeep.files.driver.filesystem.files.FilesystemWorkingRepository
+import org.archivekeep.ui.resources.Res
+import org.archivekeep.ui.resources.common_add_new_files
+import org.archivekeep.ui.resources.common_associate
+import org.archivekeep.ui.resources.common_cleanup_deleted_files
+import org.archivekeep.ui.resources.common_deinitialize
+import org.archivekeep.ui.resources.common_details
+import org.archivekeep.ui.resources.common_forget
+import org.archivekeep.ui.resources.common_open
+import org.archivekeep.ui.resources.common_reindex_changed_files
+import org.archivekeep.ui.resources.common_unassociate
+import org.archivekeep.ui.resources.common_unlock
 import org.archivekeep.utils.loading.Loadable
 import org.archivekeep.utils.loading.mapLoadedData
 import org.archivekeep.utils.loading.optional.OptionalLoadable
 import org.archivekeep.utils.loading.optional.mapLoadedData
 import org.archivekeep.utils.loading.optional.mapToLoadable
+import org.jetbrains.compose.resources.stringResource
 
 class RepositoryOperationalState(
     repositoryAccessState: RepositoryAccessState,
@@ -39,13 +51,24 @@ class RepositoryOperationalState(
     fun actions(
         launchers: ArchiveOperationLaunchers,
         uri: RepositoryURI,
-    ): RepositoryBaseUiActions =
-        object : RepositoryBaseUiActions {
+    ): RepositoryBaseUiActions {
+        val commonOpen = stringResource(Res.string.common_open)
+        val commonDetails = stringResource(Res.string.common_details)
+        val commonUnlock = stringResource(Res.string.common_unlock)
+        val commonAddNewFiles = stringResource(Res.string.common_add_new_files)
+        val commonCleanupDeletedFiles = stringResource(Res.string.common_cleanup_deleted_files)
+        val commonReindexChangedFiles = stringResource(Res.string.common_reindex_changed_files)
+        val commonAssociate = stringResource(Res.string.common_associate)
+        val commonUnassociate = stringResource(Res.string.common_unassociate)
+        val commonForget = stringResource(Res.string.common_forget)
+        val commonDeinitialize = stringResource(Res.string.common_deinitialize)
+
+        return object : RepositoryBaseUiActions {
             override val open: Loadable<Action> =
                 withRepositoryOpener(uri) {
                     Action(
                         icon = TablerIcons.Folder,
-                        title = "Open",
+                        title = commonOpen,
                         isPending = false,
                         isAvailable = openRepository != null,
                         onLaunch = openRepository ?: {},
@@ -56,7 +79,7 @@ class RepositoryOperationalState(
                 Loadable.Loaded(
                     Action(
                         icon = TablerIcons.InfoCircle,
-                        title = "Details",
+                        title = commonDetails,
                         isPending = false,
                         onLaunch = {
                             launchers.openRepositoryDetails(uri)
@@ -68,7 +91,7 @@ class RepositoryOperationalState(
                 needsUnlock.mapLoadedData {
                     Action(
                         TablerIcons.LockOpen,
-                        "Unlock",
+                        commonUnlock,
                         isPending = it,
                         isAvailable = it,
                         onLaunch = {
@@ -81,7 +104,7 @@ class RepositoryOperationalState(
                 canAdd.mapLoadedData {
                     Action(
                         TablerIcons.Plus,
-                        "Add new files",
+                        commonAddNewFiles,
                         isAvailable = it,
                         onLaunch = {
                             launchers.openIndexUpdateOperation(uri)
@@ -93,7 +116,7 @@ class RepositoryOperationalState(
                 canCleanupDeletedFiles.mapLoadedData {
                     Action(
                         TablerIcons.Trash,
-                        "Cleanup deleted files",
+                        commonCleanupDeletedFiles,
                         isAvailable = it,
                         onLaunch = {
                             launchers.openDeletedFilesCleanupOperation(uri)
@@ -105,7 +128,7 @@ class RepositoryOperationalState(
                 canReindex.mapLoadedData {
                     Action(
                         TablerIcons.RefreshAlert,
-                        "Reindex changed files",
+                        commonReindexChangedFiles,
                         isAvailable = it,
                         onLaunch = {
                             launchers.openReindexOperation(uri)
@@ -116,7 +139,7 @@ class RepositoryOperationalState(
             override val associate =
                 Loadable.Loaded(
                     Action(
-                        title = "Associate",
+                        title = commonAssociate,
                         isPending = !isAssociated,
                         isAvailable = !isAssociated,
                         onLaunch = {
@@ -128,7 +151,7 @@ class RepositoryOperationalState(
             override val unassociate =
                 Loadable.Loaded(
                     Action(
-                        title = "Unassociate",
+                        title = commonUnassociate,
                         isPending = false,
                         isAvailable = isAssociated,
                         onLaunch = {
@@ -141,7 +164,7 @@ class RepositoryOperationalState(
                 Loadable.Loaded(
                     Action(
                         null,
-                        "Forget",
+                        commonForget,
                         isPending = false,
                         onLaunch = {
                             launchers.openForgetRepository(uri)
@@ -152,7 +175,7 @@ class RepositoryOperationalState(
                 filesystemRepo.mapLoadedData {
                     Action(
                         null,
-                        "Deinitialize",
+                        commonDeinitialize,
                         isPending = false,
                         isAvailable = it != null,
                         onLaunch = {
@@ -161,4 +184,5 @@ class RepositoryOperationalState(
                     )
                 }
         }
+    }
 }

@@ -58,6 +58,9 @@
     <string name="common_in">v</string>
     <string name="common_reindex">Preindexovať</string>
     <string name="common_unassociate">Odpojiť</string>
+    <string name="common_add_new_files">Pridať nové súbory</string>
+    <string name="common_cleanup_deleted_files">Vyčistiť zmazané súbory</string>
+    <string name="common_reindex_changed_files">Preindexovať zmenené súbory</string>
 
     <!-- Common progress states -->
     <string name="common_adding">Pridáva sa…</string>
@@ -159,6 +162,7 @@
     <string name="storage_dropdown_set_name">Nastaviť meno</string>
     <string name="storage_dropdown_mark_as_local">Označiť ako lokálne</string>
     <string name="storage_dropdown_mark_as_external">Označiť ako externé</string>
+    <string name="storage_not_found">Úložisko nenájdené</string>
 
     <!-- ==================== RELOCATION SYNC MODE ==================== -->
 
@@ -343,6 +347,11 @@
     <string name="dialog_sync_move_files">Presunúť %1$s súborov.</string>
     <string name="dialog_sync_ignore_relocations">Ignorovať %1$s presunov.</string>
     <string name="dialog_sync_upload_files">Nahrať %1$s súborov.</string>
+    <string name="dialog_sync_duplicate_base_to_extra">duplikovať %1$s do %2$s</string>
+    <string name="dialog_sync_duplicate_prefix">duplikovať </string>
+    <string name="dialog_sync_deduplicate_prefix">odduplikovať </string>
+    <string name="dialog_sync_deduplicate_connector"> a ponechať len </string>
+    <string name="dialog_sync_move_prefix">presunúť </string>
 
     <!-- ==================== DIALOG: ASSOCIATE/PUSH REPO ==================== -->
 
@@ -440,10 +449,40 @@
     <!-- ==================== SYNC PROGRESS ==================== -->
 
     <string name="sync_remaining">zostáva %1$s</string>
+    <string name="sync_remaining_format">%1$s [zostáva %2$s]</string>
+
+    <!-- ==================== BYTE UNITS ==================== -->
+
+    <string name="byte_unit_tb">TB</string>
+    <string name="byte_unit_gb">GB</string>
+    <string name="byte_unit_mb">MB</string>
+    <string name="byte_unit_kb">KB</string>
+    <string name="byte_unit_b">B</string>
+
+    <!-- ==================== INDEX UPDATE ==================== -->
+
+    <string name="index_unindexed">neindexovaných </string>
 
     <!-- ==================== DELETED FILES CLEANUP ==================== -->
 
     <string name="cleanup_moved_or_renamed">Súbory mohli byť presunuté alebo premenované namiesto odstránenia.</string>
     <string name="cleanup_proceed_with_addition">Odporúča sa najprv pokračovať s pridaním nových/presunutých súborov.</string>
+
+    <!-- ==================== PLURAL FILE COUNT ==================== -->
+
+    <string name="common_n_files_singular">1 %1$s súbor</string>
+    <string name="common_n_files_plural">%1$d %2$s súborov</string>
+
+    <!-- ==================== REPOSITORY STATUS ==================== -->
+
+    <string name="common_unindexed_files">Neindexovaných %1$s</string>
+    <string name="home_index_status_with_unindexed">%1$d súborov, %2$d neindexovaných</string>
+    <string name="home_index_status">%1$d súborov</string>
+
+    <!-- ==================== SYNC PROGRESS ==================== -->
+
+    <string name="sync_replicated">Replikovaných %1$s z %2$s</string>
+    <string name="sync_copied">Skopírovaných %1$s z %2$s</string>
+    <string name="sync_relocated">Presunutých %1$s z %2$s</string>
 
  </resources>

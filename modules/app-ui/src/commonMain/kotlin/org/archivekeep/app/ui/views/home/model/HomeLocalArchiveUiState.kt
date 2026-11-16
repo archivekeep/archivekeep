@@ -6,9 +6,13 @@ import org.archivekeep.app.ui.domain.wiring.ArchiveOperationLaunchers
 import org.archivekeep.app.ui.enableUnfinishedFeatures
 import org.archivekeep.app.ui.utils.Action
 import org.archivekeep.files.api.repository.operations.StatusOperation
+import org.archivekeep.ui.resources.Res
+import org.archivekeep.ui.resources.home_action_add_and_push
+import org.archivekeep.ui.resources.home_action_push_to_all
 import org.archivekeep.utils.loading.Loadable
 import org.archivekeep.utils.loading.mapLoadedData
 import org.archivekeep.utils.loading.optional.OptionalLoadable
+import org.jetbrains.compose.resources.stringResource
 
 data class HomeLocalArchiveUiState(
     val repositoryAccessState: RepositoryAccessState,
@@ -16,7 +20,7 @@ data class HomeLocalArchiveUiState(
     val canPush: Loadable<Boolean>,
     val anySecondaryAvailable: Boolean,
     val loading: Boolean,
-    val indexStatusText: OptionalLoadable<String>,
+    val indexStatus: OptionalLoadable<Pair<Int, Int>>,
     val addPushOperationRunning: Boolean,
     val addOperationRunning: Boolean,
     val isAssociated: Boolean,
@@ -36,6 +40,8 @@ data class HomeLocalArchiveUiState(
         localArchive: HomeLocalArchiveModel,
     ): HomeLocalArchiveUiActions {
         val ra = repositoryOperationalState.actions(archiveOperationLaunchers, localArchive.primaryRepository.reference.uri)
+        val addAndPushTitle = stringResource(Res.string.home_action_add_and_push)
+        val pushToAllTitle = stringResource(Res.string.home_action_push_to_all)
 
         return object : HomeLocalArchiveUiActions, RepositoryBaseUiActions by ra {
             override val addPush =
@@ -46,7 +52,7 @@ data class HomeLocalArchiveUiState(
                                 localArchive.primaryRepository.reference.uri,
                             )
                         },
-                        title = "Add and push",
+                        title = addAndPushTitle,
                         isPending = it,
                         running = addPushOperationRunning,
                     )
@@ -62,7 +68,7 @@ data class HomeLocalArchiveUiState(
                         },
                         isPending = it && enableUnfinishedFeatures,
                         isAvailable = it && enableUnfinishedFeatures,
-                        title = "Push to all",
+                        title = pushToAllTitle,
                     )
                 }
         }

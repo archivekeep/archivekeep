@@ -14,7 +14,10 @@ import org.archivekeep.app.ui.components.designsystem.dropdownmenu.ActionDropdow
 import org.archivekeep.app.ui.components.designsystem.sections.SectionCardBottomListItemIconButton
 import org.archivekeep.app.ui.utils.Action
 import org.archivekeep.app.ui.views.home.model.RepositoryBaseUiActions
+import org.archivekeep.ui.resources.Res
+import org.archivekeep.ui.resources.common_more
 import org.archivekeep.utils.loading.Loadable
+import org.jetbrains.compose.resources.stringResource
 
 @Composable
 fun InArchiveRepositoryDropdownIconLaunched(
@@ -35,7 +38,7 @@ fun InArchiveRepositoryDropdownIconLaunched(
 
         SectionCardBottomListItemIconButton(
             icon = TablerIcons.DotsVertical,
-            contentDescription = "More",
+            contentDescription = stringResource(Res.string.common_more),
             onClick = {
                 isDropdownExpanded = !isDropdownExpanded
             },

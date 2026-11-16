@@ -4,15 +4,20 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.sp
+import org.archivekeep.ui.resources.Res
+import org.archivekeep.ui.resources.common_error
+import org.archivekeep.ui.resources.common_loading_dots
+import org.archivekeep.ui.resources.common_not_available
 import org.archivekeep.utils.loading.Loadable
 import org.archivekeep.utils.loading.optional.OptionalLoadable
+import org.jetbrains.compose.resources.stringResource
 
 @Composable
 fun SectionCardItemStateText(loadable: Loadable<String>) {
     when (loadable) {
         is Loadable.Failed -> {
             Text(
-                "ERROR: ${loadable.throwable.message}",
+                stringResource(Res.string.common_error, loadable.throwable.message ?: ""),
                 overflow = TextOverflow.Ellipsis,
                 softWrap = false,
                 fontSize = 11.sp,
@@ -22,7 +27,7 @@ fun SectionCardItemStateText(loadable: Loadable<String>) {
 
         is Loadable.Loading -> {
             Text(
-                "Loading ...",
+                stringResource(Res.string.common_loading_dots),
                 overflow = TextOverflow.Ellipsis,
                 softWrap = false,
                 fontSize = 11.sp,
@@ -47,7 +52,7 @@ fun SectionCardItemStateText(loadable: OptionalLoadable<String>) {
     when (loadable) {
         is OptionalLoadable.Failed -> {
             Text(
-                "ERROR: ${loadable.cause.message}",
+                stringResource(Res.string.common_error, loadable.cause.message ?: ""),
                 overflow = TextOverflow.Ellipsis,
                 softWrap = false,
                 fontSize = 11.sp,
@@ -57,7 +62,7 @@ fun SectionCardItemStateText(loadable: OptionalLoadable<String>) {
 
         is OptionalLoadable.Loading -> {
             Text(
-                "Loading ...",
+                stringResource(Res.string.common_loading_dots),
                 overflow = TextOverflow.Ellipsis,
                 softWrap = false,
                 fontSize = 11.sp,
@@ -67,7 +72,7 @@ fun SectionCardItemStateText(loadable: OptionalLoadable<String>) {
 
         is OptionalLoadable.NotAvailable -> {
             Text(
-                "Not available ...",
+                stringResource(Res.string.common_not_available),
                 overflow = TextOverflow.Ellipsis,
                 softWrap = false,
                 fontSize = 11.sp,

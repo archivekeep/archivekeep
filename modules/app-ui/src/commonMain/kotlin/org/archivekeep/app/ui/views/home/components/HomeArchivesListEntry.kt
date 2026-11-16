@@ -23,8 +23,11 @@ import org.archivekeep.ui.resources.home_archive_copies_out_of_sync
 import org.archivekeep.ui.resources.home_archive_no_actions
 import org.archivekeep.ui.resources.home_archive_no_repositories
 import org.archivekeep.ui.resources.home_archive_unassociated
+import org.archivekeep.ui.resources.home_index_status
+import org.archivekeep.ui.resources.home_index_status_with_unindexed
 import org.archivekeep.utils.loading.Loadable
 import org.archivekeep.utils.loading.mapIfLoadedOrDefault
+import org.archivekeep.utils.loading.optional.OptionalLoadable
 import org.jetbrains.compose.resources.stringResource
 
 @Composable
@@ -53,7 +56,19 @@ fun HomeArchivesListEntry(
             },
         )
 
-        HomeCardStateText(state.indexStatusText)
+        val indexStatusText: OptionalLoadable<String> = when (val status = state.indexStatus) {
+            is OptionalLoadable.LoadedAvailable -> {
+                val (indexed, newFiles) = status.value
+                val text = if (newFiles > 0) {
+                    stringResource(Res.string.home_index_status_with_unindexed, indexed, newFiles)
+                } else {
+                    stringResource(Res.string.home_index_status, indexed)
+                }
+                OptionalLoadable.LoadedAvailable(text)
+            }
+            else -> OptionalLoadable.Loading
+        }
+        HomeCardStateText(indexStatusText)
 
         if (!localArchive.isAssociated) {
             Row(Modifier.padding(horizontal = sectionCardHorizontalPadding, vertical = 4.dp)) {

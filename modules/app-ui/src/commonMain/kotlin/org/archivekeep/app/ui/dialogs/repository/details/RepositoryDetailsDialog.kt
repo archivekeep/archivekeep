@@ -22,11 +22,20 @@ import org.archivekeep.app.ui.utils.collectAsLoadable
 import org.archivekeep.files.api.repository.Repo
 import org.archivekeep.files.api.repository.RepoIndex
 import org.archivekeep.ui.resources.Res
+import org.archivekeep.ui.resources.byte_unit_b
+import org.archivekeep.ui.resources.byte_unit_gb
+import org.archivekeep.ui.resources.byte_unit_kb
+import org.archivekeep.ui.resources.byte_unit_mb
+import org.archivekeep.ui.resources.byte_unit_tb
 import org.archivekeep.ui.resources.common_close
 import org.archivekeep.ui.resources.common_unknown
+import org.archivekeep.ui.resources.dialog_repo_details_encrypted
 import org.archivekeep.ui.resources.dialog_repo_details_files
 import org.archivekeep.ui.resources.dialog_repo_details_name
+import org.archivekeep.ui.resources.dialog_repo_details_plain
+import org.archivekeep.ui.resources.dialog_repo_details_rocksdb
 import org.archivekeep.ui.resources.dialog_repo_details_size
+import org.archivekeep.ui.resources.dialog_repo_details_sqlite
 import org.archivekeep.ui.resources.dialog_repo_details_storage
 import org.archivekeep.ui.resources.dialog_repo_details_type
 import org.archivekeep.ui.resources.dialog_repository_details_title
@@ -104,7 +113,7 @@ class RepositoryDetailsDialog(
             InfoRow(stringResource(Res.string.dialog_repo_details_name), state.displayName)
             InfoRow(stringResource(Res.string.dialog_repo_details_type), state.repositoryType)
             state.filesystemRepoType?.let {
-                InfoRow(stringResource(Res.string.dialog_repo_details_storage), it)
+                InfoRow(stringResource(Res.string.dialog_repo_details_storage), getFilesystemRepoTypeLabel(it))
             }
             InfoRow(stringResource(Res.string.dialog_repo_details_files), state.fileCount?.toString() ?: stringResource(Res.string.common_unknown))
             InfoRow(
@@ -148,25 +157,37 @@ private fun getFilesystemRepoTypeKey(repo: Repo): String? {
     }
 }
 
+@Composable
+private fun getFilesystemRepoTypeLabel(type: String?): String {
+    return when (type) {
+        "encrypted" -> stringResource(Res.string.dialog_repo_details_encrypted)
+        "rocksdb" -> stringResource(Res.string.dialog_repo_details_rocksdb)
+        "sqlite" -> stringResource(Res.string.dialog_repo_details_sqlite)
+        "plain" -> stringResource(Res.string.dialog_repo_details_plain)
+        else -> type ?: stringResource(Res.string.common_unknown)
+    }
+}
+
+@Composable
 private fun formatBytes(bytes: Long): String =
     when {
         bytes >= 1_000_000_000_000 -> {
-            String.format("%.1f TB", bytes / 1_000_000_000_000.0)
+            String.format("%.1f %s", bytes / 1_000_000_000_000.0, stringResource(Res.string.byte_unit_tb))
         }
 
         bytes >= 1_000_000_000 -> {
-            String.format("%.1f GB", bytes / 1_000_000_000.0)
+            String.format("%.1f %s", bytes / 1_000_000_000.0, stringResource(Res.string.byte_unit_gb))
         }
 
         bytes >= 1_000_000 -> {
-            String.format("%.1f MB", bytes / 1_000_000.0)
+            String.format("%.1f %s", bytes / 1_000_000.0, stringResource(Res.string.byte_unit_mb))
         }
 
         bytes >= 1_000 -> {
-            String.format("%.1f KB", bytes / 1_000.0)
+            String.format("%.1f %s", bytes / 1_000.0, stringResource(Res.string.byte_unit_kb))
         }
 
         else -> {
-            "$bytes B"
+            "$bytes ${stringResource(Res.string.byte_unit_b)}"
         }
     }

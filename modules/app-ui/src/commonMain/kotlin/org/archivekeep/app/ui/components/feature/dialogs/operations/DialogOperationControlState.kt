@@ -1,8 +1,14 @@
 package org.archivekeep.app.ui.components.feature.dialogs.operations
 
+import kotlinx.coroutines.runBlocking
 import org.archivekeep.app.ui.components.feature.dialogs.operations.DialogOperationControlState.Completed
 import org.archivekeep.app.ui.components.feature.dialogs.operations.DialogOperationControlState.Running
+import org.archivekeep.ui.resources.Res
+import org.archivekeep.ui.resources.common_cancelled
+import org.archivekeep.ui.resources.common_failed
+import org.archivekeep.ui.resources.common_finished
 import org.archivekeep.utils.procedures.ProcedureExecutionState
+import org.jetbrains.compose.resources.getString
 import java.util.concurrent.CancellationException
 
 sealed interface DialogOperationControlState {
@@ -36,8 +42,10 @@ fun ProcedureExecutionState.toDialogOperationControlState(
     }
 
 fun ProcedureExecutionState.Finished.outcome(): String =
-    when (error) {
-        null -> "Finished"
-        is CancellationException -> "Cancelled"
-        else -> "Failed"
+    runBlocking {
+        when (error) {
+            null -> getString(Res.string.common_finished)
+            is CancellationException -> getString(Res.string.common_cancelled)
+            else -> getString(Res.string.common_failed)
+        }
     }

@@ -15,6 +15,7 @@ import androidx.compose.ui.unit.dp
 fun SectionCardTitleIconButton(
     icon: ImageVector,
     onClick: () -> Unit,
+    contentDescription: String = "",
 ) {
     Surface(
         onClick = onClick,
@@ -23,7 +24,7 @@ fun SectionCardTitleIconButton(
     ) {
         Icon(
             icon,
-            contentDescription = "TODO",
+            contentDescription = contentDescription,
             Modifier.padding(4.dp).size(20.dp),
         )
     }

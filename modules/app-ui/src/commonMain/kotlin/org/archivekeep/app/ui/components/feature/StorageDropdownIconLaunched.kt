@@ -24,6 +24,7 @@ import org.archivekeep.ui.resources.common_rename
 import org.archivekeep.ui.resources.storage_dropdown_mark_as_external
 import org.archivekeep.ui.resources.storage_dropdown_mark_as_local
 import org.archivekeep.ui.resources.storage_dropdown_set_name
+import org.archivekeep.ui.resources.storage_not_found
 import org.archivekeep.utils.loading.mapLoadedData
 import org.jetbrains.compose.resources.stringResource
 
@@ -63,7 +64,7 @@ fun StorageDropdownIconLaunched(uri: StorageURI) {
         ) {
             LoadableGuard(storageLoadable) { storage ->
                 if (storage == null) {
-                    Text(stringResource(Res.string.common_error, "Storage not found"))
+                    Text(stringResource(Res.string.common_error, stringResource(Res.string.storage_not_found)))
                     return@LoadableGuard
                 }
 

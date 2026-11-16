@@ -6,12 +6,14 @@ import org.archivekeep.app.core.procedures.add.IndexUpdateProcedureSupervisor.Pr
 import org.archivekeep.app.ui.components.designsystem.dialog.LabelText
 import org.archivekeep.app.ui.components.designsystem.progress.ProgressRow
 import org.archivekeep.app.ui.components.designsystem.progress.ProgressRowList
-import org.archivekeep.files.procedures.indexupdate.IndexUpdateAddProgress
+import org.archivekeep.app.ui.utils.filesAutoPluralTranslated
 import org.archivekeep.files.procedures.indexupdate.ImmediateIndexUpdateProgress
+import org.archivekeep.files.procedures.indexupdate.IndexUpdateAddProgress
 import org.archivekeep.files.procedures.indexupdate.IndexUpdateMoveProgress
 import org.archivekeep.ui.resources.Res
+import org.archivekeep.ui.resources.dialog_index_update_added
+import org.archivekeep.ui.resources.dialog_index_update_moved
 import org.archivekeep.ui.resources.dialog_index_update_title
-import org.archivekeep.utils.text.filesAutoPlural
 import org.jetbrains.compose.resources.stringResource
 
 @Composable
@@ -36,13 +38,13 @@ fun LocalIndexUpdateProgress(
         if (selectedMoves.isNotEmpty()) {
             ProgressRow(progress = {
                 moveProgress.moved.size / selectedMoves.size.toFloat()
-            }, "Moved ${moveProgress.moved.size} of ${filesAutoPlural(selectedMoves)}")
+            }, stringResource(Res.string.dialog_index_update_moved, moveProgress.moved.size, filesAutoPluralTranslated(selectedMoves)))
         }
         val selectedFilesToAdd = addProgress.filesToAdd
         if (selectedFilesToAdd.isNotEmpty()) {
             ProgressRow(
                 progress = { addProgress.added.size / selectedFilesToAdd.size.toFloat() },
-                "Added ${addProgress.added.size} of ${filesAutoPlural(selectedFilesToAdd)}",
+                stringResource(Res.string.dialog_index_update_added, addProgress.added.size, filesAutoPluralTranslated(selectedFilesToAdd)),
             )
         }
     }
@@ -57,7 +59,7 @@ fun LocalIndexUpdateProgress(progress: ImmediateIndexUpdateProgress) {
         if (filesToAdd.isNotEmpty()) {
             ProgressRow(progress = {
                 progress.addedNew.size / filesToAdd.size.toFloat()
-            }, "Added ${progress.addedNew.size} of ${filesAutoPlural(filesToAdd)}")
+            }, stringResource(Res.string.dialog_index_update_added, progress.addedNew.size, filesAutoPluralTranslated(filesToAdd)))
         }
     }
 }

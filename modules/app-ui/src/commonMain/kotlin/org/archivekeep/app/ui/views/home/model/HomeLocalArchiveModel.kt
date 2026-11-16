@@ -94,10 +94,10 @@ class HomeLocalArchiveModel(
                     },
                 anySecondaryAvailable = nonLocalRepositories.any { it.second.connectionStatus.isAvailable },
                 loading = indexStatus.isLoading,
-                indexStatusText =
+                indexStatus =
                     indexStatus
                         .mapLoadedData {
-                            "${it.indexedFiles.size} files${it.newFiles.size.let { if (it > 0) ", $it uncommitted" else "" }}"
+                            Pair(it.indexedFiles.size, it.newFiles.size)
                         },
                 addPushOperationRunning = addPushOperationRunning,
                 addOperationRunning = addOperationRunning,
@@ -112,7 +112,7 @@ class HomeLocalArchiveModel(
                 canPush = Loadable.Loading,
                 anySecondaryAvailable = false,
                 loading = true,
-                indexStatusText = OptionalLoadable.Loading,
+                indexStatus = OptionalLoadable.Loading,
                 addPushOperationRunning = false,
                 addOperationRunning = false,
                 isAssociated = isAssociated,

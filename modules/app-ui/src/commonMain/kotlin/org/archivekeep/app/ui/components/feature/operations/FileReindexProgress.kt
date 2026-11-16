@@ -5,9 +5,10 @@ import org.archivekeep.app.core.procedures.reindex.FileReindexProcedureSuperviso
 import org.archivekeep.app.ui.components.designsystem.dialog.LabelText
 import org.archivekeep.app.ui.components.designsystem.progress.ProgressRow
 import org.archivekeep.app.ui.components.designsystem.progress.ProgressRowList
+import org.archivekeep.app.ui.utils.filesAutoPluralTranslated
 import org.archivekeep.ui.resources.Res
+import org.archivekeep.ui.resources.dialog_reindex_reindexed
 import org.archivekeep.ui.resources.dialog_reindex_title
-import org.archivekeep.utils.text.filesAutoPlural
 import org.jetbrains.compose.resources.stringResource
 
 @Composable
@@ -19,7 +20,7 @@ fun FileReindexProgress(jobState: FileReindexProcedureSupervisor.JobState) {
         if (selectedFilesToReindex.isNotEmpty()) {
             ProgressRow(progress = {
                 jobState.reindexProgress.reindexedFiles.size / selectedFilesToReindex.size.toFloat()
-            }, "Reindexed ${jobState.reindexProgress.reindexedFiles.size} of ${filesAutoPlural(selectedFilesToReindex)}")
+            }, stringResource(Res.string.dialog_reindex_reindexed, jobState.reindexProgress.reindexedFiles.size, filesAutoPluralTranslated(selectedFilesToReindex)))
         }
     }
 }

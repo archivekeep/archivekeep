@@ -21,6 +21,8 @@ import androidx.compose.ui.unit.dp
 import org.archivekeep.app.ui.utils.Action
 import org.archivekeep.ui.resources.Res
 import org.archivekeep.ui.resources.common_loading_dots
+import org.archivekeep.ui.resources.common_more
+import org.archivekeep.ui.resources.common_more_actions
 import org.archivekeep.utils.loading.Loadable
 import org.archivekeep.utils.loading.isLoading
 import org.jetbrains.compose.resources.stringResource
@@ -66,15 +68,16 @@ fun SectionCardActionsRow(
                     contentAlignment = Alignment.BottomEnd,
                 ) {
                     var isDropdownExpanded by remember { mutableStateOf(false) }
+                    val moreActionsLabel = stringResource(Res.string.common_more_actions)
 
                     SectionCardSecondaryButton(
                         onClick = {
                             isDropdownExpanded = true
                         },
-                        text = "More",
+                        text = stringResource(Res.string.common_more),
                         modifier =
                             Modifier.semantics {
-                                contentDescription = "More actions"
+                                contentDescription = moreActionsLabel
                             },
                     )
 

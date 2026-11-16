@@ -5,9 +5,10 @@ import org.archivekeep.app.core.procedures.deletedcleanup.DeletedFilesCleanupPro
 import org.archivekeep.app.ui.components.designsystem.dialog.LabelText
 import org.archivekeep.app.ui.components.designsystem.progress.ProgressRow
 import org.archivekeep.app.ui.components.designsystem.progress.ProgressRowList
+import org.archivekeep.app.ui.utils.filesAutoPluralTranslated
 import org.archivekeep.ui.resources.Res
+import org.archivekeep.ui.resources.dialog_cleanup_removed
 import org.archivekeep.ui.resources.dialog_cleanup_title
-import org.archivekeep.utils.text.filesAutoPlural
 import org.jetbrains.compose.resources.stringResource
 
 @Composable
@@ -19,7 +20,7 @@ fun DeletedFilesCleanupProgress(jobState: DeletedFilesCleanupProcedureSupervisor
         if (selectedFilesToRemove.isNotEmpty()) {
             ProgressRow(progress = {
                 jobState.deletedFilesCleanupProgress.removedFiles.size / selectedFilesToRemove.size.toFloat()
-            }, "Removed ${jobState.deletedFilesCleanupProgress.removedFiles.size} of ${filesAutoPlural(selectedFilesToRemove)}")
+            }, stringResource(Res.string.dialog_cleanup_removed, jobState.deletedFilesCleanupProgress.removedFiles.size, filesAutoPluralTranslated(selectedFilesToRemove)))
         }
     }
 }

@@ -58,6 +58,9 @@
     <string name="common_in">in</string>
     <string name="common_reindex">Reindex</string>
     <string name="common_unassociate">Unassociate</string>
+    <string name="common_add_new_files">Add new files</string>
+    <string name="common_cleanup_deleted_files">Cleanup deleted files</string>
+    <string name="common_reindex_changed_files">Reindex changed files</string>
 
     <!-- Common progress states -->
     <string name="common_adding">Adding…</string>
@@ -159,6 +162,7 @@
     <string name="storage_dropdown_set_name">Set name</string>
     <string name="storage_dropdown_mark_as_local">Mark as local</string>
     <string name="storage_dropdown_mark_as_external">Mark as external</string>
+    <string name="storage_not_found">Storage not found</string>
 
     <!-- ==================== RELOCATION SYNC MODE ==================== -->
 
@@ -343,6 +347,11 @@
     <string name="dialog_sync_move_files">Move %1$s files.</string>
     <string name="dialog_sync_ignore_relocations">Ignore %1$s relocations.</string>
     <string name="dialog_sync_upload_files">Upload %1$s files.</string>
+    <string name="dialog_sync_duplicate_base_to_extra">duplicate %1$s to %2$s</string>
+    <string name="dialog_sync_duplicate_prefix">duplicate </string>
+    <string name="dialog_sync_deduplicate_prefix">deduplicate </string>
+    <string name="dialog_sync_deduplicate_connector"> to keep only </string>
+    <string name="dialog_sync_move_prefix">move </string>
 
     <!-- ==================== DIALOG: ASSOCIATE/PUSH REPO ==================== -->
 
@@ -440,10 +449,40 @@
     <!-- ==================== SYNC PROGRESS ==================== -->
 
     <string name="sync_remaining">remaining %1$s</string>
+    <string name="sync_remaining_format">%1$s [remaining %2$s]</string>
+
+    <!-- ==================== BYTE UNITS ==================== -->
+
+    <string name="byte_unit_tb">TB</string>
+    <string name="byte_unit_gb">GB</string>
+    <string name="byte_unit_mb">MB</string>
+    <string name="byte_unit_kb">KB</string>
+    <string name="byte_unit_b">B</string>
+
+    <!-- ==================== INDEX UPDATE ==================== -->
+
+    <string name="index_unindexed">unindexed </string>
 
     <!-- ==================== DELETED FILES CLEANUP ==================== -->
 
     <string name="cleanup_moved_or_renamed">Files may have been moved or renamed instead of removed.</string>
     <string name="cleanup_proceed_with_addition">It is recommended to proceed with addition of new/moved files first.</string>
+
+    <!-- ==================== PLURAL FILE COUNT ==================== -->
+
+    <string name="common_n_files_singular">1 %1$sfile</string>
+    <string name="common_n_files_plural">%1$d %2$sfiles</string>
+
+    <!-- ==================== REPOSITORY STATUS ==================== -->
+
+    <string name="common_unindexed_files">Unindexed %1$s</string>
+    <string name="home_index_status_with_unindexed">%1$d files, %2$d unindexed</string>
+    <string name="home_index_status">%1$d files</string>
+
+    <!-- ==================== SYNC PROGRESS ==================== -->
+
+    <string name="sync_replicated">Replicated %1$s of %2$s</string>
+    <string name="sync_copied">Copied %1$s of %2$s</string>
+    <string name="sync_relocated">Relocated %1$s of %2$s</string>
 
  </resources>
