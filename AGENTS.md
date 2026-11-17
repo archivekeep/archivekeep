@@ -76,3 +76,4 @@ The project is licensed under **GNU General Public License v3**. All new code mu
 ## Release preparation
 
 See `dev/prepare-new-release.md` for the step-by-step release workflow (changelog, version bump, Flatpak metainfo).
+See `dev/prepare-dev-for-next-release.md` for bumping to the next SNAPSHOT version after a release is published.
