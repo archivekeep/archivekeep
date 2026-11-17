@@ -16,9 +16,9 @@ jobs:
         architecture: [x86_64, aarch64]
         include:
           - architecture: x86_64
-            runner: ubuntu-24.04
+            runner: ubuntu-26.04
           - architecture: aarch64
-            runner: ubuntu-24.04-arm
+            runner: ubuntu-26.04-arm
       fail-fast: false
     runs-on: ${{ matrix.runner }}
     steps:
@@ -65,9 +65,9 @@ jobs:
         architecture: [x86_64, aarch64]
         include:
           - architecture: x86_64
-            runner: ubuntu-24.04
+            runner: ubuntu-26.04
           - architecture: aarch64
-            runner: ubuntu-24.04-arm
+            runner: ubuntu-26.04-arm
       fail-fast: false
     container:
       image: ghcr.io/flathub-infra/flatpak-github-actions:freedesktop-24.08
@@ -102,7 +102,7 @@ jobs:
 
   merge-sources:
     name: "Merge multi-arch Flatpak sources"
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
     needs:
       - flatpak-sources
     steps:
