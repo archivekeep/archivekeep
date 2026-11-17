@@ -17,17 +17,11 @@ import org.archivekeep.cli.utils.SignalInterruptCancellationException
 import org.archivekeep.cli.workingarchive.WorkingArchive
 import org.archivekeep.cli.workingarchive.openWorkingArchive
 import org.archivekeep.files.api.repository.Repo
-import org.archivekeep.files.api.repository.auth.BasicAuthCredentials
 import org.archivekeep.files.driver.filesystem.files.FileSystemRepositoryFactory
-import org.archivekeep.files.driver.grpc.Options
-import org.archivekeep.files.driver.grpc.grpcPrefix
-import org.archivekeep.files.driver.grpc.isNotAuthorized
-import org.archivekeep.files.driver.grpc.openGrpcArchive
 import picocli.CommandLine
 import picocli.CommandLine.Command
 import picocli.CommandLine.IExecutionExceptionHandler
 import picocli.CommandLine.Model
-import picocli.CommandLine.Option
 import picocli.CommandLine.Spec
 import sun.misc.Signal
 import java.io.InputStream
@@ -60,48 +54,14 @@ class MainCommand(
     @Spec
     lateinit var spec: Model.CommandSpec
 
-    @Option(
-        names = ["--insecure"],
-        description = ["allow insecure connection"],
-        scope = CommandLine.ScopeType.INHERIT,
-    )
-    var insecure: Boolean = false
-
     // used for ascii doctor
     internal constructor() : this(Path.of("."), EmptyCoroutineContext)
 
     suspend fun openCurrentArchive(): WorkingArchive = openWorkingArchive(workingDirectory)
 
-    suspend fun openOtherArchive(otherArchiveLocation: String): Repo {
-        if (otherArchiveLocation.startsWith(grpcPrefix)) {
-            val options =
-                Options(
-                    credentials = null,
-                    insecure = insecure,
-                )
-
-            try {
-                return openGrpcArchive(otherArchiveLocation, options)
-            } catch (e: Exception) {
-                if (e.isNotAuthorized()) {
-                    val username = askForText("Please, enter username")
-                    val password = askForText("Please, enter password")
-
-                    val optionsWithCredentials =
-                        options.copy(
-                            credentials = BasicAuthCredentials(username, password),
-                        )
-
-                    return openGrpcArchive(otherArchiveLocation, optionsWithCredentials)
-                } else {
-                    throw e
-                }
-            }
-        }
-
-        return FileSystemRepositoryFactory.openPlainRepositoryOrNull(workingDirectory.resolve(otherArchiveLocation))
+    suspend fun openOtherArchive(otherArchiveLocation: String): Repo =
+        FileSystemRepositoryFactory.openPlainRepositoryOrNull(workingDirectory.resolve(otherArchiveLocation))
             ?: throw RuntimeException("not an archive")
-    }
 
     val out: PrintWriter
         get() = spec.commandLine().out

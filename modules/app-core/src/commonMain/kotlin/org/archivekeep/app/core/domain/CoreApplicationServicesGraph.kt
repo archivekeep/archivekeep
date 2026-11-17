@@ -5,7 +5,6 @@ import dev.zacsweers.metro.Provides
 import kotlinx.coroutines.CoroutineScope
 import org.archivekeep.app.core.domain.storages.StorageDriver
 import org.archivekeep.app.core.persistence.credentials.CredentialsStore
-import org.archivekeep.app.core.persistence.drivers.grpc.GRPCStorageDriver
 import org.archivekeep.app.core.persistence.drivers.s3.S3StorageDriver
 
 interface CoreApplicationServicesGraph : CoreApplicationServices {
@@ -15,11 +14,8 @@ interface CoreApplicationServicesGraph : CoreApplicationServices {
         scope: CoroutineScope,
         credentialsStore: CredentialsStore,
     ): List<StorageDriver> =
-        (
-            listOf(
-                GRPCStorageDriver(scope, credentialsStore),
-                S3StorageDriver(scope, credentialsStore),
-            )
+        listOf(
+            S3StorageDriver(scope, credentialsStore),
         )
 
     @Provides

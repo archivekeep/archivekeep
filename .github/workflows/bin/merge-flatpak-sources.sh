@@ -20,7 +20,6 @@ process_list gradle-sources-app-ui
 process_list gradle-sources-cli
 process_list gradle-sources-files
 process_list gradle-sources-files-driver-filesystem
-process_list gradle-sources-files-driver-grpc
 process_list gradle-sources-files-driver-s3
 process_list gradle-sources-root
 

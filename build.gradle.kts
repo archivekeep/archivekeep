@@ -11,7 +11,6 @@ plugins {
     alias(libs.plugins.compose) apply false
     alias(libs.plugins.flatpak.gradle.generator)
     alias(libs.plugins.svg2ico) apply false
-    alias(libs.plugins.protobuf) apply false
     alias(libs.plugins.kotlinx.protobuf) apply false
     alias(libs.plugins.ksp) apply false
     alias(libs.plugins.ktlint) apply false
@@ -136,10 +135,6 @@ allprojects {
                 "annotationProcessor",
                 "compileClasspath",
                 "runtimeClasspath",
-                "protobuf",
-                "protobufToolsLocator_grpc",
-                "protobufToolsLocator_grpckt",
-                "protobufToolsLocator_protoc",
                 "kotlinxProtobufProtoc",
                 "kotlinxProtobufProtoPath",
                 "kotlinxProtobufCommonMainProtoPath",

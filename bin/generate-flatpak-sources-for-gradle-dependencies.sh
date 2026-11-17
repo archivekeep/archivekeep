@@ -11,7 +11,6 @@ cp ./modules/app-ui/build/flatpak/dependencies-sources.json ./distribution/flatp
 cp ./modules/cli/build/flatpak/dependencies-sources.json ./distribution/flatpak/gradle-sources-cli.json
 cp ./modules/files/build/flatpak/dependencies-sources.json ./distribution/flatpak/gradle-sources-files.json
 cp ./modules/files-driver-filesystem/build/flatpak/dependencies-sources.json ./distribution/flatpak/gradle-sources-files-driver-filesystem.json
-cp ./modules/files-driver-grpc/build/flatpak/dependencies-sources.json ./distribution/flatpak/gradle-sources-files-driver-grpc.json
 cp ./modules/files-driver-s3/build/flatpak/dependencies-sources.json ./distribution/flatpak/gradle-sources-files-driver-s3.json
 
 jq --slurp 'reduce .[] as $i ([]; . + ($i - .))' ./distribution/flatpak/gradle-sources-*.json > ./distribution/flatpak/gradle-sources.json

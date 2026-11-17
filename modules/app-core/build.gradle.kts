@@ -24,7 +24,6 @@ kotlin {
             dependencies {
                 api(project(":files"))
                 api(project(":files-driver-filesystem"))
-                api(project(":files-driver-grpc"))
                 api(project(":files-driver-s3"))
 
                 implementation(libs.kotlinx.coroutines.core)

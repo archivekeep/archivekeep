@@ -8,13 +8,10 @@ material3 = "1.12.0-alpha03"
 
 metro = "1.5.2"
 
-grpc = "1.85.1"
-grpc-kotlin = "1.5.0"
 ksp = "2.3.7"
 oshi = "7.7.3"
 picocli = "4.7.7"
 kotlinx-protobuf = "0.7.0-beta.1"
-protobuf = "0.10.1"
 protobuf-kotlin = "4.36.2"
 room = "2.8.5"
 sqlite = "2.7.1"
@@ -48,13 +45,6 @@ compose-ui-test-junit4-desktop = { module = "org.jetbrains.compose.ui:ui-test-ju
 androidx-sqlite-bundled = { group = "androidx.sqlite", name = "sqlite-bundled", version.ref = "sqlite" }
 androidx-room-compiler = { group = "androidx.room", name = "room-compiler", version.ref = "room" }
 androidx-room-runtime = { group = "androidx.room", name = "room-runtime", version.ref = "room" }
-
-grpc-protobuf-lite = { group = "io.grpc", name = "grpc-protobuf-lite", version.ref = "grpc" }
-grpc-core = { group = "io.grpc", name = "grpc-core", version.ref = "grpc" }
-grpc-stub = { group = "io.grpc", name = "grpc-stub", version.ref = "grpc" }
-grpc-okhttp = { group = "io.grpc", name = "grpc-okhttp", version.ref = "grpc" }
-
-grpc-kotlin-stub = { group = "io.grpc", name = "grpc-kotlin-stub", version.ref = "grpc-kotlin" }
 
 protobuf-kotlin-lite = { group = "com.google.protobuf", name = "protobuf-kotlin-lite", version.ref = "protobuf-kotlin" }
 
@@ -107,7 +97,6 @@ ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
 metro = { id = "dev.zacsweers.metro", version.ref = "metro" }
 
 kotlinx-protobuf = { id = "kim.jade.kotlinx-protobuf", version.ref = "kotlinx-protobuf" }
-protobuf = { id = "com.google.protobuf", version.ref = "protobuf" }
 
 svg2ico = { id = "com.gitlab.svg2ico", version.ref = "svg2ico" }
 

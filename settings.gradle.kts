@@ -14,7 +14,6 @@ include(
     ":utils",
     ":files",
     ":files-driver-filesystem",
-    ":files-driver-grpc",
     ":files-driver-s3",
     ":files-test",
     ":cli",
@@ -27,7 +26,6 @@ include(
 project(":utils").projectDir = file("modules/utils")
 project(":files").projectDir = file("modules/files")
 project(":files-driver-filesystem").projectDir = file("modules/files-driver-filesystem")
-project(":files-driver-grpc").projectDir = file("modules/files-driver-grpc")
 project(":files-driver-s3").projectDir = file("modules/files-driver-s3")
 project(":files-test").projectDir = file("modules/files-test")
 project(":cli").projectDir = file("modules/cli")
