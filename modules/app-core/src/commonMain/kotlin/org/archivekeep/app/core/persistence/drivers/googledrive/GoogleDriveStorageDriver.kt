@@ -9,15 +9,12 @@ import kotlinx.coroutines.flow.emitAll
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.flowOn
-import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
+import org.archivekeep.app.core.api.repository.location.GoogleDriveCredentialsJsonRequest
 import org.archivekeep.app.core.api.repository.location.RepositoryLocationAccessor
 import org.archivekeep.app.core.api.repository.location.RepositoryLocationContentsState
-import org.archivekeep.app.core.api.repository.location.UserCredentialsInputType
-import org.archivekeep.app.core.api.repository.location.UserCredentialsRequest
-import org.archivekeep.app.core.domain.repositories.UnlockOptions
 import org.archivekeep.app.core.domain.storages.NeedsUnlock
 import org.archivekeep.app.core.domain.storages.Storage
 import org.archivekeep.app.core.domain.storages.StorageConnection
@@ -27,7 +24,6 @@ import org.archivekeep.app.core.persistence.credentials.CredentialsStore
 import org.archivekeep.app.core.utils.identifiers.RepositoryURI
 import org.archivekeep.app.core.utils.identifiers.StorageURI
 import org.archivekeep.files.api.repository.Repo
-import org.archivekeep.files.api.repository.auth.BasicAuthCredentials
 import org.archivekeep.files.driver.googledrive.GoogleDriveLocationNotInitializedAsRepositoryException
 import org.archivekeep.files.driver.googledrive.GoogleDriveRepository
 import org.archivekeep.utils.loading.Loadable
@@ -89,30 +85,13 @@ class GoogleDriveStorageDriver internal constructor(
                 },
             )
         } catch (_: GoogleDriveLocationNotInitializedAsRepositoryException) {
-            InnerState.LocationCanBeInitialized { permanentPreserve ->
+            InnerState.LocationCanBeInitialized { _ ->
                 withContext(Dispatchers.IO) {
                     GoogleDriveRepository.create(authProvider.createDriveClient(credentialsJson), rootFolderId).close()
                 }
-                preserveCredentials(
-                    RepositoryURI(GoogleDriveRepositoryURIData.ID, rootFolderId),
-                    // TODO: not basic auth credentials
-                    BasicAuthCredentials(username = "", password = credentialsJson),
-                    permanentPreserve,
-                )
+                credentialsStore.saveGoogleDriveCredentials(credentialsJson)
             }
         }
-
-    private suspend fun preserveCredentials(
-        uri: RepositoryURI,
-        credentials: BasicAuthCredentials,
-        permanentPreserve: Boolean,
-    ) {
-        if (permanentPreserve) {
-            credentialsStore.saveRepositoryCredentials(uri, credentials)
-        } else {
-            credentialsStore.inMemoryCredentials.update { existing -> existing + (uri to credentials) }
-        }
-    }
 
     inner class RepositoryLocationAccessorImpl(
         uri: RepositoryURI,
@@ -123,31 +102,22 @@ class GoogleDriveStorageDriver internal constructor(
                 val openLock = Mutex()
                 val repoData = uri.typedRepoURIData as GoogleDriveRepositoryURIData
 
-                suspend fun tryOpen(
-                    // TODO: not basic auth credentials
-                    credentials: BasicAuthCredentials,
-                    unlockOptions: UnlockOptions,
-                ) {
+                suspend fun tryOpen(credentialsJson: String) {
                     openLock.withLock {
                         if (state.value is LoadedAvailable) {
                             return
                         }
 
-                        val opened = open(repoData.rootFolderId, credentials.password)
-
-                        if (unlockOptions.preserveCredentials) {
-                            preserveCredentials(uri, credentials, unlockOptions.permanentCredentialsPreserve)
-                        }
-
+                        val opened = open(repoData.rootFolderId, credentialsJson)
+                        credentialsStore.saveGoogleDriveCredentials(credentialsJson)
                         state.value = LoadedAvailable(opened)
                     }
                 }
 
                 state.value =
                     NeedsUnlock(
-                        UserCredentialsRequest(
-                            tryOpen = ::tryOpen,
-                            inputType = UserCredentialsInputType.GOOGLE_DRIVE_CREDENTIALS_JSON,
+                        GoogleDriveCredentialsJsonRequest(
+                            tryOpen = { credentialsJson, _ -> tryOpen(credentialsJson) },
                         ),
                     )
 

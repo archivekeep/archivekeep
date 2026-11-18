@@ -33,6 +33,7 @@ ArchiveKeep is a **Kotlin Multiplatform** application for reliable file archivat
   - `chore:` — maintenance tasks, dependencies, build config
 - **Wording rules**:
   - Use plain language — avoid technical terms like "refactor," "optimize," "implement," or internal class/method names.
+  - Describe the actual change, not existing behavior that was already present before it.
   - Prefer direct phrasing: "to show X" or "to allow X" over wordier alternatives like "to let users see X."
   - Include temporal qualifiers when relevant: "live," "instant," "real-time" — they convey important behavioral differences.
   - Name the feature plainly if it has a user-visible name (e.g., "quick-add," "quick scan") — but don't use backticks or code formatting.
@@ -50,6 +51,7 @@ ArchiveKeep is a **Kotlin Multiplatform** application for reliable file archivat
 - **Examples**:
   - ✅ `feat: add live performance tab to show where time is spent during repository operations`
   - ✅ `feat: add quick-add to let users add new files to the index without waiting for the full scan`
+  - ✅ `feat: share Google Drive login across repositories to avoid signing in for each one`
   - ✅ `fix: prevent duplicate files from being added when repository path changes`
   - ✅ `ui: replace operation progress tabs with button-style design to improve visual consistency across the app`
   - ❌ `refactor: replace operation progress tabs with button-style design` — visible change, not a refactor
@@ -57,6 +59,7 @@ ArchiveKeep is a **Kotlin Multiplatform** application for reliable file archivat
   - ❌ `feat: implement startImmediate() in IndexUpdateProcedureSupervisor`
   - ❌ `fix: handle edge case in discovery result processing`
   - ❌ `feat: add performance tab showing performances of tracked internal operations`
+  - ❌ `feat: save Google Drive login securely for use across repositories` — secure saving already existed; sharing is the change
 - **Validation**: After drafting, ask: "Would someone who doesn't know the codebase understand what changed and why it matters?"
 
 ---

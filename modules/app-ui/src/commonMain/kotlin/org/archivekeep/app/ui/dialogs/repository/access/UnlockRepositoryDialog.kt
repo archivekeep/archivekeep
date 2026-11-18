@@ -32,8 +32,8 @@ import compose.icons.tablericons.Lock
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.first
+import org.archivekeep.app.core.api.repository.location.GoogleDriveCredentialsJsonRequest
 import org.archivekeep.app.core.api.repository.location.PasswordRequest
-import org.archivekeep.app.core.api.repository.location.UserCredentialsInputType
 import org.archivekeep.app.core.api.repository.location.UserCredentialsRequest
 import org.archivekeep.app.core.domain.repositories.Repository
 import org.archivekeep.app.core.domain.repositories.RepositoryInformation
@@ -96,6 +96,7 @@ class UnlockRepositoryDialog(
         val passwordState: MutableState<String>,
         val rememberPasswordState: MutableState<Boolean>,
         val basicAuthCredentialsState: MutableState<BasicAuthCredentials?>,
+        val googleDriveCredentialsJsonState: MutableState<String>,
         val unlockOptionsState: MutableState<UnlockOptions>,
         val onClose: () -> Unit,
     ) {
@@ -107,6 +108,7 @@ class UnlockRepositoryDialog(
         var rememberPassword by rememberPasswordState
 
         var basicAuthCredentials by basicAuthCredentialsState
+        var googleDriveCredentialsJson by googleDriveCredentialsJsonState
         var unlockOptions by unlockOptionsState
 
         val action by launchable.asAction(
@@ -115,12 +117,11 @@ class UnlockRepositoryDialog(
                 when (val request = accessState.asUnlockRequest()) {
                     is UserCredentialsRequest -> {
                         basicAuthCredentials?.let {
-                            when (request.inputType) {
-                                UserCredentialsInputType.GOOGLE_DRIVE_CREDENTIALS_JSON -> it.password.isNotBlank()
-                                else -> it.username.isNotBlank() && it.password.isNotBlank()
-                            }
+                            it.username.isNotBlank() && it.password.isNotBlank()
                         } ?: false
                     }
+
+                    is GoogleDriveCredentialsJsonRequest -> googleDriveCredentialsJson.isNotBlank()
 
                     is PasswordRequest -> {
                         password.isNotBlank()
@@ -154,6 +155,7 @@ class UnlockRepositoryDialog(
         val rememberPasswordState = mutableStateOf(false)
 
         val basicAuthCredentialsState = mutableStateOf<BasicAuthCredentials?>(null)
+        val googleDriveCredentialsJsonState = mutableStateOf("")
 
         val unlockOptionsState =
             mutableStateOf(
@@ -182,6 +184,14 @@ class UnlockRepositoryDialog(
                             basicAuthCredentialsState.value!!,
                             unlockOptions,
                         )
+                    }
+
+                    is GoogleDriveCredentialsJsonRequest -> {
+                        if (!walletOperationLaunchers.ensureWalletForWrite()) {
+                            throw RuntimeException("Wallet not available")
+                        }
+
+                        request.tryOpen(googleDriveCredentialsJsonState.value, unlockOptions)
                     }
 
                     is PasswordRequest -> {
@@ -233,6 +243,7 @@ class UnlockRepositoryDialog(
                     passwordState = vm.passwordState,
                     rememberPasswordState = vm.rememberPasswordState,
                     basicAuthCredentialsState = vm.basicAuthCredentialsState,
+                    googleDriveCredentialsJsonState = vm.googleDriveCredentialsJsonState,
                     unlockOptionsState = vm.unlockOptionsState,
                     onClose = vm::onClose,
                 )
@@ -314,11 +325,11 @@ class UnlockRepositoryDialog(
                         stringResource(Res.string.dialog_unlock_enter_credentials),
                         modifier = Modifier.padding(bottom = 8.dp),
                     )
-                    if (unlockRequest.inputType == UserCredentialsInputType.GOOGLE_DRIVE_CREDENTIALS_JSON) {
+                    if (unlockRequest is GoogleDriveCredentialsJsonRequest) {
                         OutlinedTextField(
-                            state.basicAuthCredentials?.password ?: "",
+                            state.googleDriveCredentialsJson,
                             onValueChange = {
-                                state.basicAuthCredentials = BasicAuthCredentials(username = "", password = it)
+                                state.googleDriveCredentialsJson = it
                             },
                             modifier = Modifier.focusRequester(passwordFocusRequester),
                             visualTransformation = PasswordVisualTransformation(),
@@ -376,16 +387,18 @@ class UnlockRepositoryDialog(
                         )
                     }
                     Spacer(Modifier.height(12.dp))
-                    CheckboxWithText(
-                        state.unlockOptions.permanentCredentialsPreserve,
-                        onValueChange = {
-                            state.unlockOptions =
-                                state.unlockOptions.copy(
-                                    permanentCredentialsPreserve = it,
-                                )
-                        },
-                        text = stringResource(Res.string.common_remember_session),
-                    )
+                    if (unlockRequest !is GoogleDriveCredentialsJsonRequest) {
+                        CheckboxWithText(
+                            state.unlockOptions.permanentCredentialsPreserve,
+                            onValueChange = {
+                                state.unlockOptions =
+                                    state.unlockOptions.copy(
+                                        permanentCredentialsPreserve = it,
+                                    )
+                            },
+                            text = stringResource(Res.string.common_remember_session),
+                        )
+                    }
                 }
 
                 is PasswordRequest -> {

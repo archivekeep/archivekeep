@@ -3,6 +3,7 @@ package org.archivekeep.app.core.operations
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.transformWhile
 import kotlinx.coroutines.flow.update
+import org.archivekeep.app.core.api.repository.location.GoogleDriveCredentialsJsonRequest
 import org.archivekeep.app.core.api.repository.location.RepositoryLocationContentsState
 import org.archivekeep.app.core.api.repository.location.UserCredentialsRequest
 import org.archivekeep.app.core.domain.repositories.RepositoryService
@@ -26,6 +27,18 @@ class AddRemoteRepositoryUseCaseImpl(
         uri: RepositoryURI,
         credentials: BasicAuthCredentials?,
         rememberCredentials: Boolean,
+    ): AddRemoteRepositoryOutcome = addRemote(uri, credentials, rememberCredentials, null)
+
+    override suspend fun addGoogleDrive(
+        uri: RepositoryURI,
+        credentialsJson: String,
+    ): AddRemoteRepositoryOutcome = addRemote(uri, null, false, credentialsJson)
+
+    private suspend fun addRemote(
+        uri: RepositoryURI,
+        credentials: BasicAuthCredentials?,
+        rememberCredentials: Boolean,
+        googleDriveCredentialsJson: String?,
     ): AddRemoteRepositoryOutcome {
         val driver = drivers.getDriverForURI(uri) ?: throw RuntimeException("Driver unsupported")
         val location = driver.openLocation(uri)
@@ -44,14 +57,23 @@ class AddRemoteRepositoryUseCaseImpl(
 
                         is OptionalLoadable.NotAvailable -> {
                             if (it is NeedsUnlock) {
-                                when (it.unlockRequest) {
+                                when (val unlockRequest = it.unlockRequest) {
                                     is UserCredentialsRequest -> {
                                         if (credentials != null) {
                                             // TODO: move out this
-                                            it.unlockRequest.tryOpen(
+                                            unlockRequest.tryOpen(
                                                 credentials,
                                                 UnlockOptions(rememberCredentials, rememberCredentials),
                                             )
+                                            true
+                                        } else {
+                                            throw RequiresCredentialsException()
+                                        }
+                                    }
+
+                                    is GoogleDriveCredentialsJsonRequest -> {
+                                        if (googleDriveCredentialsJson != null) {
+                                            unlockRequest.tryOpen(googleDriveCredentialsJson, UnlockOptions(false, false))
                                             true
                                         } else {
                                             throw RequiresCredentialsException()

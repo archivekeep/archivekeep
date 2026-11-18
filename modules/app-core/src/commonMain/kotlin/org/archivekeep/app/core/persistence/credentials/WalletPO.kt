@@ -14,4 +14,13 @@ data class WalletPO(
     val repositoryCredentials: Set<CredentialsInProtectedWalletDataStore.PersistedRepositoryCredentials>,
     @EncodeDefault
     val repositorySecrets: Map<RepositoryURI, Map<RepositorySecretType, JsonElement>> = emptyMap(),
+    @EncodeDefault
+    val googleDriveCredentialEntries: Map<String, GoogleDriveCredentialPO> = emptyMap(),
+    @EncodeDefault
+    val googleDriveDefaultCredentialId: String? = null,
+)
+
+@Serializable
+data class GoogleDriveCredentialPO(
+    val credentialsJson: String,
 )

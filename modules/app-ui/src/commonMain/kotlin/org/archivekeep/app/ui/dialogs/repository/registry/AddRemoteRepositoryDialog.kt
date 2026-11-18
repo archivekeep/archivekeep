@@ -129,7 +129,7 @@ class AddRemoteRepositoryDialog : Dialog {
             override fun canLaunch(): Boolean = rootFolderId.value.isNotBlank() && credentialsJson.value.isNotBlank()
 
             override suspend fun execute(useCase: AddRemoteRepositoryUseCase) =
-                useCase.addGoogleDrive(rootFolderId.value.trim(), credentialsJson.value, rememberCredentials.value)
+                useCase.addGoogleDrive(rootFolderId.value.trim(), credentialsJson.value)
         }
 
         class Other(
@@ -185,7 +185,7 @@ class AddRemoteRepositoryDialog : Dialog {
             addLaunchGuard.launch {
                 addOutcome.value = null
 
-                if (input.currentInput.value.rememberCredentials.value) {
+                if (input.currentInput.value is Input.GoogleDrive || input.currentInput.value.rememberCredentials.value) {
                     if (!walletOperationLaunchers.ensureWalletForWrite()) {
                         throw RuntimeException("Wallet not available")
                     }
@@ -197,7 +197,7 @@ class AddRemoteRepositoryDialog : Dialog {
 
         fun launchCreate() {
             createLaunchGuard.launch {
-                if (input.currentInput.value.rememberCredentials.value) {
+                if (input.currentInput.value is Input.GoogleDrive || input.currentInput.value.rememberCredentials.value) {
                     if (!walletOperationLaunchers.ensureWalletForWrite()) {
                         throw RuntimeException("Wallet not available")
                     }

@@ -10,6 +10,10 @@ import org.archivekeep.utils.loading.optional.OptionalLoadable
 interface CredentialsStore {
     val inMemoryCredentials: MutableStateFlow<Map<RepositoryURI, BasicAuthCredentials>>
 
+    fun getGoogleDriveCredentialsFlow(): Flow<OptionalLoadable<String?>>
+
+    suspend fun saveGoogleDriveCredentials(credentialsJson: String)
+
     fun getRepositorySecretsFlow(uri: RepositoryURI): Flow<OptionalLoadable<Map<RepositorySecretType, JsonElement>>>
 
     suspend fun saveRepositorySecret(

@@ -160,5 +160,36 @@ private suspend fun FlowCollector<OptionalLoadable<Repo>>.autoUnlock(
                 println("Auto-open failed: $e")
             }
         }
+
+        is GoogleDriveCredentialsJsonRequest -> {
+            var emittedUnlockRequest = false
+            credentialsStore
+                .getGoogleDriveCredentialsFlow()
+                .conflate()
+                .collect { sharedCredentials ->
+                    when (sharedCredentials) {
+                        is LoadedAvailable -> {
+                            val credentialsJson = sharedCredentials.value
+                            if (credentialsJson != null) {
+                                try {
+                                    unlockRequest.tryOpen(credentialsJson, UnlockOptions(false, false))
+                                    return@collect
+                                } catch (e: CancellationException) {
+                                    throw e
+                                } catch (e: Throwable) {
+                                    println("Auto-open with Google Drive credentials failed: $e")
+                                }
+                            }
+                        }
+
+                        else -> {}
+                    }
+
+                    if (!emittedUnlockRequest) {
+                        emit(repoLoadable)
+                        emittedUnlockRequest = true
+                    }
+                }
+        }
     }
 }

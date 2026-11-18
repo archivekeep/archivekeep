@@ -13,6 +13,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -22,6 +23,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.launch
+import org.archivekeep.app.core.persistence.credentials.WalletPO
 import org.archivekeep.app.ui.components.designsystem.elements.InfoAlert
 import org.archivekeep.app.ui.components.designsystem.input.TextField
 import org.archivekeep.app.ui.components.feature.errors.AutomaticErrorMessage
@@ -30,13 +32,11 @@ import org.archivekeep.app.ui.dialogs.repository.registry.googledrive.createGoog
 import org.archivekeep.app.ui.domain.wiring.LocalApplicationServices
 import org.archivekeep.app.ui.domain.wiring.WalletOperationLaunchers
 import org.archivekeep.ui.resources.Res
-import org.archivekeep.ui.resources.common_remember_credentials
 import org.archivekeep.ui.resources.dialog_unlock_wallet_open
 import org.archivekeep.ui.resources.googledrive_back_to_sign_in
 import org.archivekeep.ui.resources.googledrive_credential_json
 import org.archivekeep.ui.resources.googledrive_credential_json_info
 import org.archivekeep.ui.resources.googledrive_credential_json_placeholder
-import org.archivekeep.ui.resources.googledrive_dont_save_credentials
 import org.archivekeep.ui.resources.googledrive_folder_and_auth
 import org.archivekeep.ui.resources.googledrive_pick_folder
 import org.archivekeep.ui.resources.googledrive_root_folder_id
@@ -48,7 +48,6 @@ import org.archivekeep.ui.resources.googledrive_signing_in
 import org.archivekeep.ui.resources.googledrive_use_credentials_file
 import org.archivekeep.ui.resources.googledrive_waiting_for_browser
 import org.archivekeep.ui.resources.googledrive_wallet_unlock_needed
-import org.archivekeep.utils.datastore.passwordprotected.ProtectedDataStore
 import org.archivekeep.utils.loading.optional.OptionalLoadable
 import org.jetbrains.compose.resources.stringResource
 
@@ -65,13 +64,30 @@ fun GoogleDriveForm(
     var authError by remember { mutableStateOf<Throwable?>(null) }
     val coroutineScope = rememberCoroutineScope()
     val appServices = LocalApplicationServices.current
+    val walletData = appServices.walletDataStore.data.collectAsState(initial = null).value
+    val walletIsOpen = walletData is OptionalLoadable.LoadedAvailable
+    val sharedCredentials = appServices.credentialsStore.getGoogleDriveCredentialsFlow().collectAsState(initial = null).value
+
+    LaunchedEffect(sharedCredentials) {
+        if (input.credentialsJson.value.isBlank() && sharedCredentials is OptionalLoadable.LoadedAvailable) {
+            input.credentialsJson.value = sharedCredentials.value.orEmpty()
+        }
+    }
 
     val launcher = createGoogleDriveAuthLauncher { result ->
         when (result) {
             is GoogleDriveAuthResult.Success -> {
-                input.credentialsJson.value = result.credentialsJson
-                isSigningIn = false
-                showFolderPicker = true
+                coroutineScope.launch {
+                    try {
+                        appServices.credentialsStore.saveGoogleDriveCredentials(result.credentialsJson)
+                        input.credentialsJson.value = result.credentialsJson
+                        showFolderPicker = true
+                    } catch (e: Throwable) {
+                        authError = e
+                    } finally {
+                        isSigningIn = false
+                    }
+                }
             }
 
             is GoogleDriveAuthResult.Failure -> {
@@ -85,10 +101,6 @@ fun GoogleDriveForm(
         }
     }
     val hasAuth = launcher != null || onOAuthSignIn != null
-
-    if (hasAuth && !showManualCredentials && !input.rememberCredentials.value) {
-        input.rememberCredentials.value = true
-    }
 
     Text(stringResource(Res.string.googledrive_folder_and_auth))
     Spacer(Modifier.height(4.dp))
@@ -132,9 +144,20 @@ fun GoogleDriveForm(
                     onClick = {
                         isSigningIn = true
                         authError = null
-                        launcher()
+                        coroutineScope.launch {
+                            try {
+                                if (!walletOperationLaunchers.ensureWalletForWrite()) {
+                                    isSigningIn = false
+                                    return@launch
+                                }
+                                launcher()
+                            } catch (e: Throwable) {
+                                authError = e
+                                isSigningIn = false
+                            }
+                        }
                     },
-                    enabled = isEditable && !isSigningIn,
+                    enabled = isEditable && !isSigningIn && walletIsOpen,
                     modifier = Modifier.fillMaxWidth(),
                 ) {
                     if (isSigningIn) {
@@ -157,7 +180,11 @@ fun GoogleDriveForm(
                         authError = null
                         coroutineScope.launch {
                             try {
+                                if (!walletOperationLaunchers.ensureWalletForWrite()) {
+                                    return@launch
+                                }
                                 val credentialsJson = onOAuthSignIn()
+                                appServices.credentialsStore.saveGoogleDriveCredentials(credentialsJson)
                                 input.credentialsJson.value = credentialsJson
                             } catch (e: Throwable) {
                                 authError = e
@@ -166,7 +193,7 @@ fun GoogleDriveForm(
                             }
                         }
                     },
-                    enabled = isEditable && !isSigningIn,
+                    enabled = isEditable && !isSigningIn && walletIsOpen,
                     modifier = Modifier.fillMaxWidth(),
                 ) {
                     if (isSigningIn) {
@@ -200,12 +227,6 @@ fun GoogleDriveForm(
             }
 
             Spacer(Modifier.height(8.dp))
-            GoogleDriveWalletAlert(
-                walletDataStore = appServices.walletDataStore,
-                walletOperationLaunchers = walletOperationLaunchers,
-                rememberCredentials = input.rememberCredentials,
-                isEditable = isEditable,
-            )
         }
     } else if (!hasAuth) {
         Text(
@@ -213,6 +234,12 @@ fun GoogleDriveForm(
             modifier = Modifier.padding(bottom = 4.dp),
         )
     }
+
+    GoogleDriveWalletAlert(
+        walletData = walletData,
+        walletOperationLaunchers = walletOperationLaunchers,
+        isEditable = isEditable,
+    )
 
     if (showManualCredentials || !hasAuth) {
         Spacer(Modifier.height(8.dp))
@@ -241,50 +268,30 @@ fun GoogleDriveForm(
         }
     }
 
-    Spacer(Modifier.height(4.dp))
-    org.archivekeep.app.ui.components.designsystem.input.CheckboxWithText(
-        input.rememberCredentials.value,
-        onValueChange = { input.rememberCredentials.value = it },
-        text = stringResource(Res.string.common_remember_credentials),
-    )
-
     Spacer(Modifier.height(12.dp))
 }
 
 @Composable
 private fun GoogleDriveWalletAlert(
-    walletDataStore: ProtectedDataStore<WalletPO>,
+    walletData: OptionalLoadable<WalletPO>?,
     walletOperationLaunchers: WalletOperationLaunchers,
-    rememberCredentials: androidx.compose.runtime.MutableState<Boolean>,
     isEditable: Boolean,
 ) {
-    if (!rememberCredentials.value) return
-
-    val walletData = walletDataStore.data.collectAsState(initial = null).value
-
-    if (walletData is OptionalLoadable.NotAvailable) {
+    if (walletData !is OptionalLoadable.LoadedAvailable) {
+        val coroutineScope = rememberCoroutineScope()
         InfoAlert {
             Text(stringResource(Res.string.googledrive_wallet_unlock_needed))
             Spacer(Modifier.height(8.dp))
             TextButton(
                 onClick = {
-                    walletOperationLaunchers.openUnlockWallet(null)
+                    coroutineScope.launch {
+                        walletOperationLaunchers.ensureWalletForWrite()
+                    }
                 },
                 enabled = isEditable,
             ) {
                 Text(stringResource(Res.string.dialog_unlock_wallet_open))
             }
-            Spacer(Modifier.height(4.dp))
-            TextButton(
-                onClick = {
-                    rememberCredentials.value = false
-                },
-                enabled = isEditable,
-            ) {
-                Text(stringResource(Res.string.googledrive_dont_save_credentials))
-            }
         }
     }
 }
-
-private typealias WalletPO = org.archivekeep.app.core.persistence.credentials.WalletPO

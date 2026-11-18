@@ -20,6 +20,11 @@ interface AddRemoteRepositoryUseCase {
         credentials: BasicAuthCredentials?,
         rememberCredentials: Boolean,
     ): AddRemoteRepositoryOutcome
+
+    suspend fun addGoogleDrive(
+        uri: RepositoryURI,
+        credentialsJson: String,
+    ): AddRemoteRepositoryOutcome = this(uri, null, false)
 }
 
 suspend fun AddRemoteRepositoryUseCase.addS3(
@@ -38,11 +43,4 @@ suspend fun AddRemoteRepositoryUseCase.addS3(
 suspend fun AddRemoteRepositoryUseCase.addGoogleDrive(
     rootFolderId: String,
     credentialsJson: String,
-    rememberCredentials: Boolean,
-): AddRemoteRepositoryOutcome =
-    this(
-        GoogleDriveRepositoryURIData(rootFolderId).toURI(),
-        // TODO: not basic auth credentials
-        BasicAuthCredentials(username = "", password = credentialsJson),
-        rememberCredentials,
-    )
+): AddRemoteRepositoryOutcome = addGoogleDrive(GoogleDriveRepositoryURIData(rootFolderId).toURI(), credentialsJson)

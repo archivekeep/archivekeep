@@ -15,6 +15,7 @@ import org.archivekeep.files.api.repository.auth.BasicAuthCredentials
 import org.archivekeep.utils.datastore.passwordprotected.ProtectedDataStore
 import org.archivekeep.utils.loading.optional.OptionalLoadable
 import org.archivekeep.utils.loading.optional.mapLoadedData
+import java.util.UUID
 
 @Inject
 @SingleIn(AppScope::class)
@@ -30,6 +31,11 @@ class CredentialsInProtectedWalletDataStore(
             .mapLoadedData {
                 it.repositorySecrets[uri] ?: emptyMap()
             }
+
+    override fun getGoogleDriveCredentialsFlow(): Flow<OptionalLoadable<String?>> =
+        datastore.data.mapLoadedData { wallet ->
+            wallet.googleDriveDefaultCredentialId?.let(wallet.googleDriveCredentialEntries::get)?.credentialsJson
+        }
 
     override suspend fun saveRepositorySecret(
         repositoryURI: RepositoryURI,
@@ -72,6 +78,29 @@ class CredentialsInProtectedWalletDataStore(
                     ),
                 )
         }
+    }
+
+    override suspend fun saveGoogleDriveCredentials(credentialsJson: String) {
+        datastore.updateData {
+            val credentialEntries = it.googleDriveCredentialEntries
+            val credentialId =
+                it.googleDriveDefaultCredentialId
+                    ?.takeIf { id -> id in credentialEntries }
+                    ?: newGoogleDriveCredentialId(credentialEntries.keys)
+
+            it.copy(
+                googleDriveCredentialEntries = credentialEntries + (credentialId to GoogleDriveCredentialPO(credentialsJson)),
+                googleDriveDefaultCredentialId = credentialId,
+            )
+        }
+    }
+
+    private fun newGoogleDriveCredentialId(existingIds: Set<String>): String {
+        var id: String
+        do {
+            id = UUID.randomUUID().toString()
+        } while (id in existingIds)
+        return id
     }
 
     private suspend fun updateRepositoryCredentials(fn: (old: Set<PersistedRepositoryCredentials>) -> Set<PersistedRepositoryCredentials>) {
