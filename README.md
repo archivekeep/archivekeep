@@ -99,6 +99,8 @@ See [docs/features.md](docs/content/about/features/index.md) for overview. To be
 
 This project uses [Weblate] for language translations. Contributions are welcome.
 
+Translations are licensed under [CC0 1.0 Universal](https://creativecommons.org/publicdomain/zero/1.0/), dedicating them to the public domain. This is configured on the Weblate project settings and is compatible with the project's GPL-3.0 license.
+
 [![Translation status](https://hosted.weblate.org/widget/archivekeep/multi-auto.svg)](https://hosted.weblate.org/engage/archivekeep/)
 
 Code contributions are currently not accepted.

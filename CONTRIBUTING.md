@@ -8,6 +8,8 @@ Found a bug or experience issues with the application? Feel free to report it at
 
 This project uses [Weblate](https://hosted.weblate.org/engage/archivekeep/) for language translations. Contributions are welcome.
 
+Translations are licensed under [CC0 1.0 Universal](https://creativecommons.org/publicdomain/zero/1.0/), dedicating them to the public domain. This is configured on the Weblate project settings and is compatible with the project's GPL-3.0 license.
+
 [![Translation status](https://hosted.weblate.org/widget/archivekeep/multi-auto.svg)](https://hosted.weblate.org/engage/archivekeep/)
 
 Code contributions are currently not accepted.
