@@ -11,6 +11,7 @@ import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.Icon
 import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -24,6 +25,7 @@ import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import compose.icons.TablerIcons
 import compose.icons.tablericons.Lock
@@ -31,6 +33,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.first
 import org.archivekeep.app.core.api.repository.location.PasswordRequest
+import org.archivekeep.app.core.api.repository.location.UserCredentialsInputType
 import org.archivekeep.app.core.api.repository.location.UserCredentialsRequest
 import org.archivekeep.app.core.domain.repositories.Repository
 import org.archivekeep.app.core.domain.repositories.RepositoryInformation
@@ -109,9 +112,14 @@ class UnlockRepositoryDialog(
         val action by launchable.asAction(
             onLaunch = { onLaunch(Unit) },
             canLaunch = {
-                when (accessState.asUnlockRequest()) {
+                when (val request = accessState.asUnlockRequest()) {
                     is UserCredentialsRequest -> {
-                        basicAuthCredentials?.let { it.username.isNotBlank() && it.password.isNotBlank() } ?: false
+                        basicAuthCredentials?.let {
+                            when (request.inputType) {
+                                UserCredentialsInputType.GOOGLE_DRIVE_CREDENTIALS_JSON -> it.password.isNotBlank()
+                                else -> it.username.isNotBlank() && it.password.isNotBlank()
+                            }
+                        } ?: false
                     }
 
                     is PasswordRequest -> {
@@ -306,45 +314,67 @@ class UnlockRepositoryDialog(
                         stringResource(Res.string.dialog_unlock_enter_credentials),
                         modifier = Modifier.padding(bottom = 8.dp),
                     )
-                    TextField(
-                        state.basicAuthCredentials?.username ?: "",
-                        onValueChange = {
-                            state.basicAuthCredentials =
-                                BasicAuthCredentials(
-                                    username = it,
-                                    password = state.basicAuthCredentials?.password ?: "",
-                                )
-                        },
-                        placeholder = {
-                            Text(stringResource(Res.string.common_enter_username))
-                        },
-                        singleLine = true,
-                    )
-                    Spacer(Modifier.height(12.dp))
-                    PasswordField(
-                        value = state.basicAuthCredentials?.password ?: "",
-                        onValueChange = {
-                            state.basicAuthCredentials =
-                                BasicAuthCredentials(
-                                    password = it,
-                                    username = state.basicAuthCredentials?.username ?: "",
-                                )
-                        },
-                        modifier = Modifier.focusRequester(passwordFocusRequester),
-                        keyboardOptions = KeyboardOptions(
-                            imeAction = ImeAction.Done,
-                        ),
-                        keyboardActions = KeyboardActions(
-                            onDone = {
-                                if (state.action.canLaunch) {
-                                    state.action.onLaunch()
-                                }
+                    if (unlockRequest.inputType == UserCredentialsInputType.GOOGLE_DRIVE_CREDENTIALS_JSON) {
+                        OutlinedTextField(
+                            state.basicAuthCredentials?.password ?: "",
+                            onValueChange = {
+                                state.basicAuthCredentials = BasicAuthCredentials(username = "", password = it)
                             },
-                        ),
-                        placeholder = {
-                            Text(stringResource(Res.string.common_enter_password))
-                        },
-                    )
+                            modifier = Modifier.focusRequester(passwordFocusRequester),
+                            visualTransformation = PasswordVisualTransformation(),
+                            keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
+                            keyboardActions = KeyboardActions(
+                                onDone = {
+                                    if (state.action.canLaunch) {
+                                        state.action.onLaunch()
+                                    }
+                                },
+                            ),
+                            minLines = 4,
+                            maxLines = 8,
+                            placeholder = { Text("Credential JSON") },
+                        )
+                    } else {
+                        TextField(
+                            state.basicAuthCredentials?.username ?: "",
+                            onValueChange = {
+                                state.basicAuthCredentials =
+                                    BasicAuthCredentials(
+                                        username = it,
+                                        password = state.basicAuthCredentials?.password ?: "",
+                                    )
+                            },
+                            placeholder = {
+                                Text(stringResource(Res.string.common_enter_username))
+                            },
+                            singleLine = true,
+                        )
+                        Spacer(Modifier.height(12.dp))
+                        PasswordField(
+                            value = state.basicAuthCredentials?.password ?: "",
+                            onValueChange = {
+                                state.basicAuthCredentials =
+                                    BasicAuthCredentials(
+                                        password = it,
+                                        username = state.basicAuthCredentials?.username ?: "",
+                                    )
+                            },
+                            modifier = Modifier.focusRequester(passwordFocusRequester),
+                            keyboardOptions = KeyboardOptions(
+                                imeAction = ImeAction.Done,
+                            ),
+                            keyboardActions = KeyboardActions(
+                                onDone = {
+                                    if (state.action.canLaunch) {
+                                        state.action.onLaunch()
+                                    }
+                                },
+                            ),
+                            placeholder = {
+                                Text(stringResource(Res.string.common_enter_password))
+                            },
+                        )
+                    }
                     Spacer(Modifier.height(12.dp))
                     CheckboxWithText(
                         state.unlockOptions.permanentCredentialsPreserve,

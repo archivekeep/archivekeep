@@ -146,6 +146,7 @@ allprojects {
                 "kotlinxProtobufCommonMainKotlinGenerator",
                 "kotlinxProtobufCommonMainJavaProtocPlugin",
                 "gradleOfflineBuildExtra",
+                "gradleOfflineBuildExtra2",
             )
         excludeConfigurations = setOf("kotlinNativeBundleConfiguration")
     }

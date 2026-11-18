@@ -12,6 +12,7 @@ import org.archivekeep.app.core.domain.storages.StorageService
 import org.archivekeep.app.core.persistence.credentials.CredentialsStore
 import org.archivekeep.app.core.persistence.credentials.WalletPO
 import org.archivekeep.app.core.persistence.drivers.filesystem.FileStores
+import org.archivekeep.app.core.persistence.drivers.googledrive.GoogleDriveAuthProvider
 import org.archivekeep.app.core.persistence.registry.RegistryDataStore
 import org.archivekeep.app.core.persistence.repository.MemorizedRepositoryIndexRepository
 import org.archivekeep.app.core.persistence.repository.MemorizedRepositoryMetadataRepository
@@ -53,4 +54,6 @@ interface CoreApplicationServices {
     val verifySupervisorService: VerifySupervisorService
 
     val knownStorageService: KnownStorageService
+
+    val googleDriveAuthProvider: GoogleDriveAuthProvider
 }

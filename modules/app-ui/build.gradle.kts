@@ -48,6 +48,8 @@ kotlin {
         val androidMain by getting {
             dependencies {
                 implementation("com.google.accompanist:accompanist-permissions:0.37.2")
+                implementation("androidx.activity:activity-compose:1.10.1")
+                implementation(libs.appauth)
             }
         }
         val desktopMain by getting {

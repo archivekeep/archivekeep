@@ -501,4 +501,32 @@
     <string name="sync_copied">Copied %1$s of %2$s</string>
     <string name="sync_relocated">Relocated %1$s of %2$s</string>
 
- </resources>
+    <!-- ==================== GOOGLE DRIVE ==================== -->
+
+    <string name="googledrive_title">Google Drive</string>
+    <string name="googledrive_folder_and_auth">Google Drive folder and authentication:</string>
+    <string name="googledrive_root_folder_id">Root folder ID</string>
+    <string name="googledrive_root_folder_id_placeholder">Google Drive folder ID</string>
+    <string name="googledrive_pick_folder">Pick folder from Google Drive</string>
+    <string name="googledrive_sign_in">Sign in with Google</string>
+    <string name="googledrive_signing_in">Signing in...</string>
+    <string name="googledrive_waiting_for_browser">Waiting for browser...</string>
+    <string name="googledrive_use_credentials_file">Use credentials file instead</string>
+    <string name="googledrive_sign_in_unavailable">Google Drive sign-in is not available on this platform. Use credentials file instead.</string>
+    <string name="googledrive_credential_json">Credential JSON</string>
+    <string name="googledrive_credential_json_placeholder">Paste credential JSON from a downloaded credentials file</string>
+    <string name="googledrive_credential_json_info">Select a downloaded credentials file or paste the JSON content.</string>
+    <string name="googledrive_share_folder_info">Share the folder with the Google account from the credentials file.</string>
+    <string name="googledrive_back_to_sign_in">← Back to sign in</string>
+    <string name="googledrive_wallet_unlock_needed">To save your Google Drive credentials securely, the credential wallet needs to be unlocked.</string>
+    <string name="googledrive_dont_save_credentials">Do not save credentials</string>
+    <string name="googledrive_select_folder_title">Select Folder</string>
+    <string name="googledrive_drive_root">Drive</string>
+    <string name="googledrive_loading_folders">Loading folders...</string>
+    <string name="googledrive_error">Error: %1$s</string>
+    <string name="googledrive_go_back">Go back</string>
+    <string name="googledrive_retry">Retry</string>
+    <string name="googledrive_no_folders_found">No folders found</string>
+    <string name="googledrive_select_this_folder">Select this folder</string>
+
+</resources>

@@ -501,4 +501,32 @@
     <string name="sync_copied">Skopírovaných %1$s z %2$s</string>
     <string name="sync_relocated">Presunutých %1$s z %2$s</string>
 
- </resources>
+    <!-- ==================== GOOGLE DRIVE ==================== -->
+
+    <string name="googledrive_title">Google Drive</string>
+    <string name="googledrive_folder_and_auth">Adresár a overenie pre Google Drive:</string>
+    <string name="googledrive_root_folder_id">ID koreňového adresára</string>
+    <string name="googledrive_root_folder_id_placeholder">ID adresára v Google Drive</string>
+    <string name="googledrive_pick_folder">Vybrať adresár z Google Drive</string>
+    <string name="googledrive_sign_in">Prihlásiť sa pomocou Google</string>
+    <string name="googledrive_signing_in">Prihlasuje sa...</string>
+    <string name="googledrive_waiting_for_browser">Čaká sa na prehliadač...</string>
+    <string name="googledrive_use_credentials_file">Namiesto toho použiť súbor s povereniami</string>
+    <string name="googledrive_sign_in_unavailable">Prihlasovanie do Google Drive nie je na tejto platforme dostupné. Namiesto toho použite súbor s povereniami.</string>
+    <string name="googledrive_credential_json">JSON poverení</string>
+    <string name="googledrive_credential_json_placeholder">Vložte JSON z stiahnutého súboru s povereniami</string>
+    <string name="googledrive_credential_json_info">Vyberte stiahnutý súbor s povereniami alebo vložte obsah JSON.</string>
+    <string name="googledrive_share_folder_info">Zdieľajte adresár s Google účtom z poverení.</string>
+    <string name="googledrive_back_to_sign_in">← Späť na prihlásenie</string>
+    <string name="googledrive_wallet_unlock_needed">Na bezpečné uloženie poverení pre Google Drive je potrebné odomknúť peňaženku.</string>
+    <string name="googledrive_dont_save_credentials">Neukladať poverenia</string>
+    <string name="googledrive_select_folder_title">Vybrať adresár</string>
+    <string name="googledrive_drive_root">Drive</string>
+    <string name="googledrive_loading_folders">Načítavajú sa adresáre...</string>
+    <string name="googledrive_error">Chyba: %1$s</string>
+    <string name="googledrive_go_back">Späť</string>
+    <string name="googledrive_retry">Skúsiť znova</string>
+    <string name="googledrive_no_folders_found">Nenašli sa žiadne adresáre</string>
+    <string name="googledrive_select_this_folder">Vybrať tento adresár</string>
+
+</resources>

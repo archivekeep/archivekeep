@@ -18,6 +18,9 @@ import org.archivekeep.app.core.persistence.credentials.WalletPO
 import org.archivekeep.app.core.persistence.drivers.filesystem.DesktopFileStores
 import org.archivekeep.app.core.persistence.drivers.filesystem.FileStores
 import org.archivekeep.app.core.persistence.drivers.filesystem.FileSystemStorageDriver
+import org.archivekeep.app.core.persistence.drivers.googledrive.DesktopGoogleDriveAuthProvider
+import org.archivekeep.app.core.persistence.drivers.googledrive.GoogleDriveAuthProvider
+import org.archivekeep.app.core.persistence.drivers.googledrive.GoogleDriveOAuthConfig
 import org.archivekeep.app.core.persistence.registry.PreferenceDataStoreRegistryData
 import org.archivekeep.app.core.persistence.registry.RegistryDataStore
 import org.archivekeep.app.core.persistence.repository.MemorizedRepositoryIndexRepository
@@ -84,6 +87,18 @@ interface DesktopApplicationServices :
     @Binds
     @IntoSet
     val FileSystemStorageDriver.bind: StorageDriver
+
+    @Provides
+    @SingleIn(AppScope::class)
+    fun googleDriveAuthProvider(): GoogleDriveAuthProvider {
+        val clientId = "367084333033-4aa5vsts90m4mskc771mmdni028s6eb5.apps.googleusercontent.com"
+        val clientSecret =
+            checkNotNull(DesktopApplicationServices::class.java.getResourceAsStream("/google-drive-client-secret.txt")) {
+                "Google Drive client secret resource is missing"
+            }.bufferedReader().use { it.readText().trim() }
+        val config = GoogleDriveOAuthConfig(clientId, clientSecret)
+        return DesktopGoogleDriveAuthProvider(config)
+    }
 
     @DependencyGraph.Factory
     fun interface Factory {

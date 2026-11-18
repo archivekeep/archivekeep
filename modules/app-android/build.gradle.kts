@@ -1,3 +1,5 @@
+import java.util.Properties
+
 plugins {
     alias(libs.plugins.kotlin.compose)
     alias(libs.plugins.kotlin.serialization)
@@ -9,10 +11,26 @@ plugins {
     alias(libs.plugins.metro)
 }
 
+val localProperties = Properties().apply {
+    rootProject.file("local.properties").takeIf { it.isFile }?.inputStream()?.use { load(it) }
+}
+val googleDriveClientId =
+    localProperties
+        .getProperty("googleDriveClientId")
+        ?.trim()
+        ?.takeIf { it.isNotEmpty() }
+        ?: "367084333033-n8de4dv4lg43g8rmotk6c0op179egapu.apps.googleusercontent.com"
+check(Regex("\\d+-[A-Za-z0-9-]+\\.apps\\.googleusercontent\\.com").matches(googleDriveClientId)) {
+    "googleDriveClientId must be a valid Google OAuth client ID ending in .apps.googleusercontent.com"
+}
+val googleDriveClientIdPrefix = googleDriveClientId.removeSuffix(".apps.googleusercontent.com")
+val googleDriveRedirectScheme = "com.googleusercontent.apps.$googleDriveClientIdPrefix"
+
 dependencies {
     implementation(project(":app-core"))
     implementation(project(":app-ui"))
 
+    implementation(libs.appauth)
     implementation(libs.kotlinx.serialization.json)
 
     implementation(libs.compose.foundation)
@@ -32,6 +50,9 @@ android {
 
         versionCode = (project.properties["versionCode"]!! as String).toInt()
         versionName = (project.properties["version"]!! as String)
+
+        buildConfigField("String", "GOOGLE_DRIVE_CLIENT_ID", "\"$googleDriveClientId\"")
+        manifestPlaceholders["appAuthRedirectScheme"] = googleDriveRedirectScheme
     }
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_21

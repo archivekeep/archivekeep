@@ -8,7 +8,7 @@ import kotlinx.serialization.descriptors.SerialDescriptor
 import kotlinx.serialization.encoding.Decoder
 import kotlinx.serialization.encoding.Encoder
 import org.archivekeep.app.core.persistence.drivers.filesystem.FileSystemRepositoryURIData
-import org.archivekeep.app.core.persistence.drivers.grpc.GRPCRepositoryURIData
+import org.archivekeep.app.core.persistence.drivers.googledrive.GoogleDriveRepositoryURIData
 import org.archivekeep.app.core.persistence.drivers.s3.S3RepositoryURIData
 import org.archivekeep.app.core.persistence.platform.demo.DemoRepositoryURIData
 
@@ -22,7 +22,7 @@ data class RepositoryURI(
     val typedRepoURIData: TypedRepoURIData =
         when (driver) {
             FileSystemRepositoryURIData.ID -> FileSystemRepositoryURIData.fromSerialized(data)
-            GRPCRepositoryURIData.ID -> GRPCRepositoryURIData.fromSerialized(data)
+            GoogleDriveRepositoryURIData.ID -> GoogleDriveRepositoryURIData.fromSerialized(data)
             S3RepositoryURIData.ID -> S3RepositoryURIData.fromSerialized(data)
             DemoRepositoryURIData.ID -> DemoRepositoryURIData.fromSerialized(data)
             else -> throw RuntimeException("Not supported $driver")

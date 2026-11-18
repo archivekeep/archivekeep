@@ -1,5 +1,9 @@
 import com.gitlab.svg2ico.Svg2PngTask
 import org.jetbrains.compose.desktop.application.dsl.TargetFormat
+import java.util.Base64
+import javax.crypto.Cipher
+import javax.crypto.spec.IvParameterSpec
+import javax.crypto.spec.SecretKeySpec
 
 plugins {
     alias(libs.plugins.kotlin.jvm)
@@ -36,6 +40,60 @@ dependencies {
 
 kotlin {
     jvmToolchain(21)
+}
+
+val generatedGoogleDriveClientSecret =
+    layout.buildDirectory.file("generated/googleDriveClientSecret/google-drive-client-secret.txt")
+val encryptedGoogleDriveClientSecret =
+    providers
+        .gradleProperty("googleDriveClientSecret")
+        .orElse(providers.environmentVariable("GOOGLE_DRIVE_CLIENT_SECRET"))
+        .orElse("WiG3UtICrJIDMi2l6EVlqf4hdZY1uVPavORc6maH35eFTCN5y3C0WDIQKw2Eg6civzqXipksHnlLoVboWeYEGA==")
+val generateGoogleDriveClientSecret =
+    tasks.register("generateGoogleDriveClientSecret") {
+        inputs.property("encryptedGoogleDriveClientSecret", encryptedGoogleDriveClientSecret)
+        outputs.file(generatedGoogleDriveClientSecret)
+
+        doLast {
+            val encryptedBytes = Base64.getDecoder().decode(encryptedGoogleDriveClientSecret.get())
+            require(encryptedBytes.size > 16 && (encryptedBytes.size - 16) % 16 == 0) {
+                "Google Drive client secret must be a Base64-encoded IV and AES-CBC payload"
+            }
+
+            val key =
+                "8a5a6db6f987e7130912fecfaca02c2e3b4a4b0b620376200ccd2bffa7c7748f"
+                    .chunked(2)
+                    .map { it.toInt(16).toByte() }
+                    .toByteArray()
+            val cipher = Cipher.getInstance("AES/CBC/PKCS5Padding")
+            cipher.init(
+                Cipher.DECRYPT_MODE,
+                SecretKeySpec(key, "AES"),
+                IvParameterSpec(encryptedBytes.copyOfRange(0, 16)),
+            )
+            val clientSecret =
+                cipher
+                    .doFinal(encryptedBytes.copyOfRange(16, encryptedBytes.size))
+                    .toString(Charsets.UTF_8)
+            require(clientSecret.isNotBlank()) { "Google Drive client secret cannot be blank" }
+
+            generatedGoogleDriveClientSecret.get().asFile.apply {
+                parentFile.mkdirs()
+                writeText(clientSecret, Charsets.UTF_8)
+            }
+        }
+    }
+
+sourceSets.main {
+    resources.srcDir(generatedGoogleDriveClientSecret.get().asFile.parentFile)
+}
+
+tasks.named("processResources") {
+    dependsOn(generateGoogleDriveClientSecret)
+}
+
+tasks.named("sourcesJar") {
+    dependsOn(generateGoogleDriveClientSecret)
 }
 
 val pngIconTask =

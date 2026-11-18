@@ -29,7 +29,9 @@ import kotlinx.coroutines.CoroutineScope
 import org.archivekeep.app.core.operations.AddRemoteRepositoryOutcome
 import org.archivekeep.app.core.operations.AddRemoteRepositoryUseCase
 import org.archivekeep.app.core.operations.RequiresCredentialsException
+import org.archivekeep.app.core.operations.addGoogleDrive
 import org.archivekeep.app.core.operations.addS3
+import org.archivekeep.app.core.persistence.drivers.googledrive.GoogleDriveAuthProvider
 import org.archivekeep.app.core.utils.generics.ExecutionOutcome
 import org.archivekeep.app.core.utils.identifiers.RepositoryURI
 import org.archivekeep.app.ui.components.base.layout.ScrollableColumn
@@ -72,6 +74,7 @@ import org.archivekeep.ui.resources.dialog_add_remote_tab_s3
 import org.archivekeep.ui.resources.dialog_add_remote_title
 import org.archivekeep.ui.resources.dialog_add_remote_uri_placeholder
 import org.archivekeep.ui.resources.dialog_add_remote_url_label
+import org.archivekeep.ui.resources.googledrive_title
 import org.archivekeep.utils.exceptions.WrongCredentialsException
 import org.jetbrains.compose.resources.stringResource
 
@@ -82,11 +85,13 @@ class AddRemoteRepositoryDialog : Dialog {
     }
 
     class Input(
-        val selectedRemoteType: MutableState<RemoteType> = mutableStateOf(RemoteType.S3),
+        val selectedRemoteType: MutableState<RemoteType> = mutableStateOf(RemoteType.GOOGLE_DRIVE),
         val s3input: S3 = S3(),
+        val googleDriveInput: GoogleDrive = GoogleDrive(),
         val otherInput: Other = Other(),
     ) {
         enum class RemoteType {
+            GOOGLE_DRIVE,
             S3,
             OTHER,
         }
@@ -117,6 +122,16 @@ class AddRemoteRepositoryDialog : Dialog {
                 )
         }
 
+        class GoogleDrive(
+            val rootFolderId: MutableState<String> = mutableStateOf(""),
+            val credentialsJson: MutableState<String> = mutableStateOf(""),
+        ) : RemoteInput() {
+            override fun canLaunch(): Boolean = rootFolderId.value.isNotBlank() && credentialsJson.value.isNotBlank()
+
+            override suspend fun execute(useCase: AddRemoteRepositoryUseCase) =
+                useCase.addGoogleDrive(rootFolderId.value.trim(), credentialsJson.value, rememberCredentials.value)
+        }
+
         class Other(
             val uri: MutableState<String> = mutableStateOf(""),
             val basicAuthCredentialsState: MutableState<BasicAuthCredentials?> = mutableStateOf(null),
@@ -131,6 +146,7 @@ class AddRemoteRepositoryDialog : Dialog {
             derivedStateOf {
                 when (selectedRemoteType.value) {
                     RemoteType.S3 -> s3input
+                    RemoteType.GOOGLE_DRIVE -> googleDriveInput
                     RemoteType.OTHER -> otherInput
                 }
             }
@@ -140,6 +156,7 @@ class AddRemoteRepositoryDialog : Dialog {
         coroutineScope: CoroutineScope,
         val useCase: AddRemoteRepositoryUseCase,
         val walletOperationLaunchers: WalletOperationLaunchers,
+        val googleDriveAuthProvider: GoogleDriveAuthProvider,
     ) {
         val input = Input()
 
@@ -199,13 +216,15 @@ class AddRemoteRepositoryDialog : Dialog {
     @OptIn(ExperimentalMaterial3Api::class)
     @Composable
     override fun render(onClose: () -> Unit) {
-        val operationFactory = LocalApplicationServices.current.operationFactory
+        val appServices = LocalApplicationServices.current
+        val operationFactory = appServices.operationFactory
         val walletOperationLaunchers = LocalWalletOperationLaunchers.current
+        val googleDriveAuthProvider = appServices.googleDriveAuthProvider
 
         val coroutineScope = rememberCoroutineScope()
         val vm =
-            remember(coroutineScope, operationFactory, walletOperationLaunchers) {
-                VM(coroutineScope, operationFactory.get(AddRemoteRepositoryUseCase::class.java), walletOperationLaunchers)
+            remember(coroutineScope, operationFactory, walletOperationLaunchers, googleDriveAuthProvider) {
+                VM(coroutineScope, operationFactory.get(AddRemoteRepositoryUseCase::class.java), walletOperationLaunchers, googleDriveAuthProvider)
             }
 
         val executionState = vm.addLaunchGuard.state
@@ -237,6 +256,14 @@ class AddRemoteRepositoryDialog : Dialog {
                         containerColor = Color.White,
                     ) {
                         Tab(
+                            selected = selectedTab == Input.RemoteType.GOOGLE_DRIVE,
+                            onClick = { vm.input.selectedRemoteType.value = Input.RemoteType.GOOGLE_DRIVE },
+                            text = {
+                                Text(text = stringResource(Res.string.googledrive_title), maxLines = 1, overflow = TextOverflow.Ellipsis)
+                            },
+                            enabled = isEditable,
+                        )
+                        Tab(
                             selected = selectedTab == Input.RemoteType.S3,
                             onClick = { vm.input.selectedRemoteType.value = Input.RemoteType.S3 },
                             text = {
@@ -257,6 +284,17 @@ class AddRemoteRepositoryDialog : Dialog {
 
                     ScrollableColumn {
                         when (selectedTab) {
+                            Input.RemoteType.GOOGLE_DRIVE -> {
+                                GoogleDriveForm(
+                                    vm.input.googleDriveInput,
+                                    isEditable,
+                                    onOAuthSignIn = if (vm.googleDriveAuthProvider.isSupported) {
+                                        suspend { vm.googleDriveAuthProvider.authenticate() }
+                                    } else null,
+                                    walletOperationLaunchers = walletOperationLaunchers,
+                                )
+                            }
+
                             Input.RemoteType.S3 -> {
                                 S3Form(vm.input.s3input, isEditable)
                             }
@@ -350,39 +388,41 @@ class AddRemoteRepositoryDialog : Dialog {
                                         }
                                     },
                                 )
-                                RadioWithTextAndExtra(
-                                    selected = vm.initType.value == InitType.ENCRYPTED,
-                                    onClick = { vm.initType.value = InitType.ENCRYPTED },
-                                    text = stringResource(Res.string.dialog_add_remote_encrypted_custom),
-                                    enabled = initIsEditble,
-                                    extra = {
-                                        Column {
-                                            WarningAlert {
-                                                Text(stringResource(Res.string.dialog_add_remote_encrypted_warning))
+                                if (selectedTab != Input.RemoteType.GOOGLE_DRIVE) {
+                                    RadioWithTextAndExtra(
+                                        selected = vm.initType.value == InitType.ENCRYPTED,
+                                        onClick = { vm.initType.value = InitType.ENCRYPTED },
+                                        text = stringResource(Res.string.dialog_add_remote_encrypted_custom),
+                                        enabled = initIsEditble,
+                                        extra = {
+                                            Column {
+                                                WarningAlert {
+                                                    Text(stringResource(Res.string.dialog_add_remote_encrypted_warning))
+                                                    Spacer(Modifier.height(8.dp))
+                                                    Text(stringResource(Res.string.dialog_add_remote_encrypted_warning2))
+                                                }
+
                                                 Spacer(Modifier.height(8.dp))
-                                                Text(stringResource(Res.string.dialog_add_remote_encrypted_warning2))
+
+                                                PasswordField(
+                                                    vm.initPassword.value,
+                                                    onValueChange = { vm.initPassword.value = it },
+                                                    placeholder = { Text(stringResource(Res.string.common_enter_password)) },
+                                                    modifier = Modifier.padding(bottom = 8.dp).testTag("Enter password …"),
+                                                    enabled = initIsEditble,
+                                                )
+
+                                                PasswordField(
+                                                    vm.initPasswordCheck.value,
+                                                    onValueChange = { vm.initPasswordCheck.value = it },
+                                                    placeholder = { Text(stringResource(Res.string.common_verify_password)) },
+                                                    modifier = Modifier.testTag("Verify password …"),
+                                                    enabled = initIsEditble,
+                                                )
                                             }
-
-                                            Spacer(Modifier.height(8.dp))
-
-                                            PasswordField(
-                                                vm.initPassword.value,
-                                                onValueChange = { vm.initPassword.value = it },
-                                                placeholder = { Text(stringResource(Res.string.common_enter_password)) },
-                                                modifier = Modifier.padding(bottom = 8.dp).testTag("Enter password …"),
-                                                enabled = initIsEditble,
-                                            )
-
-                                            PasswordField(
-                                                vm.initPasswordCheck.value,
-                                                onValueChange = { vm.initPasswordCheck.value = it },
-                                                placeholder = { Text(stringResource(Res.string.common_verify_password)) },
-                                                modifier = Modifier.testTag("Verify password …"),
-                                                enabled = initIsEditble,
-                                            )
-                                        }
-                                    },
-                                )
+                                        },
+                                    )
+                                }
                             }
                         }
                     }

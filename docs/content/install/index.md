@@ -12,6 +12,8 @@ weight: 15
 
 ## Building from sources
 
+For Android Google Drive OAuth setup and development client configuration when building from source, see the [developer guide](https://github.com/archivekeep/archivekeep/blob/main/dev/android-google-drive.md).
+
 ### Building Flatpak application
 
 The application can be built by Gradle using `app-desktop:createDistributable` and then installed as an user application using Flatpak.

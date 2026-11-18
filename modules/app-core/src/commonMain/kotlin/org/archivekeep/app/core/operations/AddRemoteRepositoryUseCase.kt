@@ -1,5 +1,6 @@
 package org.archivekeep.app.core.operations
 
+import org.archivekeep.app.core.persistence.drivers.googledrive.GoogleDriveRepositoryURIData
 import org.archivekeep.app.core.persistence.drivers.s3.S3RepositoryURIData
 import org.archivekeep.app.core.utils.identifiers.RepositoryURI
 import org.archivekeep.files.api.repository.auth.BasicAuthCredentials
@@ -31,5 +32,17 @@ suspend fun AddRemoteRepositoryUseCase.addS3(
     this(
         S3RepositoryURIData(endpoint, bucket).toURI(),
         BasicAuthCredentials(accessKey, secretKey),
+        rememberCredentials,
+    )
+
+suspend fun AddRemoteRepositoryUseCase.addGoogleDrive(
+    rootFolderId: String,
+    credentialsJson: String,
+    rememberCredentials: Boolean,
+): AddRemoteRepositoryOutcome =
+    this(
+        GoogleDriveRepositoryURIData(rootFolderId).toURI(),
+        // TODO: not basic auth credentials
+        BasicAuthCredentials(username = "", password = credentialsJson),
         rememberCredentials,
     )

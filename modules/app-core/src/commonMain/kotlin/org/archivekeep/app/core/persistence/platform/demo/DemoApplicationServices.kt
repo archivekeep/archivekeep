@@ -20,6 +20,7 @@ import org.archivekeep.app.core.domain.storages.StorageDriver
 import org.archivekeep.app.core.persistence.credentials.WalletPO
 import org.archivekeep.app.core.persistence.drivers.filesystem.FileStores
 import org.archivekeep.app.core.persistence.drivers.filesystem.MountedFileSystem
+import org.archivekeep.app.core.persistence.drivers.googledrive.GoogleDriveAuthProvider
 import org.archivekeep.app.core.persistence.registry.RegistryDataStore
 import org.archivekeep.app.core.persistence.repository.MemorizedRepositoryIndexRepository
 import org.archivekeep.app.core.persistence.repository.MemorizedRepositoryMetadataRepository
@@ -112,6 +113,10 @@ interface DemoApplicationServices : CoreApplicationServicesGraph {
     @Provides
     @SingleIn(AppScope::class)
     fun repositoryMetadataMemory(): MemorizedRepositoryMetadataRepository = InMemoryMemorizedRepositoryMetadataRepository()
+
+    @Provides
+    @SingleIn(AppScope::class)
+    fun googleDriveAuthProvider(): GoogleDriveAuthProvider = UnsupportedGoogleDriveAuthProvider
 
     @Provides
     @ElementsIntoSet

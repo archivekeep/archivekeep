@@ -20,6 +20,8 @@ import org.archivekeep.app.core.persistence.credentials.WalletPO
 import org.archivekeep.app.core.persistence.drivers.filesystem.AndroidFileStores
 import org.archivekeep.app.core.persistence.drivers.filesystem.FileStores
 import org.archivekeep.app.core.persistence.drivers.filesystem.FileSystemStorageDriver
+import org.archivekeep.app.core.persistence.drivers.googledrive.AndroidGoogleDriveAuthProvider
+import org.archivekeep.app.core.persistence.drivers.googledrive.GoogleDriveAuthProvider
 import org.archivekeep.app.core.persistence.registry.PreferenceDataStoreRegistryData
 import org.archivekeep.app.core.persistence.registry.RegistryDataStore
 import org.archivekeep.app.core.persistence.repository.MemorizedRepositoryIndexRepository
@@ -88,6 +90,10 @@ interface AndroidApplicationServices :
         fileStores: FileStores,
         credentialsStore: CredentialsStore,
     ): StorageDriver = FileSystemStorageDriver(scope, fileStores, credentialsStore)
+
+    @Provides
+    @SingleIn(AppScope::class)
+    fun googleDriveAuthProvider(): GoogleDriveAuthProvider = AndroidGoogleDriveAuthProvider(BuildConfig.GOOGLE_DRIVE_CLIENT_ID)
 
     @DependencyGraph.Factory
     fun interface Factory {

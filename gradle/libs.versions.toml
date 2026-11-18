@@ -2,6 +2,7 @@
 kotlin = "2.4.21"
 
 kotlinx-coroutines = "1.11.0"
+appauth = "0.11.1"
 
 compose = "1.12.2"
 material3 = "1.12.0-alpha03"
@@ -44,6 +45,7 @@ compose-resources-tabler-icons = { group = "br.com.devsrsouza.compose.icons", na
 compose-runtime = { module = "org.jetbrains.compose.runtime:runtime", version.ref = "compose" }
 compose-ui = { module = "org.jetbrains.compose.ui:ui", version.ref = "compose" }
 compose-ui-test-junit4-desktop = { module = "org.jetbrains.compose.ui:ui-test-junit4-desktop", version.ref = "compose" }
+appauth = { group = "net.openid", name = "appauth", version.ref = "appauth" }
 
 androidx-sqlite-bundled = { group = "androidx.sqlite", name = "sqlite-bundled", version.ref = "sqlite" }
 androidx-room-compiler = { group = "androidx.room", name = "room-compiler", version.ref = "room" }
@@ -61,6 +63,11 @@ protobuf-kotlin-lite = { group = "com.google.protobuf", name = "protobuf-kotlin-
 s3-sdk = { group = "aws.sdk.kotlin", name = "s3", version = "1.9.32" }
 s3-mock = { group = "com.adobe.testing", name = "s3mock", version = "4.12.4" }
 s3-mock-testcontainers = { group = "com.adobe.testing", name = "s3mock-testcontainers", version = "4.12.4" }
+google-drive-sdk = { group = "com.google.apis", name = "google-api-services-drive", version = "v3-rev20261023-2.9.2" }
+google-auth-oauth2 = { group = "com.google.auth", name = "google-auth-library-oauth2-http", version = "1.39.0" }
+google-oauth-client-java6 = { group = "com.google.oauth-client", name = "google-oauth-client-java6", version = "1.39.0" }
+google-oauth-client-jetty = { group = "com.google.oauth-client", name = "google-oauth-client-jetty", version = "1.39.0" }
+google-api-client = { group = "com.google.api-client", name = "google-api-client", version = "2.7.2" }
 
 testcontainers-junit-jupiter = { group = "org.testcontainers", name = "junit-jupiter", version = "1.21.4" }
 

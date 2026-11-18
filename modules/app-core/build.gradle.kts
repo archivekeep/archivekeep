@@ -15,6 +15,7 @@ kotlin {
     android {
         compileSdk = 37
         namespace = "org.archivekeep.app.core"
+        minSdk = 30
     }
 
     jvm("desktop")
@@ -26,9 +27,11 @@ kotlin {
                 api(project(":files-driver-filesystem"))
                 api(project(":files-driver-grpc"))
                 api(project(":files-driver-s3"))
+                api(project(":files-driver-google-drive"))
 
                 implementation(libs.kotlinx.coroutines.core)
                 implementation(libs.kotlinx.serialization.json)
+                implementation(libs.google.auth.oauth2)
 
                 implementation(libs.guava.jre)
                 implementation(libs.guava.android)
@@ -54,6 +57,9 @@ kotlin {
         val desktopMain by getting {
             dependencies {
                 implementation(libs.oshi.core)
+                implementation(libs.google.oauth.client.java6)
+                implementation(libs.google.oauth.client.jetty)
+                implementation(libs.google.api.client)
             }
         }
         val desktopTest by getting {
