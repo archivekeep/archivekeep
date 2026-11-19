@@ -34,6 +34,7 @@ ArchiveKeep is a **Kotlin Multiplatform** application for reliable file archivat
 - **Wording rules**:
   - Use plain language — avoid technical terms like "refactor," "optimize," "implement," or internal class/method names.
   - Describe the actual change, not existing behavior that was already present before it.
+  - Focus on the core distinction — the one thing that is different now vs before. If a feature already existed, don't describe it as new; describe only what changed about it. For example, "show as many as fit" is different from "add overflow menu" if the overflow menu already existed.
   - Prefer direct phrasing: "to show X" or "to allow X" over wordier alternatives like "to let users see X."
   - Include temporal qualifiers when relevant: "live," "instant," "real-time" — they convey important behavioral differences.
   - Name the feature plainly if it has a user-visible name (e.g., "quick-add," "quick scan") — but don't use backticks or code formatting.
@@ -64,6 +65,8 @@ ArchiveKeep is a **Kotlin Multiplatform** application for reliable file archivat
   - ❌ `fix: hide performance tab when tracker has no recorded stats` — hiding empty content is a `ui:` change, not a bug fix
   - ❌ `feat: add performance tab showing performances of tracked internal operations`
   - ❌ `feat: save Google Drive login securely for use across repositories` — secure saving already existed; sharing is the change
+  - ❌ `feat: add overflow menu to section card actions` — overflow already existed; the change was showing more buttons
+  - ✅ `ui: show as many action buttons as fit in section card overflow row instead of just one` — focuses on what changed, not what existed
 - **Validation**: After drafting, ask: "Would someone who doesn't know the codebase understand what changed and why it matters?"
 - **One-liner rule**: Commit messages must be a single line — no multi-line commits, no bullet points, no elaboration. If the change is way too complex or big, ask whether multi-line is acceptable.
 
