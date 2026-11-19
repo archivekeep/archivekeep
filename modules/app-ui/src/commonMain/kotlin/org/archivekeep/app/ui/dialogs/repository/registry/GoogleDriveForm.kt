@@ -136,8 +136,9 @@ fun GoogleDriveForm(
     if (showFolderPicker) {
         GoogleDriveFolderPickerDialog(
             credentialsJson = input.credentialsJson.value,
-            onFolderSelected = { folderId ->
+            onFolderSelected = { folderId, folderName ->
                 input.rootFolderId.value = folderId
+                input.rootFolderName.value = folderName
             },
             onDismiss = { showFolderPicker = false },
         )

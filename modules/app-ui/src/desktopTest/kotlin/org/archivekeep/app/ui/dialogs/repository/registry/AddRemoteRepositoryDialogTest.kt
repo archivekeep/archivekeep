@@ -159,5 +159,6 @@ class NoOpAddRemoteRepositoryUseCase : AddRemoteRepositoryUseCase {
         uri: RepositoryURI,
         credentials: BasicAuthCredentials?,
         rememberCredentials: Boolean,
+        label: String?,
     ) = AddRemoteRepositoryOutcome.Added
 }

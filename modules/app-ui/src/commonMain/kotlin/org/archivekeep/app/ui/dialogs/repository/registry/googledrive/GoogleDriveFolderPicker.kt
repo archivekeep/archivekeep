@@ -199,8 +199,7 @@ fun GoogleDriveFolderPicker(
                 SimpleActionDialogControlButtons(
                     launchText = stringResource(Res.string.googledrive_select_this_folder),
                     onLaunch = {
-                        val names = breadcrumb.map { it.name }
-                        val displayName = if (names.isEmpty()) "Root" else names.joinToString(" / ")
+                        val displayName = if (breadcrumb.isEmpty()) "Root" else breadcrumb.last().name
                         onResult(
                             GoogleDriveFolderPickResult.Success(
                                 folderId = currentFolderId ?: "root",

@@ -13,7 +13,7 @@ import org.archivekeep.app.ui.domain.wiring.LocalApplicationServices
 @Composable
 fun GoogleDriveFolderPickerDialog(
     credentialsJson: String,
-    onFolderSelected: (folderId: String) -> Unit,
+    onFolderSelected: (folderId: String, folderName: String) -> Unit,
     onDismiss: () -> Unit,
 ) {
     val appServices = LocalApplicationServices.current
@@ -26,7 +26,7 @@ fun GoogleDriveFolderPickerDialog(
             onResult = { result ->
                 when (result) {
                     is GoogleDriveFolderPickResult.Success -> {
-                        onFolderSelected(result.folderId)
+                        onFolderSelected(result.folderId, result.folderName)
                         onDismiss()
                     }
 

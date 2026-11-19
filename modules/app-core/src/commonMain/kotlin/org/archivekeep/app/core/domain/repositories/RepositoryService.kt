@@ -5,7 +5,10 @@ import org.archivekeep.app.core.utils.identifiers.RepositoryURI
 interface RepositoryService {
     fun getRepository(repositoryURI: RepositoryURI): Repository
 
-    suspend fun registerRepository(repositoryURI: RepositoryURI)
+    suspend fun registerRepository(
+        repositoryURI: RepositoryURI,
+        label: String? = null,
+    )
 
     suspend fun invalidateRepository(repositoryURI: RepositoryURI)
 }

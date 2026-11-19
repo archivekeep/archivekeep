@@ -124,12 +124,13 @@ class AddRemoteRepositoryDialog : Dialog {
 
         class GoogleDrive(
             val rootFolderId: MutableState<String> = mutableStateOf(""),
+            val rootFolderName: MutableState<String> = mutableStateOf(""),
             val credentialsJson: MutableState<String> = mutableStateOf(""),
         ) : RemoteInput() {
             override fun canLaunch(): Boolean = rootFolderId.value.isNotBlank() && credentialsJson.value.isNotBlank()
 
             override suspend fun execute(useCase: AddRemoteRepositoryUseCase) =
-                useCase.addGoogleDrive(rootFolderId.value.trim(), credentialsJson.value)
+                useCase.addGoogleDrive(rootFolderId.value.trim(), credentialsJson.value, rootFolderName.value.ifBlank { null })
         }
 
         class Other(

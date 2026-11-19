@@ -27,18 +27,21 @@ class AddRemoteRepositoryUseCaseImpl(
         uri: RepositoryURI,
         credentials: BasicAuthCredentials?,
         rememberCredentials: Boolean,
-    ): AddRemoteRepositoryOutcome = addRemote(uri, credentials, rememberCredentials, null)
+        label: String?,
+    ): AddRemoteRepositoryOutcome = addRemote(uri, credentials, rememberCredentials, null, label)
 
     override suspend fun addGoogleDrive(
         uri: RepositoryURI,
         credentialsJson: String,
-    ): AddRemoteRepositoryOutcome = addRemote(uri, null, false, credentialsJson)
+        label: String?,
+    ): AddRemoteRepositoryOutcome = addRemote(uri, null, false, credentialsJson, label)
 
     private suspend fun addRemote(
         uri: RepositoryURI,
         credentials: BasicAuthCredentials?,
         rememberCredentials: Boolean,
         googleDriveCredentialsJson: String?,
+        label: String?,
     ): AddRemoteRepositoryOutcome {
         val driver = drivers.getDriverForURI(uri) ?: throw RuntimeException("Driver unsupported")
         val location = driver.openLocation(uri)
@@ -103,7 +106,7 @@ class AddRemoteRepositoryUseCaseImpl(
                         }
                 }
 
-                repositoryService.registerRepository(repositoryURI = uri)
+                repositoryService.registerRepository(repositoryURI = uri, label = label)
 
                 return AddRemoteRepositoryOutcome.Added
             }
@@ -115,7 +118,7 @@ class AddRemoteRepositoryUseCaseImpl(
                             {
                                 initializeAsPlain(rememberCredentials)
 
-                                repositoryService.registerRepository(repositoryURI = uri)
+                                repositoryService.registerRepository(repositoryURI = uri, label = label)
                             }
                         },
                     initializeAsE2EEPasswordProtected =
@@ -123,7 +126,7 @@ class AddRemoteRepositoryUseCaseImpl(
                             { password ->
                                 initializeAsE2EEPasswordProtected(password, rememberCredentials)
 
-                                repositoryService.registerRepository(repositoryURI = uri)
+                                repositoryService.registerRepository(repositoryURI = uri, label = label)
                             }
                         },
                 )

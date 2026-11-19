@@ -41,9 +41,12 @@ class DefaultRepositoryService(
 
     override fun getRepository(repositoryURI: RepositoryURI) = repositoryStates[repositoryURI]
 
-    override suspend fun registerRepository(repositoryURI: RepositoryURI) {
+    override suspend fun registerRepository(
+        repositoryURI: RepositoryURI,
+        label: String?,
+    ) {
         registry.updateRepositories { old ->
-            old + setOf(RegisteredRepository(uri = repositoryURI))
+            old + setOf(RegisteredRepository(uri = repositoryURI, label = label))
         }
     }
 
