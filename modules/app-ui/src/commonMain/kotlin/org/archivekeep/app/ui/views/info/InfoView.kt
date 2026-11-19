@@ -7,7 +7,6 @@ import kotlinx.coroutines.CoroutineScope
 import org.archivekeep.app.desktop.ui.views.home.components.HomeArchiveKeepFunctionDescription
 import org.archivekeep.app.ui.components.designsystem.layout.views.ViewScrollableContainer
 import org.archivekeep.app.ui.components.designsystem.theme.CColors
-import org.archivekeep.app.ui.components.feature.WelcomeText
 import org.archivekeep.app.ui.views.View
 
 class InfoView : View<Unit> {
@@ -32,8 +31,6 @@ class InfoView : View<Unit> {
 @Composable
 private fun homeViewContent(vm: Unit) {
     ViewScrollableContainer {
-        WelcomeText()
-
         HomeArchiveKeepFunctionDescription()
     }
 }

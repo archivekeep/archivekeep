@@ -107,31 +107,33 @@
     <string name="appbar_close">Zavrieť aplikáciu</string>
     <string name="appbar_unlock_credentials">Odomknúť poverenia …</string>
 
-    <!-- ==================== WELCOME ==================== -->
-
-    <string name="welcome_title">Vitajte v ArchiveKeep</string>
-    <string name="welcome_subtitle">Osobná archivácia - synchronizácia a replikácia súborov medzi viacerými úložiskami (repozitármi)</string>
-
     <!-- ==================== HOME VIEW ==================== -->
 
     <!-- HomeViewContent -->
-    <string name="home_section_introduction">Úvod</string>
     <string name="home_section_local_archives">Lokálne archívy</string>
     <string name="home_section_external_archives">Externé archívy</string>
     <string name="home_section_external_storages">Externé úložiská</string>
 
-    <!-- HomeArchivesIntro -->
-    <string name="home_archives_intro_title">1. nastavenie lokálneho úložiska</string>
-    <string name="home_archives_intro_description">Začte pridaním lokálneho repozitára, ktorý bude obsahovať údaje, ktoré chcete archivovať.</string>
-    <string name="home_archives_intro_description_existing">Môže už obsahovať existujúce údaje.</string>
-    <string name="home_archives_intro_add_button">Pridať lokálny repozitár…</string>
-
-    <!-- HomeStoragesIntro -->
-    <string name="home_storages_intro_title">2. pridať externé úložiská</string>
-    <string name="home_storages_intro_description">Externé úložiská budú obsahovať kópiu vašich údajov.</string>
-    <string name="home_storages_intro_description_details">Môžu to byť externé disky, hostované servery (služby) alebo vlastný NAS server, …</string>
-    <string name="home_storages_intro_add_directory_button">Pridať adresár (v externom úložisku)…</string>
-    <string name="home_storages_intro_add_url_button">Pridať URL…</string>
+    <!-- Onboarding Carousel -->
+    <string name="onboarding_page_count_label">Stránka %1$d z %2$d</string>
+    <string name="onboarding_intro_title">Vitajte v ArchiveKeep</string>
+    <string name="onboarding_intro_paragraph_1">ArchiveKeep chráni vaše údaje tým, že udržiava kópie na viacerých miestach bezpečným a nedestruktívnym spôsobom — zmeny alebo poškodenie jednej kópie sa nikdy neprenášajú na ostatné.</string>
+    <string name="onboarding_intro_paragraph_2">Táto redundancia eliminuje jediný bod zlyhania: ak jedno úložisko stratíte alebo sa poškodí, vaše údaje prežijú na ostatných kopiách.</string>
+    <string name="onboarding_intro_paragraph_3">Pre najlepšiu ochranu kombinujte offline médiá (ochrana pred kompromitáciou cloudu alebo zariadenia) s cloudovým úložiskom (ochrana pred požiarom, povodňou alebo krádežou všetkých fyzických kópií).</string>
+    <string name="onboarding_intro_paragraph_4">ArchiveKeep tiež vypočítava SHA-256 odtlačok pre každý súbor, čo umožňuje detekovať a overiť integritu údajov — a zachytí aj tichý bit-rot v čase.</string>
+    <string name="onboarding_intro_button">Začať</string>
+    <string name="onboarding_local_title">1. Pridajte lokálny repozitár</string>
+    <string name="onboarding_local_description_1">Vyberte adresár na tomto zariadení pre váš archív — tam, kde sa nachádzajú vaše súbory alebo kam chcete archívované súbory stiahnuť.</string>
+    <string name="onboarding_local_description_2">Môžete mať viacero archívov pre rôzne účely — udržiavajte pracovné údaje, osobné fotky a dokumenty v samostatných archívoch. Zvážte to pri výbere adresára.</string>
+    <string name="onboarding_local_button">Pridať lokálny repozitár…</string>
+    <string name="onboarding_local_button_next">Preskočiť na neskôr</string>
+    <string name="onboarding_button_back">Späť</string>
+    <string name="onboarding_remote_title">2. Pridajte vzdialené alebo externé úložisko</string>
+    <string name="onboarding_remote_description_1">Vyberte, kde budú kópie vášho archívu uložené — externý disk, USB kľúč, cloudové úložisko alebo vzdialený server.</string>
+    <string name="onboarding_remote_description_2">Kópie na rôznych typoch úložiska zabezpečujú, že vaše údaje prežijú aj v prípade straty tohto zariadenia alebo zlyhania konkrétneho typu úložiska.</string>
+    <string name="onboarding_remote_button_filesystem">Pridať externé úložisko…</string>
+    <string name="onboarding_remote_button_remote">Pridať vzdialené úložisko…</string>
+    <string name="onboarding_remote_button_next">Dokončiť nastavenie</string>
 
     <!-- HomeArchivesList -->
     <string name="home_archives_list_empty">nič tu nie je …</string>

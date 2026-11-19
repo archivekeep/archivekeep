@@ -69,7 +69,6 @@
     <string name="appbar_title">ArchiveKeep</string>
     <string name="appbar_close">Sulge rakendus</string>
     <string name="appbar_unlock_credentials">Ava autentimisandmete lukustus…</string>
-    <string name="welcome_title">Tere tulemast, see on ArchiveKeep</string>
     <string name="common_starting">Käivitan</string>
     <string name="common_unlocking">Avan lukustust…</string>
     <string name="common_verify_contents">Kontrolli sisu</string>

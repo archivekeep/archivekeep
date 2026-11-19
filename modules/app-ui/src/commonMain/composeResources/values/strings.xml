@@ -107,31 +107,33 @@
     <string name="appbar_close">Close application</string>
     <string name="appbar_unlock_credentials">Unlock credentials …</string>
 
-    <!-- ==================== WELCOME ==================== -->
-
-    <string name="welcome_title">Welcome to ArchiveKeep</string>
-    <string name="welcome_subtitle">Personal archivation - file synchronization and replication across multiple storages (repositories)</string>
-
     <!-- ==================== HOME VIEW ==================== -->
 
     <!-- HomeViewContent -->
-    <string name="home_section_introduction">Introduction</string>
     <string name="home_section_local_archives">Local archives</string>
     <string name="home_section_external_archives">External archives</string>
     <string name="home_section_external_storages">External storages</string>
 
-    <!-- HomeArchivesIntro -->
-    <string name="home_archives_intro_title">1. setup local storage</string>
-    <string name="home_archives_intro_description">Begin by adding an local repository to contain data you want to have archived.</string>
-    <string name="home_archives_intro_description_existing">It can already contain existing data.</string>
-    <string name="home_archives_intro_add_button">Add local repository…</string>
-
-    <!-- HomeStoragesIntro -->
-    <string name="home_storages_intro_title">2. add external storages</string>
-    <string name="home_storages_intro_description">External storages will contain a copy of your data.</string>
-    <string name="home_storages_intro_description_details">These can be external drives, hosted servers (services), or self-hosted NAS server,...</string>
-    <string name="home_storages_intro_add_directory_button">Add directory (in external storage)…</string>
-    <string name="home_storages_intro_add_url_button">Add URL…</string>
+    <!-- Onboarding Carousel -->
+    <string name="onboarding_page_count_label">Page %1$d of %2$d</string>
+    <string name="onboarding_intro_title">Welcome to ArchiveKeep</string>
+    <string name="onboarding_intro_paragraph_1">ArchiveKeep protects your data by maintaining copies across multiple storage locations in a non-destructive way — changes or corruption on one copy never spread to the others.</string>
+    <string name="onboarding_intro_paragraph_2">This redundancy eliminates any single point of failure: if one storage is lost or damaged, your data survives on the remaining copies.</string>
+    <string name="onboarding_intro_paragraph_3">For the best protection, combine offline media (to guard against cloud or device compromise) with cloud storage (to guard against fire, flood, or theft of all physical copies).</string>
+    <string name="onboarding_intro_paragraph_4">ArchiveKeep also calculates a SHA-256 fingerprint for every file, which lets it detect and verify data integrity — even catching silent bit-rot over time.</string>
+    <string name="onboarding_intro_button">Get started</string>
+    <string name="onboarding_local_title">1. Add your local repository</string>
+    <string name="onboarding_local_description_1">Select a folder on this device for your archive, where your files live or will live in this device.</string>
+    <string name="onboarding_local_description_2">You can have multiple archives for different purposes — keep work data, personal photos, and documents in separate archives. Consider this when choosing a directory.</string>
+    <string name="onboarding_local_button">Add local repository…</string>
+    <string name="onboarding_local_button_next">Skip for now</string>
+    <string name="onboarding_button_back">Back</string>
+    <string name="onboarding_remote_title">2. Add a remote or external storage</string>
+    <string name="onboarding_remote_description_1">Choose where your archive copies will be stored — an external drive, USB flash drive, cloud storage, or a remote server.</string>
+    <string name="onboarding_remote_description_2">Having copies on different types of storage ensures your data survives even if this device is lost or a specific storage type fails.</string>
+    <string name="onboarding_remote_button_filesystem">Add external storage…</string>
+    <string name="onboarding_remote_button_remote">Add remote storage…</string>
+    <string name="onboarding_remote_button_next">Finish setup</string>
 
     <!-- HomeArchivesList -->
     <string name="home_archives_list_empty">nothing here ...</string>
