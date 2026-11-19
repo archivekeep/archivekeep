@@ -50,13 +50,14 @@ class FileReindexProcedureDialog(
         // TODO: this should be Loadable - show loading of contents
         val operationState: FileReindexProcedureSupervisor.State,
         val selectedFilesToReindex: MutableState<Set<String>>,
+        val onCancel: () -> Unit,
         val onClose: () -> Unit,
     ) {
         val controlState: DialogOperationControlState =
             when (val opState = operationState) {
                 is FileReindexProcedureSupervisor.JobState -> {
                     opState.executionState.toDialogOperationControlState(
-                        onCancel = null,
+                        onCancel = onCancel,
                         onHide = onClose,
                         onClose = onClose,
                     )
@@ -142,6 +143,7 @@ class FileReindexProcedureDialog(
                     archiveName = repository.displayName,
                     operationState = operationState,
                     selectedFilesToReindex = mutableStateOf(emptySet()),
+                    onCancel = { vm.operation.currentJobFlow.value?.cancel() },
                     onClose = vm::onClose,
                 )
             }

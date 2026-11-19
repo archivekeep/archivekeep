@@ -17,8 +17,6 @@ interface IndexUpdateProcedureSupervisor {
 
     fun discover(): Flow<Loadable<Discovery>>
 
-    fun cancel()
-
     sealed interface State
 
     sealed interface JobState :

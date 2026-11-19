@@ -39,6 +39,7 @@ ArchiveKeep is a **Kotlin Multiplatform** application for reliable file archivat
   - Name the feature plainly if it has a user-visible name (e.g., "quick-add," "quick scan") — but don't use backticks or code formatting.
   - Explain the benefit, not the mechanism: "without waiting for the full scan" instead of "bypassing the discovery phase."
   - Keep it action-oriented: start with a verb ("add," "allow," "fix," "improve").
+  - Cut redundant filler: if the verb already conveys the outcome, drop the rest. For example, "cancelling" implies stopping something in progress, so "allow cancelling verify contents operation" is sufficient — don't add "so users can stop file verification in progress."
 - **Avoid**:
   - Internal jargon ("index," "procedure," "supervisor," "discovery phase").
   - Implementation details ("add `startImmediate()` method," "refactor IndexUpdateProcedure").

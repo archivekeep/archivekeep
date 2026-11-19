@@ -49,13 +49,14 @@ class VerifyContentsDialog(
     data class State(
         val archiveName: String,
         val operationState: VerifySupervisor.State,
+        val onCancel: () -> Unit,
         val onClose: () -> Unit,
     ) {
         val controlState: DialogOperationControlState =
             when (val opState = operationState) {
                 is VerifySupervisor.JobState -> {
                     opState.executionState.toDialogOperationControlState(
-                        onCancel = null,
+                        onCancel = onCancel,
                         onHide = onClose,
                         onClose = onClose,
                     )
@@ -135,6 +136,7 @@ class VerifyContentsDialog(
                 State(
                     archiveName = repository.displayName,
                     operationState = operationState,
+                    onCancel = { vm.operation.currentJobFlow.value?.cancel() },
                     onClose = vm::onClose,
                 )
             }

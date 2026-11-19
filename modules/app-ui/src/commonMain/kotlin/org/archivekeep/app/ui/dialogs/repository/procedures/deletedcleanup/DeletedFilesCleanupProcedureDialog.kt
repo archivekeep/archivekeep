@@ -66,13 +66,14 @@ class DeletedFilesCleanupProcedureDialog(
         val operationState: DeletedFilesCleanupProcedureSupervisor.State,
         val selectedFilesToReindex: MutableState<Set<String>>,
         val canAdd: Boolean,
+        val onCancel: () -> Unit,
         val onClose: () -> Unit,
     ) {
         val controlState: DialogOperationControlState =
             when (val opState = operationState) {
                 is DeletedFilesCleanupProcedureSupervisor.JobState -> {
                     opState.executionState.toDialogOperationControlState(
-                        onCancel = null,
+                        onCancel = onCancel,
                         onHide = onClose,
                         onClose = onClose,
                     )
@@ -166,6 +167,7 @@ class DeletedFilesCleanupProcedureDialog(
                     operationState = operationState,
                     selectedFilesToReindex = mutableStateOf(emptySet()),
                     canAdd = canAdd.mapIfLoadedOrNull { it } ?: false,
+                    onCancel = { vm.operation.currentJobFlow.value?.cancel() },
                     onClose = vm::onClose,
                 )
             }

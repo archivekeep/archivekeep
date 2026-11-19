@@ -167,7 +167,7 @@ class IndexUpdateProcedureDialog(
                     operationState = operationState,
                     selectedFilesToAdd = mutableStateOf(emptySet()),
                     selectedMovesToExecute = mutableStateOf(emptySet()),
-                    onCancel = vm.operation::cancel,
+                    onCancel = { vm.operation.currentJobFlow.value?.cancel() },
                     onClose = vm::onClose,
                 )
             }
