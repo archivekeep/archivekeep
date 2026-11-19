@@ -530,5 +530,7 @@
     <string name="googledrive_retry">Retry</string>
     <string name="googledrive_no_folders_found">No folders found</string>
     <string name="googledrive_select_this_folder">Select this folder</string>
+    <string name="googledrive_cannot_open_browser">Cannot open browser automatically. Copy and paste the following address into your browser:</string>
+    <string name="googledrive_auth_url_label">Authorization URL</string>
 
 </resources>

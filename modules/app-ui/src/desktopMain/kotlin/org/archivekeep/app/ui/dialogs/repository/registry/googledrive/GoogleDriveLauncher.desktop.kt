@@ -22,7 +22,9 @@ actual fun createGoogleDriveAuthLauncher(
         {
             coroutineScope.launch {
                 try {
-                    val credentialsJson = provider.authenticate()
+                    val credentialsJson = provider.authenticate(onAuthUrl = { url ->
+                        onResult(GoogleDriveAuthResult.Failure(RuntimeException("Browser not available"), url))
+                    })
                     onResult(GoogleDriveAuthResult.Success(credentialsJson))
                 } catch (e: Throwable) {
                     onResult(GoogleDriveAuthResult.Failure(e))

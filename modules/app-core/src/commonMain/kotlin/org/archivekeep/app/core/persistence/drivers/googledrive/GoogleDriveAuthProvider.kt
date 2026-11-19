@@ -8,7 +8,7 @@ interface GoogleDriveAuthProvider {
     val isSupported: Boolean
         get() = true
 
-    suspend fun authenticate(): String
+    suspend fun authenticate(onAuthUrl: ((String) -> Unit)? = null): String
 
     fun createDriveClient(credentialsJson: String): Drive
 }

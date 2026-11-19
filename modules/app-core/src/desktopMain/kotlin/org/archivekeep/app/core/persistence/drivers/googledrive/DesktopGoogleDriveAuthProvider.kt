@@ -1,6 +1,5 @@
 package org.archivekeep.app.core.persistence.drivers.googledrive
 
-import com.google.api.client.extensions.java6.auth.oauth2.AuthorizationCodeInstalledApp
 import com.google.api.client.extensions.jetty.auth.oauth2.LocalServerReceiver
 import com.google.api.client.googleapis.auth.oauth2.GoogleAuthorizationCodeFlow
 import com.google.api.client.googleapis.javanet.GoogleNetHttpTransport
@@ -13,6 +12,10 @@ import com.google.auth.http.HttpCredentialsAdapter
 import com.google.gson.GsonBuilder
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import java.awt.Desktop
+import java.awt.Desktop.Action
+import java.io.IOException
+import java.net.URI
 import java.util.Collections
 
 class DesktopGoogleDriveAuthProvider(
@@ -34,7 +37,7 @@ class DesktopGoogleDriveAuthProvider(
             .build()
     }
 
-    override suspend fun authenticate(): String {
+    override suspend fun authenticate(onAuthUrl: ((String) -> Unit)?): String {
         val credential =
             withContext(Dispatchers.IO) {
                 val httpTransport = NetHttpTransport()
@@ -43,7 +46,7 @@ class DesktopGoogleDriveAuthProvider(
                 val localServerReceiver =
                     LocalServerReceiver
                         .Builder()
-                        .setPort(0)
+                        .setPort(-1)
                         .build()
 
                 val flow =
@@ -59,8 +62,43 @@ class DesktopGoogleDriveAuthProvider(
                         .setApprovalPrompt("force")
                         .build()
 
-                AuthorizationCodeInstalledApp(flow, localServerReceiver)
-                    .authorize("user")
+                // Start the local server by getting the redirect URI
+                val redirectUri = localServerReceiver.getRedirectUri()
+
+                // Build the authorization URL
+                val authorizationUrl =
+                    flow
+                        .newAuthorizationUrl()
+                        .setRedirectUri(redirectUri)
+                        .build()
+                        .toString()
+
+                // Try to open the browser
+                try {
+                    if (Desktop.isDesktopSupported() && Desktop.getDesktop().isSupported(Action.BROWSE)) {
+                        Desktop.getDesktop().browse(URI.create(authorizationUrl))
+                    } else {
+                        onAuthUrl?.invoke(authorizationUrl)
+                    }
+                } catch (e: IOException) {
+                    onAuthUrl?.invoke(authorizationUrl)
+                } catch (e: InternalError) {
+                    onAuthUrl?.invoke(authorizationUrl)
+                }
+
+                // Wait for the authorization code — the server keeps running regardless of whether
+                // the browser opened successfully. The user can manually paste the URL into their
+                // browser, and the callback will still be received.
+                val code = localServerReceiver.waitForCode()
+
+                // Exchange the authorization code for tokens
+                val tokenResponse = flow.newTokenRequest(code).setRedirectUri(redirectUri).execute()
+
+                // Store and return the credential
+                flow.createAndStoreCredential(tokenResponse, "user").also { credential ->
+                    localServerReceiver.stop()
+                    credential
+                }
             }
 
         val refreshToken =

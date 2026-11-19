@@ -9,6 +9,7 @@ sealed interface GoogleDriveAuthResult {
 
     data class Failure(
         val error: Throwable,
+        val authUrl: String? = null,
     ) : GoogleDriveAuthResult
 
     data object Cancelled : GoogleDriveAuthResult

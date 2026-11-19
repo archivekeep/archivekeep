@@ -48,6 +48,8 @@ import org.archivekeep.ui.resources.googledrive_root_folder_id
 import org.archivekeep.ui.resources.googledrive_root_folder_id_placeholder
 import org.archivekeep.ui.resources.googledrive_share_folder_info
 import org.archivekeep.ui.resources.googledrive_sign_in
+import org.archivekeep.ui.resources.googledrive_auth_url_label
+import org.archivekeep.ui.resources.googledrive_cannot_open_browser
 import org.archivekeep.ui.resources.googledrive_sign_in_unavailable
 import org.archivekeep.ui.resources.googledrive_signing_in
 import org.archivekeep.ui.resources.googledrive_use_credentials_file
@@ -67,6 +69,7 @@ fun GoogleDriveForm(
     var showFolderPicker by remember { mutableStateOf(false) }
     var isSigningIn by remember { mutableStateOf(false) }
     var authError by remember { mutableStateOf<Throwable?>(null) }
+    var authUrl by remember { mutableStateOf<String?>(null) }
     val coroutineScope = rememberCoroutineScope()
     val appServices = LocalApplicationServices.current
     val walletData = appServices.walletDataStore.data.collectAsState(initial = null).value
@@ -91,13 +94,20 @@ fun GoogleDriveForm(
                         authError = e
                     } finally {
                         isSigningIn = false
+                        authUrl = null
                     }
                 }
             }
 
             is GoogleDriveAuthResult.Failure -> {
-                authError = result.error
-                isSigningIn = false
+                if (result.authUrl != null) {
+                    // Browser couldn't be opened — auth is still in progress, just show the URL
+                    authUrl = result.authUrl
+                } else {
+                    // Actual auth failure
+                    authError = result.error
+                    isSigningIn = false
+                }
             }
 
             GoogleDriveAuthResult.Cancelled -> {
@@ -134,15 +144,18 @@ fun GoogleDriveForm(
                 onClick = {
                     isSigningIn = true
                     authError = null
+                    authUrl = null
                     coroutineScope.launch {
                         try {
                             if (!walletOperationLaunchers.ensureWalletForWrite()) {
                                 isSigningIn = false
+                                authUrl = null
                                 return@launch
                             }
                             signInAction()
                         } catch (e: Throwable) {
                             authError = e
+                            authUrl = null
                             isSigningIn = false
                         }
                     }
@@ -182,11 +195,28 @@ fun GoogleDriveForm(
             ) {
                 Text(stringResource(Res.string.googledrive_use_credentials_file))
             }
-            if (authError != null) {
+            if (authError != null && authUrl == null) {
                 Spacer(Modifier.height(8.dp))
                 AutomaticErrorMessage(
                     cause = authError!!,
-                    onResolve = { authError = null },
+                    onResolve = { 
+                        authError = null
+                    },
+                )
+            }
+            if (authUrl != null) {
+                Spacer(Modifier.height(8.dp))
+                Text(stringResource(Res.string.googledrive_cannot_open_browser))
+                Spacer(Modifier.height(4.dp))
+                TextField(
+                    authUrl!!,
+                    onValueChange = {},
+                    label = { Text(stringResource(Res.string.googledrive_auth_url_label)) },
+                    readOnly = true,
+                    singleLine = false,
+                    minLines = 1,
+                    maxLines = 3,
+                    modifier = Modifier.fillMaxWidth(),
                 )
             }
 

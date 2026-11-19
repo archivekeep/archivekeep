@@ -8,7 +8,7 @@ import com.google.auth.http.HttpCredentialsAdapter
 class AndroidGoogleDriveAuthProvider(
     override val clientId: String,
 ) : GoogleDriveAuthProvider {
-    override suspend fun authenticate(): String = throw GoogleDriveAuthException("Use browser sign-in for Google Drive")
+    override suspend fun authenticate(onAuthUrl: ((String) -> Unit)?): String = throw GoogleDriveAuthException("Use browser sign-in for Google Drive")
 
     override fun createDriveClient(credentialsJson: String): Drive {
         val credentials = GoogleDriveOAuthCredentials.createGoogleCredentials(credentialsJson)
