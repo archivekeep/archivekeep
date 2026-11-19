@@ -1,0 +1,58 @@
+name: Build Android APK
+
+on:
+  push:
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
+
+jobs:
+  build-android:
+    runs-on: ubuntu-26.04
+    permissions:
+      contents: read
+
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@v5
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v5
+
+      - name: Set up Android SDK
+        uses: android-actions/setup-android@v3
+        with:
+          command: sdkmanager
+          packages: 'build-tools;35.0.1'
+
+      - name: Apply F-Droid patches
+        run: |
+          cd modules/app-android
+          sed -i -e '/jetbrains/d' -e '/offline-repository/d' -e '/^\s\{20\}maven {/,/^\s\{20\}}/d' ../../build.gradle.kts
+          sed -i -e '/offline-repository/d' ../../settings.gradle.kts
+
+      - name: Build APK
+        run: |
+          cd modules/app-android
+          ../../gradlew --no-daemon --console=plain build
+
+      - name: Locate and align APK
+        run: |
+          cd modules/app-android
+          find . -iname "*.apk"
+          cp ./build/outputs/apk/release/app-android-release-unsigned.apk ./
+          "${ANDROID_HOME}/build-tools/35.0.1/zipalign" -v -p 4 app-android-release-unsigned.apk app-android-release-unsigned-aligned.apk
+
+      - name: Upload aligned APK
+        uses: actions/upload-artifact@v6
+        with:
+          name: archivekeep-android-apk
+          path: modules/app-android/app-android-release-unsigned-aligned.apk
+          retention-days: 7
