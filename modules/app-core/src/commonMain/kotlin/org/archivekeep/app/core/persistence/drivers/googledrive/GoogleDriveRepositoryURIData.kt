@@ -7,7 +7,7 @@ import org.archivekeep.app.core.utils.identifiers.TypedRepoURIData
 data class GoogleDriveRepositoryURIData(
     val rootFolderId: String,
 ) : TypedRepoURIData {
-    override val storageURI = StorageURI(ID, rootFolderId)
+    override val storageURI = StorageURI(ID, "")
 
     override val defaultLabel = rootFolderId
 

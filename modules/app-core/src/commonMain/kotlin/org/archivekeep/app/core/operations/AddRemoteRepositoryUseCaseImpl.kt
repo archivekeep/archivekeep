@@ -14,6 +14,7 @@ import org.archivekeep.app.core.domain.storages.getDriverForURI
 import org.archivekeep.app.core.persistence.credentials.CredentialsStore
 import org.archivekeep.app.core.persistence.registry.RegistryDataStore
 import org.archivekeep.app.core.utils.identifiers.RepositoryURI
+import org.archivekeep.app.core.utils.identifiers.StorageURI
 import org.archivekeep.files.api.repository.auth.BasicAuthCredentials
 import org.archivekeep.utils.loading.optional.OptionalLoadable
 
@@ -34,7 +35,43 @@ class AddRemoteRepositoryUseCaseImpl(
         uri: RepositoryURI,
         credentialsJson: String,
         label: String?,
-    ): AddRemoteRepositoryOutcome = addRemote(uri, null, false, credentialsJson, label)
+    ): AddRemoteRepositoryOutcome {
+        val result = addRemote(uri, null, false, credentialsJson, label)
+        val storageURI = uri.typedRepoURIData.storageURI
+        when (result) {
+            is AddRemoteRepositoryOutcome.Added -> {
+                ensureStorageRegistered(storageURI)
+            }
+            is AddRemoteRepositoryOutcome.NeedsInitialization -> {
+                AddRemoteRepositoryOutcome.NeedsInitialization(
+                    initializeAsPlain =
+                        result.initializeAsPlain?.let { initializeAsPlain ->
+                            {
+                                initializeAsPlain()
+                                ensureStorageRegistered(storageURI)
+                            }
+                        },
+                    initializeAsE2EEPasswordProtected =
+                        result.initializeAsE2EEPasswordProtected?.let { initializeAsE2EEPasswordProtected ->
+                            { password ->
+                                initializeAsE2EEPasswordProtected(password)
+                                ensureStorageRegistered(storageURI)
+                            }
+                        },
+                )
+            }
+        }
+        return result
+    }
+
+    private suspend fun ensureStorageRegistered(storageURI: StorageURI) {
+        registry.updateStorage(storageURI) {
+            it.copy(
+                label = "Google Drive",
+                isLocal = false,
+            )
+        }
+    }
 
     private suspend fun addRemote(
         uri: RepositoryURI,
