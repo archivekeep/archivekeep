@@ -10,3 +10,10 @@ Features:
     <li>Incremental synchronization - update offline and other storages incrementally, when they become available.</li>
     <li>Filesystem agnostic</li>
 </ul>
+
+Optional cloud storage (not required, works fully offline):
+<ul>
+    <li>Google Drive – convenient, familiar, widespread.</li>
+    <li>S3 API – choose vendor(s) you like, no lock-in.</li>
+    <li>Planned support for more ...</li>
+</ul>

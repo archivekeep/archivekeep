@@ -44,9 +44,14 @@ Assuming you don't lose every access to each copy of your data.
 
 Supported storages:
 
-- [X] plain simple files on HDD, SSD, USB drives or other filesystem media.
-- [ ] self-hosting server - currently, it is implemented in previous version written in Go, not yet rewritten to Kotlin, but it's compatible with Kotlin client,
-- [ ] Amazon S3 and object storage services providing S3 API.
+- [X] plain simple files on HDD, SSD, USB drives or other filesystem media,
+- [X] Google Drive – convenient, familiar, widespread,
+- [X] S3 API compatible object storage services,
+- [ ] open-source self-hosted storages.
+
+Planned support for other cloud storage APIs and open-source self-hosting solutions is on the roadmap.
+
+_**Note:** Remote storage APIs must expose SHA-256 file checksums for ability to integrate._
 
 Encryption:
 

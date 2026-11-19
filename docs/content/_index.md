@@ -83,11 +83,14 @@ The contents of files stored in repositories are verifiable using digital checks
 
 ## Cloud supported
 
-For data preservation confidence, replication to remote storage(s) is essential.
+For data preservation confidence, replication to remote storage(s) is often essential.
 
-Supported API:
+- Google Drive – convenient, familiar, widespread,
+- S3 API – choose vendor(s) you like, no lock-in. 
 
-- S3 API - choose vendor(s) you like, no lock-in.
+*Planned more support, including open-source self-hosting solutions.*
+
+_**Note:** remote storage APIs must expose SHA-256 file checksums for ability to integrate._
 
 
 </div>

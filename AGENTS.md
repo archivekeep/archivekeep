@@ -23,6 +23,7 @@ ArchiveKeep is a **Kotlin Multiplatform** application for reliable file archivat
 - **Audience**: Non-technical users and future developers — the message should be understandable without reading the code.
 - **Format**: Use conventional commits (`feat:`, `fix:`, `ui:`, etc.) followed by a single, concise sentence.
 - **Focus on the "what" and "why"**: Describe what changed from the user's perspective and the benefit, not the internal implementation details.
+- **Intention and impact**: Every commit message should make the purpose of the change clear — what problem it solves or what value it adds. The reader should understand why the change exists, not just what files were touched.
 - **Structure**: One sentence maximum — name the feature or fix, then explain the user-facing impact.
 - **Conventional commit types**:
   - `feat:` — new user-visible feature or functionality that changes how the app works or what it can do
@@ -69,6 +70,7 @@ ArchiveKeep is a **Kotlin Multiplatform** application for reliable file archivat
   - ✅ `ui: show as many action buttons as fit in section card overflow row instead of just one` — focuses on what changed, not what existed
 - **Validation**: After drafting, ask: "Would someone who doesn't know the codebase understand what changed and why it matters?"
 - **One-liner rule**: Commit messages must be a single line — no multi-line commits, no bullet points, no elaboration. If the change is way too complex or big, ask whether multi-line is acceptable.
+- **Documentation commits**: When changes span multiple documentation files, use a broad scope descriptor like "user-facing documentation and materials" instead of listing every file.
 
 ---
 
