@@ -509,6 +509,7 @@
     <string name="googledrive_root_folder_id_placeholder">ID adresára v Google Drive</string>
     <string name="googledrive_pick_folder">Vybrať adresár z Google Drive</string>
     <string name="googledrive_sign_in">Prihlásiť sa pomocou Google</string>
+    <string name="googledrive_re_sign_in">Znovu prihlásiť sa pomocou Google</string>
     <string name="googledrive_signing_in">Prihlasuje sa...</string>
     <string name="googledrive_waiting_for_browser">Čaká sa na prehliadač...</string>
     <string name="googledrive_use_credentials_file">Namiesto toho použiť súbor s povereniami</string>

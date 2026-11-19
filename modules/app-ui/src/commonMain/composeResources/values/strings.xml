@@ -509,6 +509,7 @@
     <string name="googledrive_root_folder_id_placeholder">Google Drive folder ID</string>
     <string name="googledrive_pick_folder">Pick folder from Google Drive</string>
     <string name="googledrive_sign_in">Sign in with Google</string>
+    <string name="googledrive_re_sign_in">Re-sign in with Google</string>
     <string name="googledrive_signing_in">Signing in...</string>
     <string name="googledrive_waiting_for_browser">Waiting for browser...</string>
     <string name="googledrive_use_credentials_file">Use credentials file instead</string>

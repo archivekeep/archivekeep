@@ -5,9 +5,12 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.OpenInNew
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
@@ -39,6 +42,7 @@ import org.archivekeep.ui.resources.googledrive_credential_json_info
 import org.archivekeep.ui.resources.googledrive_credential_json_placeholder
 import org.archivekeep.ui.resources.googledrive_folder_and_auth
 import org.archivekeep.ui.resources.googledrive_pick_folder
+import org.archivekeep.ui.resources.googledrive_re_sign_in
 import org.archivekeep.ui.resources.googledrive_root_folder_id
 import org.archivekeep.ui.resources.googledrive_root_folder_id_placeholder
 import org.archivekeep.ui.resources.googledrive_share_folder_info
@@ -117,7 +121,7 @@ fun GoogleDriveForm(
         )
         if (input.credentialsJson.value.isNotBlank() && isEditable) {
             Spacer(Modifier.height(4.dp))
-            TextButton(
+            Button(
                 onClick = { showFolderPicker = true },
                 enabled = isEditable,
                 modifier = Modifier.fillMaxWidth(),
@@ -138,76 +142,61 @@ fun GoogleDriveForm(
             onDismiss = { showFolderPicker = false },
         )
     } else if (hasAuth && !showManualCredentials) {
-        Column(modifier = Modifier.fillMaxWidth()) {
+        val isSignedIn = input.credentialsJson.value.isNotBlank()
+        val signInAction = remember(launcher, onOAuthSignIn) {
             if (launcher != null) {
-                Button(
-                    onClick = {
-                        isSigningIn = true
-                        authError = null
-                        coroutineScope.launch {
-                            try {
-                                if (!walletOperationLaunchers.ensureWalletForWrite()) {
-                                    isSigningIn = false
-                                    return@launch
-                                }
-                                launcher()
-                            } catch (e: Throwable) {
-                                authError = e
-                                isSigningIn = false
-                            }
-                        }
-                    },
-                    enabled = isEditable && !isSigningIn && walletIsOpen,
-                    modifier = Modifier.fillMaxWidth(),
-                ) {
-                    if (isSigningIn) {
-                        CircularProgressIndicator(modifier = Modifier.padding(4.dp))
-                        Spacer(Modifier.height(4.dp))
-                        Text(stringResource(Res.string.googledrive_signing_in))
-                    } else {
-                        Icon(
-                            Icons.AutoMirrored.Filled.OpenInNew,
-                            contentDescription = null,
-                        )
-                        Spacer(Modifier.height(4.dp))
-                        Text(stringResource(Res.string.googledrive_sign_in))
-                    }
+                suspend { launcher() }
+            } else {
+                suspend {
+                    val credentialsJson = onOAuthSignIn!!()
+                    appServices.credentialsStore.saveGoogleDriveCredentials(credentialsJson)
+                    input.credentialsJson.value = credentialsJson
                 }
-            } else if (onOAuthSignIn != null) {
-                Button(
-                    onClick = {
-                        isSigningIn = true
-                        authError = null
-                        coroutineScope.launch {
-                            try {
-                                if (!walletOperationLaunchers.ensureWalletForWrite()) {
-                                    return@launch
-                                }
-                                val credentialsJson = onOAuthSignIn()
-                                appServices.credentialsStore.saveGoogleDriveCredentials(credentialsJson)
-                                input.credentialsJson.value = credentialsJson
-                            } catch (e: Throwable) {
-                                authError = e
-                            } finally {
+            }
+        }
+        Column(modifier = Modifier.fillMaxWidth()) {
+            Button(
+                onClick = {
+                    isSigningIn = true
+                    authError = null
+                    coroutineScope.launch {
+                        try {
+                            if (!walletOperationLaunchers.ensureWalletForWrite()) {
                                 isSigningIn = false
+                                return@launch
                             }
+                            signInAction()
+                        } catch (e: Throwable) {
+                            authError = e
+                            isSigningIn = false
                         }
-                    },
-                    enabled = isEditable && !isSigningIn && walletIsOpen,
-                    modifier = Modifier.fillMaxWidth(),
-                ) {
-                    if (isSigningIn) {
-                        CircularProgressIndicator(modifier = Modifier.padding(4.dp))
-                        Spacer(Modifier.height(4.dp))
-                        Text(stringResource(Res.string.googledrive_waiting_for_browser))
-                    } else {
-                        Icon(
-                            Icons.AutoMirrored.Filled.OpenInNew,
-                            contentDescription = null,
-                        )
-                        Spacer(Modifier.height(4.dp))
-                        Text(stringResource(Res.string.googledrive_sign_in))
                     }
+                },
+                enabled = isEditable && !isSigningIn && walletIsOpen,
+                colors = if (isSignedIn) ButtonDefaults.outlinedButtonColors() else ButtonDefaults.buttonColors(),
+                border = if (isSignedIn) ButtonDefaults.outlinedButtonBorder(true) else null,
+                modifier = Modifier.fillMaxWidth(),
+            ) {
+                if (isSigningIn) {
+                    CircularProgressIndicator(
+                        strokeWidth = 2.dp,
+                        gapSize = 0.dp,
+                        modifier = Modifier.size(16.dp))
+                    Spacer(Modifier.width(8.dp))
+                    Text(stringResource(
+                        if (launcher != null) {
+                            Res.string.googledrive_signing_in
+                        } else {
+                            Res.string.googledrive_waiting_for_browser
+                        }
+                    ))
+                } else {
+                    Icon(
+                        Icons.AutoMirrored.Filled.OpenInNew,
+                        contentDescription = null,
+                    )
+                    Spacer(Modifier.width(6.dp))
+                    Text(stringResource(if (isSignedIn) Res.string.googledrive_re_sign_in else Res.string.googledrive_sign_in))
                 }
             }
             Spacer(Modifier.height(8.dp))
