@@ -505,7 +505,7 @@
     <!-- ==================== GOOGLE DRIVE ==================== -->
 
     <string name="googledrive_title">Google Drive</string>
-    <string name="googledrive_folder_and_auth">Adresár a overenie pre Google Drive:</string>
+    <string name="googledrive_folder_and_auth">Vyberte adresár v Google Drive ako svoj archív:</string>
     <string name="googledrive_root_folder_id">ID koreňového adresára</string>
     <string name="googledrive_root_folder_id_placeholder">ID adresára v Google Drive</string>
     <string name="googledrive_pick_folder">Vybrať adresár z Google Drive</string>

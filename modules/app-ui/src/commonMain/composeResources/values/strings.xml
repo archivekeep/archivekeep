@@ -505,7 +505,7 @@
     <!-- ==================== GOOGLE DRIVE ==================== -->
 
     <string name="googledrive_title">Google Drive</string>
-    <string name="googledrive_folder_and_auth">Google Drive folder and authentication:</string>
+    <string name="googledrive_folder_and_auth">Select a Google Drive folder to use as your repository:</string>
     <string name="googledrive_root_folder_id">Root folder ID</string>
     <string name="googledrive_root_folder_id_placeholder">Google Drive folder ID</string>
     <string name="googledrive_pick_folder">Pick folder from Google Drive</string>

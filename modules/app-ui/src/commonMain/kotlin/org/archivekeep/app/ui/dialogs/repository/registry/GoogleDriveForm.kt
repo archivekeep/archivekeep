@@ -12,6 +12,7 @@ import androidx.compose.material.icons.automirrored.filled.OpenInNew
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -107,42 +108,15 @@ fun GoogleDriveForm(
     val hasAuth = launcher != null || onOAuthSignIn != null
 
     Text(stringResource(Res.string.googledrive_folder_and_auth))
-    Spacer(Modifier.height(4.dp))
+    Spacer(Modifier.height(16.dp))
 
-    Column(modifier = Modifier.fillMaxWidth()) {
-        TextField(
-            input.rootFolderId.value,
-            onValueChange = { input.rootFolderId.value = it },
-            label = { Text(stringResource(Res.string.googledrive_root_folder_id)) },
-            placeholder = { Text(stringResource(Res.string.googledrive_root_folder_id_placeholder)) },
-            singleLine = true,
-            enabled = isEditable,
-            modifier = Modifier.fillMaxWidth(),
-        )
-        if (input.credentialsJson.value.isNotBlank() && isEditable) {
-            Spacer(Modifier.height(4.dp))
-            Button(
-                onClick = { showFolderPicker = true },
-                enabled = isEditable,
-                modifier = Modifier.fillMaxWidth(),
-            ) {
-                Text(stringResource(Res.string.googledrive_pick_folder))
-            }
-        }
-    }
+    GoogleDriveWalletAlert(
+        walletData = walletData,
+        walletOperationLaunchers = walletOperationLaunchers,
+        isEditable = isEditable,
+    )
 
-    Spacer(Modifier.height(12.dp))
-
-    if (showFolderPicker) {
-        GoogleDriveFolderPickerDialog(
-            credentialsJson = input.credentialsJson.value,
-            onFolderSelected = { folderId, folderName ->
-                input.rootFolderId.value = folderId
-                input.rootFolderName.value = folderName
-            },
-            onDismiss = { showFolderPicker = false },
-        )
-    } else if (hasAuth && !showManualCredentials) {
+    if (hasAuth && !showManualCredentials) {
         val isSignedIn = input.credentialsJson.value.isNotBlank()
         val signInAction = remember(launcher, onOAuthSignIn) {
             if (launcher != null) {
@@ -203,7 +177,7 @@ fun GoogleDriveForm(
             Spacer(Modifier.height(8.dp))
             TextButton(
                 onClick = { showManualCredentials = true },
-                enabled = isEditable,
+                enabled = isEditable && walletIsOpen,
                 modifier = Modifier.fillMaxWidth(),
             ) {
                 Text(stringResource(Res.string.googledrive_use_credentials_file))
@@ -224,12 +198,6 @@ fun GoogleDriveForm(
             modifier = Modifier.padding(bottom = 4.dp),
         )
     }
-
-    GoogleDriveWalletAlert(
-        walletData = walletData,
-        walletOperationLaunchers = walletOperationLaunchers,
-        isEditable = isEditable,
-    )
 
     if (showManualCredentials || !hasAuth) {
         Spacer(Modifier.height(8.dp))
@@ -258,7 +226,40 @@ fun GoogleDriveForm(
         }
     }
 
-    Spacer(Modifier.height(12.dp))
+    Spacer(Modifier.height(4.dp))
+    HorizontalDivider()
+    Spacer(Modifier.height(16.dp))
+
+    if (showFolderPicker) {
+        GoogleDriveFolderPickerDialog(
+            credentialsJson = input.credentialsJson.value,
+            onFolderSelected = { folderId, folderName ->
+                input.rootFolderId.value = folderId
+                input.rootFolderName.value = folderName
+            },
+            onDismiss = { showFolderPicker = false },
+        )
+    }
+
+    Column(modifier = Modifier.fillMaxWidth()) {
+        Button(
+            onClick = { showFolderPicker = true },
+            enabled = input.credentialsJson.value.isNotBlank() && isEditable,
+            modifier = Modifier.fillMaxWidth(),
+        ) {
+            Text(stringResource(Res.string.googledrive_pick_folder))
+        }
+        Spacer(Modifier.height(4.dp))
+        TextField(
+            input.rootFolderId.value,
+            onValueChange = { input.rootFolderId.value = it },
+            label = { Text(stringResource(Res.string.googledrive_root_folder_id)) },
+            placeholder = { Text(stringResource(Res.string.googledrive_root_folder_id_placeholder)) },
+            singleLine = true,
+            enabled = isEditable,
+            modifier = Modifier.fillMaxWidth(),
+        )
+    }
 }
 
 @Composable
@@ -283,5 +284,8 @@ private fun GoogleDriveWalletAlert(
                 Text(stringResource(Res.string.dialog_unlock_wallet_open))
             }
         }
+        Spacer(Modifier.height(24.dp))
+        HorizontalDivider()
+        Spacer(Modifier.height(24.dp))
     }
 }
