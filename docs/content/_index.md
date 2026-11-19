@@ -17,7 +17,7 @@
             <h2>ArchiveKeep<span class="sub">Files archiving</span></h2>
             <p>Use your own <strong>SSD, HDD, USB flash-drives,...</strong> Rent <strong>cloud storages</strong> without vendor lock-in. Self-host. <strong>Combine</strong> storages.</p>
             <div class="links">
-                <a href='#download'><img alt="Download" src="https://img.shields.io/badge/Download-4A86CF?style=for-the-badge&logo=arrow-down&logoColor=white"/></a>
+                <a class="download-btn" href='#download'>Download</a>
             </div>
         </div>
         <div class="other">
@@ -128,13 +128,20 @@ _**Note:** there's no dedicated application for self-hosting._
 </div>
 </div>
 
-<div class="two-col-section-wrapper">
-<div class="two-col-section">
+<div class="three-col-section-wrapper">
+<div class="three-col-section">
 <div class="section-title">
 
 ## Download
 
 </div>
+<div><div>
+
+### Windows platform
+
+Support is planned, GitHub [issue](https://github.com/archivekeep/archivekeep/issues/15) created.
+
+</div></div>
 <div><div>
 
 ### Linux platform

@@ -255,6 +255,31 @@ div.home-page {
           height: 40px;
           width: auto;
         }
+
+        a.download-btn {
+          display: inline-flex;
+          align-items: center;
+          gap: 0.5rem;
+          padding: 0.625rem 1.5rem 0.625rem 1.25rem;
+          background-color: #4A86CF;
+          color: #fff;
+          text-decoration: none;
+          font-weight: 600;
+          font-size: 1rem;
+          border-radius: 0.5rem;
+          transition: background-color 0.15s ease;
+
+          &::before {
+            content: "\2193";
+            font-size: 1.1rem;
+            line-height: 1;
+            margin-right: 0.125rem;
+          }
+
+          &:hover {
+            background-color: #3a70b0;
+          }
+        }
       }
 
       a.other-link, a.other-link:visited {
