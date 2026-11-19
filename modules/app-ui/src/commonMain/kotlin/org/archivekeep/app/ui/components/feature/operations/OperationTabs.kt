@@ -33,11 +33,11 @@ private const val TAB_PERFORMANCE = "performance"
 
 @Composable
 private fun getTabOptions(
-    trackerPresent: Boolean,
+    trackerPresentAndNotEmpty: Boolean,
 ): List<Pair<String, @Composable () -> String>> = listOfNotNull(
     TAB_SUMMARY to { stringResource(Res.string.common_summary) },
     TAB_LOG to { stringResource(Res.string.common_log) },
-    if (trackerPresent) TAB_PERFORMANCE to { stringResource(Res.string.common_performance) } else null,
+    if (trackerPresentAndNotEmpty) TAB_PERFORMANCE to { stringResource(Res.string.common_performance) } else null,
     TAB_ERROR_LOG to { stringResource(Res.string.common_errors) },
 )
 
@@ -49,7 +49,8 @@ fun <S : BaseJobState> OperationProgressTabs(
 ) {
     var selectedTab by remember { mutableStateOf(TAB_SUMMARY) }
 
-    val tabOptions = getTabOptions(state.performanceTracker!=null)
+    val statsSnapshot = state.performanceTracker?.statsSnapshot?.collectAsState()
+    val tabOptions = getTabOptions(statsSnapshot?.value?.isNotEmpty() == true)
     val validTabOptions = tabOptions.filter { it.first != TAB_ERROR_LOG || errorLog != null }
 
     TabRow {

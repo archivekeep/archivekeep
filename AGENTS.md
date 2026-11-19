@@ -26,8 +26,8 @@ ArchiveKeep is a **Kotlin Multiplatform** application for reliable file archivat
 - **Structure**: One sentence maximum — name the feature or fix, then explain the user-facing impact.
 - **Conventional commit types**:
   - `feat:` — new user-visible feature or functionality
-  - `fix:` — fixes a bug or incorrect behavior
-  - `ui:` — presentation-layer changes with no new functionality or bug fix (restyling, visual polish, layout adjustments, theme changes)
+  - `fix:` — fixes a bug or incorrect behavior (wrong values, crashes, data loss, broken workflows)
+  - `ui:` — presentation-layer changes with no new functionality or bug fix (restyling, visual polish, layout adjustments, theme changes, hiding empty UI elements, conditional visibility of tabs/panels)
   - `docs:` — documentation changes (README, CHANGELOG, guides, agent instructions)
   - `refactor:` — internal code changes with **no user-visible effect** (do not use if the change looks different to the user)
   - `chore:` — maintenance tasks, dependencies, build config
@@ -46,6 +46,7 @@ ArchiveKeep is a **Kotlin Multiplatform** application for reliable file archivat
   - Repetition: don't repeat the same word (e.g., "performance tab showing performance").
   - Backticks or code formatting around feature names.
   - Multiple sentences or semicolons — keep it to one clear statement.
+  - Mislabeling `ui:` changes as `fix:` — hiding empty content, toggling visibility, or adjusting what the user sees is a `ui:` change, not a bug fix. A `fix:` is reserved for incorrect behavior, crashes, or data issues.
 - **Template**: `type: [verb] [feature name] to [user benefit]`
   - Optionally append: `without/instead of [pain point]` when it adds clarity.
 - **Examples**:
@@ -54,13 +55,16 @@ ArchiveKeep is a **Kotlin Multiplatform** application for reliable file archivat
   - ✅ `feat: share Google Drive login across repositories to avoid signing in for each one`
   - ✅ `fix: prevent duplicate files from being added when repository path changes`
   - ✅ `ui: replace operation progress tabs with button-style design to improve visual consistency across the app`
+  - ✅ `ui: hide performance tab when tracker has no recorded stats`
   - ❌ `refactor: replace operation progress tabs with button-style design` — visible change, not a refactor
   - ❌ `style: restyle tab buttons with filled background` — UI change, not code formatting
   - ❌ `feat: implement startImmediate() in IndexUpdateProcedureSupervisor`
   - ❌ `fix: handle edge case in discovery result processing`
+  - ❌ `fix: hide performance tab when tracker has no recorded stats` — hiding empty content is a `ui:` change, not a bug fix
   - ❌ `feat: add performance tab showing performances of tracked internal operations`
   - ❌ `feat: save Google Drive login securely for use across repositories` — secure saving already existed; sharing is the change
 - **Validation**: After drafting, ask: "Would someone who doesn't know the codebase understand what changed and why it matters?"
+- **One-liner rule**: Commit messages must be a single line — no multi-line commits, no bullet points, no elaboration. If the change is way too complex or big, ask whether multi-line is acceptable.
 
 ---
 
