@@ -62,10 +62,8 @@ class DesktopGoogleDriveAuthProvider(
                         .setApprovalPrompt("force")
                         .build()
 
-                // Start the local server by getting the redirect URI
                 val redirectUri = localServerReceiver.getRedirectUri()
 
-                // Build the authorization URL
                 val authorizationUrl =
                     flow
                         .newAuthorizationUrl()
@@ -73,28 +71,28 @@ class DesktopGoogleDriveAuthProvider(
                         .build()
                         .toString()
 
-                // Try to open the browser
-                try {
-                    if (Desktop.isDesktopSupported() && Desktop.getDesktop().isSupported(Action.BROWSE)) {
-                        Desktop.getDesktop().browse(URI.create(authorizationUrl))
-                    } else {
+                if (FlatpakBrowser.isRunningInFlatpak()) {
+                    if (!FlatpakBrowser.tryOpenUrl(authorizationUrl)) {
                         onAuthUrl?.invoke(authorizationUrl)
                     }
-                } catch (e: IOException) {
-                    onAuthUrl?.invoke(authorizationUrl)
-                } catch (e: InternalError) {
-                    onAuthUrl?.invoke(authorizationUrl)
+                } else {
+                    try {
+                        if (Desktop.isDesktopSupported() && Desktop.getDesktop().isSupported(Action.BROWSE)) {
+                            Desktop.getDesktop().browse(URI.create(authorizationUrl))
+                        } else {
+                            onAuthUrl?.invoke(authorizationUrl)
+                        }
+                    } catch (e: IOException) {
+                        onAuthUrl?.invoke(authorizationUrl)
+                    } catch (e: InternalError) {
+                        onAuthUrl?.invoke(authorizationUrl)
+                    }
                 }
 
-                // Wait for the authorization code — the server keeps running regardless of whether
-                // the browser opened successfully. The user can manually paste the URL into their
-                // browser, and the callback will still be received.
                 val code = localServerReceiver.waitForCode()
 
-                // Exchange the authorization code for tokens
                 val tokenResponse = flow.newTokenRequest(code).setRedirectUri(redirectUri).execute()
 
-                // Store and return the credential
                 flow.createAndStoreCredential(tokenResponse, "user").also { credential ->
                     localServerReceiver.stop()
                     credential
