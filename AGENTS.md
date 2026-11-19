@@ -25,9 +25,9 @@ ArchiveKeep is a **Kotlin Multiplatform** application for reliable file archivat
 - **Focus on the "what" and "why"**: Describe what changed from the user's perspective and the benefit, not the internal implementation details.
 - **Structure**: One sentence maximum — name the feature or fix, then explain the user-facing impact.
 - **Conventional commit types**:
-  - `feat:` — new user-visible feature or functionality
-  - `fix:` — fixes a bug or incorrect behavior (wrong values, crashes, data loss, broken workflows)
-  - `ui:` — presentation-layer changes with no new functionality or bug fix (restyling, visual polish, layout adjustments, theme changes, hiding empty UI elements, conditional visibility of tabs/panels)
+  - `feat:` — new user-visible feature or functionality that changes how the app works or what it can do
+  - `fix:` — corrects incorrect behavior, crashes, data issues, or broken workflows (the app was doing the wrong thing)
+  - `ui:` — presentation-layer changes with no new functionality or bug fix: restyling, visual polish, layout adjustments, theme changes, adding/removing visual elements, conditional visibility, UI behavior, or anything that only affects how things look or feel or behave on UI without change to how functionality works
   - `docs:` — documentation changes (README, CHANGELOG, guides, agent instructions)
   - `refactor:` — internal code changes with **no user-visible effect** (do not use if the change looks different to the user)
   - `chore:` — maintenance tasks, dependencies, build config

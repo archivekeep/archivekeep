@@ -75,6 +75,7 @@
     <string name="common_log">Protokol</string>
     <string name="common_errors">Chyby</string>
     <string name="common_summary">Súhrn</string>
+    <string name="common_autoscroll">Automatické posúvanie</string>
     <string name="common_performance">Výkon</string>
     <string name="common_performance_no_stats">Zatiaľ nie sú zaznamenané žiadne štatistiky výkonu.</string>
     <string name="common_performance_count">Počet</string>
