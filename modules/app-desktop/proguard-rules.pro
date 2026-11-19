@@ -192,4 +192,57 @@
   static *** getCurrentEnvironment (...);
 }
 
+# ########################################### #
+#              Google API Client              #
+# ########################################### #
+
+# Google API client uses reflection and generic types extensively.
+# ProGuard must preserve signatures, annotations, and enum structures.
+# Source: https://github.com/google/google-api-java-client-samples
+
+-keepattributes Signature,RuntimeVisibleAnnotations,AnnotationDefault
+
+-keepclassmembers class * {
+  @com.google.api.client.util.Key <fields>;
+}
+
+# Keep Google API client utility classes — GenericData.Flags is an enum that
+# ProGuard may optimize in a way that breaks EnumSet.noneOf() at runtime.
+# All fields must be preserved because ProGuard may strip @Key annotations from
+# library classes before keep rules are evaluated, breaking reflection-based
+# parameter discovery (query params, JSON serialization).
+# CRITICAL: ProGuard converts Boolean wrapper fields to primitives, breaking
+# Data.isNull() checks — so parameters set to true/false are treated as null
+# and never added to the query string. Use 'includecode' to prevent method body
+# optimization that causes this Boolean-to-primitive conversion.
+-keep,includecode class com.google.api.client.util.** { *; }
+-keepclassmembers class com.google.api.client.util.** { <fields>; }
+-keep,includecode class com.google.api.client.http.** { *; }
+-keepclassmembers class com.google.api.client.http.** { <fields>; }
+-keep,includecode class com.google.api.client.json.** { *; }
+-keepclassmembers class com.google.api.client.json.** { <fields>; }
+-keep,includecode class com.google.api.client.googleapis.** { *; }
+-keepclassmembers class com.google.api.client.googleapis.** { <fields>; }
+-keep,includecode class com.google.api.client.auth.** { *; }
+-keepclassmembers class com.google.api.client.auth.** { <fields>; }
+-keep,includecode class com.google.api.client.extensions.** { *; }
+-keepclassmembers class com.google.api.client.extensions.** { <fields>; }
+
+# Keep Google Drive service classes — all fields must survive optimization,
+# not just those with @Key annotations, since ProGuard may strip annotations
+# from library classes before the keep rules are evaluated.
+-keep,includecode class com.google.api.services.drive.** { *; }
+-keepclassmembers class com.google.api.services.drive.** { <fields>; }
+
+# Keep Gson factory and related classes used by Google API client
+-keep class com.google.api.client.json.gson.** { *; }
+
+# Keep OpenCensus — used by Google API client for tracing. Its inner enum classes
+# (e.g. Span.Options) must remain enums for EnumSet.noneOf() to work at runtime.
+-keep class io.opencensus.** { *; }
+
+# Suppress warnings for Android-specific classes that aren't present on desktop
+-dontwarn com.google.api.client.extensions.android.**
+-dontwarn com.google.api.client.googleapis.extensions.android.**
+
 # ################################################################ #

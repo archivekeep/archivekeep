@@ -34,6 +34,7 @@ import org.archivekeep.app.core.persistence.drivers.googledrive.GoogleDriveAuthP
 import org.archivekeep.app.ui.components.base.layout.ScrollableLazyColumn
 import org.archivekeep.app.ui.components.designsystem.dialog.DialogButtonContainer
 import org.archivekeep.app.ui.components.designsystem.dialog.DialogInnerContainer
+import org.archivekeep.app.ui.components.designsystem.elements.ErrorAlert
 import org.archivekeep.app.ui.components.feature.dialogs.SimpleActionDialogControlButtons
 import org.archivekeep.ui.resources.Res
 import org.archivekeep.ui.resources.googledrive_drive_root
@@ -130,7 +131,9 @@ fun GoogleDriveFolderPicker(
                         horizontalAlignment = Alignment.CenterHorizontally,
                     ) {
                         Spacer(Modifier.height(20.dp))
-                        Text(stringResource(Res.string.googledrive_error, error?.message ?: ""))
+                        ErrorAlert {
+                            Text(stringResource(Res.string.googledrive_error, error?.message ?: ""))
+                        }
                         Spacer(Modifier.height(8.dp))
                         TextButton(onClick = {
                             currentFolderId = if (breadcrumb.isEmpty()) null else breadcrumb.last().id

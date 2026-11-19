@@ -122,6 +122,7 @@ compose.desktop {
 
                 modules("jdk.security.auth")
                 modules("jdk.unsupported")
+                modules("jdk.httpserver")
 
                 installationPath = "/usr"
 
