@@ -10,6 +10,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.LocalContext
+import androidx.core.net.toUri
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.LifecycleEventEffect
 import org.archivekeep.app.core.persistence.drivers.filesystem.MountedFileSystem
@@ -56,7 +57,11 @@ fun storageManagerGuard(): PlatformSpecificPermissionFulfilment {
             ),
             "Go to settings",
             onLaunch = {
-                context.startActivity(Intent(Settings.ACTION_MANAGE_ALL_FILES_ACCESS_PERMISSION))
+                val intent =
+                    Intent(Settings.ACTION_MANAGE_APP_ALL_FILES_ACCESS_PERMISSION).apply {
+                        data = "package:${context.packageName}".toUri()
+                    }
+                context.startActivity(intent)
                 isExternalStorageManager = Environment.isExternalStorageManager()
             },
         )
