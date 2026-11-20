@@ -114,6 +114,15 @@
     <string name="home_section_external_archives">External archives</string>
     <string name="home_section_external_storages">External storages</string>
 
+    <!-- Association Banner -->
+    <string name="home_association_banner_title">Link your local and remote repositories</string>
+    <string name="home_association_banner_no_association_state">No repositories are associated yet.</string>
+    <string name="home_association_banner_no_association_action">Pick a local repository below, click Associate, and select a remote repository. If a remote repository does not match your local purpose, add another local or remote repository for association.</string>
+    <string name="home_association_banner_remote_only_state">A remote repository is associated, but no local repository is linked to it.</string>
+    <string name="home_association_banner_remote_only_action">Associate a local repository with the already-associated remote repository if the purpose matches. Otherwise, add another local or remote repository to match and associate.</string>
+    <string name="home_association_banner_both_separate_state">A remote archive is present, and a local repository is associated with a different archive. They are not linked to each other.</string>
+    <string name="home_association_banner_both_separate_action">Add the corresponding repositories to complete the association, or re-associate if needed.</string>
+
     <!-- Onboarding Carousel -->
     <string name="onboarding_page_count_label">Page %1$d of %2$d</string>
     <string name="onboarding_intro_title">Welcome to ArchiveKeep</string>
