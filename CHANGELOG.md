@@ -1,5 +1,24 @@
 # Changelog
 
+## 0.9.0 - 2026-11-19
+
+### Added
+
+- Google Drive repository support to archive files directly to Google Drive on Linux (including Flatpak) and Android, with shared login across repositories to avoid signing in for each one,
+- onboarding carousel to guide new users through setting up local and external repositories,
+- association banner on home screen to guide users in linking local and remote repositories.
+
+### Changed
+
+- section card overflow row shows as many action buttons as fit instead of just one,
+- log tabs auto-scroll with an overlay button to re-enable scrolling when manually scrolled up,
+- performance tab is hidden when no stats are available,
+- storage permission settings now opens directly for the app instead of showing the system-wide app list.
+
+### Fixed
+
+- running operations in verify, cleanup, reindex, and add file dialogs can now be cancelled.
+
 ## 0.8.3 - 2026-11-16
 
 ### Added

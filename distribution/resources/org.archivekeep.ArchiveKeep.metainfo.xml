@@ -67,6 +67,28 @@
     <content_rating type="oars-1.1" />
 
     <releases>
+        <release version="0.9.0" date="2026-11-19">
+            <description>
+                <p>Added:</p>
+                <ul>
+                    <li>Google Drive repository support to archive files directly to Google Drive on Linux (including Flatpak) and Android, with shared login across repositories to avoid signing in for each one,</li>
+                    <li>onboarding carousel to guide new users through setting up local and external repositories,</li>
+                    <li>association banner on home screen to guide users in linking local and remote repositories,</li>
+                    <li>Android APK build workflow for F-Droid reproducible builds.</li>
+                </ul>
+                <p>Changed:</p>
+                <ul>
+                    <li>section card overflow row shows as many action buttons as fit instead of just one,</li>
+                    <li>log tabs auto-scroll with an overlay button to re-enable scrolling when manually scrolled up,</li>
+                    <li>performance tab is hidden when no stats are available,</li>
+                    <li>storage permission settings now opens directly for the app instead of showing the system-wide app list.</li>
+                </ul>
+                <p>Fixed:</p>
+                <ul>
+                    <li>running operations in verify, cleanup, reindex, and add file dialogs can now be cancelled.</li>
+                </ul>
+            </description>
+        </release>
         <release version="0.8.3" date="2026-11-16">
             <description>
                 <p>Added:</p>
