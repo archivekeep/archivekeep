@@ -4,24 +4,24 @@
     <launchable type="desktop-id">org.archivekeep.ArchiveKeep.desktop</launchable>
 
     <name>ArchiveKeep</name>
-    <summary>Archive files the easy way</summary>
+    <summary>Preserve your files long-term</summary>
     <description>
-        <p>
-            <em>DISCLAIMER:</em> This is an early release. The author already uses the software to fulfil own needs, but there's still a room for improvement and a potential to find undiscovered issues, bugs or edge-cases.
-        </p>
-        <p>Utility facilitating preservation of personal archive of files, replicated in multiple storages of own choice.</p>
-        <p>The main focus is on preservation - keep identical copies while not performing any destructive operations, nor replication of corruption, nor other means of data loss.</p>
+        <p>ArchiveKeep helps you preserve your personal files by maintaining identical copies across multiple storage locations — without risking corruption or data loss during synchronization.</p>
+        <p>Once a file is archived, it stays unchanged. ArchiveKeep never overwrites existing copies with modifications or corrupted data, ensuring your archives remain intact over time.</p>
         <p>Features:</p>
         <ul>
-            <li>Plain files - archived files aren't wrapped in custom format, and are readable with any application.</li>
-            <li>Incremental synchronization - update offline and other storages incrementally, when they become available.</li>
-            <li>Filesystem agnostic</li>
+            <li>Plain files — no proprietary format, readable with any application.</li>
+            <li>Incremental synchronization — replicates new files or moves when storages become available, working fully offline.</li>
+            <li>SHA-256 file fingerprinting — fast verification that catches silent bit-rot before it spreads.</li>
+            <li>Multi-platform — available on Linux desktop and Android.</li>
+            <li>No vendor lock-in — you control where your files live.</li>
         </ul>
-        <p>Cloud storages supported:</p>
+        <p>Supported cloud storages:</p>
         <ul>
-            <li>Google Drive – convenient, familiar, widespread.</li>
-            <li>S3 API – choose vendor(s) you like, no lock-in.</li>
+            <li>Google Drive — convenient, familiar, widely available.</li>
+            <li>S3-compatible APIs — choose any vendor that supports the S3 protocol.</li>
         </ul>
+        <p><em>ArchiveKeep is in active development and improving with each release. Feedback and bug reports are welcome.</em></p>
     </description>
 
     <screenshots>

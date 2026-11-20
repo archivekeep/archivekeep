@@ -129,7 +129,7 @@
     <string name="onboarding_intro_paragraph_1">Preserve your files\nreliably, long-term.</string>
     <string name="onboarding_intro_paragraph_2">Keep copies in multiple storages in a safe way — changes or corruption on one copy never spread to the others.</string>
     <string name="onboarding_intro_paragraph_3">Combine offline media with cloud storage for the best protection against loss.</string>
-    <string name="onboarding_intro_paragraph_4">SHA-256 of files is used to enable fast incremental syncs and integrity verification — catching silent bit-rot during verification.</string>
+    <string name="onboarding_intro_paragraph_4">SHA-256 files fingerprint is used to enable fast incremental syncs and integrity verification — catching silent bit-rot during verification.</string>
     <string name="onboarding_intro_button">Get started</string>
     <string name="onboarding_local_title">1. Add your local repository</string>
     <string name="onboarding_local_description_1">Select a folder on this device for your archive, where your files live or will live in this device.</string>
