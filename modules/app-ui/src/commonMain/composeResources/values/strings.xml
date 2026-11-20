@@ -117,14 +117,14 @@
     <!-- Onboarding Carousel -->
     <string name="onboarding_page_count_label">Page %1$d of %2$d</string>
     <string name="onboarding_intro_title">Welcome to ArchiveKeep</string>
-    <string name="onboarding_intro_paragraph_1">ArchiveKeep protects your data by maintaining copies across multiple storage locations in a non-destructive way — changes or corruption on one copy never spread to the others.</string>
-    <string name="onboarding_intro_paragraph_2">This redundancy eliminates any single point of failure: if one storage is lost or damaged, your data survives on the remaining copies.</string>
-    <string name="onboarding_intro_paragraph_3">For the best protection, combine offline media (to guard against cloud or device compromise) with cloud storage (to guard against fire, flood, or theft of all physical copies).</string>
-    <string name="onboarding_intro_paragraph_4">ArchiveKeep also calculates a SHA-256 fingerprint for every file, which lets it detect and verify data integrity — even catching silent bit-rot over time.</string>
+    <string name="onboarding_intro_paragraph_1">Preserve your files\nreliably, long-term.</string>
+    <string name="onboarding_intro_paragraph_2">Keep copies in multiple storages in a safe way — changes or corruption on one copy never spread to the others.</string>
+    <string name="onboarding_intro_paragraph_3">Combine offline media with cloud storage for the best protection against loss.</string>
+    <string name="onboarding_intro_paragraph_4">SHA-256 of files is used to enable fast incremental syncs and integrity verification — catching silent bit-rot during verification.</string>
     <string name="onboarding_intro_button">Get started</string>
     <string name="onboarding_local_title">1. Add your local repository</string>
     <string name="onboarding_local_description_1">Select a folder on this device for your archive, where your files live or will live in this device.</string>
-    <string name="onboarding_local_description_2">You can have multiple archives for different purposes — keep work data, personal photos, and documents in separate archives. Consider this when choosing a directory.</string>
+    <string name="onboarding_local_description_2">You can have multiple archives for different purposes — keep work data, personal photos, and documents in separate archives.</string>
     <string name="onboarding_local_button">Add local repository…</string>
     <string name="onboarding_local_button_next">Skip for now</string>
     <string name="onboarding_button_back">Back</string>

@@ -117,14 +117,14 @@
     <!-- Onboarding Carousel -->
     <string name="onboarding_page_count_label">Stránka %1$d z %2$d</string>
     <string name="onboarding_intro_title">Vitajte v ArchiveKeep</string>
-    <string name="onboarding_intro_paragraph_1">ArchiveKeep chráni vaše údaje tým, že udržiava kópie na viacerých miestach bezpečným a nedestruktívnym spôsobom — zmeny alebo poškodenie jednej kópie sa nikdy neprenášajú na ostatné.</string>
-    <string name="onboarding_intro_paragraph_2">Táto redundancia eliminuje jediný bod zlyhania: ak jedno úložisko stratíte alebo sa poškodí, vaše údaje prežijú na ostatných kopiách.</string>
-    <string name="onboarding_intro_paragraph_3">Pre najlepšiu ochranu kombinujte offline médiá (ochrana pred kompromitáciou cloudu alebo zariadenia) s cloudovým úložiskom (ochrana pred požiarom, povodňou alebo krádežou všetkých fyzických kópií).</string>
-    <string name="onboarding_intro_paragraph_4">ArchiveKeep tiež vypočítava SHA-256 odtlačok pre každý súbor, čo umožňuje detekovať a overiť integritu údajov — a zachytí aj tichý bit-rot v čase.</string>
+    <string name="onboarding_intro_paragraph_1">Zachovejte svoje súbory\nspoľahlivo, na dlhú dobu.</string>
+    <string name="onboarding_intro_paragraph_2">Udržiavajte kópie na viacerých úložiskách bezpečným spôsobom — zmeny alebo poškodenie jednej kópie sa nikdy neprenášajú na ostatné.</string>
+    <string name="onboarding_intro_paragraph_3">Kombinujte offline médiá s cloudovým úložiskom pre najlepšiu ochranu pred stratou.</string>
+    <string name="onboarding_intro_paragraph_4">SHA-256 súborov sa používa na rýchle inkrementálne synchronizácie a overovanie integrity — zachytenie tichého bit-rotu počas overovania.</string>
     <string name="onboarding_intro_button">Začať</string>
     <string name="onboarding_local_title">1. Pridajte lokálny repozitár</string>
     <string name="onboarding_local_description_1">Vyberte adresár na tomto zariadení pre váš archív — tam, kde sa nachádzajú vaše súbory alebo kam chcete archívované súbory stiahnuť.</string>
-    <string name="onboarding_local_description_2">Môžete mať viacero archívov pre rôzne účely — udržiavajte pracovné údaje, osobné fotky a dokumenty v samostatných archívoch. Zvážte to pri výbere adresára.</string>
+    <string name="onboarding_local_description_2">Môžete mať viacero archívov pre rôzne účely — udržiavajte pracovné údaje, osobné fotky a dokumenty v samostatných archívoch.</string>
     <string name="onboarding_local_button">Pridať lokálny repozitár…</string>
     <string name="onboarding_local_button_next">Preskočiť na neskôr</string>
     <string name="onboarding_button_back">Späť</string>
