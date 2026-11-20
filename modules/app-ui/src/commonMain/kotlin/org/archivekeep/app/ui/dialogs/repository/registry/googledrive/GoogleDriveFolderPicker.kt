@@ -36,9 +36,9 @@ import org.archivekeep.app.ui.components.designsystem.dialog.DialogButtonContain
 import org.archivekeep.app.ui.components.designsystem.dialog.DialogInnerContainer
 import org.archivekeep.app.ui.components.designsystem.elements.ErrorAlert
 import org.archivekeep.app.ui.components.feature.dialogs.SimpleActionDialogControlButtons
+import org.archivekeep.app.ui.components.feature.errors.GeneralErrorMessage
 import org.archivekeep.ui.resources.Res
 import org.archivekeep.ui.resources.googledrive_drive_root
-import org.archivekeep.ui.resources.googledrive_error
 import org.archivekeep.ui.resources.googledrive_go_back
 import org.archivekeep.ui.resources.googledrive_loading_folders
 import org.archivekeep.ui.resources.googledrive_no_folders_found
@@ -74,6 +74,7 @@ fun GoogleDriveFolderPicker(
             val list = listDriveFolders(credentialsJson, targetFolder, authProvider)
             folders.addAll(list)
         } catch (e: Throwable) {
+            e.printStackTrace()
             error = e
         } finally {
             loading = false
@@ -132,7 +133,7 @@ fun GoogleDriveFolderPicker(
                     ) {
                         Spacer(Modifier.height(20.dp))
                         ErrorAlert {
-                            Text(stringResource(Res.string.googledrive_error, error?.message ?: ""))
+                            GeneralErrorMessage(error!!)
                         }
                         Spacer(Modifier.height(8.dp))
                         TextButton(onClick = {

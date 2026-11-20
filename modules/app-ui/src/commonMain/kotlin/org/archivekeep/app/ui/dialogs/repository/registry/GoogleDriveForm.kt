@@ -91,6 +91,7 @@ fun GoogleDriveForm(
                         input.credentialsJson.value = result.credentialsJson
                         showFolderPicker = true
                     } catch (e: Throwable) {
+                        e.printStackTrace()
                         authError = e
                     } finally {
                         isSigningIn = false
@@ -154,6 +155,7 @@ fun GoogleDriveForm(
                             }
                             signInAction()
                         } catch (e: Throwable) {
+                            e.printStackTrace()
                             authError = e
                             authUrl = null
                             isSigningIn = false

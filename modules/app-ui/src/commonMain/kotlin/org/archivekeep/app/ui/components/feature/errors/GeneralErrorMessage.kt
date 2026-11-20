@@ -20,9 +20,14 @@ import androidx.compose.ui.unit.sp
 
 @Composable
 fun GeneralErrorMessage(cause: Throwable) {
+    val errorMessage = if (cause.message.isNullOrBlank()) {
+        cause.javaClass.name
+    } else {
+        "${cause.javaClass.name}: ${cause.message}"
+    }
     SelectionContainer {
         Column {
-            Text(cause.toString())
+            Text(errorMessage)
 
             Spacer(Modifier.height(8.dp))
 

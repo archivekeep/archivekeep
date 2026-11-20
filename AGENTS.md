@@ -42,6 +42,8 @@ ArchiveKeep is a **Kotlin Multiplatform** application for reliable file archivat
   - Explain the benefit, not the mechanism: "without waiting for the full scan" instead of "bypassing the discovery phase."
   - Keep it action-oriented: start with a verb ("add," "allow," "fix," "improve").
   - Cut redundant filler: if the verb already conveys the outcome, drop the rest. For example, "cancelling" implies stopping something in progress, so "allow cancelling verify contents operation" is sufficient — don't add "so users can stop file verification in progress."
+  - Avoid redundant action words when the commit type already implies them: don't use "restore," "fix," "repair," or "re-enable" after `fix:` — just name what was broken. For example, `fix: Google Drive folder loading` is better than `fix: restore Google Drive folder loading`.
+  - Lead with the major issue — when a fix addresses both a core functionality problem and a secondary improvement, name the major problem first. For example, a broken feature is more important than an empty error message that was discovered while debugging it.
 - **Avoid**:
   - Internal jargon ("index," "procedure," "supervisor," "discovery phase").
   - Implementation details ("add `startImmediate()` method," "refactor IndexUpdateProcedure").
@@ -68,6 +70,9 @@ ArchiveKeep is a **Kotlin Multiplatform** application for reliable file archivat
   - ❌ `feat: save Google Drive login securely for use across repositories` — secure saving already existed; sharing is the change
   - ❌ `feat: add overflow menu to section card actions` — overflow already existed; the change was showing more buttons
   - ✅ `ui: show as many action buttons as fit in section card overflow row instead of just one` — focuses on what changed, not what existed
+  - ✅ `fix: Google Drive folder loading on Android release builds, error details weren't shown on error` — major issue first, minor issue second, no redundant "restore"
+  - ❌ `fix: restore Google Drive folder loading on Android release builds` — "restore" is redundant with "fix"
+  - ❌ `fix: show actual error details, Google Drive folder loading on Android release builds` — minor issue should not lead the message
 - **Validation**: After drafting, ask: "Would someone who doesn't know the codebase understand what changed and why it matters?"
 - **One-liner rule**: Commit messages must be a single line — no multi-line commits, no bullet points, no elaboration. If the change is way too complex or big, ask whether multi-line is acceptable.
 - **Documentation commits**: When changes span multiple documentation files, use a broad scope descriptor like "user-facing documentation and materials" instead of listing every file.
