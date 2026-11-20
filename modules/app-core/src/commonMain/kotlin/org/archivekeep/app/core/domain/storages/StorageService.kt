@@ -7,6 +7,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.flowOf
 import org.archivekeep.app.core.domain.repositories.RepositoryService
 import org.archivekeep.app.core.utils.generics.UniqueInstanceManager
@@ -72,8 +73,9 @@ class StorageService(
     fun repository(repositoryURI: RepositoryURI): Flow<StorageRepository> =
         allRepos
             .mapLoadedData {
-                it.first { it.uri == repositoryURI }
+                it.firstOrNull { it.uri == repositoryURI }
             }.waitLoadedValue()
+            .filterNotNull()
 }
 
 @OptIn(DelicateCoroutinesApi::class)

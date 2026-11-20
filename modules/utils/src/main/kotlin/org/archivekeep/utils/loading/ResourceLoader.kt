@@ -69,11 +69,7 @@ class ResourceLoader<T>(
                 }
         }.shareIn(
             scope = scope,
-            started =
-                SharingStarted.WhileSubscribed(
-                    stopTimeout = Duration.ZERO,
-                    replayExpiration = Duration.ZERO,
-                ),
+            started = SharingStarted.WhileSubscribed(stopTimeout = Duration.ZERO, replayExpiration = Duration.ZERO),
             replay = 0,
         )
 

@@ -10,10 +10,8 @@ import dev.zacsweers.metro.SingleIn
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.channels.Channel
-import kotlinx.coroutines.channels.trySendBlocking
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.consumeAsFlow
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.onStart
 import org.archivekeep.utils.io.debounceAndRepeatAfterDelay
 import org.archivekeep.utils.loading.Loadable
@@ -35,7 +33,7 @@ class AndroidFileStores(
         get() = context.getSystemService(Context.STORAGE_SERVICE) as StorageManager
 
     // TODO: trigger on permission grant
-    private val changes = Channel<Date>(capacity = 1)
+    private val changes = MutableSharedFlow<Date>(extraBufferCapacity = 1)
 
     private val fileSystemRemovedCallbacks = Collections.synchronizedList(mutableListOf<(String) -> Unit>())
 
@@ -44,7 +42,6 @@ class AndroidFileStores(
             scope,
             updateTriggerFlow =
                 changes
-                    .consumeAsFlow()
                     .onStart { emit(Date()) }
                     .debounceAndRepeatAfterDelay(),
             loadFn = {
@@ -99,7 +96,7 @@ class AndroidFileStores(
         object : StorageManager.StorageVolumeCallback() {
             override fun onStateChanged(volume: StorageVolume) {
                 notifyFileSystemRemovedCallbacksIfRemoved(volume)
-                changes.trySendBlocking(Date())
+                changes.tryEmit(Date())
             }
 
             private fun notifyFileSystemRemovedCallbacksIfRemoved(volume: StorageVolume) {
