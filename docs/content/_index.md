@@ -14,7 +14,7 @@
 <div class="main-display-container">
     <div class="main-display-inner-container">
         <div class="text">
-            <h2>ArchiveKeep<span class="sub">Files archiving</span></h2>
+            <h2>ArchiveKeep<span class="sub">Long-term file preservation</span></h2>
             <p>Use your own <strong>SSD, HDD, USB flash-drives,...</strong> Rent <strong>cloud storages</strong> without vendor lock-in. Self-host. <strong>Combine</strong> storages.</p>
             <div class="links">
                 <a class="download-btn" href='#download'>Download</a>
@@ -165,6 +165,28 @@ Support is planned, GitHub [issue](https://github.com/archivekeep/archivekeep/is
 
 </div></div>
 </div></div>
+
+<div class="one-col-section-wrapper">
+<div class="one-col-section">
+
+## What ArchiveKeep is not?
+
+### Not traditional backup tool
+
+Backups capture point-in-time snapshots. A snapshot doesn't guarantee the original file is intact — it may have been already modified or corrupted before the backup was taken.
+
+Old snapshots can also disappear due to storage limits or retention policies.
+
+ArchiveKeep replicates original files across multiple locations with SHA-256 integrity checks, so your files stay authentic over time.
+
+### Not typical file sync
+
+Sync tools keep exact mirror copies of your data. If a file gets corrupted or redacted, the change instantly spreads to every synced location.
+
+ArchiveKeep is nondestructive by design: it doesn't propagate corruption or other destructive changes. Every file is verified with SHA-256 checksums before it spreads.
+
+</div>
+</div>
 
 <div class="two-col-section-wrapper">
 <div class="two-col-section">
